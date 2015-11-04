@@ -19,17 +19,14 @@ class AbstractPhotonDetector(AbstractBaseCalculator):
     """
 
     __metaclass__  = ABCMeta
-
     @abstractmethod
-    def __init__(self, **kwargs):
-        """
-        Constructor for the Abstract Photon Detector.
+    def __init__(self, parameters=None, input_path=None, output_path=None):
+        #"""
+        #Constructor for the Abstract Photon Detector.
+        #"""
 
-        @param **kwargs : Keyword arguments needed for setting up a photon source simulation.
-        @type : keyword arguments variable1=value1, variable2=value2, ...
-        """
-
-        pass
+        # Initialize the base class.
+        super(AbstractPhotonDetector, self).__init__(parameters, input_path, output_path)
 
 def checkAndSetPhotonDetector(var=None, default=None):
     """

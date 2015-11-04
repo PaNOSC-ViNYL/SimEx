@@ -19,31 +19,34 @@ class AbstractBaseCalculator(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, control_parameters=None, io=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
         Constructor for the Abstract Base Calculator.
 
-        @param control_parameters: Dictionary for the parameters of the calculation (not data).
+        @param control_parameters : Dictionary for the parameters of the calculation (not data).
         @type : dict
 
-        @param io: Paths to input an output data
-        @type : string or tuple [ipath, opath]
-        @example : io='/home/user/sim/data/' (use path as directory where all io is read/written, unique filenames will be constructed for both input and output.
-        @example : io=['/home/user/sim/data/sim1.in.h5', '/home/user/sim/data/sim1.out.h5'] (use these files for input and output respectively.)
-        @example : io='/home/user/sim/data/sim1.h5' : File is used for input and later overwritten for output.
+        @param input_path: Path to hdf5 file holding the input data.
+        @type : string
+        @default : None
+
+        @param output_path: Path to hdf5 file for output.
+        @type : string
+        @default : None
         """
 
         # Check parameters.
-        #self.__control_parameters = checkAndSetInstance(dict, control_parameters, None)
+        self.__parameters = checkAndSetInstance(dict, parameters, {})
 
-        #self.__io = checkAndSetIO(io)
+        self.__input_path, self.__output_path = checkAndSetIO((input_path, output_path))
 
+    @abstractmethod
     def backengine(self):
         """
         Method to call the backengine for the calculator.
         To be implemented on the derived classes.
         """
-        raise exceptions.RuntimeError("This method has to be implemented on the derived class.")
+        pass
 
     #######################################################################
     # Queries and setters
@@ -51,50 +54,61 @@ class AbstractBaseCalculator(object):
     # control_parameters
 
     @property
-    def control_parameters(self):
+    def parameters(self):
         """ Query for the control parameters of the calculator."""
-        return self.__control_parameters
-    @control_parameters.setter
-    def control_parameters(self, value):
+        return self.__parameters
+    @parameters.setter
+    def parameters(self, value):
         """ Set the control parameters for the calculation. """
-        self.__control_parameters = checkAndSetInstance(dict, value, None)
-    @control_parameters.deleter
-    def control_parameters(self):
+        self.__parameters = checkAndSetInstance(dict, value, None)
+    @parameters.deleter
+    def parameters(self):
         """ Delete the control parameters.  """
-        del self.__control_parameters
+        del self.__parameters
 
-    # io
+    # input
     @property
-    def io(self):
-        """ Query for the io file path(s). """
-        return self.__io
-    @io.setter
-    def io(self, value):
+    def input_path(self):
+        """ Query for the input file path(s). """
+        return self.__input_path
+    @input_path.setter
+    def input_path(self, value):
         """ Set the io path(s) to a value. """
-        self.__io = checkAndSetInstance( (str, list), value, None   )
-    @io.deleter
-    def io(self):
-        """ Delete the io path(s). """
-        del self.__io
+        self.__input_path = checkAndSetInstance( (str, list), value, None   )
+    @input_path.deleter
+    def input_path(self):
+        """ Delete the input_path path(s). """
+        del self.__input_path
+
+    # output
+    @property
+    def output_path(self):
+        """ Query for the output file path(s). """
+        return self.__output_path
+    @output_path.setter
+    def output_path(self, value):
+        """ Set the io path(s) to a value. """
+        self.__output_path = checkAndSetInstance( (str, list), value, None   )
+    @output_path.deleter
+    def output_path(self):
+        """ Delete the output_path path(s). """
+        del self.__output_path
+
 
 def checkAndSetIO(io):
     """ Check the passed io path/filenames and set appropriately. """
 
     # Check if it is a single file.
     # In that case, io is the path for output only, no input required.
-    if isinstance(io, str):
-        i = None
-        o = io
-    else:
-        io = checkAndSetInstance(tuple, io)
-        if len(io) != 2:
-            raise exceptions.RuntimeError("The parameter 'io' can only be a string or a tuple of two strings.")
+    io = checkAndSetInstance(tuple, io)
+    if len(io) != 2:
+        raise exceptions.RuntimeError("The parameter 'io' can only be a string or a tuple of two strings.")
 
-        # Check if input exists, if not, raise.
-        i = checkAndSetInstance(str, io[0])
-        i = os.path.abspath(i)
-        if not os.path.isfile(i):
-            raise exceptions.RuntimeError('Input file %s could not be found.' % (i))
+    # Check if input exists, if not, raise.
+    i = checkAndSetInstance(str, io[0])
+    i = os.path.abspath(i)
+    if not os.path.isfile(i):
+        raise exceptions.RuntimeError('Input file %s could not be found.' % (i))
 
     # Check if output file exists, otherwise attempt to create it.
     o = checkAndSetInstance(str, io[1])

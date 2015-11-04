@@ -1,6 +1,7 @@
 import paths
 import unittest
 
+# Import classes to test.
 from AbstractBaseCalculatorTest import AbstractBaseCalculatorTest
 from AbstractPhotonSourceTest import AbstractPhotonSourceTest
 from AbstractPhotonPropagatorTest import AbstractPhotonPropagatorTest
@@ -8,6 +9,7 @@ from AbstractPhotonInteractorTest import AbstractPhotonInteractorTest
 from AbstractPhotonDiffractorTest import AbstractPhotonDiffractorTest
 from AbstractPhotonDetectorTest import AbstractPhotonDetectorTest
 
+# Setup the suite.
 def suite():
     suites = (
              unittest.makeSuite(AbstractBaseCalculatorTest,    'test'),
@@ -17,8 +19,10 @@ def suite():
              unittest.makeSuite(AbstractPhotonDiffractorTest,  'test'),
              unittest.makeSuite(AbstractPhotonDetectorTest,    'test'),
              )
-    # If the unittest are run under extensive mode, enable these tests as well.
+
     return unittest.TestSuite(suites)
+
+# If called as script, run the suite.
 if __name__=="__main__":
     unittest.main(defaultTest="suite")
 

@@ -13,6 +13,8 @@ import unittest
 from XXX.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from XXX.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
+from TestUtilities import TestUtilities
+
 
 class AbstractPhotonPropagatorTest(unittest.TestCase):
     """
@@ -49,6 +51,10 @@ class AbstractPhotonPropagatorTest(unittest.TestCase):
         class TestPhotonPropagator(AbstractPhotonPropagator):
 
             def __init__(self):
+                input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
+                super(TestPhotonPropagator, self).__init__(parameters=None, input_path=input_path, output_path='test_out.h5')
+
+            def backengine(self):
                 pass
 
         test_source = TestPhotonPropagator()
@@ -57,8 +63,6 @@ class AbstractPhotonPropagatorTest(unittest.TestCase):
         self.assertIsInstance( test_source, object )
         self.assertIsInstance( test_source, AbstractBaseCalculator )
         self.assertIsInstance( test_source, AbstractPhotonPropagator )
-
-
 
 
 

@@ -15,6 +15,13 @@ import os
 from XXX.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from XXX.Calculators.AbstractBaseCalculator import checkAndSetIO
 
+# Derive a class from the abc.
+class DerivedCalculator(AbstractBaseCalculator):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
+        super(DerivedCalculator, self).__init__(parameters, input_path, output_path)
+    def backengine(self):
+        pass
+
 
 class AbstractBaseCalculatorTest(unittest.TestCase):
     """
@@ -33,27 +40,29 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         """ Setting up a test. """
         self.__files_to_be_removed = []
 
+        self.test_class_instance = DerivedCalculator(parameters={1 : '1'}, input_path=__file__, output_path='test.h5')
+
     def tearDown(self):
         """ Tearing down a test. """
         for f in self.__files_to_be_removed:
             if os.path.isfile(f): os.remove(f)
+
+        del self.test_class_instance
+
 
     def testConstruction(self):
         """ Testing the default construction of the class. """
         self.assertRaises(TypeError, AbstractBaseCalculator )
 
     # Check its type.
-    def notestThis(self):
-        self.assertIsInstance(abc, AbstractBaseCalculator)
+    def testQueries(self):
 
+        abc = self.test_class_instance
         # Check it has the required members.
-        self.assertTrue( hasattr(abc, 'control_parameters') )
-        self.assertTrue( hasattr(abc, 'io') )
-        self.assertTrue( hasattr(abc, 'backengine') )
-        self.assertTrue( hasattr(abc, 'io_data_handles') )
+        self.assertTrue( hasattr(abc, 'parameters') )
+        self.assertTrue( hasattr(abc, 'input_path') )
+        self.assertTrue( hasattr(abc, 'output_path') )
 
-        abc = AbstractBaseCalculator()
-        self.assertRaises( exceptions.RuntimeError, abc.backengine )
 
     def testCheckAndSetIO(self):
         """ Check that setting data io paths works correctly. """
