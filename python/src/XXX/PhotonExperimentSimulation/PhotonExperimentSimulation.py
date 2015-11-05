@@ -45,6 +45,14 @@ class PhotonExperimentSimulation:
         #self.__photon_detector = checkAndSetPhotonDetector(photon_detector)
         #self.__photon_analyser = checkAndSetPhotonAnalyser(photon_analyser)
 
+        self.__calculators = [
+                self.__photon_source,
+                self.__photon_propagator,
+                #self.__photon_interactor,
+                #self.__photon_diffractor,
+                #self.__photon_detector,
+                ]
+
     def run(self):
         """ Method to start the photon experiment simulation workflow. """
 
@@ -54,3 +62,13 @@ class PhotonExperimentSimulation:
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
+
+    def _checkInterfaceConsistency(self):
+        """
+        Check that all calculators provide the data expected by the next downstream
+        calculator.
+        """
+        status = True
+        for i,calculator in enumerate(self.__calculators[:-1]):
+            status = status and self.__calculators[i+1].expectedData() in calculator.providedData()
+        return status

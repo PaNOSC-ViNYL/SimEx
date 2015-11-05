@@ -49,6 +49,23 @@ class AbstractBaseCalculator(object):
         pass
 
     @abstractmethod
+    def expectedData(self):
+        """
+        Query for the data fields expected by this calculator.
+        """
+        # To be implemented in specialized calculators.
+        pass
+
+    @abstractmethod
+    def providedData(self):
+        """
+        Query for the data fields provided by this calculator.
+        """
+        # To be implemented by specialized calculator.
+        pass
+
+
+    @abstractmethod
     def _readH5(self):
         pass
 

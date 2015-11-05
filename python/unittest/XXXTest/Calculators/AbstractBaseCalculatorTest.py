@@ -21,6 +21,14 @@ class DerivedCalculator(AbstractBaseCalculator):
         super(DerivedCalculator, self).__init__(parameters, input_path, output_path)
     def backengine(self):
         pass
+    def _readH5(self):
+        pass
+    def saveH5(self):
+        pass
+    def providedData(self):
+        return ['/params/params1', '/params/params2', '/data/dat1', '/data/dat2']
+    def expectedData(self):
+        return ['/data/dat1', '/data/dat2']
 
 
 class AbstractBaseCalculatorTest(unittest.TestCase):
@@ -86,10 +94,6 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         self.assertEqual(io_ret[0], os.path.abspath(inp) )
         self.assertEqual(io_ret[1], os.path.abspath(out) )
 
-        # Check exception on wrong input.
-        io = ('nonexisting_file.dat', 'output.dat')
-        self.assertRaises(exceptions.RuntimeError, checkAndSetIO, io )
-
         # Check exception on wrong types.
         io = (1,2)
         self.assertRaises(exceptions.TypeError, checkAndSetIO, io )
@@ -101,6 +105,17 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         # Check exception on wrong second type.
         io = ('test.in', None)
         self.assertRaises(exceptions.TypeError, checkAndSetIO, io )
+
+    def testProvidedData(self):
+        """ Check the provided data query. """
+
+        instance = self.test_class_instance
+        provided_data = instance.providedData()
+        expected_data = instance.expectedData()
+
+        for ed in expected_data:
+            self.assertTrue ( ed in provided_data)
+
 
 
 

@@ -29,12 +29,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
     def tearDown(self):
         """ Tearing down a test. """
 
-    def notestConstruction(self):
-        """ Testing something stupid."""
-        experiment_simulation_platform = PhotonExperimentSimulation()
-
-        self.assertIsInstance( experiment_simulation_platform, PhotonExperimentSimulation )
-
     def testMinimalWorkflow(self):
         """ Testing that a minimal workflow works. """
 
