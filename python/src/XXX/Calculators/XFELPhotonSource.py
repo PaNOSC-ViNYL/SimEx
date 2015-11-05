@@ -5,6 +5,7 @@
     @creation 20151104
 
 """
+from subprocess import Popen
 import numpy
 import h5py
 
@@ -74,21 +75,27 @@ class XFELPhotonSource(AbstractPhotonSource):
         """
 
         # Open the file for writing.
-        file_handle = h5py.File(self.output_path, 'w')
+        #out_file_handle = h5py.File(self.output_path, 'w')
+        #in_file_handle = h5py.File(self.input_path, 'r')
 
-        # Create data and parameters.
-        params = file_handle.create_group('params')
-        data = file_handle.create_group('data')
+        ## Recreate all data groups and sets.
+        #for d in
+        #params = file_handle.create_group('params')
+        #data = file_handle.create_group('data')
 
-        pE = params.create_dataset(name="photonEnergy",
-                                   shape=(),
-                                   dtype=numpy.float,
-                                   data=self.parameters['photon_energy'] )
+        #pE = params.create_dataset(name="photonEnergy",
+                                   #shape=(),
+                                   #dtype=numpy.float,
+                                   #data=self.parameters['photon_energy'] )
 
-        Ehor = data.create_dataset(name='arrEhor', shape=self.data[0].shape, data=self.data[0])
-        Ever = data.create_dataset(name='arrEver', shape=self.data[1].shape, data=self.data[1])
+        #Ehor = data.create_dataset(name='arrEhor', shape=self.data[0].shape, data=self.data[0])
+        #Ever = data.create_dataset(name='arrEver', shape=self.data[1].shape, data=self.data[1])
 
-        file_handle.close()
+        #file_handle.close()
+
+        # Simply copy the input to output.
+        command = 'cp %s %s' % (self.input_path, self.output_path)
+        proc = Popen(command, shell=True)
 
 
 

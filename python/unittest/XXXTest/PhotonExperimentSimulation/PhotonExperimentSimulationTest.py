@@ -41,5 +41,24 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         pxs.run()
 
+    def testCheckInterfaceConsistency(self):
+        """ Test if the check for interface consistency works correctly. """
+
+        # Setup a minimal experiment simulation.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
+        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
+        photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
+
+        pxs = PhotonExperimentSimulation(photon_source=photon_source,
+                                         photon_propagator=photon_propagator)
+
+        interfaces_are_consistent = pxs._checkInterfaceConsistency()
+
+        self.assertTrue(interfaces_are_consistent)
+
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
