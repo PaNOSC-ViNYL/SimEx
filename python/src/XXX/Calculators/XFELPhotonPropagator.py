@@ -1,4 +1,4 @@
-""" Module that holds the XFELPhotonSource class.
+""" Module that holds the XFELPhotonPropagator class.
 
     @author : CFG
     @institution : XFEL
@@ -8,17 +8,17 @@
 import numpy
 import h5py
 
-from XXX.Calculators.AbstractPhotonSource import AbstractPhotonSource
+from XXX.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 
 
-class XFELPhotonSource(AbstractPhotonSource):
+class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
-    Class representing a x-ray free electron laser photon source.
+    Class representing a x-ray free electron laser photon propagator.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon source.
+        Constructor for the xfel photon propagator.
 
         @param  :
         @type :
@@ -26,7 +26,7 @@ class XFELPhotonSource(AbstractPhotonSource):
         """
 
         # Initialize base class.
-        super(XFELPhotonSource, self).__init__(parameters,input_path,output_path)
+        super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
 
 
     def backengine(self):
@@ -48,7 +48,7 @@ class XFELPhotonSource(AbstractPhotonSource):
         parameters = {}
 
         # Get photon energy.
-        parameters['photon_energy'] = file_handle['params/photonEnergy'].value
+        #parameters['photon_energy'] = file_handle['params/photonEnergy'].value
 
         # Read the electric field data and convert to numpy array.
         data = numpy.array([file_handle['data/arrEhor'],
@@ -57,9 +57,9 @@ class XFELPhotonSource(AbstractPhotonSource):
                           )
 
         # Store on object.
-        self.__data = data
+        self.__e_field = data
 
-        super(XFELPhotonSource, self).__init__(parameters,self.input_path,self.output_path)
+        super(XFELPhotonPropagator, self).__init__(parameters,self.input_path,self.output_path)
 
         file_handle.close()
 
@@ -77,21 +77,16 @@ class XFELPhotonSource(AbstractPhotonSource):
         file_handle = h5py.File(self.output_path, 'w')
 
         # Create data and parameters.
-        params = file_handle.create_group('params')
-        data = file_handle.create_group('data')
-
-        pE = params.create_dataset(name="photonEnergy",
-                                   shape=(),
-                                   dtype=numpy.float,
-                                   data=self.parameters['photon_energy'] )
-
-        Ehor = data.create_dataset(name='arrEhor', shape=self.data[0].shape, data=self.data[0])
-        Ever = data.create_dataset(name='arrEver', shape=self.data[1].shape, data=self.data[1])
-
+        #params = file_handle.create_group('params')
+        #data = file_handle.create_group('data')
+#
+        #pE = params.create_dataset(name="photonEnergy",
+                                   #shape=(),
+                                   #dtype=numpy.float,
+                                   #data=self.parameters['photon_energy'] )
+#
+        #Ehor = data.create_dataset(name='arrEhor', shape=self.data[0].shape, data=self.data[0])
+        #Ever = data.create_dataset(name='arrEver', shape=self.data[1].shape, data=self.data[1])
+#
         file_handle.close()
-
-
-
-
-
 

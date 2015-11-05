@@ -48,6 +48,14 @@ class AbstractBaseCalculator(object):
         """
         pass
 
+    @abstractmethod
+    def _readH5(self):
+        pass
+
+    @abstractmethod
+    def saveH5(self):
+        pass
+
     #######################################################################
     # Queries and setters
     #######################################################################
@@ -107,16 +115,16 @@ def checkAndSetIO(io):
     # Check if input exists, if not, raise.
     i = checkAndSetInstance(str, io[0])
     i = os.path.abspath(i)
-    if not os.path.isfile(i):
-        raise exceptions.RuntimeError('Input file %s could not be found.' % (i))
-
+    #if not os.path.isfile(i):
+        #raise exceptions.RuntimeError('Input file %s could not be found.' % (i))
+#
     # Check if output file exists, otherwise attempt to create it.
     o = checkAndSetInstance(str, io[1])
-    o = os.path.abspath(io[1])
-    if not os.path.isfile( o ):
-        path = os.path.dirname( o )
-        if not os.path.isdir( path ):
-            os.makedirs( path ) # Raises if permissions not sufficient to create the file.
+    o = os.path.abspath(o)
+    #if not os.path.isfile( o ):
+        #path = os.path.dirname( o )
+        #if not os.path.isdir( path ):
+            #os.makedirs( path ) # Raises if permissions not sufficient to create the file.
     return (i, o)
 
 
