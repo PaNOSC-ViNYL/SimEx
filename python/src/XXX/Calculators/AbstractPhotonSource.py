@@ -26,6 +26,11 @@ class AbstractPhotonSource(AbstractBaseCalculator):
         #"""
         super(AbstractPhotonSource, self).__init__(parameters, input_path, output_path)
 
+    def expectedData():
+        pass
+    def providedData():
+        pass
+
 def checkAndSetPhotonSource(var=None, default=None):
     """
     Check if passed object is an AbstractPhotonSource instance. If non is given, set to given default.

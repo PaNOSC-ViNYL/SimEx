@@ -57,6 +57,9 @@ class AbstractPhotonSourceTest(unittest.TestCase):
             def backengine(self):
                 pass
 
+            def _readH5(self): pass
+            def saveH5(self): pass
+
         test_source = TestPhotonSource()
 
         self.assertIsInstance( test_source, TestPhotonSource )

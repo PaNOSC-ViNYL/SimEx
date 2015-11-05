@@ -15,9 +15,10 @@ from XXX.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonPropagator(AbstractBaseCalculator):
     """
-    Class representing an abstract photon source, serving as API for actual photon source simulation calculators.
+    Class representing an abstract photon propagator, serving as API for actual photon propagation calculators.
     """
 
+    # Make this class an abstract base class.
     __metaclass__  = ABCMeta
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
@@ -25,6 +26,11 @@ class AbstractPhotonPropagator(AbstractBaseCalculator):
         #Constructor for the Abstract Photon Propagator.
         #"""
         super(AbstractPhotonPropagator, self).__init__(parameters, input_path, output_path)
+
+    def expectedData():
+        pass
+    def providedData():
+        pass
 
 def checkAndSetPhotonPropagator(var=None, default=None):
     """

@@ -50,6 +50,7 @@ class XFELPhotonSourceTest(unittest.TestCase):
         # Construct an object with some input.
         xfel = XFELPhotonSource(parameters=None, input_path=self.input_h5, output_path='FELsource_out2.h5')
 
+        xfel._readH5()
         # Get the parameters.
         photon_energy = xfel.parameters['photon_energy']
 
