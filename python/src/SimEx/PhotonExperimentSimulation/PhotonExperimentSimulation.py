@@ -17,7 +17,7 @@ class PhotonExperimentSimulation:
                        photon_detector=None,
                        photon_analyser=None):
         """
-        Constructor for the PhotonExperimentSimulation object.
+        !@brief  Constructor for the PhotonExperimentSimulation object.
 
         @param photon_source: The calculator for the photon source.
         @type : Child of AbstractPhotonSource
