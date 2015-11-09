@@ -2,9 +2,9 @@ import unittest
 import sys
 
 # Import suites to run.
-from XXXTest.Calculators import CalculatorsTests
-from XXXTest.Utilities import UtilitiesTests
-from XXXTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
+from SimExTest.Calculators import CalculatorsTests
+from SimExTest.Utilities import UtilitiesTests
+from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
 # Define the encapsulating test suite.
 def suite():

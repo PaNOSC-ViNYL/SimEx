@@ -11,6 +11,7 @@ top_level_path = os.path.abspath(separator.join(separated_file_path[:top_level_i
 
 paths_to_insert = ['src/',
                    'unittest/',
+                   'lib/'
                    ]
 
 for p in paths_to_insert:
