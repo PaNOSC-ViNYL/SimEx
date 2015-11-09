@@ -9,7 +9,7 @@ PATCHES=${EXTERNALS}/patches
 
 # Makefile for the SIMEX simulation suite.
 # Build external dependencies.
-include ${MAKE_INCLUDES}/simS2E.mk
+include ${MAKE_INCLUDES}/wpg.mk
 
 clean:
 	rm -rf ${LIB}/*

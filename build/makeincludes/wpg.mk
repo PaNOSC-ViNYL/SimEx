@@ -6,10 +6,11 @@
 ###################
 #include ${ROOT_DIR}/packages/environment.mk
 
-default: all
+default: wpg
 
-all: build\
-   	install
+wpg: build \
+	install
+
 
 fetch:
 	cd ${PACKAGES} && \
@@ -33,14 +34,8 @@ install:
 	cd ${SRC} && \
 	cp -r prop-develop ${LIB}/prop && \
 	cp -r WPG-develop/wpg ${LIB}
-	cd ${ROOT}/python && \
-	ln -s ../lib lib && \
+	if [ ! -d ${ROOT}/python/lib/ ]; then \
+		ln -s ${LIB} ${ROOT}/python/lib; \
+	fi
 	cd ${LIB}/prop && \
 	touch __init__.py
-
-
-# Pull zipped repository from github.
-# Unpack
-# Patch
-# Build
-# Install
