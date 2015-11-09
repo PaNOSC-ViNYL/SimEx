@@ -32,7 +32,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
     def testMinimalWorkflow(self):
         """ Testing that a minimal workflow works. """
 
-        source_input = TestUtilities.generateTestFilePath('FELsource_out_0000001.h5')
+        #source_input = TestUtilities.generateTestFilePath('FELsource_out_0000001.h5')
+        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
 
