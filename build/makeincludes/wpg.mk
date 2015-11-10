@@ -43,6 +43,6 @@ ${WPG_SRC_DIR}/install.stamp: ${WPG_SRC_DIR}/build.stamp
 	${call header2start,"Building ${WPG}."}
 	cd ${SRC} && \
 	cp -r prop-develop ${PYTHON_LIBDIR}/prop && \
-	cp -r WPG-develop/wpg ${PYTHON_LIBDIR}
+	cp -r WPG-develop/wpg ${PYTHON_LIBDIR} && \
 	touch $@
 	${call header2end,"Installed ${WPG}."}

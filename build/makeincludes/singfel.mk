@@ -2,7 +2,11 @@ SINGFEL=singfel
 SINGFEL_DIR=${PACKAGES}/singfel
 SINGFEL_SRC_DIR=${SRC}/singfel
 
-singfel: ${SINGFEL_SRC_DIR}/build.stamp
+singfel: ${MPICH_SRC_DIR}/install.stamp \
+	${ARMADILLO_SRC_DIR}/install.stamp \
+	${HDF5_SRC_DIR}/install.stamp \
+	${BOOST_SRC_DIR}/install.stamp \
+	${SINGFEL_SRC_DIR}/install.stamp
 
 ${PACKAGES}/singfel_package.stamp:
 	${call header2start,"Fetching ${SINGFEL}."}
@@ -44,7 +48,11 @@ ${SINGFEL_SRC_DIR}/build.stamp: ${SINGFEL_SRC_DIR}/patch.stamp
 ${SINGFEL_SRC_DIR}/install.stamp: ${SINGFEL_SRC_DIR}/build.stamp
 	${call header2start,"Building ${SINGFEL}."}
 	cd ${SRC} && \
-	cp -r singfel ${LIB} && \
-	touch __init__.py && \
+	cp -r singfel/bin/* ${PREFIX_DIR}/bin && \
+	if [ ! -d ${PREFIX_DIR}/include/singfel ]; then \
+		mkdir -p ${PREFIX_DIR}/include/singfel; \
+	fi && \
+	cp -r singfel/libsingfel/*.h ${PREFIX_DIR}/include/singfel && \
+	cp -r singfel/lib/*.so ${LIBDIR} && \
 	touch $@
 	${call header2end,"Installed ${SINGFEL}."}

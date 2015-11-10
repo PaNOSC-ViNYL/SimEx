@@ -9,8 +9,8 @@ FULL_BOOST=${BOOST}_${BOOST_UNDERSCORED_VERSION}
 BOOST_DIR=${PACKAGES}/${FULL_BOOST}
 BOOST_SRC_DIR=${SRC}/${FULL_BOOST}
 
-boost: ${BOOST_SRC_DIR}/build.stamp \
-	${BOOST_SRC_DIR}/install.stamp
+boost: ${MPICH_SRC_DIR}/install.stamp \
+	${BOOST_SRC_DIR}/install.stamp \
 
 ${PACKAGES}/${FULL_BOOST}_package.stamp:
 	${call header2start,"Fetching ${FULL_BOOST}."}
@@ -48,7 +48,7 @@ ${BOOST_SRC_DIR}/build.stamp: ${BOOST_SRC_DIR}/patch.stamp
 	touch $@
 	${call header2end,"Built ${BOOST}."}
 
-${BOOST_SRC_DIR}/install.stamp:
+${BOOST_SRC_DIR}/install.stamp: ${BOOST_SRC_DIR}/build.stamp
 	${call header2start,"Building ${BOOST}."}
 	cd ${BOOST_SRC_DIR} && \
     ./b2 --prefix=${PREFIX_DIR} install && \
