@@ -48,6 +48,3 @@ ${MPICH_SRC_DIR}/install.stamp: ${MPICH_SRC_DIR}/build.stamp
 	make install && \
 	touch $@
 	${call header2end,"Installed ${MPICH}."}
-
-
-

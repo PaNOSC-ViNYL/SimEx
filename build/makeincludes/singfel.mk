@@ -24,7 +24,8 @@ ${SINGFEL_SRC_DIR}/unpack.stamp: ${PACKAGES}/singfel_package.stamp
 ${SINGFEL_SRC_DIR}/patch.stamp: ${SINGFEL_SRC_DIR}/unpack.stamp
 	${call header2start,"Patching ${SINGFEL}."}
 	cd ${SINGFEL_SRC_DIR} && \
-	patch CMakeLists.txt ${PATCHES}/${SINGFEL}/CMakeLists.txt.patch
+	patch CMakeLists.txt ${PATCHES}/${SINGFEL}/CMakeLists.txt.patch && \
+	patch CMake/FindArmadillo.cmake ${PATCHES}/${SINGFEL}/FindArmadillo.cmake.patch && \
 	touch $@
 	${call header2end,"Patched ${SINGFEL}."}
 
@@ -35,7 +36,7 @@ ${SINGFEL_SRC_DIR}/build.stamp: ${SINGFEL_SRC_DIR}/patch.stamp
 		mkdir build; \
     fi
 	cd ${SINGFEL_SRC_DIR}/build && \
-    cmake .. && \
+		PATH=${PREFIX_DIR}/bin:${PATH} BOOST_INCLUDEDIR=${PREFIX_DIR}/include/boost BOOST_DIR=${PREFIX_DIR} ARMA_DIR=${PREFIX_DIR} LD_LIBRARY_PATH=${LIBDIR} HDF5_DIR=${PREFIX_DIR} cmake .. && \
     make && \
 	touch $@
 	${call header2end,"Built ${SINGFEL}."}
