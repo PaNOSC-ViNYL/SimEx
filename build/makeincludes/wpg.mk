@@ -29,7 +29,6 @@ ${WPG_SRC_DIR}/patch.stamp: ${WPG_SRC_DIR}/unpack.stamp
 	@echo "\nPatching ${WPG}."
 	cd ${SRC}/prop-develop && \
 	patch propagateSE.py ${PATCHES}/wpg/propagateSE.py.patch && \
-	patch propagateSE.py ${PATCHES}/wpg/propagateSE.py.patch.2 && \
 	patch diagnostics.py ${PATCHES}/wpg/diagnostics.py.patch && \
 	touch $@
 	@echo "Patched ${WPG}.\n"
