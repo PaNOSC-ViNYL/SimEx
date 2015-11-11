@@ -29,6 +29,7 @@ ${WPG_SRC_DIR}/patch.stamp: ${WPG_SRC_DIR}/unpack.stamp
 	${call header2start,"Patching ${WPG}."}
 	cd ${SRC}/prop-develop && \
 	patch propagateSE.py ${PATCHES}/wpg/propagateSE.py.patch && \
+	patch propagateSE.py ${PATCHES}/wpg/propagateSE.py.patch.2 && \
 	patch diagnostics.py ${PATCHES}/wpg/diagnostics.py.patch && \
 	touch $@
 	${call header2end,"Patched ${WPG}."}
@@ -42,7 +43,8 @@ ${WPG_SRC_DIR}/build.stamp: ${WPG_SRC_DIR}/patch.stamp
 ${WPG_SRC_DIR}/install.stamp: ${WPG_SRC_DIR}/build.stamp
 	${call header2start,"Building ${WPG}."}
 	cd ${SRC} && \
-	cp -r prop-develop ${PYTHON_LIBDIR}/prop && \
-	cp -r WPG-develop/wpg ${PYTHON_LIBDIR} && \
+	cp -r prop-develop ${PYPATH}/prop && \
+	touch ${PYPATH}/prop/__init__.py && \
+	cp -r WPG-develop/wpg ${PYPATH} && \
 	touch $@
 	${call header2end,"Installed ${WPG}."}

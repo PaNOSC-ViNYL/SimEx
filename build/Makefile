@@ -7,7 +7,7 @@ MAKE_INCLUDES=${BUILD}/makeincludes
 PATCHES=${EXTERNALS}/patches
 PREFIX_DIR=${ROOT}/sw
 LIBDIR=${PREFIX_DIR}/lib
-PYTHON_LIBDIR=${LIBDIR}/python2.7/site-packages
+PYPATH=${LIBDIR}/python2.7/site-packages
 
 default: all
 
@@ -34,6 +34,7 @@ clean:
 allclean: clean \
 	rm -rf ${PREFIX_DIR}
 
+
 # Makefile for the SIMEX simulation suite.
 # Build external dependencies.
 # WPG
@@ -43,5 +44,4 @@ include ${MAKE_INCLUDES}/hdf5.mk
 include ${MAKE_INCLUDES}/boost.mk
 include ${MAKE_INCLUDES}/armadillo.mk
 include ${MAKE_INCLUDES}/singfel.mk
-
 
