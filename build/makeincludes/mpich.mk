@@ -9,42 +9,42 @@ MPICH_SRC_DIR=${SRC}/${MPICH}
 mpich: ${MPICH_SRC_DIR}/install.stamp
 
 ${PACKAGES}/mpich_package.stamp:
-	${call header2start,"Fetching ${MPICH}."}
+	@echo "\nFetching ${MPICH}."
 	cd ${PACKAGES} && \
     wget http://www.mpich.org/static/downloads/${MPICH_MAJOR}.${MPICH_MINOR}.${MPICH_BUILD}/mpich-${MPICH_MAJOR}.${MPICH_MINOR}.${MPICH_BUILD}.tar.gz && \
 	touch $@
-	${call header2end,"Fetched ${MPICH}."}
+	@echo "Fetched ${MPICH}.\n"
 
 ${MPICH_SRC_DIR}/unpack.stamp: ${PACKAGES}/mpich_package.stamp
-	${call header2start,"Unpacking ${MPICH}."}
+	@echo "\nUnpacking ${MPICH}."
 	cd ${SRC} && \
     tar -xvf ${PACKAGES}/mpich-${MPICH_MAJOR}.${MPICH_MINOR}.${MPICH_BUILD}.tar.gz && \
 	touch $@
-	${call header2end,"Unpacked ${MPICH}."}
+	@echo "Unpacked ${MPICH}.\n"
 
 ${MPICH_SRC_DIR}/patch.stamp: ${MPICH_SRC_DIR}/unpack.stamp
-	${call header2start,"Patching ${MPICH}."}
+	@echo "\nPatching ${MPICH}."
 	touch $@
-	${call header2end,"Patched ${MPICH}."}
+	@echo "Patched ${MPICH}.\n"
 
 ${MPICH_SRC_DIR}/configure.stamp: ${MPICH_SRC_DIR}/patch.stamp
-	${call header2start,"Configuring ${MPICH}."}
+	@echo "\nConfiguring ${MPICH}."
 	cd ${MPICH_SRC_DIR} && \
     ./configure --disable-fortran --prefix=${PREFIX_DIR} && \
 	touch $@
-	${call header2end,"Configured ${MPICH}."}
+	@echo "Configured ${MPICH}.\n"
 
 
 ${MPICH_SRC_DIR}/build.stamp: ${MPICH_SRC_DIR}/configure.stamp
-	${call header2start,"Building ${MPICH}."}
+	@echo "\nBuilding ${MPICH}."
 	cd ${MPICH_SRC_DIR} && \
 	make && \
 	touch $@
-	${call header2end,"Built ${MPICH}."}
+	@echo "Built ${MPICH}.\n"
 
 ${MPICH_SRC_DIR}/install.stamp: ${MPICH_SRC_DIR}/build.stamp
-	${call header2start,"Building ${MPICH}."}
+	@echo "\nBuilding ${MPICH}."
 	cd ${MPICH_SRC_DIR} && \
 	make install && \
 	touch $@
-	${call header2end,"Installed ${MPICH}."}
+	@echo "Installed ${MPICH}.\n"

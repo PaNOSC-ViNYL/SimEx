@@ -11,45 +11,45 @@ PROJECT_SRC_DIR=${SRC}/${FULL_PROJECT}
 <+target+>: ${PROJECT_SRC_DIR}/install.stamp
 
 ${PACKAGES}/${FULL_PROJECT}_package.stamp:
-	${call header2start,"Fetching ${FULL_PROJECT}."}
+	${echo "\nFetching ${FULL_PROJECT}."}
 	cd ${PACKAGES} && \
 	<++> && \
 	touch $@
-	${call header2end,"Fetched ${PROJECT}."}
+	${echo "\nFetched ${PROJECT}."}
 
 ${PROJECT_SRC_DIR}/unpack.stamp: ${PACKAGES}/${FULL_PROJECT}_package.stamp
-	${call header2start,"Unpacking ${PROJECT}."}
+	${echo "\nUnpacking ${PROJECT}."}
 	cd ${SRC} && \
 	<++> && \
 	touch $@
-	${call header2end,"Unpacked ${PROJECT}."}
+	${echo "\nUnpacked ${PROJECT}."}
 
 ${PROJECT_SRC_DIR}/patch.stamp: ${PROJECT_SRC_DIR}/unpack.stamp
-	${call header2start,"Patching ${PROJECT}."}
+	${echo "\nPatching ${PROJECT}."}
 	<++> && \
 	touch $@
-	${call header2end,"Patched ${PROJECT}."}
+	${echo "\nPatched ${PROJECT}."}
 
 ${PROJECT_SRC_DIR}/configure.stamp: ${PROJECT_SRC_DIR}/patch.stamp
-	${call header2start,"Configuring ${PROJECT}."}
+	${echo "\nConfiguring ${PROJECT}."}
 	cd ${PROJECT_SRC_DIR} && \
 	<++> && \
 	touch $@
-	${call header2end,"Configured ${PROJECT}."}
+	${echo "\nConfigured ${PROJECT}."}
 
 ${PROJECT_SRC_DIR}/build.stamp: ${PROJECT_SRC_DIR}/configure.stamp
-	${call header2start,"Building ${PROJECT}."}
+	${echo "\nBuilding ${PROJECT}."}
 	cd ${PROJECT_SRC_DIR} && \
 	<++> && \
 	touch $@
-	${call header2end,"Built ${MPICH}."}
+	${echo "\nBuilt ${MPICH}."}
 
 ${PROJECT_SRC_DIR}/install.stamp: ${PROJECT_SRC_DIR}/build.stamp
-	${call header2start,"Building ${PROJECT}."}
+	${echo "\nBuilding ${PROJECT}."}
 	cd ${PROJECT_SRC_DIR} && \
 	<++> && \
 	touch $@
-	${call header2end,"Installed ${PROJECT}."}
+	${echo "\nInstalled ${PROJECT}."}
 
 
 

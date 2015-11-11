@@ -9,32 +9,32 @@ singfel: ${MPICH_SRC_DIR}/install.stamp \
 	${SINGFEL_SRC_DIR}/install.stamp
 
 ${PACKAGES}/singfel_package.stamp:
-	${call header2start,"Fetching ${SINGFEL}."}
+	@echo "\nFetching ${SINGFEL}."
 	cd ${PACKAGES} && \
     wget https://www.dropbox.com/s/nnoc78iafor0qrn/singfel.tar.gz?dl=0 -O singfel.tar.gz
 	touch $@
-	${call header2end,"Fetched ${SINGFEL}."}
+	@echo "Fetched ${SINGFEL}.\n"
 
 ${SINGFEL_SRC_DIR}/unpack.stamp: ${PACKAGES}/singfel_package.stamp
-	${call header2start,"Unpacking ${SINGFEL}."}
+	@echo "\nUnpacking ${SINGFEL}."
 	if [ ! -d ${SINGFEL_SRC_DIR} ]; then \
     	mkdir ${SINGFEL_SRC_DIR}; \
 	fi
 	cd ${SINGFEL_SRC_DIR} && \
 	tar -xvf ${PACKAGES}/singfel.tar.gz --strip-components 1 && \
 	touch $@
-	${call header2end,"Unpacked ${SINGFEL}."}
+	@echo "Unpacked ${SINGFEL}.\n"
 
 ${SINGFEL_SRC_DIR}/patch.stamp: ${SINGFEL_SRC_DIR}/unpack.stamp
-	${call header2start,"Patching ${SINGFEL}."}
+	@echo "\nPatching ${SINGFEL}."
 	cd ${SINGFEL_SRC_DIR} && \
 	patch CMakeLists.txt ${PATCHES}/${SINGFEL}/CMakeLists.txt.patch && \
 	patch CMake/FindArmadillo.cmake ${PATCHES}/${SINGFEL}/FindArmadillo.cmake.patch && \
 	touch $@
-	${call header2end,"Patched ${SINGFEL}."}
+	@echo "Patched ${SINGFEL}.\n"
 
 ${SINGFEL_SRC_DIR}/build.stamp: ${SINGFEL_SRC_DIR}/patch.stamp
-	${call header2start,"Building ${SINGFEL}."}
+	@echo "\nBuilding ${SINGFEL}."
 	cd ${SINGFEL_SRC_DIR} && \
 	if [ ! -d build ]; then \
 		mkdir build; \
@@ -43,10 +43,10 @@ ${SINGFEL_SRC_DIR}/build.stamp: ${SINGFEL_SRC_DIR}/patch.stamp
 		PATH=${PREFIX_DIR}/bin:${PATH} BOOST_INCLUDEDIR=${PREFIX_DIR}/include/boost BOOST_DIR=${PREFIX_DIR} ARMA_DIR=${PREFIX_DIR} LD_LIBRARY_PATH=${LIBDIR} HDF5_DIR=${PREFIX_DIR} cmake .. && \
     make && \
 	touch $@
-	${call header2end,"Built ${SINGFEL}."}
+	@echo "Built ${SINGFEL}.\n"
 
 ${SINGFEL_SRC_DIR}/install.stamp: ${SINGFEL_SRC_DIR}/build.stamp
-	${call header2start,"Building ${SINGFEL}."}
+	@echo "\nBuilding ${SINGFEL}."
 	cd ${SRC} && \
 	cp -r singfel/bin/* ${PREFIX_DIR}/bin && \
 	if [ ! -d ${PREFIX_DIR}/include/singfel ]; then \
@@ -55,4 +55,4 @@ ${SINGFEL_SRC_DIR}/install.stamp: ${SINGFEL_SRC_DIR}/build.stamp
 	cp -r singfel/libsingfel/*.h ${PREFIX_DIR}/include/singfel && \
 	cp -r singfel/lib/*.so ${LIBDIR} && \
 	touch $@
-	${call header2end,"Installed ${SINGFEL}."}
+	@echo "Installed ${SINGFEL}.\n"

@@ -20,19 +20,29 @@ all: directories \
 	singfel
 
 directories:
+	@echo "Making directories."
 	if [ ! -d ${PREFIX_DIR} ]; then \
 		mkdir -p ${PREFIX_DIR}; \
 	fi
-	if [ ! -d ${PREFIX_DIR}/lib/python2.7/site-packages ]; then \
-		mkdir -p ${PREFIX_DIR}/lib/python2.7/site-packages; \
+	if [ ! -d ${SRC} ]; then \
+		mkdir -p ${SRC}; \
 	fi
+	if [ ! -d ${PYPATH} ]; then \
+		mkdir -p ${PYPATH}; \
+	fi
+	touch ${PYPATH}/__init__.py
+	@echo "Made directories.\n"
 
 clean:
-	rm -rf ${LIBDIR}/*
-	rm -rf ${SRC}/*
+	@echo "\nCleaning."
+	rm -rf ${LIBDIR}/* && \
+	rm -rf ${SRC}
+	@echo "Done cleaning.\n"
 
-allclean: clean \
+allclean: clean
+	@echo "\nCleaning all."
 	rm -rf ${PREFIX_DIR}
+	@echo "Done cleaning all.\n"
 
 
 # Makefile for the SIMEX simulation suite.

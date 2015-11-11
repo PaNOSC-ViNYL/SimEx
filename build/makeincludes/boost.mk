@@ -13,45 +13,44 @@ boost: ${MPICH_SRC_DIR}/install.stamp \
 	${BOOST_SRC_DIR}/install.stamp \
 
 ${PACKAGES}/${FULL_BOOST}_package.stamp:
-	${call header2start,"Fetching ${FULL_BOOST}."}
+	@echo "\nFetching ${FULL_BOOST}."
 	cd ${PACKAGES} && \
     wget http://sourceforge.net/projects/boost/files/boost/${BOOST_DOTTED_VERSION}/${FULL_BOOST}.tar.gz && \
 	touch $@
-	${call header2end,"Fetched ${BOOST}."}
+	@echo "Fetched ${BOOST}.\n"
 
 ${BOOST_SRC_DIR}/unpack.stamp: ${BOOST_DIR}_package.stamp
-	${call header2start,"Unpacking ${BOOST}."}
+	@echo "\nUnpacking ${BOOST}."
 	cd ${SRC} && \
     tar -xvf ${BOOST_DIR}.tar.gz && \
 	touch $@
-	${call header2end,"Unpacked ${BOOST}."}
+	@echo "Unpacked ${BOOST}.\n"
 
 ${BOOST_SRC_DIR}/configure.stamp: ${BOOST_SRC_DIR}/unpack.stamp
-	${call header2start,"Configuring ${BOOST}."}
+	@echo "\nConfiguring ${BOOST}."
 	cd ${BOOST_SRC_DIR} && \
     LD_LIBRARY_PATH=${LIBDIR} PATH=${PREFIX_DIR}/bin:${PATH} ./bootstrap.sh --prefix=${PREFIX_DIR} --with-python=/usr/bin/python && \
 	touch $@
-	${call header2end,"Configured ${BOOST}."}
+	@echo "Configured ${BOOST}.\n"
 
 ${BOOST_SRC_DIR}/patch.stamp: ${BOOST_SRC_DIR}/configure.stamp
-	${call header2start,"Patching ${BOOST}."}
+	@echo "\nPatching ${BOOST}."
 	cd ${BOOST_SRC_DIR} && \
 	echo "using mpi : ${PREFIX_DIR}/bin/mpicxx ;" >> project-config.jam && \
     echo "using mpi : ${PREFIX_DIR}/bin/mpicxx ;" >> user-config.jam && \
 	touch $@
-	${call header2end,"Patched ${BOOST}."}
+	@echo "\nPatched ${BOOST}.\n"
 
 ${BOOST_SRC_DIR}/build.stamp: ${BOOST_SRC_DIR}/patch.stamp
-	${call header2start,"Building ${BOOST}."}
+	@echo "\nBuilding ${BOOST}."
 	cd ${BOOST_SRC_DIR} && \
     LD_LIBRARY_PATH=${LIBDIR} PATH=${PREFIX_DIR}/bin:${PATH} ./b2 --with-mpi --debug-configuration --debug-building 2>&1 | tee b2.log && \
 	touch $@
-	${call header2end,"Built ${BOOST}."}
+	@echo "Built ${BOOST}.\n"
 
 ${BOOST_SRC_DIR}/install.stamp: ${BOOST_SRC_DIR}/build.stamp
-	${call header2start,"Building ${BOOST}."}
+	@echo "\nBuilding ${BOOST}."
 	cd ${BOOST_SRC_DIR} && \
     ./b2 --prefix=${PREFIX_DIR} install && \
 	touch $@
-	${call header2end,"Installed ${BOOST}."}
-
+	@echo "Installed ${BOOST}.\n"
