@@ -6,6 +6,8 @@
 
 from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
 from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
+from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffractor
+from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
 
 class PhotonExperimentSimulation:
     """ The PhotonExperimentSimulation is the top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
@@ -40,16 +42,16 @@ class PhotonExperimentSimulation:
 
         self.__photon_source = checkAndSetPhotonSource(photon_source)
         self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)
-        #self.__photon_interactor = checkAndSetPhotonInteractor(photon_interactor)
-        #self.__photon_diffractor = checkAndSetPhotonDiffractor(photon_diffractor)
+        self.__photon_interactor = checkAndSetPhotonInteractor(photon_interactor)
+        self.__photon_diffractor = checkAndSetPhotonDiffractor(photon_diffractor)
         #self.__photon_detector = checkAndSetPhotonDetector(photon_detector)
         #self.__photon_analyser = checkAndSetPhotonAnalyser(photon_analyser)
 
         self.__calculators = [
                 self.__photon_source,
                 self.__photon_propagator,
-                #self.__photon_interactor,
-                #self.__photon_diffractor,
+                self.__photon_interactor,
+                self.__photon_diffractor,
                 #self.__photon_detector,
                 ]
 
@@ -62,6 +64,10 @@ class PhotonExperimentSimulation:
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
+
+        self.__photon_diffractor._readH5()
+        self.__photon_diffractor.backengine()
+        self.__photon_diffractor.saveH5()
 
     def _checkInterfaceConsistency(self):
         """

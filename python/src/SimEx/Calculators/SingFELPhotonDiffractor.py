@@ -5,7 +5,7 @@
     @creation 20151104
 
 """
-
+import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 
 
@@ -71,7 +71,22 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
     def backengine(self):
         """ This method drives the backengine code, in this case the WPG interface to SRW."""
-        from singFEL import *
+        command_string = 'mpirun \
+-np 1 \
+radiationDamageMPI \
+ --inputDir . \
+ --outputDir . \
+ --beamFile ./s2e.beam \
+ --geomFile ./s2e.geom \
+ --uniformRotation 1 \
+ --calculateCompton 0 \
+ --sliceInterval 1\
+ --numSlices 1\
+ --pmiStartID 1 \
+ --pmiEndID 1 \
+ --numDP 1'
+        proc = subprocess.Popen(command_string, shell=True)
+        proc.wait()
 
     @property
     def data(self):
