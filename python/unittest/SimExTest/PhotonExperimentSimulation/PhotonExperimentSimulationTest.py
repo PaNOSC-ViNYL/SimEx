@@ -37,12 +37,15 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         #source_input = TestUtilities.generateTestFilePath('FELsource_out_0000001.h5')
         source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
         diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
+        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
         photon_diffractor = SingFELPhotonDiffractor(parameters=None, input_path=diffr_input, output_path='diffr_out.h5')
 
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
                                          photon_propagator=photon_propagator,
+                                         photon_interactor=photon_interactor,
                                          photon_diffractor=photon_diffractor)
 
         pxs.run()

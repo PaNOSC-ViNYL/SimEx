@@ -58,6 +58,9 @@ class PhotonExperimentSimulation:
     def run(self):
         """ Method to start the photon experiment simulation workflow. """
 
+        if not self._checkInterfaceConsistency():
+            raise RuntimeError(" Interfaces are not consistent, i.e. at least one module's expectations with respect to incoming data sets are not satisfied.")
+
         self.__photon_source._readH5()
         self.__photon_source.saveH5()
 
