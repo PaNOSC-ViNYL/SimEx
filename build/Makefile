@@ -14,9 +14,9 @@ default: all
 all: directories \
 	wpg \
 	mpich \
-	hdf5 \
-	boost \
 	armadillo \
+	boost \
+	hdf5 \
 	singfel
 
 directories:

@@ -40,7 +40,7 @@ ${SINGFEL_SRC_DIR}/build.stamp: ${SINGFEL_SRC_DIR}/patch.stamp
 		mkdir build; \
     fi
 	cd ${SINGFEL_SRC_DIR}/build && \
-		PATH=${PREFIX_DIR}/bin:${PATH} BOOST_INCLUDEDIR=${PREFIX_DIR}/include/boost BOOST_DIR=${PREFIX_DIR} ARMA_DIR=${PREFIX_DIR} LD_LIBRARY_PATH=${LIBDIR} HDF5_DIR=${PREFIX_DIR} cmake .. && \
+		PATH=${PREFIX_DIR}/bin:${PATH} BOOST_INCLUDEDIR=${PREFIX_DIR}/include/boost BOOST_DIR=${PREFIX_DIR} ARMA_DIR=${PREFIX_DIR} LD_LIBRARY_PATH=${LIBDIR}:${LD_LIBRARY_PATH} HDF5_DIR=${PREFIX_DIR} cmake .. && \
     make && \
 	touch $@
 	@echo "Built ${SINGFEL}.\n"

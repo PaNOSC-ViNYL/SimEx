@@ -29,7 +29,7 @@ ${BOOST_SRC_DIR}/unpack.stamp: ${BOOST_DIR}_package.stamp
 ${BOOST_SRC_DIR}/configure.stamp: ${BOOST_SRC_DIR}/unpack.stamp
 	@echo "\nConfiguring ${BOOST}."
 	cd ${BOOST_SRC_DIR} && \
-    LD_LIBRARY_PATH=${LIBDIR} PATH=${PREFIX_DIR}/bin:${PATH} ./bootstrap.sh --prefix=${PREFIX_DIR} --with-python=/usr/bin/python && \
+    LD_LIBRARY_PATH=${LIBDIR}:${LD_LIBRARY_PATH} PATH=${PREFIX_DIR}/bin:${PATH} ./bootstrap.sh --prefix=${PREFIX_DIR} --with-python=/usr/bin/python && \
 	touch $@
 	@echo "Configured ${BOOST}.\n"
 
@@ -44,7 +44,7 @@ ${BOOST_SRC_DIR}/patch.stamp: ${BOOST_SRC_DIR}/configure.stamp
 ${BOOST_SRC_DIR}/build.stamp: ${BOOST_SRC_DIR}/patch.stamp
 	@echo "\nBuilding ${BOOST}."
 	cd ${BOOST_SRC_DIR} && \
-    LD_LIBRARY_PATH=${LIBDIR} PATH=${PREFIX_DIR}/bin:${PATH} ./b2 --with-mpi --debug-configuration --debug-building 2>&1 | tee b2.log && \
+    LD_LIBRARY_PATH=${LIBDIR}:${LD_LIBRARY_PATH} PATH=${PREFIX_DIR}/bin:${PATH} ./b2 --with-mpi --debug-configuration --debug-building 2>&1 | tee b2.log && \
 	touch $@
 	@echo "Built ${BOOST}.\n"
 

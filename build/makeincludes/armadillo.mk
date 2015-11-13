@@ -40,7 +40,7 @@ ${ARMADILLO_SRC_DIR}/configure.stamp: ${ARMADILLO_SRC_DIR}/patch.stamp
 ${ARMADILLO_SRC_DIR}/build.stamp: ${ARMADILLO_SRC_DIR}/configure.stamp
 	@echo "\nBuilding ${ARMADILLO}."
 	cd ${ARMADILLO_SRC_DIR} && \
-    cmake . && \
+	LD_LIBRARY_PATH=${LIBDIR}:${LD_LIBRARY_PATH} cmake . && \
 	touch $@
 	@echo "Built ${ARMADILLO}.\n"
 
