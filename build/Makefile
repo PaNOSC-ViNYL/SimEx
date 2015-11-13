@@ -27,6 +27,9 @@ directories:
 	if [ ! -d ${SRC} ]; then \
 		mkdir -p ${SRC}; \
 	fi
+	if [ ! -d ${PACKAGES} ]; then \
+		mkdir -p ${PACKAGES}; \
+	fi
 	if [ ! -d ${PYPATH} ]; then \
 		mkdir -p ${PYPATH}; \
 	fi

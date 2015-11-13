@@ -8,6 +8,8 @@ from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
 from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
 from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffractor
 from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
+from SimEx.Calculators.AbstractPhotonDetector import checkAndSetPhotonDetector
+from SimEx.Calculators.AbstractPhotonAnalyzer import checkAndSetPhotonAnalyzer
 
 class PhotonExperimentSimulation:
     """ The PhotonExperimentSimulation is the top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
@@ -17,7 +19,7 @@ class PhotonExperimentSimulation:
                        photon_interactor=None,
                        photon_diffractor=None,
                        photon_detector=None,
-                       photon_analyser=None):
+                       photon_analyzer=None):
         """
         !@brief  Constructor for the PhotonExperimentSimulation object.
 
@@ -36,16 +38,16 @@ class PhotonExperimentSimulation:
         @param photon_detector : The calculator for photon detection.
         @type : Child of AbstractPhotonDetector
 
-        @param photon_analyser : The calculator for  photon signal analysis.
-        @type : Child of AbstractPhotonAnalyser
+        @param photon_analyzer : The calculator for  photon signal analysis.
+        @type : Child of AbstractPhotonAnalyzer
         """
 
         self.__photon_source = checkAndSetPhotonSource(photon_source)
         self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)
         self.__photon_interactor = checkAndSetPhotonInteractor(photon_interactor)
         self.__photon_diffractor = checkAndSetPhotonDiffractor(photon_diffractor)
-        #self.__photon_detector = checkAndSetPhotonDetector(photon_detector)
-        #self.__photon_analyser = checkAndSetPhotonAnalyser(photon_analyser)
+        self.__photon_detector = checkAndSetPhotonDetector(photon_detector)
+        self.__photon_analyzer = checkAndSetPhotonAnalyzer(photon_analyzer)
 
         self.__calculators = [
                 self.__photon_source,

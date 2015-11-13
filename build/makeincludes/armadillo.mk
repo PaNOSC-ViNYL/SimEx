@@ -42,7 +42,7 @@ ${ARMADILLO_SRC_DIR}/build.stamp: ${ARMADILLO_SRC_DIR}/configure.stamp
 	cd ${ARMADILLO_SRC_DIR} && \
     cmake . && \
 	touch $@
-	@echo "Built ${MPICH}.\n"
+	@echo "Built ${ARMADILLO}.\n"
 
 ${ARMADILLO_SRC_DIR}/install.stamp: ${ARMADILLO_SRC_DIR}/build.stamp
 	@echo "\nBuilding ${ARMADILLO}."
