@@ -19,7 +19,7 @@ def checkAndSetInstance(cls, var=None, default=None):
 
     if var is None:
         if default is None:
-            raise exceptions.TypeError("The parameters 'var' and 'default' cannot both be None.")
+            return None
         elif not isinstance(default, cls):
             raise exceptions.TypeError("The default is not of correct type.")
         else: return default

@@ -5,6 +5,8 @@
     @creation 20151111
 
 """
+import subprocess
+
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from TestUtilities.TestUtilities import generateTestFilePath
 
@@ -93,8 +95,11 @@ class FakePhotonMatterInteractor(AbstractPhotonInteractor):
 
     def backengine(self):
         """ This method drives the backengine code."""
-        cached_out = generateTestFilePath('pmi_out.h5')
-        command_string = 'cp %s %s' % (cached_out, './pmi_out.h5')
+        cached_out = generateTestFilePath('pmi_out_0000001.h5')
+        command_string = 'cp %s %s' % (cached_out, '.')
+        proc = subprocess.Popen(command_string, shell=True)
+        proc.wait()
+
 
     @property
     def data(self):

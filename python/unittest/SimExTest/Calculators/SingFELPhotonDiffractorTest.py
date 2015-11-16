@@ -57,7 +57,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     }
+                   }
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')

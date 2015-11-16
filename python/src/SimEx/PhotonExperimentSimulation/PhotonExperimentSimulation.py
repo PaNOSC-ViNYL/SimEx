@@ -54,7 +54,7 @@ class PhotonExperimentSimulation:
                 self.__photon_propagator,
                 self.__photon_interactor,
                 self.__photon_diffractor,
-                #self.__photon_detector,
+                self.__photon_detector,
                 ]
 
     def run(self):
@@ -69,6 +69,10 @@ class PhotonExperimentSimulation:
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
+
+        self.__photon_interactor._readH5()
+        self.__photon_interactor.backengine()
+        self.__photon_interactor.saveH5()
 
         self.__photon_diffractor._readH5()
         self.__photon_diffractor.backengine()
