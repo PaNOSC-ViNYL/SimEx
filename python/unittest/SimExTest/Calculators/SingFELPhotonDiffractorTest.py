@@ -48,16 +48,38 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     def testConstruction(self):
         """ Testing the default construction of the class. """
 
+        parameters={ 'number_of_uniform_rotations': 1,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
 
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 
+        parameters={ 'number_of_uniform_rotations': 1,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         # Call backengine.
         status = diffractor.backengine()
@@ -79,8 +101,19 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Create the pmi dir.
         os.mkdir('pmi')
 
+        parameters={ 'number_of_uniform_rotations': 1,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         # Call backengine.
         status = diffractor.backengine()
@@ -105,9 +138,19 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         proc = subprocess.Popen(ln_pmi_command, shell=True)
         proc.wait()
 
+        parameters={ 'number_of_uniform_rotations': 1,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
 
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         # Call backengine.
         status = diffractor.backengine()
@@ -122,6 +165,29 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.__files_to_remove.append('diffr_out_0000002.h5')
         self.__files_to_remove.append(os.path.join('pmi', 'pmi_out_0000001.h5'))
         self.__dirs_to_remove.append('pmi')
+
+    def testRunWithParameters(self):
+        """ Check we can run the backengine with a given parameter set. """
+
+        parameters={ 'number_of_uniform_rotations': 1,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
+
+        # Call backengine.
+        status = diffractor.backengine()
+
+        self.assertEqual(status, 0)
+
 
 
 

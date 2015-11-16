@@ -23,9 +23,18 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Constructor for the xfel photon propagator.
 
-        @param  :
-        @type :
-        @default :
+        @param  parameters : Dictionary of singFEL parameters.
+        @type : dict
+        @example : parameters={ 'number_of_uniform_rotations': 1,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
         """
 
         # Initialize base class.
@@ -102,23 +111,75 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             proc = subprocess.Popen(ln_preph5_command, shell=True)
             proc.wait()
 
+
+        input_dir = '.'
+        output_dir = '.'
+        config_file = '/dev/null'
+
+
+        # If parameters are given, map them to command line arguments.
+        if 'number_of_uniform_rotations' in self.parameters.keys():
+            number_of_uniform_rotations = str(self.parameters['number_of_uniform_rotations'])
+        else:
+            number_of_uniform_rotations = 1
+
+        if 'calculate_Compton' in self.parameters.keys():
+            calculate_Compton = {True : '1', False : '0'}[self.parameters['calculate_Compton']]
+        else:
+            calculate_Compton = '0'
+
+        if 'slice_interval' in self.parameters.keys():
+            slice_interval = str(self.parameters['slice_interval'])
+        else:
+            slice_interval = 100
+
+        if 'number_of_slices' in self.parameters.keys():
+            number_of_slices = str(self.parameters['number_of_slices'])
+
+        if 'pmi_start_ID' in self.parameters.keys():
+            pmi_start_ID = str(self.parameters['pmi_start_ID'])
+        else:
+            pmi_start_ID = 0
+
+        if 'pmi_stop_ID' in self.parameters.keys():
+            pmi_stop_ID = str(self.parameters['pmi_stop_ID'])
+        else:
+            pmi_stop_ID = 0
+
+        if 'number_of_diffraction_patterns' in self.parameters.keys():
+            number_of_diffraction_patterns = str(self.parameters['number_of_diffraction_patterns'])
+        else:
+            number_of_diffraction_patterns = 1
+
+        if 'beam_parameter_file' in self.parameters.keys():
+            beam_parameter_file = self.parameters['beam_parameter_file']
+        else:
+            raise RuntimeError("Beam parameter file must be given.")
+
+        if 'beam_geometry_file' in self.parameters.keys():
+            beam_geometry_file = self.parameters['beam_geometry_file']
+        else:
+            raise RuntimeError("Beam geometry file must be given.")
+
+
         # Run the backengine command.
-        command_string = 'mpirun \
--np 2 \
-radiationDamageMPI \
- --inputDir . \
- --outputDir . \
- --beamFile %s \
- --geomFile %s \
- --configFile /dev/null \
- --uniformRotation 1 \
- --calculateCompton 0 \
- --sliceInterval 100\
- --numSlices 2\
- --pmiStartID 1 \
- --pmiEndID 1 \
- --numDP 2' % ( TestUtilities.generateTestFilePath('s2e.beam'), TestUtilities.generateTestFilePath('s2e.geom') )
-        proc = subprocess.Popen(command_string, shell=True)
+        command_sequence = ['mpirun',
+                            '-np','2',
+                            'radiationDamageMPI',
+                            '--inputDir',         str(input_dir),
+                            '--outputDir',        str(output_dir),
+                            '--beamFile',         str(beam_parameter_file),
+                            '--geomFile',         str(beam_geometry_file),
+                            '--configFile',       str(config_file),
+                            '--uniformRotation',  str(number_of_uniform_rotations),
+                            '--calculateCompton', str(calculate_Compton),
+                            '--sliceInterval',    str(slice_interval),
+                            '--numSlices',        str(number_of_slices),
+                            '--pmiStartID',       str(pmi_start_ID),
+                            '--pmiEndID',         str(pmi_stop_ID),
+                            '--numDP',            str(number_of_diffraction_patterns),
+                            ]
+        proc = subprocess.Popen(command_sequence)
         proc.wait()
 
         # Return the return code from the backengine.
