@@ -21,7 +21,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath('pmi_out.h5')
+        cls.input_h5 = TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
 
     @classmethod
     def tearDownClass(cls):
@@ -39,8 +39,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
 
-
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+
+    def testBackengine(self):
+        """ Test that we can start a test calculation. """
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+
+        # Call backengine.
+        diffractor.backengine()
 
 if __name__ == '__main__':
     unittest.main()

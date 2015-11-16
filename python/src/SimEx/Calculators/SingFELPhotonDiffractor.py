@@ -5,9 +5,13 @@
     @creation 20151104
 
 """
+import os
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 
+from TestUtilities import TestUtilities
+
+from SimEx.Utilities import prepHDF5
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -70,21 +74,51 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         return self.__provided_data
 
     def backengine(self):
-        """ This method drives the backengine code, in this case the WPG interface to SRW."""
+        """ This method drives the backengine code, in this case Chuck's singFEL."""
+
+        # Link pmi output
+        # Setup directory to pmi output.
+        pmi_dir = os.path.abspath(os.path.join('.', 'pmi'))
+
+        # Check if path is a file.
+        if os.path.isfile(pmi_dir):
+            raise OSError("Cannot create directory %s because a file with the same name already exists.")
+        # Create if not existing.
+        if not os.path.exists(pmi_dir):
+                os.mkdir(pmi_dir)
+
+        # Nothing to do if pmi output already in pmi subdir.
+        if not pmi_dir == os.path.abspath(os.path.dirname(self.input_path)):
+            # If link already exists, just continue.
+            ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
+            proc = subprocess.Popen(ln_pmi_command, shell=True)
+            proc.wait()
+
+        preph5_location = os.path.abspath(prepHDF5.__file__)
+        # Link the prepHDF5 utility that gets called from singFEL code.
+        if not os.path.isfile('prepHDF5.py'):
+            ln_preph5_command = 'ln -s %s' % ( preph5_location )
+            proc = subprocess.Popen(ln_preph5_command, shell=True)
+            proc.wait()
+
+
+
+        # Now run the command.
         command_string = 'mpirun \
--np 1 \
+-np 2 \
 radiationDamageMPI \
  --inputDir . \
  --outputDir . \
- --beamFile ./s2e.beam \
- --geomFile ./s2e.geom \
+ --beamFile %s \
+ --geomFile %s \
+ --configFile /dev/null \
  --uniformRotation 1 \
  --calculateCompton 0 \
- --sliceInterval 1\
- --numSlices 1\
+ --sliceInterval 100\
+ --numSlices 2\
  --pmiStartID 1 \
  --pmiEndID 1 \
- --numDP 1'
+ --numDP 2' % ( TestUtilities.generateTestFilePath('s2e.beam'), TestUtilities.generateTestFilePath('s2e.geom') )
         proc = subprocess.Popen(command_string, shell=True)
         proc.wait()
 

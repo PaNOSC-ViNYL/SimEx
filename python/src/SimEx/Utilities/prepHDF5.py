@@ -18,14 +18,14 @@ def prepS2E( src , dest , config ) :
 
     pre_s2e_module = os.path.basename( os.path.dirname( os.path.abspath( src ) ) )
     #print 'Previous module: ' , pre_s2e_module
-
+    
     # Add attribute to history/parent
     grp_hist_parent.attrs['name'] =  "_" + pre_s2e_module
-
+    
     grp_srchist = file_in.get( "history/parent" ) ;
     file_out.copy( grp_srchist , grp_hist_parent )
 
-    # Copy everything to history except "data" & "history"
+    # Copy everything to history except "data" & "history"  
     for objname in file_in.keys() :
         if   objname != "data" \
              and   objname != "history" :
@@ -48,13 +48,13 @@ def prepS2E( src , dest , config ) :
         #    print '  NOT:', objname
 
     #print file_in['data'].keys()
-    #print file_in['data'].items()
+    #print file_in['data'].items()    
 
     # Create external link to parent's data
     #file_out['history/parent/detail/data'] = h5py.ExternalLink(src,'/data')
     parent_module = os.path.basename( src ) [ : os.path.basename( src ) .find( '_out' ) ]
     file_out['history/parent/detail/data'] = h5py.ExternalLink( '../' + parent_module + '/' + os.path.basename( src ) , '/data' )
-
+    
 	# Create your own groups
     grp_data = file_out.create_group( "data" )
     grp_param = file_out.create_group( "params" )
@@ -62,7 +62,7 @@ def prepS2E( src , dest , config ) :
     grp_param = file_out.create_group( "info" )
 
     str_type = h5py.new_vlen(str)
-	# Interface version
+	# Interface version  
     dataset = file_out.create_dataset("version", (1,), dtype='f')
     dataset[...] = 0.1
     # Populate /info
@@ -82,7 +82,7 @@ def prepS2E( src , dest , config ) :
     dataset = file_out.create_dataset("params/info",(1,), dtype=str_type)
     data = open(config)
     dataset[...] = data.read()
-
+     
     file_out.close()
     file_in.close()
 
@@ -108,9 +108,9 @@ if __name__ == '__main__':
 
         src  = sys.argv[1]
         dest = sys.argv[2]
-        config = sys.argv[3]
-        prepS2E( src , dest , config )
-
+        config = sys.argv[3]        
+        prepS2E( src , dest , config ) 
+                        
 # inputs to the script
 #if __name__ == '__main__':
 #    import argparse
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 #                        type=valid_file)
 #    parser.add_argument("-o", "--output", dest="outfilename", required=False,
 #                        help='output text filename', metavar="FILE",
-#                        type=valid_name, default="out.h5")
+#                        type=valid_name, default="out.h5")                  
 #    args = parser.parse_args()
 #    prepS2E( args.filename, args.outfilename )
 
