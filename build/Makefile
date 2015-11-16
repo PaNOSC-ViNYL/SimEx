@@ -47,7 +47,6 @@ allclean: clean
 	rm -rf ${PREFIX_DIR}
 	@echo "Done cleaning all.\n"
 
-
 # Makefile for the SIMEX simulation suite.
 # Build external dependencies.
 # WPG
