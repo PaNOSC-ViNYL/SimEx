@@ -6,6 +6,7 @@
 
 """
 import os
+import inspect
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 
@@ -88,22 +89,20 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                 os.mkdir(pmi_dir)
 
         # Nothing to do if pmi output already in pmi subdir.
-        if not pmi_dir == os.path.abspath(os.path.dirname(self.input_path)):
+        if not os.path.basename(self.input_path) in os.listdir(pmi_dir):
             # If link already exists, just continue.
             ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
             proc = subprocess.Popen(ln_pmi_command, shell=True)
             proc.wait()
 
-        preph5_location = os.path.abspath(prepHDF5.__file__)
+        preph5_location = inspect.getsourcefile(prepHDF5)
         # Link the prepHDF5 utility that gets called from singFEL code.
         if not os.path.isfile('prepHDF5.py'):
             ln_preph5_command = 'ln -s %s' % ( preph5_location )
             proc = subprocess.Popen(ln_preph5_command, shell=True)
             proc.wait()
 
-
-
-        # Now run the command.
+        # Run the backengine command.
         command_string = 'mpirun \
 -np 2 \
 radiationDamageMPI \
@@ -121,6 +120,9 @@ radiationDamageMPI \
  --numDP 2' % ( TestUtilities.generateTestFilePath('s2e.beam'), TestUtilities.generateTestFilePath('s2e.geom') )
         proc = subprocess.Popen(command_string, shell=True)
         proc.wait()
+
+        # Return the return code from the backengine.
+        return proc.returncode
 
     @property
     def data(self):
