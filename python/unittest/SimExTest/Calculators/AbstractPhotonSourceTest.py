@@ -100,7 +100,8 @@ class AbstractPhotonSourceTest(unittest.TestCase):
             def saveH5(self):
                 pass
 
-        self.assertRaises( TypeError, Source )
+        self.assertRaises( IOError, Source )
+
         class Source2(AbstractPhotonSource):
             def __init__(self):
                 super (Source2, self).__init__(parameters=None,

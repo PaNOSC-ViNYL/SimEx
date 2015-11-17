@@ -129,14 +129,17 @@ def checkAndSetIO(io):
     if len(io) != 2:
         raise exceptions.RuntimeError("The parameter 'io' can only be a string or a tuple of two strings.")
 
+    # Check if correct type.
     # Check if input exists, if not, raise.
     i = checkAndSetInstance(str, io[0])
+    if i is None:
+        raise exceptions.IOError("The parameter 'input_path' must be a valid filename.")
     i = os.path.abspath(i)
-    #if not os.path.isfile(i):
-        #raise exceptions.RuntimeError('Input file %s could not be found.' % (i))
 #
     # Check if output file exists, otherwise attempt to create it.
     o = checkAndSetInstance(str, io[1])
+    if o is None:
+        raise exceptions.IOError("The parameter 'output_path' must be a valid filename.")
     o = os.path.abspath(o)
     #if not os.path.isfile( o ):
         #path = os.path.dirname( o )
