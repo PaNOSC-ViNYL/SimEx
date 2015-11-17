@@ -141,10 +141,7 @@ def checkAndSetIO(io):
     if o is None:
         raise exceptions.IOError("The parameter 'output_path' must be a valid filename.")
     o = os.path.abspath(o)
-    #if not os.path.isfile( o ):
-        #path = os.path.dirname( o )
-        #if not os.path.isdir( path ):
-            #os.makedirs( path ) # Raises if permissions not sufficient to create the file.
+
     return (i, o)
 
 
