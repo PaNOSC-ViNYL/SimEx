@@ -26,11 +26,6 @@ class EntityChecksTest(unittest.TestCase):
     def tearDown(self):
         """ Tearing down a test. """
 
-    def testCheckAndSetInstanceNoDefault(self):
-        """ Test the check and set utility raises if no default nor var is given. """
-
-        # No default given.
-        self.assertRaises(exceptions.TypeError, checkAndSetInstance, int)
 
     def testCheckAndSetInstanceWrongType(self):
         """ Test the check and set utility raises if var is wrong type."""
