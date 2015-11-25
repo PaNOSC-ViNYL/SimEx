@@ -1,6 +1,6 @@
 SINGFEL=singfel
-SINGFEL_DIR=${PACKAGES}/singfel
-SINGFEL_SRC_DIR=${SRC}/singfel
+SINGFEL_DIR=${PACKAGES}/${SINGFEL}
+SINGFEL_SRC_DIR=${SRC}/${SINGFEL}
 
 singfel: ${MPICH_SRC_DIR}/install.stamp \
 	${ARMADILLO_SRC_DIR}/install.stamp \

@@ -17,7 +17,8 @@ all: directories \
 	armadillo \
 	boost \
 	hdf5 \
-	singfel
+	singfel \
+	recon \
 
 directories:
 	@echo "Making directories."
@@ -56,4 +57,5 @@ include ${MAKE_INCLUDES}/hdf5.mk
 include ${MAKE_INCLUDES}/boost.mk
 include ${MAKE_INCLUDES}/armadillo.mk
 include ${MAKE_INCLUDES}/singfel.mk
+include ${MAKE_INCLUDES}/recon.mk
 
