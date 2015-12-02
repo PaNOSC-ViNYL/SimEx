@@ -19,6 +19,7 @@ class AbstractPhotonDiffractor(AbstractBaseCalculator):
     """
 
     __metaclass__  = ABCMeta
+
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         #"""

@@ -35,5 +35,16 @@ ${RECON_SRC_DIR}/build.stamp:${RECON_SRC_DIR}/unpack.stamp
 
 ${RECON_SRC_DIR}/install.stamp:${RECON_SRC_DIR}/build.stamp
 	@echo "\nInstalling ${RECON}."
+	cd ${RECON_SRC_DIR}/s2e_recon/EMC_Src && \
+	cp -av EMC ${PREFIX_DIR}/bin && \
+	cp -av quaternions ${ROOT}/python/src/SimEx/Calculators/CalculatorUtilities && \
+	cp -av runEMC.py ${PYPATH} && \
+	mkdir -p ${PYPATH}/supp_py_modules && \
+	cp -av supp_py_modules/*.py ${PYPATH}/supp_py_modules && \
+	cp -av supp_py_modules/*.so ${PYPATH}/supp_py_modules && \
+	cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
+	cp -av object_recon ${PREFIX_DIR}/bin && \
+	cp -av runDM.py ${PYPATH}
 	touch $@
 	@echo "Installed ${RECON}.\n"
+

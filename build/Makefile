@@ -58,4 +58,3 @@ include ${MAKE_INCLUDES}/boost.mk
 include ${MAKE_INCLUDES}/armadillo.mk
 include ${MAKE_INCLUDES}/singfel.mk
 include ${MAKE_INCLUDES}/recon.mk
-
