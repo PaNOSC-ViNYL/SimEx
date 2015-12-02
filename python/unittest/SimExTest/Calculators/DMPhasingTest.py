@@ -57,8 +57,17 @@ class DMPhasingTest(unittest.TestCase):
 
         self.__files_to_remove.append('phasing_out.h5')
 
+        dm_parameters = {'number_of_trials'        : 500,
+                         'number_of_iterations'    : 2,
+                         'averaging_start'         : 15,
+                         'leash'                   : 0.2,
+                         'number_of_shrink_cycles' : 20,
+                         }
+
         # Construct the object.
-        analyzer = DMPhasing(parameters=None, input_path=self.input_h5, output_path='phasing_out.h5')
+        analyzer = DMPhasing(parameters=dm_parameters, input_path=self.input_h5, output_path='phasing_out.h5')
+
+        analyzer._readH5()
 
         # Call backengine.
         status = analyzer.backengine()

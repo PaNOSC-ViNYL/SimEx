@@ -73,6 +73,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                 input_path='diffr_out.h5',
                 output_path='detector_out.h5')
 
+
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
                                          photon_propagator=photon_propagator,
                                          photon_interactor=photon_interactor,

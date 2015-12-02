@@ -129,7 +129,6 @@ def checkAndSetIO(io):
     if len(io) != 2:
         raise exceptions.RuntimeError("The parameter 'io' can only be a string or a tuple of two strings.")
 
-    # Check if correct type.
     # Check if input exists, if not, raise.
     i = checkAndSetInstance(str, io[0])
     if i is None:

@@ -13,8 +13,9 @@ import glob
 import h5py
 import re
 
+from AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
-class DMPhasing():
+class DMPhasing(AbstractPhotonAnalyzer):
     """
     Class representing photon data analysis for electron density reconstruction from oriented 3D diffraction patterns.
     """
@@ -29,14 +30,21 @@ class DMPhasing():
         @example : parameters={}
         """
 
-        self.__expected_data = ['data/data',
-                                'data/angle',
-                                'data/center',
-                                'params/info',
-                                'version',]
+        super(DMPhasing, self).__init__(parameters,input_path,output_path)
 
-        self.__provided_data = []
+        self.__expected_data = ['/data/data',
+                                '/data/angle',
+                                '/data/center',
+                                '/params/info',
+                                '/version',]
 
+        self.__provided_data = ['/data/electronDensity',
+                                '/params/info',
+                                '/history',
+                                '/info',
+                                '/misc',
+                                '/version',
+                                ]
 
     def expectedData(self):
         """ Query for the data expected by the Analyzer. """
@@ -54,12 +62,12 @@ class DMPhasing():
     def _readH5(self):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-        pass # Nothing to be done since IO happens in backengine.
+        pass
 
     def saveH5(self):
         """ """
         """
-        Private method to save the object to a file.
+        Method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
         @type : string
@@ -68,12 +76,13 @@ class DMPhasing():
         pass # No action required since output is written in backengine.
 
 
-
     def backengine(self):
+        """ Start the actual calculation. """
 
         status = self.run_dm()
 
         return status
+
 
     def run_dm(self):
         """ Run the Difference Map (DM) algorithm.
@@ -86,35 +95,32 @@ class DMPhasing():
         if 'number_of_trials' in self.parameters.keys():
             number_of_trials = self.parameters['number_of_trials']
         else:
-            number_of_trials = 1
+            number_of_trials = 500
 
         if 'averaging_start' in self.parameters.keys():
             averaging_start = self.parameters['averaging_start']
         else:
-            averaging_start = 1
+            averaging_start = 15
 
         if 'number_of_iterations' in self.parameters.keys():
             number_of_iterations = self.parameters['number_of_iterations']
         else:
-            number_of_iterations = 1
+            number_of_iterations = 50
 
         if 'leash' in self.parameters.keys():
             leash = self.parameters['leash']
         else:
-            leash = 1
+            leash = 0.2
 
         if 'number_of_shrink_cycles' in self.parameters.keys():
             number_of_shrink_cycles = self.parameters['number_of_shrink_cycles']
         else:
-            number_of_shrink_cycles = 1
-
+            number_of_shrink_cycles = 10
 
         run_instance_dir = tempfile.mkdtemp(prefix='dm_run_')
-        #log_dir          = tempfile.mkdtemp(prefix='dm_log_')
         out_dir          = tempfile.mkdtemp(prefix='dm_out_')
         support_file     = os.path.join(run_instance_dir, "support.dat")
-        input_intensity_file  = 'final_intensity.dat'
-        #print_to_log("Using input intensity file " + input_intensity_file)
+        input_intensity_file  = self.input_path
         intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
         output_file          = os.path.join(out_dir, "phase_out_.h5")
 
@@ -143,6 +149,7 @@ class DMPhasing():
         #if not os.path.isfile("object_recon"):
             #os.symlink(os.path.join(op.srcDir, "object_recon"), "object_recon")
         cmd = ["object_recon"] + [str(o) for o in input_options]
+
         #print_to_log("Running phasing command: " + cmd)
         process_handle = subprocess.Popen(cmd)
         process_handle.wait()

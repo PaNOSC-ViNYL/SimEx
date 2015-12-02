@@ -13,12 +13,12 @@ import unittest
 
 
 # Import the class to test.
-from SimEx.Calculators.S2EReconstruction import S2EReconstruction
+from SimEx.Calculators.EMCOrientation import EMCOrientation
 from TestUtilities import TestUtilities
 
-class S2EReconstructionTest(unittest.TestCase):
+class EMCOrientationTest(unittest.TestCase):
     """
-    Test class for the S2EReconstruction class.
+    Test class for the EMCOrientation class.
     """
 
     @classmethod
@@ -49,9 +49,9 @@ class S2EReconstructionTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='recon_out.h5')
+        analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
 
-        self.assertIsInstance(analyzer, S2EReconstruction)
+        self.assertIsInstance(analyzer, EMCOrientation)
 
     def testBackengine(self):
         """ Test that we can start a test calculation. """
@@ -59,7 +59,7 @@ class S2EReconstructionTest(unittest.TestCase):
         self.__files_to_remove.append('orient_out.h5')
 
         # Construct the object.
-        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='recon_out.h5')
+        analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
 
         # Call backengine.
         status = analyzer.backengine()

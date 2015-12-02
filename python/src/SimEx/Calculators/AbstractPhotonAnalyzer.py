@@ -21,9 +21,9 @@ class AbstractPhotonAnalyzer(AbstractBaseCalculator):
     __metaclass__  = ABCMeta
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
-        #"""
-        #Constructor for the Abstract Photon Analyzer.
-        #"""
+        """
+        Constructor for the Abstract Photon Analyzer.
+        """
 
         # Initialize the base class.
         super(AbstractPhotonAnalyzer, self).__init__(parameters, input_path, output_path)
