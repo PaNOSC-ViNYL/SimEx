@@ -91,6 +91,15 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
 
 
     def backengine(self):
+
+        status = self.run_emc()
+
+        if status == 0:
+            status = self.run_dm()
+
+        return status
+
+    def run_emc(self):
         ###############################################################
         # Instantiate a reconstruction object
         ###############################################################
@@ -340,4 +349,12 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
             os.chdir(cwd)
             raise
             #return 1
+
+    def run_dm(self):
+        """ Run the Difference Map algorithm.
+
+        @return : 0 if DM algorithm returns successfully, 1 if not.
+        """
+
+        return 0
 
