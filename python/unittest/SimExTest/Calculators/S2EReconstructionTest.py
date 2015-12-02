@@ -49,17 +49,17 @@ class S2EReconstructionTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
 
         self.assertIsInstance(analyzer, S2EReconstruction)
 
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 
-        self.__files_to_remove.append('diffr_out.h5')
+        self.__files_to_remove.append('orient_out.h5')
 
         # Construct the object.
-        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='diffr_out.h5')
+        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
 
         # Call backengine.
         status = analyzer.backengine()
