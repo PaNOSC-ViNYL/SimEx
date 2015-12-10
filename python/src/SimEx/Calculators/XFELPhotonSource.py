@@ -21,9 +21,14 @@ class XFELPhotonSource(AbstractPhotonSource):
         """
         Constructor for the xfel photon source.
 
-        @param  :
-        @type :
-        @default :
+        @param parameters : Photon source parameters.
+        @type : dict
+
+        @param input_path : The path to the input data for the photon source.
+        @type : string
+
+        @param output_path : The path where to save output data.
+        @type : string
         """
 
         # Initialize base class.
@@ -96,6 +101,7 @@ class XFELPhotonSource(AbstractPhotonSource):
         # Simply copy the input to output.
         command = 'cp %s %s' % (self.input_path, self.output_path)
         proc = Popen(command, shell=True)
+        proc.wait()
 
 
 

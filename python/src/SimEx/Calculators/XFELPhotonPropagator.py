@@ -5,8 +5,7 @@
     @creation 20151104
 
 """
-import numpy
-import h5py
+from prop import propagateSE
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 
@@ -20,9 +19,14 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         """
         Constructor for the xfel photon propagator.
 
-        @param  :
-        @type :
-        @default :
+        @param  parameters  : Parameters steering the propagation of photons.
+        @type               : dict
+
+        @param  input_path  : Location of input data for the photon propagation.
+        @type               : string
+
+        @param  output_path : Location of output data for the photon propagation.
+        @type               : string
         """
 
         # Initialize base class.
@@ -31,7 +35,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
     def backengine(self):
         """ This method drives the backengine code, in this case the WPG interface to SRW."""
-        from prop import propagateSE
+
         propagateSE.propagate(self.input_path, self.output_path)
 
     @property
@@ -43,27 +47,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
         pass # Nothing to be done since IO happens in backengine.
-
-        ## Read the file.
-        #file_handle = h5py.File(self.input_path, 'r')
-
-        ## Setup empty dictionary.
-        #parameters = {}
-
-        ## Get photon energy.
-        ##parameters['photon_energy'] = file_handle['params/photonEnergy'].value
-
-        ## Read the electric field data and convert to numpy array.
-        ##import ipdb; ipdb.set_trace()
-        #Ehor = numpy.array(file_handle['/data/arrEhor'][:])
-        #Ever = numpy.array(file_handle['/data/arrEver'][:])
-
-        ## Store on object.
-        #self.__e_field = numpy.array([Ehor, Ever])
-
-        #super(XFELPhotonPropagator, self).__init__(parameters,self.input_path,self.output_path)
-
-        #file_handle.close()
 
     def saveH5(self):
         """ """

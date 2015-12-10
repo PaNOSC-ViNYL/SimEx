@@ -6,6 +6,8 @@
 
 """
 import paths
+import os
+import shutil
 import unittest
 
 
@@ -29,15 +31,24 @@ class FakePhotonMatterInteractorTest(unittest.TestCase):
 
     def setUp(self):
         """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__paths_to_remove = []
 
     def tearDown(self):
         """ Tearing down a test. """
+        # Clean up.
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for p in self.__paths_to_remove:
+            if os.path.isdir(p):
+                shutil.rmtree(p)
 
     def testConstruction(self):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        diffractor = FakePhotonMatterInteractor(parameters=None, input_path=self.input_h5, output_path='pmi_out.h5')
+        diffractor = FakePhotonMatterInteractor(parameters=None, input_path=self.input_h5, output_path='pmi')
 
         self.assertIsInstance(diffractor, FakePhotonMatterInteractor)
 
@@ -60,6 +71,40 @@ class FakePhotonMatterInteractorTest(unittest.TestCase):
         for d in provided_data:
             self.assertIsInstance(d, str)
             self.assertEqual(d[0], '/')
+
+    def testBackengine(self):
+        """ Check that the backengine method works correctly. """
+
+        # Get test instance.
+        pmi_parameters = {'number_of_trajectories' : 10}
+        test_interactor = FakePhotonMatterInteractor(parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi')
+
+        # Call backengine
+        status = test_interactor.backengine()
+
+        # Check that the backengine returned zero.
+        self.assertEqual(status, 0)
+
+        # Check that output was written to the given directory.
+        self.assertTrue( os.path.isdir( test_interactor.output_path ) )
+        self.assertEqual( len( os.listdir( test_interactor.output_path ) ), test_interactor.parameters['number_of_trajectories'] )
+
+        # Call backengine again, so see that it works if directory already exists.
+        status = test_interactor.backengine()
+
+        # Check that the backengine returned zero.
+        self.assertEqual(status, 0)
+
+        # Test that exception raises if output_path is a file that already exists.
+        shutil.copyfile( os.path.join( test_interactor.output_path, 'pmi_out_0000001.h5' ), 'pmi_out_0000001.h5' )
+        shutil.rmtree(test_interactor.output_path)
+
+        fake = FakePhotonMatterInteractor( parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi_out_0000001.h5')
+        self.assertRaises( IOError, fake.backengine )
+
+        # Clean up.
+        self.__paths_to_remove.append('pmi')
+        self.__files_to_remove.append('pmi_out_0000001.h5')
 
 
 if __name__ == '__main__':
