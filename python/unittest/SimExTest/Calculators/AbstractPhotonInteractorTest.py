@@ -57,6 +57,11 @@ class AbstractPhotonInteractorTest(unittest.TestCase):
             def backengine(self):
                 pass
 
+            def _readH5(self): pass
+            def saveH5(self): pass
+            def expectedData(self): pass
+            def providedData(self): pass
+
         test_source = TestPhotonInteractor()
 
         self.assertIsInstance( test_source, TestPhotonInteractor )

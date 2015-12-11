@@ -117,82 +117,86 @@ class DMPhasing(AbstractPhotonAnalyzer):
         else:
             number_of_shrink_cycles = 10
 
-        run_instance_dir = tempfile.mkdtemp(prefix='dm_run_')
-        out_dir          = tempfile.mkdtemp(prefix='dm_out_')
-        support_file     = os.path.join(run_instance_dir, "support.dat")
-        input_intensity_file  = self.input_path
-        intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
-        output_file          = os.path.join(out_dir, "phase_out_.h5")
+        try:
+            run_instance_dir = tempfile.mkdtemp(prefix='dm_run_')
+            out_dir          = tempfile.mkdtemp(prefix='dm_out_')
+            support_file     = os.path.join(run_instance_dir, "support.dat")
+            input_intensity_file  = self.input_path
+            intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
+            output_file          = os.path.join(out_dir, "phase_out_.h5")
 
-        #Read intensity and translate into ASCII *.dat format
-        (qmax, t_intens, intens_len, qPos, qPos_full) = load_intensities(input_intensity_file)
-        input_intens = t_intens
-        input_intens.tofile(intensity_tmp, sep=" ")
+            #Read intensity and translate into ASCII *.dat format
+            (qmax, t_intens, intens_len, qPos, qPos_full) = load_intensities(input_intensity_file)
+            input_intens = t_intens
+            input_intens.tofile(intensity_tmp, sep=" ")
 
-        # Compute autocorrelation and support
-        #print_to_log("Computing autocorrelation...")
-        input_intens  = v_zero_neg(input_intens.ravel()).reshape(input_intens.shape)
-        auto        = numpy.fft.fftshift(numpy.abs(numpy.fft.fftn(numpy.fft.ifftshift(input_intens))))
-        #print_to_log("Using 2-means clustering to determine significant voxels in autocorrelation...")
-        (a_0, a_1)  = cluster_two_means(auto.ravel())
-        #print_to_log("cluster averages: %lf %lf"%(a_0, a_1))
-        #print_to_log("Determining support from autocorrelation (will write to support.dat by default)...")
-        support     = support_from_autocorr(auto, qmax, a_0, a_1, support_file)
+            # Compute autocorrelation and support
+            #print_to_log("Computing autocorrelation...")
+            input_intens  = v_zero_neg(input_intens.ravel()).reshape(input_intens.shape)
+            auto        = numpy.fft.fftshift(numpy.abs(numpy.fft.fftn(numpy.fft.ifftshift(input_intens))))
+            #print_to_log("Using 2-means clustering to determine significant voxels in autocorrelation...")
+            (a_0, a_1)  = cluster_two_means(auto.ravel())
+            #print_to_log("cluster averages: %lf %lf"%(a_0, a_1))
+            #print_to_log("Determining support from autocorrelation (will write to support.dat by default)...")
+            support     = support_from_autocorr(auto, qmax, a_0, a_1, support_file)
 
-        #Start phasing
-        #Store parameters into phase_out.h5.
-        #Link executable from compiled version in srcDir to tmpDir
-        os.chdir(run_instance_dir)
-        input_options = [number_of_trials, number_of_iterations, averaging_start, leash, number_of_shrink_cycles]
+            #Start phasing
+            #Store parameters into phase_out.h5.
+            #Link executable from compiled version in srcDir to tmpDir
+            os.chdir(run_instance_dir)
+            input_options = [number_of_trials, number_of_iterations, averaging_start, leash, number_of_shrink_cycles]
 
-        # Link executable
-        #if not os.path.isfile("object_recon"):
-            #os.symlink(os.path.join(op.srcDir, "object_recon"), "object_recon")
-        cmd = ["object_recon"] + [str(o) for o in input_options]
+            # Link executable
+            #if not os.path.isfile("object_recon"):
+                #os.symlink(os.path.join(op.srcDir, "object_recon"), "object_recon")
+            cmd = ["object_recon"] + [str(o) for o in input_options]
 
-        #print_to_log("Running phasing command: " + cmd)
-        process_handle = subprocess.Popen(cmd)
-        process_handle.wait()
+            #print_to_log("Running phasing command: " + cmd)
+            process_handle = subprocess.Popen(cmd)
+            process_handle.wait()
 
-        #Phasing completed. Write output to single h5
-        min_objects     = glob.glob("finish_min_object*.dat")
-        logFiles        = glob.glob("object*.log")
-        shrinkWrapFile  = "shrinkwrap.log"
-        #fin_object      = "finish_object.dat"
+            #Phasing completed. Write output to single h5
+            min_objects     = glob.glob("finish_min_object*.dat")
+            logFiles        = glob.glob("object*.log")
+            shrinkWrapFile  = "shrinkwrap.log"
+            #fin_object      = "finish_object.dat"
 
-        #print_to_log("Done with reconstructions, now saving output from final shrink_cycle to h5 file")
-        fp          = h5py.File(output_file, "w")
-        g_data      = fp.create_group("data")
-        g_params    = fp.create_group("params")
-        #g_supp      = fp.create_group("/history/support")
-        g_err       = fp.create_group("/history/error")
-        g_hist_obj  = fp.create_group("/history/object")
-        for n, mo in enumerate(logFiles):
-            err = parse_error_log(mo)
-            g_err.create_dataset("%0.4d"%(n+1), data=err, compression="gzip")
-            os.remove(mo)
+            #print_to_log("Done with reconstructions, now saving output from final shrink_cycle to h5 file")
+            fp          = h5py.File(output_file, "w")
+            g_data      = fp.create_group("data")
+            g_params    = fp.create_group("params")
+            #g_supp      = fp.create_group("/history/support")
+            g_err       = fp.create_group("/history/error")
+            g_hist_obj  = fp.create_group("/history/object")
+            for n, mo in enumerate(logFiles):
+                err = parse_error_log(mo)
+                g_err.create_dataset("%0.4d"%(n+1), data=err, compression="gzip")
+                os.remove(mo)
 
-        for n, ob_fn in enumerate(min_objects):
-            obj = extract_object(ob_fn)
-            g_hist_obj.create_dataset("%0.4d"%(n+1), data=obj, compression="gzip")
-            os.remove(ob_fn)
+            for n, ob_fn in enumerate(min_objects):
+                obj = extract_object(ob_fn)
+                g_hist_obj.create_dataset("%0.4d"%(n+1), data=obj, compression="gzip")
+                os.remove(ob_fn)
 
-        finish_object = extract_object("finish_object.dat")
-        g_data.create_dataset("electronDensity", data=finish_object, compression="gzip")
-        os.system("cp finish_object.dat start_object.dat")
+            finish_object = extract_object("finish_object.dat")
+            g_data.create_dataset("electronDensity", data=finish_object, compression="gzip")
+            os.system("cp finish_object.dat start_object.dat")
 
-        g_params.create_dataset("DM_support",           data=support, compression="gzip")
-        g_params.create_dataset("DM_numTrials",         data=number_of_trials)
-        g_params.create_dataset("DM_numIterPerTrial",   data=number_of_iterations)
-        g_params.create_dataset("DM_startAvePerIter",   data=averaging_start)
-        g_params.create_dataset("DM_leashParameter",    data=leash)
-        g_params.create_dataset("DM_shrinkwrapCycles",  data=number_of_shrink_cycles)
+            g_params.create_dataset("DM_support",           data=support, compression="gzip")
+            g_params.create_dataset("DM_numTrials",         data=number_of_trials)
+            g_params.create_dataset("DM_numIterPerTrial",   data=number_of_iterations)
+            g_params.create_dataset("DM_startAvePerIter",   data=averaging_start)
+            g_params.create_dataset("DM_leashParameter",    data=leash)
+            g_params.create_dataset("DM_shrinkwrapCycles",  data=number_of_shrink_cycles)
 
-        shrinkWrap = parse_shrinkwrap_log(shrinkWrapFile)
-        fp.create_dataset("/history/shrinkwrap", data=shrinkWrap, compression="gzip")
-        fp.create_dataset("version", data=h5py.version.hdf5_version)
+            shrinkWrap = parse_shrinkwrap_log(shrinkWrapFile)
+            fp.create_dataset("/history/shrinkwrap", data=shrinkWrap, compression="gzip")
+            fp.create_dataset("version", data=h5py.version.hdf5_version)
 
-        fp.close()
+            fp.close()
+        except:
+            return 1
+        return 0
 
 
 def load_intensities(ref_file):

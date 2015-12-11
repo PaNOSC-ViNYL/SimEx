@@ -18,7 +18,7 @@ ${RECON_SRC_DIR}/unpack.stamp: ${PACKAGES}/${RECON}_package.stamp
 		mkdir ${RECON_SRC_DIR}; \
 	fi
 	cd ${RECON_SRC_DIR} && \
-	tar xzvf ${PACKAGES}/${RECON}.zip && \
+	tar xzvf ${PACKAGES}/${RECON}.tar.gz && \
 	touch $@
 	@echo "Unpacked ${RECON}.\n"
 
