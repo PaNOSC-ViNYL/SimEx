@@ -117,6 +117,8 @@ class DMPhasing(AbstractPhotonAnalyzer):
         else:
             number_of_shrink_cycles = 10
 
+        # Save current working directory.
+        cwd = os.path.abspath(os.curdir)
         try:
             run_instance_dir = tempfile.mkdtemp(prefix='dm_run_')
             out_dir          = tempfile.mkdtemp(prefix='dm_out_')
@@ -143,6 +145,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
             #Start phasing
             #Store parameters into phase_out.h5.
             #Link executable from compiled version in srcDir to tmpDir
+            cwd = os.path.abspath(os.curdir)
             os.chdir(run_instance_dir)
             input_options = [number_of_trials, number_of_iterations, averaging_start, leash, number_of_shrink_cycles]
 
@@ -194,9 +197,11 @@ class DMPhasing(AbstractPhotonAnalyzer):
             fp.create_dataset("version", data=h5py.version.hdf5_version)
 
             fp.close()
+            os.chdir(cwd)
+            return 0
         except:
+            os.chdir(cwd)
             return 1
-        return 0
 
 
 def load_intensities(ref_file):

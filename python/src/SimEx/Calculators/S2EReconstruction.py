@@ -102,9 +102,9 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
 
     def backengine(self):
 
-        if self.__emc.backengine() != 0:
-            raise RuntimeError("EMC failed. Check log.")
-        if self.__dm.backengine() != 0:
-            raise RuntimeError("DM failed. Check log.")
+        emc_status = self.__emc.backengine()
+        if  emc_status!= 0:
+            return 1
+        dm_status = self.__dm.backengine()
 
-        return 0
+        return dm_status

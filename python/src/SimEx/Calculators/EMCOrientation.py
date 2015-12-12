@@ -345,6 +345,6 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         except:
             os.chdir(cwd)
-            raise
-            #return 1
+            #raise
+            return 1
 

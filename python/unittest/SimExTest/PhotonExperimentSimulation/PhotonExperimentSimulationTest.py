@@ -2,7 +2,7 @@
     @author : CFG
     @creation : 20151005
 """
-import os
+import os, shutil
 import unittest
 import paths
 
@@ -35,11 +35,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
     def tearDown(self):
         """ Tearing down a test. """
         for f in self.__files_to_remove:
-            if os.path.isfile:
+            if os.path.isfile and not os.path.isdir(f):
                 os.remove(f)
         for d in self.__dirs_to_remove:
             if os.path.isdir:
-                os.rmdir(d)
+                shutil.rmtree(d)
 
     def testMinimalWorkflow(self):
         """ Testing that a minimal workflow works. """
@@ -86,7 +86,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Check that all output was generated.
         expected_files = [ 'FELsource_out.h5',
                            'prop_out.h5',
-                           'pmi_out_0000001.h5',
+                           'pmi',
                            'diffr_out_0000001.h5',
                            'diffr_out_0000002.h5',
                            ]
@@ -95,8 +95,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
             self.assertTrue (ex in os.listdir('.') )
             self.__files_to_remove.append(ex)
 
+        # Check pmi output was written.
+        self.assertTrue ('pmi_out_0000001.h5' in os.listdir('pmi') )
+
+        # Cleanup.
         self.__files_to_remove.append('prepHDF5.py')
-        self.__files_to_remove.append('pmi/pmi_out_0000001.h5')
         self.__dirs_to_remove.append('pmi')
 
         # Cleanup.
