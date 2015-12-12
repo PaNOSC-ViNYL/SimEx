@@ -5,7 +5,7 @@
     @creation 20151109
 
 """
-import os
+import os, shutil
 import subprocess
 
 import paths
@@ -38,16 +38,19 @@ class S2EReconstructionTest(unittest.TestCase):
 
     def tearDown(self):
         """ Tearing down a test. """
+
         for f in self.__files_to_remove:
             if os.path.isfile(f):
                 os.remove(f)
         for d in self.__dirs_to_remove:
             if os.path.isdir(d):
-                os.rmdir(d)
+                shutil.rmtree(d)
 
     def testConstruction(self):
         """ Testing the default construction of the class. """
 
+        self.__files_to_remove.append('orient_out.h5')
+        self.__files_to_remove.append('recon_out.h5')
         # Construct the object.
         analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='recon_out.h5')
 
@@ -57,9 +60,18 @@ class S2EReconstructionTest(unittest.TestCase):
         """ Test that we can start a test calculation. """
 
         self.__files_to_remove.append('orient_out.h5')
+        self.__files_to_remove.append('recon_out.h5')
+
+        dm_parameters = {'number_of_trials'        : 5,
+                         'number_of_iterations'    : 2,
+                         'averaging_start'         : 15,
+                         'leash'                   : 0.2,
+                         'number_of_shrink_cycles' : 2,
+                         }
+
 
         # Construct the object.
-        analyzer = S2EReconstruction(parameters=None, input_path=self.input_h5, output_path='recon_out.h5')
+        analyzer = S2EReconstruction(parameters={'EMC_Parameters' : None, 'DM_Parameters' : dm_parameters}, input_path=self.input_h5, output_path='recon_out.h5')
 
         # Call backengine.
         status = analyzer.backengine()

@@ -108,26 +108,29 @@ class FakePhotonMatterInteractor(AbstractPhotonInteractor):
         status = 0
         data_source = generateTestFilePath('pmi_out_0000001.h5')
 
-        if self.parameters['number_of_trajectories'] == 1:
-            data_target = os.abspath( self.output_path )
-            command_string = 'cp %s %s' % (data_source, data_target)
-            proc = subprocess.Popen(command_string, shell=True)
-            proc.wait()
-        else:
-
-            # Check if output_path already exists as a file.
-            if os.path.isfile(self.output_path):
-                raise IOError("Output path %s already exists but is not a directory. Cowardly refusing to overwrite existing file." % (self.output_path))
-            # Check if output_path already exists as a directory. Create if not.
-            if not os.path.isdir(self.output_path):
-                os.mkdir(self.output_path)
-            for i in range(self.parameters['number_of_trajectories']):
-                data_target = os.path.join( os.path.abspath( self.output_path ), 'pmi_out_%07d.h5' % (i) )
+        try:
+            if self.parameters['number_of_trajectories'] == 1:
+                data_target = os.abspath( self.output_path )
                 command_string = 'cp %s %s' % (data_source, data_target)
                 proc = subprocess.Popen(command_string, shell=True)
                 proc.wait()
+            else:
 
-        return 0
+                # Check if output_path already exists as a file.
+                if os.path.isfile(self.output_path):
+                    raise IOError("Output path %s already exists but is not a directory. Cowardly refusing to overwrite existing file." % (self.output_path))
+                # Check if output_path already exists as a directory. Create if not.
+                if not os.path.isdir(self.output_path):
+                    os.mkdir(self.output_path)
+                for i in range(self.parameters['number_of_trajectories']):
+                    data_target = os.path.join( os.path.abspath( self.output_path ), 'pmi_out_%07d.h5' % (i) )
+                    command_string = 'cp %s %s' % (data_source, data_target)
+                    proc = subprocess.Popen(command_string, shell=True)
+                    proc.wait()
+        except:
+            status = 1
+
+        return status
 
     @property
     def data(self):

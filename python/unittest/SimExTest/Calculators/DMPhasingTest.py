@@ -23,7 +23,7 @@ class DMPhasingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath('orient_out_0000001.h5')
+        cls.input_h5 = TestUtilities.generateTestFilePath('orient_out.h5')
 
     @classmethod
     def tearDownClass(cls):
@@ -57,11 +57,11 @@ class DMPhasingTest(unittest.TestCase):
 
         self.__files_to_remove.append('phasing_out.h5')
 
-        dm_parameters = {'number_of_trials'        : 500,
+        dm_parameters = {'number_of_trials'        : 5,
                          'number_of_iterations'    : 2,
                          'averaging_start'         : 15,
                          'leash'                   : 0.2,
-                         'number_of_shrink_cycles' : 20,
+                         'number_of_shrink_cycles' : 2,
                          }
 
         # Construct the object.

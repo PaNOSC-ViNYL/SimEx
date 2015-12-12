@@ -123,11 +123,10 @@ class AbstractBaseCalculator(object):
 def checkAndSetIO(io):
     """ Check the passed io path/filenames and set appropriately. """
 
-    # Check if it is a single file.
-    # In that case, io is the path for output only, no input required.
+    # Check we have a tuple.
     io = checkAndSetInstance(tuple, io)
     if len(io) != 2:
-        raise exceptions.RuntimeError("The parameter 'io' can only be a string or a tuple of two strings.")
+        raise exceptions.RuntimeError("The parameter 'io' can only be a tuple of two strings.")
 
     # Check if input exists, if not, raise.
     i = checkAndSetInstance(str, io[0])

@@ -99,8 +99,8 @@ class FakePhotonMatterInteractorTest(unittest.TestCase):
         shutil.copyfile( os.path.join( test_interactor.output_path, 'pmi_out_0000001.h5' ), 'pmi_out_0000001.h5' )
         shutil.rmtree(test_interactor.output_path)
 
-        fake = FakePhotonMatterInteractor( parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi_out_0000001.h5')
-        self.assertRaises( IOError, fake.backengine )
+        fake = FakePhotonMatterInteractor( parameters=pmi_parameters, input_path=self.input_h5, output_path=TestUtilities.generateTestFilePath( 'pmi_out_0000001.h5' ) )
+        self.assertEqual( fake.backengine(), 1 )
 
         # Clean up.
         self.__paths_to_remove.append('pmi')
