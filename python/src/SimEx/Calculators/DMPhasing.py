@@ -21,7 +21,6 @@ class DMPhasing(AbstractPhotonAnalyzer):
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
-        ### TODO
         """
         Constructor for the phasing analyser.
 

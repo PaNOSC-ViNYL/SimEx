@@ -56,7 +56,7 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
     def testBackengineSingleInputFile(self):
         """ Test a backengine run with a single input file. """
         # Construct the object.
-        xfel_propagator = XFELPhotonPropagator( parameters=None, input_path=self.input_h5, output_path='prop_out.h5' )
+        xfel_propagator = XFELPhotonPropagator( parameters=None, input_path=self.input_h5, output_path='prop_out_0000001.h5' )
 
         # Call the backengine.
         status = xfel_propagator.backengine()
