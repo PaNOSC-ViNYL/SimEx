@@ -25,7 +25,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         @param  parameters : Dictionary of singFEL parameters.
         @type : dict
-        @example : parameters={ 'number_of_uniform_rotations': 1,
+        @example : parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
@@ -93,16 +93,23 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Check if path is a file.
         if os.path.isfile(pmi_dir):
             raise OSError("Cannot create directory %s because a file with the same name already exists.")
+
         # Create if not existing.
         if not os.path.exists(pmi_dir):
+            # If input is not a dir, first create pmi/
+            if not os.path.isdir(self.input_path):
                 os.mkdir(pmi_dir)
-
-        # Nothing to do if pmi output already in pmi subdir.
-        if not os.path.basename(self.input_path) in os.listdir(pmi_dir):
-            # If link already exists, just continue.
+            # Link input to pmi/.
             ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
             proc = subprocess.Popen(ln_pmi_command, shell=True)
             proc.wait()
+
+        ## Nothing to do if pmi output already in pmi subdir.
+        #if not os.path.basename(self.input_path) in os.listdir(pmi_dir):
+            ## If link already exists, just continue.
+            #ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
+            #proc = subprocess.Popen(ln_pmi_command, shell=True)
+            #proc.wait()
 
         preph5_location = inspect.getsourcefile(prepHDF5)
         # Link the prepHDF5 utility that gets called from singFEL code.
@@ -113,15 +120,19 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
         input_dir = '.'
-        output_dir = '.'
+        if os.path.isdir( self.output_path ):
+            output_dir = self.output_path
+        else:
+            output_dir = '.'
+
         config_file = '/dev/null'
 
 
         # If parameters are given, map them to command line arguments.
-        if 'number_of_uniform_rotations' in self.parameters.keys():
-            number_of_uniform_rotations = str(self.parameters['number_of_uniform_rotations'])
+        if 'uniform_rotation' in self.parameters.keys():
+            uniform_rotation = {True : 'true', False : 'false'}[self.parameters['uniform_rotation']]
         else:
-            number_of_uniform_rotations = 1
+            uniform_rotation = '1'
 
         if 'calculate_Compton' in self.parameters.keys():
             calculate_Compton = {True : '1', False : '0'}[self.parameters['calculate_Compton']]
@@ -171,7 +182,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--beamFile',         str(beam_parameter_file),
                             '--geomFile',         str(beam_geometry_file),
                             '--configFile',       str(config_file),
-                            '--uniformRotation',  str(number_of_uniform_rotations),
+                            '--uniformRotation',  str(uniform_rotation),
                             '--calculateCompton', str(calculate_Compton),
                             '--sliceInterval',    str(slice_interval),
                             '--numSlices',        str(number_of_slices),

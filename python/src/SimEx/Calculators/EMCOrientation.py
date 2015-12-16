@@ -26,11 +26,18 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         @param  parameters : Dictionary of reconstruction parameters.
         @type : dict
-        @example : parameters={}
+        @example : parameters={'initial_number_of_quaternions' : 1,
+                               'max_number_of_quaternions'     : 9,
+                               'max_number_of_iterations'      : 100,
+                               'min_error'                     : 1.0e-8,
+                               'beamstop'                      : 1.0e-5,
+                               'detailed_output'               : False
+                               }
         """
 
         # Initialize base class.
         super(EMCOrientation, self).__init__(parameters,input_path,output_path)
+
 
         self.__provided_data = ['data/data',
                                 'data/angle',
@@ -141,6 +148,11 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         #out_dir = self.output_path
         run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
         src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','sw','bin'))
+
+        ###############################################
+        import ipdb
+        ipdb.set_trace()
+        ###############################################
 
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
         #run_log_file        = os.path.join(run_instance_dir, "orient.log")

@@ -75,7 +75,10 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         """ Check that the backengine method works correctly. """
 
         # Get test instance.
-        pmi_parameters = {'number_of_trajectories' : 10}
+        pmi_parameters = {'number_of_trajectories' : 10,
+                          'number_of_steps'        : 100,
+                         }
+
         test_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi', sample_path=TestUtilities.generateTestFilePath('sample.h5') )
 
         # Call backengine
@@ -84,26 +87,11 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         # Check that the backengine returned zero.
         self.assertEqual(status, 0)
 
-        ## Check that output was written to the given directory.
-        #self.assertTrue( os.path.isdir( test_interactor.output_path ) )
-        #self.assertEqual( len( os.listdir( test_interactor.output_path ) ), test_interactor.parameters['number_of_trajectories'] )
+        # Check we have generated the expected output.
+        self.assertTrue( 'pmi_out_0000001.h5' in os.listdir( test_interactor.output_path ) )
 
-        ## Call backengine again, so see that it works if directory already exists.
-        #status = test_interactor.backengine()
-
-        ## Check that the backengine returned zero.
-        #self.assertEqual(status, 0)
-
-        ## Test that exception raises if output_path is a file that already exists.
-        #shutil.copyfile( os.path.join( test_interactor.output_path, 'pmi_out_0000001.h5' ), 'pmi_out_0000001.h5' )
-        #shutil.rmtree(test_interactor.output_path)
-
-        #fake = XMDYNDemoPhotonMatterInteractor( parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi_out_0000001.h5')
-        #self.assertEqual( 1, fake.backengine() )
-
-        ## Clean up.
+        # Clean up.
         #self.__paths_to_remove.append('pmi')
-        #self.__files_to_remove.append('pmi_out_0000001.h5')
 
 
 if __name__ == '__main__':

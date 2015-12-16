@@ -55,6 +55,7 @@ class PhotonExperimentSimulation:
                 self.__photon_interactor,
                 self.__photon_diffractor,
                 self.__photon_detector,
+                self.__photon_analyzer,
                 ]
 
     def run(self):
@@ -78,6 +79,16 @@ class PhotonExperimentSimulation:
         self.__photon_diffractor.backengine()
         self.__photon_diffractor.saveH5()
 
+        self.__photon_detector._readH5()
+        self.__photon_detector.backengine()
+        self.__photon_detector.saveH5()
+
+        self.__photon_analyzer._readH5()
+        self.__photon_analyzer.backengine()
+        self.__photon_analyzer.saveH5()
+
+
+
     def _checkInterfaceConsistency(self):
         """
         Check that all calculators provide the data expected by the next downstream
@@ -85,5 +96,6 @@ class PhotonExperimentSimulation:
         """
         status = True
         for i,calculator in enumerate(self.__calculators[:-1]):
+            print calculator
             status = status and set(self.__calculators[i+1].expectedData()).issubset( set(calculator.providedData()) )
         return status

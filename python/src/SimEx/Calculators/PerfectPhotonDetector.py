@@ -29,9 +29,37 @@ class PerfectPhotonDetector(AbstractPhotonDetector):
         # Initialize base class.
         super(PerfectPhotonDetector, self).__init__(parameters,input_path,output_path)
 
-        self.__provided_data = []
+        self.__provided_data = ['/-input_dir'
+                                '/-output_dir'
+                                '/-config_file'
+                                '/-b',
+                                '/-g',
+                                '/-uniformRotation',
+                                '/-calculateCompton',
+                                '/-sliceInterval',
+                                '/-numSlices',
+                                '/-pmiStartID',
+                                '/-pmiEndID',
+                                '/-dpID',
+                                '/-numDP',
+                                '/-USE_GPU',
+                                '/version']
 
-        self.__expected_data = []
+        self.__expected_data = ['/-input_dir'
+                                '/-output_dir'
+                                '/-config_file'
+                                '/-b',
+                                '/-g',
+                                '/-uniformRotation',
+                                '/-calculateCompton',
+                                '/-sliceInterval',
+                                '/-numSlices',
+                                '/-pmiStartID',
+                                '/-pmiEndID',
+                                '/-dpID',
+                                '/-numDP',
+                                '/-USE_GPU',
+                                '/version']
 
 
     def expectedData(self):
