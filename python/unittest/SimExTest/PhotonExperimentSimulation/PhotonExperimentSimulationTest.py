@@ -10,6 +10,7 @@ from TestUtilities import TestUtilities
 from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
 from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
 from SimEx.Calculators.FakePhotonMatterInteractor import FakePhotonMatterInteractor
+from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Calculators.PerfectPhotonDetector import PerfectPhotonDetector
 from SimEx.Calculators.S2EReconstruction import S2EReconstruction
@@ -41,17 +42,26 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
             if os.path.isdir:
                 shutil.rmtree(d)
 
-    def testSimS2EWorkflow(self):
-        """ Testing that a minimal workflow works. """
+    def testSimS2EWorkflowTwoDiffractionPatterns(self):
+        """ Testing that a workflow akin to the simS2E example workflow works. """
 
-        source_input = TestUtilities.generateTestFilePath('FELsource_out_0000001.h5')
+        # Location of the FEL source file.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out/FELsource_out_0000001.h5')
 
+        # Photon source.
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out_0000001.h5')
 
+        # Photon propagator, default parameters.
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out_0000001.h5', output_path='prop_out_0000001.h5')
-        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path='prop_out_0000001.h5', output_path='pmi_out_0000001.h5')
 
-        diffraction_parameters={ 'number_of_uniform_rotations': 10,
+        # Photon interactor with default parameters.
+        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=None,
+                                                             input_path='prop_out_0000001.h5',
+                                                             output_path='pmi',
+                                                             sample_path=TestUtilities.generateTestFilePath('sample.h5') )
+
+        #  Diffraction with parameters.
+        diffraction_parameters={ 'uniform_rotation': 1,
                      'calculate_Compton' : False,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
@@ -62,17 +72,18 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
 
-        # Construct the object.
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path='pmi_out_0000001.h5',
-                output_path='diffr_out_0000001.h5')
+                input_path='pmi',
+                output_path='diffr')
 
+        # Perfect detector.
         photon_detector = PerfectPhotonDetector(
                 parameters = None,
-                input_path='diffr_out_0000001.h5',
-                output_path='detector_out_0000001.h5')
+                input_path='diffr',
+                output_path='detector')
 
+        # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
                                'max_number_of_quaternions'     : 9,
                                'max_number_of_iterations'      : 100,
@@ -89,10 +100,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                          }
 
         reconstructor = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters},
-                                          input_path='detector_out_0000001.h5',
-                                          output_path = 'recon_out_0000001.h5'
+                                          input_path='detector',
+                                          output_path = 'recon.h5'
                                           )
 
+        # Setup the photon experiment.
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
                                          photon_propagator=photon_propagator,
                                          photon_interactor=photon_interactor,
@@ -101,28 +113,23 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                          photon_analyzer=reconstructor,
                                          )
 
+        # Run the experiment.
         pxs.run()
 
-        ## Check that all output was generated.
-        #expected_files = [ 'FELsource_out.h5',
-                           #'prop_out.h5',
-                           #'pmi',
-                           #'diffr_out_0000001.h5',
-                           #'diffr_out_0000002.h5',
-                           #]
+        # Check all output was generated.
+        self.assertTrue( 'FELsource_out_0000001.h5' in os.listdir( os.curdir ) )
+        self.assertTrue( 'prop_out_0000001.h5' in os.listdir( os.curdir ) )
+        self.assertTrue( 'pmi' in os.listdir( os.curdir ) )
+        self.assertTrue( 'pmi_out_0000001.h5' in os.listdir( 'pmi' ) )
+        self.assertTrue( 'diffr' in os.listdir( os.curdir ) )
+        self.assertTrue( 'diffr_out_0000001.h5' in os.listdir( 'diffr' ) )
+        self.assertTrue( 'diffr_out_0000002.h5' in os.listdir( 'diffr' ) )
+        self.assertTrue( 'detector' in os.listdir( os.curdir ) )
+        self.assertTrue( 'diffr_out_0000001.h5' in os.listdir( 'detector' ) )
+        self.assertTrue( 'diffr_out_0000002.h5' in os.listdir( 'detector' ) )
+        self.assertTrue( 'orient_out.h5' in os.listdir( os.curdir ) )
 
-        #for ex in expected_files:
-            #self.assertTrue (ex in os.listdir('.') )
-            #self.__files_to_remove.append(ex)
 
-        ## Check pmi output was written.
-        #self.assertTrue ('pmi_out_0000001.h5' in os.listdir('pmi') )
-
-        ## Cleanup.
-        #self.__files_to_remove.append('prepHDF5.py')
-        #self.__dirs_to_remove.append('pmi')
-
-        # Cleanup.
     def testCheckInterfaceConsistency(self):
         """ Test if the check for interface consistency works correctly. """
 
