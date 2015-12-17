@@ -36,14 +36,36 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
     def tearDown(self):
         """ Tearing down a test. """
         for f in self.__files_to_remove:
-            if os.path.isfile and not os.path.isdir(f):
+            if os.path.isfile(f) or os.path.islink(f):
                 os.remove(f)
         for d in self.__dirs_to_remove:
-            if os.path.isdir:
+            if os.path.isdir(d):
                 shutil.rmtree(d)
 
     def testSimS2EWorkflowTwoDiffractionPatterns(self):
         """ Testing that a workflow akin to the simS2E example workflow works. """
+
+        # These directories and files are expected to be present after a successfull calculation.
+        expected_dirs = [ 'pmi',
+                          'diffr',
+                          ]
+
+        expected_symlinks = ['detector']
+
+        expected_files = ['FELsource_out_0000001.h5',
+                          'prop_out_0000001.h5',
+                          'pmi/pmi_out_0000001.h5',
+                          'diffr/diffr_out_0000001.h5',
+                          'diffr/diffr_out_0000002.h5',
+                          'detector/diffr_out_0000001.h5',
+                          'detector/diffr_out_0000002.h5',
+                          'orient_out.h5',
+                          ]
+
+        # Ensure proper cleanup.
+        self.__files_to_remove = expected_files+expected_symlinks
+        self.__dirs_to_remove = expected_dirs
+
 
         # Location of the FEL source file.
         source_input = TestUtilities.generateTestFilePath('FELsource_out/FELsource_out_0000001.h5')
@@ -116,18 +138,15 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Run the experiment.
         pxs.run()
 
-        # Check all output was generated.
-        self.assertTrue( 'FELsource_out_0000001.h5' in os.listdir( os.curdir ) )
-        self.assertTrue( 'prop_out_0000001.h5' in os.listdir( os.curdir ) )
-        self.assertTrue( 'pmi' in os.listdir( os.curdir ) )
-        self.assertTrue( 'pmi_out_0000001.h5' in os.listdir( 'pmi' ) )
-        self.assertTrue( 'diffr' in os.listdir( os.curdir ) )
-        self.assertTrue( 'diffr_out_0000001.h5' in os.listdir( 'diffr' ) )
-        self.assertTrue( 'diffr_out_0000002.h5' in os.listdir( 'diffr' ) )
-        self.assertTrue( 'detector' in os.listdir( os.curdir ) )
-        self.assertTrue( 'diffr_out_0000001.h5' in os.listdir( 'detector' ) )
-        self.assertTrue( 'diffr_out_0000002.h5' in os.listdir( 'detector' ) )
-        self.assertTrue( 'orient_out.h5' in os.listdir( os.curdir ) )
+        # Check that all output files and directories are present.
+        for directory in expected_dirs+expected_symlinks:
+            self.assertTrue( os.path.isdir( directory ) )
+
+        print "\n"
+        print expected_files
+        for f in expected_files:
+            print f
+            self.assertTrue( os.path.isfile( f ) )
 
 
     def testCheckInterfaceConsistency(self):
@@ -142,7 +161,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
         photon_diffractor = SingFELPhotonDiffractor(parameters=None, input_path=diffr_input, output_path='diffr_out.h5')
         photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
-        photon_analyzer = OrientAndPhasePhotonAnalyzer(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
+        photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
 
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
                                          photon_propagator=photon_propagator,

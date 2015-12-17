@@ -96,6 +96,5 @@ class PhotonExperimentSimulation:
         """
         status = True
         for i,calculator in enumerate(self.__calculators[:-1]):
-            print calculator
             status = status and set(self.__calculators[i+1].expectedData()).issubset( set(calculator.providedData()) )
         return status
