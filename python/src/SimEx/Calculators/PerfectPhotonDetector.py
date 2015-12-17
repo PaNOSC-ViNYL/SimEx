@@ -6,10 +6,9 @@
 
 """
 
-import subprocess
+import os
 
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
-from TestUtilities.TestUtilities import generateTestFilePath
 
 
 class PerfectPhotonDetector(AbstractPhotonDetector):
@@ -72,10 +71,8 @@ class PerfectPhotonDetector(AbstractPhotonDetector):
 
     def backengine(self):
         """ This method drives the backengine code."""
-        cached_out = generateTestFilePath('diffr_out.h5')
-        command_string = 'cp %s %s' % (cached_out, './detector_out.h5')
-        proc = subprocess.Popen(command_string, shell=True)
-        proc.wait()
+        # Simply link input to output and we're fine.
+        os.symlink(self.input_path, self.output_path)
 
     @property
     def data(self):

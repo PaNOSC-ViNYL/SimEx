@@ -118,16 +118,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             proc = subprocess.Popen(ln_preph5_command, shell=True)
             proc.wait()
 
-
-        input_dir = '.'
-        if os.path.isdir( self.output_path ):
-            output_dir = self.output_path
-        else:
-            output_dir = '.'
-
-        config_file = '/dev/null'
-
-
         # If parameters are given, map them to command line arguments.
         if 'uniform_rotation' in self.parameters.keys():
             uniform_rotation = {True : 'true', False : 'false'}[self.parameters['uniform_rotation']]
@@ -172,6 +162,18 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             raise RuntimeError("Beam geometry file must be given.")
 
+
+        input_dir = '.'
+
+        if number_of_diffraction_patterns > 1:
+            if not os.path.isdir( self.output_path ):
+                os.mkdir( self.output_path )
+            output_dir = self.output_path
+
+        else:
+            output_dir = '.'
+
+        config_file = '/dev/null'
 
         # Run the backengine command.
         command_sequence = ['mpirun',

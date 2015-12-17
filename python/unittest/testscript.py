@@ -68,7 +68,7 @@ dm_parameters = {'number_of_trials'        : 5,
 
 reconstructor = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters},
                                   input_path='detector',
-                                  output_path = 'recon'
+                                  output_path = 'recon.h5'
                                   )
 
 # Setup the photon experiment.
