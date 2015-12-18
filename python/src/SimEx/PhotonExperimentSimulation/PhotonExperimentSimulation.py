@@ -54,9 +54,11 @@ class PhotonExperimentSimulation:
                 self.__photon_propagator,
                 self.__photon_interactor,
                 self.__photon_diffractor,
-                self.__photon_detector,
                 self.__photon_analyzer,
                 ]
+
+        if self.__photon_detector is not None:
+            self.__calculators.insert(-2, self.__photon_detector )
 
     def run(self):
         """ Method to start the photon experiment simulation workflow. """
@@ -64,29 +66,38 @@ class PhotonExperimentSimulation:
         if not self._checkInterfaceConsistency():
             raise RuntimeError(" Interfaces are not consistent, i.e. at least one module's expectations with respect to incoming data sets are not satisfied.")
 
+        print '\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80])
+        print '\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80])
         self.__photon_source._readH5()
         self.__photon_source.saveH5()
 
+        print '\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80])
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
 
+        print '\n'.join(["#"*80,  "# Starting SIMEX photon-matter interaction.", "#"*80])
         self.__photon_interactor._readH5()
         self.__photon_interactor.backengine()
         self.__photon_interactor.saveH5()
 
+        print '\n'.join(["#"*80,  "# Starting SIMEX photon diffraction.", "#"*80])
         self.__photon_diffractor._readH5()
         self.__photon_diffractor.backengine()
         self.__photon_diffractor.saveH5()
 
-        self.__photon_detector._readH5()
-        self.__photon_detector.backengine()
-        self.__photon_detector.saveH5()
+        if self.__photon_detector is not None:
+            print '\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80])
+            self.__photon_detector._readH5()
+            self.__photon_detector.backengine()
+            self.__photon_detector.saveH5()
 
+        print '\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80])
         self.__photon_analyzer._readH5()
         self.__photon_analyzer.backengine()
         self.__photon_analyzer.saveH5()
 
+        print '\n'.join(["#"*80,  "# SIMEX  done.", "#"*80])
 
 
     def _checkInterfaceConsistency(self):

@@ -5,7 +5,7 @@
     @creation 20151104
 
 """
-import os
+import os, shutil
 import subprocess
 import tempfile
 import numpy
@@ -124,7 +124,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
             support_file     = os.path.join(run_instance_dir, "support.dat")
             input_intensity_file  = self.input_path
             intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
-            output_file          = os.path.join(out_dir, "phase_out_.h5")
+            output_file          = os.path.join(out_dir, "phase_out.h5")
 
             #Read intensity and translate into ASCII *.dat format
             (qmax, t_intens, intens_len, qPos, qPos_full) = load_intensities(input_intensity_file)
@@ -196,6 +196,8 @@ class DMPhasing(AbstractPhotonAnalyzer):
             fp.create_dataset("version", data=h5py.version.hdf5_version)
 
             fp.close()
+
+            shutil.copy( output_file, os.path.join( cwd, self.output_path ) )
             os.chdir(cwd)
             return 0
         except:

@@ -5,7 +5,7 @@
     @creation 20151104
 
 """
-
+import os
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
 from EMCOrientation import EMCOrientation
@@ -64,8 +64,13 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
             emc_parameters = self.parameters['EMC_Parameters']
             dm_parameters = self.parameters['DM_Parameters']
 
-        self.__emc = EMCOrientation(emc_parameters, self.input_path, 'orient_out.h5')
-        self.__dm = DMPhasing(dm_parameters, 'orient_out.h5', self.output_path)
+        if os.path.isdir( self.output_path ):
+            intermediate_output_path = os.path.join( self.output_path, 'orient_out.h5' )
+        else:
+            intermediate_output_path  = 'orient_out.h5'
+
+        self.__emc = EMCOrientation(emc_parameters, self.input_path, intermediate_output_path )
+        self.__dm = DMPhasing(dm_parameters, intermediate_output_path, self.output_path)
 
 
 
@@ -104,7 +109,7 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
 
         emc_status = self.__emc.backengine()
         if  emc_status!= 0:
-            return 1
+            return emc_status
         dm_status = self.__dm.backengine()
 
         return dm_status

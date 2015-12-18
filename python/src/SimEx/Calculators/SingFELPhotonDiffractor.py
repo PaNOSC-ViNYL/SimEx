@@ -163,6 +163,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             raise RuntimeError("Beam geometry file must be given.")
 
 
+
         input_dir = '.'
 
         if number_of_diffraction_patterns > 1:
@@ -195,6 +196,12 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         proc = subprocess.Popen(command_sequence)
         proc.wait()
 
+        # Remove the simlink
+        if os.path.islink(pmi_dir):
+            os.remove(pmi_dir)
+        if os.path.islink('prepHDF5.py'):
+            os.remove('prepHDF5.py')
+
         # Return the return code from the backengine.
         return proc.returncode
 
@@ -207,27 +214,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
         pass # Nothing to be done since IO happens in backengine.
-
-        ## Read the file.
-        #file_handle = h5py.File(self.input_path, 'r')
-
-        ## Setup empty dictionary.
-        #parameters = {}
-
-        ## Get photon energy.
-        ##parameters['photon_energy'] = file_handle['params/photonEnergy'].value
-
-        ## Read the electric field data and convert to numpy array.
-        ##import ipdb; ipdb.set_trace()
-        #Ehor = numpy.array(file_handle['/data/arrEhor'][:])
-        #Ever = numpy.array(file_handle['/data/arrEver'][:])
-
-        ## Store on object.
-        #self.__e_field = numpy.array([Ehor, Ever])
-
-        #super(SingFELPhotonDiffractor, self).__init__(parameters,self.input_path,self.output_path)
-
-        #file_handle.close()
 
     def saveH5(self):
         """ """

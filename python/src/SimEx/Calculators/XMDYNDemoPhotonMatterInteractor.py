@@ -122,7 +122,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             input_files = [self.input_path]
 
         elif os.path.isdir(self.input_path):
-            input_files = [ os.path.join( self.input_path, os.listdir( self.input_path ) ) ]
+            input_files = [ os.path.join( self.input_path, f) for f in os.listdir( self.input_path ) ]
             input_files.sort()
 
         else:
@@ -135,9 +135,9 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             raise IOError( "Output file %s already exists, cowardly refusing to overwrite." % (self.output_path) )
 
         # Generate formatted output files (i.e. attach history to output file).
-        for input_file in input_files:
+        for i,input_file in enumerate(input_files):
             tail = input_file.split( 'prop' )[-1]
-            output_file = os.path.join( self.output_path , 'pmi' + tail )
+            output_file = os.path.join( self.output_path , 'pmi_out_%07d.h5' % (i+1) )
             pmi_script.f_h5_out2in( input_file, output_file)
 
             # Get the backengine calculator.
