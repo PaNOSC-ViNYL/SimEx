@@ -69,6 +69,7 @@ class PhotonExperimentSimulation:
         print '\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80])
         print '\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80])
         self.__photon_source._readH5()
+        self.__photon_source.backengine()
         self.__photon_source.saveH5()
 
         print '\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80])

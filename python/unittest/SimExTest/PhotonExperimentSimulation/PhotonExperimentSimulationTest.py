@@ -88,7 +88,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
+                     'pmi_stop_ID'  : 2,
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
@@ -146,7 +146,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
             self.assertTrue( os.path.isfile( f ) )
 
     def testSimS2EWorkflowDirectories(self):
-        """ Testing that a workflow akin to the simS2E example workflow works. Only one I/O file per calculator. """
+        """ Testing that a workflow akin to the simS2E example workflow works.
+            Two sources, two diffraction patterns."""
 
         # Setup directories.
         working_directory = 'SPI'
@@ -167,10 +168,10 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         os.mkdir(recon_dir)
 
         # Ensure proper cleanup.
-        self.__dirs_to_remove.append(working_directory)
+        #self.__dirs_to_remove.append(working_directory)
 
         # Location of the FEL source file.
-        source_input = TestUtilities.generateTestFilePath('FELsource_out/FELsource_out_0000001.h5')
+        source_input = TestUtilities.generateTestFilePath('FELsource_out')
 
         # Photon source.
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path=source_dir)
@@ -190,8 +191,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 1,
+                     'pmi_stop_ID'  : 2,
+                     'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }

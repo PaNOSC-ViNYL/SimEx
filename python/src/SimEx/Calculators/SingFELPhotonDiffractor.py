@@ -35,6 +35,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
+        @note: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
         """
 
         # Initialize base class.
