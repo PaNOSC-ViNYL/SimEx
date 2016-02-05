@@ -21,7 +21,7 @@ ${SIMS2E_SRC_DIR}/unpack.stamp: ${PACKAGES}/s2e_files_package.stamp
 
 ${SIMS2E_SRC_DIR}/patch.stamp: ${SIMS2E_SRC_DIR}/unpack.stamp
 	@echo "Installing ${SIMS2E}."
-	cp ${PATCHES}/simS2E/pmi_demo.py ${SIMS2E_SRC_DIR}/packages/pmi/pmi_demo.py
+	cp ${PATCHES}/s2e_files/pmi_demo.py ${SIMS2E_SRC_DIR}/packages/pmi/pmi_demo.py
 	touch $@
 
 ${SIMS2E_SRC_DIR}/install.stamp: ${SIMS2E_SRC_DIR}/patch.stamp
