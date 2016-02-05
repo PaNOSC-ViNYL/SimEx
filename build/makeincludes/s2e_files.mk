@@ -1,23 +1,36 @@
-S2EFILES=s2e_files
-S2EFILES_DIR=${PACKAGES}/${S2EFILES}
-S2EFILES_SRC_DIR=${SRC}/${S2EFILES}
+SIMS2E=simS2E
+SIMS2E_DIR=${PACKAGES}/${SIMS2E}
+SIMS2E_SRC_DIR=${SRC}/${SIMS2E}
 
-s2e_files: ${PACKAGES}/s2e_files_install.stamp
+s2e_files: ${SIMS2E_SRC_DIR}/install.stamp
 
 ${PACKAGES}/s2e_files_package.stamp:
-	@echo "\nFetching ${S2EFILES}."
+	@echo "Fetching ${SIMS2E}."
 	cd ${PACKAGES} && \
-    wget https://github.com/chuckie82/simS2E/blob/master/data/sim_example/diffr/s2e.beam && \
-    wget https://github.com/chuckie82/simS2E/blob/master/data/sim_example/diffr/s2e.geom && \
-	wget https://github.com/chuckie82/simS2E/blob/master/modules/diffr/prepHDF5.py && \
-	wget https://github.com/chuckie82/simS2E/blob/master/data/sim_example/sample/sample.h5 && \
+	wget https://github.com/chuckie82/simS2E/archive/master.zip && \
+	mv master.zip ${SIMS2E}.zip && \
 	touch $@
-	@echo "Fetched ${S2EFILES}.\n"
+	@echo "Fetched ${SIMS2E}.\n"
 
-${PACKAGES}/s2e_files_install.stamp: ${PACKAGES}/s2e_files_package.stamp
-	@echo "\nInstalling ${S2EFILES}."
-	cp -av ${PACKAGES}/s2e.* ${SIMEX}/unittest/TestFiles/.
-	cp -av ${PACKAGES}/sample.h5 ${SIMEX}/unittest/TestFiles/.
-	cp -av ${PACKAGES}/prepHDF5.py ${SIMEX}/src/SimEx/Utilities/.
+${SIMS2E_SRC_DIR}/unpack.stamp: ${PACKAGES}/s2e_files_package.stamp
+	@echo "Unpacking ${SIMS2E}."
+	unzip -d ${SRC} ${PACKAGES}/${SIMS2E}.zip
+	mv ${SRC}/${SIMS2E}-master ${SIMS2E_SRC_DIR}
 	touch $@
-	@echo "Installed ${S2EFILES}.\n"
+	@echo "Unpacked ${SIMS2E}.\n"
+
+${SIMS2E_SRC_DIR}/patch.stamp: ${SIMS2E_SRC_DIR}/unpack.stamp
+	@echo "Installing ${SIMS2E}."
+	cp ${PATCHES}/simS2E/pmi_demo.py ${SIMS2E_SRC_DIR}/packages/pmi/pmi_demo.py
+	touch $@
+
+${SIMS2E_SRC_DIR}/install.stamp: ${SIMS2E_SRC_DIR}/patch.stamp
+	@echo "Installing ${SIMS2E}."
+	cd ${SIMS2E_SRC_DIR} && \
+	cp -av data/sim_example/diffr/s2e.beam ${SIMEX}/unittest/TestFiles/. && \
+	cp -av data/sim_example/diffr/s2e.geom ${SIMEX}/unittest/TestFiles/. && \
+	cp -av modules/diffr/prepHDF5.py       ${SIMEX}/src/SimEx/Utilities/. && \
+    cp -av data/sim_example/sample/sample.h5 ${SIMEX}/unittest/TestFiles/. && \
+    cp -av packages/pmi_demo/pmi_demo.py ${PYPATH}/. && \
+	touch $@
+	@echo "Installed ${SIMS2E}.\n"
