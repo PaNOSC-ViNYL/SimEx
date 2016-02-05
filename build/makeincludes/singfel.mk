@@ -2,6 +2,10 @@ SINGFEL=singfel
 SINGFEL_DIR=${PACKAGES}/${SINGFEL}
 SINGFEL_SRC_DIR=${SRC}/${SINGFEL}
 
+#export LD_LIBRARY_PATH=/afs/desy.de/products/python/.amd64_rhel60/2.7/lib:${LD_LIBRARY_PATH}
+#export INCLUDE_PATH=/afs/desy.de/products/python/.amd64_rhel60/2.7/include/python2.7:${INCLUDE_PATH}
+
+
 singfel: ${MPICH_SRC_DIR}/install.stamp \
 	${ARMADILLO_SRC_DIR}/install.stamp \
 	${HDF5_SRC_DIR}/install.stamp \
@@ -28,7 +32,7 @@ ${SINGFEL_SRC_DIR}/unpack.stamp: ${PACKAGES}/singfel_package.stamp
 ${SINGFEL_SRC_DIR}/patch.stamp: ${SINGFEL_SRC_DIR}/unpack.stamp
 	@echo "\nPatching ${SINGFEL}."
 	cd ${SINGFEL_SRC_DIR} && \
-	patch CMakeLists.txt ${PATCHES}/${SINGFEL}/CMakeLists.txt.patch && \
+	cp -v ${PATCHES}/${SINGFEL}/CMakeLists.txt . && \
 	patch CMake/FindArmadillo.cmake ${PATCHES}/${SINGFEL}/FindArmadillo.cmake.patch && \
 	touch $@
 	@echo "Patched ${SINGFEL}.\n"

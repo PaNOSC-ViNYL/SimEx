@@ -9,8 +9,6 @@ PREFIX_DIR=${ROOT}/sw
 LIBDIR=${PREFIX_DIR}/lib
 PYPATH=${LIBDIR}/python2.7/site-packages
 SIMEX=${ROOT}/python
-default: all
-
 all: directories \
 	wpg \
 	mpich \
