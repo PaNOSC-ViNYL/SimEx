@@ -66,9 +66,10 @@ ENDIF()
 
 # Make sure we get the correct python2.7 libs and headers.
 SET(PYTHON_INCLUDE_PATH $ENV{PYTHON27_INCLUDE_PATH})
-SET(PYTHON_LIBRARY $ENV{PYTHON27_LIB})
-FIND_PACKAGE(PythonLibs 2.7.5 EXACT REQUIRED)
-FIND_PACKAGE(PythonInterp 2.7.5 EXACT REQUIRED)
+# Uncomment the following line e.g. on rhel6 with non-default location of libpython2.7.so and set PYTHON27_LIB environment variable in $ROOT/build/setenv.sh.
+#SET(PYTHON_LIBRARY $ENV{PYTHON27_LIB})
+FIND_PACKAGE(PythonLibs 2.7)
+FIND_PACKAGE(PythonInterp 2.7)
 
 SET(BOOST_ROOT $ENV{BOOST_DIR})
 FIND_PACKAGE(Boost 1.55.0 REQUIRED COMPONENTS python thread date_time system mpi serialization filesystem unit_test_framework)
@@ -104,7 +105,7 @@ MESSAGE("BOOST LIBS: ${Boost_LIBRARIES}")
 
 # MPICH: Use local installation.
 SET(${MPI_INCLUDE_PATH}, $ENV{INCLUDE_PATH})
-#FIND_PACKAGE(MPI REQUIRED)
+FIND_PACKAGE(MPI REQUIRED)
 INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
 
 #SET(CMAKE_CXX_FLAGS "-std=c++0x -g -Wall") # Add c++11 features
