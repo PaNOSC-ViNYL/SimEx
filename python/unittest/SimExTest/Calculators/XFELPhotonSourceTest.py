@@ -65,28 +65,6 @@ class XFELPhotonSourceTest(unittest.TestCase):
 
         self.assertIsInstance(xfel_source, XFELPhotonSource)
 
-    def testReadSave(self):
-        """ Check that we can read the h5 input and get all relevant parameters for
-        initializing the object. """
-
-        # Construct an object with some input.
-        xfel = XFELPhotonSource(parameters=None, input_path=self.input_h5, output_path='FELsource_out2.h5')
-
-        xfel._readH5()
-        # Get the parameters.
-        photon_energy = xfel.parameters['photon_energy']
-
-        # Check photon energy.
-        self.assertAlmostEqual(photon_energy, 4960.0, 1)  # 5 keV
-
-        # Get the data.
-        data = xfel._XFELPhotonSource__data
-
-        # Assert we have horizontal and vertical polarizations.
-        self.assertEqual(data.shape[0], 2)
-
-
-        xfel.saveH5()
 if __name__ == '__main__':
     unittest.main()
 

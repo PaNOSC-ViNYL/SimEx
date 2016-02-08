@@ -80,7 +80,7 @@ class PhotonExperimentSimulation:
                 ]
 
         if self.__photon_detector is not None:
-            self.__calculators.insert(-2, self.__photon_detector )
+            self.__calculators.insert(-1, self.__photon_detector )
 
     def run(self):
         """ Method to start the photon experiment simulation workflow. """

@@ -85,7 +85,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           ]
 
         # Ensure proper cleanup.
-        self.__files_to_remove = expected_files+expected_symlinks
+        self.__files_to_remove = expected_files+expected_symlinks+['recon.h5']
         self.__dirs_to_remove = expected_dirs
 
 
@@ -190,7 +190,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         os.mkdir(recon_dir)
 
         # Ensure proper cleanup.
-        #self.__dirs_to_remove.append(working_directory)
+        self.__dirs_to_remove.append(working_directory)
 
         # Location of the FEL source file.
         source_input = TestUtilities.generateTestFilePath('FELsource_out')
@@ -281,13 +281,14 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'pmi/pmi_out_0000001.h5',
                           'diffr/diffr_out_0000001.h5',
                           'detector/diffr_out_0000001.h5',
+                          'recon.h5',
                           'orient_out.h5',
                           ]
 
         # Ensure proper cleanup.
-        #self.__files_to_remove = expected_files+expected_symlinks
-        #self.__files_to_remove.append('prepHDF5.py')
-        #self.__dirs_to_remove = expected_dirs
+        self.__files_to_remove = expected_files+expected_symlinks
+        self.__files_to_remove.append('prepHDF5.py')
+        self.__dirs_to_remove = expected_dirs
 
 
         # Location of the FEL source file.
