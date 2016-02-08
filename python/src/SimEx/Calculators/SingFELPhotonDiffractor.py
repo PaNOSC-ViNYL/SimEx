@@ -1,3 +1,25 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
+#                                                                        #
+##########################################################################
+
 """ Module that holds the SingFELPhotonDiffractor class.
 
     @author : CFG
@@ -25,7 +47,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         @param  parameters : Dictionary of singFEL parameters.
         @type : dict
-        @example : parameters={ 'number_of_uniform_rotations': 1,
+        @example : parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
@@ -35,6 +57,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
+        @note: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
         """
 
         # Initialize base class.
@@ -93,16 +116,23 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Check if path is a file.
         if os.path.isfile(pmi_dir):
             raise OSError("Cannot create directory %s because a file with the same name already exists.")
+
         # Create if not existing.
         if not os.path.exists(pmi_dir):
+            # If input is not a dir, first create pmi/
+            if not os.path.isdir(self.input_path):
                 os.mkdir(pmi_dir)
-
-        # Nothing to do if pmi output already in pmi subdir.
-        if not os.path.basename(self.input_path) in os.listdir(pmi_dir):
-            # If link already exists, just continue.
+            # Link input to pmi/.
             ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
             proc = subprocess.Popen(ln_pmi_command, shell=True)
             proc.wait()
+
+        ## Nothing to do if pmi output already in pmi subdir.
+        #if not os.path.basename(self.input_path) in os.listdir(pmi_dir):
+            ## If link already exists, just continue.
+            #ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
+            #proc = subprocess.Popen(ln_pmi_command, shell=True)
+            #proc.wait()
 
         preph5_location = inspect.getsourcefile(prepHDF5)
         # Link the prepHDF5 utility that gets called from singFEL code.
@@ -111,17 +141,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             proc = subprocess.Popen(ln_preph5_command, shell=True)
             proc.wait()
 
-
-        input_dir = '.'
-        output_dir = '.'
-        config_file = '/dev/null'
-
-
         # If parameters are given, map them to command line arguments.
-        if 'number_of_uniform_rotations' in self.parameters.keys():
-            number_of_uniform_rotations = str(self.parameters['number_of_uniform_rotations'])
+        if 'uniform_rotation' in self.parameters.keys():
+            uniform_rotation = {True : 'true', False : 'false'}[self.parameters['uniform_rotation']]
         else:
-            number_of_uniform_rotations = 1
+            uniform_rotation = '1'
 
         if 'calculate_Compton' in self.parameters.keys():
             calculate_Compton = {True : '1', False : '0'}[self.parameters['calculate_Compton']]
@@ -162,6 +186,19 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             raise RuntimeError("Beam geometry file must be given.")
 
 
+
+        input_dir = '.'
+
+        if number_of_diffraction_patterns > 1:
+            if not os.path.isdir( self.output_path ):
+                os.mkdir( self.output_path )
+            output_dir = self.output_path
+
+        else:
+            output_dir = '.'
+
+        config_file = '/dev/null'
+
         # Run the backengine command.
         command_sequence = ['mpirun',
                             '-np','2',
@@ -171,7 +208,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--beamFile',         str(beam_parameter_file),
                             '--geomFile',         str(beam_geometry_file),
                             '--configFile',       str(config_file),
-                            '--uniformRotation',  str(number_of_uniform_rotations),
+                            '--uniformRotation',  str(uniform_rotation),
                             '--calculateCompton', str(calculate_Compton),
                             '--sliceInterval',    str(slice_interval),
                             '--numSlices',        str(number_of_slices),
@@ -181,6 +218,12 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             ]
         proc = subprocess.Popen(command_sequence)
         proc.wait()
+
+        # Remove the simlink
+        if os.path.islink(pmi_dir):
+            os.remove(pmi_dir)
+        if os.path.islink('prepHDF5.py'):
+            os.remove('prepHDF5.py')
 
         # Return the return code from the backengine.
         return proc.returncode
@@ -194,27 +237,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
         pass # Nothing to be done since IO happens in backengine.
-
-        ## Read the file.
-        #file_handle = h5py.File(self.input_path, 'r')
-
-        ## Setup empty dictionary.
-        #parameters = {}
-
-        ## Get photon energy.
-        ##parameters['photon_energy'] = file_handle['params/photonEnergy'].value
-
-        ## Read the electric field data and convert to numpy array.
-        ##import ipdb; ipdb.set_trace()
-        #Ehor = numpy.array(file_handle['/data/arrEhor'][:])
-        #Ever = numpy.array(file_handle['/data/arrEver'][:])
-
-        ## Store on object.
-        #self.__e_field = numpy.array([Ehor, Ever])
-
-        #super(SingFELPhotonDiffractor, self).__init__(parameters,self.input_path,self.output_path)
-
-        #file_handle.close()
 
     def saveH5(self):
         """ """

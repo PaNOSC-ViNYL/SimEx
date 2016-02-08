@@ -1,3 +1,25 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
+#                                                                        #
+##########################################################################
+
 """ Module that holds the S2EReconstruction class.
 
     @author : CFG
@@ -5,7 +27,7 @@
     @creation 20151104
 
 """
-import os
+import os, shutil
 import subprocess
 import tempfile
 import numpy
@@ -21,7 +43,6 @@ class DMPhasing(AbstractPhotonAnalyzer):
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
-        ### TODO
         """
         Constructor for the phasing analyser.
 
@@ -125,7 +146,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
             support_file     = os.path.join(run_instance_dir, "support.dat")
             input_intensity_file  = self.input_path
             intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
-            output_file          = os.path.join(out_dir, "phase_out_.h5")
+            output_file          = os.path.join(out_dir, "phase_out.h5")
 
             #Read intensity and translate into ASCII *.dat format
             (qmax, t_intens, intens_len, qPos, qPos_full) = load_intensities(input_intensity_file)
@@ -197,6 +218,8 @@ class DMPhasing(AbstractPhotonAnalyzer):
             fp.create_dataset("version", data=h5py.version.hdf5_version)
 
             fp.close()
+
+            shutil.copy( output_file, os.path.join( cwd, self.output_path ) )
             os.chdir(cwd)
             return 0
         except:

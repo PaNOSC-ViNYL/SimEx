@@ -1,3 +1,25 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
+#                                                                        #
+##########################################################################
+
 """ Module that holds the EMCOrientation class.
 
     @author : CFG
@@ -26,11 +48,18 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         @param  parameters : Dictionary of reconstruction parameters.
         @type : dict
-        @example : parameters={}
+        @example : parameters={'initial_number_of_quaternions' : 1,
+                               'max_number_of_quaternions'     : 9,
+                               'max_number_of_iterations'      : 100,
+                               'min_error'                     : 1.0e-8,
+                               'beamstop'                      : 1.0e-5,
+                               'detailed_output'               : False
+                               }
         """
 
         # Initialize base class.
         super(EMCOrientation, self).__init__(parameters,input_path,output_path)
+
 
         self.__provided_data = ['data/data',
                                 'data/angle',
@@ -144,7 +173,14 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
         #run_log_file        = os.path.join(run_instance_dir, "orient.log")
-        photonFiles         = self.input_path
+        if os.path.isdir(self.input_path):
+            photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
+            photonFiles.sort()
+        elif os.path.isfile(self.input_path):
+            photonFiles = [self.input_path]
+        else:
+            raise IOError( " Input file %s not found." % self.input_path )
+
         sparsePhotonFile    = os.path.join(tmp_out_dir, "photons.dat")
         avgPatternFile      = os.path.join(tmp_out_dir, "avg_photon.h5")
         detectorFile        = os.path.join(tmp_out_dir, "detector.dat")
@@ -171,10 +207,10 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             msg = "Photons.dat and detector.dat not found in " + tmp_out_dir + ". Will create them now..."
             print_to_log(msg=msg, log_file=outputLog)
             os.system("touch %s" % lockFile)
-            #gen.readGeomFromPhotonData(photonFiles[0])
-            gen.readGeomFromPhotonData(photonFiles)
+            gen.readGeomFromPhotonData(photonFiles[0])
+            #gen.readGeomFromPhotonData(photonFiles)
             gen.writeDetectorToFile(filename=detectorFile)
-            gen.writeSparsePhotonFile([photonFiles], sparsePhotonFile, avgPatternFile)
+            gen.writeSparsePhotonFile(photonFiles, sparsePhotonFile, avgPatternFile)
             print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=outputLog)
             os.system("rm %s " % lockFile)
         else:

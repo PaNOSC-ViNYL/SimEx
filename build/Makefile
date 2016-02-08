@@ -8,9 +8,7 @@ PATCHES=${EXTERNALS}/patches
 PREFIX_DIR=${ROOT}/sw
 LIBDIR=${PREFIX_DIR}/lib
 PYPATH=${LIBDIR}/python2.7/site-packages
-
-default: all
-
+SIMEX=${ROOT}/python
 all: directories \
 	wpg \
 	mpich \
@@ -18,6 +16,7 @@ all: directories \
 	boost \
 	hdf5 \
 	singfel \
+	s2e_files \
 	recon \
 
 directories:
@@ -57,4 +56,5 @@ include ${MAKE_INCLUDES}/hdf5.mk
 include ${MAKE_INCLUDES}/boost.mk
 include ${MAKE_INCLUDES}/armadillo.mk
 include ${MAKE_INCLUDES}/singfel.mk
+include ${MAKE_INCLUDES}/s2e_files.mk
 include ${MAKE_INCLUDES}/recon.mk

@@ -1,3 +1,25 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
+#                                                                        #
+##########################################################################
+
 """ Test module for the XFELPhotonSource.
 
     @author : CFG
@@ -43,28 +65,6 @@ class XFELPhotonSourceTest(unittest.TestCase):
 
         self.assertIsInstance(xfel_source, XFELPhotonSource)
 
-    def testReadSave(self):
-        """ Check that we can read the h5 input and get all relevant parameters for
-        initializing the object. """
-
-        # Construct an object with some input.
-        xfel = XFELPhotonSource(parameters=None, input_path=self.input_h5, output_path='FELsource_out2.h5')
-
-        xfel._readH5()
-        # Get the parameters.
-        photon_energy = xfel.parameters['photon_energy']
-
-        # Check photon energy.
-        self.assertAlmostEqual(photon_energy, 4960.0, 1)  # 5 keV
-
-        # Get the data.
-        data = xfel._XFELPhotonSource__data
-
-        # Assert we have horizontal and vertical polarizations.
-        self.assertEqual(data.shape[0], 2)
-
-
-        xfel.saveH5()
 if __name__ == '__main__':
     unittest.main()
 

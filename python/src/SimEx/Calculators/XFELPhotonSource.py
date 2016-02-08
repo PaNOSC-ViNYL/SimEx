@@ -1,3 +1,25 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
+#                                                                        #
+##########################################################################
+
 """ Module that holds the XFELPhotonSource class.
 
     @author : CFG
@@ -5,6 +27,8 @@
     @creation 20151104
 
 """
+import os
+import shutil
 from subprocess import Popen
 import numpy
 import h5py
@@ -36,7 +60,20 @@ class XFELPhotonSource(AbstractPhotonSource):
 
 
     def backengine(self):
-        pass
+        # Copy input to output.
+        # Check if input_path is a directory.
+        if os.path.isdir(self.input_path):
+            # Make directory target if not existing already.
+            if not os.path.isdir(self.output_path):
+                os.mkdir( self.output_path )
+            # Copy files.
+            files_to_copy = [os.path.join(self.input_path, ff) for ff in os.listdir(self.input_path) if 'FELsource_out' in ff and ff.split('.')[-1] == 'h5']
+            for f in files_to_copy:
+                shutil.copy( f, self.output_path )
+
+        # If input is a single file, just copy it to output.
+        else:
+            shutil.copy( self.input_path, self.output_path )
 
     @property
     def data(self):
@@ -47,27 +84,7 @@ class XFELPhotonSource(AbstractPhotonSource):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
 
-        # Read the file.
-        file_handle = h5py.File(self.input_path, 'r')
-
-        # Setup empty dictionary.
-        parameters = {}
-
-        # Get photon energy.
-        parameters['photon_energy'] = file_handle['params/photonEnergy'].value
-
-        # Read the electric field data and convert to numpy array.
-        data = numpy.array([file_handle['data/arrEhor'],
-                            file_handle['data/arrEver']
-                           ]
-                          )
-
-        # Store on object.
-        self.__data = data
-
-        super(XFELPhotonSource, self).__init__(parameters,self.input_path,self.output_path)
-
-        file_handle.close()
+        pass
 
     def saveH5(self):
         """ """
@@ -79,31 +96,7 @@ class XFELPhotonSource(AbstractPhotonSource):
         @default : None
         """
 
-        # Open the file for writing.
-        #out_file_handle = h5py.File(self.output_path, 'w')
-        #in_file_handle = h5py.File(self.input_path, 'r')
-
-        ## Recreate all data groups and sets.
-        #for d in
-        #params = file_handle.create_group('params')
-        #data = file_handle.create_group('data')
-
-        #pE = params.create_dataset(name="photonEnergy",
-                                   #shape=(),
-                                   #dtype=numpy.float,
-                                   #data=self.parameters['photon_energy'] )
-
-        #Ehor = data.create_dataset(name='arrEhor', shape=self.data[0].shape, data=self.data[0])
-        #Ever = data.create_dataset(name='arrEver', shape=self.data[1].shape, data=self.data[1])
-
-        #file_handle.close()
-
-        # Simply copy the input to output.
-        command = 'cp %s %s' % (self.input_path, self.output_path)
-        proc = Popen(command, shell=True)
-        proc.wait()
-
-
+        pass
 
 
 

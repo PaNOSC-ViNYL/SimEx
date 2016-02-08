@@ -1,3 +1,25 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
+#                                                                        #
+##########################################################################
+
 """ Module that holds the S2EReconstruction class.
 
     @author : CFG
@@ -5,7 +27,7 @@
     @creation 20151104
 
 """
-
+import os
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
 from EMCOrientation import EMCOrientation
@@ -64,8 +86,13 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
             emc_parameters = self.parameters['EMC_Parameters']
             dm_parameters = self.parameters['DM_Parameters']
 
-        self.__emc = EMCOrientation(emc_parameters, self.input_path, 'orient_out.h5')
-        self.__dm = DMPhasing(dm_parameters, 'orient_out.h5', self.output_path)
+        if os.path.isdir( self.output_path ):
+            intermediate_output_path = os.path.join( self.output_path, 'orient_out.h5' )
+        else:
+            intermediate_output_path  = 'orient_out.h5'
+
+        self.__emc = EMCOrientation(emc_parameters, self.input_path, intermediate_output_path )
+        self.__dm = DMPhasing(dm_parameters, intermediate_output_path, self.output_path)
 
 
 
@@ -104,7 +131,7 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
 
         emc_status = self.__emc.backengine()
         if  emc_status!= 0:
-            return 1
+            return emc_status
         dm_status = self.__dm.backengine()
 
         return dm_status
