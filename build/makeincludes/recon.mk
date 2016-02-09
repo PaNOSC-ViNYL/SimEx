@@ -22,13 +22,35 @@ ${RECON_SRC_DIR}/unpack.stamp: ${PACKAGES}/${RECON}_package.stamp
 	touch $@
 	@echo "Unpacked ${RECON}.\n"
 
+${RECON_SRC_DIR}/patch.stamp: ${RECON_SRC_DIR}/unpack.stamp
+	@echo "Patching ${RECON}."
+	cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
+	cp ${PATCHES}/recon/makefile_DM Makefile
+	touch $@
+	@echo "Patched ${RECON}.\n"
 
-${RECON_SRC_DIR}/build.stamp:${RECON_SRC_DIR}/unpack.stamp
+
+${RECON_SRC_DIR}/build.stamp:${RECON_SRC_DIR}/build_emc.stamp \
+	${RECON_SRC_DIR}/build_dm.stamp
+
+${RECON_SRC_DIR}/build_emc.stamp:${RECON_SRC_DIR}/patch.stamp
 	@echo "\nBuilding ${RECON}."
 	cd ${RECON_SRC_DIR}/s2e_recon/EMC_Src && \
 	./compile_EMC && \
-	cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
-	./compile_DM && \
+	touch $@
+	@echo "Built ${RECON}.\n"
+
+
+${RECON_SRC_DIR}/build_dm.stamp:${RECON_SRC_DIR}/patch.stamp
+	@echo "\nBuilding ${RECON}."
+	if [ -d ${MKLROOT} ]; then \
+		cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
+		make mkl;\
+	fi
+	if [ ! -d ${MKLROOT} ]; then \
+		cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
+		make;\
+	fi
 	touch $@
 	@echo "Built ${RECON}.\n"
 

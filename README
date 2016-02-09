@@ -47,20 +47,24 @@ software needed to build the external simulation tools:
     * build-essential
     * bz2 libraries (libbz2-dev)
     * GSL (libgsl0-dev)
-    * FFTW3 (libfftw3-dev)
+    * FFTW3 (libfftw3-dev) or MKL
     * lapack
     * cmake
     * C/C++ and Fortran compilers, e.g. gcc
 
+A note on MKL: Make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation, e.g. /opt/intel/2015 for a recent version of MKL(R).
 
-2.2 Build external tools
+2.3) Build external tools
 Change into the build/ directory and type
 $> make
 
 This will sequentially build and install all external simulation tools.
-The build process has been tested on ubuntu 15.04 (64bit) and on
-Scientific Linux 6 (64bit). Reports about other platforms either via
+The build process has been tested on ubuntu 15.04 (64bit).
+Some issues were encountered on RHEL6. In particular RHEL6 ships with python2.6 installed but singFEL requires python2.7. Some adjustments in the CMakeLists.txt in the singFEL root directory might be required, see respective comments.
+
+Experiences on other platforms either via
 email or on github are highly appreciated!
+
 
 3.)
 Getting started
