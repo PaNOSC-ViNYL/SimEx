@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -30,6 +29,7 @@
 import os
 import subprocess
 
+# Include needed directories in sys.path.
 import paths
 import unittest
 
@@ -85,6 +85,20 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+
+    def testConstructionExceptions(self):
+        """ Check that proper exceptions are thrown if object is constructed incorrectly. """
+        # Parameter not a dict.
+        self.assertRaises( TypeError, SingFELPhotonDiffractor, 1, self.input_h5, 'diffr.h5')
+
+        # uniform_rotation not a bool.
+        parameters = {'uniform_rotation' : 1}
+        #self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+
+        # calculate_Compton not a bool.
+        parameters = {'calculate_Compton' : 1}
+        #self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+
 
     def testBackengine(self):
         """ Test that we can start a test calculation. """

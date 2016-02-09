@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -31,8 +30,8 @@ import os
 import inspect
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-from TestUtilities import TestUtilities
 
 from SimEx.Utilities import prepHDF5
 
@@ -45,23 +44,54 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Constructor for the xfel photon propagator.
 
-        @param  parameters : Dictionary of singFEL parameters.
-        @type : dict
-        @example : parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
+        @param  parameters : singFEL parameters.
+        @type              : dict
+        @example : parameters={ 'uniform_rotation'    : True,
+                     'calculate_Compton'              : False,
+                     'pmi_start_ID'                   : 1,
+                     'pmi_stop_ID'                    : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'slice_interval'                 : 10,
+                     'number_of_slices'               : 100,
+                     'beam_parameter_file'            : 's2e.beam',
+                     'beam_geometry_file'             : 's2e.geom',
                      }
+
+        @param parameters['uniform_rotation']  : Whether or not to apply uniform sampling of the sample's rotations.
+        @type : boolean
+
+        @param parameters['calculate_Compton'] : Whether or not to calculate incoherent (Compton) scattering.
+        @type : Bool
+
+        @param parameters['pmi_start_ID'] : Index of the pmi file to start from.
+        @type : int
+
+        @param parameters['pmi_stop_ID'] : Index of the pmi file to stop at.
+        @type : int
+
+        @param parameters['number_of_diffraction_patterns'] : The number of diffraction patterns to calculate from each photon-matter interaction trajectory.
+        @type : int
+
+        @param parameters['slice_interval'] : The number of time slices to skip between two samplings of the photon-matter interaction trajectory.
+        @type : int
+
+        @param parameters['number_of_slices'] : Total number of slices in the pmi files."
+        @type : int
+
+        @param parameters['beam_parameter_file'] : Path of the beam parameter (.beam) file.
+        @type : string
+
+        @param parameters['beam_geometry_file'] : Path of the beam geometry (.geom) file.
+        @type : string
+
         @note: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
         """
 
         # Initialize base class.
         super(SingFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
+
+        # Check parameters.
+        #self.parameters['uniform_rotation'] = checkAndSetInstance(bool, self.parameters['uniform_rotation'], True)
 
         self.__expected_data = ['/data/snp_<7 digit index>/ff',
                                 '/data/snp_<7 digit index>/halfQ',
@@ -143,7 +173,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # If parameters are given, map them to command line arguments.
         if 'uniform_rotation' in self.parameters.keys():
-            uniform_rotation = {True : 'true', False : 'false'}[self.parameters['uniform_rotation']]
+            uniform_rotation = {True : '1', False : '0'}[self.parameters['uniform_rotation']]
         else:
             uniform_rotation = '1'
 
@@ -155,7 +185,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if 'slice_interval' in self.parameters.keys():
             slice_interval = str(self.parameters['slice_interval'])
         else:
-            slice_interval = 100
+            slice_interval = '100'
 
         if 'number_of_slices' in self.parameters.keys():
             number_of_slices = str(self.parameters['number_of_slices'])
@@ -163,17 +193,17 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if 'pmi_start_ID' in self.parameters.keys():
             pmi_start_ID = str(self.parameters['pmi_start_ID'])
         else:
-            pmi_start_ID = 0
+            pmi_start_ID = '0'
 
         if 'pmi_stop_ID' in self.parameters.keys():
             pmi_stop_ID = str(self.parameters['pmi_stop_ID'])
         else:
-            pmi_stop_ID = 0
+            pmi_stop_ID = '0'
 
         if 'number_of_diffraction_patterns' in self.parameters.keys():
             number_of_diffraction_patterns = str(self.parameters['number_of_diffraction_patterns'])
         else:
-            number_of_diffraction_patterns = 1
+            number_of_diffraction_patterns = '1'
 
         if 'beam_parameter_file' in self.parameters.keys():
             beam_parameter_file = self.parameters['beam_parameter_file']
@@ -184,7 +214,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             beam_geometry_file = self.parameters['beam_geometry_file']
         else:
             raise RuntimeError("Beam geometry file must be given.")
-
 
 
         input_dir = '.'
