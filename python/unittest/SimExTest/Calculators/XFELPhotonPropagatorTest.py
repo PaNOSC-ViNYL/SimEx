@@ -75,6 +75,11 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
 
         self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
 
+    def testConstructionNumberOfFiles(self):
+        """ Test that input and output are setup correctly depending on the number and type of input files given."""
+        ### TODO
+        self.assertTrue(False)
+
     def testBackengineSingleInputFile(self):
         """ Test a backengine run with a single input file. """
         # Construct the object.

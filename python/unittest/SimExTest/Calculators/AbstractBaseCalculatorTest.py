@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -101,7 +100,6 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         # Ensure proper cleanup.
         self.__files_to_be_removed += [inp, out]
 
-
         # Setup the tuple.
         io = (inp, out)
 
@@ -110,7 +108,7 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         inp_handle.write('xxx')
         inp_handle.close()
 
-        # Call checker
+        # Call checker.
         io_ret = checkAndSetIO(io)
 
         self.assertEqual(io_ret[0], os.path.abspath(inp) )
@@ -137,8 +135,6 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
 
         for ed in expected_data:
             self.assertTrue ( ed in provided_data)
-
-
 
 
 if __name__ == '__main__':

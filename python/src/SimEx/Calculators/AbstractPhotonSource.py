@@ -52,6 +52,7 @@ class AbstractPhotonSource(AbstractBaseCalculator):
 
         # Check input path. Raises if none given.
         input_path = checkAndSetInstance(str, input_path, None)
+
         # Check output path. Set default if none given.
         output_path = checkAndSetInstance(str, output_path, 'source_out.h5')
 

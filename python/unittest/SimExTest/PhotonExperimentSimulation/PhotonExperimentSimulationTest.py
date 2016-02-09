@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -63,6 +62,53 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d):
                 shutil.rmtree(d)
+
+    def testConstruction(self):
+        """ Test the default constructor of this class. """
+        ### TODO
+        self.assertTrue(False)
+
+    def testCalculatorQueries(self):
+        """ Test that the calculator queries return the correct calculators. """
+        ### TODO
+        self.assertTrue(False)
+
+    def testConstructionExceptions(self):
+        """ Test that the appropriate exceptions are thrown if the object is constructed incorrectly. """
+        ### TODO
+        self.assertTrue(False)
+
+    def testCheckInterfaceConsistency(self):
+        """ Test if the check for interface consistency works correctly. """
+
+        ### TODO: More finegrained testing here: Check that inconsistencies are reported in a way that allows the user to address the issue quickly, report which pair of calculators are not consistent, and which data fields are missing.
+
+        # Setup a minimal experiment simulation.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
+        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
+        photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
+        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_diffractor = SingFELPhotonDiffractor(parameters=None, input_path=diffr_input, output_path='diffr_out.h5')
+        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
+
+        pxs = PhotonExperimentSimulation(photon_source=photon_source,
+                                         photon_propagator=photon_propagator,
+                                         photon_interactor=photon_interactor,
+                                         photon_diffractor=photon_diffractor,
+                                         photon_detector=photon_detector,
+                                         photon_analyzer=photon_analyzer,
+                                         )
+
+        interfaces_are_consistent = pxs._checkInterfaceConsistency()
+
+        self.assertTrue( interfaces_are_consistent )
+
+
+
+
 
     def testSimS2EWorkflowTwoDiffractionPatterns(self):
         """ Testing that a workflow akin to the simS2E example workflow works. """
@@ -368,34 +414,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         for f in expected_files:
             print f
             self.assertTrue( os.path.isfile( f ) )
-
-
-
-    def testCheckInterfaceConsistency(self):
-        """ Test if the check for interface consistency works correctly. """
-
-        # Setup a minimal experiment simulation.
-        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
-        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
-        pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
-        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
-        photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
-        photon_diffractor = SingFELPhotonDiffractor(parameters=None, input_path=diffr_input, output_path='diffr_out.h5')
-        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
-        photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
-
-        pxs = PhotonExperimentSimulation(photon_source=photon_source,
-                                         photon_propagator=photon_propagator,
-                                         photon_interactor=photon_interactor,
-                                         photon_diffractor=photon_diffractor,
-                                         photon_detector=photon_detector,
-                                         photon_analyzer=photon_analyzer,
-                                         )
-
-        interfaces_are_consistent = pxs._checkInterfaceConsistency()
-
-        self.assertTrue( interfaces_are_consistent )
 
 
 
