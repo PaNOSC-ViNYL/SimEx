@@ -30,6 +30,8 @@ import exceptions
 import unittest
 
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
+from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 class EntityChecksTest(unittest.TestCase):
     """ Test class for the EntityChecks class. """
@@ -96,6 +98,44 @@ class EntityChecksTest(unittest.TestCase):
         var = checkAndSetInstance(tp, None, default)
 
         self.assertEqual(var, default)
+
+    def testCheckAndSetPositiveInteger(self):
+        """ Test the check method for positive integers. """
+
+        # Check with correct parameter.
+        self.assertEqual( 1, checkAndSetPositiveInteger(1) )
+
+        # Check default.
+        self.assertEqual( 1, checkAndSetPositiveInteger(None, 1) )
+
+        # Check exception if parameter not an int.
+        self.assertRaises( TypeError, checkAndSetPositiveInteger, "not an integer")
+
+        # Check exception if parameter < 0.
+        self.assertRaises( TypeError, checkAndSetPositiveInteger, -1)
+
+        # Check exception if parameter = 0.
+        self.assertRaises( TypeError, checkAndSetPositiveInteger, 0)
+
+    def testCheckAndSetNonNegativeInteger(self):
+        """ Test the check method for non-negative integers. """
+
+        # Check with correct parameter.
+        self.assertEqual( 1, checkAndSetNonNegativeInteger(1) )
+        self.assertEqual(0, checkAndSetNonNegativeInteger(0) )
+
+        # Check default.
+        self.assertEqual( 1, checkAndSetNonNegativeInteger(None, 1) )
+
+        # Check exception if parameter not an int.
+        self.assertRaises( TypeError, checkAndSetNonNegativeInteger, "not an integer")
+
+        # Check exception if parameter < 0.
+        self.assertRaises( TypeError, checkAndSetNonNegativeInteger, -1)
+
+
+
+
 
 
 if __name__ == '__main__':

@@ -30,7 +30,7 @@ import os
 import inspect
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 
 from SimEx.Utilities import prepHDF5
@@ -91,7 +91,34 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         super(SingFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
 
         # Check parameters.
-        #self.parameters['uniform_rotation'] = checkAndSetInstance(bool, self.parameters['uniform_rotation'], True)
+        # Check that only accepted parameters are present.
+        accepted_keys = ['uniform_rotation',
+                         'calculate_Compton',
+                         'slice_interval',
+                         'number_of_slices',
+                         'number_of_diffraction_patterns',
+                         'pmi_start_ID',
+                         'pmi_stop_ID',
+                         'beam_parameter_file',
+                         'beam_geometry_file']
+
+        for k in self.parameters.keys():
+            if k not in accepted_keys:
+                raise RuntimeError( "The parameter '%s' is not a valid parameter for the SingFELPhotonDiffractor. " % (k))
+        # Check each parameter individually and set defaults if not set.
+        self.parameters['uniform_rotation'] = checkAndSetInstance(bool, self.parameters['uniform_rotation'], True)
+        self.parameters['calculate_Compton'] = checkAndSetInstance(bool, self.parameters['calculate_Compton'], True)
+        self.parameters['slice_interval'] = checkAndSetPositiveInteger(self.parameters['slice_interval'], 1)
+        self.parameters['number_of_slices'] = checkAndSetPositiveInteger(self.parameters['number_of_slices'], 1)
+        self.parameters['number_of_diffraction_patterns'] = checkAndSetPositiveInteger(self.parameters['number_of_diffraction_patterns'], 1)
+        self.parameters['pmi_start_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_start_ID'], 1)
+        self.parameters['pmi_stop_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_stop_ID'], 1)
+        self.parameters['beam_parameter_file'] = checkAndSetInstance(str, self.parameters['beam_parameter_file'])
+        if not os.path.isfile(self.parameters['beam_parameter_file']):
+            raise IOError("%s is not a file." % (self.parameters['beam_parameter_file']))
+        self.parameters['beam_geometry_file'] = checkAndSetInstance(str, self.parameters['beam_geometry_file'])
+        if not os.path.isfile(self.parameters['beam_geometry_file']):
+            raise IOError("%s is not a file." % (self.parameters['beam_geometry_file']))
 
         self.__expected_data = ['/data/snp_<7 digit index>/ff',
                                 '/data/snp_<7 digit index>/halfQ',
@@ -137,37 +164,25 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         return self.__provided_data
 
     def backengine(self):
-        """ This method drives the backengine code, in this case Chuck's singFEL."""
+        """ This method drives the backengine singFEL."""
 
-        # Link pmi output
         # Setup directory to pmi output.
-        pmi_dir = os.path.abspath(os.path.join('.', 'pmi'))
+        # Backengine expects a directory name, so have to check if
+        # input_path is dir or file and handle accordingly.
+        if os.path.isdir( self.input_path ):
+            input_dir = self.input_path
 
-        # Check if path is a file.
-        if os.path.isfile(pmi_dir):
-            raise OSError("Cannot create directory %s because a file with the same name already exists.")
+        elif os.path.isfile( self.input_path ):
+            input_dir = os.path.dirname( self.input_path )
 
-        # Create if not existing.
-        if not os.path.exists(pmi_dir):
-            # If input is not a dir, first create pmi/
-            if not os.path.isdir(self.input_path):
-                os.mkdir(pmi_dir)
-            # Link input to pmi/.
-            ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
-            proc = subprocess.Popen(ln_pmi_command, shell=True)
-            proc.wait()
-
-        ## Nothing to do if pmi output already in pmi subdir.
-        #if not os.path.basename(self.input_path) in os.listdir(pmi_dir):
-            ## If link already exists, just continue.
-            #ln_pmi_command = 'ln -s %s %s' % ( self.input_path, pmi_dir)
-            #proc = subprocess.Popen(ln_pmi_command, shell=True)
-            #proc.wait()
+        # Link the  python utility so the backengine can find it.
+        ### Yes, this is messy.
 
         preph5_location = inspect.getsourcefile(prepHDF5)
+        preph5_target =  os.path.join( input_dir, 'prepHDF5.py')
         # Link the prepHDF5 utility that gets called from singFEL code.
-        if not os.path.isfile('prepHDF5.py'):
-            ln_preph5_command = 'ln -s %s' % ( preph5_location )
+        if not os.path.isfile( preph5_target ):
+            ln_preph5_command = 'ln -s %s %s' % ( preph5_location, preph5_target )
             proc = subprocess.Popen(ln_preph5_command, shell=True)
             proc.wait()
 
@@ -216,8 +231,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             raise RuntimeError("Beam geometry file must be given.")
 
 
-        input_dir = '.'
-
         if number_of_diffraction_patterns > 1:
             if not os.path.isdir( self.output_path ):
                 os.mkdir( self.output_path )
@@ -248,11 +261,9 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         proc = subprocess.Popen(command_sequence)
         proc.wait()
 
-        # Remove the simlink
-        if os.path.islink(pmi_dir):
-            os.remove(pmi_dir)
-        if os.path.islink('prepHDF5.py'):
-            os.remove('prepHDF5.py')
+
+        if os.path.islink(preph5_target):
+            os.remove(preph5_target)
 
         # Return the return code from the backengine.
         return proc.returncode

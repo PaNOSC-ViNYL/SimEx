@@ -34,6 +34,7 @@ ${SINGFEL_SRC_DIR}/patch.stamp: ${SINGFEL_SRC_DIR}/unpack.stamp
 	cd ${SINGFEL_SRC_DIR} && \
 	cp -v ${PATCHES}/${SINGFEL}/CMakeLists.txt . && \
 	patch CMake/FindArmadillo.cmake ${PATCHES}/${SINGFEL}/FindArmadillo.cmake.patch && \
+	patch src/radiationDamageMPI.cpp ${PATCHES}/${SINGFEL}/radiationDamageMPI.cpp.patch && \
 	touch $@
 	@echo "Patched ${SINGFEL}.\n"
 
