@@ -156,6 +156,27 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
 
         self.assertIsInstance( xrts_calculator, PlasmaXRTSCalculator )
 
+    def testBackengine(self):
+        """ Check that the backengine can be executed. """
+
+        # Setup parameters.
+        xrts_parameters = {'scattering_angle' : 90,
+                           'photon_energy_range' : numpy.arange(-100., 100., 1.0),
+                           'model_See0'          : 'RPA',
+                           'model_Sii'           : 'DH',
+                           'model_Sbf'           : 'IA',
+                           }
+
+
+        # Construct an instance.
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=self.input_path,
+                                                output_path='xrts_out'
+                                              )
+
+        # Call the backengine.
+        xrts_calculator.backengine()
+
 if __name__ == '__main__':
     unittest.main()
 
