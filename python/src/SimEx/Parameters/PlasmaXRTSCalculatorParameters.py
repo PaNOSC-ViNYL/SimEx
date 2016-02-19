@@ -19,7 +19,7 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the PlasmaXRTSCalculator class.
+""" Module that holds the PlasmaXRTSCalculatorParameters class.
 
     @author : CFG
     @institution : XFEL
@@ -31,22 +31,22 @@ import numpy
 import inspect
 import tempfile
 import subprocess
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.CalculatorParameterss.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 
 from SimEx.Utilities import prepHDF5
 
-class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
+class PlasmaXRTSCalculatorParameters(AbstractPhotonDiffractor):
     """
     Class representing a x-ray free electron laser photon propagator.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the PlasmaXRTSCalculator.
+        Constructor for the PlasmaXRTSCalculatorParameters.
 
-        @param parameters : Parameters for the PlasmaXRTSCalculator.
+        @param parameters : Parameters for the PlasmaXRTSCalculatorParameters.
         @type : dict
         @default : None
         """
@@ -55,7 +55,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         parameters = checkAndSetParameters( parameters )
 
         # Init base class.
-        super( PlasmaXRTSCalculator, self).__init__(parameters, input_path, output_path)
+        super( PlasmaXRTSCalculatorParameters, self).__init__(parameters, input_path, output_path)
 
         # Set state to not-initialized (e.g. input deck is not written).
         self.__is_initialized = False
