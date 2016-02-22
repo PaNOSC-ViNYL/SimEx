@@ -26,7 +26,7 @@
     @creation 20160219
 
 """
-
+import paths
 import os
 import numpy
 import shutil
@@ -36,27 +36,38 @@ import subprocess
 import paths
 import unittest
 
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
 # Import the class to test.
-from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
-from TestUtilities import TestUtilities
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetScatteringAngle
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetElements
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetDensitiesAndCharge
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetElectronTemperature
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetIonTemperature
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetDebyeTemperature
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetBandGap
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelMix
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetLFC
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetSbfNorm
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetEnergyRange
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelSii
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelSee
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelSbf
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelIPL
 
-class PlasmaXRTSCalculatorTest(unittest.TestCase):
+class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
     """
-    Test class for the PlasmaXRTSCalculator class.
+    Test class for the PlasmaXRTSCalculatorParameters class.
     """
 
     @classmethod
     def setUpClass(cls):
-        """ Setting up the test class. """
-        cls.input_path = TestUtilities.generateTestFilePath('')
+        pass
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        del cls.input_path
+        pass
 
     def setUp(self):
         """ Setting up a test. """
@@ -72,116 +83,195 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def testConstructionDict(self):
+    def testConstruction(self):
         """ Testing the default construction of the class using a dictionary. """
 
         # Attempt to construct an instance of the class.
-        parameters_dict =
-        xrts_parameters = PlasmaXRTSCalculatorParameters(
-                elements=['Be'],
-                average_charge=2.0,
-                scattering_angle=90.0,
+        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         electron_temperature=10.0,
+                                                         electron_density=1.0e23,
+                                                         ion_charge=2.3)
 
 
         # Check instance and inheritance.
-        self.assertIsInstance( xrts_calculator, PlasmaXRTSCalculator )
-        self.assertIsInstance( xrts_calculator, AbstractPhotonDiffractor )
-        self.assertIsInstance( xrts_calculator, AbstractBaseCalculator )
+        self.assertIsInstance( xrts_parameters, PlasmaXRTSCalculatorParameters )
 
-    def testCheckSaneParameters(self):
-        """ Testing the input parameter checks pass for a sane parameter dict. """
+    def testCheckAndSetScatteringAngle(self):
+        """ Test the scattering angle set/check function. """
+        # Check default.
+        self.assertRaises( RuntimeError, checkAndSetScatteringAngle, None )
 
-        # Setup parameters.
-        xrts_parameters = {'scattering_angle' : 90,
-                           'photon_energy_range' : numpy.arange(-100., 100., 1.0),
-                           'model_See0'          : 'RPA',
-                           'model_Sii'           : 'DH',
-                           'model_Sbf'           : 'IA',
-                           }
+        # Check out of range.
+        self.assertRaises( ValueError, checkAndSetScatteringAngle, 190. )
+
+        # Check negative
+        self.assertRaises( ValueError, checkAndSetScatteringAngle, -90. )
+
+        # Check zero.
+        self.assertRaises( ValueError, checkAndSetScatteringAngle, 0.0 )
+
+        # Check return.
+        self.assertEqual( checkAndSetScatteringAngle( 10.3156734 ), 10.3156734, 7 )
+
+    def testCheckAndSetElements(self):
+        """ Test the elements set/check function."""
+        # Check default.
+        self.assertRaises( RuntimeError, checkAndSetElements, None)
+
+        # Check not a valid elements list.
+        self.assertRaises( TypeError, checkAndSetElements, 'Beryllium')
+
+        # Check not a valid elements list.
+        # Only symbol.
+        self.assertRaises( TypeError, checkAndSetElements, ['Be'])
+        # Not a list of lists.
+        self.assertRaises( TypeError, checkAndSetElements, ['Be', 1, -1])
+        # Element name instead of symbol.
+        self.assertRaises( TypeError, checkAndSetElements, ['Beryllium', 1, -1])
+        # Not a valid symbol.
+        self.assertRaises( ValueError, checkAndSetElements, [['Hx', 1, -1]])
+        # Floating stoch.
+        self.assertRaises( TypeError, checkAndSetElements, [['Be', 0.0, -1]])
+        # Zero stoch.
+        self.assertRaises( TypeError, checkAndSetElements, [['Be', 0, -1]])
+        # Charge not valid.
+        self.assertRaises( ValueError, checkAndSetElements, [['Be', 1, -2]])
+        # One element in list is faulty.
+        self.assertRaises( ValueError, checkAndSetElements,[['Be', 1, -1], ['Hx', 1, -1]])
+
+        # Check return from well behaved input.
+        sane_return = checkAndSetElements([['B',1, -1], ['N', 1, 2]])
+        self.assertEqual(sane_return[0][0], 'B')
+        self.assertEqual(sane_return[0][1], 1)
+        self.assertEqual(sane_return[0][2], -1)
+        self.assertEqual(sane_return[1][0], 'N')
+        self.assertEqual(sane_return[1][1], 1)
+        self.assertEqual(sane_return[1][2], 2)
+
+    def testCheckAndSetElectronTemperature(self):
+        """ Check the electron temperature set/check function. """
+
+        # Check default.
+        self.assertRaises( RuntimeError, checkAndSetElectronTemperature, None)
+
+        # Check incorrect type.
+        self.assertRaises( TypeError, checkAndSetElectronTemperature, "1.0")
+        # Zero.
+        self.assertRaises( ValueError, checkAndSetElectronTemperature, 0.0)
+        # Negative.
+        self.assertRaises( ValueError, checkAndSetElectronTemperature, -10.0)
+
+    def testCheckAndSetDensitiesAndCharge(self):
+        """ Check the utility for setting the charge, number and mass densities works correctly. """
+
+        # Case 1: No input -> raise
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, None )
+
+        # Case 2: Not enough input.
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, 1e19, None, None )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, 2.3, None )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 )
+
+        # Case 3: Inconsistent input.
+        self.assertRaises( ValueError, checkAndSetDensitiesAndCharge, 1e19, 2.3, 5.0 )
+
+        # Case 4: Get correct number density based on charge and mass density.
+        ed, Z, rho = checkAndSetDensitiesAndCharge( None, 2.3, 5.0 )
+        self.assertAlmostEqual( ed/1.e30, 6.92546, 4 )
+        ed, Z, rho = checkAndSetDensitiesAndCharge( ed, None, 5.0 )
+        self.assertAlmostEqual( Z, 2.3, 4 )
+        ed, Z, rho = checkAndSetDensitiesAndCharge( ed, 2.3, None )
+        self.assertAlmostEqual( rho, 5.0, 4 )
 
 
-        # Construct an instance.
-        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
-                                                input_path=self.input_path,
-                                                output_path='xrts_out'
-                                              )
+    def testCheckAndSetIonTemperature(self):
+        """ Test the ion temperature check'n'set function. """
 
-        # Query the parameters.
-        query = xrts_calculator.parameters
+        # Default
+        Te = 10.0
+        Ti = None
+        self.assertEqual( checkAndSetIonTemperature( Ti, Te), Te)
 
-        # Check query is ok.
-        for key, value in xrts_parameters.items():
-            print "Checking %s" % (key)
-            if isinstance( value, str ):
-                self.assertEqual( query[key], value )
-            if isinstance( value, numpy.ndarray ):
-                for i,v in enumerate(value):
-                    self.assertAlmostEqual( query[key][i], v )
+        # Check incorrect type.
+        self.assertRaises( TypeError, checkAndSetIonTemperature, "1.0")
+        # Zero.
+        self.assertRaises( ValueError, checkAndSetIonTemperature, 0.0)
+        # Negative.
+        self.assertRaises( ValueError, checkAndSetIonTemperature, -10.0)
 
-    def testCheckInsaneParameters(self):
-        """ Testing the input parameter checks bark for insane parameter dict. """
+    def testCheckAndSetDebyeTemperature(self):
+        """ Test the Debye temperature check'n'set function. """
 
-        # Setup parameters.
-        insane_parameters = {'scattering_angle' : 270,
-                             'photon_energy_range' : 1.0,
-                             'model_See0'          : 'NambuJonaLassino',
-                             'model_Sii'           : 'KobayashiMaskawa',
-                             'model_Sbf'           : 'FermiDirac',
-                            }
+        # Default
+        self.assertEqual( checkAndSetDebyeTemperature( None), 0.0 )
 
+        # Check incorrect type.
+        self.assertRaises( TypeError, checkAndSetDebyeTemperature, "1.0")
+        # Zero.
+        self.assertRaises( ValueError, checkAndSetDebyeTemperature, 0.0)
+        # Negative.
+        self.assertRaises( ValueError, checkAndSetDebyeTemperature, -10.0)
 
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, insane_parameters, self.input_path, 'xrts_out' )
+    def testCheckAndSetBandGap(self):
+        """ Test the bandgap check'n'set function."""
+        # Default
+        self.assertEqual( checkAndSetBandGap( None), 0.0 )
 
-        # Cure angle.
-        insane_parameters['scattering_angle'] = 91.32
-        # Attempt construction, check should bark.
-        self.assertRaises( TypeError,  PlasmaXRTSCalculator, parameters=insane_parameters, input_path=self.input_path, output_path='xrts_out' )
-
-        # Cure energy range.
-        insane_parameters['photon_energy_range'] = numpy.arange( -10., 10., 0.1 )
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, parameters=insane_parameters, input_path=self.input_path, output_path='xrts_out' )
-
-        # Cure Sii model.
-        insane_parameters['model_Sii'] = 'DH'
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, parameters=insane_parameters, input_path=self.input_path, output_path='xrts_out' )
-
-        # Cure See0 model.
-        insane_parameters['model_See0'] = 'BMA'
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, insane_parameters, self.input_path, 'xrts_out' )
-
-        # Cure Sbf model.
-        insane_parameters['model_Sbf'] = 'IA'
-        # Attempt construction, check should pass.
-        xrts_calculator = PlasmaXRTSCalculator( insane_parameters,
-                                                self.input_path,
-                                                'xrts_out')
-
-        self.assertIsInstance( xrts_calculator, PlasmaXRTSCalculator )
-
-    def testBackengine(self):
-        """ Check that the backengine can be executed. """
-
-        # Setup parameters.
-        xrts_parameters = {'scattering_angle' : 90,
-                           'photon_energy_range' : numpy.arange(-100., 100., 1.0),
-                           'model_See0'          : 'RPA',
-                           'model_Sii'           : 'DH',
-                           'model_Sbf'           : 'IA',
-                           }
+        # Check incorrect type.
+        self.assertRaises( TypeError, checkAndSetBandGap, "1.0")
+        # Negative.
+        self.assertRaises( ValueError, checkAndSetBandGap, -10.0)
 
 
-        # Construct an instance.
-        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
-                                                input_path=self.input_path,
-                                                output_path='xrts_out'
-                                              )
+    def testCheckAndSetModelMix(self):
+        """ Test the mixing model check'n'set function."""
+        # Default
+        self.assertEqual( checkAndSetModelMix( None ), 0)
 
-        # Call the backengine.
-        xrts_calculator.backengine()
+        # Check malformed input.
+        self.assertRaises( TypeError, checkAndSetModelMix, "halleluja")
+        self.assertRaises( TypeError, checkAndSetModelMix, 1.0)
+
+        # Check ok return.
+        self.assertEqual( checkAndSetModelMix( 'aDV' ), 1)
+
+    def testCheckAndSetLFC(self):
+        """ Test the lfc check'n'set function."""
+        # Default.
+        self.assertEqual( checkAndSetLFC( None ), 0.0 )
+
+        # Check exception.
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetLFC, "1.0")
+
+        # Ok return.
+        self.assertEqual( checkAndSetLFC( 1.234 ), 1.234 )
+
+    def testCheckAndSetSbfNorm(self):
+        """ Test the Sbf norm check'n'set function."""
+        self.assertTrue(False)
+
+    def testCheckAndSetEnergyRan(self):
+        """ Test the <++> check'n'set function."""
+        self.assertTrue(False)
+
+    def testCheckAndSetModelSii(self):
+        """ Test the <++> check'n'set function."""
+        self.assertTrue(False)
+
+    def testCheckAndSetModelSee(self):
+        """ Test the <++> check'n'set function."""
+        self.assertTrue(False)
+
+    def testCheckAndSetModelSbf(self):
+        """ Test the <++> check'n'set function."""
+        self.assertTrue(False)
+
+    def testCheckAndSetModelIPL(self):
+        """ Test the <++> check'n'set function."""
+        self.assertTrue(False)
+
+
 
 if __name__ == '__main__':
     unittest.main()

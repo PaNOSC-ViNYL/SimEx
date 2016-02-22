@@ -51,6 +51,26 @@ def checkAndSetInstance(cls, var=None, default=None):
 
     return var
 
+def checkAndSetInteger(var=None, default=None):
+    """
+    Utility to check if the passed value is a positive integer.
+
+    @param var : The object to check.
+    @param default : The default to use if no var is given.
+    @return : The checked object or default.
+    @throw : TypeError if check fails.
+    """
+
+    if var is None:
+        if not (isinstance( default, int) ):
+            raise exceptions.TypeError("The default must be an integer.")
+        return default
+
+    if not isinstance(var, int):
+            raise exceptions.TypeError("The parameter must be of type integer.")
+    return var
+
+
 def checkAndSetPositiveInteger(var=None, default=None):
     """
     Utility to check if the passed value is a positive integer.
