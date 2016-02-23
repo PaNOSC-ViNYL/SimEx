@@ -612,9 +612,11 @@ def checkAndSetSbfNorm(Sbf_norm):
     """
     if Sbf_norm not in ['FK', 'NO', None] and not isinstance( Sbf_norm, float ):
         raise ValueError('The bound-free norm parameter has to be "FK", "NO", None, or a numerical value.')
+    if Sbf_norm is None:
+        Sbf_norm = 'FK'
     return Sbf_norm
 
-def checkAndSetEnergyRange(energy_range, electron_density):
+def checkAndSetEnergyRange(energy_range, electron_density=None):
     """
     Utility to check if the photon energy range is ok.
     @param energy_range : The range to check.
@@ -622,16 +624,40 @@ def checkAndSetEnergyRange(energy_range, electron_density):
     @return The checked photon energy range.
     @raise ValueError if not of correct shape.
     """
+    # Raise if both arguments None.
+    if energy_range is None and electron_density is None:
+        raise RuntimeError( "At least one argument (electron_density or energy_range) must be given.")
     # Some constants.
     bohr_radius_m = physical_constants['Bohr radius'][0]
     rydberg_energy_eV = physical_constants['Rydberg constant times hc in eV'][0]
 
-    # Get plasma frequency.
-    plasma_frequency_eV = 4. * math.sqrt( electron_density * (bohr_radius_m * 1e2)**3 * math.pi) * rydberg_energy_eV
+    energy_range_default = None
+    if electron_density is not None:
+        # Get plasma frequency.
+        plasma_frequency_eV = 4. * math.sqrt( electron_density * (bohr_radius_m)**3 * math.pi) * rydberg_energy_eV
 
-    # Set to +/- 10*wpl if no range given.
-    energy_range_default = {'min' : -10.*plasma_frequency_eV, 'max' : 10.*plasma_frequency_eV, 'step':0.1*plasma_frequency_eV}
+        # Set to +/- 10*wpl if no range given.
+        energy_range_default = {'min' : -10.0*plasma_frequency_eV,
+                                'max' :  10.0*plasma_frequency_eV,
+                                'step':   0.1*plasma_frequency_eV}
     energy_range = checkAndSetInstance( dict, energy_range, energy_range_default)
+
+    # Check keys.
+    if 'min' not in energy_range.keys():
+        raise ValueError( "'min' missing in energy range (keys).")
+    if 'max' not in energy_range.keys():
+        raise ValueError( "'max' missing in energy range (keys).")
+    if 'step' not in energy_range.keys():
+        raise ValueError( "'step' missing in energy range (keys).")
+
+    # Check values.
+    for key in energy_range.keys():
+        if not isinstance( energy_range[key], float):
+            raise TypeError( "All values in energy_range must be floats.")
+    if energy_range['min'] > energy_range['max']:
+            raise ValueError( "energy_range['min'] must be smaller than energy_range['max'].")
+    if energy_range['max'] - energy_range['min'] < energy_range['step']:
+            raise ValueError( "energy_range['max'] - energy_range['min'] must be larger than the stepsize energy_range['step'].")
 
     # Return
     return energy_range

@@ -249,11 +249,49 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
 
     def testCheckAndSetSbfNorm(self):
         """ Test the Sbf norm check'n'set function."""
-        self.assertTrue(False)
+        # Default.
+        self.assertEqual( checkAndSetSbfNorm( None ), 'FK' )
 
-    def testCheckAndSetEnergyRan(self):
-        """ Test the <++> check'n'set function."""
-        self.assertTrue(False)
+        # Check exception.
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetLFC, 1.0)
+        # Wrong value.
+        self.assertRaises( ValueError, checkAndSetLFC, 'Skw')
+
+        # Ok return.
+        self.assertEqual( checkAndSetLFC( "FK" ), "FK" )
+        self.assertEqual( checkAndSetLFC( "NO" ), "NO" )
+
+
+    def testCheckAndSetEnergyRange(self):
+        """ Test the energy range check'n'set function."""
+        # Default.
+        electron_density = 1.0e28
+        energy_range = checkAndSetEnergyRange(energy_range=None,electron_density=electron_density)
+        self.assertAlmostEqual( energy_range['min'], -37.13276417 )
+        self.assertAlmostEqual( energy_range['max'],  37.13276417 )
+        self.assertAlmostEqual( energy_range['step'],  0.37132764 )
+
+
+        # Check exception.
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetEnergyRange, [1,0, 2,0] )
+        # Wrong keys.
+        self.assertRaises( ValueError, checkAndSetEnergyRange, {'minimum': -10.0, 'max' : 10.0, 'step': 1.0})
+        self.assertRaises( ValueError, checkAndSetEnergyRange, {'min': -10.0, 'maximum' : 10.0, 'step': 1.0})
+        self.assertRaises( ValueError, checkAndSetEnergyRange, {'min': -10.0, 'max' : 10.0, 'd': 1.0})
+        # Wrong values.
+        self.assertRaises( TypeError, checkAndSetEnergyRange, {'min': "-10.0", 'max' : 10.0, 'step': 1.0})
+        self.assertRaises( TypeError, checkAndSetEnergyRange, {'min': -10.0, 'max' : "10.0", 'step': 1.0})
+        self.assertRaises( TypeError, checkAndSetEnergyRange, {'min': -10.0, 'max' : 10.0, 'step': "1.0"})
+        # min > max.
+        self.assertRaises( ValueError, checkAndSetEnergyRange, {'min': 10.0, 'max' : 9.0, 'step': 1.0})
+        # min = max.
+        self.assertRaises( ValueError, checkAndSetEnergyRange, {'min': 10.0, 'max' : 10.1, 'step': 1.0})
+
+        # Ok return.
+        energy_range = {'min': -10.0, 'max' : 10.0, 'step': 1.0}
+        self.assertEqual( checkAndSetEnergyRange( energy_range, None ), energy_range )
 
     def testCheckAndSetModelSii(self):
         """ Test the <++> check'n'set function."""
