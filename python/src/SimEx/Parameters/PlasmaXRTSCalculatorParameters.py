@@ -585,9 +585,12 @@ def checkAndSetModelMix(model_Mix):
     @type : string
     @return : The checked mixing model.
     """
-    if isinstance( model_Mix, str):
-        model_Mix = model_Mix.lower()
-    if model_Mix not in ['adv', None]:
+    if model_Mix is None:
+        return 0
+    if not isinstance( model_Mix, str):
+        raise TypeError('The mixing model must be a string or None.')
+    model_Mix = model_Mix.lower()
+    if not model_Mix == 'adv':
         raise ValueError('The mixing model has to be "ADV" (advanced) or None.')
 
     return {'adv' : 1, None: 0}[model_Mix]
@@ -755,9 +758,10 @@ def checkAndSetModelIPL( model ):
     valid_models = ['SP',
                     'EK',
                     ]
-
-    if not (model in valid_models or not isinstance( model, float )):
-        raise ValueError( "The Sbf model must be a valid Sbf model. Valid Sbf models are %s or a numerical value." % (str(valid_models)) )
+    if not ( isinstance( model, str ) or isinstance( model, float ) ):
+            raise TypeError("The IPL model must be a string or a float.")
+    if not (model in valid_models or isinstance( model, float )):
+        raise ValueError( "The Sbf model must be a valid Sbf model or a numerical value. Valid Sbf models are %s." % (str(valid_models)) )
 
     # Return
     return model

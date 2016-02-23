@@ -88,6 +88,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         scattering_angle=90.0,
                                                          electron_temperature=10.0,
                                                          electron_density=1.0e23,
                                                          ion_charge=2.3)
@@ -207,8 +208,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
 
         # Check incorrect type.
         self.assertRaises( TypeError, checkAndSetDebyeTemperature, "1.0")
-        # Zero.
-        self.assertRaises( ValueError, checkAndSetDebyeTemperature, 0.0)
         # Negative.
         self.assertRaises( ValueError, checkAndSetDebyeTemperature, -10.0)
 
@@ -229,7 +228,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetModelMix( None ), 0)
 
         # Check malformed input.
-        self.assertRaises( TypeError, checkAndSetModelMix, "halleluja")
+        self.assertRaises( ValueError, checkAndSetModelMix, "halleluja")
         self.assertRaises( TypeError, checkAndSetModelMix, 1.0)
 
         # Check ok return.
@@ -252,15 +251,13 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         # Default.
         self.assertEqual( checkAndSetSbfNorm( None ), 'FK' )
 
-        # Check exception.
-        # Wrong type.
-        self.assertRaises( TypeError, checkAndSetLFC, 1.0)
         # Wrong value.
-        self.assertRaises( ValueError, checkAndSetLFC, 'Skw')
+        self.assertRaises( ValueError, checkAndSetSbfNorm, 'Skw')
 
         # Ok return.
-        self.assertEqual( checkAndSetLFC( "FK" ), "FK" )
-        self.assertEqual( checkAndSetLFC( "NO" ), "NO" )
+        self.assertEqual( checkAndSetSbfNorm( "FK" ), "FK" )
+        self.assertEqual( checkAndSetSbfNorm( "NO" ), "NO" )
+        self.assertEqual( checkAndSetSbfNorm( 1.0 ), 1.0 )
 
 
     def testCheckAndSetEnergyRange(self):
@@ -309,17 +306,55 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertAlmostEqual( checkAndSetModelSii( numpy.pi ), 3.1416, 4 )
 
     def testCheckAndSetModelSee(self):
-        """ Test the <++> check'n'set function."""
-        self.assertTrue(False)
+        """ Test the See model check'n'set function."""
+        # Default.
+        self.assertEqual( checkAndSetModelSee( None ), "RPA" )
+
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetModelSee, [1,0, 2.0] )
+        self.assertRaises( TypeError, checkAndSetModelSee, 1.0 )
+
+        # Wrong specifier.
+        self.assertRaises( ValueError, checkAndSetModelSee, "Magic" )
+
+        # Return from ok input.
+        self.assertEqual( checkAndSetModelSee( "RPA" ), "RPA" )
+        self.assertEqual( checkAndSetModelSee( "BMA" ), "BMA" )
+        self.assertEqual( checkAndSetModelSee( "BMA+sLFC" ), "BMA+sLFC" )
 
     def testCheckAndSetModelSbf(self):
-        """ Test the <++> check'n'set function."""
-        self.assertTrue(False)
+        """ Test the Sbf model check'n'set function."""
+        # Default.
+        self.assertEqual( checkAndSetModelSbf( None ), "IA" )
+
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetModelSbf, [1,0, 2.0] )
+        self.assertRaises( TypeError, checkAndSetModelSbf, 1.0 )
+
+        # Wrong specifier.
+        self.assertRaises( ValueError, checkAndSetModelSbf, "Magic" )
+
+        # Return from ok input.
+        self.assertEqual( checkAndSetModelSbf( "FFA" ), "FFA" )
+        self.assertEqual( checkAndSetModelSbf( "IA" ), "IA" )
+        self.assertEqual( checkAndSetModelSbf( "IBA" ), "IBA" )
+
 
     def testCheckAndSetModelIPL(self):
-        """ Test the <++> check'n'set function."""
-        self.assertTrue(False)
+        """ Test the IPL model check'n'set function."""
+        # Default.
+        self.assertEqual( checkAndSetModelIPL( None ), "SP" )
 
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetModelIPL, [1,0, 2.0] )
+
+        # Wrong specifier.
+        self.assertRaises( ValueError, checkAndSetModelIPL, "Magic" )
+
+        # Return from ok input.
+        self.assertEqual( checkAndSetModelIPL( "SP" ), "SP" )
+        self.assertEqual( checkAndSetModelIPL( "EK" ), "EK" )
+        self.assertEqual( checkAndSetModelIPL( -10.0 ), -10.0 )
 
 
 if __name__ == '__main__':
