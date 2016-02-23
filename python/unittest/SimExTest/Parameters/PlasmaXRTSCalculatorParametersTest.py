@@ -294,8 +294,19 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetEnergyRange( energy_range, None ), energy_range )
 
     def testCheckAndSetModelSii(self):
-        """ Test the <++> check'n'set function."""
-        self.assertTrue(False)
+        """ Test the Sii model check'n'set function."""
+        # Default.
+        self.assertEqual( checkAndSetModelSii( None ), "SOCP" )
+
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetModelSii, [1,0, 2.0] )
+
+        # Wrong specifier.
+        self.assertRaises( ValueError, checkAndSetModelSii, "Magic" )
+
+        # Return from ok input.
+        self.assertEqual( checkAndSetModelSii( "DH" ), "DH" )
+        self.assertAlmostEqual( checkAndSetModelSii( numpy.pi ), 3.1416, 4 )
 
     def testCheckAndSetModelSee(self):
         """ Test the <++> check'n'set function."""

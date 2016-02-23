@@ -677,8 +677,9 @@ def checkAndSetModelSii( model ):
 
     ###TODO: Complete
     valid_models = [ 'DH', 'OCP', 'SOCP', 'SOCPN' ]
-
-    if not (model in valid_models or not isinstance( model, float )):
+    if not (isinstance( model, str) or isinstance( model, float )):
+        raise TypeError( "The Sii model must be a valid model specifier (string) or a float giving the value of Sii(k).")
+    if not (model in valid_models or isinstance( model, float )):
         raise ValueError( "The Sii model must be a valid Sii model or a numerical value. Valid Sii models are %s." % (str(valid_models)) )
 
     return model
