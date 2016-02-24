@@ -39,6 +39,7 @@ import unittest
 
 # Import the class to test.
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetPhotonEnergy
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetScatteringAngle
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetElements
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetDensitiesAndCharge
@@ -74,6 +75,16 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
+        self.xrts_parameters = PlasmaXRTSCalculatorParameters(
+                                                         elements=[['Be', 1, -1]],
+                                                         photon_energy=4.96e3,
+                                                         scattering_angle=90.0,
+                                                         electron_temperature=10.0,
+                                                         electron_density=3.0e29,
+                                                         ion_charge=2.3,
+                                                         mass_density=1.85
+                                                         )
+
     def tearDown(self):
         """ Tearing down a test. """
         for f in self.__files_to_remove:
@@ -88,10 +99,13 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         photon_energy=4.96e3,
                                                          scattering_angle=90.0,
                                                          electron_temperature=10.0,
                                                          electron_density=1.0e23,
-                                                         ion_charge=2.3)
+                                                         ion_charge=2.3,
+                                                         mass_density=1.85,
+                                                         )
 
 
         # Check instance and inheritance.
@@ -113,6 +127,20 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
 
         # Check return.
         self.assertEqual( checkAndSetScatteringAngle( 10.3156734 ), 10.3156734, 7 )
+
+    def testCheckAndSetPhotonEnergy(self):
+        """ Test the photon energy  set/check function. """
+        # Check default.
+        self.assertRaises( RuntimeError, checkAndSetPhotonEnergy, None )
+
+        # Check negative
+        self.assertRaises( ValueError, checkAndSetPhotonEnergy, -90. )
+
+        # Check zero.
+        self.assertRaises( ValueError, checkAndSetPhotonEnergy, 0.0 )
+
+        # Check return.
+        self.assertEqual( checkAndSetPhotonEnergy( 1600. ), 1600. )
 
     def testCheckAndSetElements(self):
         """ Test the elements set/check function."""
@@ -184,7 +212,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         ed, Z, rho = checkAndSetDensitiesAndCharge( ed, 2.3, None )
         self.assertAlmostEqual( rho, 5.0, 4 )
 
-
     def testCheckAndSetIonTemperature(self):
         """ Test the ion temperature check'n'set function. """
 
@@ -220,7 +247,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertRaises( TypeError, checkAndSetBandGap, "1.0")
         # Negative.
         self.assertRaises( ValueError, checkAndSetBandGap, -10.0)
-
 
     def testCheckAndSetModelMix(self):
         """ Test the mixing model check'n'set function."""
@@ -338,7 +364,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetModelSbf( "IA" ), "IA" )
         self.assertEqual( checkAndSetModelSbf( "IBA" ), "IBA" )
 
-
     def testCheckAndSetModelIPL(self):
         """ Test the IPL model check'n'set function."""
         # Default.
@@ -355,15 +380,11 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetModelIPL( "EK" ), "EK" )
         self.assertEqual( checkAndSetModelIPL( -10.0 ), -10.0 )
 
-    def testSeeModelHandlingRPA(self):
+    def testSetSeeFlagsRPA(self):
         """ Test the internal conversion of the See model into use_* flags. """
 
         # Check default.
-        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
-                                                         scattering_angle=90.0,
-                                                         electron_temperature=10.0,
-                                                         electron_density=1.0e23,
-                                                         ion_charge=2.3)
+        xrts_parameters = self.xrts_parameters
 
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         1 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
@@ -375,12 +396,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
 
         # Check RPA.
-        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
-                                                         scattering_angle=90.0,
-                                                         electron_temperature=10.0,
-                                                         electron_density=1.0e23,
-                                                         ion_charge=2.3,
-                                                         model_See='RPA')
+        xrts_parameters.model_See = 'RPA'
 
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         1 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
@@ -391,17 +407,24 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
 
+        # Check RPA.
+        xrts_parameters.model_See = None
 
-    def testSeeModelHandlingBMA(self):
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma_slfc,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__write_bma,       0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_lindhard,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_dynamic_lfc, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
+
+    def testSetSeeFlagsBMA(self):
         """ Test the internal conversion of the See model into use_* flags. """
 
         # Check BMA.
-        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
-                                                         scattering_angle=90.0,
-                                                         electron_temperature=10.0,
-                                                         electron_density=1.0e23,
-                                                         ion_charge=2.3,
-                                                         model_See='BMA')
+        xrts_parameters = self.xrts_parameters
+        xrts_parameters.model_See = 'BMA'
 
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         0 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         1 )
@@ -413,13 +436,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
 
         # Check BMA+sLFC.
-        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
-                                                         scattering_angle=90.0,
-                                                         electron_temperature=10.0,
-                                                         electron_density=1.0e23,
-                                                         ion_charge=2.3,
-                                                         model_See='BMA+sLFC')
-
+        xrts_parameters.model_See = 'BMA+sLFC'
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         0 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma_slfc,    1 )
@@ -429,7 +446,111 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
 
+    def testSetSiiFlags(self):
+        """ Test setting the internal Sii usage flags. """
+        # Setup parameters object.
+        xrts_parameters = self.xrts_parameters
 
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 0 )
+
+        xrts_parameters.model_Sii = 'DH'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 0 )
+
+        xrts_parameters.model_Sii = 'OCP'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 0 )
+
+        xrts_parameters.model_Sii = 'SOCP'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 0 )
+
+        xrts_parameters.model_Sii = 'SOCPN'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 0 )
+
+        xrts_parameters.model_Sii = 1.5
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 1.5 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 1 )
+        self.assertEqual( xrts_parameters.model_Sii, 'USR' )
+
+    def testSetSbfNormFlags(self):
+        """ Test setting the internal Sbf norm flags. """
+        # Get default parameters.
+        xrts_parameters = self.xrts_parameters
+
+        # Check.
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm, 'FK' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm_value, 0.0 )
+
+        xrts_parameters.Sbf_norm = 'FK'
+        # Check.
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm, 'FK' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm_value, 0.0 )
+
+        xrts_parameters.Sbf_norm = 'NO'
+        # Check.
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm, 'NO' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm_value, 0.0 )
+
+        xrts_parameters.Sbf_norm = .1435
+        # Check.
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm, 'USR' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sbf_norm_value, 0.1435 )
+
+    def testSetDebyeTemperatureFlags(self):
+        """ Check setting the internal Debye temperature flags. """
+        # Get default parameters.
+        xrts_parameters = self.xrts_parameters
+        # Check.
+        self.assertEqual( xrts_parameters.debye_temperature, None )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__debye_temperature_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_debye_temperature, 0 )
+
+        xrts_parameters.debye_temperature = 1.0
+        # Check.
+        self.assertEqual( xrts_parameters.debye_temperature, 1.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__debye_temperature_value, 1.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_debye_temperature, 1 )
+
+    def testSetBandGapFlags(self):
+        """ Check setting the internal bandgap flags. """
+        # Get default parameters.
+        xrts_parameters = self.xrts_parameters
+        # Check.
+        self.assertEqual( xrts_parameters.band_gap, None )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__band_gap_value, 0.0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_band_gap, 0 )
+
+        xrts_parameters.band_gap = 1.234
+        # Check.
+        self.assertEqual( xrts_parameters.band_gap, 1.234 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__band_gap_value, 1.234 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_band_gap, 1 )
+
+    def testSetIPLFlags(self):
+        """ Check setting the internal IPL flags. """
+        # Get default parameters.
+        xrts_parameters = self.xrts_parameters
+        # Check.
+        self.assertEqual( xrts_parameters.model_IPL, 'SP' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__ipl_value, 0.0 )
+
+        xrts_parameters.model_IPL = 1.234
+        # Check.
+        self.assertEqual( xrts_parameters.model_IPL, 'USR' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__ipl_value, 1.234 )
+
+
+    def testSerialize(self):
+        """ Test the serialization of parameters into input deck."""
+
+        # Setup parameters object.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_parameters._serialize()
+        print xrts_parameters._tmp_dir
 
 if __name__ == '__main__':
     unittest.main()

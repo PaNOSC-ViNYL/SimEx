@@ -43,13 +43,14 @@ from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 BOOL_TO_INT = {True : 1, False : 0}
 
-class PlasmaXRTSCalculatorParameters():
+class PlasmaXRTSCalculatorParameters(object):
     """
     Class representing a x-ray free electron laser photon propagator.
     """
 
     def __init__(self,
                  elements=None,
+                 photon_energy=None,
                  scattering_angle=None,
                  electron_temperature=None,
                  electron_density=None,
@@ -76,6 +77,10 @@ class PlasmaXRTSCalculatorParameters():
         @default: None
         @example: [['B', 1, 2], ['N', 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).
         @example: [['C', 1, 4], ['H', 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.
+
+        @param photon_energy : The central energy of incoming x-ray photons.
+        @type : float
+        @default : None
 
         @params scattering_angle: The scattering angle.
         @type: double
@@ -153,22 +158,23 @@ class PlasmaXRTSCalculatorParameters():
         """
 
         # Check and set all parameters.
-        self.__elements = checkAndSetElements(elements)
-        self.__scattering_angle = checkAndSetScatteringAngle(scattering_angle)
+        self.__elements             = checkAndSetElements(elements)
+        self.__photon_energy        = checkAndSetPhotonEnergy(photon_energy)
+        self.__scattering_angle     = checkAndSetScatteringAngle(scattering_angle)
         self.__electron_temperature = checkAndSetElectronTemperature(electron_temperature)
         # Set electron density, charge, and mass density depending on which input was given.
         self.__electron_density, self.__ion_charge, self.__mass_density = checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density)
-        self.__ion_temperature = checkAndSetIonTemperature(ion_temperature, self.electron_temperature)
+        self.__ion_temperature   = checkAndSetIonTemperature(ion_temperature, self.electron_temperature)
         self.__debye_temperature = checkAndSetDebyeTemperature(debye_temperature)
-        self.__band_gap = checkAndSetBandGap(band_gap)
-        self.__energy_range = checkAndSetEnergyRange(energy_range, self.electron_density)
-        self.__model_Sii = checkAndSetModelSii(model_Sii)
-        self.__model_See = checkAndSetModelSee(model_See)
-        self.__model_Sbf = checkAndSetModelSbf(model_Sbf)
-        self.__model_IPL = checkAndSetModelIPL(model_IPL)
-        self.__model_Mix = checkAndSetModelMix(model_Mix)
-        self.__lfc = checkAndSetLFC(lfc)
-        self.__Sbf_norm = checkAndSetSbfNorm(Sbf_norm)
+        self.__band_gap          = checkAndSetBandGap(band_gap)
+        self.__energy_range      = checkAndSetEnergyRange(energy_range, self.electron_density)
+        self.__model_Sii         = checkAndSetModelSii(model_Sii)
+        self.__model_See         = checkAndSetModelSee(model_See)
+        self.__model_Sbf         = checkAndSetModelSbf(model_Sbf)
+        self.__model_IPL         = checkAndSetModelIPL(model_IPL)
+        self.__model_Mix         = checkAndSetModelMix(model_Mix)
+        self.__lfc               = checkAndSetLFC(lfc)
+        self.__Sbf_norm          = checkAndSetSbfNorm(Sbf_norm)
 
         # Set internal parameters.
         self._setSeeFlags()
@@ -176,6 +182,7 @@ class PlasmaXRTSCalculatorParameters():
         self._setSbfNormFlags()
         self._setDebyeTemperatureFlags()
         self._setBandGapFlags()
+        self._setIPLFlags()
 
         # Set state to not-initialized (e.g. input deck is not written).
         self.__is_initialized = False
@@ -193,18 +200,17 @@ class PlasmaXRTSCalculatorParameters():
 
     def _setSiiFlags(self):
         """ Set the internal Sii parameters as used in the input deck generator."""
-
         # By default, switch off usage of user given Sii value.
         self.__Sii_value = 0.0
-        self.__use_Sii = 0
+        self.__use_Sii_value = 0
 
         # Only if Sii model input parameter is float, use it as Sii(k).
-        if isinstance( self.model_Sii, float):
+        if isinstance( self.__model_Sii, float):
             self.__use_Sii_value = 1
             # Copy value.
-            self.__Sii_value = copy.deepcopy(self.model_Sii)
-            # Reset model parameter.
-            self.model_Sii = 'USR'
+            self.__Sii_value = copy.deepcopy(self.__model_Sii)
+            # Reset model parameter but short-cutting the setter.
+            self.__model_Sii = 'USR'
 
     def _setSbfNormFlags(self):
         """ Set the internal Sbf norm flags used in the input deck generator. """
@@ -217,60 +223,73 @@ class PlasmaXRTSCalculatorParameters():
             # Copy value.
             self.__Sbf_norm_value = copy.deepcopy(self.Sbf_norm)
             # Reset model parameter.
-            self.Sbf_norm = 'USR'
+            self.__Sbf_norm = 'USR'
 
     def _setDebyeTemperatureFlags(self):
         """ Set the internal Debye temperature flags used in the input deck generator. """
 
         # By default, switch off usage of user given Debye temperature.
         self.__use_debye_temperature = 0
+        self.__debye_temperature_value = 0.0
 
         # Only if Debye Temperature is non-zero use it.
         if self.debye_temperature is not None:
+            self.__debye_temperature_value = self.__debye_temperature
             self.__use_debye_temperature = 1
 
     def _setBandGapFlags(self):
         """ Set the internal bandgap flags used in the input deck generator. """
 
-        # By default, switch off usage of usage of band gap.
+        # By default, switch off usage of band gap.
         self.__use_band_gap = 0
+        self.__band_gap_value = 0.0
 
         # Only if bandgap is non-zero use it.
         if self.band_gap is not None:
             self.__use_band_gap = 1
+            self.__band_gap_value = self.__band_gap
 
+    def _setIPLFlags(self):
+        """ Set the internal ionization potential lowering flags used in the input deck generator. """
+
+        # By default, switch off usage of band gap.
+        self.__ipl_value = 0.0
+
+        # Only if ipl is non-zero use it.
+        if isinstance( self.__model_IPL, float ):
+            self.__ipl_value = copy.deepcopy(self.__model_IPL)
+            self.__model_IPL = 'USR'
 
     def _serialize(self):
         """ Write the input deck for the xrts backengine. """
-
         # Make a temporary directory.
-        self.__tmp_dir = tempfile.mkdtemp(prefix='xrs_')
+        self._tmp_dir = tempfile.mkdtemp(prefix='xrs_')
 
         # Write the input file.
-        input_deck_path = os.path.join( self.__tmp_dir, 'input.dat' )
+        input_deck_path = os.path.join( self._tmp_dir, 'input.dat' )
         with open(input_deck_path, 'w') as input_deck:
             input_deck.write('--XRTS---input_file-----------------------------------\n')
             input_deck.write('--\n')
             input_deck.write('--fit_parameters------------------------------flag----\n')
-            input_deck.write('DO_FIT                 0\n')
-            input_deck.write('PHOTON_ENERGY %4.3f\n' % (self._input_data['photon_energy']))
-            input_deck.write('SCATTERING_ANGLE     %4.3f\n' % (self.scattering_angle) )
+            input_deck.write('DO_FIT                0\n')
+            input_deck.write('PHOTON_ENERGY     %4.3f\n' % (self.photon_energy))
+            input_deck.write('SCATTERING_ANGLE  %4.3f\n' % (self.scattering_angle) )
             input_deck.write('ELECTRON_TEMP     %4.3f 0\n' % (self.electron_temperature) )
-            input_deck.write('ELECTRON_DENSITY     %4.3e 0\n' % (self.electron_density) )
-            input_deck.write('AMPLITUDE         1.0         0\n')
-            input_deck.write('BASELINE             0.0         0\n')
-            input_deck.write('Z_FREE             %4.3f        0\n' % (self.ion_charge) )
-            input_deck.write('OUT(1=XSEC,2=PWR)    1\n')
+            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density) )
+            input_deck.write('AMPLITUDE         1.0   0\n')
+            input_deck.write('BASELINE          0.0   0\n')
+            input_deck.write('Z_FREE            %4.3f 0\n' % (self.ion_charge) )
+            input_deck.write('OUT(1=XSEC,2=PWR)       1\n')
             input_deck.write('--model_for_total_spec---------use-flag--------------\n')
             input_deck.write('USE_RPA %d\n' % (self.__use_rpa) )
-            input_deck.write('USE_LINDHARD %d\n' % (self.__use_lindhard) )
-            input_deck.write('USE_TSYTOVICH 0\n' )
-            input_deck.write('USE_STATIC_LFC %d\n' % (self.__use_static_lfc) )
+            input_deck.write('USE_LINDHARD    %d\n' % (self.__use_lindhard) )
+            input_deck.write('USE_TSYTOVICH    0\n' )
+            input_deck.write('USE_STATIC_LFC  %d\n' % (self.__use_static_lfc) )
             input_deck.write('USE_DYNAMIC_LFC %d\n' % (self.__use_dynamic_lfc) )
-            input_deck.write('USE_MFF %d\n' % (self.__use_mff) )
-            input_deck.write('USE_BMA %d\n' % (self.__use_bma) )
-            input_deck.write('USE_BMA+sLFC \n' % (self.__use_bma_slfc) )
-            input_deck.write('USE_CORE 1\n')
+            input_deck.write('USE_MFF         %d\n' % (self.__use_mff) )
+            input_deck.write('USE_BMA         %d\n' % (self.__use_bma) )
+            input_deck.write('USE_BMA+sLFC    %d\n' % (self.__use_bma_slfc) )
+            input_deck.write('USE_CORE         1\n')
             input_deck.write('--gradients------------------------------------------\n')
             input_deck.write('GRAD 0\n')
             input_deck.write('L_GRADIENT            0.0e-0 \n')
@@ -279,43 +298,43 @@ class PlasmaXRTSCalculatorParameters():
             input_deck.write('--ion_parameters----------------------------use_flag-\n')
             input_deck.write('ION_TEMP %d 1\n' % (self.ion_temperature) )
             input_deck.write('S_ION_FEATURE %4.3f %d\n' % (self.__Sii_value, self.__use_Sii_value) )
-            input_deck.write('DEBYE_TEMP %4.3f %d\n' % (self.debye_temperature, self.__use_debye_temperature) )
-            input_deck.write('BAND_GAP %4.3f %d\n' % (self.band_gap, self.__use_band_gap) )
+            input_deck.write('DEBYE_TEMP    %4.3f %d\n' % (self.__debye_temperature_value, self.__use_debye_temperature) )
+            input_deck.write('BAND_GAP      %4.3f %d\n' % (self.__band_gap_value, self.__use_band_gap) )
 
             input_deck.write('--integration----------------------------------------\n')
-            input_deck.write('N_DAWSON 32\n')
+            input_deck.write('N_DAWSON       32\n')
             input_deck.write('N_DISTRIBUTION 32\n')
-            input_deck.write('N_PVI 32\n')
-            input_deck.write('N_LANDEN 512\n')
+            input_deck.write('N_PVI          32\n')
+            input_deck.write('N_LANDEN      512\n')
             input_deck.write('N_RELAXATION 1024\n')
-            input_deck.write('N_FFT 4096\n')
-            input_deck.write('EPS 1.0E-4\n')
+            input_deck.write('N_FFT        4096\n')
+            input_deck.write('EPS        1.0E-4\n')
             input_deck.write('--See(k,w)------------------------------use/norm-----\n')
             input_deck.write('STATIC_MODEL(DH,OCP,SOCP,SOCPN) %s\n' % (self.model_Sii) )
             input_deck.write('USE_ADV_Mix %d\n' % (self.model_Mix) )
-            input_deck.write('USE_IRS_MODEL                     0\n')
-            input_deck.write('HARD_SPHERE_DIAM                 1E-10 0\n')
+            input_deck.write('USE_IRS_MODEL                            0\n')
+            input_deck.write('HARD_SPHERE_DIAM                 1E-10   0\n')
             input_deck.write('POLARIZABILITY                     0.0 0.0\n')
-            input_deck.write('BOUND-FREE_MODEL(IA,IBA,FFA)     %s\n' % (self.model_Sbf) )
-            input_deck.write('BOUND-FREE_NORM(FK,NO,USR)       %s %4.3f\n' % (self.Sbf_norm, self.__Sbf_norm_value) )
-            input_deck.write('BOUND-FREE_MEFF                 1.0\n')
-            input_deck.write('USE_BOUND-FREE_DOPPLER          0\n')
-            input_deck.write('CONT-LOWR_MODEL(SP,EK,USR)      %s\n' % (self.model_IPL) )
-            input_deck.write('GK                         %4.3f 0\n')
-            input_deck.write('RPA                         %d 0\n' % (self.__use_rpa) )
-            input_deck.write('LINDHARD                     %d 0\n' % (self.__use_lindhard) )
-            input_deck.write('SALPETER                         0 0\n')
-            input_deck.write('LANDEN                         0 0\n')
-            input_deck.write('RPA_TSYTOVICH                 0 0\n')
-            input_deck.write('STATIC_LFC                     0 0\n')
-            input_deck.write('DYNAMIC_LFC                     0 0\n')
-            input_deck.write('MFF                             0 0\n')
-            input_deck.write('BMA(+sLFC)                     %d 0\n' % (self.__write_bma))
-            input_deck.write('CORE                             1 0\n')
-            input_deck.write('TOTAL                         0 0\n')
-            input_deck.write('E_MIN                         %4.3f\n' % (self.energy_range['min']))
-            input_deck.write('E_MAX                         %4.3f\n' % (self.energy_range['max']))
-            input_deck.write('E_STEP                         %4.3f\n' % (self.energy_range['step']))
+            input_deck.write('BOUND-FREE_MODEL(IA,IBA,FFA)            %s\n' % (self.model_Sbf) )
+            input_deck.write('BOUND-FREE_NORM(FK,NO,USR)        %s %4.3f\n' % (self.Sbf_norm, self.__Sbf_norm_value) )
+            input_deck.write('BOUND-FREE_MEFF                        1.0\n')
+            input_deck.write('USE_BOUND-FREE_DOPPLER                   0\n')
+            input_deck.write('CONT-LOWR_MODEL(SP,EK,USR)         %s    %4.3f\n' % (self.model_IPL, self.__ipl_value) )
+            input_deck.write('GK                                 %4.3f 0\n' % self.__lfc)
+            input_deck.write('RPA                                %d    0\n' % (self.__use_rpa) )
+            input_deck.write('LINDHARD                           %d    0\n' % (self.__use_lindhard) )
+            input_deck.write('SALPETER                            0    0\n')
+            input_deck.write('LANDEN                              0    0\n')
+            input_deck.write('RPA_TSYTOVICH                       0    0\n')
+            input_deck.write('STATIC_LFC                         %d    0\n' % (self.__use_static_lfc) )
+            input_deck.write('DYNAMIC_LFC                        %d    0\n' % (self.__use_dynamic_lfc) )
+            input_deck.write('MFF                                %d    0\n' % (self.__use_mff) )
+            input_deck.write('BMA(+sLFC)                         %d    0\n' % (self.__write_bma))
+            input_deck.write('CORE                                1    0\n')
+            input_deck.write('TOTAL                               1    0\n')
+            input_deck.write('E_MIN                              %4.3f  \n' % (self.energy_range['min']))
+            input_deck.write('E_MAX                              %4.3f  \n' % (self.energy_range['max']))
+            input_deck.write('E_STEP                             %4.3f  \n' % (self.energy_range['step']))
             input_deck.write('--target_spec--------------------------chem----Zfree--\n')
             input_deck.write('NUMBER_OF_SPECIES %d\n' % (len(self.elements)) )
             for i,element in enumerate(self.elements):
@@ -329,7 +348,7 @@ class PlasmaXRTSCalculatorParameters():
             input_deck.write('USE_FILE 0\n')
             input_deck.write('FILE_NAME nofile.dat\n')
             input_deck.write('INST_MODEL GAUSSIAN\n')
-            input_deck.write('INST_FWHM 5.0\n')
+            input_deck.write('INST_FWHM 100.0\n')
             input_deck.write('BIN_PER_PIXEL 1.0\n')
             input_deck.write('INST_INDEX 2.0\n')
             input_deck.write('--additional_parameters-------------------------------\n')
@@ -347,6 +366,16 @@ class PlasmaXRTSCalculatorParameters():
     def elements(self, value):
         """ Set the elements to <value> """
         self.__elements = checkAndSetElements(value)
+
+    @property
+    def photon_energy(self):
+        """ Query for the photon energy. """
+        return self.__photon_energy
+    @photon_energy.setter
+    def photon_energy(self, value):
+        """ Set the photon energy to <value>. """
+        self.__photon_energy = checkAndSetPhotonEnergy(value)
+
 
     @property
     def scattering_angle(self):
@@ -373,8 +402,8 @@ class PlasmaXRTSCalculatorParameters():
     @electron_density.setter
     def electron_density(self, value):
         """ Set the electron density to <value>. """
-        self.__electron_density = checkAndSetElectronDensity(value)
-
+        self.__electron_density = value
+        print "WARNING: Electron density might be inconsistent with mass density and charge."
     @property
     def ion_temperature(self):
         """ Query for the ion temperature. """
@@ -391,7 +420,8 @@ class PlasmaXRTSCalculatorParameters():
     @ion_charge.setter
     def ion_charge(self, value):
         """ Set the ion charge to <value>. """
-        self.__ion_charge = checkAndSetIonCharge(value)
+        self.__ion_charge = value
+        print "WARNING: Ion charge might be inconsistent with electron density and mass density."
 
     @property
     def mass_density(self):
@@ -400,7 +430,8 @@ class PlasmaXRTSCalculatorParameters():
     @mass_density.setter
     def mass_density(self, value):
         """ Set the mass density to <value>. """
-        self.__mass_density = checkAndSetMassDensity(value)
+        self.__mass_density = value
+        print "WARNING: Mass density might be inconsistent with electron density and charge."
 
     @property
     def debye_temperature(self):
@@ -410,6 +441,7 @@ class PlasmaXRTSCalculatorParameters():
     def debye_temperature(self, value):
         """ Set the Debye temperature to <value>. """
         self.__debye_temperature = checkAndSetDebyeTemperature(value)
+        self._setDebyeTemperatureFlags()
 
     @property
     def band_gap(self):
@@ -419,6 +451,7 @@ class PlasmaXRTSCalculatorParameters():
     def band_gap(self, value):
         """ Set the band gap to <value>. """
         self.__band_gap = checkAndSetBandGap(value)
+        self._setBandGapFlags()
 
     @property
     def energy_range(self):
@@ -437,6 +470,7 @@ class PlasmaXRTSCalculatorParameters():
     def model_Sii(self, value):
         """ Set the ion-ion structure factor model to <value>. """
         self.__model_Sii = checkAndSetModelSii(value)
+        self._setSiiFlags()
 
     @property
     def model_See(self):
@@ -446,6 +480,7 @@ class PlasmaXRTSCalculatorParameters():
     def model_See(self, value):
         """ Set the electron-electron (high-frequency) structure factor model to <value>. """
         self.__model_See = checkAndSetModelSee(value)
+        self._setSeeFlags()
 
     @property
     def model_Sbf(self):
@@ -464,6 +499,7 @@ class PlasmaXRTSCalculatorParameters():
     def model_IPL(self, value):
         """ Set the ionization potential lowering model to <value>. """
         self.__model_IPL = checkAndSetModelIPL(value)
+        self._setIPLFlags()
 
     @property
     def model_Mix(self):
@@ -491,6 +527,7 @@ class PlasmaXRTSCalculatorParameters():
     def Sbf_norm(self, value):
         """ Set the norm of the bound-free structure factor to <value>. """
         self.__Sbf_norm = checkAndSetSbfNorm(value)
+        self._setSbfNormFlags()
 
     #@property
     #def (self):
@@ -536,12 +573,33 @@ def checkAndSetScatteringAngle(angle):
     if angle is None:
         raise RuntimeError( "Scattering angle not specified.")
 
+    angle = checkAndSetInstance( float, angle, None)
     # Check if in range.
     if angle <= 0.0 or angle > 180.0:
         raise( ValueError, "Scattering angle must be between 0 and 180 [degrees].")
 
     # Return.
     return angle
+
+def checkAndSetPhotonEnergy(energy):
+    """
+    Utility to check if the photon energy is correct.
+    @param energy : The energy to check.
+    @return The checked energy.
+    """
+
+    # Set default.
+    if energy is None:
+        raise RuntimeError( "Photon energy not specified.")
+
+    energy = checkAndSetInstance( float, energy, None)
+
+    # Check if in range.
+    if energy <= 0.0:
+        raise( ValueError, "Photon energy must be positive.")
+
+    # Return.
+    return energy
 
 def checkAndSetElements(elements):
     """ Utility to check if input is a valid list of elements.
@@ -589,18 +647,18 @@ def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density):
     # Find number of Nones in input.
     number_of_nones = (sum(x is None for x in [electron_density, ion_charge, mass_density]))
     # raise if not enough input.
-    if number_of_nones > 1:
-        raise RuntimeError( "At least two of electron_density, ion_charge, and mass_density must be given.")
+    if number_of_nones > 0:
+        raise RuntimeError( "Electron_density, ion_charge, and mass_density must be given.")
 
-    if electron_density is None:
-        electron_density = mass_density * ion_charge * Avogadro* 1e6
-    if ion_charge is None:
-        ion_charge = electron_density / (mass_density * Avogadro* 1e6)
-    if mass_density is None:
-        mass_density = electron_density / (ion_charge * Avogadro* 1e6)
+    #if electron_density is None:
+        #electron_density = mass_density * ion_charge * Avogadro
+    #if ion_charge is None:
+        #ion_charge = electron_density / (mass_density * Avogadro)
+    #if mass_density is None:
+        #mass_density = electron_density / (ion_charge * Avogadro)
 
-    if abs( electron_density / (mass_density * ion_charge * Avogadro* 1e6) - 1 ) > 1e-4:
-        raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA = %5.4e/m**3." % (electron_density, mass_density * ion_charge * Avogadro* 1e6) )
+    #if abs( electron_density / (mass_density * ion_charge * Avogadro) - 1 ) > 1e-4:
+        #raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA = %5.4e/m**3." % (electron_density, mass_density * ion_charge * Avogadro) )
 
     return electron_density, ion_charge, mass_density
 
@@ -755,7 +813,6 @@ def checkAndSetModelSii( model ):
     if model is None:
         model = 'SOCP'
 
-    ###TODO: Complete
     valid_models = [ 'DH', 'OCP', 'SOCP', 'SOCPN' ]
     if not (isinstance( model, str) or isinstance( model, float )):
         raise TypeError( "The Sii model must be a valid model specifier (string) or a float giving the value of Sii(k).")
@@ -842,5 +899,3 @@ def checkAndSetModelIPL( model ):
 
     # Return
     return model
-
-
