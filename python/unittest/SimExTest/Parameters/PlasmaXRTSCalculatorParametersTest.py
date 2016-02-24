@@ -204,7 +204,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         """ Test the Debye temperature check'n'set function. """
 
         # Default
-        self.assertEqual( checkAndSetDebyeTemperature( None), 0.0 )
+        self.assertEqual( checkAndSetDebyeTemperature( None), None )
 
         # Check incorrect type.
         self.assertRaises( TypeError, checkAndSetDebyeTemperature, "1.0")
@@ -214,7 +214,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
     def testCheckAndSetBandGap(self):
         """ Test the bandgap check'n'set function."""
         # Default
-        self.assertEqual( checkAndSetBandGap( None), 0.0 )
+        self.assertEqual( checkAndSetBandGap( None), None )
 
         # Check incorrect type.
         self.assertRaises( TypeError, checkAndSetBandGap, "1.0")
@@ -258,7 +258,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetSbfNorm( "FK" ), "FK" )
         self.assertEqual( checkAndSetSbfNorm( "NO" ), "NO" )
         self.assertEqual( checkAndSetSbfNorm( 1.0 ), 1.0 )
-
 
     def testCheckAndSetEnergyRange(self):
         """ Test the energy range check'n'set function."""
@@ -355,6 +354,81 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetModelIPL( "SP" ), "SP" )
         self.assertEqual( checkAndSetModelIPL( "EK" ), "EK" )
         self.assertEqual( checkAndSetModelIPL( -10.0 ), -10.0 )
+
+    def testSeeModelHandlingRPA(self):
+        """ Test the internal conversion of the See model into use_* flags. """
+
+        # Check default.
+        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         scattering_angle=90.0,
+                                                         electron_temperature=10.0,
+                                                         electron_density=1.0e23,
+                                                         ion_charge=2.3)
+
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma_slfc,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__write_bma,       0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_lindhard,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_dynamic_lfc, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
+
+        # Check RPA.
+        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         scattering_angle=90.0,
+                                                         electron_temperature=10.0,
+                                                         electron_density=1.0e23,
+                                                         ion_charge=2.3,
+                                                         model_See='RPA')
+
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma_slfc,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__write_bma,       0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_lindhard,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_dynamic_lfc, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
+
+
+    def testSeeModelHandlingBMA(self):
+        """ Test the internal conversion of the See model into use_* flags. """
+
+        # Check BMA.
+        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         scattering_angle=90.0,
+                                                         electron_temperature=10.0,
+                                                         electron_density=1.0e23,
+                                                         ion_charge=2.3,
+                                                         model_See='BMA')
+
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma_slfc,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__write_bma,       1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_lindhard,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_dynamic_lfc, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
+
+        # Check BMA+sLFC.
+        xrts_parameters = PlasmaXRTSCalculatorParameters(elements=[['Be', 1, -1]],
+                                                         scattering_angle=90.0,
+                                                         electron_temperature=10.0,
+                                                         electron_density=1.0e23,
+                                                         ion_charge=2.3,
+                                                         model_See='BMA+sLFC')
+
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_rpa,         0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma,         0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_bma_slfc,    1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__write_bma,       1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_lindhard,    0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_dynamic_lfc, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_static_lfc,  0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_mff,         0 )
+
 
 
 if __name__ == '__main__':

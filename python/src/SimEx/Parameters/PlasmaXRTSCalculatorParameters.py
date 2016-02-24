@@ -28,6 +28,7 @@
 """
 import paths
 import os
+import copy
 import numpy
 import math
 import tempfile
@@ -39,6 +40,8 @@ from SimEx.Utilities.EntityChecks import checkAndSetInteger
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
 from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
+
+BOOL_TO_INT = {True : 1, False : 0}
 
 class PlasmaXRTSCalculatorParameters():
     """
@@ -166,11 +169,79 @@ class PlasmaXRTSCalculatorParameters():
         self.__model_Mix = checkAndSetModelMix(model_Mix)
         self.__lfc = checkAndSetLFC(lfc)
         self.__Sbf_norm = checkAndSetSbfNorm(Sbf_norm)
+
+        # Set internal parameters.
+        self._setSeeFlags()
+        self._setSiiFlags()
+        self._setSbfNormFlags()
+        self._setDebyeTemperatureFlags()
+        self._setBandGapFlags()
+
         # Set state to not-initialized (e.g. input deck is not written).
         self.__is_initialized = False
 
-    def _initialize(self):
-        """ Initialize all parameters and io slots needed by the backengine. """
+    def _setSeeFlags(self):
+        """ Set the See parameters as used in the input deck generator. """
+        self.__use_rpa         = BOOL_TO_INT[self.model_See == "RPA"]
+        self.__use_bma         = BOOL_TO_INT[self.model_See == "BMA"]
+        self.__use_bma_slfc    = BOOL_TO_INT[self.model_See == 'BMA+sLFC']
+        self.__write_bma = BOOL_TO_INT[self.model_See == 'BMA+sLFC' or self.model_See == 'BMA']
+        self.__use_lindhard    = BOOL_TO_INT[self.model_See == 'Lindhard']
+        self.__use_static_lfc  = BOOL_TO_INT[self.model_See == 'sLFC']
+        self.__use_dynamic_lfc = BOOL_TO_INT[self.model_See == 'dLFC']
+        self.__use_mff = BOOL_TO_INT[self.model_See == 'MFF']
+
+    def _setSiiFlags(self):
+        """ Set the internal Sii parameters as used in the input deck generator."""
+
+        # By default, switch off usage of user given Sii value.
+        self.__Sii_value = 0.0
+        self.__use_Sii = 0
+
+        # Only if Sii model input parameter is float, use it as Sii(k).
+        if isinstance( self.model_Sii, float):
+            self.__use_Sii_value = 1
+            # Copy value.
+            self.__Sii_value = copy.deepcopy(self.model_Sii)
+            # Reset model parameter.
+            self.model_Sii = 'USR'
+
+    def _setSbfNormFlags(self):
+        """ Set the internal Sbf norm flags used in the input deck generator. """
+
+        # By default, switch off usage of user given SbfNorm value.
+        self.__Sbf_norm_value = 0.0
+
+        # Only if SbfNorm model input parameter is float, use it as SbfNorm(k).
+        if isinstance( self.Sbf_norm, float):
+            # Copy value.
+            self.__Sbf_norm_value = copy.deepcopy(self.Sbf_norm)
+            # Reset model parameter.
+            self.Sbf_norm = 'USR'
+
+    def _setDebyeTemperatureFlags(self):
+        """ Set the internal Debye temperature flags used in the input deck generator. """
+
+        # By default, switch off usage of user given Debye temperature.
+        self.__use_debye_temperature = 0
+
+        # Only if Debye Temperature is non-zero use it.
+        if self.debye_temperature is not None:
+            self.__use_debye_temperature = 1
+
+    def _setBandGapFlags(self):
+        """ Set the internal bandgap flags used in the input deck generator. """
+
+        # By default, switch off usage of usage of band gap.
+        self.__use_band_gap = 0
+
+        # Only if bandgap is non-zero use it.
+        if self.band_gap is not None:
+            self.__use_band_gap = 1
+
+
+    def _serialize(self):
+        """ Write the input deck for the xrts backengine. """
 
         # Make a temporary directory.
         self.__tmp_dir = tempfile.mkdtemp(prefix='xrs_')
@@ -202,9 +273,9 @@ class PlasmaXRTSCalculatorParameters():
             input_deck.write('USE_CORE 1\n')
             input_deck.write('--gradients------------------------------------------\n')
             input_deck.write('GRAD 0\n')
-            input_deck.write('L_GRADIENT            0.0e-0        \n')
-            input_deck.write('T_GRADIENT            0.0\n')
-            input_deck.write('DSTEP                0.0    \n')
+            input_deck.write('L_GRADIENT            0.0e-0 \n')
+            input_deck.write('T_GRADIENT            0.0    \n')
+            input_deck.write('DSTEP                 0.0    \n')
             input_deck.write('--ion_parameters----------------------------use_flag-\n')
             input_deck.write('ION_TEMP %d 1\n' % (self.ion_temperature) )
             input_deck.write('S_ION_FEATURE %4.3f %d\n' % (self.__Sii_value, self.__use_Sii_value) )
@@ -226,7 +297,7 @@ class PlasmaXRTSCalculatorParameters():
             input_deck.write('HARD_SPHERE_DIAM                 1E-10 0\n')
             input_deck.write('POLARIZABILITY                     0.0 0.0\n')
             input_deck.write('BOUND-FREE_MODEL(IA,IBA,FFA)     %s\n' % (self.model_Sbf) )
-            input_deck.write('BOUND-FREE_NORM(FK,NO,USR)         %s     %d\n' % (self.Sbf_norm, self.__normalize_Sbf) )
+            input_deck.write('BOUND-FREE_NORM(FK,NO,USR)       %s %4.3f\n' % (self.Sbf_norm, self.__Sbf_norm_value) )
             input_deck.write('BOUND-FREE_MEFF                 1.0\n')
             input_deck.write('USE_BOUND-FREE_DOPPLER          0\n')
             input_deck.write('CONT-LOWR_MODEL(SP,EK,USR)      %s\n' % (self.model_IPL) )
@@ -247,10 +318,10 @@ class PlasmaXRTSCalculatorParameters():
             input_deck.write('E_STEP                         %4.3f\n' % (self.energy_range['step']))
             input_deck.write('--target_spec--------------------------chem----Zfree--\n')
             input_deck.write('NUMBER_OF_SPECIES %d\n' % (len(self.elements)) )
-            for i,element in enumerate(self.elements.keys()):
+            for i,element in enumerate(self.elements):
                 input_deck.write('TARGET_%d %s %d %d\n' % (i+1, element[0], element[1], element[2] ) )
             input_deck.write('MASS_DENSITY %4.3f\n' % (self.mass_density))
-            input_deck.write('NE_ZF_LOCK %d\n' % (self.__lock_zf))
+            input_deck.write('NE_ZF_LOCK 1\n')
             input_deck.write('DATA_FILE data.txt\n')
             input_deck.write('NUMBER_POINTS 1024\n')
             input_deck.write('OPACITY_FILE nofile 0\n')
@@ -558,6 +629,9 @@ def checkAndSetDebyeTemperature(debye_temperature):
     @default : 0.0
     @return : The checked Debye temperature.
     """
+    if debye_temperature is None:
+        return None
+
     debye_temperature = checkAndSetInstance( float, debye_temperature, 0.0)
     if debye_temperature < 0.0:
         raise ValueError( "Debye temperature must be non-negative.")
@@ -572,6 +646,9 @@ def checkAndSetBandGap(band_gap):
     @default 0.0.
     @return : The checked bandgap.
     """
+    if band_gap is None:
+        return None
+
     band_gap = checkAndSetInstance( float, band_gap, 0.0)
     if band_gap < 0.0:
         raise ValueError( "Debye temperature must be positive.")
