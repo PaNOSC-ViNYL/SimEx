@@ -201,16 +201,9 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, 2.3, None )
         self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 )
 
-        # Case 3: Inconsistent input.
-        self.assertRaises( ValueError, checkAndSetDensitiesAndCharge, 1e19, 2.3, 5.0 )
+        ed, Zf, rho = 3e29, 2.3, 1.85
 
-        # Case 4: Get correct number density based on charge and mass density.
-        ed, Z, rho = checkAndSetDensitiesAndCharge( None, 2.3, 5.0 )
-        self.assertAlmostEqual( ed/1.e30, 6.92546, 4 )
-        ed, Z, rho = checkAndSetDensitiesAndCharge( ed, None, 5.0 )
-        self.assertAlmostEqual( Z, 2.3, 4 )
-        ed, Z, rho = checkAndSetDensitiesAndCharge( ed, 2.3, None )
-        self.assertAlmostEqual( rho, 5.0, 4 )
+        self.assertAlmostEqual( (ed, Zf, rho) , checkAndSetDensitiesAndCharge( ed, Zf, rho ) )
 
     def testCheckAndSetIonTemperature(self):
         """ Test the ion temperature check'n'set function. """
