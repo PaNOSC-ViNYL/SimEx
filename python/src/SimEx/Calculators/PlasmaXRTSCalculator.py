@@ -28,6 +28,7 @@
 """
 import h5py
 import os
+import re
 import numpy
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -212,42 +213,79 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
         Skw_total.attrs.create('unit', 'eV**-1')
 
-        h5.close()
-
         # Static data.
-        #self._parseStaticData()
-        #Sk_elastic = self.__static_data['Sk_elastic']
+        self.__static_data = parseStaticData( self.__run_log )
+
+        # Save to h5 file.
+        for key, value in self.__static_data.items():
+            h5.create_dataset("/data/static/%s" % (key), data=value)
+
+        # Attach a unit to the ionization potential lowering.
+        h5['/data/static/']['ipl'].attrs.create('unit', 'eV')
 
 
-                                #'/data/dynamic'
-                                #'/data/dynamic/energy_shifts',
-                                #'/data/dynamic/Skw_free',
-                                #'/data/dynamic/Skw_bound',
-                                ##'/data/dynamic/collision_frequency',
-                                #'/data/static'
-                                #'/data/static/Sk_bound',
-                                #'/data/static/Sk_ion',
-                                #'/data/static/Sk_elastic',
-                                #'/data/static/Sk_core_inelastic',
-                                #'/data/static/Sk_free_inelastic',
-                                #'/data/static/Sk_total',
-                                #'/data/static/fk',
-                                #'/data/static/qk',
-                                #'/data/static/ionization_potential_delta'
-                                #'/data/static/LFC',
                                 #'/history/parent/detail',
                                 #'/history/parent/parent',
                                 #'/info/package_version',
                                 #'/info/contact',
                                 #'/info/data_description',
                                 #'/info/method_description',
-                                #'/info/units/energy'
-                                #'/info/units/structure_factor'
                                 #'/params/beam/photonEnergy',
                                 #'/params/beam/spectrum',
                                 #'/params/info',
+        ####
+        # Close the file.
+        ####
+        h5.close()
+        # Never write after this line in this function.
+
+def parseStaticData(data_string):
+        """
+        Function to parse the run log and extract static data (form factors etc.)
+
+        @params data_string : The string to parse.
+        @type : str
+        @return: A dictionary with static data.
+        @rtype : dict
+
+        """
+        # Setup return dictionary.
+        static_dict = {}
+
+        # Extract static data from
+        static_dict['fk']           = extractDate("f\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['qk']           = extractDate("q\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_ion']       = extractDate("S_ii\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_free']      = extractDate("S_ee\^0\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_core']      = extractDate("Core_inelastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Wk']           = extractDate("Elastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_total']     = extractDate("S_total\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['ipl']          = extractDate("IP depression \[eV\]\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['lfc']          = extractDate("G\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['debye_waller'] = extractDate("Debye-Waller\\s+=\\s+[1|\\d+.\\d+]", data_string)
+
+        return static_dict
 
 
+def extractDate(pattern_string, text):
+    """ Workhorse function to get a pattern from text using a regular expression.
+    @param pattern_string : The regex pattern to find.
+    @type : str (argument to re.compile)
+
+    @param text : The string from which to extract the date.
+    @type : str
+
+    @return : The date.
+    @rtype : float
+    """
+
+    # Find the line.
+    pattern = re.compile(pattern_string)
+    line = pattern.findall(text)
+
+    # Extract value (behind the '=' symbol).
+    pattern = re.compile("=\\s")
+    return  float( pattern.split( line[0] )[-1] )
 
 ###########################
 # Check and set functions #

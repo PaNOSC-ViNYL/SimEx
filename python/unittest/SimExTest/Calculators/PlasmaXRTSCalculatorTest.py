@@ -41,6 +41,7 @@ from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
 # Import the class to test.
 from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
+from SimEx.Calculators.PlasmaXRTSCalculator import parseStaticData
 from TestUtilities import TestUtilities
 
 class PlasmaXRTSCalculatorTest(unittest.TestCase):
@@ -156,10 +157,8 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
                                               )
 
         # Call the backengine.
-        # xrts_calculator.backengine()
+        xrts_calculator.backengine()
 
-        # Fill in dummy data.
-        xrts_calculator._PlasmaXRTSCalculator__run_data = numpy.random.random((200, 4))
         # Save to h5
         xrts_calculator.saveH5()
 
@@ -169,7 +168,7 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         # Open the file for reading.
         h5 = h5py.File( xrts_calculator.output_path, 'r' )
 
-        # Check that the keys in provided_keys are present.
+        # Check that the all data to be provided is present.
         for key in xrts_calculator.providedData():
             group = key.split('/')[1]
             self.assertTrue( group in h5.keys() )
@@ -186,6 +185,215 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
 
         self.assertEqual( numpy.array( h5['data/dynamic/']['Skw_total']).shape,     (200,) )
         self.assertEqual( str( h5['data/dynamic/']['Skw_total'].attrs['unit']), 'eV**-1')
+
+        # Check static data.
+        self.assertAlmostEqual( h5['data/static']['fk'].value,          1.513,  3)
+        self.assertAlmostEqual( h5['data/static']['qk'].value,          0.4319, 4)
+        self.assertAlmostEqual( h5['data/static']['Sk_ion'].value,      1.076,  3)
+        self.assertAlmostEqual( h5['data/static']['Sk_free'].value,     0.8122, 4)
+        self.assertAlmostEqual( h5['data/static']['Sk_core'].value,     0.0591, 4)
+        self.assertAlmostEqual( h5['data/static']['Wk'].value,          4.07 ,  2)
+        self.assertAlmostEqual( h5['data/static']['Sk_total'].value,    5.997,  3)
+        self.assertAlmostEqual( h5['data/static']['ipl'].value,        37.683,  3)
+        # IPL has a unit.
+        self.assertEqual( h5['data/static']['ipl'].attrs['unit'], 'eV')
+        self.assertAlmostEqual( h5['data/static']['lfc'].value,         0.000 , 3)
+        self.assertAlmostEqual( h5['data/static']['debye_waller'].value,1.000 , 3)
+
+
+    def testParseStaticDebyeWaller1(self):
+        """ Test the parser to extract static dat from the log Debye-Waller factor = 1. """
+        # Setup a log.
+        log_text = """ ----------------------------------------
+Reading parameters from input file ......done.
+Initializing ...... done.
+Reading input data file ...... done.
+Initializing element properties ...... done.
+Calculating average state of the system ...
+Electron Density - Zfree lock is enabled.
+... done
+Initializing instrument function ...... done.
+Init bound states ... ... done.
+NSPEC=2
+Initializing static structure factors ...... done.
+Lineshape construction:
+
+Init vectors ...... done.
+Writing spectrum to file ...... done.
+Free memory ...... done.
+
+SUMMARY TABLE
+
+Target             = Be1
+SPECIE 1           = Be (Zf = 2.3, Zb = 1.7)
+Mass den.   [g/cc] = 1.85
+Wavelength    [nm] = 0.25 (4960.0 eV)
+Theta        [deg] = 90.00
+k(w=0)      [m^-1] = 3.555E+10
+Te            [eV] =  10 (1.16E+05 K)
+ne         [cm^-3] = 2.843E+23
+Zfree/ion average  = 2.3
+Zbound/ion average = 1.7
+Zhopping           = 0.9695
+L_kx           [m] =   0
+T_wx           [s] =   0
+Amplitude          =   1
+Baseline           =   0
+Ion At. Num. av.   = 9.012
+Tion          [eV] =  10
+Zfree/molecule     = 2.3
+Tf non rel    [eV] = 15.77
+Tf            [eV] = 15.77
+Tquantum      [eV] = 14.5
+Tclas         [eV] = 17.61
+Compton shift [eV] = 47.68
+l_compton      [m] = 3.482E-11
+l_debye        [m] = 4.409E-11
+dis            [m] = 9.434E-11
+Alpha              = 0.481
+rs                 = 1.783
+Gamma_ee_0         = 1.526
+Gamma_ee_fermi     = 0.968
+Gamma_ee           = 0.867
+Gamma_ii           = 6.117
+wpe         [s^-1] = 3.008E+16 (19.8 eV)
+k vt        [s^-1] = 6.256E+16 (41.18 eV)
+k vF        [s^-1] = 8.372E+16 (55.1 eV)
+k dis              = 3.354
+k l_debye          = 1.567
+l_compton/dis      = 0.369
+G(k)               = 0.000
+IP depression [eV] = 37.683
+Free_inelastic(k)  = 1.868
+Elastic(k)         = 4.07
+Core_inelastic(k)  = 0.0591
+S_total(k)         = 5.997
+Peak ratio         = 0.459
+f(k)               = 1.513
+q(k)               = 0.4319
+1-f(k)^2/Zb        = -0.3469
+S_ee^0(k)          = 0.8122
+S_ii(k)            = 1.076
+Static correction  = 0.1622
+Debye-Waller       =   1
+Charge calculated without IRS model
+data for curve fitting saved on file: xrts_out.txt
+
+User time: 12.4 seconds
+Real time: 12.0 seconds
+"""
+        static_dict = parseStaticData( log_text )
+
+        # Check keys.
+        static_data_keys = static_dict.keys()
+        self.assertIn( 'fk',            static_data_keys )
+        self.assertIn( 'qk',            static_data_keys )
+        self.assertIn( 'Sk_ion',        static_data_keys )
+        self.assertIn( 'Sk_free',       static_data_keys )
+        self.assertIn( 'Sk_core',       static_data_keys )
+        self.assertIn( 'Wk',            static_data_keys )
+        self.assertIn( 'Sk_total',      static_data_keys )
+        self.assertIn( 'ipl',           static_data_keys )
+        self.assertIn( 'lfc',           static_data_keys )
+        self.assertIn( 'debye_waller',  static_data_keys )
+
+    def testParseStaticDebyeWallerFloat(self):
+        """ Test the parser to extract static dat from the log Debye-Waller factor = some float. """
+        # Setup a log.
+        log_text = """ ----------------------------------------
+Reading parameters from input file ......done.
+Initializing ...... done.
+Reading input data file ...... done.
+Initializing element properties ...... done.
+Calculating average state of the system ...
+Electron Density - Zfree lock is enabled.
+... done
+Initializing instrument function ...... done.
+Init bound states ... ... done.
+NSPEC=2
+Initializing static structure factors ...... done.
+Lineshape construction:
+
+Init vectors ...... done.
+Writing spectrum to file ...... done.
+Free memory ...... done.
+
+SUMMARY TABLE
+
+Target             = Be1
+SPECIE 1           = Be (Zf = 2.3, Zb = 1.7)
+Mass den.   [g/cc] = 1.85
+Wavelength    [nm] = 0.25 (4960.0 eV)
+Theta        [deg] = 90.00
+k(w=0)      [m^-1] = 3.555E+10
+Te            [eV] =  10 (1.16E+05 K)
+ne         [cm^-3] = 2.843E+23
+Zfree/ion average  = 2.3
+Zbound/ion average = 1.7
+Zhopping           = 0.9695
+L_kx           [m] =   0
+T_wx           [s] =   0
+Amplitude          =   1
+Baseline           =   0
+Ion At. Num. av.   = 9.012
+Tion          [eV] =  10
+Zfree/molecule     = 2.3
+Tf non rel    [eV] = 15.77
+Tf            [eV] = 15.77
+Tquantum      [eV] = 14.5
+Tclas         [eV] = 17.61
+Compton shift [eV] = 47.68
+l_compton      [m] = 3.482E-11
+l_debye        [m] = 4.409E-11
+dis            [m] = 9.434E-11
+Alpha              = 0.481
+rs                 = 1.783
+Gamma_ee_0         = 1.526
+Gamma_ee_fermi     = 0.968
+Gamma_ee           = 0.867
+Gamma_ii           = 6.117
+wpe         [s^-1] = 3.008E+16 (19.8 eV)
+k vt        [s^-1] = 6.256E+16 (41.18 eV)
+k vF        [s^-1] = 8.372E+16 (55.1 eV)
+k dis              = 3.354
+k l_debye          = 1.567
+l_compton/dis      = 0.369
+G(k)               = 0.000
+IP depression [eV] = 37.683
+Free_inelastic(k)  = 1.868
+Elastic(k)         = 4.07
+Core_inelastic(k)  = 0.0591
+S_total(k)         = 5.997
+Peak ratio         = 0.459
+f(k)               = 1.513
+q(k)               = 0.4319
+1-f(k)^2/Zb        = -0.3469
+S_ee^0(k)          = 0.8122
+S_ii(k)            = 1.076
+Static correction  = 0.1622
+Debye-Waller       = 1.2345
+Charge calculated without IRS model
+data for curve fitting saved on file: xrts_out.txt
+
+User time: 12.4 seconds
+Real time: 12.0 seconds
+"""
+        static_dict = parseStaticData( log_text )
+
+        # Check keys.
+        static_data_keys = static_dict.keys()
+        self.assertIn( 'fk',            static_data_keys )
+        self.assertIn( 'qk',            static_data_keys )
+        self.assertIn( 'Sk_ion',        static_data_keys )
+        self.assertIn( 'Sk_free',       static_data_keys )
+        self.assertIn( 'Sk_core',       static_data_keys )
+        self.assertIn( 'Wk',            static_data_keys )
+        self.assertIn( 'Sk_total',      static_data_keys )
+        self.assertIn( 'ipl',           static_data_keys )
+        self.assertIn( 'lfc',           static_data_keys )
+        self.assertIn( 'debye_waller',  static_data_keys )
+
+
 
 
 
