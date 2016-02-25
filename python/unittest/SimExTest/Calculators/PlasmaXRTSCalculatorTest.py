@@ -35,6 +35,7 @@ import subprocess
 import paths
 import unittest
 
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
@@ -82,16 +83,19 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         self.assertIsInstance( xrts_calculator, AbstractPhotonDiffractor )
         self.assertIsInstance( xrts_calculator, AbstractBaseCalculator )
 
-    def testCheckSaneParameters(self):
+    def testConstructionParameters(self):
         """ Testing the input parameter checks pass for a sane parameter dict. """
 
         # Setup parameters.
-        xrts_parameters = {'scattering_angle' : 90,
-                           'photon_energy_range' : numpy.arange(-100., 100., 1.0),
-                           'model_See0'          : 'RPA',
-                           'model_Sii'           : 'DH',
-                           'model_Sbf'           : 'IA',
-                           }
+        xrts_parameters = PlasmaXRTSCalculatorParameters(
+                            elements=[['Be', 1, -1]],
+                            photon_energy=4.96e3,
+                            electron_density=3e29,
+                            electron_temperature=10.0,
+                            mass_density=1.85,
+                            ion_charge=2.3,
+                            scattering_angle=90.,
+                            )
 
 
         # Construct an instance.
@@ -104,13 +108,7 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         query = xrts_calculator.parameters
 
         # Check query is ok.
-        for key, value in xrts_parameters.items():
-            print "Checking %s" % (key)
-            if isinstance( value, str ):
-                self.assertEqual( query[key], value )
-            if isinstance( value, numpy.ndarray ):
-                for i,v in enumerate(value):
-                    self.assertAlmostEqual( query[key][i], v )
+        self.assertIsInstance( query, PlasmaXRTSCalculatorParameters )
 
     def testCheckInsaneParameters(self):
         """ Testing the input parameter checks bark for insane parameter dict. """

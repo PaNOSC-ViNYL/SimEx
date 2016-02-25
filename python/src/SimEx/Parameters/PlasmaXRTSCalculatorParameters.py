@@ -26,7 +26,6 @@
     @creation 20151104
 
 """
-import paths
 import os
 import copy
 import numpy
@@ -34,6 +33,8 @@ import math
 import tempfile
 from scipy.constants import physical_constants
 from scipy.constants import Avogadro
+
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.Utilities import ALL_ELEMENTS
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.EntityChecks import checkAndSetInteger
@@ -43,7 +44,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 BOOL_TO_INT = {True : 1, False : 0}
 
-class PlasmaXRTSCalculatorParameters(object):
+class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     """
     Class representing a x-ray free electron laser photon propagator.
     """

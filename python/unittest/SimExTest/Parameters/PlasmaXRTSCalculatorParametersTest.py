@@ -36,6 +36,7 @@ import subprocess
 import paths
 import unittest
 
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 # Import the class to test.
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
@@ -110,6 +111,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
 
         # Check instance and inheritance.
         self.assertIsInstance( xrts_parameters, PlasmaXRTSCalculatorParameters )
+        self.assertIsInstance( xrts_parameters, AbstractCalculatorParameters )
 
     def testCheckAndSetScatteringAngle(self):
         """ Test the scattering angle set/check function. """
@@ -543,7 +545,11 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         xrts_parameters = self.xrts_parameters
 
         xrts_parameters._serialize()
-        print xrts_parameters._tmp_dir
+
+        # Check that the input deck has been generated.
+        self.assertTrue( os.path.isdir( xrts_parameters._tmp_dir ) )
+
+        self.assertTrue( 'input.dat' in os.listdir( xrts_parameters._tmp_dir ) )
 
 if __name__ == '__main__':
     unittest.main()

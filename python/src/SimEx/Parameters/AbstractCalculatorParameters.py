@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -28,8 +27,6 @@
 
 """
 from abc import ABCMeta, abstractmethod
-
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 
 class AbstractCalculatorParameters(object):
@@ -47,16 +44,4 @@ class AbstractCalculatorParameters(object):
         @type : dict
 
         """
-
-        # Check parameters.
-        parameters_dict = checkAndSetInstance(dict, parameters_dict, {})
-
-        self.__parameters = {}
-        self.insertParameters(parameters_dict)
-
-    def insertParameters(self, parameters_dict):
-
-        # Setup members.
-        for key, value in parameters_dict.items():
-            self.__parameters[key] = value
-            setattr( self, key, value )
+        pass

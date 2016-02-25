@@ -31,6 +31,7 @@ import exceptions
 import os
 from abc import ABCMeta, abstractmethod
 
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 
@@ -107,6 +108,14 @@ class AbstractBaseCalculator(object):
     @parameters.setter
     def parameters(self, value):
         """ Set the control parameters for the calculation. """
+        ###############################################
+        import ipdb
+        ipdb.set_trace()
+        ###############################################
+
+        if isinstance( value, AbstractCalculatorParameters):
+            self.__parameters = value
+            return
         self.__parameters = checkAndSetInstance(dict, value, None)
     @parameters.deleter
     def parameters(self):
