@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016 Carsten Fortmann-Grote                              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -29,7 +29,6 @@
 import os
 import numpy
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
 import paths
@@ -112,60 +111,12 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         # Check query is ok.
         self.assertIsInstance( query, PlasmaXRTSCalculatorParameters )
 
-    def testCheckInsaneParameters(self):
-        """ Testing the input parameter checks bark for insane parameter dict. """
-
-        # Setup parameters.
-        insane_parameters = {'scattering_angle' : 270,
-                             'photon_energy_range' : 1.0,
-                             'model_See0'          : 'NambuJonaLassino',
-                             'model_Sii'           : 'KobayashiMaskawa',
-                             'model_Sbf'           : 'FermiDirac',
-                            }
-
-
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, insane_parameters, self.input_path, 'xrts_out' )
-
-        # Cure angle.
-        insane_parameters['scattering_angle'] = 91.32
-        # Attempt construction, check should bark.
-        self.assertRaises( TypeError,  PlasmaXRTSCalculator, parameters=insane_parameters, input_path=self.input_path, output_path='xrts_out' )
-
-        # Cure energy range.
-        insane_parameters['photon_energy_range'] = numpy.arange( -10., 10., 0.1 )
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, parameters=insane_parameters, input_path=self.input_path, output_path='xrts_out' )
-
-        # Cure Sii model.
-        insane_parameters['model_Sii'] = 'DH'
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, parameters=insane_parameters, input_path=self.input_path, output_path='xrts_out' )
-
-        # Cure See0 model.
-        insane_parameters['model_See0'] = 'BMA'
-        # Attempt construction, check should bark.
-        self.assertRaises( ValueError,  PlasmaXRTSCalculator, insane_parameters, self.input_path, 'xrts_out' )
-
-        # Cure Sbf model.
-        insane_parameters['model_Sbf'] = 'IA'
-        # Attempt construction, check should pass.
-        xrts_calculator = PlasmaXRTSCalculator( insane_parameters,
-                                                self.input_path,
-                                                'xrts_out')
-
-        self.assertIsInstance( xrts_calculator, PlasmaXRTSCalculator )
 
     def testBackengine(self):
-        """ Check that the backengine can be executed. """
+        """ Check that the backengine can be executed and output is generated. """
 
         # Setup parameters.
-        xrts_parameters = {'scattering_angle' : 90,
-                           'photon_energy_range' : numpy.arange(-100., 100., 1.0),
-                           'model_See0'          : 'RPA',
-                           'model_Sii'           : 'DH',
-                           'model_Sbf'           : 'IA',
-                           }
+        xrts_parameters = self.parameters
 
 
         # Construct an instance.
@@ -176,6 +127,10 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
 
         # Call the backengine.
         xrts_calculator.backengine()
+
+        # Check for output.
+        self.assertTrue( os.path.isdir( xrts_calculator.parameters._tmp_dir ) )
+        self.assertTrue( 'xrts_out.txt' in os.listdir( xrts_calculator.parameters._tmp_dir ) )
 
     def testCheckAndSetParameters(self):
         """ Test the parameters check'n'set function. """

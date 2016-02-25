@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016 Carsten Fortmann-Grote                              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,14 +28,11 @@
 """
 import os
 import numpy
-import inspect
-import tempfile
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities import prepHDF5
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
