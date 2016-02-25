@@ -59,7 +59,7 @@ class AbstractBaseCalculator(object):
         """
 
         # Check parameters.
-        self.__parameters = checkAndSetInstance(dict, parameters, {})
+        self.__parameters = checkAndSetParameters(parameters)
 
         self.__input_path, self.__output_path = checkAndSetIO((input_path, output_path))
 
@@ -186,4 +186,17 @@ def checkAndSetBaseCalculator(var=None, default=None):
 
     return checkAndSetInstance(AbstractBaseCalculator, var, default)
 
+def checkAndSetParameters(parameters):
+    """ Utility to check if the 'parameters' argument is valid input.
 
+    @param parameters : The parameters object to check.
+    @type : dict or AbstractCalculatorParameters
+    @return : The checked parameters object.
+    """
+    if parameters is None:
+        parameters = {}
+    if not ( isinstance( parameters, dict ) or isinstance( parameters, AbstractCalculatorParameters) ):
+        raise TypeError( "The 'parameters' argument to the constructor must be of type dict or AbstractCalculatorParameters.")
+
+    # Return.
+    return parameters

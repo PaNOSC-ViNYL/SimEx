@@ -35,6 +35,15 @@ import os
 # Import the class to test.
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Calculators.AbstractBaseCalculator import checkAndSetIO
+from SimEx.Calculators.AbstractBaseCalculator import checkAndSetParameters
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+
+# Test parameter class.
+class DerivedParameters(AbstractCalculatorParameters):
+    def __init__(self, a, b, c):
+        self.__a = a
+        self.__b = b
+        self.__c = c
 
 # Derive a class from the abc.
 class DerivedCalculator(AbstractBaseCalculator):
@@ -82,6 +91,22 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
     def testConstruction(self):
         """ Testing the default construction of the class. """
         self.assertRaises(TypeError, AbstractBaseCalculator )
+
+    def testConstructionParametersDict(self):
+        """ Testing the construction of the class with a parameters dict. """
+        abc =  DerivedCalculator( parameters={},
+                                  input_path=__file__,
+                                  output_path='out.h5' )
+
+        self.assertIsInstance( abc, AbstractBaseCalculator )
+
+    def testConstructionParametersClass(self):
+        """ Testing the construction with a parameters class instance. """
+        abc =  DerivedCalculator( parameters=DerivedParameters(1,2,3),
+                                  input_path=__file__,
+                                  output_path='out.h5' )
+
+        self.assertIsInstance( abc, AbstractBaseCalculator )
 
     # Check its type.
     def testQueries(self):
@@ -136,6 +161,20 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         for ed in expected_data:
             self.assertTrue ( ed in provided_data)
 
+    def testCheckAndSetParameters(self):
+        """ Test the parameters check'n'set function. """
+        # Check default.
+        self.assertEqual( {}, checkAndSetParameters( None ) )
+
+        # Check exceptions on wrong type.
+        self.assertRaises( TypeError, checkAndSetParameters, [1,2,3] )
+        self.assertRaises( TypeError, checkAndSetParameters, 1 )
+        self.assertRaises( TypeError, checkAndSetParameters, 'string of parameters' )
+        self.assertRaises( TypeError, checkAndSetParameters, ['list', 'of', 'parameters'] )
+
+        # Check return from correct input.
+        parameters = DerivedParameters(a=1, b=2, c=3)
+        self.assertEqual( parameters, checkAndSetParameters( parameters ) )
 
 if __name__ == '__main__':
     unittest.main()

@@ -63,31 +63,8 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
-    def tearDown(self):
-        """ Tearing down a test. """
-        for f in self.__files_to_remove:
-            if os.path.isfile(f):
-                os.remove(f)
-        for d in self.__dirs_to_remove:
-            if os.path.isdir(d):
-                shutil.rmtree(d)
-
-    def testConstruction(self):
-        """ Testing the default construction of the class. """
-
-        # Attempt to construct an instance of the class.
-        xrts_calculator = PlasmaXRTSCalculator(input_path=self.input_path, output_path='xrts_out')
-
-        # Check instance and inheritance.
-        self.assertIsInstance( xrts_calculator, PlasmaXRTSCalculator )
-        self.assertIsInstance( xrts_calculator, AbstractPhotonDiffractor )
-        self.assertIsInstance( xrts_calculator, AbstractBaseCalculator )
-
-    def testConstructionParameters(self):
-        """ Testing the input parameter checks pass for a sane parameter dict. """
-
         # Setup parameters.
-        xrts_parameters = PlasmaXRTSCalculatorParameters(
+        self.xrts_parameters = PlasmaXRTSCalculatorParameters(
                             elements=[['Be', 1, -1]],
                             photon_energy=4.96e3,
                             electron_density=3e29,
@@ -97,9 +74,34 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
                             scattering_angle=90.,
                             )
 
+    def tearDown(self):
+        """ Tearing down a test. """
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for d in self.__dirs_to_remove:
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+        del self.xrts_parameters
+
+    def testConstruction(self):
+        """ Testing the default construction of the class. """
+
+        # Attempt to construct an instance of the class.
+        xrts_calculator = PlasmaXRTSCalculator(parameters=self.xrts_parameters,
+                                               input_path=self.input_path,
+                                               output_path='xrts_out')
+
+        # Check instance and inheritance.
+        self.assertIsInstance( xrts_calculator, PlasmaXRTSCalculator )
+        self.assertIsInstance( xrts_calculator, AbstractPhotonDiffractor )
+        self.assertIsInstance( xrts_calculator, AbstractBaseCalculator )
+
+    def testConstructionParameters(self):
+        """ Testing the input parameter checks pass for a sane parameter dict. """
 
         # Construct an instance.
-        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+        xrts_calculator = PlasmaXRTSCalculator( parameters=self.xrts_parameters,
                                                 input_path=self.input_path,
                                                 output_path='xrts_out'
                                               )
@@ -174,6 +176,10 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
 
         # Call the backengine.
         xrts_calculator.backengine()
+
+    def testCheckAndSetParameters(self):
+        """ Test the parameters check'n'set function. """
+
 
 if __name__ == '__main__':
     unittest.main()
