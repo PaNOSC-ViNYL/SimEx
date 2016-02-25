@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016 Carsten Fortmann-Grote                              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -23,7 +23,7 @@
 
     @author : CFG
     @institution : XFEL
-    @creation 20151104
+    @creation 20160219
 
 """
 import os
@@ -46,7 +46,7 @@ BOOL_TO_INT = {True : 1, False : 0}
 
 class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    Class representing parameters for the plasma x-ray Thomson scattering calculator.
     """
 
     def __init__(self,

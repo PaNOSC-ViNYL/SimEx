@@ -23,7 +23,7 @@
 
     @author : CFG
     @institution : XFEL
-    @creation 20151104
+    @creation 20160225
 
 """
 import h5py
@@ -38,7 +38,7 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    Class representing a plasma x-ray Thomson scattering calculation.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):

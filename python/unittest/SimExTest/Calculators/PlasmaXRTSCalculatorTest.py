@@ -23,7 +23,7 @@
 
     @author : CFG
     @institution : XFEL
-    @creation 20151109
+    @creation 20160225
 
 """
 import os
