@@ -26,6 +26,7 @@
     @creation 20151104
 
 """
+import h5py
 import os
 import numpy
 import subprocess
@@ -57,6 +58,57 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Set state to not-initialized (e.g. input deck is not written).
         self.__is_initialized = False
 
+        # Overwrite provided_data.
+        self.__expected_data = ['/data/snp_<7 digit index>/ff',
+                                '/data/snp_<7 digit index>/halfQ',
+                                '/data/snp_<7 digit index>/Nph',
+                                '/data/snp_<7 digit index>/r',
+                                '/data/snp_<7 digit index>/T',
+                                '/data/snp_<7 digit index>/Z',
+                                '/data/snp_<7 digit index>/xyz',
+                                '/data/snp_<7 digit index>/Sq_halfQ',
+                                '/data/snp_<7 digit index>/Sq_bound',
+                                '/data/snp_<7 digit index>/Sq_free',
+                                '/history/parent/detail',
+                                '/history/parent/parent',
+                                '/info/package_version',
+                                '/info/contact',
+                                '/info/data_description',
+                                '/info/method_description',
+                                '/version']
+
+        self.__provided_data = [
+                                '/data/',
+                                '/data/dynamic'
+                                '/data/dynamic/energy_shifts',
+                                '/data/dynamic/Skw_free',
+                                '/data/dynamic/Skw_bound',
+                                '/data/dynamic/collision_frequency',
+                                '/data/static'
+                                '/data/static/Sk_bound',
+                                '/data/static/Sk_ion',
+                                '/data/static/Sk_elastic',
+                                '/data/static/Sk_core_inelastic',
+                                '/data/static/Sk_free_inelastic',
+                                '/data/static/Sk_total',
+                                '/data/static/fk',
+                                '/data/static/qk',
+                                '/data/static/ionization_potential_delta'
+                                '/data/static/LFC',
+                                '/history/parent/detail',
+                                '/history/parent/parent',
+                                '/info/package_version',
+                                '/info/contact',
+                                '/info/data_description',
+                                '/info/method_description',
+                                '/info/units/energy'
+                                '/info/units/structure_factor'
+                                '/params/beam/photonEnergy',
+                                '/params/beam/spectrum',
+                                '/params/info',
+                                ]
+
+
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
         return self.__expected_data
@@ -68,12 +120,40 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def backengine(self):
         """ This method drives the backengine xrts."""
 
-        #if not self.__is_initialized:
-            #self._initialize()
+        # Serialize the parameters (generate the input deck).
+        self.parameters._serialize()
 
+        # cd to the temporary directory where input deck was written.
+        pwd = os.getcwd()
+
+        # Setup command sequence and issue the system call.
+        # Make sure to cd to correct directory where input deck is located.
         command_sequence = ['xrs']
-        process = subprocess.Popen(command_sequence)
-        process.wait()
+        process = subprocess.Popen( command_sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.parameters._tmp_dir )
+
+        # Catch stdout and stderr, wait until process terminates.
+        out, err = process.communicate(input=None)
+
+        # Error handling.
+        if not err == "":
+            raise( RuntimeError, "Error during xrts backengine execution in %s. Error output follows. %s" % ( self.parameters._tmp_dir, err) )
+        # Check if data was produced.
+        path_to_data = os.path.join( self.parameters._tmp_dir, 'xrts_out.txt' )
+        if not os.path.isfile( path_to_data ):
+            raise( IOError, "No data generated. Check input deck %s." % ( os.path.join( self.parameters._tmp_dir, 'input.dat' ) ) )
+
+        # Store output internally.
+        self.__run_log = out
+
+        # Write to tmp_dir.
+        with open( os.path.join( self.parameters._tmp_dir ,'xrts.log'), 'w') as log_file_handle:
+                log_file_handle.write(out)
+
+        # Store data internally.
+        self.__run_data = numpy.loadtxt( path_to_data )
+        # Cd back to where we came from.
+        os.chdir( pwd )
+
 
     @property
     def data(self):
@@ -88,20 +168,92 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def saveH5(self):
         """ """
         """
-        Private method to save the object to a file.
+        Method to save the data to a file.
 
         @param output_path : The file where to save the object's data.
         @type : string
         @default : None
         """
-        raise( RuntimeError, "Not implemented.")
+
+        # Setup h5 data groups and sets.
+        h5 = h5py.File( self.output_path, 'w' )
+        # Data
+        h5.create_group("/data/dynamic")
+        h5.create_group("/data/static")
+
+        # History
+        h5.create_group("/history/parent")
+
+        # Info
+        h5.create_group("/info/units/")
+
+        # Parameters
+        h5.create_group("/params/beam")
+
+
+        # Create data datasets.
+        # Dynamic data.
+        energies  = self.__run_data[:,0]
+        Skw_free  = self.__run_data[:,1]
+        Skw_bound = self.__run_data[:,2]
+        Skw_total = self.__run_data[:,3]
+        ### TODO
+        #collfreq  = self.__run_data[:,4]
+
+        energy_shifts = h5.create_dataset("data/dynamic/energy_shifts", data=energies)
+        energy_shifts.attrs.create('unit', 'eV')
+
+        Skw_free = h5.create_dataset("data/dynamic/Skw_free", data=Skw_free)
+        Skw_free.attrs.create('unit', 'eV**-1')
+
+        Skw_bound = h5.create_dataset("data/dynamic/Skw_bound", data=Skw_bound)
+        Skw_bound.attrs.create('unit', 'eV**-1')
+
+        Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
+        Skw_total.attrs.create('unit', 'eV**-1')
+
+        h5.close()
+
+        # Static data.
+        #self._parseStaticData()
+        #Sk_elastic = self.__static_data['Sk_elastic']
+
+
+                                #'/data/dynamic'
+                                #'/data/dynamic/energy_shifts',
+                                #'/data/dynamic/Skw_free',
+                                #'/data/dynamic/Skw_bound',
+                                ##'/data/dynamic/collision_frequency',
+                                #'/data/static'
+                                #'/data/static/Sk_bound',
+                                #'/data/static/Sk_ion',
+                                #'/data/static/Sk_elastic',
+                                #'/data/static/Sk_core_inelastic',
+                                #'/data/static/Sk_free_inelastic',
+                                #'/data/static/Sk_total',
+                                #'/data/static/fk',
+                                #'/data/static/qk',
+                                #'/data/static/ionization_potential_delta'
+                                #'/data/static/LFC',
+                                #'/history/parent/detail',
+                                #'/history/parent/parent',
+                                #'/info/package_version',
+                                #'/info/contact',
+                                #'/info/data_description',
+                                #'/info/method_description',
+                                #'/info/units/energy'
+                                #'/info/units/structure_factor'
+                                #'/params/beam/photonEnergy',
+                                #'/params/beam/spectrum',
+                                #'/params/info',
+
 
 
 ###########################
 # Check and set functions #
 ###########################
 def checkAndSetParameters( parameters ):
-    """ Utility to check if the parameters dictionary is ok . """
+    """ Utility to check if the parameters dictionary is ok ."""
 
     if not isinstance( parameters, AbstractCalculatorParameters ):
         raise RuntimeError( "The 'parameters' argument must be of the type PlasmaXRTSCalculatorParameters.")

@@ -29,6 +29,7 @@
 import os
 import numpy
 import shutil
+import h5py
 
 # Include needed directories in sys.path.
 import paths
@@ -116,7 +117,7 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         """ Check that the backengine can be executed and output is generated. """
 
         # Setup parameters.
-        xrts_parameters = self.parameters
+        xrts_parameters = self.xrts_parameters
 
 
         # Construct an instance.
@@ -131,9 +132,61 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         # Check for output.
         self.assertTrue( os.path.isdir( xrts_calculator.parameters._tmp_dir ) )
         self.assertTrue( 'xrts_out.txt' in os.listdir( xrts_calculator.parameters._tmp_dir ) )
+        self.assertTrue( 'xrts.log' in os.listdir( xrts_calculator.parameters._tmp_dir ) )
 
-    def testCheckAndSetParameters(self):
-        """ Test the parameters check'n'set function. """
+        # Check log content.
+        self.assertIn( "SUMMARY TABLE", xrts_calculator._PlasmaXRTSCalculator__run_log )
+        # Check data shape.
+        self.assertEqual( xrts_calculator._PlasmaXRTSCalculator__run_data.shape, (200, 4 ) )
+
+    def testSaveH5(self):
+        """ Test hdf5 output generation. """
+        # Make sure we clean up after ourselves.
+        outfile = 'xrts_out.h5'
+        self.__files_to_remove.append(outfile)
+
+        # Setup parameters.
+        xrts_parameters = self.xrts_parameters
+
+
+        # Construct an instance.
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=self.input_path,
+                                                output_path=outfile
+                                              )
+
+        # Call the backengine.
+        # xrts_calculator.backengine()
+
+        # Fill in dummy data.
+        xrts_calculator._PlasmaXRTSCalculator__run_data = numpy.random.random((200, 4))
+        # Save to h5
+        xrts_calculator.saveH5()
+
+        # Check output was written.
+        self.assertTrue( os.path.isfile( xrts_calculator.output_path ) )
+
+        # Open the file for reading.
+        h5 = h5py.File( xrts_calculator.output_path, 'r' )
+
+        # Check that the keys in provided_keys are present.
+        for key in xrts_calculator.providedData():
+            group = key.split('/')[1]
+            self.assertTrue( group in h5.keys() )
+
+        # Check dynamic datasets shapes and units.
+        self.assertEqual( numpy.array( h5['data/dynamic/']['energy_shifts']).shape, (200,) )
+        self.assertEqual( str( h5['data/dynamic/']['energy_shifts'].attrs['unit']), 'eV')
+
+        self.assertEqual( numpy.array( h5['data/dynamic/']['Skw_free']).shape,      (200,) )
+        self.assertEqual( str( h5['data/dynamic/']['Skw_free'].attrs['unit']), 'eV**-1')
+
+        self.assertEqual( numpy.array( h5['data/dynamic/']['Skw_bound']).shape,     (200,) )
+        self.assertEqual( str( h5['data/dynamic/']['Skw_bound'].attrs['unit']), 'eV**-1')
+
+        self.assertEqual( numpy.array( h5['data/dynamic/']['Skw_total']).shape,     (200,) )
+        self.assertEqual( str( h5['data/dynamic/']['Skw_total'].attrs['unit']), 'eV**-1')
+
 
 
 if __name__ == '__main__':
