@@ -56,6 +56,8 @@ from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelSii
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelSee
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelSbf
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetModelIPL
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetSourceSpectrum
+from SimEx.Parameters.PlasmaXRTSCalculatorParameters import checkAndSetSourceSpectrumFWHM
 
 class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
     """
@@ -374,6 +376,65 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetModelIPL( "SP" ), "SP" )
         self.assertEqual( checkAndSetModelIPL( "EK" ), "EK" )
         self.assertEqual( checkAndSetModelIPL( -10.0 ), -10.0 )
+
+    def testCheckAndSetSourceSpectrum(self):
+        """ Test the source spectrum check'n'set function. """
+        # Default.
+        self.assertEqual( checkAndSetSourceSpectrum( None ), "GAUSS" )
+
+        # Return from sane input.
+        self.assertEqual( checkAndSetSourceSpectrum( "Gauss" ), "GAUSS" )
+        self.assertEqual( checkAndSetSourceSpectrum( "Lorentz" ), "LORENTZ" )
+        self.assertEqual( checkAndSetSourceSpectrum( "prop" ), "PROP" )
+
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetSourceSpectrum, ["GAUSS", 1.0] )
+
+        # Wrong value.
+        self.assertRaises( ValueError, checkAndSetSourceSpectrum, "VOIGT" )
+
+    def testCheckAndSetSourceSpectrumFWHM(self):
+        """ Test the source spectrum fwhm check'n'set function. """
+        # Default.
+        self.assertEqual( checkAndSetSourceSpectrumFWHM( None ), 5.0 )
+
+        # Return from sane input.
+        self.assertEqual( checkAndSetSourceSpectrumFWHM( 5.9 ), 5.9 )
+
+        # Wrong type.
+        self.assertRaises( TypeError, checkAndSetSourceSpectrumFWHM, ["GAUSS", 1.0] )
+
+        # Wrong value.
+        self.assertRaises( ValueError, checkAndSetSourceSpectrumFWHM, 0.0 )
+        self.assertRaises( ValueError, checkAndSetSourceSpectrumFWHM, -10.0 )
+
+    def testSetSourceSpectrumFlags(self):
+        """ Test the setter for the internal source spectrum flags. """
+
+        # Check default.
+        xrts_parameters = self.xrts_parameters
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_source_spectrum_file, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_identifier, 'GAUSSIAN' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_fwhm, 5.0 )
+
+        # Check Gauss
+        xrts_parameters.source_spectrum = 'Gauss'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_source_spectrum_file, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_identifier, 'GAUSSIAN' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_fwhm, 5.0 )
+
+        # Check Lorentz
+        xrts_parameters.source_spectrum = 'Lorentz'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_source_spectrum_file, 0 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_identifier, 'LORENTZIAN' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_fwhm, 5.0 )
+
+        # Check prop.
+        xrts_parameters.source_spectrum = 'prop'
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_source_spectrum_file, 1 )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_identifier, 'GAUSSIAN' )
+        self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_fwhm, 5.0 )
+
 
     def testSetSeeFlagsRPA(self):
         """ Test the internal conversion of the See model into use_* flags. """

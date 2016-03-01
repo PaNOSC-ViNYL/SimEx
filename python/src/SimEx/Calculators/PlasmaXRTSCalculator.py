@@ -125,6 +125,9 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Serialize the parameters (generate the input deck).
         self.parameters._serialize()
 
+        # Write the spectrum if required.
+        ### TODO
+
         # cd to the temporary directory where input deck was written.
         pwd = os.getcwd()
 
@@ -170,7 +173,9 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         h5 = h5py.File(self.input_path, 'r')
 
         self._input_data = {}
-        self._input_data['pulse_spectrum'] = numpy.array(h5['misc/spectrum0'].value)
+        self._input_data['source_spectrum'] = numpy.array(h5['misc/spectrum0'].value)
+
+        h5.close()
 
     def saveH5(self):
         """ """

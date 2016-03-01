@@ -411,8 +411,29 @@ Real time: 12.0 seconds
 
         xrts_calculator._readH5()
 
-        self.assertIn( 'pulse_spectrum', xrts_calculator._input_data.keys() )
-        #xrts_calculator.backengine()
+        self.assertIn( 'source_spectrum', xrts_calculator._input_data.keys() )
+
+        e = xrts_calculator._input_data['source_spectrum'][:,0]
+        s = xrts_calculator._input_data['source_spectrum'][:,1]
+        import pylab
+        pylab.plot(e, s)
+        #pylab.show()
+
+    def testRunWithSpectrum(self):
+        """ Test a run with loaded source spectrum to convolute with structure factor. """
+        # Construct parameters.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'),
+                                                output_path='xrts_out.h5')
+
+
+        xrts_calculator._readH5()
+
+        xrts_parameters.source_spectrum = 'prop'
+
+        xrts_parameters._serialize()
 
 if __name__ == '__main__':
     unittest.main()
