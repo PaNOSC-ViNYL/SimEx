@@ -2,8 +2,7 @@ RECON=recon
 RECON_DIR = ${PACKAGES}/${RECON}
 RECON_SRC_DIR=${SRC}/${RECON}
 
-${RECON}: ${HDF5_SRC_DIR}/install.stamp \
-	${RECON_SRC_DIR}/install.stamp
+${RECON}: ${RECON_SRC_DIR}/install.stamp
 
 ${PACKAGES}/${RECON}_package.stamp:
 	@echo "\nFetching ${RECON}."
@@ -14,7 +13,7 @@ ${PACKAGES}/${RECON}_package.stamp:
 
 ${RECON_SRC_DIR}/unpack.stamp: ${PACKAGES}/${RECON}_package.stamp
 	@echo "\nUnpacking ${RECON}."
-	if [ ! -d ${RECON_SRC_DIR} ]; then \
+	if [ ! -d "${RECON_SRC_DIR}" ]; then \
 		mkdir ${RECON_SRC_DIR}; \
 	fi
 	cd ${RECON_SRC_DIR} && \
@@ -25,7 +24,7 @@ ${RECON_SRC_DIR}/unpack.stamp: ${PACKAGES}/${RECON}_package.stamp
 ${RECON_SRC_DIR}/patch.stamp: ${RECON_SRC_DIR}/unpack.stamp
 	@echo "Patching ${RECON}."
 	cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
-	cp ${PATCHES}/recon/makefile_DM Makefile
+	cp ${PATCHES}/recon/makefile_DM Makefile    
 	touch $@
 	@echo "Patched ${RECON}.\n"
 
@@ -43,11 +42,11 @@ ${RECON_SRC_DIR}/build_emc.stamp:${RECON_SRC_DIR}/patch.stamp
 
 ${RECON_SRC_DIR}/build_dm.stamp:${RECON_SRC_DIR}/patch.stamp
 	@echo "\nBuilding ${RECON}."
-	if [ -d ${MKLROOT} ]; then \
+	if [ -d "${MKLROOT}" ]; then \
 		cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
 		make mkl;\
 	fi
-	if [ ! -d ${MKLROOT} ]; then \
+	if [ ! -d "${MKLROOT}" ]; then \
 		cd ${RECON_SRC_DIR}/s2e_recon/DM_Src && \
 		make;\
 	fi
@@ -59,7 +58,7 @@ ${RECON_SRC_DIR}/install.stamp:${RECON_SRC_DIR}/build.stamp
 	@echo "\nInstalling ${RECON}."
 	cd ${RECON_SRC_DIR}/s2e_recon/EMC_Src && \
 	cp -av EMC ${PREFIX_DIR}/bin && \
-	cp -av quaternions ${ROOT}/python/src/SimEx/Calculators/CalculatorUtilities && \
+	cp -av quaternions ${SIMEX}/src/SimEx/Calculators/CalculatorUtilities && \
 	cp -av runEMC.py ${PYPATH} && \
 	mkdir -p ${PYPATH}/supp_py_modules && \
 	cp -av supp_py_modules/*.py ${PYPATH}/supp_py_modules && \

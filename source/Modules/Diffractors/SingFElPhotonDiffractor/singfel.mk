@@ -6,11 +6,7 @@ SINGFEL_SRC_DIR=${SRC}/${SINGFEL}
 #export INCLUDE_PATH=/afs/desy.de/products/python/.amd64_rhel60/2.7/include/python2.7:${INCLUDE_PATH}
 
 
-singfel: ${MPICH_SRC_DIR}/install.stamp \
-	${ARMADILLO_SRC_DIR}/install.stamp \
-	${HDF5_SRC_DIR}/install.stamp \
-	${BOOST_SRC_DIR}/install.stamp \
-	${SINGFEL_SRC_DIR}/install.stamp
+singfel: ${SINGFEL_SRC_DIR}/install.stamp
 
 ${PACKAGES}/singfel_package.stamp:
 	@echo "\nFetching ${SINGFEL}."
@@ -34,7 +30,6 @@ ${SINGFEL_SRC_DIR}/patch.stamp: ${SINGFEL_SRC_DIR}/unpack.stamp
 	cd ${SINGFEL_SRC_DIR} && \
 	cp -v ${PATCHES}/${SINGFEL}/CMakeLists.txt . && \
 	patch CMake/FindArmadillo.cmake ${PATCHES}/${SINGFEL}/FindArmadillo.cmake.patch && \
-	patch src/radiationDamageMPI.cpp ${PATCHES}/${SINGFEL}/radiationDamageMPI.cpp.patch && \
 	touch $@
 	@echo "Patched ${SINGFEL}.\n"
 
@@ -45,7 +40,7 @@ ${SINGFEL_SRC_DIR}/build.stamp: ${SINGFEL_SRC_DIR}/patch.stamp
 		mkdir build; \
     fi
 	cd ${SINGFEL_SRC_DIR}/build && \
-		PATH=${PREFIX_DIR}/bin:${PATH} BOOST_INCLUDEDIR=${PREFIX_DIR}/include/boost BOOST_DIR=${PREFIX_DIR} ARMA_DIR=${PREFIX_DIR} LD_LIBRARY_PATH=${LIBDIR}:${LD_LIBRARY_PATH} HDF5_DIR=${PREFIX_DIR} cmake .. && \
+		cmake .. && \
     make && \
 	touch $@
 	@echo "Built ${SINGFEL}.\n"

@@ -1,5 +1,3 @@
-
-
 install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION .
 			PATTERN ".git*" EXCLUDE 
 		    PATTERN "CMakeLists.txt" EXCLUDE )	
