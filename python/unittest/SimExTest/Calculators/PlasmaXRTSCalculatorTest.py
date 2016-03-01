@@ -38,11 +38,12 @@ import unittest
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
+from TestUtilities import TestUtilities
 
 # Import the class to test.
 from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
 from SimEx.Calculators.PlasmaXRTSCalculator import parseStaticData
-from TestUtilities import TestUtilities
+
 
 class PlasmaXRTSCalculatorTest(unittest.TestCase):
     """
@@ -98,6 +99,9 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         self.assertIsInstance( xrts_calculator, AbstractPhotonDiffractor )
         self.assertIsInstance( xrts_calculator, AbstractBaseCalculator )
 
+        # Check attributes are initialized.
+        self.assertEqual( xrts_calculator._input_data, {} )
+
     def testConstructionParameters(self):
         """ Testing the input parameter checks pass for a sane parameter dict. """
 
@@ -113,6 +117,8 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         # Check query is ok.
         self.assertIsInstance( query, PlasmaXRTSCalculatorParameters )
 
+        # Check attributes are initialized.
+        self.assertEqual( xrts_calculator._input_data, {})
 
     def testBackengine(self):
         """ Check that the backengine can be executed and output is generated. """
@@ -393,9 +399,20 @@ Real time: 12.0 seconds
         self.assertIn( 'lfc',           static_data_keys )
         self.assertIn( 'debye_waller',  static_data_keys )
 
+    def testReadH5(self):
+        """ Test the readH5 function to read input from the photon propagator. """
+        # Construct parameters.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'),
+                                                output_path='xrts_out.h5')
 
 
+        xrts_calculator._readH5()
 
+        self.assertIn( 'pulse_spectrum', xrts_calculator._input_data.keys() )
+        #xrts_calculator.backengine()
 
 if __name__ == '__main__':
     unittest.main()

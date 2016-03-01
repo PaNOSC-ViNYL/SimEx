@@ -109,6 +109,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
                                 '/params/info',
                                 ]
 
+        self._input_data = {}
 
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
@@ -164,7 +165,12 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def _readH5(self):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-        raise( RuntimeError, "Not implemented.")
+
+        # Open the h5 file.
+        h5 = h5py.File(self.input_path, 'r')
+
+        self._input_data = {}
+        self._input_data['pulse_spectrum'] = numpy.array(h5['misc/spectrum0'].value)
 
     def saveH5(self):
         """ """
