@@ -435,7 +435,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_identifier, 'GAUSSIAN' )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__source_spectrum_fwhm, 5.0 )
 
-
     def testSetSeeFlagsRPA(self):
         """ Test the internal conversion of the See model into use_* flags. """
 
@@ -597,7 +596,6 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         # Check.
         self.assertEqual( xrts_parameters.model_IPL, 'USR' )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__ipl_value, 1.234 )
-
 
     def testSerialize(self):
         """ Test the serialization of parameters into input deck."""

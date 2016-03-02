@@ -419,8 +419,8 @@ Real time: 12.0 seconds
         pylab.plot(e, s)
         #pylab.show()
 
-    def testRunWithSpectrum(self):
-        """ Test a run with loaded source spectrum to convolute with structure factor. """
+    def testSerializeSourceSpectrum(self):
+        """ Test saving the source spectrum to file in the correct location. """
         # Construct parameters.
         xrts_parameters = self.xrts_parameters
 
@@ -434,6 +434,75 @@ Real time: 12.0 seconds
         xrts_parameters.source_spectrum = 'prop'
 
         xrts_parameters._serialize()
+
+        xrts_calculator._serializeSourceSpectrum()
+
+        self.assertTrue( 'source_spectrum.txt' in os.listdir( xrts_parameters._tmp_dir ) )
+
+    def testBackengineWithSpectrum(self):
+        """ Test saving the source spectrum to file in the correct location. """
+        # Construct parameters.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'),
+                                                output_path='xrts_out.h5')
+
+        # Read in the data.
+        xrts_calculator._readH5()
+
+        # Specify that we want to use the measured source spectrum.
+        xrts_parameters.source_spectrum = 'prop'
+        xrts_parameters.energy_range = {'min' :-300.0,
+                                        'max' :300.0,
+                                        'step':3.,
+                                          }
+
+
+        # Run the backengine.
+        xrts_calculator.backengine()
+
+    def testPhotonEnergyConsistency(self):
+        """ Test that an exception is thrown if the given photon energy is not equal to the source photon energy. """
+        # Construct parameters.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'),
+                                                output_path='xrts_out.h5')
+        # This should cause the exception since source photon energy is 4.96 keV.
+        xrts_calculator.parameters.photon_energy = 5.0e3
+
+        # Read in the data.
+        self.assertRaises( RuntimeError, xrts_calculator._readH5 )
+
+
+    def testBackengineWithGauss(self):
+        """ Test saving the source spectrum to file in the correct location. """
+        # Construct parameters.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'),
+                                                output_path='xrts_out.h5')
+
+        # Read in the data.
+        xrts_calculator._readH5()
+
+        # Specify that we want to use the measured source spectrum.
+        xrts_parameters.source_spectrum_fwhm=1.0
+        xrts_parameters.energy_range = {'min' :-200.0,
+                                        'max' :200.0,
+                                        'step':2.,
+                                          }
+
+
+        # Run the backengine.
+        xrts_calculator.backengine()
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

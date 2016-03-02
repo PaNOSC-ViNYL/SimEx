@@ -126,10 +126,10 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         self.parameters._serialize()
 
         # Write the spectrum if required.
-        ### TODO
+        if self.parameters.source_spectrum == 'PROP':
+            self._serializeSourceSpectrum()
 
-        # cd to the temporary directory where input deck was written.
-        pwd = os.getcwd()
+        #pwd = os.getcwd()
 
         # Setup command sequence and issue the system call.
         # Make sure to cd to correct directory where input deck is located.
@@ -157,8 +157,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Store data internally.
         self.__run_data = numpy.loadtxt( path_to_data )
         # Cd back to where we came from.
-        os.chdir( pwd )
-
+        #os.chdir( pwd )
 
     @property
     def data(self):
@@ -173,7 +172,16 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         h5 = h5py.File(self.input_path, 'r')
 
         self._input_data = {}
-        self._input_data['source_spectrum'] = numpy.array(h5['misc/spectrum0'].value)
+        photon_energy = h5['params/photonEnergy'].value
+        if self.parameters.photon_energy != photon_energy:
+            raise RuntimeError( "Parameter 'photon_energy' (%4.3f) not equal to source photon energy (%4.3f)." % (self.parameters.photon_energy, photon_energy))
+
+        self.parameters.photon_energy = photon_energy
+
+        source_data = numpy.array(h5['misc/spectrum0'].value)
+        source_data[:,0] = source_data[:,0] - self.parameters.photon_energy
+        self._input_data['source_spectrum'] = source_data
+
 
         h5.close()
 
@@ -249,6 +257,18 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         ####
         h5.close()
         # Never write after this line in this function.
+
+    def _serializeSourceSpectrum(self):
+        """ Write the source spectrum to a file on disk. """
+
+        source_spectrum_data = self._input_data['source_spectrum']
+        source_spectrum_path = os.path.join( self.parameters._tmp_dir, 'source_spectrum.txt')
+
+        try:
+            numpy.savetxt( source_spectrum_path, source_spectrum_data, delimiter='\t' )
+        except:
+            print  "Source spectrum could not be saved. Please check temporary directory %s exists. Backtrace follows."
+            raise
 
 def parseStaticData(data_string):
         """
