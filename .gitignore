@@ -1,6 +1,0 @@
-doc/
-build/externals/packages/
-build/externals/src/
-sw/
-*.dat
-*.log

@@ -1,7 +1,0 @@
-FILE(GLOB_RECURSE new_list RELATIVE ${SIMEX_MODULES_ROOT} ${SIMEX_MODULES_ROOT}/CMakeLists.txt)
-SET(SIMEX_MODULES "")
-FOREACH(file_path ${new_list})
-    GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
-    LIST(APPEND SIMEX_MODULES ${dir_path})
-ENDFOREACH()
-

@@ -1,4 +1,0 @@
-#!/bin/sh
-
-export PATH=${BINDIR}:$PATH
-export PYTHONPATH=${PYPATH}:$PYTHONPATH

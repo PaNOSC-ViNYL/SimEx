@@ -1,0 +1,14 @@
+# find needed packages
+FIND_PACKAGE (PythonLibs REQUIRED)
+include(FindPythonModules)
+find_python_module(h5py REQUIRED)
+find_python_module(matplotlib REQUIRED)
+find_python_module(scipy REQUIRED)
+
+FIND_PACKAGE (LAPACK REQUIRED)
+#message (STATUS "***** LAPACK_LIBRARIES ${LAPACK_LIBRARIES} ****")
+
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION .
+			PATTERN ".git*" EXCLUDE 
+		    PATTERN "CMakeLists.txt" EXCLUDE )	
