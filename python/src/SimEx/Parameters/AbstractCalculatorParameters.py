@@ -19,32 +19,29 @@
 #                                                                        #
 ##########################################################################
 
-import unittest
-import sys
+""" Module for AbstractCalculatorParameters class
 
-# Import suites to run.
-from SimExTest.Calculators import CalculatorsTests
-from SimExTest.Utilities import UtilitiesTests
-from SimExTest.Parameters import ParametersTests
-from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
+    @author : CFG
+    @institution : XFEL
+    @creation 20160219
 
-# Define the encapsulating test suite.
-def suite():
-    suites = [ CalculatorsTests.suite(),
-               UtilitiesTests.suite(),
-               ParametersTests.suite(),
-               PhotonExperimentSimulationTests.suite(),
-             ]
+"""
+from abc import ABCMeta, abstractmethod
 
-    return unittest.TestSuite(suites)
 
-# Run the top level suite and return a success status code. This enables running an automated git-bisect.
-if __name__=="__main__":
+class AbstractCalculatorParameters(object):
+    """
+    Abstract class for all calculator parameters.
+    """
+    __metaclass__ = ABCMeta
 
-    result = unittest.TextTestRunner(verbosity=2).run(suite())
+    @abstractmethod
+    def __init__(self, parameters_dict=None):
+        """
+        Constructor for the Abstract Calculator Parameters.
 
-    if result.wasSuccessful():
-        print '---> OK <---'
-        sys.exit(0)
+        @param control_parameters : The parameters to turn into class members.
+        @type : dict
 
-    sys.exit(1)
+        """
+        pass

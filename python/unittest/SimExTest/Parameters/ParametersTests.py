@@ -19,32 +19,21 @@
 #                                                                        #
 ##########################################################################
 
+import paths
 import unittest
-import sys
 
-# Import suites to run.
-from SimExTest.Calculators import CalculatorsTests
-from SimExTest.Utilities import UtilitiesTests
-from SimExTest.Parameters import ParametersTests
-from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
+# Import classes to test.
+from PlasmaXRTSCalculatorParametersTest import PlasmaXRTSCalculatorParametersTest
 
-# Define the encapsulating test suite.
+# Setup the suite.
 def suite():
-    suites = [ CalculatorsTests.suite(),
-               UtilitiesTests.suite(),
-               ParametersTests.suite(),
-               PhotonExperimentSimulationTests.suite(),
-             ]
+    suites = (
+             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,    'test'),
+             )
 
     return unittest.TestSuite(suites)
 
-# Run the top level suite and return a success status code. This enables running an automated git-bisect.
+# If called as script, run the suite.
 if __name__=="__main__":
+    unittest.main(defaultTest="suite")
 
-    result = unittest.TextTestRunner(verbosity=2).run(suite())
-
-    if result.wasSuccessful():
-        print '---> OK <---'
-        sys.exit(0)
-
-    sys.exit(1)

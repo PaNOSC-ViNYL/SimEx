@@ -50,3 +50,65 @@ def checkAndSetInstance(cls, var=None, default=None):
         raise exceptions.TypeError("The parameter 'var' is not of correct type.")
 
     return var
+
+def checkAndSetInteger(var=None, default=None):
+    """
+    Utility to check if the passed value is a positive integer.
+
+    @param var : The object to check.
+    @param default : The default to use if no var is given.
+    @return : The checked object or default.
+    @throw : TypeError if check fails.
+    """
+
+    if var is None:
+        if not (isinstance( default, int) ):
+            raise exceptions.TypeError("The default must be an integer.")
+        return default
+
+    if not isinstance(var, int):
+            raise exceptions.TypeError("The parameter must be of type integer.")
+    return var
+
+
+def checkAndSetPositiveInteger(var=None, default=None):
+    """
+    Utility to check if the passed value is a positive integer.
+
+    @param var : The object to check.
+    @param default : The default to use if no var is given.
+    @return : The checked object or default.
+    @throw : TypeError if check fails.
+    """
+
+    if var is None:
+        if not (isinstance( default, int) and default > 0):
+            raise exceptions.TypeError("The default must be a positive integer.")
+        return default
+
+    if not isinstance(var, int):
+            raise exceptions.TypeError("The parameter must be of type integer.")
+    if var <= 0:
+            raise exceptions.TypeError("The parameter must be a positive integer.")
+    return var
+
+def checkAndSetNonNegativeInteger(var=None, default=None):
+    """
+    Utility to check if the passed value is a non-negative integer.
+
+    @param var : The object to check.
+    @param default : The default to use if no var is given.
+    @return : The checked object or default.
+    @throw : TypeError if check fails.
+    """
+
+    if var is None:
+        if not (isinstance( default, int) and default >= 0):
+            raise exceptions.TypeError("The default must be a non-negative integer.")
+        return default
+
+    if not isinstance(var, int):
+            raise exceptions.TypeError("The parameter must be of type integer.")
+    if var < 0:
+            raise exceptions.TypeError("The parameter must be a non-negative integer.")
+    return var

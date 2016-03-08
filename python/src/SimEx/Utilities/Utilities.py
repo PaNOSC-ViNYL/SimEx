@@ -16,35 +16,22 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
-import unittest
-import sys
+""" Module for various utilities.
+    @author CFG
+    @institution XFEL
+    @creation 20160222
+"""
 
-# Import suites to run.
-from SimExTest.Calculators import CalculatorsTests
-from SimExTest.Utilities import UtilitiesTests
-from SimExTest.Parameters import ParametersTests
-from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
-
-# Define the encapsulating test suite.
-def suite():
-    suites = [ CalculatorsTests.suite(),
-               UtilitiesTests.suite(),
-               ParametersTests.suite(),
-               PhotonExperimentSimulationTests.suite(),
-             ]
-
-    return unittest.TestSuite(suites)
-
-# Run the top level suite and return a success status code. This enables running an automated git-bisect.
-if __name__=="__main__":
-
-    result = unittest.TextTestRunner(verbosity=2).run(suite())
-
-    if result.wasSuccessful():
-        print '---> OK <---'
-        sys.exit(0)
-
-    sys.exit(1)
+ALL_ELEMENTS= ['H','He',
+'Li','Be','B','C','N','O','F','Ne',
+'Na','Mg','Al','Si','P','S','Cl','Ar',
+'K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
+'Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te','I','Xe',
+'Cs','Ba','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn',
+'Fr','Ra','Rf','Db','Sg','Bh','Hs','Mt','Ds','Rg','Cn','Uut','Fl','Uup','Lv','Uus','Uuo',
+'La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu',
+'Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr']

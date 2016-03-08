@@ -86,6 +86,8 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         return 0
 
+        ### TODO: Consider moving IO logic to the ABC.
+
     @property
     def data(self):
         """ Query for the field data. """
