@@ -25,7 +25,7 @@ import sys
 # Import suites to run.
 from SimExTest.Calculators import CalculatorsTests
 from SimExTest.Utilities import UtilitiesTests
-from SimExTest.ParametersTests import ParametersTests
+from SimExTest.Parameters import ParametersTests
 from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
 # Define the encapsulating test suite.

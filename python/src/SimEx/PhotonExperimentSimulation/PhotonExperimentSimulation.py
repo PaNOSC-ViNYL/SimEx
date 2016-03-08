@@ -25,14 +25,18 @@
     @creation : 20151005
 """
 
-from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
-from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
+
+
+from SimEx.Calculators.AbstractPhotonAnalyzer   import checkAndSetPhotonAnalyzer
+from SimEx.Calculators.AbstractPhotonDetector   import checkAndSetPhotonDetector
 from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffractor
 from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
-from SimEx.Calculators.AbstractPhotonDetector import checkAndSetPhotonDetector
-from SimEx.Calculators.AbstractPhotonAnalyzer import checkAndSetPhotonAnalyzer
+from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
+from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
 
-class PhotonExperimentSimulation:
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+
+class PhotonExperimentSimulation(object):
     """ The PhotonExperimentSimulation is the top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
 
     def __init__(self, photon_source=None,
@@ -62,7 +66,6 @@ class PhotonExperimentSimulation:
         @param photon_analyzer : The calculator for  photon signal analysis.
         @type : Child of AbstractPhotonAnalyzer
         """
-
         self.__photon_source = checkAndSetPhotonSource(photon_source)
         self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)
         self.__photon_interactor = checkAndSetPhotonInteractor(photon_interactor)
@@ -78,8 +81,63 @@ class PhotonExperimentSimulation:
                 self.__photon_analyzer,
                 ]
 
+
         if self.__photon_detector is not None:
             self.__calculators.insert(-1, self.__photon_detector )
+
+        if any([calc is None for calc in self.__calculators]):
+            raise( TypeError, "No calculator can be None.")
+
+    #######################
+    # Queries and setters #
+    #######################
+    @property
+    def photon_source(self):
+        """ Query for the photon source attached to this workflow. """
+        return self.__photon_source
+    @photon_source.setter
+    def photon_source(self, value):
+        self.__photon_source = checkAndSetPhotonSource( value )
+
+    @property
+    def photon_propagator(self):
+        """ Query for the photon propagator attached to this workflow. """
+        return self.__photon_propagator
+    @photon_propagator.setter
+    def photon_propagator(self, value):
+        self.__photon_propagator = checkAndSetPhotonPropagator( value )
+
+    @property
+    def photon_interactor(self):
+        """ Query for the photon interactor attached to this workflow. """
+        return self.__photon_interactor
+    @photon_interactor.setter
+    def photon_interactor(self, value):
+        self.__photon_interactor = checkAndSetPhotonInteractor( value )
+
+    @property
+    def photon_diffractor(self):
+        """ Query for the photon diffractor attached to this workflow. """
+        return self.__photon_diffractor
+    @photon_diffractor.setter
+    def photon_diffractor(self, value):
+        self.__photon_diffractor = checkAndSetPhotonDiffractor( value )
+
+    @property
+    def photon_detector(self):
+        """ Query for the photon detector attached to this workflow. """
+        return self.__photon_detector
+    @photon_detector.setter
+    def photon_detector(self, value):
+        self.__photon_detector = checkAndSetPhotonDetector( value )
+
+    @property
+    def photon_analyzer(self):
+        """ Query for the photon analyzer attached to this workflow. """
+        return self.__photon_analyzer
+    @photon_analyzer.setter
+    def photon_analyzer(self, value):
+        self.__photon_analyzer = checkAndSetPhotonAnalyzer( value )
 
     def run(self):
         """ Method to start the photon experiment simulation workflow. """
@@ -129,5 +187,8 @@ class PhotonExperimentSimulation:
         """
         status = True
         for i,calculator in enumerate(self.__calculators[:-1]):
-            status = status and set(self.__calculators[i+1].expectedData()).issubset( set(calculator.providedData()) )
+            provided_data_set = set(calculator.providedData())
+            expected_data_set = set(self.__calculators[i+1].expectedData())
+            if not expected_data_set.issubset( provided_data_set ):
+                raise RuntimeError( "Dataset expected by %s is not a subset of data provided by %s.\n Provided data are:\n%s.\n\n Expected data are:\n%s" % (self.__calculators[i+1], calculator, str(provided_data_set).replace(',', '\n'), str(expected_data_set).replace(',', '\n') ) )
         return status

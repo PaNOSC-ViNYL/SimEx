@@ -62,21 +62,25 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
                                 '/version',
                                 ]
 
-        self.__expected_data = ['/-input_dir'
-                                '/-output_dir'
-                                '/-config_file'
-                                '/-b',
-                                '/-g',
-                                '/-uniformRotation',
-                                '/-calculateCompton',
-                                '/-sliceInterval',
-                                '/-numSlices',
-                                '/-pmiStartID',
-                                '/-pmiEndID',
-                                '/-dpID',
-                                '/-numDP',
-                                '/-USE_GPU',
-                                '/version']
+        self.__expected_data = [
+                                '/data/data',
+                                '/data/diffr',
+                                '/data/angle',
+                                '/history/parent/detail',
+                                '/history/parent/parent',
+                                '/info/package_version',
+                                '/info/contact',
+                                '/info/data_description',
+                                '/info/method_description',
+                                '/params/geom/detectorDist',
+                                '/params/geom/pixelWidth',
+                                '/params/geom/pixelHeight',
+                                '/params/geom/mask',
+                                '/params/beam/photonEnergy',
+                                '/params/beam/photons',
+                                '/params/beam/focusArea',
+                                '/params/info',
+                                ]
 
         emc_parameters = None
         dm_parameters = None
