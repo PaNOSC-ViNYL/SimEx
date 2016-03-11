@@ -38,6 +38,9 @@ from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
 from EMCCaseGenerator import  EMCCaseGenerator, print_to_log
 
+debug = False
+
+
 class EMCOrientation(AbstractPhotonAnalyzer):
     """
     Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
@@ -172,10 +175,12 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','sw','bin'))
 
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
-        #run_log_file        = os.path.join(run_instance_dir, "orient.log")
         if os.path.isdir(self.input_path):
             photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
             photonFiles.sort()
+            if debug:
+                photonFiles = photonFiles[:100]
+
         elif os.path.isfile(self.input_path):
             photonFiles = [self.input_path]
         else:
@@ -221,8 +226,6 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                     log_file=outputLog)
 
 
-        #msg = time.asctime() + ":: " +"Creating symbolic link to crucial files in output subdirectory, " + run_instance_dir
-        #print_to_log(msg, log_file=runLogFile)
         if not (os.path.isfile(os.path.join(run_instance_dir,"detector.dat"))):
             os.symlink(os.path.join(tmp_out_dir,"detector.dat"), os.path.join(run_instance_dir,"detector.dat"))
         if not (os.path.isfile(os.path.join(run_instance_dir,"photons.dat"))):

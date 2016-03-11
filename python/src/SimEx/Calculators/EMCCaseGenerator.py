@@ -31,9 +31,6 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 
-################################################################################
-# Convenience functions for this script
-################################################################################
 def print_to_log(msg, log_file=None):
     if not os.path.exists(log_file):
         fp = open(log_file, "w")
@@ -43,6 +40,9 @@ def print_to_log(msg, log_file=None):
     fp.write(t_msg)
     fp.write("\n")
     fp.close()
+
+    print msg
+    sys.stdout.flush()
 
 def create_directory(dir_name, logging=True, log_file=None, err_msg=""):
     if os.path.exists(dir_name):
@@ -316,7 +316,7 @@ class EMCCaseGenerator(object):
                 outf.write(' '.join([strNumO, ssO, strNumM, ssM]) + "\n")
                 f.close()
             except:
-                msg = "Failed to read file %"%n
+                msg = "Failed to read file #%d %s." % (n, fn)
                 print_to_log(msg, log_file=self.runLog)
 
             if n%10 == 0:
