@@ -1,6 +1,6 @@
 INCLUDE(ExternalProject)
 
-FIND_PACKAGE (HDF5 REQUIRED)
+FIND_PACKAGE (HDF5 REQUIRED HL CXX)
 FIND_PACKAGE (MPI REQUIRED)
 FIND_PACKAGE (Armadillo REQUIRED)
 FIND_PACKAGE(Boost 1.55.0 REQUIRED COMPONENTS python thread date_time system mpi serialization
@@ -12,7 +12,8 @@ singfel
 URL https://www.dropbox.com/s/nnoc78iafor0qrn/singfel.tar.gz
 PATCH_COMMAND cp ${SIMEX_CMAKE_DIR}/FindArmadillo.cmake CMake/FindArmadillo.cmake &&
 	          cp -v ${CMAKE_CURRENT_SOURCE_DIR}/patches/CMakeLists.txt.patch CMakeLists.txt &&
-	          cp ${SIMEX_CMAKE_DIR}/FindMKL.cmake CMake/ARMA_FindMKL.cmake
+	          cp ${SIMEX_CMAKE_DIR}/FindMKL.cmake CMake/ARMA_FindMKL.cmake &&
+		  rm CMake/FindHDF5.cmake
 INSTALL_COMMAND ""
 )
     
