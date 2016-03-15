@@ -13,6 +13,7 @@ URL https://www.dropbox.com/s/nnoc78iafor0qrn/singfel.tar.gz
 PATCH_COMMAND cp ${SIMEX_CMAKE_DIR}/FindArmadillo.cmake CMake/FindArmadillo.cmake &&
 	          cp -v ${CMAKE_CURRENT_SOURCE_DIR}/patches/CMakeLists.txt.patch CMakeLists.txt &&
 	          cp ${SIMEX_CMAKE_DIR}/FindMKL.cmake CMake/ARMA_FindMKL.cmake &&
+		  patch	src/radiationDamageMPI.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/radiationDamageMPI.cpp.patch &&
 		  rm CMake/FindHDF5.cmake
 INSTALL_COMMAND ""
 )

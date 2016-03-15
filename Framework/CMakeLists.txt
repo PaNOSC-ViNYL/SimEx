@@ -1,5 +1,5 @@
 # find needed packages
-FIND_PACKAGE (PythonLibs REQUIRED)
+FIND_PACKAGE (PythonLibs 2.7 REQUIRED)
 include(FindPythonModules)
 find_python_module(h5py REQUIRED)
 find_python_module(matplotlib REQUIRED)
