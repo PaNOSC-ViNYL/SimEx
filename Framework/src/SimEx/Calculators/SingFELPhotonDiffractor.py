@@ -194,35 +194,35 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if 'uniform_rotation' in self.parameters.keys():
             uniform_rotation = {True : '1', False : '0'}[self.parameters['uniform_rotation']]
         else:
-            uniform_rotation = '1'
+            uniform_rotation = 1
 
         if 'calculate_Compton' in self.parameters.keys():
-            calculate_Compton = {True : '1', False : '0'}[self.parameters['calculate_Compton']]
+            calculate_Compton = {True : 1, False : 0}[self.parameters['calculate_Compton']]
         else:
-            calculate_Compton = '0'
+            calculate_Compton = 0
 
         if 'slice_interval' in self.parameters.keys():
-            slice_interval = str(self.parameters['slice_interval'])
+            slice_interval = self.parameters['slice_interval']
         else:
-            slice_interval = '100'
+            slice_interval = 100
 
         if 'number_of_slices' in self.parameters.keys():
-            number_of_slices = str(self.parameters['number_of_slices'])
+            number_of_slices = self.parameters['number_of_slices']
 
         if 'pmi_start_ID' in self.parameters.keys():
-            pmi_start_ID = str(self.parameters['pmi_start_ID'])
+            pmi_start_ID = self.parameters['pmi_start_ID']
         else:
-            pmi_start_ID = '0'
+            pmi_start_ID = 0
 
         if 'pmi_stop_ID' in self.parameters.keys():
-            pmi_stop_ID = str(self.parameters['pmi_stop_ID'])
+            pmi_stop_ID = self.parameters['pmi_stop_ID']
         else:
-            pmi_stop_ID = '0'
+            pmi_stop_ID = 0
 
         if 'number_of_diffraction_patterns' in self.parameters.keys():
-            number_of_diffraction_patterns = str(self.parameters['number_of_diffraction_patterns'])
+            number_of_diffraction_patterns = self.parameters['number_of_diffraction_patterns']
         else:
-            number_of_diffraction_patterns = '1'
+            number_of_diffraction_patterns = 1
 
         if 'beam_parameter_file' in self.parameters.keys():
             beam_parameter_file = self.parameters['beam_parameter_file']

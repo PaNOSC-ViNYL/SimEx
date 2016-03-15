@@ -65,23 +65,203 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
     def testConstruction(self):
         """ Test the default constructor of this class. """
-        ### TODO
-        self.assertTrue(False)
+        # Setup a minimal experiment simulation.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
+        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
+        photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
+        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+        photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
+
+        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
+
+        pxs = PhotonExperimentSimulation(photon_source=photon_source,
+                                         photon_propagator=photon_propagator,
+                                         photon_interactor=photon_interactor,
+                                         photon_diffractor=photon_diffractor,
+                                         photon_detector=photon_detector,
+                                         photon_analyzer=photon_analyzer,
+                                         )
+
+        # Check instance.
+        self.assertIsInstance( pxs, PhotonExperimentSimulation )
 
     def testCalculatorQueries(self):
         """ Test that the calculator queries return the correct calculators. """
-        ### TODO
-        self.assertTrue(False)
+        # Setup a minimal experiment simulation.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
+        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
+        photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
+        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+        photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
+
+        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
+
+        pxs = PhotonExperimentSimulation(photon_source=photon_source,
+                                         photon_propagator=photon_propagator,
+                                         photon_interactor=photon_interactor,
+                                         photon_diffractor=photon_diffractor,
+                                         photon_detector=photon_detector,
+                                         photon_analyzer=photon_analyzer,
+                                         )
+
+        # Check queries.
+        self.assertIs( pxs.photon_source, photon_source )
+        self.assertIs( pxs.photon_propagator, photon_propagator )
+        self.assertIs( pxs.photon_interactor, photon_interactor )
+        self.assertIs( pxs.photon_diffractor, photon_diffractor )
+        self.assertIs( pxs.photon_detector, photon_detector )
+        self.assertIs( pxs.photon_analyzer, photon_analyzer )
 
     def testConstructionExceptions(self):
         """ Test that the appropriate exceptions are thrown if the object is constructed incorrectly. """
-        ### TODO
-        self.assertTrue(False)
+        # Setup a minimal experiment simulation.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
+        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
+        photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
+        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+        photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
+
+        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
+
+        # Check wrong source.
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=None,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_propagator,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+
+
+        # Check wrong propagator.
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=None,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_source,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+
+
+
+        # Check wrong interactor.
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=None,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_source,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+
+
+
+        # Check wrong diffractor.
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=None,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_source,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_analyzer,
+                         )
+
+        # Check wrong analyzer.
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=None,
+                         )
+        self.assertRaises( TypeError, PhotonExperimentSimulation,
+                                                                  photon_source=photon_source,
+                                                                  photon_propagator=photon_propagator,
+                                                                  photon_interactor=photon_interactor,
+                                                                  photon_diffractor=photon_diffractor,
+                                                                  photon_detector=photon_detector,
+                                                                  photon_analyzer=photon_diffractor,
+                         )
 
     def testCheckInterfaceConsistency(self):
         """ Test if the check for interface consistency works correctly. """
-
-        ### TODO: More finegrained testing here: Check that inconsistencies are reported in a way that allows the user to address the issue quickly, report which pair of calculators are not consistent, and which data fields are missing.
 
         # Setup a minimal experiment simulation.
         source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
@@ -90,7 +270,19 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
         photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
-        photon_diffractor = SingFELPhotonDiffractor(parameters=None, input_path=diffr_input, output_path='diffr_out.h5')
+
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+        photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
+
         photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
         photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
 
@@ -151,7 +343,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                                              sample_path=TestUtilities.generateTestFilePath('sample.h5') )
 
         #  Diffraction with parameters.
-        diffraction_parameters={ 'uniform_rotation': 1,
+        diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
@@ -254,7 +446,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                                              sample_path=TestUtilities.generateTestFilePath('sample.h5') )
 
         #  Diffraction with parameters.
-        diffraction_parameters={ 'uniform_rotation': 1,
+        diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
@@ -353,7 +545,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                                              sample_path=TestUtilities.generateTestFilePath('sample.h5') )
 
         #  Diffraction with parameters.
-        diffraction_parameters={ 'uniform_rotation': 1,
+        diffraction_parameters={
+                     'uniform_rotation': True,
                      'calculate_Compton' : False,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,

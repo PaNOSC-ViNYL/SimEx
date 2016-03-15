@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016 Carsten Fortmann-Grote                              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -23,7 +23,7 @@
 
     @author : CFG
     @institution : XFEL
-    @creation 20151104
+    @creation 20160219
 
 """
 import os
@@ -46,7 +46,7 @@ BOOL_TO_INT = {True : 1, False : 0}
 
 class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    Class representing parameters for the plasma x-ray Thomson scattering calculator.
     """
 
     def __init__(self,
@@ -67,7 +67,9 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
                  model_IPL=None,
                  model_Mix=None,
                  lfc=None,
-                 Sbf_norm=None
+                 Sbf_norm=None,
+                 source_spectrum=None,
+                 source_spectrum_fwhm=None,
                  ):
 
         """
@@ -156,6 +158,14 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         @params Sbf_norm: How to normalize the bound-free structure factor.
         @type: string or double
         @default: None
+
+        @params source_spectrum: The x-ray probe energy spectrum.
+        @type: str
+        @default: "GAUSS"
+
+        @params source_spectrum_fwhm: The x-ray probe energy spectrum fwhm.
+        @type: float
+        @default: 5.0
         """
 
         # Check and set all parameters.
@@ -176,6 +186,8 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__model_Mix         = checkAndSetModelMix(model_Mix)
         self.__lfc               = checkAndSetLFC(lfc)
         self.__Sbf_norm          = checkAndSetSbfNorm(Sbf_norm)
+        self.__source_spectrum    = checkAndSetSourceSpectrum(source_spectrum)
+        self.__source_spectrum_fwhm=checkAndSetSourceSpectrumFWHM(source_spectrum_fwhm)
 
         # Set internal parameters.
         self._setSeeFlags()
@@ -184,6 +196,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self._setDebyeTemperatureFlags()
         self._setBandGapFlags()
         self._setIPLFlags()
+        self._setSourceSpectrumFlags()
 
         # Set state to not-initialized (e.g. input deck is not written).
         self.__is_initialized = False
@@ -260,6 +273,17 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         if isinstance( self.__model_IPL, float ):
             self.__ipl_value = copy.deepcopy(self.__model_IPL)
             self.__model_IPL = 'USR'
+
+    def _setSourceSpectrumFlags(self):
+        """ Set the internal source spectrum flags used in the input deck generation."""
+        # Default.
+        self.__use_source_spectrum_file = 0
+        self.__source_spectrum_identifier = "GAUSSIAN"
+
+        if self.__source_spectrum == "LORENTZ":
+            self.__source_spectrum_identifier = "LORENTZIAN"
+        elif self.__source_spectrum == "PROP":
+            self.__use_source_spectrum_file = 1
 
     def _serialize(self):
         """ Write the input deck for the xrts backengine. """
@@ -346,10 +370,10 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('NUMBER_POINTS 1024\n')
             input_deck.write('OPACITY_FILE nofile 0\n')
             input_deck.write('--instrument_function---------------------------------\n')
-            input_deck.write('USE_FILE 0\n')
-            input_deck.write('FILE_NAME nofile.dat\n')
-            input_deck.write('INST_MODEL GAUSSIAN\n')
-            input_deck.write('INST_FWHM 100.0\n')
+            input_deck.write('USE_FILE %d\n' % (self.__use_source_spectrum_file) )
+            input_deck.write('FILE_NAME source_spectrum.txt\n')
+            input_deck.write('INST_MODEL %s\n' % (self.__source_spectrum_identifier) )
+            input_deck.write('INST_FWHM %4.3f\n' % (self.__source_spectrum_fwhm) )
             input_deck.write('BIN_PER_PIXEL 1.0\n')
             input_deck.write('INST_INDEX 2.0\n')
             input_deck.write('--additional_parameters-------------------------------\n')
@@ -530,35 +554,37 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__Sbf_norm = checkAndSetSbfNorm(value)
         self._setSbfNormFlags()
 
+    @property
+    def source_spectrum(self):
+        """ Query for the source spectrum identifier. """
+        return self.__source_spectrum
+    @source_spectrum.setter
+    def source_spectrum(self, value):
+        """ Set the source_spectrum to <value>."""
+        self.__source_spectrum = checkAndSetSourceSpectrum(value)
+        self._setSourceSpectrumFlags()
+
+    @property
+    def source_spectrum_fwhm(self):
+        """ Query for the source spectrum fwhm identifier. """
+        return self.__source_spectrum
+    @source_spectrum_fwhm.setter
+    def source_spectrum_fwhm(self, value):
+        """ Set the source_spectrum fwhm to <value>."""
+        self.__source_spectrum_fwhm = checkAndSetSourceSpectrumFWHM(value)
+
     #@property
     #def (self):
         #""" Query for the <++>. """
         #return self.__<++>
+    #@<++>.setter
+    #def <++>(self, value):
+        #""" Set the <++> to <value>."""
+        #self.__<++> = checkAndSet<++>(value)
+        #<++>
 
-    #@property
-    #def <++>(self):
-        #""" Query for the <++>. """
-        #return self.__<++>
+       #<++>
 
-    #@property
-    #def <++>(self):
-        #""" Query for the <++>. """
-        #return self.__<++>
-
-    #@property
-    #def <++>(self):
-        #""" Query for the <++>. """
-        #return self.__<++>
-
-    #@property
-    #def <++>(self):
-        #""" Query for the <++>. """
-        #return self.__<++>
-
-    #@property
-    #def <++>(self):
-        #""" Query for the <++>. """
-        #return self.__<++>
 ###########################
 # Check and set functions #
 ###########################
@@ -900,3 +926,46 @@ def checkAndSetModelIPL( model ):
 
     # Return
     return model
+
+def checkAndSetSourceSpectrum( source_spectrum ):
+    """
+    Utility to check sanity of given input for the source spectrum identifier.
+
+    @param source_spectrum : The source spectrum identifier to check.
+    @type : str
+    @return : The checked identifier.
+    @raise : TypeError or ValueError if input is not valid.
+    """
+
+    # Check type.
+    source_spectrum = checkAndSetInstance( str, source_spectrum, "GAUSS" )
+
+    # Convert to all upper case.
+    source_spectrum = source_spectrum.upper()
+
+    # Check input is valid.
+    if source_spectrum not in ["GAUSS", "LORENTZ", "PROP"]:
+        raise ValueError( "Parameter 'source_spectrum' must be one of 'GAUSS', 'LORENTZ', or 'PROP'.")
+
+    # All checked, return.
+    return source_spectrum
+
+def checkAndSetSourceSpectrumFWHM( fwhm ):
+    """
+    Utility to check sanity of given input for the source spectrum full width at half maximum (fwhm).
+
+    @param source_spectrum : The value to check.
+    @type : float
+    @return : The checked value.
+    @raise : TypeError or ValueError if input is not valid.
+    """
+
+    # Check type.
+    fwhm = checkAndSetInstance( float, fwhm, 5.0 )
+
+    # Check positivity.
+    if fwhm <= 0.0:
+        raise ValueError( "The parameter 'source_spectrum_fwhm' must be positive.")
+
+    # All checked, return.
+    return fwhm

@@ -75,6 +75,7 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
 
         self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
 
+    @unittest.skip("Skipped")
     def testConstructionNumberOfFiles(self):
         """ Test that input and output are setup correctly depending on the number and type of input files given."""
         ### TODO

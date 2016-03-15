@@ -23,11 +23,12 @@
 
     @author : CFG
     @institution : XFEL
-    @creation 20151104
+    @creation 20160225
 
 """
 import h5py
 import os
+import re
 import numpy
 import subprocess
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -37,7 +38,7 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    Class representing a plasma x-ray Thomson scattering calculation.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
@@ -108,6 +109,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
                                 '/params/info',
                                 ]
 
+        self._input_data = {}
 
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
@@ -123,8 +125,11 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Serialize the parameters (generate the input deck).
         self.parameters._serialize()
 
-        # cd to the temporary directory where input deck was written.
-        pwd = os.getcwd()
+        # Write the spectrum if required.
+        if self.parameters.source_spectrum == 'PROP':
+            self._serializeSourceSpectrum()
+
+        #pwd = os.getcwd()
 
         # Setup command sequence and issue the system call.
         # Make sure to cd to correct directory where input deck is located.
@@ -152,8 +157,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Store data internally.
         self.__run_data = numpy.loadtxt( path_to_data )
         # Cd back to where we came from.
-        os.chdir( pwd )
-
+        #os.chdir( pwd )
 
     @property
     def data(self):
@@ -163,7 +167,23 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def _readH5(self):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-        raise( RuntimeError, "Not implemented.")
+
+        # Open the h5 file.
+        h5 = h5py.File(self.input_path, 'r')
+
+        self._input_data = {}
+        photon_energy = h5['params/photonEnergy'].value
+        if self.parameters.photon_energy != photon_energy:
+            raise RuntimeError( "Parameter 'photon_energy' (%4.3f) not equal to source photon energy (%4.3f)." % (self.parameters.photon_energy, photon_energy))
+
+        self.parameters.photon_energy = photon_energy
+
+        source_data = numpy.array(h5['misc/spectrum0'].value)
+        source_data[:,0] = source_data[:,0] - self.parameters.photon_energy
+        self._input_data['source_spectrum'] = source_data
+
+
+        h5.close()
 
     def saveH5(self):
         """ """
@@ -212,42 +232,91 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
         Skw_total.attrs.create('unit', 'eV**-1')
 
-        h5.close()
-
         # Static data.
-        #self._parseStaticData()
-        #Sk_elastic = self.__static_data['Sk_elastic']
+        self.__static_data = parseStaticData( self.__run_log )
+
+        # Save to h5 file.
+        for key, value in self.__static_data.items():
+            h5.create_dataset("/data/static/%s" % (key), data=value)
+
+        # Attach a unit to the ionization potential lowering.
+        h5['/data/static/']['ipl'].attrs.create('unit', 'eV')
 
 
-                                #'/data/dynamic'
-                                #'/data/dynamic/energy_shifts',
-                                #'/data/dynamic/Skw_free',
-                                #'/data/dynamic/Skw_bound',
-                                ##'/data/dynamic/collision_frequency',
-                                #'/data/static'
-                                #'/data/static/Sk_bound',
-                                #'/data/static/Sk_ion',
-                                #'/data/static/Sk_elastic',
-                                #'/data/static/Sk_core_inelastic',
-                                #'/data/static/Sk_free_inelastic',
-                                #'/data/static/Sk_total',
-                                #'/data/static/fk',
-                                #'/data/static/qk',
-                                #'/data/static/ionization_potential_delta'
-                                #'/data/static/LFC',
                                 #'/history/parent/detail',
                                 #'/history/parent/parent',
                                 #'/info/package_version',
                                 #'/info/contact',
                                 #'/info/data_description',
                                 #'/info/method_description',
-                                #'/info/units/energy'
-                                #'/info/units/structure_factor'
                                 #'/params/beam/photonEnergy',
                                 #'/params/beam/spectrum',
                                 #'/params/info',
+        ####
+        # Close the file.
+        ####
+        h5.close()
+        # Never write after this line in this function.
+
+    def _serializeSourceSpectrum(self):
+        """ Write the source spectrum to a file on disk. """
+
+        source_spectrum_data = self._input_data['source_spectrum']
+        source_spectrum_path = os.path.join( self.parameters._tmp_dir, 'source_spectrum.txt')
+
+        try:
+            numpy.savetxt( source_spectrum_path, source_spectrum_data, delimiter='\t' )
+        except:
+            print  "Source spectrum could not be saved. Please check temporary directory %s exists. Backtrace follows."
+            raise
+
+def parseStaticData(data_string):
+        """
+        Function to parse the run log and extract static data (form factors etc.)
+
+        @params data_string : The string to parse.
+        @type : str
+        @return: A dictionary with static data.
+        @rtype : dict
+
+        """
+        # Setup return dictionary.
+        static_dict = {}
+
+        # Extract static data from
+        static_dict['fk']           = extractDate("f\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['qk']           = extractDate("q\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_ion']       = extractDate("S_ii\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_free']      = extractDate("S_ee\^0\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_core']      = extractDate("Core_inelastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Wk']           = extractDate("Elastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['Sk_total']     = extractDate("S_total\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['ipl']          = extractDate("IP depression \[eV\]\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['lfc']          = extractDate("G\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+        static_dict['debye_waller'] = extractDate("Debye-Waller\\s+=\\s+[1|\\d+.\\d+]", data_string)
+
+        return static_dict
 
 
+def extractDate(pattern_string, text):
+    """ Workhorse function to get a pattern from text using a regular expression.
+    @param pattern_string : The regex pattern to find.
+    @type : str (argument to re.compile)
+
+    @param text : The string from which to extract the date.
+    @type : str
+
+    @return : The date.
+    @rtype : float
+    """
+
+    # Find the line.
+    pattern = re.compile(pattern_string)
+    line = pattern.findall(text)
+
+    # Extract value (behind the '=' symbol).
+    pattern = re.compile("=\\s")
+    return  float( pattern.split( line[0] )[-1] )
 
 ###########################
 # Check and set functions #
