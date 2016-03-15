@@ -87,7 +87,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         @note: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
         """
 
-        # Initialize base class.
         super(SingFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
 
         # Check parameters.
@@ -235,13 +234,9 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             raise RuntimeError("Beam geometry file must be given.")
 
 
-        if number_of_diffraction_patterns > 1:
-            if not os.path.isdir( self.output_path ):
-                os.mkdir( self.output_path )
-            output_dir = self.output_path
-
-        else:
-            output_dir = '.'
+        if not os.path.isdir( self.output_path ):
+            os.mkdir( self.output_path )
+        output_dir = self.output_path
 
         config_file = '/dev/null'
 

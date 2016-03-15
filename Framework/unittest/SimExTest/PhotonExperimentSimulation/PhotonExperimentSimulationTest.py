@@ -367,8 +367,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
-                               'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
+                               'max_number_of_quaternions'     : 1,
+                               'max_number_of_iterations'      : 10,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
@@ -464,8 +464,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
-                               'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
+                               'max_number_of_quaternions'     : 1,
+                               'max_number_of_iterations'      : 10,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
@@ -570,8 +570,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
-                               'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
+                               'max_number_of_quaternions'     : 1,
+                               'max_number_of_iterations'      : 10,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
