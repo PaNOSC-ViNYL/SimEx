@@ -1,0 +1,8 @@
+1165c1165
+<             self._wf._srwl_wf.arEx = array.array('f')
+---
+>             self._wf._srwl_wf.arEx = array.array(str(u'f'))
+1220c1220
+<             self._wf._srwl_wf.arEy = array.array('f')
+---
+>             self._wf._srwl_wf.arEy = array.array(str(u'f'))
