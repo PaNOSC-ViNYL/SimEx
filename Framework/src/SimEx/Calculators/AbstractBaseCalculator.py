@@ -108,11 +108,6 @@ class AbstractBaseCalculator(object):
     @parameters.setter
     def parameters(self, value):
         """ Set the control parameters for the calculation. """
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
-
         if isinstance( value, AbstractCalculatorParameters):
             self.__parameters = value
             return

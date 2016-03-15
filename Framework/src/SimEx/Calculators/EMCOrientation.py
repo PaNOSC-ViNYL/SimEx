@@ -169,7 +169,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         tmp_out_dir = tempfile.mkdtemp(prefix='emc_out_')
         #out_dir = self.output_path
         run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
-        src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','sw','bin'))
+        src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','bin'))
 
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
         #run_log_file        = os.path.join(run_instance_dir, "orient.log")
