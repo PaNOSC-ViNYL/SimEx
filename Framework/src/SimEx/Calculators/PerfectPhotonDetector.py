@@ -116,7 +116,6 @@ class PerfectPhotonDetector(AbstractPhotonDetector):
         ##parameters['photon_energy'] = file_handle['params/photonEnergy'].value
 
         ## Read the electric field data and convert to numpy array.
-        ##import ipdb; ipdb.set_trace()
         #Ehor = numpy.array(file_handle['/data/arrEhor'][:])
         #Ever = numpy.array(file_handle['/data/arrEver'][:])
 
