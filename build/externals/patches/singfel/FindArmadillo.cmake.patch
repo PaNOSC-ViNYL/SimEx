@@ -1,4 +1,0 @@
-66c66
-<   $ENV{ARMA_DIR}
----
->   $ENV{ARMA_DIR}/lib

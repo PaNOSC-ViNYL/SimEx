@@ -1,6 +1,9 @@
-doc/
-build/externals/packages/
-build/externals/src/
-sw/
-*.dat
-*.log
+Framework/src/SimEx/Utilities/prepHDF5.py
+Framework/unittest/TestFiles/s2e.beam
+Framework/unittest/TestFiles/s2e.geom
+Framework/unittest/TestFiles/sample.h5
+bin
+include
+lib
+
+
