@@ -28,12 +28,12 @@ import os.path
 file_path = os.path.abspath(os.path.dirname(__file__))
 separator = os.sep
 separated_file_path = file_path.split(separator)
-top_level_index = separated_file_path.index('Framework')
+top_level_index = separated_file_path.index('Sources')
 top_level_path = os.path.abspath(separator.join(separated_file_path[:top_level_index+1]))
 
 paths_to_insert = ['src/',
                    'unittest/',
-                   'lib/'
+		   'lib/'
                    ]
 
 for p in paths_to_insert:

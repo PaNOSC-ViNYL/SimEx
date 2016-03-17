@@ -12,22 +12,39 @@ endif()
 set (SIMEX_CMAKE_DIR "${SIMEX_SOURCE_DIR}/CMake")
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SIMEX_CMAKE_DIR})
 
+option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF)
+
+
+#if (DEVELOPER_INSTALL)
+# set (CMAKE_INSTALL_PREFIX "${SIMEX_SOURCE_DIR}" CACHE PATH "install path" FORCE )
+#endif()
+
 # set install paths
 set (PREFIX_DIR ${CMAKE_INSTALL_PREFIX})
-set (FRAMEWORK_DIR ${CMAKE_INSTALL_PREFIX}/Framework)
-set (UNITTESTS_DIR ${FRAMEWORK_DIR}/unittest/)
-set (TESTFILES_DIR ${UNITTESTS_DIR}/TestFiles/)
-set (UTILITIES_DIR ${FRAMEWORK_DIR}/src/SimEx/Utilities/)
-set (CALCULATORS_DIR ${FRAMEWORK_DIR}/src/SimEx/Calculators/)
+
 set (LIBDIR     ${PREFIX_DIR}/lib)
 set (INCLUDEDIR     ${PREFIX_DIR}/include)
 set (BINDIR     ${PREFIX_DIR}/bin)
 set (PYPATH     ${LIBDIR}/python)
 
+if (DEVELOPER_INSTALL)
+  set (FRAMEWORK_DIR ${SIMEX_SOURCE_DIR}/Sources)
+  set (UNITTESTS_DIR ${FRAMEWORK_DIR}/unittest/)
+  set (TESTFILES_DIR ${UNITTESTS_DIR}/TestFiles/)
+  set (UTILITIES_DIR ${FRAMEWORK_DIR}/python/SimEx/Utilities/)
+  set (CALCULATORS_DIR ${FRAMEWORK_DIR}/python/SimEx/Calculators/)
+else()
+  set (UTILITIES_DIR ${PYPATH}/SimEx/Utilities/)
+  set (CALCULATORS_DIR ${PYPATH}/SimEx/Calculators/)
+endif()
 
 
-# add Framework source
-add_subdirectory (Framework)
+
+if (DEVELOPER_INSTALL)
+   message ("Skip Simex source tree")
+else()
+   add_subdirectory (Sources)
+endif()
 
 # find and add modules
 set (SIMEX_MODULES_ROOT "${SIMEX_SOURCE_DIR}/Modules")
@@ -47,7 +64,12 @@ foreach(module ${SIMEX_MODULES})
 endforeach()	
 
 # create simex_vars.sh file
-configure_file(simex_vars.sh.in simex_vars.sh)
+if (DEVELOPER_INSTALL)
+  configure_file(simex_vars_dev.sh.in simex_vars.sh)
+else()
+  configure_file(simex_vars.sh.in simex_vars.sh)
+endif()
+
 install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
         DESTINATION ${BINDIR})
 

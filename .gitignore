@@ -1,7 +1,7 @@
-Framework/src/SimEx/Utilities/prepHDF5.py
-Framework/unittest/TestFiles/s2e.beam
-Framework/unittest/TestFiles/s2e.geom
-Framework/unittest/TestFiles/sample.h5
+Sources/python/SimEx/Utilities/prepHDF5.py
+Sources/unittest/TestFiles/s2e.beam
+Sources/unittest/TestFiles/s2e.geom
+Sources/unittest/TestFiles/sample.h5
 bin
 include
 lib
