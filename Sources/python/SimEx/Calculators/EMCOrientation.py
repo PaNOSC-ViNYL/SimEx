@@ -229,10 +229,10 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             os.symlink(os.path.join(tmp_out_dir,"detector.dat"), os.path.join(run_instance_dir,"detector.dat"))
         if not (os.path.isfile(os.path.join(run_instance_dir,"photons.dat"))):
             os.symlink(os.path.join(tmp_out_dir,"photons.dat"), os.path.join(run_instance_dir,"photons.dat"))
-        if not (os.path.isfile(os.path.join(run_instance_dir,"EMC"))):
-            os.symlink(os.path.join(src_installation_dir,"EMC"), os.path.join(run_instance_dir,"EMC"))
-        if not (os.path.isfile(os.path.join(run_instance_dir,"object_recon"))):
-            os.symlink(os.path.join(src_installation_dir,"object_recon"), os.path.join(run_instance_dir,"object_recon"))
+#        if not (os.path.isfile(os.path.join(run_instance_dir,"EMC"))):
+#            os.symlink(os.path.join(src_installation_dir,"EMC"), os.path.join(run_instance_dir,"EMC"))
+#        if not (os.path.isfile(os.path.join(run_instance_dir,"object_recon"))):
+#            os.symlink(os.path.join(src_installation_dir,"object_recon"), os.path.join(run_instance_dir,"object_recon"))
         #if not (os.path.isdir(os.path.join(runInstanceDir,"supp_py_modules"))):
             #os.symlink(os.path.join(op.srcDir,"supp_py_modules"), os.path.join(runInstanceDir,"supp_py_modules"))
         #if not (os.path.isfile(os.path.join(op.tmpOutDir, "make_diagnostic_figures.py"))):
@@ -309,7 +309,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                     # Here is the actual timed EMC iteration, which calls the EMC.c code.
                     start_time = time.clock()
 
-                    command_sequence = ['./EMC', '1']
+                    command_sequence = ['EMC', '1']
                     process_handle = subprocess.Popen(command_sequence)
                     process_handle.wait()
                     time_taken = time.clock() - start_time
