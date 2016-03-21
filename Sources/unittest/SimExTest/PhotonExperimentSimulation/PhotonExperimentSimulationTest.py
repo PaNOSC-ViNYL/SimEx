@@ -348,7 +348,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 2,
+                     'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
@@ -368,7 +368,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
                                'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
+                               'max_number_of_iterations'      : 3,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
@@ -465,7 +465,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
                                'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
+                               'max_number_of_iterations'      : 3,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
@@ -570,7 +570,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
                                'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
+                               'max_number_of_iterations'      : 3,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
