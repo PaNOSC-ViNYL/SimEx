@@ -1,7 +1,6 @@
-Sources/python/SimEx/Utilities/prepHDF5.py
-Sources/unittest/TestFiles/s2e.beam
-Sources/unittest/TestFiles/s2e.geom
-Sources/unittest/TestFiles/sample.h5
+*.pyc
+*.pyo
+.*.*sw
 bin
 include
 lib

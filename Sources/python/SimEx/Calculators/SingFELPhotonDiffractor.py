@@ -33,7 +33,7 @@ from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 
-from SimEx.Utilities import prepHDF5
+import prepHDF5
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """

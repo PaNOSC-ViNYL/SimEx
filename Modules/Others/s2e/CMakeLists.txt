@@ -12,15 +12,15 @@ INSTALL_COMMAND ""
 
 ExternalProject_Get_Property(s2e SOURCE_DIR)
 
-if (DEVELOPER_INSTALL)
-install(FILES ${SOURCE_DIR}/data/sim_example/diffr/s2e.beam
-              ${SOURCE_DIR}/data/sim_example/diffr/s2e.geom
-              ${SOURCE_DIR}/data/sim_example/sample/sample.h5
-        DESTINATION  ${TESTFILES_DIR})
-endif()
+#if (DEVELOPER_INSTALL)
+#install(FILES ${SOURCE_DIR}/data/sim_example/diffr/s2e.beam
+#              ${SOURCE_DIR}/data/sim_example/diffr/s2e.geom
+#              ${SOURCE_DIR}/data/sim_example/sample/sample.h5
+#        DESTINATION  ${TESTFILES_DIR})
+#endif()
 
 install(FILES ${SOURCE_DIR}/modules/diffr/prepHDF5.py
-        DESTINATION  ${UTILITIES_DIR})
+        DESTINATION  ${PYPATH})
 
 install(FILES ${SOURCE_DIR}/packages/pmi_demo/pmi_demo.py
         DESTINATION  ${PYPATH})
