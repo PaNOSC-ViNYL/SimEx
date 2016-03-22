@@ -44,6 +44,7 @@ software needed to build the external simulation tools:
     * python-numpy
     * python-scipy
     * python-h5py
+    * python-cython
     * python-setuptools
     * python-matplotlib
     * build-essential
@@ -103,11 +104,11 @@ Getting started
 
 3.1) Testing the installation.
 The project comes with a unittest suite that should be run immediately
-after installation. Besides many small tests, the suite also contains a
-minimal workflow using the external simulation tools. Cd to Framework/unittest and type
+after installation. You can also switch this option off by setting INSTALL_TESTS=OFF when running CMake. Besides many small tests, the suite also contains a
+minimal workflow using the external simulation tools. Cd to <install_prefix>/Tests/python/unittest and type
 $> python Test.py -v 2>&1 | tee Test.log
 This will run the entire test suite and pipe the output to the file Test.log. A final test report is appended.
 
 3.2) Minimal workflow.
-The test module Framework/unittest/SimExTest/PhotonExperimentSimulation/PhotonExperimentSimulation.py contains the test "testMininalWorkflow". It illustrates how to use the platform to  execute photon experiment simulations.
+The test module <install_prefix>/Tests/python/unittest/SimExTest/PhotonExperimentSimulation/PhotonExperimentSimulation.py contains the test "testMininalWorkflow". It illustrates how to use the platform to  execute photon experiment simulations.
 

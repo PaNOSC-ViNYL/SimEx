@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
+
 project (SIMEX)
+
+include(CMakeDependentOption)
 
 # Disallow in-source build
 if ("${SIMEX_SOURCE_DIR}"  STREQUAL "${SIMEX_BINARY_DIR}")
@@ -14,6 +17,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SIMEX_CMAKE_DIR})
 
 option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF)
 
+CMAKE_DEPENDENT_OPTION(INSTALL_TESTS "Install test files" ON
+                       "NOT DEVELOPER_INSTALL" OFF)
+
 
 #if (DEVELOPER_INSTALL)
 # set (CMAKE_INSTALL_PREFIX "${SIMEX_SOURCE_DIR}" CACHE PATH "install path" FORCE )
@@ -26,6 +32,7 @@ set (LIBDIR     ${PREFIX_DIR}/lib)
 set (INCLUDEDIR     ${PREFIX_DIR}/include)
 set (BINDIR     ${PREFIX_DIR}/bin)
 set (PYPATH     ${LIBDIR}/python)
+set (TESTSDIR   ${PREFIX_DIR}/Tests)
 
 if (DEVELOPER_INSTALL)
   set (FRAMEWORK_DIR ${SIMEX_SOURCE_DIR}/Sources)
@@ -43,6 +50,9 @@ endif()
 if (DEVELOPER_INSTALL)
    message ("Skip Simex source tree")
 else()
+   if (INSTALL_TESTS)
+     add_subdirectory (Tests)
+   endif()
    add_subdirectory (Sources)
 endif()
 
