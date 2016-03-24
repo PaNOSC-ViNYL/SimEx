@@ -33,6 +33,7 @@ from AbstractPhotonDetectorTest import AbstractPhotonDetectorTest
 
 from XFELPhotonSourceTest import XFELPhotonSourceTest
 from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
+from WavePropagatorTest import WavePropagatorTest
 from FakePhotonMatterInteractorTest import FakePhotonMatterInteractorTest
 from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from S2EReconstructionTest import S2EReconstructionTest
@@ -48,6 +49,7 @@ def suite():
              #unittest.makeSuite(AbstractPhotonDetectorTest,    'test'),
              unittest.makeSuite(XFELPhotonSourceTest,          'test'),
              unittest.makeSuite(XFELPhotonPropagatorTest,      'test'),
+             unittest.makeSuite(WavePropagatorTest,            'test'),
              unittest.makeSuite(FakePhotonMatterInteractorTest,'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,   'test'),
              unittest.makeSuite(S2EReconstructionTest,         'test'),
