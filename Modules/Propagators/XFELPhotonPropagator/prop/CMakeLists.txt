@@ -22,7 +22,9 @@ add_custom_command (
   )
 add_custom_target(GeneratePyInit ALL DEPENDS ${pyfile})
 
+add_dependencies(GeneratePyInit prop)
 
 install( DIRECTORY ${SOURCE_DIR} DESTINATION ${PYPATH}
        )   
       
+

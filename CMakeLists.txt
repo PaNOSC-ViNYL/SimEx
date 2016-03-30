@@ -20,19 +20,17 @@ option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF
 CMAKE_DEPENDENT_OPTION(INSTALL_TESTS "Install test files" ON
                        "NOT DEVELOPER_INSTALL" OFF)
 
+set (LIBDIR     lib)
+set (INCLUDEDIR include)
+set (BINDIR     bin)
+set (PYPATH     ${LIBDIR}/python2.7)
 
-#if (DEVELOPER_INSTALL)
-# set (CMAKE_INSTALL_PREFIX "${SIMEX_SOURCE_DIR}" CACHE PATH "install path" FORCE )
-#endif()
-
-# set install paths
-set (PREFIX_DIR ${CMAKE_INSTALL_PREFIX})
-
-set (LIBDIR     ${PREFIX_DIR}/lib)
-set (INCLUDEDIR     ${PREFIX_DIR}/include)
-set (BINDIR     ${PREFIX_DIR}/bin)
-set (PYPATH     ${LIBDIR}/python)
-set (TESTSDIR   ${PREFIX_DIR}/Tests)
+option (PACKAGE_MAKE "Use this option to create linux packages" OFF)
+if (PACKAGE_MAKE)
+ set (TESTSDIR   share/simex/Tests)
+else()
+ set (TESTSDIR   Tests)
+endif()
 
 if (DEVELOPER_INSTALL)
   set (FRAMEWORK_DIR ${SIMEX_SOURCE_DIR}/Sources)
@@ -43,18 +41,12 @@ if (DEVELOPER_INSTALL)
 else()
   set (UTILITIES_DIR ${PYPATH}/SimEx/Utilities/)
   set (CALCULATORS_DIR ${PYPATH}/SimEx/Calculators/)
-endif()
-
-
-
-if (DEVELOPER_INSTALL)
-   message ("Skip Simex source tree")
-else()
-   if (INSTALL_TESTS)
+  if (INSTALL_TESTS)
      add_subdirectory (Tests)
-   endif()
-   add_subdirectory (Sources)
+  endif()
+  add_subdirectory (Sources)
 endif()
+
 
 # find and add modules
 set (SIMEX_MODULES_ROOT "${SIMEX_SOURCE_DIR}/Modules")
@@ -82,5 +74,10 @@ endif()
 
 install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
         DESTINATION ${BINDIR})
+
+
+if (PACKAGE_MAKE)
+  add_subdirectory (Packages)
+endif()
 
 

@@ -91,12 +91,27 @@ will install all executables and libraries under the prefix directory given thro
 $> sudo make install
 
 NOTE TO DEVELOPERS:
-For simex_platform developers, it is recommended to install the platform
+a) For simex_platform developers, it is recommended to install the platform
 directly into the source tree, e.g. give the top level directory to the DCMAKE_INSTALL_PREFIX directive, e.g.
 $> cmake -DCMAKE_INSTALL_PREFIX=.. ..
 supposing the build directory is located in the top level source directory.
 
 In this way, you will be able to run the unittests without having to recompile.
+
+b) There is an option to create debian package which can then be installed along with all necessary dependencies via
+
+$>dpkg -i <package_name>
+$>apt-get install -f 
+
+on another computer with Debian based OS. In this case Simex will be installed in /usr/... , Tests are installed in /usr/share/simex/.... and should be system-wide available. Calling dpkg with --instdir option allows to change installation dir. In this case simex_vars.sh should be modified manually to set paths correctly.
+
+To create the package call
+
+$> cmake -DPACKAGE_MAKE=ON -DCMAKE_INSTALL_PREFIX=/usr <PATH TO SOURCE>
+$> make package
+
+(probably you will have to call cmake two times because for some unknown reason CMake creates .tgz archives in the first time).
+
 
 
 3.)
