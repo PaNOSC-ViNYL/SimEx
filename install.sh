@@ -23,7 +23,8 @@ export Boost_NO_SYSTEM_PATHS=ON
 export ARMA_DIR=/usr/local
 
 # Call cmake.
-cmake -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
+#cmake -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
+cmake -DDEVELOPER_INSTALL=ON -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
 
 # Build the project.
 make
