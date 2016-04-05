@@ -35,7 +35,6 @@ from pmi_demo import PMIDemo
 import pmi_script
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
-from TestUtilities.TestUtilities import generateTestFilePath
 
 
 class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
