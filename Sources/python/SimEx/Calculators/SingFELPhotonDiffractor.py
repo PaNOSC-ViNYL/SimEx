@@ -116,7 +116,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         self.parameters['slice_interval'] = checkAndSetPositiveInteger(self.parameters['slice_interval'], 1)
         self.parameters['number_of_slices'] = checkAndSetPositiveInteger(self.parameters['number_of_slices'], 1)
         self.parameters['number_of_diffraction_patterns'] = checkAndSetPositiveInteger(self.parameters['number_of_diffraction_patterns'], 1)
-        self.parameters['number_of_MPI_processes'] = checkAndSetPositiveInteger(self.parameters['number_of_MPI_processes'], 2)        
+        self.parameters['number_of_MPI_processes'] = checkAndSetPositiveInteger(self.parameters.get('number_of_MPI_processes',2))        
         self.parameters['pmi_start_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_start_ID'], 1)
         self.parameters['pmi_stop_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_stop_ID'], 1)
         self.parameters['beam_parameter_file'] = checkAndSetInstance(str, self.parameters['beam_parameter_file'])
