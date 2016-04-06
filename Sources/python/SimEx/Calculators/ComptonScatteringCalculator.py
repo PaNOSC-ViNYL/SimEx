@@ -36,6 +36,8 @@ from scipy.optimize import brentq as root
 from scipy.constants import physical_constants as PC
 from scipy import constants as C
 import subprocess
+import tempfile
+
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
@@ -62,6 +64,13 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
 
         # Check parameters.
         parameters = checkAndSetParameters( parameters )
+
+        # Hack to work around input path checking.
+        if input_path is None:
+            tmppath = tempfile.mkdtemp()
+            input_path = os.path.join(tmppath, 'xrts_in.h5')
+            dummy = h5py.File(input_path, 'w')
+
 
         # Init base class.
         super( ComptonScatteringCalculator, self).__init__(parameters, input_path, output_path)
@@ -121,25 +130,25 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
 
         self._input_data = {}
 
-        self.energy_shifts = numpy.arange(0., 300., 1.0 ) # eV
-        self.source_energy = 8.0e3 # eV
-        self.scattering_angle = 40.0 # deg
+        self.energy_shifts = numpy.arange(-self.parameters.energy_range['max'],
+                                          -self.parameters.energy_range['min'],
+                                           self.parameters.energy_range['step'],
+                                          )
+
+        self.source_energy = self.parameters.photon_energy
+        self.scattering_angle = self.parameters.scattering_angle
+        self.electron_density = self.parameters.electron_density
+        print self.electron_density
+        self.temperature = self.parameters.electron_temperature
+
         self.pzs = _pz( self.source_energy, self.source_energy - self.energy_shifts, self.scattering_angle)
 
-        self.electron_density = 1.0e29 # m**-3
-        self.temperature = 1.0 # eV
 
         self.fermi_energy = _fermiEnergy( self.electron_density )
         self.fermi_wavenumber = _fermiWavenumber( self.electron_density )
         self.chemical_potential = _chemicalPotential(self.electron_density, self.temperature)
 
         self.compton_profile = self._comptonProfile()
-
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
-
 
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
@@ -195,8 +204,8 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
     def _printProfile(self):
         """ Method to write the Compton profile to stdout. """
 
-        for i in range(len(self.compton_profile):
-                print self.pzs[i], self.energy_shifts[i], self.compton_profile[i]
+        for i in range(len(self.compton_profile)):
+            print self.pzs[i], self.energy_shifts[i], self.compton_profile[i]
 
 ##########################
 # Check and set functions #

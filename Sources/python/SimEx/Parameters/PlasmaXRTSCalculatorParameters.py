@@ -208,6 +208,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__use_bma_slfc    = BOOL_TO_INT[self.model_See == 'BMA+sLFC']
         self.__write_bma = BOOL_TO_INT[self.model_See == 'BMA+sLFC' or self.model_See == 'BMA']
         self.__use_lindhard    = BOOL_TO_INT[self.model_See == 'Lindhard']
+        self.__use_landen      = BOOL_TO_INT[self.model_See == 'Landen']
         self.__use_static_lfc  = BOOL_TO_INT[self.model_See == 'sLFC']
         self.__use_dynamic_lfc = BOOL_TO_INT[self.model_See == 'dLFC']
         self.__use_mff = BOOL_TO_INT[self.model_See == 'MFF']
@@ -300,7 +301,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('PHOTON_ENERGY     %4.3f\n' % (self.photon_energy))
             input_deck.write('SCATTERING_ANGLE  %4.3f\n' % (self.scattering_angle) )
             input_deck.write('ELECTRON_TEMP     %4.3f 0\n' % (self.electron_temperature) )
-            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density) )
+            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e-6) )
             input_deck.write('AMPLITUDE         1.0   0\n')
             input_deck.write('BASELINE          0.0   0\n')
             input_deck.write('Z_FREE            %4.3f 0\n' % (self.ion_charge) )
@@ -349,7 +350,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('RPA                                %d    0\n' % (self.__use_rpa) )
             input_deck.write('LINDHARD                           %d    0\n' % (self.__use_lindhard) )
             input_deck.write('SALPETER                            0    0\n')
-            input_deck.write('LANDEN                              0    0\n')
+            input_deck.write('LANDEN                             %d    0\n' %(self.__use_landen) )
             input_deck.write('RPA_TSYTOVICH                       0    0\n')
             input_deck.write('STATIC_LFC                         %d    0\n' % (self.__use_static_lfc) )
             input_deck.write('DYNAMIC_LFC                        %d    0\n' % (self.__use_dynamic_lfc) )
@@ -365,7 +366,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             for i,element in enumerate(self.elements):
                 input_deck.write('TARGET_%d %s %d %d\n' % (i+1, element[0], element[1], element[2] ) )
             input_deck.write('MASS_DENSITY %4.3f\n' % (self.mass_density))
-            input_deck.write('NE_ZF_LOCK 1\n')
+            input_deck.write('NE_ZF_LOCK 0\n')
             input_deck.write('DATA_FILE data.txt\n')
             input_deck.write('NUMBER_POINTS 1024\n')
             input_deck.write('OPACITY_FILE nofile 0\n')
@@ -865,6 +866,7 @@ def checkAndSetModelSee( model ):
     # Valid models.
     valid_models = ['RPA',
                     'Lindhard',
+                    'Landen',
                     'static LFC',
                     'dynamic LFC',
                     'BMA',

@@ -31,6 +31,7 @@ import os
 import re
 import numpy
 import subprocess
+import tempfile
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
@@ -52,6 +53,12 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
 
         # Check parameters.
         parameters = checkAndSetParameters( parameters )
+
+        # Hack to work around input path checking.
+        if input_path is None:
+            tmppath = tempfile.mkdtemp()
+            input_path = os.path.join(tmppath, 'xrts_in.h5')
+            dummy = h5py.File(input_path, 'w')
 
         # Init base class.
         super( PlasmaXRTSCalculator, self).__init__(parameters, input_path, output_path)
@@ -162,7 +169,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     @property
     def data(self):
         """ Query for the field data. """
-        return self.__data
+        return self.__run_data
 
     def _readH5(self):
         """ """
