@@ -32,7 +32,6 @@ import subprocess
 
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
-from TestUtilities.TestUtilities import generateTestFilePath
 
 
 class FakePhotonMatterInteractor(AbstractPhotonInteractor):

@@ -28,7 +28,6 @@
 
 """
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
-from TestUtilities.TestUtilities import generateTestFilePath
 
 
 class OrientAndPhasePhotonAnalyzer(AbstractPhotonAnalyzer):
