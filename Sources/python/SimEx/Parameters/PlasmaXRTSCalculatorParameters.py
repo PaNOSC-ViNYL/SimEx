@@ -74,101 +74,89 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
                  ):
 
         """
-        @brief Constructor for the PlasmaXRTSCalculatorParameters.
+        Constructor for the PlasmaXRTSCalculatorParameters.
 
         @param elements The chemical elements in the scattering target.
         <br/><b>type</b> list [[element symbol, stochiometric number, charge], ...]
         <br/><b>default</b> None
         <br/><b>example</b> [['B', 1, 2], ['N', 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).
         <br/><b>example</b> [['C', 1, 4], ['H', 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.
+
+        @param photon_energy The central energy of incoming x-ray photons.
+        <br/><b>type</b>  float
+
+        @param scattering_angle The scattering angle.
+        <br/><b>type</b>  double
+
+        @param electron_temperature The temperature of the electron subsystems (units of eV).
+        <br/><b>type</b>  double
+
+        @param electron_density The electron number density (units of 1/m^3)
+        <br/><b>type</b>  double
+
+        @param ion_temperature The temperature of the ion subsystem (units of eV).
+        <br/><b>type</b>  double
+
+        @param ion_charge The average ion charge (units of elementary charge e).
+        <br/><b>type</b>  double
+
+        @param mass_density The mass density of the target (units of g/cm^3).
+        <br/><b>type</b>  double
+
+        @param debye_temperature The Debye temperature (units of eV).
+        <br/><b>type</b>  double
+        <br/><b>default</b> 0
+
+        @param band_gap The band gap of the target (units of eV).
+        <br/><b>type</b>  double
+        <br/><b>default</b> 0
+
+        @param energy_range The energy range over which to calculate the scattering spectrum.
+        <br/><b>type</b>  dict
+        <br/><b>default</b> 0*wpl, 10*wpl, 0.1*wpl], wpl = electron plasma frequency.
+        <br/><b>example</b> {'min'  -100.0, 'max'  100, 'step'  0.5}
+
+        @param model_Sii The model to use for the ion-ion structure factor.
+        <br/><b>type</b>  string or double
+        <br/><b>default</b> 'SOCP'
+        <br/><b>example</b> model_Sii='DH' for the Debye-Hueckel structure factor.
+        <br/><b>example</b> model_Sii=1.5 to use a fixed value of Sii=1.5
+        <br/><b>note</b> Supported models are 'DH' (Debye-Hueckel), 'OCP' (one component plasma), 'SOCP' (screened one component plasma), 'SOCPN' (SOCP with negative screening Fourier component). Values >=0.0 are also allowed.
+
+        @param model_See The model of the dynamic (high frequency) part of the electron-electron structure factor.
+        <br/><b>type</b>  string
+        <br/><b>default</b> 'RPA'
+        <br/><b>note</b> Supported models are 'RPA' (random phase approximation), 'BMA' (Mermin approximation with Born collision frequency), 'BMA+sLFC' (BMA with static local field correction).
+
+        @param model_Sbf The model for the
+        <br/><b>type</b>  string
+        <br/><b>default</b> 'IA' (impulse approximation).
+        <br/><b>note</b> Supported are 'IA' (impulse approximation), 'FA' (form factor approximation).
+
+        @param model_IPL Model for ionization potential lowering.
+        <br/><b>type</b>  string or double
+        <br/><b>default</b> Stewart-Pyatt
+        <br><b>note</b> Supported are 'SP' (Stewart-Pyatt) and 'EK' (Eckard-Kroll). If a numeric value is given, this is interpreted as the ionization potential difference (lowering) in eV.
+
+        @param model_Mix The model to use for mixing (of species).
+        <br/><b>type</b>  string
+        <br/><b>default</b> None
+
+        @param lfc  The local field correction to use.
+        <br/><b>type</b>  double
+        <br/><b>default</b> 0 (calculate).
+
+        @param Sbf_norm How to normalize the bound-free structure factor.
+        <br/><b>type</b>  string or double
+        <br/><b>default</b> 'FK'
+
+        @param source_spectrum The x-ray probe energy spectrum.
+        <br/><b>type</b>  str
+        <br/><b>default</b> 'GAUSS'
+
+        @param source_spectrum_fwhm The x-ray probe energy spectrum fwhm.
+        <br/><b>type</b>  float
         """
-
-        #@param photon_energy: The central energy of incoming x-ray photons.
-        #@type photon_energy: float
-        #@default: None
-
-        #@param scattering_angle: The scattering angle.
-        #@type scattering_angle: double
-        #@default: None
-
-        #@param electron_temperature: The temperature of the electron subsystems (units of eV).
-        #@type electron_temperature: double
-        #@default: None
-
-        #@param electron_density: The electron number density (units of 1/m^3)
-        #@type electron_density: double
-        #@default: None
-
-        #@param ion_temperature: The temperature of the ion subsystem (units of eV).
-        #@type ion_temperature: double
-        #@default: None
-
-        #@param ion_charge: The average ion charge (units of elementary charge e).
-        #@type ion_charge: double
-        #@default: None
-
-        #@param mass_density: The mass density of the target (units of g/cm^3).
-        #@type mass_density: double
-        #@default: None
-
-        #@param debye_temperature: The Debye temperature (units of eV).
-        #@type debye_temperature: double
-        #@default: 0.0
-
-        #@param band_gap: The band gap of the target (units of eV).
-        #@type band_gap: double
-        #@default: 0.0
-
-        #@param energy_range: The energy range over which to calculate the scattering spectrum.
-        #@type energy_range: dict
-        #@default: [-10*wpl, 10*wpl, 0.1*wpl], wpl = electron plasma frequency.
-        #@example: {'min' : -100.0, 'max' : 100, 'step' : 0.5}
-
-
-
-        #@param model_Sii: The model to use for the ion-ion structure factor.
-        #@type model_Sii: string or double
-        #@default: SOCP
-        #@example: model_Sii='DH' for the Debye-Hueckel structure factor.
-        #@example: model_Sii=1.5 to use a fixed value of Sii=1.5
-        #:note: Supported models are 'DH' (Debye-Hueckel), 'OCP' (one component plasma), 'SOCP' (screened one component plasma), 'SOCPN' (SOCP with negative screening Fourier component). Values >=0.0 are also allowed.
-
-
-        #@param model_See: The model of the dynamic (high frequency) part of the electron-electron structure factor.
-        #@type model_See: string
-        #@default: RPA
-        #:note: Supported models are: 'RPA' (random phase approximation), 'BMA' (Mermin approximation with Born collision frequency), 'BMA+sLFC' (BMA with static local field correction).
-
-        #@param model_Sbf: The model for the
-        #@type model_Sbf: string
-        #@default: 'IA' (impulse approximation).
-        #:note: Supported are 'IA' (impulse approximation), 'FA' (form factor approximation).
-
-        #@param model_IPL: Model for ionization potential lowering.
-        #@type model_IPL: string or double
-        #@default: SP (Stewart-Pyatt)
-        #:note: Supported are 'SP' (Stewart-Pyatt) and 'EK' (Eckard-Kroll). If a numeric value is given, this is interpreted as the ionization potential difference (lowering) in eV.
-
-        #@param model_Mix: The model to use for mixing (of species).
-        #@type model_Mix: string
-        #@default: None
-
-        #@param lfc:  The local field correction to use.
-        #@type lfc: double
-        #@default: 0.0 (calculate).
-
-        #@param Sbf_norm: How to normalize the bound-free structure factor.
-        #@type Sbf_norm: string or double
-        #@default: None
-
-        #@param source_spectrum: The x-ray probe energy spectrum.
-        #@type source_spectrum: str
-        #@default: "GAUSS"
-
-        #@param source_spectrum_fwhm: The x-ray probe energy spectrum fwhm.
-        #@type source_spectrum_fwhm: float
-        #@default: 5.0
-        #"""
 
         # Check and set all parameters.
         self.__elements             = checkAndSetElements(elements)
@@ -469,8 +457,8 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         """
         @brief Set the Debye temperature to value.
 
-        @param value1 The value to set the Debye temperature to.\n
-        <b>type</b> float
+        @param value1 The value to set the Debye temperature to.
+        <br/><b>type</b> float
         """
         self.__debye_temperature = checkAndSetDebyeTemperature(value)
         self._setDebyeTemperatureFlags()
