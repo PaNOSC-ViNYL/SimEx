@@ -50,8 +50,8 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         Constructor for the reconstruction analyser.
 
         @param  parameters : Dictionary of reconstruction parameters.
-        @type : dict
-        @example : parameters={'initial_number_of_quaternions' : 1,
+        <br/><b>type</b> : dict
+        <br/><b>example</b> : parameters={'initial_number_of_quaternions' : 1,
                                'max_number_of_quaternions'     : 9,
                                'max_number_of_iterations'      : 100,
                                'min_error'                     : 1.0e-8,
@@ -111,8 +111,8 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.
 
@@ -127,7 +127,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         """ Run the Expand-Maximize-Compress (EMC) algorithm.
 
         @return : 0 if EMC returns successfully, 1 if not.
-        @note : Copied and adapted from the main routine in
+        <br/><b>note</b> : Copied and adapted from the main routine in
         s2e_recon/EMC/runEMC.py
         """
         ###############################################################

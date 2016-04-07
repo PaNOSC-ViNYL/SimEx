@@ -46,13 +46,13 @@ class XFELPhotonSource(AbstractPhotonSource):
         Constructor for the xfel photon source.
 
         @param parameters : Photon source parameters.
-        @type : dict
+        <br/><b>type</b> : dict
 
         @param input_path : The path to the input data for the photon source.
-        @type : string
+        <br/><b>type</b> : string
 
         @param output_path : The path where to save output data.
-        @type : string
+        <br/><b>type</b> : string
         """
 
         # Initialize base class.
@@ -92,8 +92,8 @@ class XFELPhotonSource(AbstractPhotonSource):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
 
         pass

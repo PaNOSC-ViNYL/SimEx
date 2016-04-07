@@ -627,7 +627,7 @@ def checkAndSetElements(elements):
     """ Utility to check if input is a valid list of elements.
 
     @param  elements: The elements to check.
-    @type elements: list
+    <br/><b>type</b> elements: list
     @return: The checked list of elements.
     """
 
@@ -652,7 +652,7 @@ def checkAndSetElectronTemperature(electron_temperature):
     """ Utility to check if input is a valid electron temperature.
 
     @param  electron_temperature : The electron temperature to check.
-    @type : double
+    <br/><b>type</b> : double
     @return : The checked electron temperature.
     """
     if electron_temperature is None:
@@ -688,8 +688,8 @@ def checkAndSetIonTemperature(ion_temperature, electron_temperature=None):
     """ Utility to check if input is a valid ion temperature.
 
     @param  ion_temperature : The ion temperature to check.
-    @type : double
-    @default : Electron temperature.
+    <br/><b>type</b> : double
+    <br/><b>default</b> : Electron temperature.
     @return : The checked ion temperature.
     """
     if electron_temperature is None:
@@ -705,8 +705,8 @@ def checkAndSetDebyeTemperature(debye_temperature):
     """ Utility to check if input is a valid Debye temperature.
 
     @param  debye_temperature : The Debye temperature to check.
-    @type : double
-    @default : 0.0
+    <br/><b>type</b> : double
+    <br/><b>default</b> : 0.0
     @return : The checked Debye temperature.
     """
     if debye_temperature is None:
@@ -722,8 +722,8 @@ def checkAndSetBandGap(band_gap):
     """ Utility to check if input is a valid bandgap.
 
     @param  band_gap: The bandgap to check.
-    @type : double
-    @default 0.0.
+    <br/><b>type</b> : double
+    <br/><b>default</b> 0.0.
     @return : The checked bandgap.
     """
     if band_gap is None:
@@ -739,7 +739,7 @@ def checkAndSetModelMix(model_Mix):
     """ Utility to check if input is a valid mixing model.
 
     @param  model_Mix : The mixing model to check.
-    @type : string
+    <br/><b>type</b> : string
     @return : The checked mixing model.
     """
     if model_Mix is None:
@@ -756,7 +756,7 @@ def checkAndSetLFC(lfc):
     """ Utility to check if input is a valid local field correction factor.
 
     @param  lfc : The lfc to check.
-    @type : double
+    <br/><b>type</b> : double
     @return : The checked lfc.
     """
     lfc = checkAndSetInstance(float, lfc, 0.0)
@@ -767,7 +767,7 @@ def checkAndSetSbfNorm(Sbf_norm):
     """ Utility to check if input is a valid norm of the bound-free structure factor.
 
     @param  Sbf_norm : The norm to check.
-    @type : string or double.
+    <br/><b>type</b> : string or double.
     @return : The checked norm.
     """
     if Sbf_norm not in ['FK', 'NO', None] and not isinstance( Sbf_norm, float ):
@@ -780,7 +780,7 @@ def checkAndSetEnergyRange(energy_range, electron_density=None):
     """
     Utility to check if the photon energy range is ok.
     @param energy_range : The range to check.
-    @type dict
+    <br/><b>type</b> dict
     @return The checked photon energy range.
     @raise ValueError if not of correct shape.
     """
@@ -827,7 +827,7 @@ def checkAndSetModelSii( model ):
     Utility to check if the model is a valid model for the Rayleigh (quasistatic) scattering feature.
 
     @param model : The model to check.
-    @type : str
+    <br/><b>type</b> : str
     @return : The checked model
     @raise ValueError if not a string or not a valid Sii model ('RPA', 'DH',
     """
@@ -849,7 +849,7 @@ def checkAndSetModelSee( model ):
     Utility to check if the model is a valid model for the high frequency (dynamic) feature.
 
     @param model : The model to check.
-    @type : str
+    <br/><b>type</b> : str
     @return : The checked model
     @raise ValueError if not a string or not a valid See0 model ('RPA', 'BMA', 'BMA+sLFC', 'BMA+dLFC', 'LFC', 'Landen')
     """
@@ -878,7 +878,7 @@ def checkAndSetModelSbf( model ):
     Utility to check if the model is a valid model for the bound-free (Compton) scattering feature.
 
     @param model : The model to check.
-    @type : str
+    <br/><b>type</b> : str
     @return : The checked model
     @raise ValueError if not a string or not a valid Sbf model ('IA', 'HWF')
     """
@@ -902,7 +902,7 @@ def checkAndSetModelIPL( model ):
     Utility to check if the model is a valid model for ionization potential lowering.
 
     @param model : The model to check.
-    @type : str or float
+    <br/><b>type</b> : str or float
     @return : The checked model
     @raise ValueError if not a valid IPL model.
     """
@@ -927,7 +927,7 @@ def checkAndSetSourceSpectrum( source_spectrum ):
     Utility to check sanity of given input for the source spectrum identifier.
 
     @param source_spectrum : The source spectrum identifier to check.
-    @type : str
+    <br/><b>type</b> : str
     @return : The checked identifier.
     @raise : TypeError or ValueError if input is not valid.
     """
@@ -950,7 +950,7 @@ def checkAndSetSourceSpectrumFWHM( fwhm ):
     Utility to check sanity of given input for the source spectrum full width at half maximum (fwhm).
 
     @param source_spectrum : The value to check.
-    @type : float
+    <br/><b>type</b> : float
     @return : The checked value.
     @raise : TypeError or ValueError if input is not valid.
     """

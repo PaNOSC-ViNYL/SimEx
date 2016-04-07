@@ -46,8 +46,8 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         Constructor for the reconstruction analyser.
 
         @param  parameters : Dictionary of reconstruction parameters.
-        @type : dict
-        @example : parameters={}
+        <br/><b>type</b> : dict
+        <br/><b>example</b> : parameters={}
         """
 
         # Initialize base class.
@@ -124,8 +124,8 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.
 

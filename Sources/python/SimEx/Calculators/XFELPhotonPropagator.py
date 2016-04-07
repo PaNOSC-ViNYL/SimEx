@@ -44,13 +44,13 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         Constructor for the xfel photon propagator.
 
         @param  parameters  : Parameters steering the propagation of photons.
-        @type               : dict
+        <br/><b>type</b>               : dict
 
         @param  input_path  : Location of input data for the photon propagation.
-        @type               : string
+        <br/><b>type</b>               : string
 
         @param  output_path : Location of output data for the photon propagation.
-        @type               : string
+        <br/><b>type</b>               : string
         """
 
         # Initialize base class.
@@ -104,7 +104,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.

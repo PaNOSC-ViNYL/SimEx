@@ -45,8 +45,8 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         Constructor for the xfel photon propagator.
 
         @param  parameters : singFEL parameters.
-        @type              : dict
-        @example : parameters={ 'uniform_rotation'    : True,
+        <br/><b>type</b>              : dict
+        <br/><b>example</b> : parameters={ 'uniform_rotation'    : True,
                      'calculate_Compton'              : False,
                      'pmi_start_ID'                   : 1,
                      'pmi_stop_ID'                    : 1,
@@ -58,33 +58,33 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                      }
 
         @param parameters['uniform_rotation']  : Whether or not to apply uniform sampling of the sample's rotations.
-        @type : boolean
+        <br/><b>type</b> : boolean
 
         @param parameters['calculate_Compton'] : Whether or not to calculate incoherent (Compton) scattering.
-        @type : Bool
+        <br/><b>type</b> : Bool
 
         @param parameters['pmi_start_ID'] : Index of the pmi file to start from.
-        @type : int
+        <br/><b>type</b> : int
 
         @param parameters['pmi_stop_ID'] : Index of the pmi file to stop at.
-        @type : int
+        <br/><b>type</b> : int
 
         @param parameters['number_of_diffraction_patterns'] : The number of diffraction patterns to calculate from each photon-matter interaction trajectory.
-        @type : int
+        <br/><b>type</b> : int
 
         @param parameters['slice_interval'] : The number of time slices to skip between two samplings of the photon-matter interaction trajectory.
-        @type : int
+        <br/><b>type</b> : int
 
         @param parameters['number_of_slices'] : Total number of slices in the pmi files."
-        @type : int
+        <br/><b>type</b> : int
 
         @param parameters['beam_parameter_file'] : Path of the beam parameter (.beam) file.
-        @type : string
+        <br/><b>type</b> : string
 
         @param parameters['beam_geometry_file'] : Path of the beam geometry (.geom) file.
-        @type : string
+        <br/><b>type</b> : string
 
-        @note: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
+        <br/><b>note</b>: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
         """
 
         super(SingFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
@@ -283,7 +283,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.
