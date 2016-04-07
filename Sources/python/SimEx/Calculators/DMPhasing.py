@@ -47,8 +47,8 @@ class DMPhasing(AbstractPhotonAnalyzer):
         Constructor for the phasing analyser.
 
         @param  parameters : Dictionary of reconstruction parameters.
-        @type : dict
-        @example : parameters={}
+        <br/><b>type</b> : dict
+        <br/><b>example</b> : parameters={}
         """
 
         super(DMPhasing, self).__init__(parameters,input_path,output_path)
@@ -91,8 +91,8 @@ class DMPhasing(AbstractPhotonAnalyzer):
         Method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.
 
@@ -109,7 +109,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
         """ Run the Difference Map (DM) algorithm.
 
         @return : 0 if DM returns successfully, 1 if not.
-        @note : Copied and adapted from the main routine in
+        <br/><b>note</b> : Copied and adapted from the main routine in
         s2e_recon/DM/runDM.py
         """
 

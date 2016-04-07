@@ -41,7 +41,7 @@ class AbstractCalculatorParameters(object):
         Constructor for the Abstract Calculator Parameters.
 
         @param control_parameters : The parameters to turn into class members.
-        @type : dict
+        <br/><b>type</b> : dict
 
         """
         pass

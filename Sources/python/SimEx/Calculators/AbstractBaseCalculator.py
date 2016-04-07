@@ -47,15 +47,15 @@ class AbstractBaseCalculator(object):
         Constructor for the Abstract Base Calculator.
 
         @param control_parameters : Dictionary for the parameters of the calculation (not data).
-        @type : dict
+        <br/><b>type</b> : dict
 
         @param input_path: Path to hdf5 file holding the input data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
 
         @param output_path: Path to hdf5 file for output.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
 
         # Check parameters.
@@ -185,7 +185,7 @@ def checkAndSetParameters(parameters):
     """ Utility to check if the 'parameters' argument is valid input.
 
     @param parameters : The parameters object to check.
-    @type : dict or AbstractCalculatorParameters
+    <br/><b>type</b> : dict or AbstractCalculatorParameters
     @return : The checked parameters object.
     """
     if parameters is None:

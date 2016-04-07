@@ -43,8 +43,8 @@ class PerfectPhotonDetector(AbstractPhotonDetector):
         Constructor for photon detector.
 
         @param  :
-        @type :
-        @default :
+        <br/><b>type</b> :
+        <br/><b>default</b> :
         """
 
         # Initialize base class.
@@ -140,7 +140,7 @@ class PerfectPhotonDetector(AbstractPhotonDetector):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.
