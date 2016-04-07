@@ -49,22 +49,22 @@ class PhotonExperimentSimulation(object):
         !@brief  Constructor for the PhotonExperimentSimulation object.
 
         @param photon_source: The calculator for the photon source.
-        @type : Child of AbstractPhotonSource
+        <br/><b>type</b> : Child of AbstractPhotonSource
 
         @param photon_propagator : The calculator for the wave propagation from source to target.
-        @type : Child of AbstractPhotonPropagator
+        <br/><b>type</b> : Child of AbstractPhotonPropagator
 
         @param photon_interactor : The calculator for the photon-matter interaction.
-        @type : Child of AbstractPhotonInteractor
+        <br/><b>type</b> : Child of AbstractPhotonInteractor
 
         @param : photon_diffractor : The calculator for the photon diffraction.
-        @type : Child of AbstractPhotonDiffractor
+        <br/><b>type</b> : Child of AbstractPhotonDiffractor
 
         @param photon_detector : The calculator for photon detection.
-        @type : Child of AbstractPhotonDetector
+        <br/><b>type</b> : Child of AbstractPhotonDetector
 
         @param photon_analyzer : The calculator for  photon signal analysis.
-        @type : Child of AbstractPhotonAnalyzer
+        <br/><b>type</b> : Child of AbstractPhotonAnalyzer
         """
         self.__photon_source = checkAndSetPhotonSource(photon_source)
         self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)

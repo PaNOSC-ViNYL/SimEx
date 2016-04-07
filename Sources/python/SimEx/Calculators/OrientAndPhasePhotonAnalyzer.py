@@ -29,7 +29,6 @@
 """
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
-
 class OrientAndPhasePhotonAnalyzer(AbstractPhotonAnalyzer):
     """
     Class representing photon data analyzes that combines orientation and phasing of 2D diffraction data.
@@ -40,8 +39,8 @@ class OrientAndPhasePhotonAnalyzer(AbstractPhotonAnalyzer):
         Constructor for the photon analyzer.
 
         @param  :
-        @type :
-        @default :
+        <br/><b>type</b> :
+        <br/><b>default</b> :
         """
 
         # Initialize base class.
@@ -100,7 +99,7 @@ class OrientAndPhasePhotonAnalyzer(AbstractPhotonAnalyzer):
         Private method to save the object to a file.
 
         @param output_path : The file where to save the object's data.
-        @type : string
-        @default : None
+        <br/><b>type</b> : string
+        <br/><b>default</b> : None
         """
         pass # No action required since output is written in backengine.

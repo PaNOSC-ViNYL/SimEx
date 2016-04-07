@@ -82,8 +82,6 @@ Reference Manual
 ================
 
 .. autoclass:: SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator
-    :members:
-    :private-members:
 
 .. autoclass:: SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer
     :members:
@@ -162,10 +160,9 @@ Reference Manual
     :private-members:
     :special-members:
 
-.. autoclass:: SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters
+.. doxygenclass:: SimEx::Parameters::PlasmaXRTSCalculatorParameters::PlasmaXRTSCalculatorParameters
     :members:
     :private-members:
-    :special-members:
 
 
 .. .. inheritance-diagram::

@@ -18,8 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('../Sources/python/SimEx/Calculators'))
-
+import breathe
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -37,7 +36,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinx.ext.inheritance_diagram',
+    'breathe',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -103,6 +102,9 @@ pygments_style = 'sphinx'
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
 
+# -- Options for breathe -- #
+breathe_projects = {"simex": "/home/grotec/Work/XFEL/Codes/SIMEX/develop/simex_platform/doc/doxy_build/xml/"}
+breathe_default_project = "simex"
 
 # -- Options for HTML output ----------------------------------------------
 
