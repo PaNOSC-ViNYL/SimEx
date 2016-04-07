@@ -19,7 +19,8 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the PlasmaXRTSCalculatorParameters class.
+"""
+    @file Module that holds the PlasmaXRTSCalculatorParameters class.
 
     @author : CFG
     @institution : XFEL
@@ -73,100 +74,101 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
                  ):
 
         """
-        Constructor for the PlasmaXRTSCalculatorParameters.
+        @brief Constructor for the PlasmaXRTSCalculatorParameters.
 
-        @params elements: The chemical elements in the scattering target.
-        @type: List of [[element symbol, stochiometric number, charge], ...]
-        @default: None
-        @example: [['B', 1, 2], ['N', 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).
-        @example: [['C', 1, 4], ['H', 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.
-
-        @param photon_energy : The central energy of incoming x-ray photons.
-        @type : float
-        @default : None
-
-        @params scattering_angle: The scattering angle.
-        @type: double
-        @default: None
-
-        @params electron_temperature: The temperature of the electron subsystems (units of eV).
-        @type: double
-        @default: None
-
-        @params electron_density: The electron number density (units of 1/m^3)
-        @type: double
-        @default: None
-
-        @params ion_temperature: The temperature of the ion subsystem (units of eV).
-        @type: double
-        @default: None
-
-        @params ion_charge: The average ion charge (units of elementary charge e).
-        @type: double
-        @default: None
-
-        @params mass_density: The mass density of the target (units of g/cm^3).
-        @type: double
-        @default: None
-
-        @params debye_temperature: The Debye temperature (units of eV).
-        @type: double
-        @default: 0.0
-
-        @params band_gap: The band gap of the target (units of eV).
-        @type: double
-        @default: 0.0
-
-        @params energy_range: The energy range over which to calculate the scattering spectrum.
-        @type: dict
-        @default: [-10*wpl, 10*wpl, 0.1*wpl], wpl = electron plasma frequency.
-        @example: {'min' : -100.0, 'max' : 100, 'step' : 0.5}
-
-
-
-        @params model_Sii: The model to use for the ion-ion structure factor.
-        @type: string or double
-        @default: SOCP
-        @example: model_Sii='DH' for the Debye-Hueckel structure factor.
-        @example: model_Sii=1.5 to use a fixed value of Sii=1.5
-        @note: Supported models are 'DH' (Debye-Hueckel), 'OCP' (one component plasma), 'SOCP' (screened one component plasma), 'SOCPN' (SOCP with negative screening Fourier component). Values >=0.0 are also allowed.
-
-
-        @params model_See: The model of the dynamic (high frequency) part of the electron-electron structure factor.
-        @type: string
-        @default: RPA
-        @note: Supported models are: 'RPA' (random phase approximation), 'BMA' (Mermin approximation with Born collision frequency), 'BMA+sLFC' (BMA with static local field correction).
-
-        @params model_Sbf: The model for the
-        @type: string
-        @default: 'IA' (impulse approximation).
-        @note: Supported are 'IA' (impulse approximation), 'FA' (form factor approximation).
-
-        @params model_IPL: Model for ionization potential lowering.
-        @type: string or double
-        @default: SP (Stewart-Pyatt)
-        @note: Supported are 'SP' (Stewart-Pyatt) and 'EK' (Eckard-Kroll). If a numeric value is given, this is interpreted as the ionization potential difference (lowering) in eV.
-
-        @params model_Mix: The model to use for mixing (of species).
-        @type: string
-        @default: None
-
-        @params lfc:  The local field correction to use.
-        @type: double
-        @default: 0.0 (calculate).
-
-        @params Sbf_norm: How to normalize the bound-free structure factor.
-        @type: string or double
-        @default: None
-
-        @params source_spectrum: The x-ray probe energy spectrum.
-        @type: str
-        @default: "GAUSS"
-
-        @params source_spectrum_fwhm: The x-ray probe energy spectrum fwhm.
-        @type: float
-        @default: 5.0
+        @param elements The chemical elements in the scattering target.
+        <br/><b>type</b> list [[element symbol, stochiometric number, charge], ...]
+        <br/><b>default</b> None
+        <br/><b>example</b> [['B', 1, 2], ['N', 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).
+        <br/><b>example</b> [['C', 1, 4], ['H', 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.
         """
+
+        #@param photon_energy: The central energy of incoming x-ray photons.
+        #@type photon_energy: float
+        #@default: None
+
+        #@param scattering_angle: The scattering angle.
+        #@type scattering_angle: double
+        #@default: None
+
+        #@param electron_temperature: The temperature of the electron subsystems (units of eV).
+        #@type electron_temperature: double
+        #@default: None
+
+        #@param electron_density: The electron number density (units of 1/m^3)
+        #@type electron_density: double
+        #@default: None
+
+        #@param ion_temperature: The temperature of the ion subsystem (units of eV).
+        #@type ion_temperature: double
+        #@default: None
+
+        #@param ion_charge: The average ion charge (units of elementary charge e).
+        #@type ion_charge: double
+        #@default: None
+
+        #@param mass_density: The mass density of the target (units of g/cm^3).
+        #@type mass_density: double
+        #@default: None
+
+        #@param debye_temperature: The Debye temperature (units of eV).
+        #@type debye_temperature: double
+        #@default: 0.0
+
+        #@param band_gap: The band gap of the target (units of eV).
+        #@type band_gap: double
+        #@default: 0.0
+
+        #@param energy_range: The energy range over which to calculate the scattering spectrum.
+        #@type energy_range: dict
+        #@default: [-10*wpl, 10*wpl, 0.1*wpl], wpl = electron plasma frequency.
+        #@example: {'min' : -100.0, 'max' : 100, 'step' : 0.5}
+
+
+
+        #@param model_Sii: The model to use for the ion-ion structure factor.
+        #@type model_Sii: string or double
+        #@default: SOCP
+        #@example: model_Sii='DH' for the Debye-Hueckel structure factor.
+        #@example: model_Sii=1.5 to use a fixed value of Sii=1.5
+        #:note: Supported models are 'DH' (Debye-Hueckel), 'OCP' (one component plasma), 'SOCP' (screened one component plasma), 'SOCPN' (SOCP with negative screening Fourier component). Values >=0.0 are also allowed.
+
+
+        #@param model_See: The model of the dynamic (high frequency) part of the electron-electron structure factor.
+        #@type model_See: string
+        #@default: RPA
+        #:note: Supported models are: 'RPA' (random phase approximation), 'BMA' (Mermin approximation with Born collision frequency), 'BMA+sLFC' (BMA with static local field correction).
+
+        #@param model_Sbf: The model for the
+        #@type model_Sbf: string
+        #@default: 'IA' (impulse approximation).
+        #:note: Supported are 'IA' (impulse approximation), 'FA' (form factor approximation).
+
+        #@param model_IPL: Model for ionization potential lowering.
+        #@type model_IPL: string or double
+        #@default: SP (Stewart-Pyatt)
+        #:note: Supported are 'SP' (Stewart-Pyatt) and 'EK' (Eckard-Kroll). If a numeric value is given, this is interpreted as the ionization potential difference (lowering) in eV.
+
+        #@param model_Mix: The model to use for mixing (of species).
+        #@type model_Mix: string
+        #@default: None
+
+        #@param lfc:  The local field correction to use.
+        #@type lfc: double
+        #@default: 0.0 (calculate).
+
+        #@param Sbf_norm: How to normalize the bound-free structure factor.
+        #@type Sbf_norm: string or double
+        #@default: None
+
+        #@param source_spectrum: The x-ray probe energy spectrum.
+        #@type source_spectrum: str
+        #@default: "GAUSS"
+
+        #@param source_spectrum_fwhm: The x-ray probe energy spectrum fwhm.
+        #@type source_spectrum_fwhm: float
+        #@default: 5.0
+        #"""
 
         # Check and set all parameters.
         self.__elements             = checkAndSetElements(elements)
@@ -389,7 +391,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__elements
     @elements.setter
     def elements(self, value):
-        """ Set the elements to <value> """
+        """ Set the elements to value. """
         self.__elements = checkAndSetElements(value)
 
     @property
@@ -398,7 +400,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__photon_energy
     @photon_energy.setter
     def photon_energy(self, value):
-        """ Set the photon energy to <value>. """
+        """ Set the photon energy to value. """
         self.__photon_energy = checkAndSetPhotonEnergy(value)
 
 
@@ -408,7 +410,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__scattering_angle
     @scattering_angle.setter
     def scattering_angle(self, value):
-        """ Set the scattering angle to <value>. """
+        """ Set the scattering angle to value. """
         self.__scattering_angle = checkAndSetScatteringAngle(value)
 
     @property
@@ -417,7 +419,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__electron_temperature
     @electron_temperature.setter
     def electron_temperature(self, value):
-        """ Set the electron temperature to <value>. """
+        """ Set the electron temperature to value. """
         self.__electron_temperature = checkAndSetElectronTemperature(value)
 
     @property
@@ -426,7 +428,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__electron_density
     @electron_density.setter
     def electron_density(self, value):
-        """ Set the electron density to <value>. """
+        """ Set the electron density to value. """
         self.__electron_density = value
         print "WARNING: Electron density might be inconsistent with mass density and charge."
     @property
@@ -435,7 +437,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__ion_temperature
     @ion_temperature.setter
     def ion_temperature(self, value):
-        """ Set the ion temperature to <value>. """
+        """ Set the ion temperature to value. """
         self.__ion_temperature = checkAndSetIonTemperature(value)
 
     @property
@@ -444,7 +446,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__ion_charge
     @ion_charge.setter
     def ion_charge(self, value):
-        """ Set the ion charge to <value>. """
+        """ Set the ion charge to value. """
         self.__ion_charge = value
         print "WARNING: Ion charge might be inconsistent with electron density and mass density."
 
@@ -454,7 +456,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__mass_density
     @mass_density.setter
     def mass_density(self, value):
-        """ Set the mass density to <value>. """
+        """ Set the mass density to value. """
         self.__mass_density = value
         print "WARNING: Mass density might be inconsistent with electron density and charge."
 
@@ -463,8 +465,13 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         """ Query for the Debye temperature. """
         return self.__debye_temperature
     @debye_temperature.setter
-    def debye_temperature(self, value):
-        """ Set the Debye temperature to <value>. """
+    def debye_temperature(self, value1, value2):
+        """
+        @brief Set the Debye temperature to value.
+
+        @param value1 The value to set the Debye temperature to.\n
+        <b>type</b> float
+        """
         self.__debye_temperature = checkAndSetDebyeTemperature(value)
         self._setDebyeTemperatureFlags()
 
@@ -474,7 +481,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__band_gap
     @band_gap.setter
     def band_gap(self, value):
-        """ Set the band gap to <value>. """
+        """ Set the band gap to value. """
         self.__band_gap = checkAndSetBandGap(value)
         self._setBandGapFlags()
 
@@ -484,7 +491,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__energy_range
     @energy_range.setter
     def energy_range(self, value):
-        """ Set the energy range to <value>. """
+        """ Set the energy range to value. """
         self.__energy_range = checkAndSetEnergyRange(value)
 
     @property
@@ -493,7 +500,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__model_Sii
     @model_Sii.setter
     def model_Sii(self, value):
-        """ Set the ion-ion structure factor model to <value>. """
+        """ Set the ion-ion structure factor model to value. """
         self.__model_Sii = checkAndSetModelSii(value)
         self._setSiiFlags()
 
@@ -503,7 +510,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__model_See
     @model_See.setter
     def model_See(self, value):
-        """ Set the electron-electron (high-frequency) structure factor model to <value>. """
+        """ Set the electron-electron (high-frequency) structure factor model to value. """
         self.__model_See = checkAndSetModelSee(value)
         self._setSeeFlags()
 
@@ -513,7 +520,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__model_Sbf
     @model_Sbf.setter
     def model_Sbf(self, value):
-        """ Set the bound-free structure factor model to <value>. """
+        """ Set the bound-free structure factor model to value. """
         self.__model_Sbf = checkAndSetModelSbf(value)
 
     @property
@@ -522,7 +529,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__model_IPL
     @model_IPL.setter
     def model_IPL(self, value):
-        """ Set the ionization potential lowering model to <value>. """
+        """ Set the ionization potential lowering model to value. """
         self.__model_IPL = checkAndSetModelIPL(value)
         self._setIPLFlags()
 
@@ -532,7 +539,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__model_Mix
     @model_Mix.setter
     def model_Mix(self, value):
-        """ Set the mixing model to <value>. """
+        """ Set the mixing model to value. """
         self.__model_Mix = checkAndSetModelMix(value)
 
     @property
@@ -541,7 +548,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__lfc
     @lfc.setter
     def lfc(self, value):
-        """ Set the local field factor to <value>. """
+        """ Set the local field factor to value. """
         self.__lfc = checkAndSetLFC(value)
 
     @property
@@ -550,7 +557,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__Sbf_norm
     @Sbf_norm.setter
     def Sbf_norm(self, value):
-        """ Set the norm of the bound-free structure factor to <value>. """
+        """ Set the norm of the bound-free structure factor to value. """
         self.__Sbf_norm = checkAndSetSbfNorm(value)
         self._setSbfNormFlags()
 
@@ -560,7 +567,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__source_spectrum
     @source_spectrum.setter
     def source_spectrum(self, value):
-        """ Set the source_spectrum to <value>."""
+        """ Set the source_spectrum to value."""
         self.__source_spectrum = checkAndSetSourceSpectrum(value)
         self._setSourceSpectrumFlags()
 
@@ -570,7 +577,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         return self.__source_spectrum
     @source_spectrum_fwhm.setter
     def source_spectrum_fwhm(self, value):
-        """ Set the source_spectrum fwhm to <value>."""
+        """ Set the source_spectrum fwhm to value."""
         self.__source_spectrum_fwhm = checkAndSetSourceSpectrumFWHM(value)
 
     #@property
@@ -579,7 +586,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         #return self.__<++>
     #@<++>.setter
     #def <++>(self, value):
-        #""" Set the <++> to <value>."""
+        #""" Set the <++> to value."""
         #self.__<++> = checkAndSet<++>(value)
         #<++>
 
@@ -631,9 +638,9 @@ def checkAndSetPhotonEnergy(energy):
 def checkAndSetElements(elements):
     """ Utility to check if input is a valid list of elements.
 
-    @param  elements : The elements to check.
-    @type : list
-    @return : The checked list of elements.
+    @param  elements: The elements to check.
+    @type elements: list
+    @return: The checked list of elements.
     """
 
     if elements is None:
