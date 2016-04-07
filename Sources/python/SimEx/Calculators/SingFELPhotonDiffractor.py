@@ -51,6 +51,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                      'pmi_start_ID'                   : 1,
                      'pmi_stop_ID'                    : 1,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes'        : 2,
                      'slice_interval'                 : 10,
                      'number_of_slices'               : 100,
                      'beam_parameter_file'            : 's2e.beam',
@@ -70,6 +71,9 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         <br/><b>type</b> : int
 
         @param parameters['number_of_diffraction_patterns'] : The number of diffraction patterns to calculate from each photon-matter interaction trajectory.
+        <br/><b>type</b> : int
+
+        @param parameters['number_of_MPI_processes'] : The number of MPI processes to use
         <br/><b>type</b> : int
 
         @param parameters['slice_interval'] : The number of time slices to skip between two samplings of the photon-matter interaction trajectory.
@@ -96,6 +100,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                          'slice_interval',
                          'number_of_slices',
                          'number_of_diffraction_patterns',
+                         'number_of_MPI_processes',
                          'pmi_start_ID',
                          'pmi_stop_ID',
                          'beam_parameter_file',
@@ -110,6 +115,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         self.parameters['slice_interval'] = checkAndSetPositiveInteger(self.parameters['slice_interval'], 1)
         self.parameters['number_of_slices'] = checkAndSetPositiveInteger(self.parameters['number_of_slices'], 1)
         self.parameters['number_of_diffraction_patterns'] = checkAndSetPositiveInteger(self.parameters['number_of_diffraction_patterns'], 1)
+        self.parameters['number_of_MPI_processes'] = checkAndSetPositiveInteger(self.parameters.get('number_of_MPI_processes',2))
         self.parameters['pmi_start_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_start_ID'], 1)
         self.parameters['pmi_stop_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_stop_ID'], 1)
         self.parameters['beam_parameter_file'] = checkAndSetInstance(str, self.parameters['beam_parameter_file'])
@@ -223,6 +229,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             number_of_diffraction_patterns = 1
 
+        if 'number_of_MPI_processes' in self.parameters.keys():
+            number_of_MPI_processes = self.parameters['number_of_MPI_processes']
+        else:
+            number_of_MPI_processes = 2
+
         if 'beam_parameter_file' in self.parameters.keys():
             beam_parameter_file = self.parameters['beam_parameter_file']
         else:
@@ -242,7 +253,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Run the backengine command.
         command_sequence = ['mpirun',
-                            '-np','2',
+                            '-np',                str(number_of_MPI_processes) ,
                             'radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(output_dir),

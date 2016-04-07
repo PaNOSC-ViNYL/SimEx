@@ -8,8 +8,9 @@ find_python_module(h5py REQUIRED)
 INCLUDE(ExternalProject)
 ExternalProject_Add(
 recon_emc    
-URL https://db.tt/8CTthFkw
-DOWNLOAD_NAME recon.tar.gz
+#URL https://db.tt/8CTthFkw
+DOWNLOAD_COMMAND wget https://db.tt/8CTthFkw -O recon.tar.gz && tar xf recon.tar.gz && rm -rf recon_emc && mv s2e_recon recon_emc
+#DOWNLOAD_NAME recon.tar.gz
 PATCH_COMMAND ""
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""

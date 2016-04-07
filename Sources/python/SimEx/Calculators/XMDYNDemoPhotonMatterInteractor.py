@@ -34,6 +34,8 @@ import subprocess
 from pmi_demo import PMIDemo
 import pmi_script
 
+from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
+
 
 class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
     """
