@@ -21,6 +21,7 @@ echo "Changed dir to $PWD."
 export BOOST_ROOT=$HOME/local
 export Boost_NO_SYSTEM_PATHS=ON
 export ARMA_DIR=$HOME/local
+export HDF5_ROOT=/opt/hdf5/hdf5-1.8.14
 
 # Uncomment the next line and specify the install dir for a custom user install.
 #cmake -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
