@@ -30,7 +30,6 @@ import paths
 from TestUtilities import TestUtilities
 from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
 from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
-from SimEx.Calculators.FakePhotonMatterInteractor import FakePhotonMatterInteractor
 from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Calculators.PerfectPhotonDetector import PerfectPhotonDetector
@@ -71,7 +70,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -107,7 +106,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -148,7 +147,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -269,7 +268,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        photon_interactor = FakePhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=pmi_input, output_path='pmi_out.h5')
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -411,6 +410,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Setup directories.
         working_directory = 'SPI'
+        self.__dirs_to_remove.append(working_directory)
         source_dir = os.path.join( working_directory, 'FELsource' )
         prop_dir = os.path.join( working_directory, 'prop' )
         pmi_dir = os.path.join( working_directory, 'pmi' )
@@ -518,15 +518,14 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'prop_out.h5',
                           'pmi/pmi_out_0000001.h5',
                           'diffr/diffr_out_0000001.h5',
-                          'detector/diffr_out_0000001.h5',
                           'recon.h5',
                           'orient_out.h5',
                           ]
 
         # Ensure proper cleanup.
-        self.__files_to_remove = expected_files+expected_symlinks
-        self.__files_to_remove.append('prepHDF5.py')
-        self.__dirs_to_remove = expected_dirs
+        #self.__files_to_remove = expected_files+expected_symlinks
+        #self.__files_to_remove.append('prepHDF5.py')
+        #self.__dirs_to_remove = expected_dirs
 
 
         # Location of the FEL source file.
@@ -561,11 +560,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                 input_path='pmi',
                 output_path='diffr')
 
-        # Perfect detector.
-        photon_detector = PerfectPhotonDetector(
-                parameters = None,
-                input_path='diffr',
-                output_path='detector')
 
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
@@ -584,7 +578,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                          }
 
         reconstructor = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters},
-                                          input_path='detector',
+                                          input_path='diffr',
                                           output_path = 'recon.h5'
                                           )
 
@@ -593,7 +587,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                          photon_propagator=photon_propagator,
                                          photon_interactor=photon_interactor,
                                          photon_diffractor=photon_diffractor,
-                                         photon_detector=photon_detector,
+                                         photon_detector=None,
                                          photon_analyzer=reconstructor,
                                          )
 
