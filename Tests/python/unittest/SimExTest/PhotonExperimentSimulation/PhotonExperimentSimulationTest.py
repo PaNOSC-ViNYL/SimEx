@@ -516,7 +516,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'prop_out.h5',
                           'pmi/pmi_out_0000001.h5',
                           'diffr/diffr_out_0000001.h5',
-                          'recon.h5',
                           'orient_out.h5',
                           ]
 
@@ -598,9 +597,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         for f in expected_files:
             print f
             self.assertTrue( os.path.isfile( f ) )
-
-
-
 
 
 if __name__ == '__main__':
