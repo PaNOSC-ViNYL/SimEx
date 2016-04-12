@@ -68,12 +68,18 @@ endforeach()
 # create simex_vars.sh file
 if (DEVELOPER_INSTALL)
   configure_file(simex_vars_dev.sh.in simex_vars.sh)
+  configure_file(simex_dev.in simex)
 else()
   configure_file(simex_vars.sh.in simex_vars.sh)
+  configure_file(simex.in simex)
 endif()
 
 install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
         DESTINATION ${BINDIR})
+
+install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
+        DESTINATION ${BINDIR})
+
 
 
 if (PACKAGE_MAKE)

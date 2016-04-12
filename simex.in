@@ -1,0 +1,4 @@
+#!/bin/sh
+
+python ${CMAKE_INSTALL_PREFIX}/${PYPATH}/SimEx/CLI/simex.py "$@"
+
