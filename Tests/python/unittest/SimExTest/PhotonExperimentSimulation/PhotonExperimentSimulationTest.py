@@ -512,8 +512,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'diffr',
                           ]
 
-        expected_symlinks = ['detector']
-
         expected_files = ['FELsource_out.h5',
                           'prop_out.h5',
                           'pmi/pmi_out_0000001.h5',
@@ -523,9 +521,9 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           ]
 
         # Ensure proper cleanup.
-        #self.__files_to_remove = expected_files+expected_symlinks
-        #self.__files_to_remove.append('prepHDF5.py')
-        #self.__dirs_to_remove = expected_dirs
+        self.__files_to_remove = expected_files
+        self.__files_to_remove.append('prepHDF5.py')
+        self.__dirs_to_remove = expected_dirs
 
 
         # Location of the FEL source file.
@@ -595,7 +593,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pxs.run()
 
         # Check that all output files and directories are present.
-        for directory in expected_dirs+expected_symlinks:
+        for directory in expected_dirs:
             self.assertTrue( os.path.isdir( directory ) )
         for f in expected_files:
             print f
