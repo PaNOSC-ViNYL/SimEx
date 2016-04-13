@@ -517,11 +517,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'pmi/pmi_out_0000001.h5',
                           'diffr/diffr_out_0000001.h5',
                           'orient_out.h5',
+                          'recon.h5'
                           ]
 
         # Ensure proper cleanup.
         self.__files_to_remove = expected_files
-        self.__files_to_remove.append('prepHDF5.py')
         self.__dirs_to_remove = expected_dirs
 
 
@@ -560,9 +560,9 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Reconstruction: EMC+DM
         emc_parameters = {'initial_number_of_quaternions' : 1,
-                               'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 3,
-                               'min_error'                     : 1.0e-8,
+                               'max_number_of_quaternions'     : 2,
+                               'max_number_of_iterations'      : 10,
+                               'min_error'                     : 1.0e-6,
                                'beamstop'                      : 1.0e-5,
                                'detailed_output'               : False
                                }
@@ -575,7 +575,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                          }
 
         reconstructor = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters},
-                                          input_path='diffr',
+                                          input_path=TestUtilities.generateTestFilePath('diffr'),  # Cheeting here to provide more realistic data for emc.
                                           output_path = 'recon.h5'
                                           )
 
