@@ -1,7 +1,18 @@
 import shutil
 import os,sys,fileinput
 
-import SimEx,parse_settings
+import SimEx,parse_settings,parse_modules
+
+def copy_module_parameters(moduleName):
+    module = parse_modules.get_module(moduleName)
+    path = os.path.dirname(SimEx.Calculators.__file__)+'/RegisteredCalculators/'
+    src = path + moduleName + "_ParamTemplate.py"
+    dest = moduleName+"_params.py"
+    shutil.copy(src,dest)
+    
+def create_modulecall_code(moduleName,prevModule,nextModule):
+    module = parse_modules.get_module(moduleName)
+    print moduleName,prevModule,nextModule
 
 def update_main_file():
     
@@ -25,6 +36,14 @@ def update_main_file():
     except :
         print('Error: cannot create file %s'%dest )        
         return
+    
     modules = parse_settings.get_modules()
-    if (len(modules)):
-        print aaa
+    if (modules == None): return
+    
+    for i,module in enumerate(modules):
+        copy_module_parameters(module)
+        next = modules[i+1] if i < len(modules)-1 else None
+        prev = modules[i-1] if i > 0 else None
+        create_modulecall_code(module,prev,next)
+        
+        
