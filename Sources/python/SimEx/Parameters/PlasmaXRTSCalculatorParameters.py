@@ -453,7 +453,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         """ Query for the Debye temperature. """
         return self.__debye_temperature
     @debye_temperature.setter
-    def debye_temperature(self, value1, value2):
+    def debye_temperature(self, value):
         """
         @brief Set the Debye temperature to value.
 

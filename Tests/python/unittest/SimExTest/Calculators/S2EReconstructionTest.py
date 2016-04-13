@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -46,7 +45,7 @@ class S2EReconstructionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath('diffr_out_0000001.h5')
+        cls.input_h5 = TestUtilities.generateTestFilePath('diffr')
 
     @classmethod
     def tearDownClass(cls):
@@ -84,6 +83,14 @@ class S2EReconstructionTest(unittest.TestCase):
         self.__files_to_remove.append('orient_out.h5')
         self.__files_to_remove.append('recon_out.h5')
 
+        emc_parameters = {'initial_number_of_quaternions' : 1,
+                          'max_number_of_quaternions'     : 2,
+                          'max_number_of_iterations'      : 10,
+                          'min_error'                     : 1.0e-6,
+                          'beamstop'                      : 1.0e-5,
+                          'detailed_output'               : False
+                               }
+
         dm_parameters = {'number_of_trials'        : 5,
                          'number_of_iterations'    : 2,
                          'averaging_start'         : 15,
@@ -93,7 +100,7 @@ class S2EReconstructionTest(unittest.TestCase):
 
 
         # Construct the object.
-        analyzer = S2EReconstruction(parameters={'EMC_Parameters' : None, 'DM_Parameters' : dm_parameters}, input_path=self.input_h5, output_path='recon_out.h5')
+        analyzer = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters}, input_path=self.input_h5, output_path='recon_out.h5')
 
         # Call backengine.
         status = analyzer.backengine()
