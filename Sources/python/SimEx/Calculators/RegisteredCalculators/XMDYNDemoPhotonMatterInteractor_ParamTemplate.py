@@ -23,7 +23,4 @@
 input_path = 'default'
 output_path = 'default'
 
-sample_path = 'sample.h5'
-
-parameters = None
-
+parameters={ 'sample_path' : 'input/sample.h5'}

@@ -7,6 +7,7 @@ def run(args):
     import os    
     command='python ./'+get_project_name()+'.py'
     os.system(command)
+    os.system("rm *.pyc")
     
 if __name__ == "__main__":
     import sys

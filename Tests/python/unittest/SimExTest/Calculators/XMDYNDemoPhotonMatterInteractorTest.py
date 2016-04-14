@@ -99,9 +99,10 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         # Get test instance.
         pmi_parameters = {'number_of_trajectories' : 10,
                           'number_of_steps'        : 100,
+			  'sample_path' : TestUtilities.generateTestFilePath('sample.h5')
                          }
 
-        test_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi', sample_path=TestUtilities.generateTestFilePath('sample.h5') )
+        test_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=self.input_h5, output_path='pmi' )
 
         # Call backengine
         status = test_interactor.backengine()
