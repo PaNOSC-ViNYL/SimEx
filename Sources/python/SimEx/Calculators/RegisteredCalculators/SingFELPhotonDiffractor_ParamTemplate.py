@@ -28,10 +28,10 @@ parameters={ 'uniform_rotation': True,
              'slice_interval' : 100,
              'number_of_slices' : 2,
              'pmi_start_ID' : 1,
-             'pmi_stop_ID'  : 2,
+             'pmi_stop_ID'  : 1,
              'number_of_diffraction_patterns' : 2,
              'number_of_MPI_processes' : 2,
-             'beam_parameter_file' : 's2e.beam',
-             'beam_geometry_file' : 's2e.geom',
+             'beam_parameter_file' : 'input/s2e.beam',
+             'beam_geometry_file' : 'input/s2e.geom',
            }
 

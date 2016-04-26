@@ -18,10 +18,23 @@ def get_settings(key):
 def get_project_name():
     return get_settings('Project Name')
 
+def get_all_modules():
+    return get_modules() + get_disabled_modules()
 
 def get_modules():
-    return get_settings('Modules')
+    list = get_settings('Modules')
+    if (list == None):
+        return []
+    else:
+        return list
 
+def get_disabled_modules():
+    list = get_settings('DisabledModules')
+    if (list == None):
+        return []
+    else:
+        return list
+    
 
 def set_settings(key,value):
     try:

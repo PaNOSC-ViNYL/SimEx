@@ -13,17 +13,18 @@ def copy_module_parameters(moduleName):
     
 def create_modulecall_code(moduleName,prevModule,nextModule):
     module = parse_modules.get_module(moduleName)
-    codeline = """
+    codelines = """
     
 #======================================================================================    
 # Module ${ModuleName}
-#--------------------------------------------------------------------------------------    
+#======================================================================================    
 
 from SimEx.Calculators.${ModuleName} import ${ModuleName}
 import ${ModuleName}_params
 
 if (${ModuleName}_params.output_path == 'default'):
     ${ModuleName}_params.output_path = "output/${ModuleName}"
+    if not os.path.exists('output'): os.makedirs('output')    
 
 ${SetInputToPrevModulePath}
 
@@ -32,24 +33,24 @@ ${ModuleName}_inst = ${ModuleName} (
                                     input_path=${ModuleName}_params.input_path,
                                     output_path=${ModuleName}_params.output_path
                                     )
+print "-"*80
 print ("Running ${ModuleName} ...")                                  
 module_time=time.time()                                    
 ${ModuleName}_inst.backengine()
 print "Done in "+str(datetime.timedelta(seconds=time.time()-start_time))
-#--------------------------------------------------------------------------------------
                        """
     prevpath = """
 if (${ModuleName}_params.input_path == 'default'):
     ${ModuleName}_params.input_path = "output/${PrevModuleName}"
                """
     if (prevModule):
-        codeline=codeline.replace("${SetInputToPrevModulePath}",prevpath)    
-        codeline=codeline.replace("${PrevModuleName}",prevModule)
+        codelines=codelines.replace("${SetInputToPrevModulePath}",prevpath)    
+        codelines=codelines.replace("${PrevModuleName}",prevModule)
     else:
-        codeline=codeline.replace("${SetInputToPrevModulePath}","")
-    codeline=codeline.replace("${ModuleName}",moduleName)
+        codelines=codelines.replace("${SetInputToPrevModulePath}","")
+    codelines=codelines.replace("${ModuleName}",moduleName)
         
-    return codeline
+    return codelines
 
 def update_main_file():
     fname = parse_settings.get_project_name()
@@ -74,7 +75,7 @@ def update_main_file():
         return
     
     modules = parse_settings.get_modules()
-    if (modules == None): return
+    if (modules == []): return
     
     string=''  
     for i,module in enumerate(modules):

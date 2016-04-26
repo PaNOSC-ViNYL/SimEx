@@ -39,6 +39,6 @@ dm_parameters = {'number_of_trials'        : 5,
                  'number_of_shrink_cycles' : 2,
                 }
 
-parameters = parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters}
+parameters = {'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters}
 
 

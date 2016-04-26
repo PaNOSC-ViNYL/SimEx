@@ -5,9 +5,7 @@ def process_args(args):
 	add_module(args.names)
 
 def add_module(names):
-	currentModules = parse_settings.get_modules()
-	if (currentModules == None):
-		currentModules=[]
+	currentModules = parse_settings.get_all_modules()
 	added  = False
 	for name in names:
 		if any(item['Name'] == name for item in parse_modules.get_available_modules()):
