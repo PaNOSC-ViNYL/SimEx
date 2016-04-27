@@ -23,6 +23,6 @@ def write_module_parameters(moduleName,module):
     s=pprint.pformat(module.parameters)
     print>>modfile,'parameters = ',s
     
-    modfile.close
+    modfile.close()
     
     

@@ -19,8 +19,7 @@ def set_arguments(parser):
 #enable module    
     parser_enable = subparsers.add_parser('enable', help='enable module(s)')
     parser_enable.set_defaults(func=enable_module.process_args_enable)
-    
-        
+         
 #disable module
     parser_disable = subparsers.add_parser('disable', help='disable module(s)')
     parser_disable.set_defaults(func=enable_module.process_args_disable)    

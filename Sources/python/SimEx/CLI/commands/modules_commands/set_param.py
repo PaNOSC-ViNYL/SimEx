@@ -1,5 +1,5 @@
 from SimEx.CLI.utilities import parse_modules,parse_classes,parse_settings,module_files
-
+import os
 
 def process_args(args):
 	set_parameters(args.name,args.parameters)
@@ -11,9 +11,10 @@ def getFromDict(dataDict, mapList):
 		raise Exception		
 	return vals
 
+
 def setInDict(dataDict, mapList, value):
-	getFromDict(dataDict, mapList) # to check if parameter exists
-	getFromDict(dataDict, mapList[:-1])[mapList[-1]] = value
+	old_value = getFromDict(dataDict, mapList) # to check if parameter exists
+	getFromDict(dataDict, mapList[:-1])[mapList[-1]] = type(old_value)(value)
 
 def set_param(param,module):
 	try:
@@ -39,7 +40,12 @@ def set_parameters(name,params):
 		return
 
 	paramfile = name+'_params'
+	
 	module = __import__(paramfile)
+	
+	picfile = name+'_params.pyc'
+	os.remove(picfile)
+
 
 	to_write = False
 	for param in params:

@@ -24,7 +24,7 @@ input_path = 'default'
 output_path = 'default'
 
 
-emc_parameters = {'initial_number_of_quaternions' : 1,
+EMC_Parameters = {'initial_number_of_quaternions' : 1,
                   'max_number_of_quaternions'     : 9,
                   'max_number_of_iterations'      : 3,
                   'min_error'                     : 1.0e-8,
@@ -32,13 +32,13 @@ emc_parameters = {'initial_number_of_quaternions' : 1,
                   'detailed_output'               : False
                  }
 
-dm_parameters = {'number_of_trials'        : 5,
+DM_Parameters = {'number_of_trials'        : 5,
                  'number_of_iterations'    : 2,
                  'averaging_start'         : 15,
                  'leash'                   : 0.2,
                  'number_of_shrink_cycles' : 2,
                 }
 
-parameters = {'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters}
+parameters = {'EMC_Parameters' : EMC_Parameters, 'DM_Parameters' : DM_Parameters}
 
 

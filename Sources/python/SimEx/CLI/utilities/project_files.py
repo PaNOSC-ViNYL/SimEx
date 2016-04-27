@@ -33,11 +33,11 @@ ${ModuleName}_inst = ${ModuleName} (
                                     input_path=${ModuleName}_params.input_path,
                                     output_path=${ModuleName}_params.output_path
                                     )
-print "-"*80
-print ("Running ${ModuleName} ...")                                  
+prCyan("-"*80)
+prCyan ("Running ${ModuleName} ...")                                  
 module_time=time.time()                                    
 ${ModuleName}_inst.backengine()
-print "Done in "+str(datetime.timedelta(seconds=time.time()-start_time))
+prCyan ("Done in "+str(datetime.timedelta(seconds=time.time()-module_time)))
                        """
     prevpath = """
 if (${ModuleName}_params.input_path == 'default'):
@@ -64,7 +64,7 @@ def update_main_file():
         shutil.copy(src,dest)
         for line in fileinput.FileInput(dest, inplace=1):
             line=line.replace('${PROJECT_NAME}',fname)
-            print line.strip()        
+            print line.rstrip()
     except shutil.Error as e:
         print('Error: %s' % e)
     # eg. source or destination doesn't exist
@@ -86,4 +86,4 @@ def update_main_file():
     
     for line in fileinput.FileInput(dest, inplace=1):
             line=line.replace('# modules will be added here',string)
-            print line.strip()        
+            print line.rstrip()        

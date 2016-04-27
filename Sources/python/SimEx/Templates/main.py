@@ -22,18 +22,22 @@
 
 import time,datetime,os
 
-
-
+def prGreen(prt,newline=True):
+	print ("\033[92m{}\033[00m" .format(prt))
+	
+def prCyan(prt,newline=True):
+	print ("\033[96m{}\033[00m" .format(prt))
+	
 start_time=time.time()
-print "="*80
-print "Simex platform. Copyright (C) 2016."
-print "Running project ${PROJECT_NAME}"
-print "-"*80
+prCyan("="*80)
+prCyan("Simex platform. Copyright (C) 2016.")
+prCyan("Running project ${PROJECT_NAME}")
+prCyan("-"*80)
 
 # modules will be added here
 
 
-print "-"*80
+prCyan("-"*80)
 
-print "Finished in "+str(datetime.timedelta(seconds=time.time()-start_time))
+prCyan("Simex finished in "+str(datetime.timedelta(seconds=time.time()-start_time)))
 
