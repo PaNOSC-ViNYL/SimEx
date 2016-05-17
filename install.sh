@@ -17,6 +17,7 @@ mkdir -v build
 cd build
 echo "Changed dir to $PWD."
 
+
 # Some needed environment variables.
 export BOOST_ROOT=/usr/local
 export Boost_NO_SYSTEM_PATHS=ON
