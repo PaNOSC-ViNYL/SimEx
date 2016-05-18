@@ -59,7 +59,17 @@ def _convertToOPMD(input_file):
 
         # Write the common metadata for the group
         E.attrs["geometry"] = numpy.string_("cartesian")
-        E.attrs["gridSpacing"] = numpy.array( [h5['params/dRx'].value, h5['params/dRy'].value], dtype=numpy.float64)
+
+        # Get grid geometry.
+        nx = h5['params/Mesh/nx'].value
+        xMax = h5['params/Mesh/xMax'].value
+        xMin = h5['params/Mesh/xMin'].value
+        dx = (xMax - xMin) / nx
+        ny = h5['params/Mesh/ny'].value
+        yMax = h5['params/Mesh/yMax'].value
+        yMin = h5['params/Mesh/yMin'].value
+        dy = (yMax - yMin) / ny
+        E.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
         E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
         E.attrs["gridUnitSI"] = numpy.float64(1.0)
         E.attrs["dataOrder"] = numpy.string_("C")
