@@ -28,6 +28,16 @@ def _convertToOPMD(input_file):
     number_of_y_meshpoints = data_shape[1]
     number_of_time_steps = data_shape[2]
 
+    time_max = h5['params/Mesh/sliceMax'].value #s
+    time_min = h5['params/Mesh/sliceMin'].value #s
+
+    time_step = abs(time_max - time_min) / number_of_time_steps #s
+
+    # Copy misc and params from original wpg output.
+    opmd_h5.create_group('history/parent')
+    h5.copy('/params', opmd_h5['history/parent'])
+    h5.copy('/misc', opmd_h5['history/parent'])
+
     for it in range(number_of_time_steps):
         # Write opmd
         # Setup the root attributes for iteration 0
@@ -35,14 +45,13 @@ def _convertToOPMD(input_file):
 
         full_meshes_path = opmd.get_basePath(opmd_h5, it) + opmd_h5.attrs["meshesPath"]
         # Setup basepath.
-        opmd.setup_base_path( opmd_h5, iteration=it)
+        opmd.setup_base_path( opmd_h5, iteration=it, time=time_min+it*time_step, time_step=time_step)
         opmd_h5.create_group(full_meshes_path)
         meshes = opmd_h5[full_meshes_path]
         # Path to the E field, within the h5py file
         full_e_path_name = b"E"
         meshes.create_group(full_e_path_name)
         E = meshes[full_e_path_name]
-
 
         # Create the dataset (2d cartesian grid)
         E.create_dataset(b"x", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64)
