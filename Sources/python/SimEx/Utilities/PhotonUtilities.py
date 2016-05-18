@@ -85,9 +85,9 @@ def convertWavefrontToPhotons(input_file):
         phases_x = numpy.angle(Ex)
         phases_y = numpy.angle(Ey)
 
-        import pylab
-        pylab.imshow(phases_x, cmap="RdBu")
-        pylab.show()
+        #import pylab
+        #pylab.imshow(phases_x, cmap="RdBu")
+        #pylab.show()
 
         print "t=%e: found %d horizontally polarized photons in central pixel." % (t, number_of_photons_x[39,39])
         print "t=%e: found %d vertically polarized photons in central pixel." % (t, number_of_photons_y[39,39])
