@@ -33,6 +33,7 @@ def _convertToOPMD(input_file):
 
     time_step = abs(time_max - time_min) / number_of_time_steps #s
 
+
     # Copy misc and params from original wpg output.
     opmd_h5.create_group('history/parent')
     h5.copy('/params', opmd_h5['history/parent'])
@@ -48,14 +49,15 @@ def _convertToOPMD(input_file):
         opmd.setup_base_path( opmd_h5, iteration=it, time=time_min+it*time_step, time_step=time_step)
         opmd_h5.create_group(full_meshes_path)
         meshes = opmd_h5[full_meshes_path]
-        # Path to the E field, within the h5py file
+
+        # Path to the E field, within the h5 file.
         full_e_path_name = b"E"
         meshes.create_group(full_e_path_name)
         E = meshes[full_e_path_name]
 
         # Create the dataset (2d cartesian grid)
-        E.create_dataset(b"x", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64)
-        E.create_dataset(b"y", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64)
+        E.create_dataset(b"x", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64, compression='gzip')
+        E.create_dataset(b"y", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64, compression='gzip')
 
         # Write the common metadata for the group
         E.attrs["geometry"] = numpy.string_("cartesian")

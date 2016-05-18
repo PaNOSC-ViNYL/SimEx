@@ -34,6 +34,9 @@ c = constants.speed_of_light
 eps0 = constants.epsilon_0
 e = constants.e
 
+photons_x = []
+photons_y = []
+
 def convertWavefrontToPhotons(input_file):
     """ Utility to convert openPMD conform hdf5 with electric fields to photons. """
 
@@ -51,8 +54,6 @@ def convertWavefrontToPhotons(input_file):
     photon_energy = h5['history/parent/params/photonEnergy'].value # eV
     photon_energy = photon_energy * e # Convert to J
 
-    sum_x = 0.0
-    sum_y = 0.0
     for key in time_keys:
 
         # Get time of this slice.
@@ -75,22 +76,14 @@ def convertWavefrontToPhotons(input_file):
         Ey = data[key+'/meshes/E/y'].value # V/m
 
 
-        # Calculate number of photons via intensity and photon energy. Since fields are stored as sqrt(W/mm^2), have to convert to W/m^2 (factor 1e6 below).
+        # Calculate number of photons via intensity and photon energy.
+        # Since fields are stored as sqrt(W/mm^2), have to convert to W/m^2 (factor 1e6 below).
         number_of_photons_x = numpy.round(abs(Ex)**2 * dA * dt *1.0e6 / photon_energy)
         number_of_photons_y = numpy.round(abs(Ey)**2 * dA * dt *1.0e6 / photon_energy)
-
-        sum_x += number_of_photons_x.sum(axis=-1).sum(axis=-1)
-        sum_y += number_of_photons_y.sum(axis=-1).sum(axis=-1)
 
         phases_x = numpy.angle(Ex)
         phases_y = numpy.angle(Ey)
 
-        #import pylab
-        #pylab.imshow(phases_x, cmap="RdBu")
-        #pylab.show()
-
-        print "t=%e: found %d horizontally polarized photons in central pixel." % (t, number_of_photons_x[39,39])
-        print "t=%e: found %d vertically polarized photons in central pixel." % (t, number_of_photons_y[39,39])
 
     print "Found total %e, %e photons (hor, ver)" % (sum_x, sum_y)
 
