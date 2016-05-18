@@ -42,7 +42,7 @@ def get_basePath(f, iteration):
     iteration_str = numpy.string_(str(iteration))
     return numpy.string_(f.attrs["basePath"]).replace(b"%T", iteration_str)
 
-def setup_base_path(f, iteration):
+def setup_base_path(f, iteration, time, time_step):
     """
     Write the basePath group for `iteration`
 
@@ -60,9 +60,9 @@ def setup_base_path(f, iteration):
     bp = f[ base_path ]
 
     # Required attributes
-    bp.attrs["time"] = 0.  # Value expressed in femtoseconds
-    bp.attrs["dt"] = 0.5   # Value expressed in femtoseconds
-    bp.attrs["timeUnitSI"] = numpy.float64(1.e-15) # Conversion factor
+    bp.attrs["time"] = time  # Value expressed in seconds
+    bp.attrs["dt"] = time_step   # Value expressed in seconds
+    bp.attrs["timeUnitSI"] = numpy.float64(1.0) # Conversion factor.
 
 def setup_root_attr(f):
     """
