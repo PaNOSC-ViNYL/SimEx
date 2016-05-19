@@ -1,0 +1,64 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "nightly"
+
+sudo: required
+dist: trusty
+
+matrix:
+  allow_failures:
+    # not yet Python 3 compatible
+    - python: "3.4"
+    - python: "3.5"
+    # Python 3.6 "nightly" (upcoming)
+    - python: "nightly"
+
+env:
+  global:
+    - C_INCLUDE_PATH=/usr/lib/openmpi/include
+
+addons:
+  apt:
+    packages:
+      - openmpi-bin
+      - libopenmpi-dev
+      - wget
+      - libboost1.55-dev
+      - libboost1.55-all-dev
+      - libarmadillo-dev
+      - libhdf5-dev # non-MPI but with HL & CPP bindings
+      - build-essential
+      - libbz2-dev
+      - libgsl0-dev
+      - libfftw3-dev
+      - liblapack-dev
+      - cmake
+      - gfortran
+      - unzip
+      - cython
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/lib
+
+before_script:
+  # print interesting versions
+  - python --version
+  - python -c "import numpy as np; print( np.__version__ )"
+  - python -c "import h5py as h5; print( h5.__version__ )"
+
+script:
+  # build & install
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV ..
+  - make
+  - make install
+  # tests
+  - cd ../Tests/python/unittest/
+  - python Test.py -v
