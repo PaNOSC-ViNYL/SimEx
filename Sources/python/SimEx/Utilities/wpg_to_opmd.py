@@ -4,6 +4,12 @@ import math
 import numpy
 import os
 import sys
+from scipy import constants
+
+# Get some constants.
+c = constants.speed_of_light
+eps0 = constants.epsilon_0
+e = constants.e
 
 from SimEx.Utilities import OpenPMDTools as opmd
 
@@ -34,10 +40,17 @@ def _convertToOPMD(input_file):
     time_step = abs(time_max - time_min) / number_of_time_steps #s
 
 
+    photon_energy = h5['params/photonEnergy'].value # eV
+    photon_energy = photon_energy * e # Convert to J
+
     # Copy misc and params from original wpg output.
     opmd_h5.create_group('history/parent')
     h5.copy('/params', opmd_h5['history/parent'])
     h5.copy('/misc', opmd_h5['history/parent'])
+    h5.copy('/history', opmd_h5['history/parent'])
+
+    sum_x = 0.0
+    sum_y = 0.0
 
     for it in range(number_of_time_steps):
         # Write opmd
@@ -46,7 +59,8 @@ def _convertToOPMD(input_file):
 
         full_meshes_path = opmd.get_basePath(opmd_h5, it) + opmd_h5.attrs["meshesPath"]
         # Setup basepath.
-        opmd.setup_base_path( opmd_h5, iteration=it, time=time_min+it*time_step, time_step=time_step)
+        time=time_min+it*time_step
+        opmd.setup_base_path( opmd_h5, iteration=it, time=time, time_step=time_step)
         opmd_h5.create_group(full_meshes_path)
         meshes = opmd_h5[full_meshes_path]
 
@@ -61,7 +75,6 @@ def _convertToOPMD(input_file):
 
         # Write the common metadata for the group
         E.attrs["geometry"] = numpy.string_("cartesian")
-
         # Get grid geometry.
         nx = h5['params/Mesh/nx'].value
         xMax = h5['params/Mesh/xMax'].value
@@ -104,12 +117,85 @@ def _convertToOPMD(input_file):
         E["y"].attrs["unitSI"] = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )
 
         # Copy the fields.
-        E["x"][:,:] =  h5['data/arrEhor'][:,:,it,0] + 1j * h5['data/arrEhor'][:,:,it,1]
-        E["y"][:,:] =  h5['data/arrEver'][:,:,it,0] + 1j * h5['data/arrEver'][:,:,it,1]
+        Ex = h5['data/arrEhor'][:,:,it,0] + 1j * h5['data/arrEhor'][:,:,it,1]
+        Ey = h5['data/arrEver'][:,:,it,0] + 1j * h5['data/arrEver'][:,:,it,1]
+        E["x"][:,:] = Ex
+        E["y"][:,:] = Ey
+
+        # Get area element.
+        dA = dx*dy
+
+        ### Number of photon fields.
+        # Path to the number of photons.
+        full_nph_path_name = b"Nph"
+        meshes.create_group(full_nph_path_name)
+        Nph = meshes[full_nph_path_name]
+
+        # Create the dataset (2d cartesian grid)
+        Nph.create_dataset(b"x", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.float32, compression='gzip')
+        Nph.create_dataset(b"y", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.float32, compression='gzip')
+
+        # Write the common metadata for the group
+        Nph.attrs["geometry"] = numpy.string_("cartesian")
+        Nph.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
+        Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+        Nph.attrs["gridUnitSI"] = numpy.float64(1.0)
+        Nph.attrs["dataOrder"] = numpy.string_("C")
+        Nph.attrs["axisLabels"] = numpy.array([b"x",b"y"])
+        Nph.attrs["unitDimension"] = \
+           numpy.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=numpy.float64)
+
+        # Add time information
+        Nph.attrs["timeOffset"] = 0.  # Time offset with respect to basePath's time
+        # Nph - Staggered position within a cell
+        Nph["x"].attrs["position"] = numpy.array([0.0, 0.5], dtype=numpy.float32)
+        Nph["y"].attrs["position"] = numpy.array([0.5, 0.0], dtype=numpy.float32)
+        Nph["x"].attrs["unitSI"] = numpy.float64(1.0 )
+        Nph["y"].attrs["unitSI"] = numpy.float64(1.0 )
+
+        # Calculate number of photons via intensity and photon energy.
+        # Since fields are stored as sqrt(W/mm^2), have to convert to W/m^2 (factor 1e6 below).
+        number_of_photons_x = numpy.round(abs(Ex)**2 * dA * time_step *1.0e6 / photon_energy)
+        number_of_photons_y = numpy.round(abs(Ey)**2 * dA * time_step *1.0e6 / photon_energy)
+        sum_x += number_of_photons_x.sum(axis=-1).sum(axis=-1)
+        sum_y += number_of_photons_y.sum(axis=-1).sum(axis=-1)
+        Nph["x"][:,:] = number_of_photons_x
+        Nph["y"][:,:] = number_of_photons_y
+
+        ### Phases.
+        # Path to phases
+        full_phases_path_name = b"phases"
+        meshes.create_group(full_phases_path_name)
+        phases = meshes[full_phases_path_name]
+
+        # Create the dataset (2d cartesian grid)
+        phases.create_dataset(b"x", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.float32, compression='gzip')
+        phases.create_dataset(b"y", (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.float32, compression='gzip')
+
+        # Write the common metadata for the group
+        phases.attrs["geometry"] = numpy.string_("cartesian")
+        phases.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
+        phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+        phases.attrs["gridUnitSI"] = numpy.float64(1.0)
+        phases.attrs["dataOrder"] = numpy.string_("C")
+        phases.attrs["axisLabels"] = numpy.array([b"x",b"y"])
+        phases.attrs["unitDimension"] = numpy.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=numpy.float64)
+        phases["x"].attrs["unitSI"] = numpy.float64(1.0 )
+        phases["y"].attrs["unitSI"] = numpy.float64(1.0 )
+
+        # Add time information
+        phases.attrs["timeOffset"] = 0.  # Time offset with respect to basePath's time
+        # phases positions. - Staggered position within a cell
+        phases["x"].attrs["position"] = numpy.array([0.0, 0.5], dtype=numpy.float32)
+        phases["y"].attrs["position"] = numpy.array([0.5, 0.0], dtype=numpy.float32)
+
+        phases["x"][:,:] = numpy.angle(Ex)
+        phases["y"][:,:] = numpy.angle(Ey)
+
+    print "Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y)
 
     opmd_h5.close()
     h5.close()
-
 
 
 if __name__ == "__main__":
