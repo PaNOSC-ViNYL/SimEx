@@ -13,7 +13,7 @@ e = constants.e
 
 from SimEx.Utilities import OpenPMDTools as opmd
 
-def _convertToOPMD(input_file):
+def convertToOPMD(input_file):
     """ Take native wpg output and rewrite in openPMD conformant way.
     @param input_file: The hdf5 file to be converted.
     @type: string
@@ -207,5 +207,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Call the converter routine.
-    _convertToOPMD(args.input_file)
+    convertToOPMD(args.input_file)
 

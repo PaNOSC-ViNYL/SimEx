@@ -32,6 +32,9 @@ import paths
 import unittest
 
 from SimEx.Utilities import OpenPMDTools as opmd
+from SimEx.Utilities.wpg_to_opmd import convertToOPMD
+
+from TestUtilities.TestUtilities import generateTestFilePath
 
 class OpenPMDToolsTest(unittest.TestCase):
     """ Test class for the openpmd tools. """
@@ -125,6 +128,38 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.assertEqual( result_array[1], 0 )
 
 
+    def testWpgToOPMDConverter(self):
+        """ Test the conversion of wpg output to openPMD conform file."""
+
+        # Get sample file.
+        h5_input = generateTestFilePath('prop_out_0000001.h5')
+
+        # Convert.
+        convertToOPMD(h5_input)
+
+        # New file name.
+        opmd_h5_file = h5_input.replace(".h5", ".opmd.h5")
+
+        # Make sure we clean up after test.
+        self.__files_to_remove.append(opmd_h5_file)
+
+        # Check new file was generated.
+        self.assertIn( 'prop_out_0000001.opmd.h5', os.listdir( os.path.dirname(opmd_h5_file) ) )
+
+        # Validate the new file.
+        g = opmd.open_file(opmd_h5_file)
+
+        # Setup result array.
+        result_array = numpy.array([0, 0])
+        result_array += opmd.check_root_attr(g, False, False)
+
+        # Go through all the iterations, checking both the particles.
+        # and the meshes
+        result_array += opmd.check_iterations(g,False,False)
+
+        # Assert that no errors nor warnings were issued.
+        self.assertEqual( result_array[0], 0 )
+        self.assertEqual( result_array[1], 0 )
 
 
 if __name__ == '__main__':
