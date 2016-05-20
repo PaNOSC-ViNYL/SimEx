@@ -103,8 +103,8 @@ class EMCOrientationTest(unittest.TestCase):
         run_files_path = analyzer.run_files_path
         tmp_files_path = analyzer.tmp_files_path
 
-        self.assertTrue( os.isdir( run_files_path ) )
-        self.assertTrue( os.isdir( tmp_files_path ) )
+        self.assertTrue( os.path.isdir( run_files_path ) )
+        self.assertTrue( os.path.isdir( tmp_files_path ) )
 
         expected_run_files = ["finish_intensity.dat", "quaternion.dat",
                               "detector.dat",
@@ -117,7 +117,7 @@ class EMCOrientationTest(unittest.TestCase):
                               ]
 
         for ef in expected_run_files:
-            self.assertIn( ef, os.path.listdir(run_files_path) )
+            self.assertIn( ef, os.listdir(run_files_path) )
 
 
 
