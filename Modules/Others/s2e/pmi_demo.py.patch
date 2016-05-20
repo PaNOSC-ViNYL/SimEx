@@ -114,7 +114,7 @@ class PMIDemo(object):
         xsnp['xyz'] = a_fp.get( dbase_root + 'xyz' ) .value
         xsnp['r']   = a_fp.get( dbase_root + 'r' )   .value
         N = xsnp['Z'].size
-        xsnp['q'] = numpy.array( [ xsnp['ff'][ pylab.find( xsnp['T'] == x ) , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
+        xsnp['q'] = numpy.array( [ xsnp['ff'][ matplotlib.mlab.find( xsnp['T'] == x ) , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
         xsnp['snp'] = a_snp ;
 
         return xsnp
@@ -141,7 +141,7 @@ class PMIDemo(object):
         xfp.close()
         sample['selZ'] = dict()
         for sel_Z in numpy.unique( sample['Z'] ) :
-            sample['selZ'][sel_Z] = pylab.find( sel_Z == sample['Z'] )
+            sample['selZ'][sel_Z] = matplotlib.mlab.find( sel_Z == sample['Z'] )
         sample['N'] = len( sample['Z'] )
 
         self.g_s2e['sample'] = sample
