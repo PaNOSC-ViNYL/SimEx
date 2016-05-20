@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -100,6 +99,14 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         """ Query for the field data. """
         return self.__data
 
+    @property
+    def run_files_path(self):
+        return self.__run_instance_dir
+
+    @property
+    def tmp_files_path(self):
+        return self.__tmp_out_dir
+
     def _readH5(self):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
@@ -168,10 +175,13 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         ###############################################################
         # Check that subdirectories for intermediate output exist
         ###############################################################
-        #tmp_log_dir = tempfile.mkdtemp(prefix='emc_log')
         tmp_out_dir = tempfile.mkdtemp(prefix='emc_out_')
-        #out_dir = self.output_path
         run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
+
+        # Store file paths on object for later reference.
+        self.__tmp_out_dir = tmp_out_dir
+        self.__run_instance_dir = run_instance_dir
+
         src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','bin'))
 
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")

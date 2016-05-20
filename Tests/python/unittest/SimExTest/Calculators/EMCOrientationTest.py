@@ -88,6 +88,38 @@ class EMCOrientationTest(unittest.TestCase):
 
         self.assertEqual(status, 0)
 
+    def testPaths(self):
+        """ Test that we can start a test calculation. """
+
+        self.__files_to_remove.append('orient_out.h5')
+
+        # Construct the object.
+        analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+
+        # Call backengine.
+        status = analyzer.backengine()
+
+        # Check paths exist and are populated.
+        run_files_path = analyzer.run_files_path
+        tmp_files_path = analyzer.tmp_files_path
+
+        self.assertTrue( os.isdir( run_files_path ) )
+        self.assertTrue( os.isdir( tmp_files_path ) )
+
+        expected_run_files = ["finish_intensity.dat", "quaternion.dat",
+                              "detector.dat",
+                              "most_likely_orientations.dat",
+                              "start_intensity.dat",
+                              "EMC_extended.log",
+                              "mutual_info.dat",
+                              "EMC.log",
+                              "photons.dat",
+                              ]
+
+        for ef in expected_run_files:
+            self.assertIn( ef, os.path.listdir(run_files_path) )
+
+
 
 if __name__ == '__main__':
     unittest.main()
