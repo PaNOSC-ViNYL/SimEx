@@ -3,6 +3,9 @@ SIMEX PLATFORM
 
 Software platform for simulation of advanced photon experiments.
 
+[![Build Status master](https://img.shields.io/travis/eucall-software/simex_platform/master.svg?label=master)](https://travis-ci.org/eucall-software/simex_platform/branches)
+[![Build Status develop](https://img.shields.io/travis/eucall-software/simex_platform/develop.svg?label=develop)](https://travis-ci.org/eucall-software/simex_platform/branches)
+
 Contents
 ==============
 1.) Purpose of the software

@@ -287,9 +287,9 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         # Default.
         electron_density = 1.0e28
         energy_range = checkAndSetEnergyRange(energy_range=None,electron_density=electron_density)
-        self.assertAlmostEqual( energy_range['min'], -37.13276417 )
-        self.assertAlmostEqual( energy_range['max'],  37.13276417 )
-        self.assertAlmostEqual( energy_range['step'],  0.37132764 )
+        self.assertAlmostEqual( energy_range['min'], -37.13276417, places=5 )
+        self.assertAlmostEqual( energy_range['max'],  37.13276417, places=5 )
+        self.assertAlmostEqual( energy_range['step'],  0.37132764, places=5 )
 
 
         # Check exception.
