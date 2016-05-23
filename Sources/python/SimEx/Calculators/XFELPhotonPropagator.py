@@ -86,7 +86,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             propagateSE.propagate(input_file, output_file)
 
             # Rewrite in openpmd conformant way.
-            wpg_to_opmd._convertToOPMD( output_file )
+            wpg_to_opmd.convertToOPMD( output_file )
 
         return 0
 
