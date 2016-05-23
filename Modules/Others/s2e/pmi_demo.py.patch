@@ -167,7 +167,7 @@ class PMIDemo(object):
     def f_rotate_sample( self ) :
         #print '   quaternion to be set!!!'
         self.g_s2e['sample']['rot_quaternion'] = numpy.random.rand( 4 ) #  pylab.array([0,0,0,0])
-        self.g_s2e['sample']['rotmat'] = pylab.zeros((9,))
+        self.g_s2e['sample']['rotmat'] = numpy.zeros((9,))
         s2e_gen_randrot_quat( self.g_s2e['sample']['rot_quaternion'] ,  self.g_s2e['sample']['rotmat'] ) ;
         s2e_rand_orient( self.g_s2e['sample']['r'] , self.g_s2e['sample']['rotmat'] ) ;
 
@@ -185,7 +185,7 @@ class PMIDemo(object):
     def f_system_setup( self ) :
 
         self.g_s2e['sys']['r'] = self.g_s2e['sample']['r'].copy()
-        self.g_s2e['sys']['q'] = pylab.zeros( self.g_s2e['sample']['Z'].shape )
+        self.g_s2e['sys']['q'] = numpy.zeros( self.g_s2e['sample']['Z'].shape )
         self.g_s2e['sys']['NE'] = self.g_s2e['sample']['Z'].copy()
         self.g_s2e['sys']['Z'] = self.g_s2e['sample']['Z']
         self.g_s2e['sys']['Nph'] = 1e99
@@ -375,10 +375,10 @@ def s2e_gen_randrot_quat( quat , rotmat ) :
                   quat[2] * quat[2] +
                   quat[3] * quat[3] ) :
             u0 = pylab.rand( 1 ) ; u1 = pylab.rand( 1 ) ; u2 = pylab.rand( 1 ) ;
-            q0 = pylab.sqrt(1-u0) * pylab.sin(2*pylab.pi*u1) ;
-            q1 = pylab.sqrt(1-u0) * pylab.cos(2*pylab.pi*u1) ;
-            q2 = pylab.sqrt(u0) * pylab.sin(2*pylab.pi*u2) ;
-            q3 = pylab.sqrt(u0) * pylab.cos(2*pylab.pi*u2) ;
+            q0 = numpy.sqrt(1-u0) * numpy.sin(2*numpy.pi*u1) ;
+            q1 = numpy.sqrt(1-u0) * numpy.cos(2*numpy.pi*u1) ;
+            q2 = numpy.sqrt(u0) * numpy.sin(2*numpy.pi*u2) ;
+            q3 = numpy.sqrt(u0) * numpy.cos(2*numpy.pi*u2) ;
 
             quat[0] = q0 ;
             quat[1] = q1 ;
@@ -432,7 +432,7 @@ def s2e_gen_randrot_quat( quat , rotmat ) :
 def s2e_rand_orient( r ,mat ) :
     N = r.shape[1]
 ###    print N
-    vv = pylab.zeros((3,0)) ;
+    vv = numpy.zeros((3,0)) ;
 
     for ii in range(N) :
         vv = r[ii,:]
