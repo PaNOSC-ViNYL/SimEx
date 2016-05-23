@@ -1,0 +1,8 @@
+Tests/python/unittest/TestFiles/diffr_out_0000001.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/FELsource_out.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/orient_out_0000001.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/orient_out.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/pmi_out_0000001.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/prop_out_0000001.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/prop_out_0000011.h5 filter=lfs diff=lfs merge=lfs -text
+Tests/python/unittest/TestFiles/sample.h5 filter=lfs diff=lfs merge=lfs -text
