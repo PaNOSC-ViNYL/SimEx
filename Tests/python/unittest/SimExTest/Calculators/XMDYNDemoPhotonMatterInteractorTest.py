@@ -113,7 +113,7 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         self.assertTrue( 'pmi_out_0000001.h5' in os.listdir( test_interactor.output_path ) )
 
         # Clean up.
-        #self.__paths_to_remove.append('pmi')
+        self.__paths_to_remove.append('pmi')
 
 
 if __name__ == '__main__':
