@@ -143,7 +143,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             input_files = [self.input_path]
 
         elif os.path.isdir(self.input_path):
-            input_files = [ os.path.join( self.input_path, f) for f in os.listdir( self.input_path ) ]
+            input_files = [ os.path.join( self.input_path, f) for f in os.listdir( self.input_path ) if f.split('.')[-1] == 'h5' and f.split('.')[-2] != 'opmd' ]
             input_files.sort()
 
         else:

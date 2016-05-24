@@ -115,6 +115,22 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         # Clean up.
         self.__paths_to_remove.append('pmi')
 
+    def testOPMD(self):
+        """ Check that the input directory scanner filters out the opmd files."""
+        # Setup parameters.
+        pmi_parameters = {'number_of_trajectories' : 10,
+                          'number_of_steps'        : 100,
+                         }
+
+        test_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=TestUtilities.generateTestFilePath('prop_out'), output_path='pmi', sample_path=TestUtilities.generateTestFilePath('sample.h5') )
+
+        # Call backengine
+        status = test_interactor.backengine()
+
+        self.assertEqual(status, 0 )
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
