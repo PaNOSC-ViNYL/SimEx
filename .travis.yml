@@ -70,10 +70,6 @@ script:
   - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV ..
   - make
   - make install
-  ### DEBUG
-  - cp /home/travis/build/eucall-software/simex_platform/Modules/Others/s2e/prepHDF5.py.patch /home/travis/virtualenv/python2.7.10/lib/python2.7/prepHDF5.py
-  ### DEBUG
   # tests
   - cd ../Tests/python/unittest/
-    #- python Test.py -v
-  - python SimExTest/Calculators/SingFELPhotonDiffractorTest.py SingFELPhotonDiffractorTest.testBackengine
+  - python Test.py -v
