@@ -44,7 +44,7 @@ cache:
   apt: true
   directories:
     - $HOME/.cache/pip
-      #- $HOME/lib
+    - $HOME/lib
 
 before_script:
   # print interesting versions
@@ -60,7 +60,7 @@ script:
   - make
   - make install
   ### DEBUG
-  - cp ../Modules/Others/s2e/prepHDF5.py.patch ../lib/python2.7/prepHDF5.py
+  - cp /home/travis/build/eucall-software/simex_platform/Modules/Others/s2e/prepHDF5.py.patch /home/travis/build/eucall-software/simex_platform/lib/python2.7/prepHDF5.py
   ### DEBUG
   # tests
   - cd ../Tests/python/unittest/
