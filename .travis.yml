@@ -64,4 +64,5 @@ script:
   ### DEBUG
   # tests
   - cd ../Tests/python/unittest/
-  - python Test.py -v
+    #- python Test.py -v
+  - python SimExTest/Calculators/SingFELPhotonDiffractorTest.py SingFELPhotonDiffractorTest.testBackengine
