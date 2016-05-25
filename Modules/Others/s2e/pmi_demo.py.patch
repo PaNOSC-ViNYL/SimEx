@@ -135,7 +135,7 @@ class PMIDemo(object):
 
     def f_load_sample( self, sample_path ) :
         sample = dict()
-        xfp = h5py.File( sample_path )
+        xfp = h5py.File( sample_path, 'r' )
         xxx = xfp.get( 'Z' )   ;  sample['Z']   = xxx.value
         xxx = xfp.get( 'r' )   ;  sample['r']   = xxx.value
         xfp.close()
