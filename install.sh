@@ -31,5 +31,10 @@ cmake -DDEVELOPER_INSTALL=ON -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
 # Build the project.
 make -j8
 
+
 # Install the project.
 make install
+
+cp ../Modules/Others/s2e/prepHDF5.py.patch ../lib/python2.7/prepHDF5.py
+
+

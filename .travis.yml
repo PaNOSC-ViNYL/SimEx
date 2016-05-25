@@ -59,6 +59,9 @@ script:
   - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV ..
   - make
   - make install
+  ### DEBUG
+  - cp ../Modules/Others/s2e/prepHDF5.py.patch ../lib/python2.7/prepHDF5.py
+  ### DEBUG
   # tests
   - cd ../Tests/python/unittest/
   - python Test.py -v
