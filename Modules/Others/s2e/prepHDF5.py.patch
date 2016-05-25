@@ -10,6 +10,7 @@ import h5py
 def prepS2E( src , dest , config ) :
 
     print "*** This is prepS2E. \n Converting %s to %s. \n ***." % (src, dest)
+
     file_in  = h5py.File( src , "r")
     file_out =  h5py.File( dest , "w")
 
