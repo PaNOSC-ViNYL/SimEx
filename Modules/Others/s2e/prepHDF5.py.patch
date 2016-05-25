@@ -12,7 +12,7 @@ def prepS2E( src , dest , config ) :
     file_in  = h5py.File( src , "r")
     file_out =  h5py.File( dest , "w")
 
-    print "*** This is prepS2E. \n Converting %s to %s. \n ***."
+    print "*** This is prepS2E. \n Converting %s to %s. \n ***." % (src, dest)
 
     grp_hist = file_out.create_group( "history" )
     grp_hist_parent = file_out.create_group( "history/parent" )
