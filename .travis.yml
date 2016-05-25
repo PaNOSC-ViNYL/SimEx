@@ -53,6 +53,8 @@ before_script:
   - python -c "import h5py as h5; print( h5.__version__ )"
 
 script:
+  # load git lfs files
+  - git lfs pull
   # build & install
   - mkdir build
   - cd build
