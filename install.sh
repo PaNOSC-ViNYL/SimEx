@@ -35,6 +35,3 @@ make -j8
 # Install the project.
 make install
 
-cp ../Modules/Others/s2e/prepHDF5.py.patch ../lib/python2.7/prepHDF5.py
-
-
