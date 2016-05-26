@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -119,7 +118,7 @@ class WavePropagatorTest(unittest.TestCase):
         # Check exception raises when attempting to read.
         self.assertRaises( IOError, propagator._readH5 )
 
-
+    @unittest.skip("Skipped while samoylv/WPG#74 not closed.")
     def testReadCalculateWrite(self):
         """ Test a backengine run with a single input file. """
         # Define a beamline.

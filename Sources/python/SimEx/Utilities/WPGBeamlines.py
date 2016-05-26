@@ -83,7 +83,7 @@ def setupSPBDay1Beamline():
     beamline.append( crl, Use_PP(semi_analytical_treatment=0, zoom=1, sampling=1) )
 
     # Drift to focus aperture
-    crl_to_exp_drift = Drift( src_to_exp )
+    crl_to_exp_drift = Drift( src_to_exp - src_to_crl )
     beamline.append( crl_to_exp_drift, Use_PP(semi_analytical_treatment=1, zoom=1, sampling=1) )
 
     return beamline
