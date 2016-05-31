@@ -109,4 +109,15 @@ numpy.savetxt('varcoeff.txt', out_data)
 #pyplot.legend(loc=2)
 #pyplot.xlim([min_pixel-1,max_pixel+1])
 #pyplot.show()
+#data_9fs = numpy.loadtxt('/home/grotec/Work/XFEL/SPB_3fs/reconstruction/data/coeff_of_variation_9fs.dat')
+#mean_9fs = data_9fs[:,1]
+#std_9fs = data_9fs[:,2]
+
+#min_pixel = 5
+#max_pixel = 39
+#pyplot.errorbar( range(max_index)[min_pixel:max_pixel], averaged_values[min_pixel:max_pixel], yerr=std[min_pixel:max_pixel], fmt="s", label="3 fs" )
+#pyplot.errorbar( range(max_index)[min_pixel:max_pixel], mean_9fs, yerr=std_9fs, fmt="s", label="9 fs")
+#pyplot.legend(loc=2)
+#pyplot.xlim([min_pixel-1,max_pixel+1])
+#pyplot.show()
 

@@ -246,13 +246,13 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             gen.writeDetectorToFile(filename=detectorFile)
             gen.writeSparsePhotonFile(photonFiles, sparsePhotonFile, avgPatternFile)
             print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=outputLog)
+            print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
             os.system("rm %s " % lockFile)
         else:
             msg = "Photons.dat and detector.dat already exists in " + tmp_out_dir + "."
             print_to_log(msg=msg, log_file=outputLog)
             gen.readGeomFromDetectorFile(detectorFile)
-            print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)),
-                    log_file=outputLog)
+            print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
 
 
         if not (os.path.isfile(os.path.join(run_instance_dir,"detector.dat"))):
@@ -324,6 +324,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                     # Here is the actual timed EMC iteration, which calls the EMC.c code.
                     start_time = time.clock()
 
+                    #command_sequence = ['EMC.x', '1']
                     command_sequence = ['EMC', '1']
                     process_handle = subprocess.Popen(command_sequence)
                     process_handle.wait()
