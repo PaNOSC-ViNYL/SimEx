@@ -32,6 +32,7 @@ import os
 from prop import propagateSE
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
+from SimEx.Utilities import wpg_to_opmd
 
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
@@ -84,9 +85,11 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
             propagateSE.propagate(input_file, output_file)
 
+            # Rewrite in openpmd conformant way.
+            wpg_to_opmd.convertToOPMD( output_file )
+
         return 0
 
-        ### TODO: Consider moving IO logic to the ABC.
 
     @property
     def data(self):

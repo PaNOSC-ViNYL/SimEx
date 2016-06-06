@@ -1,6 +1,7 @@
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Based on simS2E script provided by D. Loh.
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -16,15 +17,14 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
-import numpy as N
 import h5py
+import numpy
 import os
-import time
 import sys
+import time
 
 import matplotlib
 matplotlib.use('Agg')
@@ -64,18 +64,18 @@ def load_intensities(ref_file):
     intens_len = len(t_intens)
     qmax    = intens_len/2
     (q_low, q_high) = (15, int(0.9*qmax))
-    qRange1 = N.arange(-q_high, q_high + 1)
-    qRange2 = N.arange(-qmax, qmax + 1)
-    qPos0   = N.array([[i,j,0] for i in qRange1 for j in qRange1 if N.sqrt(i*i+j*j) > q_low]).astype("float")
-    qPos1   = N.array([[i,0,j] for i in qRange1 for j in qRange1 if N.sqrt(i*i+j*j) > q_low]).astype("float")
-    qPos2   = N.array([[0,i,j] for i in qRange1 for j in qRange1 if N.sqrt(i*i+j*j) > q_low]).astype("float")
-    qPos    = N.concatenate((qPos0, qPos1, qPos2))
-    qPos_full = N.array([[i,j,k] for i in qRange2 for j in qRange2 for k in qRange2]).astype("float")
+    qRange1 = numpy.arange(-q_high, q_high + 1)
+    qRange2 = numpy.arange(-qmax, qmax + 1)
+    qPos0   = numpy.array([[i,j,0] for i in qRange1 for j in qRange1 if numpy.sqrt(i*i+j*j) > q_low]).astype("float")
+    qPos1   = numpy.array([[i,0,j] for i in qRange1 for j in qRange1 if numpy.sqrt(i*i+j*j) > q_low]).astype("float")
+    qPos2   = numpy.array([[0,i,j] for i in qRange1 for j in qRange1 if numpy.sqrt(i*i+j*j) > q_low]).astype("float")
+    qPos    = numpy.concatenate((qPos0, qPos1, qPos2))
+    qPos_full = numpy.array([[i,j,k] for i in qRange2 for j in qRange2 for k in qRange2]).astype("float")
     return (qmax, t_intens, intens_len, qPos, qPos_full)
 
 def zero_neg(x):
     return 0. if x<=0. else x
-v_zero_neg  = N.vectorize(zero_neg)
+v_zero_neg  = numpy.vectorize(zero_neg)
 
 def find_two_means(vals, v0, v1):
     v0_t    = 0.
@@ -83,7 +83,7 @@ def find_two_means(vals, v0, v1):
     v1_t    = 0.
     v1_t_n  = 0.
     for vv in vals:
-        if (N.abs(vv-v0) > abs(vv-v1)):
+        if (numpy.abs(vv-v0) > abs(vv-v1)):
             v1_t    += vv
             v1_t_n  += 1.
         else:
@@ -94,23 +94,23 @@ def find_two_means(vals, v0, v1):
 def cluster_two_means(vals):
     (v0,v1)     = (0.,0.1)
     (v00, v11)  = find_two_means(vals, v0, v1)
-    err = 0.5*(N.abs(v00-v0)+N.abs(v11-v1))
+    err = 0.5*(numpy.abs(v00-v0)+numpy.abs(v11-v1))
     while(err > 1.E-5):
         (v00, v11)  = find_two_means(vals, v0, v1)
-        err         = 0.5*(N.abs(v00-v0)+N.abs(v11-v1))
+        err         = 0.5*(numpy.abs(v00-v0)+numpy.abs(v11-v1))
         (v0, v1)    = (v00, v11)
     return (v0, v1)
 
 def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
-    pos     = N.argwhere(N.abs(auto-thr_0) > N.abs(auto-thr_1))
+    pos     = numpy.argwhere(numpy.abs(auto-thr_0) > numpy.abs(auto-thr_1))
     pos_set = set()
     pos_list= []
     kerl    = range(-kl,kl+1)
     ker     = [[i,j,k] for i in kerl for j in kerl for k in kerl]
 
     def trun(v):
-        return int(N.ceil(0.5*v))
-    v_trun = N.vectorize(trun)
+        return int(numpy.ceil(0.5*v))
+    v_trun = numpy.vectorize(trun)
 
     for (pi, pj, pk) in pos:
         for (ci, cj, ck) in ker:
@@ -118,9 +118,9 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
     for s in pos_set:
         pos_list.append([s[0], s[1], s[2]])
 
-    pos_array = N.array(pos_list)
+    pos_array = numpy.array(pos_list)
     pos_array -= [a.min() for a in pos_array.transpose()]
-    pos_array = N.array([v_trun(a) for a in pos_array])
+    pos_array = numpy.array([v_trun(a) for a in pos_array])
 
     if write:
         fp  = open("support.dat", "w")
@@ -167,7 +167,7 @@ class EMCCaseGenerator(object):
         Writes computed detector and beamstop coordinates to output (default:detector.dat)
         """
         print_to_log("Writing detector to %s"%(filename), log_file=self.runLog)
-        header = "%d\t%d\t%d\n" % (N.ceil(self.qmax), len(self.detector), len(self.beamstop))
+        header = "%d\t%d\t%d\n" % (numpy.ceil(self.qmax), len(self.detector), len(self.beamstop))
         f = open(filename, 'w')
         f.write(header)
         for i in self.detector:
@@ -184,9 +184,9 @@ class EMCCaseGenerator(object):
         the (x,y,z)=(ii,jj,zL) position of pixel in the diffraction laboratory.
         The latter is measured in terms of the size of each realspace pixel.
         """
-        v = N.array([ii,jj,zL])
-        vDenom = N.sqrt(1 + (ii*ii + jj*jj)/(zL*zL))
-        return v/vDenom - N.array([0,0,zL])
+        v = numpy.array([ii,jj,zL])
+        vDenom = numpy.sqrt(1 + (ii*ii + jj*jj)/(zL*zL))
+        return v/vDenom - numpy.array([0,0,zL])
 
     def readGeomFromPhotonData(self, fn):
         """
@@ -208,22 +208,22 @@ class EMCCaseGenerator(object):
         pixW = (f['params/geom/pixelWidth'].value)
         if(pixH == pixW):
             self.pixSize = pixH
-        maxScattAng = N.arctan(self.numPixToEdge * self.pixSize / self.detectorDist)
+        maxScattAng = numpy.arctan(self.numPixToEdge * self.pixSize / self.detectorDist)
         zL = self.detectorDist / self.pixSize
-        self.qmax = int(2 * self.numPixToEdge * N.sin(0.5*maxScattAng) / N.tan(maxScattAng))
+        self.qmax = int(2 * self.numPixToEdge * numpy.sin(0.5*maxScattAng) / numpy.tan(maxScattAng))
 
         #Write detector to file
-        [x,y] = N.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
+        [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
         tempDetectorPix = [self.placePixel(i,j,zL) for i,j in zip(x.flat, y.flat)]
-        qualifiedDetectorPix = [i for i in tempDetectorPix if (N.sqrt(i[0]*i[0] +i[1]*i[1] + i[2]*i[2])>self.qmin and N.sqrt(i[0]*i[0] +i[1]*i[1] + i[2]*i[2])<self.qmax and N.abs(i[0])>3)]
-        self.detector = N.array(qualifiedDetectorPix)
+        qualifiedDetectorPix = [i for i in tempDetectorPix if (numpy.sqrt(i[0]*i[0] +i[1]*i[1] + i[2]*i[2])>self.qmin and numpy.sqrt(i[0]*i[0] +i[1]*i[1] + i[2]*i[2])<self.qmax and numpy.abs(i[0])>3)]
+        self.detector = numpy.array(qualifiedDetectorPix)
 
         # qmin defaults to 2 pixel beamstop
         # qmin = 1.4302966531242025 * (self.qmax / particleRadiusInPix)
         self.qmin = 2
-        fQmin = N.floor(self.qmin)
-        [x,y,z] = N.mgrid[-fQmin:fQmin+1, -fQmin:fQmin+1, -fQmin:fQmin+1]
-        self.beamstop = N.array([[xx,yy,zz] for xx,yy,zz in zip(x.flat, y.flat, z.flat) if N.sqrt(xx*xx + yy*yy + zz*zz)<=self.qmin])
+        fQmin = numpy.floor(self.qmin)
+        [x,y,z] = numpy.mgrid[-fQmin:fQmin+1, -fQmin:fQmin+1, -fQmin:fQmin+1]
+        self.beamstop = numpy.array([[xx,yy,zz] for xx,yy,zz in zip(x.flat, y.flat, z.flat) if numpy.sqrt(xx*xx + yy*yy + zz*zz)<=self.qmin])
 
     def readGeomFromDetectorFile(self, fn="detector.dat"):
         """
@@ -236,8 +236,8 @@ class EMCCaseGenerator(object):
 
         d = f.readlines()
         dLoc = [[float(y) for y in x.split("\t")] for x in d]
-        self.detector = N.array(dLoc[:line1[1]])
-        self.beamstop = N.array(dLoc[line1[1]:])
+        self.detector = numpy.array(dLoc[:line1[1]])
+        self.beamstop = numpy.array(dLoc[line1[1]:])
         f.close()
         return
 
@@ -250,18 +250,18 @@ class EMCCaseGenerator(object):
         print_to_log(msg, log_file=self.runLog)
 
         # Define in-plane detector x,y coordinates
-        [x,y] = N.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
+        [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
 
         # Compute qx,qy,qz positions of detector
         zL = self.detectorDist / self.pixSize
-        tmpQ = N.array([self.placePixel(i,j,zL) for i,j in zip(x.flat, y.flat)])
+        tmpQ = numpy.array([self.placePixel(i,j,zL) for i,j in zip(x.flat, y.flat)])
 
         # Enumerate qualified detector pixels with a running index, currPos
         pos = -1 + 0*x.flatten()
         currPos = 0
         flatMask = 0.*pos
         for p,v in enumerate(tmpQ):
-            if N.sqrt(v[0]*v[0] +v[1]*v[1] + v[2]*v[2])<self.qmax and N.sqrt(v[0]*v[0] +v[1]*v[1] + v[2]*v[2])>self.qmin and N.abs(v[0])>3:
+            if numpy.sqrt(v[0]*v[0] +v[1]*v[1] + v[2]*v[2])<self.qmax and numpy.sqrt(v[0]*v[0] +v[1]*v[1] + v[2]*v[2])>self.qmin and numpy.abs(v[0])>3:
                     pos[p] = currPos
                     flatMask[p] = 1.
                     currPos += 1
@@ -273,8 +273,8 @@ class EMCCaseGenerator(object):
         totPhoton = 0.
         for fn in fileList[:numFilesToAvgForMeanCount]:
             f = h5py.File(fn, 'r')
-            meanPhoton += N.mean((f["data/data"].value).flatten())
-            totPhoton += N.sum((f["data/data"].value).flatten())
+            meanPhoton += numpy.mean((f["data/data"].value).flatten())
+            totPhoton += numpy.sum((f["data/data"].value).flatten())
             f.close()
         meanPhoton /= 1.*numFilesToAvgForMeanCount
         totPhoton /= 1.*numFilesToAvgForMeanCount
@@ -361,17 +361,17 @@ class EMCCaseGenerator(object):
         self.frac = inFrac
         self.pad = inPad
 
-        self.radius = int(N.floor(self.particleRadius) + N.floor(self.pad))
+        self.radius = int(numpy.floor(self.particleRadius) + numpy.floor(self.pad))
         self.size = 2*self.radius + 1
-        [x,y,z] = N.mgrid[-self.radius:self.radius+1, -self.radius:self.radius+1, -self.radius:self.radius+1]
-        self.support = N.sqrt(x*x + y*y + z*z) < self.particleRadius
-        filter = N.fft.ifftshift(N.exp(-self.damping * (x*x + y*y + z*z) / (self.radius*self.radius)))
-        suppRad = N.floor(self.radius)
+        [x,y,z] = numpy.mgrid[-self.radius:self.radius+1, -self.radius:self.radius+1, -self.radius:self.radius+1]
+        self.support = numpy.sqrt(x*x + y*y + z*z) < self.particleRadius
+        filter = numpy.fft.ifftshift(numpy.exp(-self.damping * (x*x + y*y + z*z) / (self.radius*self.radius)))
+        suppRad = numpy.floor(self.radius)
         flatSupport = self.support.flatten()
 
         lenIter = self.size * self.size * self.size
-        iter = N.random.rand(lenIter)
-        numPixsToKeep = N.ceil(self.frac * self.support.sum())
+        iter = numpy.random.rand(lenIter)
+        numPixsToKeep = numpy.ceil(self.frac * self.support.sum())
 
         #Recipe for making binary particle.
         for i in range(4):
@@ -383,14 +383,14 @@ class EMCCaseGenerator(object):
             iter[ordering] = 1.
 
             #Smoothing with Gaussian filter
-            temp = N.fft.fftn(iter.reshape(self.size, self.size, self.size))
-            iter = N.real(N.fft.ifftn(filter*temp).flatten())
+            temp = numpy.fft.fftn(iter.reshape(self.size, self.size, self.size))
+            iter = numpy.real(numpy.fft.ifftn(filter*temp).flatten())
 
         self.density = iter.reshape(self.size, self.size, self.size)
 
         #Create padded support
-        paddedSupport = N.sqrt(x*x + y*y + z*z) < (self.particleRadius + self.pad)
-        self.supportPositions = N.array([[self.radius+i,self.radius+j,self.radius+k] for i,j,k,l in zip(x.flat, y.flat, z.flat, paddedSupport.flat) if l >0]).astype(int)
+        paddedSupport = numpy.sqrt(x*x + y*y + z*z) < (self.particleRadius + self.pad)
+        self.supportPositions = numpy.array([[self.radius+i,self.radius+j,self.radius+k] for i,j,k,l in zip(x.flat, y.flat, z.flat, paddedSupport.flat) if l >0]).astype(int)
 
     def createTestScatteringGeometry(self):
         """
@@ -401,35 +401,35 @@ class EMCCaseGenerator(object):
         damping         = 1.5   (larger damping=larger DeBye-Waller factor),
         frac            = 0.5   (frac. of most intense realspace voxels forced to persist in iterative particle generation),
         pad             = 1.8   (extra voxels to pad on 3D particle density to create support for phasing),
-        radius          = N.floor(particleRadius) + N.floor(pad) (half length of cubic volume that holds particle),
+        radius          = numpy.floor(particleRadius) + numpy.floor(pad) (half length of cubic volume that holds particle),
         size            = 2*radius + 1 (length of cubic volume that holds particle).
 
         """
 
         self.z = 1.
         self.sigma = 6.0
-        self.qmax = N.ceil(self.sigma * self.particleRadius)
+        self.qmax = numpy.ceil(self.sigma * self.particleRadius)
         self.qmin = 1.4302966531242025 * (self.qmax / self.particleRadius)
         zSq = self.z*self.z
-        self.numPixToEdge = N.floor(self.qmax / N.sqrt(zSq/(1.+zSq) + (zSq/N.sqrt(1+zSq) -self.z)))
+        self.numPixToEdge = numpy.floor(self.qmax / numpy.sqrt(zSq/(1.+zSq) + (zSq/numpy.sqrt(1+zSq) -self.z)))
         self.detectorDist = self.z * self.numPixToEdge
         msg = time.asctime() + ":: " +"(qmin, qmax, detectorDist)=(%lf, %lf, %lf)"%(self.qmin, self.qmax, self.detectorDist)
         print_to_log(msg, log_file=self.runLog)
 
         #make detector
-        [x,y] = N.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
+        [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
         tempDetectorPix = [self.placePixel(i,j,self.detectorDist) for i,j in zip(x.flat, y.flat)]
-        qualifiedDetectorPix = [i for i in tempDetectorPix if (self.qmin<N.sqrt(i[0]*i[0] +i[1]*i[1] + i[2]*i[2])<self.qmax)]
-        self.detector = N.array(qualifiedDetectorPix)
+        qualifiedDetectorPix = [i for i in tempDetectorPix if (self.qmin<numpy.sqrt(i[0]*i[0] +i[1]*i[1] + i[2]*i[2])<self.qmax)]
+        self.detector = numpy.array(qualifiedDetectorPix)
 
         #make beamstop
-        fQmin = N.floor(self.qmin)
-        [x,y,z] = N.mgrid[-fQmin:fQmin+1, -fQmin:fQmin+1, -fQmin:fQmin+1]
+        fQmin = numpy.floor(self.qmin)
+        [x,y,z] = numpy.mgrid[-fQmin:fQmin+1, -fQmin:fQmin+1, -fQmin:fQmin+1]
         if op.beamstop:
-            tempBeamstop = [[i,j,k] for i,j,k in zip(x.flat, y.flat, z.flat) if (N.sqrt(i*i + j*j + k*k) < (self.qmin - N.sqrt(3.)))]
+            tempBeamstop = [[i,j,k] for i,j,k in zip(x.flat, y.flat, z.flat) if (numpy.sqrt(i*i + j*j + k*k) < (self.qmin - numpy.sqrt(3.)))]
         else:
             tempBeamstop = [[0,0,0]]
-        self.beamstop = N.array(tempBeamstop).astype(int)
+        self.beamstop = numpy.array(tempBeamstop).astype(int)
 
     def diffractTestCase(self, inMaxScattAngDeg=45., inSigma=6.0, inQminNumShannonPix=1.4302966531242025):
         """
@@ -450,26 +450,26 @@ class EMCCaseGenerator(object):
         detector        =   pixel position of 2D area detector (projected on Ewald sphere),
         intensities     =   3D Fourier intensities of particle.
         """
-        self.z = 1/N.tan(N.pi * inMaxScattAngDeg / 180.)
+        self.z = 1/numpy.tan(numpy.pi * inMaxScattAngDeg / 180.)
         self.sigma = inSigma
-        self.qmax = N.ceil(self.sigma * self.particleRadius)
+        self.qmax = numpy.ceil(self.sigma * self.particleRadius)
         zSq = self.z*self.z
-        self.numPixToEdge = N.floor(self.qmax / N.sqrt(zSq/(1.+zSq) + (zSq/N.sqrt(1+zSq) -self.z)))
+        self.numPixToEdge = numpy.floor(self.qmax / numpy.sqrt(zSq/(1.+zSq) + (zSq/numpy.sqrt(1+zSq) -self.z)))
         self.detectorDist = self.z * self.numPixToEdge
         self.qmin = inQminNumShannonPix * (self.qmax / self.particleRadius)
 
         #make fourier intensities
         intensSize = 2 * self.qmax + 1
-        self.intensities = N.zeros((intensSize, intensSize, intensSize))
+        self.intensities = numpy.zeros((intensSize, intensSize, intensSize))
         self.intensities[:self.size, :self.size, :self.size] = self.density
-        self.intensities = N.fft.fftshift(N.fft.fftn(self.intensities))
-        self.intensities = N.abs(self.intensities * self.intensities.conjugate())
+        self.intensities = numpy.fft.fftshift(numpy.fft.fftn(self.intensities))
+        self.intensities = numpy.abs(self.intensities * self.intensities.conjugate())
 
     def showDensity(self):
         """
         Shows particle density as an array of sequential, equal-sized 2D sections.
         """
-        subplotlen = int(N.ceil(N.sqrt(len(self.density))))
+        subplotlen = int(numpy.ceil(numpy.sqrt(len(self.density))))
         fig = plt.figure(figsize=(9.5, 9.5))
         for i in range(len(self.density)):
             ax = fig.add_subplot(subplotlen, subplotlen, i+1)
@@ -489,7 +489,7 @@ class EMCCaseGenerator(object):
         fig = plt.figure(figsize=(13.9,9.5))
         ax = fig.add_subplot(111)
         ax.set_title("log(intensities) of section q=%d"%plotSection)
-        self.currPlot = plt.imshow(N.log(self.intensities[:,:,plotSection]), interpolation='nearest')
+        self.currPlot = plt.imshow(numpy.log(self.intensities[:,:,plotSection]), interpolation='nearest')
         self.colorbar = plt.colorbar(self.currPlot, pad=0.02)
         plt.show()
 
@@ -498,13 +498,13 @@ class EMCCaseGenerator(object):
         Shows Fourier intensities as an array of sequential, equal-sized 2D sections.
         Maximum intensities set to logarithm of maximum intensity in 3D Fourier volume.
         """
-        subplotlen = int(N.ceil(N.sqrt(len(self.intensities))))
-        maxLogIntens = N.log(self.intensities.max())
-        minLogIntens = N.log(self.intensities.min())
+        subplotlen = int(numpy.ceil(numpy.sqrt(len(self.intensities))))
+        maxLogIntens = numpy.log(self.intensities.max())
+        minLogIntens = numpy.log(self.intensities.min())
         fig = plt.figure(figsize=(13.5, 9.5))
         for i in range(len(self.intensities)):
             ax = fig.add_subplot(subplotlen, subplotlen, i+1)
-            ax.imshow(N.log(self.intensities[:,:,i]+1.E-7), vmin=minLogIntens, vmax=maxLogIntens, interpolation='nearest')
+            ax.imshow(numpy.log(self.intensities[:,:,i]+1.E-7), vmin=minLogIntens, vmax=maxLogIntens, interpolation='nearest')
             ax.set_xticks(())
             ax.set_yticks(())
             ax.set_title('%d'%(i-self.qmax), color='white', position=(0.85,0.))

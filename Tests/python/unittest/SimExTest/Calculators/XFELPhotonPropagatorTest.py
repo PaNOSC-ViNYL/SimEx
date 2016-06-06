@@ -72,7 +72,6 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         # Construct the object.
         xfel_propagator = XFELPhotonPropagator(parameters=None, input_path=self.input_h5, output_path='prop_out_0000000.h5')
 
-
         self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
 
     @unittest.skip("Skipped")
