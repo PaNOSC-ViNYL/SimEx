@@ -68,7 +68,16 @@ software needed to build the external simulation tools:
  - C/C++ and Fortran compilers, e.g. gcc
  - unzip
 
-A note on MKL: Make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation, e.g. /opt/intel/2015 for a recent version of MKL(R).
+NOTE 1 (Intel(R) MKL(R)): If you want to link against Intel(R) MKL(R), make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the
+scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation,
+e.g. /opt/intel/2015 for a recent version of MKL(R).
+
+NOTE 2 (BOOST): Sometimes boost_mpi is not built allthough all libraries (default) where requested as per project.conf in
+the boost build directory. Append a "using mpi ;" to that file (without the quotes) to enforce building boost_mpi.
+
+NOTE 3 (BOOST): It has been observed that newer versions of boost (>1.61), if linked against mpich, require libmpich.so.12,
+which might not be available on all systems, especially not completely updated clusters. Use boost.1.60 or lower if this problem occurs.
+You can find out by running ldd on libboost_mpi.so.
 
 ## 2.3)
 
@@ -132,7 +141,7 @@ b) There is an option to create debian package which can then be installed along
 
 ```bash
 $> dpkg -i <package_name>
-$> apt-get install -f 
+$> apt-get install -f
 ```
 
 on another computer with Debian based OS. In this case Simex will be installed in `/usr/...` , Tests are installed in `/usr/share/simex/...` and should be system-wide available.
@@ -162,6 +171,9 @@ $> python Test.py -v 2>&1 | tee Test.log
 ```
 This will run the entire test suite and pipe the output to the file `Test.log`.
 A final test report is appended.
+
+NOTE 4 (Large Test Files): If you encounter test failures and the test log mentions something like "hdf file could not be read", make sure you issued a "git lsf pull" command at least once. This is not a standard git command, you have to install git-lsf (e.g. via https://git-lfs.github.com/)
+
 
 ### 3.2) Minimal workflow.
 
