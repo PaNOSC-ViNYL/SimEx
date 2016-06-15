@@ -175,6 +175,9 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                 # If run dir already existed, this would have been caught earlier.
             run_instance_dir = self.run_files_path
 
+        # Return.
+        return run_instance_dir, tmp_out_dir
+
     def backengine(self):
 
         status = self.run_emc()

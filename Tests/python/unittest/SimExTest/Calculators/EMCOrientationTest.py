@@ -141,11 +141,13 @@ class EMCOrientationTest(unittest.TestCase):
                              tmp_files_path=None,
                              run_files_path=None,)
 
-        emc._setupPaths()
+        run, tmp = emc._setupPaths()
 
         # Check.
         self.assertTrue( os.path.isdir( emc.run_files_path ) )
         self.assertTrue( os.path.isdir( emc.tmp_files_path ) )
+        self.assertEqual( run, emc.run_files_path )
+        self.assertEqual( tmp, emc.tmp_files_path )
 
         # Case 1: non-existing paths given, make dirs.
         emc2 = EMCOrientation(parameters=emc_parameters,
@@ -154,11 +156,13 @@ class EMCOrientationTest(unittest.TestCase):
                              tmp_files_path="emc_tmp",
                              run_files_path="emc_run",)
 
-        emc2._setupPaths()
+        run, tmp = emc2._setupPaths()
 
         # Check.
         self.assertEqual( emc2.run_files_path, "emc_run" )
         self.assertEqual( emc2.tmp_files_path, "emc_tmp" )
+        self.assertEqual( emc2.run_files_path, run )
+        self.assertEqual( emc2.tmp_files_path, tmp )
 
         # Case 3: existing tmp path given, make dirs.
         emc3 = EMCOrientation(parameters=emc_parameters,
@@ -167,11 +171,13 @@ class EMCOrientationTest(unittest.TestCase):
                              tmp_files_path="emc_tmp",
                              run_files_path=None,)
 
-        emc3._setupPaths()
+        run, tmp = emc3._setupPaths()
 
         # Check.
         self.assertTrue( os.path.dirname( emc3.run_files_path ), "tmp" )
-        self.assertEqual( emc2.tmp_files_path, "emc_tmp" )
+        self.assertEqual( emc3.tmp_files_path, "emc_tmp" )
+        self.assertEqual( emc3.run_files_path, run )
+        self.assertEqual( emc3.tmp_files_path, tmp )
 
         # Case 4: existing run path given, raise exception.
         self.assertRaises( IOError, EMCOrientation,
