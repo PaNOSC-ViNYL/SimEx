@@ -39,6 +39,7 @@ import os
 import time
 
 def load_reference_intensites(ref_file):
+
     t_intens = (read_results.extract_value_from_h5(ref_file, "/data/data")).astype("float")
     intens_len = len(t_intens)
     qmax    = intens_len/2
