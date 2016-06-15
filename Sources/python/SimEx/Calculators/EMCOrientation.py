@@ -86,15 +86,10 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                                 '/-USE_GPU',
                                 '/version']
 
-        ### TODO: make setupPaths member function with proper checks.
         # Set run and tmp files paths.
-
-        self.run_files_path = run_files_path
-        self.tmp_files_path = tmp_files_path
-
-    def _setupPaths(self):
-        """ """
-        """ Private method do setup all needed directories for temp and persistant output. """
+        if _checkPaths( run_files_path, tmp_files_path ):
+            self.run_files_path = run_files_path
+            self.tmp_files_path = tmp_files_path
 
 
     def expectedData(self):
@@ -157,6 +152,28 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         """
         pass # No action required since output is written in backengine.
 
+    def _setupPaths(self):
+        """ """
+        """ Private method do setup all needed directories for temp and persistant output. """
+        # If tmp dir is set to None, create a temporary directory and store path on object and return value.
+        if self.tmp_files_path is None:
+            tmp_out_dir = tempfile.mkdtemp(prefix='emc_out_')
+            self.tmp_files_path = tmp_out_dir
+        # Else, check if path exists and store on return value.
+        else:
+            if not os.path.isdir( self.tmp_files_path ):
+                os.mkdir( self.tmp_files_path )
+            tmp_out_dir = self.tmp_files_path
+
+        # Same for run dir.
+        if self.run_files_path is None:
+            run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
+            self.__run_instance_dir = run_instance_dir
+        else:
+            if not os.path.isdir( self.run_files_path ):
+                os.mkdir( self.run_files_path )
+                # If run dir already existed, this would have been caught earlier.
+            run_instance_dir = self.run_files_path
 
     def backengine(self):
 
@@ -205,25 +222,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         else:
             detailed_output = False
 
-
-        ###############################################################
-        # Check that subdirectories for intermediate output exist
-        ###############################################################
-        if self.tmp_files_path is None:
-            tmp_out_dir = tempfile.mkdtemp(prefix='emc_out_')
-            self.tmp_files_path = tmp_out_dir
-        else:
-            if not os.path.isdir( self.tmp_files_path ):
-                os.mkdir( self.tmp_files_path )
-            tmp_out_dir = self.tmp_files_path
-
-        if self.run_files_path is None:
-            run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
-            self.__run_instance_dir = run_instance_dir
-        else:
-            if not os.path.isdir( self.run_files_path ):
-                os.mkdir( self.run_files_path )
-            run_instance_dir = self.run_files_path
+        run_instance_dir, tmp_out_dir = self._setupPaths()
 
         src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','bin'))
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
@@ -442,10 +441,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 def _checkPaths(run_files_path, tmp_files_path):
     """ Utility to check validity of paths given to constructor. """
 
-    if run_files_path is None and tmp_files_path is None:
-        return True
-
-    if not all([ isinstance( path, str ) for path in [run_files_path, tmp_files_path] ]):
+    if not all([ (isinstance( path, str ) or path is None) for path in [run_files_path, tmp_files_path] ]):
         raise IOError( "Paths must be strings.")
 
     if run_files_path is not None:

@@ -121,6 +121,10 @@ class EMCOrientationTest(unittest.TestCase):
     def testSetupPaths( self ):
         """ Check that setting up paths works correctly. """
 
+        # Clean up no matter how tests go.
+        self.__dirs_to_remove.append("emc_run")
+        self.__dirs_to_remove.append("emc_tmp")
+
         # Construct the object.
         emc_parameters = {"initial_number_of_quaternions" : 1,
                           "max_number_of_quaternions"     : 2,
@@ -166,7 +170,7 @@ class EMCOrientationTest(unittest.TestCase):
         emc3._setupPaths()
 
         # Check.
-        self.assertTrue( os.path.dirname( emc3.run_files_path, "tmp" ) )
+        self.assertTrue( os.path.dirname( emc3.run_files_path ), "tmp" )
         self.assertEqual( emc2.tmp_files_path, "emc_tmp" )
 
         # Case 4: existing run path given, raise exception.
@@ -182,6 +186,8 @@ class EMCOrientationTest(unittest.TestCase):
         """ Check path check utility. """
 
         self.assertTrue( _checkPaths( None, None ) )
+        self.assertTrue( _checkPaths( None, "emc_tmp" ) )
+        self.assertTrue( _checkPaths( "emc_run", None ) )
         self.assertTrue( _checkPaths( "emc_run", "emc_tmp" ) )
         self.assertRaises( IOError, _checkPaths, "/tmp", "emc_tmp")
         self.assertRaises( IOError, _checkPaths, 1, "emc_tmp")
