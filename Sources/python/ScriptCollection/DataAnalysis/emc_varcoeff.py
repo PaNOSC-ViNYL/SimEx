@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016 Carsten Fortmann-Grote                              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -31,12 +31,15 @@ import matplotlib
 matplotlib.use('Qt4Agg')
 from matplotlib import pyplot
 
+#h5 = h5py.File('3d_stack_test.h5', 'r')
 h5 = h5py.File('3d_stack.h5', 'r')
 
 stacks = numpy.array(h5["data/oriented_diffraction_volumes"])
 h5.close()
 
+##############################################################
 # First average over the individual reconstructions.
+##############################################################
 std = numpy.std(stacks, axis=0)
 mean = numpy.mean(stacks, axis=0)
 
@@ -47,35 +50,39 @@ variation = std / mean
 variation[numpy.where(numpy.isnan(variation))] = -1.0
 variation[numpy.where(numpy.isinf(variation))] = -1.0
 
-# Second average: over resolution shells.
+##############################################################
+# Second average over resolution shells.
+##############################################################
 nx, ny, nz = variation.shape
 
-max_index = 45
-r_grid = numpy.array([[[math.sqrt(ix**2 + iy**2 + iz**2) for iz in xrange(-max_index,max_index+1)] for iy in xrange(-max_index,max_index+1)] for ix in xrange(-max_index,max_index+1)])
+# Index of the central voxel (assuming cubic shape). This is also the length of the results arrays.
+central_index = ((nx-1)/2)
+radius = float(central_index)
 
-radii = r_grid.flatten()
+# This grid carries the distance of each pixel from the central pixel.
+r_grid = numpy.array([[[math.sqrt((float(ix)-radius)**2 + (float(iy)-radius)**2 + (float(iz)-radius)**2) for ix in range(nx)] for iy in range(ny)] for iz in range(nz)])
 
+# Setup arrays to hold results.
+# For values.
+values = numpy.zeros(central_index)
+# For square of values.
+squares = numpy.zeros(central_index)
+# For number of elements at each index.
+norms = numpy.zeros(central_index)
 
-
-values = numpy.zeros(max_index)
-squares = numpy.zeros(max_index)
-norms = numpy.zeros(max_index)
-
-for ix in range(nx):
+for iz in range(nz):
     for iy in range(ny):
-        for iz in range(nz):
-            r = r_grid[ix, iy, iz]
+        for ix in range(nx):
+            r = r_grid[iz, iy, ix]
 
-            if r>=max_index: continue
-
+            if r>=central_index: continue
 
             index = int( math.floor(r ) )
 
-            var = variation[ix, iy, iz]
+            var = variation[iz, iy, ix]
 
             # Filter out the zeros.
             if var == -1.0: continue
-            #raw_input( (ix, iy, iz, r, index, var) )
 
             values[index] += var
             squares[index] += var**2
@@ -87,16 +94,19 @@ averaged_values = values / norms
 averaged_squares = squares / norms
 
 std = numpy.sqrt( averaged_squares - averaged_values**2 )
+indices = range(central_index)
 
-#data_9fs = numpy.loadtxt('data/coeff_of_variation_9fs.dat')
+out_data = numpy.array([[i, averaged_values[i],  std[i]] for i in indices])
+numpy.savetxt('varcoeff.txt', out_data)
+
+#data_9fs = numpy.loadtxt('/home/grotec/Work/XFEL/SPB_3fs/reconstruction/data/coeff_of_variation_9fs.dat')
 #mean_9fs = data_9fs[:,1]
 #std_9fs = data_9fs[:,2]
-
-min_pixel = 5
-max_pixel = 39
-pyplot.errorbar( range(max_index)[min_pixel:max_pixel], averaged_values[min_pixel:max_pixel], yerr=std[min_pixel:max_pixel], fmt="s", label="3 fs" )
-#pyplot.errorbar( range(max_index)[min_pixel:max_pixel], mean_9fs, yerr=std_9fs, fmt="s", label="9 fs")
-pyplot.legend(loc=2)
-pyplot.xlim([min_pixel-1,max_pixel+1])
-pyplot.show()
+#min_pixel = 5
+#max_pixel = 38
+#pyplot.errorbar( xrange(min_pixel, max_pixel), averaged_values[min_pixel:], yerr=std[min_pixel:], fmt="s", label="9 fs (new analysis, no Compton)" )
+#pyplot.errorbar( xrange(min_pixel, max_pixel), mean_9fs[:-1], yerr=std_9fs[:-1], fmt="s", label="9 fs (Yoon et al. (2016), w/ Compton)")
+#pyplot.legend(loc=2)
+#pyplot.xlim([min_pixel-1,max_pixel+1])
+#pyplot.show()
 
