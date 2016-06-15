@@ -125,10 +125,10 @@ class EMCOrientationTest(unittest.TestCase):
         self.__dirs_to_remove.append("emc_run")
         self.__dirs_to_remove.append("emc_tmp")
 
-        # Construct the object.
+        # Construct the object with very nonsensical iteration control parameters.
         emc_parameters = {"initial_number_of_quaternions" : 1,
                           "max_number_of_quaternions"     : 2,
-                          "max_number_of_iterations"      : 10,
+                          "max_number_of_iterations"      : 2,
                           "min_error"                     : 5.e-6,
                           "beamstop"                      : True,
                           "detailed_output"               : True,
@@ -204,11 +204,12 @@ class EMCOrientationTest(unittest.TestCase):
         """ Check that the photons.dat from the previous run is reused. """
 
         self.__files_to_remove.append('orient_out.h5')
+        self.__files_to_remove.append('orient_out2.h5')
 
         # Construct the object.
         emc_parameters = {"initial_number_of_quaternions" : 1,
                           "max_number_of_quaternions"     : 2,
-                          "max_number_of_iterations"      : 100,
+                          "max_number_of_iterations"      : 2,
                           "min_error"                     : 1.e-6,
                           "beamstop"                      : True,
                           "detailed_output"               : True,
@@ -247,7 +248,7 @@ class EMCOrientationTest(unittest.TestCase):
 
         emc2 = EMCOrientation(parameters=emc_parameters,
                              input_path=self.input_h5,
-                             output_path='orient_out.h5',
+                             output_path='orient_out2.h5',
                              tmp_files_path=emc.tmp_files_path,
                              run_files_path=None)
 
