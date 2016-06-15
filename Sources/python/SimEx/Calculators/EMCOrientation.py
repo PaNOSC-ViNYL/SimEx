@@ -44,7 +44,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
     """
     Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self,  parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
         """
         Constructor for the reconstruction analyser.
 
@@ -54,7 +54,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                                'max_number_of_quaternions'     : 9,
                                'max_number_of_iterations'      : 100,
                                'min_error'                     : 1.0e-8,
-                               'beamstop'                      : 1.0e-5,
+                               'beamstop'                      : True,
                                'detailed_output'               : False
                                }
         """
@@ -69,6 +69,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                                 'params/info',
                                 'version',]
 
+        ### FIXME: These are the parameters for diffr, not the output.
         self.__expected_data = ['/-input_dir'
                                 '/-output_dir'
                                 '/-config_file'
@@ -84,6 +85,16 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                                 '/-numDP',
                                 '/-USE_GPU',
                                 '/version']
+
+        ### TODO: make setupPaths member function with proper checks.
+        # Set run and tmp files paths.
+
+        self.run_files_path = run_files_path
+        self.tmp_files_path = tmp_files_path
+
+    def _setupPaths(self):
+        """ """
+        """ Private method do setup all needed directories for temp and persistant output. """
 
 
     def expectedData(self):
@@ -102,10 +113,33 @@ class EMCOrientation(AbstractPhotonAnalyzer):
     @property
     def run_files_path(self):
         return self.__run_instance_dir
+    @run_files_path.setter
+    def run_files_path(self, value):
+        """ Set the path to runtime files.
+        @param value: The path where runtime generated files shall be saved.
+        @type: str
+        """
+
+        if isinstance( value, str ) or value is None:
+            self.__run_instance_dir = value
+        else:
+            raise IOError( "Parameter 'run_files_path' must be a string or None." )
 
     @property
     def tmp_files_path(self):
         return self.__tmp_out_dir
+    @tmp_files_path.setter
+    def tmp_files_path(self, value):
+        """ Set the path to tmptime files.
+        @param value: The path where tmptime generated files shall be saved.
+        @type: str
+        """
+
+        if isinstance( value, str ) or value is None:
+            self.__tmp_out_dir = value
+        else:
+            raise IOError( "Parameter 'tmp_files_path' must be a string or None." )
+
 
     def _readH5(self):
         """ """
@@ -175,16 +209,25 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         ###############################################################
         # Check that subdirectories for intermediate output exist
         ###############################################################
-        tmp_out_dir = tempfile.mkdtemp(prefix='emc_out_')
-        run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
+        if self.tmp_files_path is None:
+            tmp_out_dir = tempfile.mkdtemp(prefix='emc_out_')
+            self.tmp_files_path = tmp_out_dir
+        else:
+            if not os.path.isdir( self.tmp_files_path ):
+                os.mkdir( self.tmp_files_path )
+            tmp_out_dir = self.tmp_files_path
 
-        # Store file paths on object for later reference.
-        self.__tmp_out_dir = tmp_out_dir
-        self.__run_instance_dir = run_instance_dir
+        if self.run_files_path is None:
+            run_instance_dir = tempfile.mkdtemp(prefix='emc_run_')
+            self.__run_instance_dir = run_instance_dir
+        else:
+            if not os.path.isdir( self.run_files_path ):
+                os.mkdir( self.run_files_path )
+            run_instance_dir = self.run_files_path
 
         src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','bin'))
-
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
+
         if os.path.isdir(self.input_path):
             photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
             photonFiles.sort()
@@ -395,4 +438,19 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             os.chdir(cwd)
             #raise
             return 1
+
+def _checkPaths(run_files_path, tmp_files_path):
+    """ Utility to check validity of paths given to constructor. """
+
+    if run_files_path is None and tmp_files_path is None:
+        return True
+
+    if not all([ isinstance( path, str ) for path in [run_files_path, tmp_files_path] ]):
+        raise IOError( "Paths must be strings.")
+
+    if run_files_path is not None:
+        if os.path.isdir( run_files_path ):
+            raise IOError( "Run files path already exists, cowardly refusing to overwrite.")
+
+    return True
 
