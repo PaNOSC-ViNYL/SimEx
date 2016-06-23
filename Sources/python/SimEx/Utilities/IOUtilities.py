@@ -92,11 +92,11 @@ def loadPDB( path = None ):
             atoms_dict['r'].append(coordinates)
 
     except:
-        raise IOError( "Input file is not a valid pdb file. ")
+        raise IOError( "Input file %s is not a valid pdb file. " % (path) )
 
 
     if len(atoms_dict['Z']) == 0:
-        raise IOError( "Input file is not a valid pdb file. ")
+        raise IOError( "Input file %s is not a valid pdb file. " % (path) )
 
     # Get unique elements.
     for sel_Z in numpy.unique( atoms_dict['Z'] ) :

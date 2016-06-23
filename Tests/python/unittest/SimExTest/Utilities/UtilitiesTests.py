@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -30,6 +29,7 @@ from EntityChecksTest import EntityChecksTest
 def suite():
     suites = (
              unittest.makeSuite(EntityChecksTest,    'test'),
+             unittest.makeSuite(IOUtilityTest,       'test'),
              )
 
     return unittest.TestSuite(suites)

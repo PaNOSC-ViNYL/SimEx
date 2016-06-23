@@ -27,6 +27,7 @@
 
 """
 import os
+import h5py
 import subprocess
 
 
@@ -190,6 +191,11 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.f_load_pulse( pmi_demo.g_s2e['prop_out'] )
 
             # Check if sample is a h5 file. Horrible hack.
+            ###############################################
+            import ipdb
+            ipdb.set_trace()
+            ###############################################
+
             try:
                 h5 = h5py.File(self.__sample_path)
                 h5.close()
