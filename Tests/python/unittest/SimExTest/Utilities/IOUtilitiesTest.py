@@ -117,6 +117,31 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check exception on wrong input type.
         self.assertRaises( IOError, IOUtilities.loadPDB, 'xyz.pdb' )
 
+    def testQueryPDBDirectory(self):
+        """ Check that we can query a non-existing pdb from pdb.org, save in a dir, and convert it to a dict. """
+
+        # Setup path to pdb file.
+        pdb_path = 'pdb/2nip.pdb'
+        self.__files_to_remove.append(pdb_path)
+
+        self.__paths_to_remove.append('obsolete')
+        self.__paths_to_remove.append('pdb')
+        os.mkdir('pdb')
+
+        # Attempt to load it.
+        return_dict = IOUtilities.loadPDB(pdb_path)
+
+        # Check items on dict.
+        self.assertIsInstance( return_dict['Z'], numpy.ndarray )
+        self.assertIsInstance( return_dict['r'], numpy.ndarray )
+        self.assertIsInstance( return_dict['selZ'], dict )
+        self.assertIsInstance( return_dict['N'], int )
+        self.assertEqual( return_dict['Z'].shape, (4728,) )
+        self.assertEqual( return_dict['r'].shape, (4728,3) )
+
+        # Check that return type is a dict.
+        self.assertIsInstance( return_dict, dict )
+
 
 if __name__ == '__main__':
     unittest.main()

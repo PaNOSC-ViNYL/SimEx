@@ -65,9 +65,8 @@ def loadPDB( path = None ):
             print "PDB file %s could not be found. Attempting to query from protein database server." % (path)
             pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir )
         except:
-            raise
             raise IOError( "Database query failed.")
-        shutil.move('pdb'+pdb_target_name.lower()+'.ent', pdb_target_name.lower()+'.pdb')
+        shutil.move(os.path.join(pdb_target_dir, 'pdb'+pdb_target_name.lower()+'.ent'), os.path.join(pdb_target_dir, pdb_target_name.lower()+'.pdb') )
 
 
 
