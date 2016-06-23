@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -25,11 +24,13 @@ import unittest
 
 # Import classes to test.
 from EntityChecksTest import EntityChecksTest
+from IOUtilitiesTest import IOUtilitiesTest
 
 # Setup the suite.
 def suite():
     suites = (
              unittest.makeSuite(EntityChecksTest,    'test'),
+             unittest.makeSuite(IOUtilitiesTest,       'test'),
              )
 
     return unittest.TestSuite(suites)
