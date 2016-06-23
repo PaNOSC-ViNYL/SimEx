@@ -26,6 +26,7 @@
 """
 import exceptions
 import os
+import shutil
 import numpy
 import paths
 import unittest
@@ -46,9 +47,20 @@ class IOUtilitiesTest(unittest.TestCase):
 
     def setUp(self):
         """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__paths_to_remove = []
 
     def tearDown(self):
         """ Tearing down a test. """
+        # Clean up.
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for p in self.__paths_to_remove:
+            if os.path.isdir(p):
+                shutil.rmtree(p)
+
+
 
     def testLoadPDB(self):
         """ Check that we can load a pdb and convert it to a dict. """
@@ -70,9 +82,6 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check that return type is a dict.
         self.assertIsInstance( return_dict, dict )
 
-        # Check exception on nonexisting file.
-        self.assertRaises( IOError, IOUtilities.loadPDB, "2nip.pdb" )
-
         # Check exception on corrupt file.
         # does not raise due to highly tolerant default acceptance levels in Bio.PDB.
         #self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("2nip_corrupt.pdb" ) )
@@ -82,6 +91,31 @@ class IOUtilitiesTest(unittest.TestCase):
 
         # Check exception on wrong file type.
         self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("sample.h5") )
+
+    def testQueryPDB(self):
+        """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
+
+        # Setup path to pdb file.
+        pdb_path = '2nip.pdb'
+        self.__files_to_remove.append(pdb_path)
+        self.__paths_to_remove.append('obsolete')
+
+        # Attempt to load it.
+        return_dict = IOUtilities.loadPDB(pdb_path)
+
+        # Check items on dict.
+        self.assertIsInstance( return_dict['Z'], numpy.ndarray )
+        self.assertIsInstance( return_dict['r'], numpy.ndarray )
+        self.assertIsInstance( return_dict['selZ'], dict )
+        self.assertIsInstance( return_dict['N'], int )
+        self.assertEqual( return_dict['Z'].shape, (4728,) )
+        self.assertEqual( return_dict['r'].shape, (4728,3) )
+
+        # Check that return type is a dict.
+        self.assertIsInstance( return_dict, dict )
+
+        # Check exception on wrong input type.
+        self.assertRaises( IOError, IOUtilities.loadPDB, 'xyz.pdb' )
 
 
 if __name__ == '__main__':

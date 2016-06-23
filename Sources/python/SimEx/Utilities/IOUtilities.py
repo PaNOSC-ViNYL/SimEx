@@ -27,7 +27,7 @@
 
 import exceptions
 import numpy
-import os
+import os, shutil
 
 from Bio import PDB
 import periodictable
@@ -54,7 +54,22 @@ def loadPDB( path = None ):
         raise IOError( "The parameter 'path' must be a path to a valid pdb file.")
 
     if not os.path.isfile( path ):
-        raise IOError( "The parameter 'path' must be a path to a valid pdb file.")
+        # Query from pdb.org
+        pdb_list = PDB.PDBList()
+        pdb_target_name = os.path.basename(path).split('.pdb')[0]
+        pdb_target_dir = os.path.dirname(path)
+        if pdb_target_dir == '':
+            pdb_target_dir = '.'
+
+        try:
+            print "PDB file %s could not be found. Attempting to query from protein database server." % (path)
+            pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir )
+        except:
+            raise
+            raise IOError( "Database query failed.")
+        shutil.move('pdb'+pdb_target_name.lower()+'.ent', pdb_target_name.lower()+'.pdb')
+
+
 
     # Setup the return dictionary.
     atoms_dict = {'Z' : [],     # Atomic number.
