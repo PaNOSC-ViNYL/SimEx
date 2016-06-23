@@ -1,0 +1,88 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+#                                                                        #
+##########################################################################
+
+""" Test module for the entity checks.
+    @author CFG
+    @institution XFEL
+    @creation 20160623 (Day of the UK EU referendum)
+"""
+import exceptions
+import os
+import numpy
+import paths
+import unittest
+
+from TestUtilities.TestUtilities import generateTestFilePath
+from SimEx.Utilities import IOUtilities
+
+class IOUtilitiesTest(unittest.TestCase):
+    """ Test class for the IOUtilities. """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+
+    def tearDown(self):
+        """ Tearing down a test. """
+
+    def testLoadPDB(self):
+        """ Check that we can load a pdb and convert it to a dict. """
+
+        # Setup path to pdb file.
+        pdb_path = generateTestFilePath("2nip.pdb")
+
+        # Attempt to load it.
+        return_dict = IOUtilities.loadPDB(pdb_path)
+
+        # Check items on dict.
+        self.assertIsInstance( return_dict['Z'], numpy.ndarray )
+        self.assertIsInstance( return_dict['r'], numpy.ndarray )
+        self.assertIsInstance( return_dict['selZ'], dict )
+        self.assertIsInstance( return_dict['N'], int )
+        self.assertEqual( return_dict['Z'].shape, (4728,) )
+        self.assertEqual( return_dict['r'].shape, (4728,3) )
+
+        # Check that return type is a dict.
+        self.assertIsInstance( return_dict, dict )
+
+        # Check exception on nonexisting file.
+        self.assertRaises( IOError, IOUtilities.loadPDB, "2nip.pdb" )
+
+        # Check exception on corrupt file.
+        # does not raise due to highly tolerant default acceptance levels in Bio.PDB.
+        #self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("2nip_corrupt.pdb" ) )
+
+        # Check exception on wrong input type.
+        self.assertRaises( IOError, IOUtilities.loadPDB, [1,2] )
+
+        # Check exception on wrong file type.
+        self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("sample.h5") )
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -35,6 +34,7 @@ from pmi_demo import PMIDemo
 import pmi_script
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
+from SimEx.Utilities import IOUtilities
 
 
 class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
@@ -188,7 +188,17 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.f_init_random()
             pmi_demo.f_save_info()
             pmi_demo.f_load_pulse( pmi_demo.g_s2e['prop_out'] )
-            pmi_demo.f_load_sample(self.__sample_path)
+
+            # Check if sample is a h5 file. Horrible hack.
+            try:
+                h5 = h5py.File(self.__sample_path)
+                h5.close()
+                pmi_demo.f_load_sample(self.__sample_path)
+            except:
+                # Assume it's a pdb file. Will raise if not.
+                atoms_dict = IOUtilities.loadPDB(self.__sample_path)
+                pmi_demo.g_s2e['sample'] = atoms_dict
+
             pmi_demo.f_rotate_sample()
             pmi_demo.f_system_setup()
 

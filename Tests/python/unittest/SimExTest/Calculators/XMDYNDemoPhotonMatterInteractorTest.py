@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -128,6 +127,22 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         status = test_interactor.backengine()
 
         self.assertEqual(status, 0 )
+
+    def testLoadPDBFile(self):
+        """ Check that the sample can be taken from a pdb directly. """
+
+        # Get test instance.
+        pmi_parameters = {'number_of_trajectories' : 10,
+                          'number_of_steps'        : 100,
+                         }
+
+        pmi = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters,
+                                              input_path=self.input_h5,
+                                              output_path='pmi',
+                                              sample_path=TestUtilities.generateTestFilePath('2nip.pdb') )
+
+        # Call backengine
+        status = pmi.backengine()
 
 
 
