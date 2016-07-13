@@ -43,10 +43,10 @@ photon_source = XFELPhotonSource(parameters=None, input_path=source_input, outpu
 photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out_0000001.h5', output_path='prop_out_0000001.h5')
 
 # Photon interactor with default parameters.
-photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=None,
+pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
+photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=pmi_parameters,
                                                      input_path='prop_out_0000001.h5',
-                                                     output_path='pmi',
-                                                     sample_path=TestUtilities.generateTestFilePath('sample.h5') )
+                                                     output_path='pmi')
 
 #  Diffraction with parameters.
 diffraction_parameters={ 'uniform_rotation': 1,

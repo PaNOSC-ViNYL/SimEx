@@ -1,0 +1,4 @@
+#!/bin/sh
+
+python ${FRAMEWORK_DIR}/python/SimEx/CLI/simex.py "$@"
+

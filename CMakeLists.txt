@@ -17,9 +17,6 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SIMEX_CMAKE_DIR})
 
 option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF)
 
-CMAKE_DEPENDENT_OPTION(INSTALL_TESTS "Install test files" ON
-                       "NOT DEVELOPER_INSTALL" OFF)
-
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
@@ -35,15 +32,12 @@ endif()
 if (DEVELOPER_INSTALL)
   set (FRAMEWORK_DIR ${SIMEX_SOURCE_DIR}/Sources)
   set (UNITTESTS_DIR ${FRAMEWORK_DIR}/unittest/)
-  set (TESTFILES_DIR ${UNITTESTS_DIR}/TestFiles/)
   set (UTILITIES_DIR ${FRAMEWORK_DIR}/python/SimEx/Utilities/)
   set (CALCULATORS_DIR ${FRAMEWORK_DIR}/python/SimEx/Calculators/)
 else()
   set (UTILITIES_DIR ${PYPATH}/SimEx/Utilities/)
   set (CALCULATORS_DIR ${PYPATH}/SimEx/Calculators/)
-  if (INSTALL_TESTS)
-     add_subdirectory (Tests)
-  endif()
+  add_subdirectory (Tests)
   add_subdirectory (Sources)
 endif()
 
@@ -68,12 +62,18 @@ endforeach()
 # create simex_vars.sh file
 if (DEVELOPER_INSTALL)
   configure_file(simex_vars_dev.sh.in simex_vars.sh)
+  configure_file(simex_dev.in simex)
 else()
   configure_file(simex_vars.sh.in simex_vars.sh)
+  configure_file(simex.in simex)
 endif()
 
 install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
         DESTINATION ${BINDIR})
+
+install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
+        DESTINATION ${BINDIR})
+
 
 
 if (PACKAGE_MAKE)

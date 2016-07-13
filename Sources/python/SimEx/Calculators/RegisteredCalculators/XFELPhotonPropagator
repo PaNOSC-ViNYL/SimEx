@@ -1,0 +1,6 @@
+{
+	"Name"  : "XFELPhotonPropagator",
+	"Class" : "Propagators",
+	"Source": "default",
+	"Parameters Template" : "default"
+}
