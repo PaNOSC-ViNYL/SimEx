@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -54,7 +53,7 @@ class AbstractPhotonSource(AbstractBaseCalculator):
         input_path = checkAndSetInstance(str, input_path, None)
 
         # Check output path. Set default if none given.
-        output_path = checkAndSetInstance(str, output_path, 'source_out.h5')
+        output_path = checkAndSetInstance(str, output_path, 'source')
 
         # Init base class.
         super(AbstractPhotonSource, self).__init__(parameters, input_path, output_path)

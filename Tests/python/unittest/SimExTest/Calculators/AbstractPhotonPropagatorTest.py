@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -125,8 +124,8 @@ class AbstractPhotonPropagatorTest(unittest.TestCase):
         # Construct with no paths given.
         propagator = Propagator()
 
-        self.assertEqual(propagator.output_path, os.path.abspath('propagation_out.h5'))
-        self.assertEqual(propagator.input_path, os.path.abspath('source_out.h5'))
+        self.assertEqual(propagator.output_path, os.path.abspath('prop'))
+        self.assertEqual(propagator.input_path, os.path.abspath('source'))
 
 
 
