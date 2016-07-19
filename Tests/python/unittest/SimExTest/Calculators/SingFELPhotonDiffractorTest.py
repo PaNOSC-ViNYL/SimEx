@@ -68,8 +68,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def testConstruction(self):
-        """ Testing the default construction of the class. """
+    def testShapedConstruction(self):
+        """ Testing the construction of the class with parameters. """
 
         parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -86,6 +86,35 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+
+    def testDefaultConstruction(self):
+        """ Testing the default construction of the class. """
+
+        # Prepare input.
+        shutil.copytree( TestUtilities.generateTestFilePath( 'pmi_out' ), os.path.abspath( 'pmi' ) )
+
+        # Ensure proper cleanup.
+        self.__dirs_to_remove.append( os.path.abspath( 'pmi') )
+        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+
+        # Set up parameters.
+        parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+
+        self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+
+        self.assertEqual( diffractor.input_path,  os.path.abspath( 'pmi') )
+        self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
     def testConstructionExceptions(self):
         """ Check that proper exceptions are thrown if object is constructed incorrectly. """
