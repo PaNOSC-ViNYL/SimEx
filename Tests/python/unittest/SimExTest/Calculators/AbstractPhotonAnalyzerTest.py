@@ -86,6 +86,28 @@ class AbstractPhotonAnalyzerTest(unittest.TestCase):
         self.assertIsInstance( test_source, AbstractPhotonAnalyzer )
 
 
+    def testDefaultPaths(self):
+        """ Check that default pathnames are chosen correctly. """
+
+        # Attempt to setup without input path.
+        class Derived(AbstractPhotonAnalyzer):
+            def __init__(self):
+                super (Derived, self).__init__(parameters=None, input_path=None, output_path=None)
+            def backengine(self):
+                pass
+            def _readH5(self):
+                pass
+            def saveH5(self):
+                pass
+            def expectedData(self): pass
+            def providedData(self): pass
+
+        # Construct with no paths given.
+        instance = Derived()
+
+        self.assertEqual(instance.output_path, os.path.abspath('analysis'))
+        self.assertEqual(instance.input_path, os.path.abspath('detector'))
+
 
 if __name__ == '__main__':
     unittest.main()

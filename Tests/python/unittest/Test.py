@@ -24,13 +24,16 @@ import sys
 
 # Import suites to run.
 from SimExTest.Calculators import CalculatorsTests
+from SimExTest.Calculators import AbstractCalculatorsTests
 from SimExTest.Utilities import UtilitiesTests
 from SimExTest.Parameters import ParametersTests
 from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
 # Define the encapsulating test suite.
 def suite():
-    suites = [ CalculatorsTests.suite(),
+    suites = [
+               AbstractCalculatorsTests.suite(),
+               CalculatorsTests.suite(),
                UtilitiesTests.suite(),
                ParametersTests.suite(),
                PhotonExperimentSimulationTests.suite(),

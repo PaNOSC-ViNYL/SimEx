@@ -39,17 +39,16 @@ from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from TestUtilities import TestUtilities
 
 class TestPhotonPropagator(AbstractPhotonPropagator):
+    """ Implements a dummy child instance of the AbstractPhotonPropagator base class."""
 
-            def __init__(self):
-                input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
-                super(TestPhotonPropagator, self).__init__(parameters=None, input_path=input_path, output_path='test_out.h5')
+    def __init__(self):
+        super(TestPhotonPropagator, self).__init__(parameters=None, input_path=None, output_path=None)
 
-            def backengine(self):
-                pass
+    def backengine(self):
+        pass
 
-            def _readH5(self): pass
-            def saveH5(self): pass
-
+    def _readH5(self): pass
+    def saveH5(self): pass
 
 
 class AbstractPhotonPropagatorTest(unittest.TestCase):
@@ -110,19 +109,7 @@ class AbstractPhotonPropagatorTest(unittest.TestCase):
     def testDefaultPaths(self):
         """ Check that default pathnames are chosen correctly. """
 
-        # Attempt to setup without input path.
-        class Propagator(AbstractPhotonPropagator):
-            def __init__(self):
-                super (Propagator, self).__init__(parameters=None, input_path=None, output_path=None)
-            def backengine(self):
-                pass
-            def _readH5(self):
-                pass
-            def saveH5(self):
-                pass
-
-        # Construct with no paths given.
-        propagator = Propagator()
+        propagator = TestPhotonPropagator()
 
         self.assertEqual(propagator.output_path, os.path.abspath('prop'))
         self.assertEqual(propagator.input_path, os.path.abspath('source'))

@@ -27,6 +27,8 @@
 
 """
 import paths
+
+import os
 import unittest
 
 
@@ -35,6 +37,20 @@ from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
 from TestUtilities import TestUtilities
+
+class TestPhotonDiffractor(AbstractPhotonDiffractor):
+
+    def __init__(self):
+        super(TestPhotonDiffractor, self).__init__(parameters=None, input_path=None, output_path=None)
+
+    def backengine(self):
+        pass
+
+
+    def _readH5(self): pass
+    def saveH5(self): pass
+    def expectedData(self): pass
+    def providedData(self): pass
 
 
 class AbstractPhotonDiffractorTest(unittest.TestCase):
@@ -61,28 +77,9 @@ class AbstractPhotonDiffractorTest(unittest.TestCase):
 
         self.assertRaises(TypeError, AbstractPhotonDiffractor )
 
-    def notestThis(self):
-        aps = AbstractPhotonDiffractor()
-
-        self.assertIsInstance(aps, AbstractPhotonDiffractor)
-
     def testConstructionDerived(self):
         """ Test that we can construct a derived class and it has the correct inheritance. """
 
-        class TestPhotonDiffractor(AbstractPhotonDiffractor):
-
-            def __init__(self):
-                input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
-                super(TestPhotonDiffractor, self).__init__(parameters=None, input_path=input_path, output_path='test_out.h5')
-
-            def backengine(self):
-                pass
-
-
-            def _readH5(self): pass
-            def saveH5(self): pass
-            def expectedData(self): pass
-            def providedData(self): pass
 
         test_source = TestPhotonDiffractor()
 
@@ -90,6 +87,17 @@ class AbstractPhotonDiffractorTest(unittest.TestCase):
         self.assertIsInstance( test_source, object )
         self.assertIsInstance( test_source, AbstractBaseCalculator )
         self.assertIsInstance( test_source, AbstractPhotonDiffractor )
+
+
+    def testDefaultPaths(self):
+        """ Check that default pathnames are chosen correctly. """
+
+        # Construct with no paths given.
+        instance = TestPhotonDiffractor()
+
+        self.assertEqual(instance.output_path, os.path.abspath('diffr'))
+        self.assertEqual(instance.input_path, os.path.abspath('pmi'))
+
 
 
 

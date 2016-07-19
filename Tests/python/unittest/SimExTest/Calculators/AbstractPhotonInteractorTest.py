@@ -27,14 +27,30 @@
 
 """
 import paths
-import unittest
 
+import os
+import unittest
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
 from TestUtilities import TestUtilities
+
+
+class TestPhotonInteractor(AbstractPhotonInteractor):
+    """ Implements a dummy child instance of the AbstractPhotonInteractor base class."""
+
+    def __init__(self):
+        super(TestPhotonInteractor, self).__init__(parameters=None, input_path=None, output_path=None)
+
+    def backengine(self):
+        pass
+
+    def _readH5(self): pass
+    def saveH5(self): pass
+    def expectedData(self): pass
+    def providedData(self): pass
 
 
 class AbstractPhotonInteractorTest(unittest.TestCase):
@@ -69,20 +85,6 @@ class AbstractPhotonInteractorTest(unittest.TestCase):
     def testConstructionDerived(self):
         """ Test that we can construct a derived class and it has the correct inheritance. """
 
-        class TestPhotonInteractor(AbstractPhotonInteractor):
-
-            def __init__(self):
-                input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
-                super(TestPhotonInteractor, self).__init__(parameters=None, input_path=input_path, output_path='test_out.h5')
-
-            def backengine(self):
-                pass
-
-            def _readH5(self): pass
-            def saveH5(self): pass
-            def expectedData(self): pass
-            def providedData(self): pass
-
         test_source = TestPhotonInteractor()
 
         self.assertIsInstance( test_source, TestPhotonInteractor )
@@ -90,6 +92,14 @@ class AbstractPhotonInteractorTest(unittest.TestCase):
         self.assertIsInstance( test_source, AbstractBaseCalculator )
         self.assertIsInstance( test_source, AbstractPhotonInteractor )
 
+    def testDefaultPaths(self):
+        """ Check that default pathnames are chosen correctly. """
+
+        # Construct with no paths given.
+        instance = TestPhotonInteractor()
+
+        self.assertEqual(instance.output_path, os.path.abspath('pmi'))
+        self.assertEqual(instance.input_path, os.path.abspath('prop'))
 
 
 if __name__ == '__main__':
