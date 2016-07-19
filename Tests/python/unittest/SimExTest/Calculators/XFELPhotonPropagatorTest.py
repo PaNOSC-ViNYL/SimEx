@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -65,20 +64,46 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d): shutil.rmtree(d)
 
-
-    def testConstruction(self):
+    def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
+
+        # Construct the object.
+        xfel_propagator = XFELPhotonPropagator()
+
+        self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
+
+        self.assertEqual( xfel_propagator.input_path,  os.path.abspath('source') )
+        self.assertEqual( xfel_propagator.output_path, os.path.abspath('prop') )
+
+    def testShapedConstruction(self):
+        """ Testing the construction of the class with non-default parameters. """
 
         # Construct the object.
         xfel_propagator = XFELPhotonPropagator(parameters=None, input_path=self.input_h5, output_path='prop_out_0000000.h5')
 
         self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
 
-    @unittest.skip("Skipped")
-    def testConstructionNumberOfFiles(self):
-        """ Test that input and output are setup correctly depending on the number and type of input files given."""
-        ### TODO
-        self.assertTrue(False)
+    def testBackengineDefaultPaths(self):
+        """ Test a backengine run with a default io paths."""
+        # Prepare source.
+        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
+        self.__dirs_to_remove.append( 'source' )
+        self.__dirs_to_remove.append( 'prop' )
+
+        # Construct the object.
+        xfel_propagator = XFELPhotonPropagator()
+
+        # Call the backengine.
+        status = xfel_propagator.backengine()
+
+        # Check backengine returned sanely.
+        self.assertEqual( status, 0 )
+
+        # Check expected files exist.
+        self.assertTrue( os.path.isdir, os.path.abspath('prop') )
+        self.assertIn( 'prop_out_0000000.h5', os.listdir( 'prop' ) )
+        self.assertIn( 'prop_out_0000001.h5', os.listdir( 'prop' ) )
+
 
     def testBackengineSingleInputFile(self):
         """ Test a backengine run with a single input file. """

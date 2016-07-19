@@ -82,20 +82,10 @@ class XFELPhotonSource(AbstractPhotonSource):
 
     def _readH5(self):
         """ """
-        """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-
         pass
 
     def saveH5(self):
         """ """
-        """
-        Private method to save the object to a file.
-
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
-        """
-
         pass
 
 

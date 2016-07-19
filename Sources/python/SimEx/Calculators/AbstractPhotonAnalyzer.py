@@ -36,7 +36,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonAnalyzer(AbstractBaseCalculator):
     """
-    Class representing an abstract photon source, serving as API for actual photon source simulation calculators.
+    Class representing an abstract photon analyzer, serving as API for actual photon analysis calculators.
     """
 
     __metaclass__  = ABCMeta
