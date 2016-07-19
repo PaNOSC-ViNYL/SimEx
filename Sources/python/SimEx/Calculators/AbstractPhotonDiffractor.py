@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -44,9 +43,14 @@ class AbstractPhotonDiffractor(AbstractBaseCalculator):
 
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
-        #"""
-        #Constructor for the Abstract Photon Diffractor.
-        #"""
+        """
+        Constructor for the Abstract Photon Diffractor.
+        """
+        # Check input path. Set to default if none given.
+        input_path = checkAndSetInstance(str, input_path, 'pmi')
+        # Check output path. Set default if none given.
+        output_path = checkAndSetInstance(str, output_path, 'diffr')
+
         super(AbstractPhotonDiffractor, self).__init__(parameters, input_path, output_path)
 
 def checkAndSetPhotonDiffractor(var=None, default=None):

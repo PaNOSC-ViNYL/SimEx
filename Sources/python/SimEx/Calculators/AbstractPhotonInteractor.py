@@ -42,9 +42,14 @@ class AbstractPhotonInteractor(AbstractBaseCalculator):
     __metaclass__  = ABCMeta
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
-        #"""
-        #Constructor for the Abstract Photon Interactor.
-        #"""
+        """
+        Constructor for the Abstract Photon Interactor.
+        """
+        # Check input path. Set to default if none given.
+        input_path = checkAndSetInstance(str, input_path, 'prop')
+        # Check output path. Set default if none given.
+        output_path = checkAndSetInstance(str, output_path, 'pmi')
+
         super(AbstractPhotonInteractor, self).__init__(parameters, input_path, output_path)
 
 def checkAndSetPhotonInteractor(var=None, default=None):

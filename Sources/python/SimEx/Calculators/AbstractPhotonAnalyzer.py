@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -46,6 +45,10 @@ class AbstractPhotonAnalyzer(AbstractBaseCalculator):
         """
         Constructor for the Abstract Photon Analyzer.
         """
+        # Check input path. Set to default if none given.
+        input_path = checkAndSetInstance(str, input_path, 'detector')
+        # Check output path. Set default if none given.
+        output_path = checkAndSetInstance(str, output_path, 'analysis')
 
         # Initialize the base class.
         super(AbstractPhotonAnalyzer, self).__init__(parameters, input_path, output_path)
