@@ -34,4 +34,3 @@ make -j8
 
 # Install the project.
 make install
-

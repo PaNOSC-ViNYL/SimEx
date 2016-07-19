@@ -241,6 +241,42 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    def testBackengineDefaultPaths(self):
+        """ Test that we can start a calculation with default paths given. """
+
+        # Prepare input.
+        shutil.copytree( TestUtilities.generateTestFilePath( 'pmi_out' ), os.path.abspath( 'pmi' ) )
+
+        # Ensure proper cleanup.
+        self.__dirs_to_remove.append( os.path.abspath( 'pmi') )
+        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+
+        parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+
+        # Call backengine.
+        status = diffractor.backengine()
+
+        # Check successful completion.
+        self.assertEqual(status, 0)
+
+        # Check expected files exist.
+        self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
+        self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
+        self.assertIn( 'diffr_out_0000002.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
+
+
     def testBackengineInputFile(self):
         """ Test that we can start a test calculation if the input path is a single file. """
 
