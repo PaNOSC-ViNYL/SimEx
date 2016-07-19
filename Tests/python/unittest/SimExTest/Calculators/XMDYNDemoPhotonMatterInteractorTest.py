@@ -141,6 +141,10 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
     def testBackengine(self):
         """ Check that the backengine method works correctly. """
 
+
+        # Clean up.
+        self.__dirs_to_remove.append('pmi')
+
         # Get test instance.
         pmi_parameters = {'number_of_trajectories' : 1,
                           'number_of_steps'        : 100,
@@ -160,11 +164,12 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         # Check we have generated the expected output.
         self.assertTrue( 'pmi_out_0000001.h5' in os.listdir( test_interactor.output_path ) )
 
+    def testOPMD(self):
+        """ Check that the input directory scanner filters out the opmd files."""
+
         # Clean up.
         self.__dirs_to_remove.append('pmi')
 
-    def testOPMD(self):
-        """ Check that the input directory scanner filters out the opmd files."""
         # Setup parameters.
         pmi_parameters = {'number_of_trajectories' : 10,
                           'number_of_steps'        : 100,
@@ -183,6 +188,9 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
     def testLoadPDBFile(self):
         """ Check that the sample can be taken from a pdb directly. """
 
+        # Clean up.
+        self.__dirs_to_remove.append('pmi')
+
         # Get test instance.
         pmi_parameters = {'number_of_trajectories' : 10,
                           'number_of_steps'        : 100,
@@ -195,6 +203,8 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
 
         # Call backengine
         status = pmi.backengine()
+
+        self.assertEqual(status, 0 )
 
 
 
