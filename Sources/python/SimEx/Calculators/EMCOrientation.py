@@ -218,7 +218,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         if 'beamstop' in self.parameters.keys():
             beamstop = self.parameters['beamstop']
         else:
-            beamstop = 1e-5 # This is very optimistic.
+            beamstop = True
 
         if 'detailed_output' in self.parameters.keys():
             detailed_output = self.parameters['detailed_output']

@@ -27,6 +27,7 @@
 
 """
 import paths
+import os, shutil
 import unittest
 
 
@@ -35,6 +36,20 @@ from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
 from TestUtilities import TestUtilities
+
+class TestPhotonAnalyzer(AbstractPhotonAnalyzer):
+
+    def __init__(self):
+        input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
+        super(TestPhotonAnalyzer, self).__init__()
+
+    def backengine(self):
+        pass
+
+    def saveH5(self): pass
+    def _readH5(self): pass
+    def expectedData(self): pass
+    def providedData(self): pass
 
 
 class AbstractPhotonAnalyzerTest(unittest.TestCase):
@@ -52,9 +67,12 @@ class AbstractPhotonAnalyzerTest(unittest.TestCase):
 
     def setUp(self):
         """ Setting up a test. """
-
+        self.__dirs_to_remove = []
     def tearDown(self):
         """ Tearing down a test. """
+        for d in self.__dirs_to_remove:
+            if os.path.isdir(d):
+                shutil.rmtree( d )
 
     def testConstruction(self):
         """ Testing the default construction of the class. """
@@ -69,14 +87,9 @@ class AbstractPhotonAnalyzerTest(unittest.TestCase):
     def testConstructionDerived(self):
         """ Test that we can construct a derived class and it has the correct inheritance. """
 
-        class TestPhotonAnalyzer(AbstractPhotonAnalyzer):
+        # Ensure proper cleanup:
+        self.__dirs_to_remove.append('analysis')
 
-            def __init__(self):
-                input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
-                super(TestPhotonAnalyzer, self).__init__(parameters=None, input_path=input_path, output_path='test_out.h5')
-
-            def backengine(self):
-                pass
 
         test_source = TestPhotonAnalyzer()
 
@@ -89,24 +102,16 @@ class AbstractPhotonAnalyzerTest(unittest.TestCase):
     def testDefaultPaths(self):
         """ Check that default pathnames are chosen correctly. """
 
-        # Attempt to setup without input path.
-        class Derived(AbstractPhotonAnalyzer):
-            def __init__(self):
-                super (Derived, self).__init__(parameters=None, input_path=None, output_path=None)
-            def backengine(self):
-                pass
-            def _readH5(self):
-                pass
-            def saveH5(self):
-                pass
-            def expectedData(self): pass
-            def providedData(self): pass
+        # Ensure proper cleanup:
+        self.__dirs_to_remove.append('analysis')
 
         # Construct with no paths given.
-        instance = Derived()
+        instance = TestPhotonAnalyzer()
 
         self.assertEqual(instance.output_path, os.path.abspath('analysis'))
         self.assertEqual(instance.input_path, os.path.abspath('detector'))
+
+
 
 
 if __name__ == '__main__':

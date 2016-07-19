@@ -29,6 +29,7 @@
 
 from abc import ABCMeta
 from abc import abstractmethod
+import os
 
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -48,7 +49,11 @@ class AbstractPhotonAnalyzer(AbstractBaseCalculator):
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'detector')
         # Check output path. Set default if none given.
-        output_path = checkAndSetInstance(str, output_path, 'analysis')
+        o_path = checkAndSetInstance(str, output_path, 'analysis')
+
+        if output_path is None:
+            os.makedirs( os.path.abspath( o_path) )
+        output_path = o_path
 
         # Initialize the base class.
         super(AbstractPhotonAnalyzer, self).__init__(parameters, input_path, output_path)
