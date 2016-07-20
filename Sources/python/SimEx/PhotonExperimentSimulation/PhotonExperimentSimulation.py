@@ -172,9 +172,10 @@ class PhotonExperimentSimulation(object):
             self.__photon_detector.backengine()
             self.__photon_detector.saveH5()
 
-        # If no detector is present, link diffr out to analysis in.
+        # If no detector is present, link diffr out to analysis in. If already exists, do nothing.
         else:
-            os.symlink(self.__photon_diffractor.output_path, self.__photon_analyzer.input_path)
+            if not (os.path.isfile(self.__photon_analyzer.input_path) or os.path.isdir(self.__photon_analyzer.input_path)):
+                os.symlink(self.__photon_diffractor.output_path, self.__photon_analyzer.input_path)
 
         print '\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80])
         self.__photon_analyzer._readH5()
