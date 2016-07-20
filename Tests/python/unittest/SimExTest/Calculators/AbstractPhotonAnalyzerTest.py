@@ -111,9 +111,6 @@ class AbstractPhotonAnalyzerTest(unittest.TestCase):
         self.assertEqual(instance.output_path, os.path.abspath('analysis'))
         self.assertEqual(instance.input_path, os.path.abspath('detector'))
 
-
-
-
 if __name__ == '__main__':
     unittest.main()
 

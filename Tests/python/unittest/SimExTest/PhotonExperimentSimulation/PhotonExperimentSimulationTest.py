@@ -53,6 +53,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
+        self.__sample_path = TestUtilities.generateTestFilePath('sample.h5')
+
     def tearDown(self):
         """ Tearing down a test. """
         for f in self.__files_to_remove:
@@ -70,8 +72,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None,
+                                                            input_path=pmi_input,
+                                                            output_path='pmi_out.h5',
+                                                            sample_path=self.__sample_path
+                                                            )
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -107,8 +112,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None,
+                                                            input_path=pmi_input,
+                                                            output_path='pmi_out.h5',
+                                                            sample_path=self.__sample_path
+                                                            )
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -149,8 +157,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
-        pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None,
+                                                            input_path=pmi_input,
+                                                            output_path='pmi_out.h5',
+                                                            sample_path=self.__sample_path
+                                                            )
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -272,7 +283,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
         pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters, input_path=pmi_input, output_path='pmi_out.h5')
+        photon_interactor = XMDYNDemoPhotonMatterInteractor(parameters=None,
+                                                            input_path=pmi_input,
+                                                            output_path='pmi_out.h5',
+                                                            sample_path=self.__sample_path
+                                                            )
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : False,
@@ -340,10 +355,10 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out_0000001.h5', output_path='prop_out_0000001.h5')
 
         # Photon interactor with default parameters.
-	pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=pmi_parameters,
+        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=None,
                                                              input_path='prop_out_0000001.h5',
-                                                             output_path='pmi')
+                                                             output_path='pmi',
+                                                             sample_path=self.__sample_path)
 
         #  Diffraction with parameters.
         diffraction_parameters={ 'uniform_rotation': True,
@@ -444,10 +459,10 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path=source_dir, output_path=prop_dir)
 
         # Photon interactor with default parameters.
-        pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=pmi_parameters,
+        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=None,
                                                              input_path=prop_dir,
-                                                             output_path=pmi_dir)
+                                                             output_path=pmi_dir,
+                                                             sample_path=self.__sample_path)
 
         #  Diffraction with parameters.
         diffraction_parameters={ 'uniform_rotation': True,
@@ -539,10 +554,10 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
 
         # Photon interactor with default parameters.
-        pmi_parameters= {'sample_path' :TestUtilities.generateTestFilePath('sample.h5')}
-        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=pmi_parameters,
+        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=None,
                                                              input_path='prop_out.h5',
-                                                             output_path='pmi')
+                                                             output_path='pmi',
+                                                             sample_path=self.__sample_path)
 
         #  Diffraction with parameters.
         diffraction_parameters={ 'uniform_rotation': True,

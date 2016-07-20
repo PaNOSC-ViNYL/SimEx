@@ -80,6 +80,16 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
 
         self.assertIsInstance(interactor, XMDYNDemoPhotonMatterInteractor)
 
+
+    def testConstructionNoSample(self):
+        """ Test construction w/o sample path raises. """
+        # Setup pmi parameters.
+        pmi_parameters = {'number_of_trajectories' : 1,
+                          'number_of_steps'        : 100,
+                         }
+
+        self.assertRaises( ValueError, XMDYNDemoPhotonMatterInteractor, pmi_parameters, 'pmi_out', 'pmi_in', None)
+
     def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
 

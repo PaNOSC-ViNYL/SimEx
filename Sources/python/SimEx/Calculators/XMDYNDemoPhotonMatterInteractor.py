@@ -64,6 +64,8 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
         super(XMDYNDemoPhotonMatterInteractor, self).__init__(parameters,input_path,output_path)
 
         # Check sample path.
+        if sample_path is None:
+            raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
         if not os.path.isfile( sample_path):
             raise IOError( "%s is not a a regular sample/target file." % (sample_path) )
 
