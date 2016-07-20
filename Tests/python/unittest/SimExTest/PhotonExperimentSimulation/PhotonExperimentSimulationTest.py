@@ -61,8 +61,11 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
             if os.path.isfile(f) or os.path.islink(f):
                 os.remove(f)
         for d in self.__dirs_to_remove:
-            if os.path.isdir(d):
+            if all([os.path.isdir(d), not os.path.islink(d)]):
                 shutil.rmtree(d)
+            elif os.path.islink(d):
+                os.remove(d)
+
 
     def testConstruction(self):
         """ Test the default constructor of this class. """
@@ -616,6 +619,101 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         for f in expected_files:
             print f
             self.assertTrue( os.path.isfile( f ) )
+
+    def testSimS2EWorkflowDefaultPaths(self):
+        """ Testing that a workflow akin to the simS2E example workflow works. No IO paths specified. """
+
+        # These directories and files are expected to be present after a successfull calculation.
+        expected_dirs = [ 'source_in',
+                          'source',
+                          'prop',
+                          'pmi',
+                          'detector',
+                          'diffr',
+                          'analysis',
+                          ]
+
+        expected_files = [
+                          'source/FELsource_out_0000000.h5',
+                          'source/FELsource_out_0000001.h5',
+                          'prop/prop_out_0000000.h5',
+                          'prop/prop_out_0000001.h5',
+                          'pmi/pmi_out_0000001.h5',
+                          'pmi/pmi_out_0000002.h5',
+                          'diffr/diffr_out_0000001.h5',
+                          'diffr/diffr_out_0000002.h5',
+                          'detector/diffr_out_0000001.h5',
+                          'detector/diffr_out_0000002.h5',
+                          'analysis/orient_out.h5',
+                          'analysis/phase_out.h5',
+                          ]
+
+        # Ensure proper cleanup.
+        self.__dirs_to_remove = expected_dirs
+
+        # Get proper FEL source files to start from.
+        shutil.copytree( TestUtilities.generateTestFilePath('FELsource_out'), 'source_in')
+
+        # Photon source.
+        photon_source = XFELPhotonSource(input_path='source_in')
+
+        # Photon propagator, default parameters.
+        photon_propagator = XFELPhotonPropagator()
+
+        # Photon interactor with default parameters.
+        photon_interactor = XMDYNDemoPhotonMatterInteractor( sample_path=self.__sample_path )
+
+        #  Diffraction with parameters.
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 2,
+                     'number_of_diffraction_patterns' : 1,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
+        photon_diffractor = SingFELPhotonDiffractor( parameters=diffraction_parameters )
+
+
+        # Reconstruction: EMC+DM
+        emc_parameters = {'initial_number_of_quaternions' : 1,
+                               'max_number_of_quaternions'     : 2,
+                               'max_number_of_iterations'      : 10,
+                               'min_error'                     : 1.0e-6,
+                               'beamstop'                      : 1.0e-5,
+                               'detailed_output'               : False
+                               }
+
+        dm_parameters = {'number_of_trials'        : 5,
+                         'number_of_iterations'    : 2,
+                         'averaging_start'         : 15,
+                         'leash'                   : 0.2,
+                         'number_of_shrink_cycles' : 2,
+                         }
+
+        reconstructor = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters})
+
+        # Setup the photon experiment.
+        pxs = PhotonExperimentSimulation(photon_source=photon_source,
+                                         photon_propagator=photon_propagator,
+                                         photon_interactor=photon_interactor,
+                                         photon_diffractor=photon_diffractor,
+                                         photon_analyzer=reconstructor,
+                                         )
+
+        # Run the experiment.
+        pxs.run()
+
+        # Check that all output files and directories are present.
+        for directory in expected_dirs:
+            self.assertTrue( os.path.isdir( directory ) )
+        for f in expected_files:
+            print f
+            self.assertTrue( os.path.isfile( f ) )
+
 
 
 if __name__ == '__main__':

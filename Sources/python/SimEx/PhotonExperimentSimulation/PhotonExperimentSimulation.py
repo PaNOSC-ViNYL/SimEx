@@ -25,7 +25,7 @@
     @creation : 20151005
 """
 
-
+import os
 
 from SimEx.Calculators.AbstractPhotonAnalyzer   import checkAndSetPhotonAnalyzer
 from SimEx.Calculators.AbstractPhotonDetector   import checkAndSetPhotonDetector
@@ -171,6 +171,10 @@ class PhotonExperimentSimulation(object):
             self.__photon_detector._readH5()
             self.__photon_detector.backengine()
             self.__photon_detector.saveH5()
+
+        # If no detector is present, link diffr out to analysis in.
+        else:
+            os.symlink(self.__photon_diffractor.output_path, self.__photon_analyzer.input_path)
 
         print '\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80])
         self.__photon_analyzer._readH5()
