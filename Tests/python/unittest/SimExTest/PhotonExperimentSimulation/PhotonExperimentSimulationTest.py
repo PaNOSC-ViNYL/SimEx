@@ -24,6 +24,7 @@
     @creation : 20151005
 """
 import os, shutil
+import h5py
 import unittest
 import paths
 
@@ -426,13 +427,13 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
             print f
             self.assertTrue( os.path.isfile( f ) )
 
-    def testSimS2EWorkflowDirectories(self):
-        """ Testing that a workflow akin to the simS2E example workflow works.
-            Two sources, two diffraction patterns."""
+    def testHistory(self):
+        """ Testing that all generated output files contain the history """
 
         # Setup directories.
         working_directory = 'SPI'
         self.__dirs_to_remove.append(working_directory)
+
         source_dir = os.path.join( working_directory, 'FELsource' )
         prop_dir = os.path.join( working_directory, 'prop' )
         pmi_dir = os.path.join( working_directory, 'pmi' )
@@ -449,8 +450,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         os.mkdir(detector_dir)
         os.mkdir(recon_dir)
 
-        # Ensure proper cleanup.
-        self.__dirs_to_remove.append(working_directory)
 
         # Location of the FEL source file.
         source_input = TestUtilities.generateTestFilePath('FELsource_out')
@@ -517,12 +516,142 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Run the experiment.
         pxs.run()
 
-        ## Check that all output files and directories are present.
-        #for directory in expected_dirs+expected_symlinks:
-            #self.assertTrue( os.path.isdir( directory ) )
-        #for f in expected_files:
-            #print f
-            #self.assertTrue( os.path.isfile( f ) )
+        # Check histories.
+        # prop.
+        with h5py.File( os.path.join( prop_dir, 'prop_out_0000000.h5'), 'r') as prop_h5:
+            self.assertIn( 'history', prop_h5.keys() )
+            self.assertIn( 'parent', prop_h5['history'].keys() )
+            self.assertIn( 'detail', prop_h5['history/parent'].keys() )
+            self.assertIn( 'parent', prop_h5['history/parent'].keys() )
+
+            prop_h5.close()
+
+        # pmi.
+        with h5py.File( os.path.join( pmi_dir, 'pmi_out_0000001.h5'), 'r') as pmi_h5:
+
+            self.assertIn( 'history', pmi_h5.keys() )
+            self.assertIn( 'parent', pmi_h5['history'].keys() )
+            self.assertIn( 'detail', pmi_h5['history/parent'].keys() )
+            self.assertIn( 'parent', pmi_h5['history/parent'].keys() )
+            self.assertIn( 'detail', pmi_h5['history/parent/parent'].keys() )
+            self.assertIn( 'parent', pmi_h5['history/parent/parent'].keys() )
+
+            pmi_h5.close()
+
+        # diffr.
+        with h5py.File( os.path.join( diffr_dir, 'diffr_out_0000001.h5'), 'r') as diffr_h5:
+
+            self.assertIn( 'history', diffr_h5.keys() )
+            self.assertIn( 'parent', diffr_h5['history'].keys() )
+            self.assertIn( 'detail', diffr_h5['history/parent'].keys() )
+            self.assertIn( 'parent', diffr_h5['history/parent'].keys() )
+            self.assertIn( 'parent', diffr_h5['history/parent/parent'].keys() )
+            self.assertIn( 'detail', diffr_h5['history/parent/parent'].keys() )
+            self.assertIn( 'parent', diffr_h5['history/parent/parent/parent'].keys() )
+            self.assertIn( 'detail', diffr_h5['history/parent/parent/parent'].keys() )
+
+            diffr_h5.close()
+
+        # phase.
+        with h5py.File( os.path.join( recon_dir, 'phase_out.h5'), 'r') as dm_h5:
+
+            self.assertIn( 'history', dm_h5.keys() )
+            self.assertIn( 'error', dm_h5['history'].keys() )
+            self.assertIn( 'object', dm_h5['history'].keys() )
+
+            dm_h5.close()
+
+    def testSimS2EWorkflowDirectories(self):
+        """ Testing that a workflow akin to the simS2E example workflow works.
+            Two sources, two diffraction patterns."""
+
+        # Setup directories.
+        working_directory = 'SPI'
+        self.__dirs_to_remove.append(working_directory)
+
+        source_dir = os.path.join( working_directory, 'FELsource' )
+        prop_dir = os.path.join( working_directory, 'prop' )
+        pmi_dir = os.path.join( working_directory, 'pmi' )
+        diffr_dir = os.path.join( working_directory, 'diffr' )
+        detector_dir = os.path.join( working_directory, 'detector' )
+        recon_dir = os.path.join( working_directory, 'recon' )
+
+        # Make directories.
+        os.mkdir(working_directory)
+        os.mkdir(source_dir)
+        os.mkdir(prop_dir)
+        os.mkdir(pmi_dir)
+        os.mkdir(diffr_dir)
+        os.mkdir(detector_dir)
+        os.mkdir(recon_dir)
+
+
+        # Location of the FEL source file.
+        source_input = TestUtilities.generateTestFilePath('FELsource_out')
+
+        # Photon source.
+        photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path=source_dir)
+
+        # Photon propagator, default parameters.
+        photon_propagator = XFELPhotonPropagator(parameters=None, input_path=source_dir, output_path=prop_dir)
+
+        # Photon interactor with default parameters.
+        photon_interactor = XMDYNDemoPhotonMatterInteractor( parameters=None,
+                                                             input_path=prop_dir,
+                                                             output_path=pmi_dir,
+                                                             sample_path=self.__sample_path)
+
+        #  Diffraction with parameters.
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 2,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     }
+
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                input_path=pmi_dir,
+                output_path=diffr_dir)
+
+        # Reconstruction: EMC+DM
+        emc_parameters = {'initial_number_of_quaternions' : 1,
+                               'max_number_of_quaternions'     : 9,
+                               'max_number_of_iterations'      : 3,
+                               'min_error'                     : 1.0e-8,
+                               'beamstop'                      : 1.0e-5,
+                               'detailed_output'               : False
+                               }
+
+        dm_parameters = {'number_of_trials'        : 5,
+                         'number_of_iterations'    : 2,
+                         'averaging_start'         : 15,
+                         'leash'                   : 0.2,
+                         'number_of_shrink_cycles' : 2,
+                         }
+
+        reconstructor = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters},
+                                          input_path=diffr_dir,
+                                          output_path = recon_dir
+                                          )
+
+        # Setup the photon experiment.
+        pxs = PhotonExperimentSimulation(photon_source=photon_source,
+                                         photon_propagator=photon_propagator,
+                                         photon_interactor=photon_interactor,
+                                         photon_diffractor=photon_diffractor,
+                                         photon_detector=None,
+                                         photon_analyzer=reconstructor,
+                                         )
+
+        # Run the experiment.
+
+        pxs.run()
+
 
 
 
