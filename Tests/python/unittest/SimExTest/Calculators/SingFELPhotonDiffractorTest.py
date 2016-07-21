@@ -37,6 +37,7 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
+from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from TestUtilities import TestUtilities
 
 class SingFELPhotonDiffractorTest(unittest.TestCase):
@@ -86,6 +87,43 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+
+    def testConstructionParameters(self):
+        """ Check we can construct with a parameter object. """
+        parameters = SingFELPhotonDiffractorParameters(uniform_rotation = True,
+                                                       calculate_Compton = False,
+                                                       slice_interval = 100,
+                                                       number_of_slices = 2,
+                                                       pmi_start_ID = 1,
+                                                       pmi_stop_ID  = 1,
+                                                       number_of_diffraction_patterns = 2,
+                                                       beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
+                                                       beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
+                                                       )
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
+
+        # Check instance.
+        self.assertIsInstance( diffractor, SingFELPhotonDiffractor )
+
+    def testShapedConstruction(self):
+        """ Testing the construction of the class with parameters. """
+
+        parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
+
+        self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+
 
     def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
@@ -151,7 +189,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # slice_interval not positive integer.
         parameters['slice_interval'] = -1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         # slice_interval not a number
         parameters['slice_interval'] = 'one'
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
@@ -160,7 +198,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # number_of_slices not positive integer.
         parameters['number_of_slices'] = -1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         # number_of_slices not a number
         parameters['number_of_slices'] = 'one'
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
@@ -169,7 +207,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # number_of_diffraction_patterns not positive integer.
         parameters['number_of_diffraction_patterns'] = -1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         # number_of_diffraction_patterns not a number
         parameters['number_of_diffraction_patterns'] = 'one'
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
@@ -178,7 +216,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # pmi_start_ID not positive integer.
         parameters['pmi_start_ID'] = -1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         # pmi_start_ID not a number
         parameters['pmi_start_ID'] = 'one'
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
@@ -187,7 +225,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # pmi_stop_ID not positive integer.
         parameters['pmi_stop_ID'] = -1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
+        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         # pmi_stop_ID not a number
         parameters['pmi_stop_ID'] = 'one'
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
@@ -209,10 +247,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         parameters['beam_geometry_file'] = 's2e.geom'
         self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         parameters['beam_geometry_file'] =  TestUtilities.generateTestFilePath('s2e.geom'),
-
-        # Unknown parameter name.
-        parameters['number_of_nonexisting_parameter'] = 3
-        self.assertRaises( RuntimeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
 
 
     def testBackengine(self):

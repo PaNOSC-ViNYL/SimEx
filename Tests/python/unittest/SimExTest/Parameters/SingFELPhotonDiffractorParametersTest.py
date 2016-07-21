@@ -91,7 +91,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
 
     def testLegacyDictionary(self):
         """ Check parameter object can be initialized via a old-style dictionary. """
-        parameter_dict = { 'uniform_rotation': False,
+        parameters_dict = { 'uniform_rotation': False,
                            'calculate_Compton' : True,
                            'slice_interval' : 12,
                            'number_of_slices' : 2,
@@ -103,7 +103,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
                    }
 
 
-        parameters = SingFELPhotonDiffractorParameters(parameter_dictionary=parameter_dict)
+        parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameter_dict)
 
         # Check all parameters are set correctly.
         self.assertFalse( parameters.uniform_rotation )
