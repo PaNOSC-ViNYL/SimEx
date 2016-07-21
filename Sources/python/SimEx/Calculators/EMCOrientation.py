@@ -55,8 +55,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                                'max_number_of_iterations'      : 100,
                                'min_error'                     : 1.0e-8,
                                'beamstop'                      : True,
-                               'detailed_output'               : False
-                               }
+                               'detailed_output'               : False        }
         """
 
         # Initialize base class.
