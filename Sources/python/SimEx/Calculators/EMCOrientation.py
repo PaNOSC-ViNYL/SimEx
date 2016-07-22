@@ -33,11 +33,11 @@ import numpy
 import h5py
 import time
 
-from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
-
 from EMCCaseGenerator import  EMCCaseGenerator, print_to_log
+from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
+from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-debug = False
 
 
 class EMCOrientation(AbstractPhotonAnalyzer):
@@ -48,15 +48,19 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         """
         Constructor for the reconstruction analyser.
 
-        @param  parameters : Dictionary of reconstruction parameters.
-        <br/><b>type</b> : dict
-        <br/><b>example</b> : parameters={'initial_number_of_quaternions' : 1,
-                               'max_number_of_quaternions'     : 9,
-                               'max_number_of_iterations'      : 100,
-                               'min_error'                     : 1.0e-8,
-                               'beamstop'                      : True,
-                               'detailed_output'               : False        }
+        @param  parameters : Parameters for the EMC orientation calculator.
+        <br/><b>type</b> : EMCOrientationParameters instance
         """
+        # Check parameters.
+        if isinstance( parameters, dict ):
+            parameters = EMCOrientationParameters( parameters_dictionary = parameters )
+
+        # Set default parameters is no parameters given.
+        if parameters is None:
+            parameters = checkAndSetInstance( EMCOrientationParameters, parameters, EMCOrientationParameters() )
+        else:
+            parameters = checkAndSetInstance( EMCOrientationParameters, parameters, None )
+
 
         # Initialize base class.
         super(EMCOrientation, self).__init__(parameters,input_path,output_path)
@@ -68,22 +72,17 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                                 'params/info',
                                 'version',]
 
-        ### FIXME: These are the parameters for diffr, not the output.
-        self.__expected_data = ['/-input_dir'
-                                '/-output_dir'
-                                '/-config_file'
-                                '/-b',
-                                '/-g',
-                                '/-uniformRotation',
-                                '/-calculateCompton',
-                                '/-sliceInterval',
-                                '/-numSlices',
-                                '/-pmiStartID',
-                                '/-pmiEndID',
-                                '/-dpID',
-                                '/-numDP',
-                                '/-USE_GPU',
-                                '/version']
+        self.__expected_data = ['/data/data',
+                                '/data/diffr',
+                                '/data/angle',
+                                '/params/geom/detectorDist',
+                                '/params/geom/pixelWidth',
+                                '/params/geom/pixelHeight',
+                                '/params/geom/mask',
+                                '/params/beam/photonEnergy',
+                                '/params/beam/photons',
+                                '/params/beam/focusArea',
+                                ]
 
         # Set run and tmp files paths.
         if _checkPaths( run_files_path, tmp_files_path ):
@@ -194,46 +193,23 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         # Instantiate a reconstruction object
         ###############################################################
         # If parameters are given, map them to command line arguments.
-        if 'initial_number_of_quaternions' in self.parameters.keys():
-            initial_number_of_quaternions = self.parameters['initial_number_of_quaternions']
-        else:
-            initial_number_of_quaternions = 1
+        initial_number_of_quaternions = self.parameters.initial_number_of_quaternions
+        max_number_of_quaternions = self.parameters.max_number_of_quaternions
+        max_number_of_iterations = self.parameters.max_number_of_iterations
+        min_error = self.parameters.min_error
+        beamstop = self.parameters.beamstop
+        detailed_output = self.parameters.detailed_output
 
-        if 'max_number_of_quaternions' in self.parameters.keys():
-            max_number_of_quaternions = self.parameters['max_number_of_quaternions']
-        else:
-            max_number_of_quaternions = 1
-
-        if 'max_number_of_iterations' in self.parameters.keys():
-            max_number_of_iterations = self.parameters['max_number_of_iterations']
-        else:
-            max_number_of_iterations = 1
-
-        if 'min_error' in self.parameters.keys():
-            min_error = self.parameters['min_error']
-        else:
-            min_error = 1e-5 # This is very optimistic.
-
-        if 'beamstop' in self.parameters.keys():
-            beamstop = self.parameters['beamstop']
-        else:
-            beamstop = True
-
-        if 'detailed_output' in self.parameters.keys():
-            detailed_output = self.parameters['detailed_output']
-        else:
-            detailed_output = False
-
+        # Get paths.
         run_instance_dir, tmp_out_dir = self._setupPaths()
 
-        src_installation_dir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),'..', '..','..','..','bin'))
+        # Get path to log.
         outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
 
+        # Prepare for reading input.
         if os.path.isdir(self.input_path):
             photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
             photonFiles.sort()
-            if debug:
-                photonFiles = photonFiles[:100]
 
         elif os.path.isfile(self.input_path):
             photonFiles = [self.input_path]
@@ -283,24 +259,14 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             os.symlink(os.path.join(tmp_out_dir,"detector.dat"), os.path.join(run_instance_dir,"detector.dat"))
         if not (os.path.isfile(os.path.join(run_instance_dir,"photons.dat"))):
             os.symlink(os.path.join(tmp_out_dir,"photons.dat"), os.path.join(run_instance_dir,"photons.dat"))
-#        if not (os.path.isfile(os.path.join(run_instance_dir,"EMC"))):
-#            os.symlink(os.path.join(src_installation_dir,"EMC"), os.path.join(run_instance_dir,"EMC"))
-#        if not (os.path.isfile(os.path.join(run_instance_dir,"object_recon"))):
-#            os.symlink(os.path.join(src_installation_dir,"object_recon"), os.path.join(run_instance_dir,"object_recon"))
-        #if not (os.path.isdir(os.path.join(runInstanceDir,"supp_py_modules"))):
-            #os.symlink(os.path.join(op.srcDir,"supp_py_modules"), os.path.join(runInstanceDir,"supp_py_modules"))
-        #if not (os.path.isfile(os.path.join(op.tmpOutDir, "make_diagnostic_figures.py"))):
-            #os.symlink(os.path.join(op.srcDir,"make_diagnostic_figures.py"), os.path.join(op.tmpOutDir, "make_diagnostic_figures.py"))
 
         ###############################################################
         # Create dummy destination h5 for intermediate output from EMC
         ###############################################################
         cwd = os.path.abspath(os.curdir)
         os.chdir(run_instance_dir)
-        #Output file is kept in tmpOutDir,
-        #a hard-linked version of this is kept in outDir
+        #Output file is kept in tmpOutDir.
         outFile = self.output_path
-        #outFileHardLink = os.path.join(output_path, "orient_out_" + op.timeStamp +".h5")
         offset_iter = 0
         if not (os.path.isfile(outFile)):
             f = h5py.File(outFile, "w")
@@ -332,11 +298,6 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             msg = "Output will be appended to the results of %d iterations before this."%offset_iter
             print_to_log(msg=msg, log_file=outputLog)
 
-        #if not (os.path.isfile(outFileHardLink)):
-            #os.link(outFile, outFileHardLink)
-        #else:
-            #msg = "Hard link to %s already exists and will not be re-created.."%(outFileHardLink)
-            #print_to_log(msg)
 
         ###############################################################
         # Iterate EMC
@@ -437,7 +398,6 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         except:
             os.chdir(cwd)
-            #raise
             return 1
 
 def _checkPaths(run_files_path, tmp_files_path):
@@ -451,4 +411,3 @@ def _checkPaths(run_files_path, tmp_files_path):
             raise IOError( "Run files path already exists, cowardly refusing to overwrite.")
 
     return True
-

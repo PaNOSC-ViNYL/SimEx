@@ -108,7 +108,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
         """ Set the 'initial_number_of_quaternions' parameter to a given value.
         @param value : The value to set 'initial_number_of_quaternions' to.
         """
-        initial_number_of_quaternions = checkAndSetInstance( int, value, True )
+        initial_number_of_quaternions = checkAndSetInstance( int, value, 1 )
 
         if all([initial_number_of_quaternions > 0, initial_number_of_quaternions < 10]):
             self.__initial_number_of_quaternions = initial_number_of_quaternions
