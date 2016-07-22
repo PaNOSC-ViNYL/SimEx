@@ -19,7 +19,7 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the SingFELPhotonDiffractor.
+""" Test module for the S2EReconstruction.
 
     @author : CFG
     @institution : XFEL
@@ -85,7 +85,7 @@ class S2EReconstructionTest(unittest.TestCase):
                           'max_number_of_quaternions'     : 2,
                           'max_number_of_iterations'      : 10,
                           'min_error'                     : 1.0e-6,
-                          'beamstop'                      : 1.0e-5,
+                          'beamstop'                      : True,
                           'detailed_output'               : False
                                }
 
@@ -140,7 +140,7 @@ class S2EReconstructionTest(unittest.TestCase):
                           'max_number_of_quaternions'     : 2,
                           'max_number_of_iterations'      : 10,
                           'min_error'                     : 1.0e-6,
-                          'beamstop'                      : 1.0e-5,
+                          'beamstop'                      : True,
                           'detailed_output'               : False
                                }
 

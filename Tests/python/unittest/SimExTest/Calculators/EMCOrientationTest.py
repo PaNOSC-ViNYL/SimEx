@@ -35,6 +35,7 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.EMCOrientation import EMCOrientation, _checkPaths
+from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from TestUtilities import TestUtilities
 
 class EMCOrientationTest(unittest.TestCase):
@@ -55,7 +56,7 @@ class EMCOrientationTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
         self.__files_to_remove = []
-        self.__dirs_to_remove = []
+        self.__dirs_to_remove = ['analysis']
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -70,7 +71,46 @@ class EMCOrientationTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+        analyzer = EMCOrientation()
+
+        # Test a parameter.
+        self.assertEqual( analyzer.parameters.initial_number_of_quaternions, 1 )
+
+        self.assertIsInstance(analyzer, EMCOrientation)
+
+    def testConstructionParameters(self):
+        """ Testing the construction of the class with a parameters object. """
+
+        # Construct the object.
+        emc_parameters = EMCOrientationParameters( initial_number_of_quaternions = 2,
+                                                   max_number_of_quaternions     = 4,
+                                                   max_number_of_iterations      = 5,
+                                                   min_error                     = 1.e-6,
+                                                   beamstop                      = False,
+                                                   detailed_output               = False )
+
+        analyzer = EMCOrientation(parameters=emc_parameters)
+
+        # Test a parameter.
+        self.assertEqual( analyzer.parameters.initial_number_of_quaternions, 2 )
+
+        self.assertIsInstance(analyzer, EMCOrientation)
+
+    def testConstructionParametersDict(self):
+        """ Testing the construction of the class with a parameters dictionary. """
+
+        # Construct the object.
+        emc_parameters = { 'initial_number_of_quaternions' : 2,
+                           'max_number_of_quaternions'     : 4,
+                           'max_number_of_iterations'      : 5,
+                           'min_error'                     : 1.e-6,
+                           'beamstop'                      : False,
+                           'detailed_output'               : False }
+
+        analyzer = EMCOrientation(parameters=emc_parameters)
+
+        # Test a parameter.
+        self.assertEqual( analyzer.parameters.initial_number_of_quaternions, 2 )
 
         self.assertIsInstance(analyzer, EMCOrientation)
 
@@ -81,6 +121,9 @@ class EMCOrientationTest(unittest.TestCase):
 
         # Construct the object.
         analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+
+        # Keep the test short.
+        analyzer.parameters.max_number_of_iterations=2
 
         # Call backengine.
         status = analyzer.backengine()
@@ -94,6 +137,9 @@ class EMCOrientationTest(unittest.TestCase):
 
         # Construct the object.
         analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+
+        # Keep the test short.
+        analyzer.parameters.max_number_of_iterations=2
 
         # Call backengine.
         status = analyzer.backengine()

@@ -392,7 +392,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                'max_number_of_quaternions'     : 9,
                                'max_number_of_iterations'      : 3,
                                'min_error'                     : 1.0e-8,
-                               'beamstop'                      : 1.0e-5,
+                               'beamstop'                      : True,
                                'detailed_output'               : False
                                }
 
@@ -488,7 +488,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                'max_number_of_quaternions'     : 9,
                                'max_number_of_iterations'      : 3,
                                'min_error'                     : 1.0e-8,
-                               'beamstop'                      : 1.0e-5,
+                               'beamstop'                      : True,
                                'detailed_output'               : False
                                }
 
@@ -623,7 +623,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                'max_number_of_quaternions'     : 9,
                                'max_number_of_iterations'      : 3,
                                'min_error'                     : 1.0e-8,
-                               'beamstop'                      : 1.0e-5,
+                               'beamstop'                      : True,
                                'detailed_output'               : False
                                }
 
@@ -714,7 +714,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                'max_number_of_quaternions'     : 2,
                                'max_number_of_iterations'      : 10,
                                'min_error'                     : 1.0e-6,
-                               'beamstop'                      : 1.0e-5,
+                               'beamstop'                      : True,
                                'detailed_output'               : False
                                }
 
@@ -812,7 +812,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                                'max_number_of_quaternions'     : 2,
                                'max_number_of_iterations'      : 10,
                                'min_error'                     : 1.0e-6,
-                               'beamstop'                      : 1.0e-5,
+                               'beamstop'                      : True,
                                'detailed_output'               : False
                                }
 

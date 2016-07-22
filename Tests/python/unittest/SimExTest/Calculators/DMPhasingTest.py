@@ -34,6 +34,7 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.DMPhasing import DMPhasing
+from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
 from TestUtilities import TestUtilities
 
 class DMPhasingTest(unittest.TestCase):
@@ -54,7 +55,7 @@ class DMPhasingTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
         self.__files_to_remove = []
-        self.__dirs_to_remove = []
+        self.__dirs_to_remove = ['analysis']
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -69,9 +70,42 @@ class DMPhasingTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        analyzer = DMPhasing(parameters=None, input_path=self.input_h5, output_path='phasing_out.h5')
+        analyzer = DMPhasing(parameters=None)
 
         self.assertIsInstance(analyzer, DMPhasing)
+
+        # Check parameters.
+        self.assertEqual( analyzer.parameters.number_of_shrink_cycles, 10 )
+
+    def testConstructionParameters(self):
+        """ Testing the construction of the class with parameters. """
+
+        # Construct the object.
+        analyzer = DMPhasing(parameters=DMPhasingParameters())
+
+        self.assertIsInstance(analyzer, DMPhasing)
+
+        # Check parameters.
+        self.assertEqual( analyzer.parameters.number_of_shrink_cycles, 10 )
+
+    def testConstructionParameters(self):
+        """ Testing the construction of the class with parameters. """
+
+        # Construct the object.
+        dm_parameters = {'number_of_trials'        : 5,
+                         'number_of_iterations'    : 2,
+                         'averaging_start'         : 15,
+                         'leash'                   : 0.2,
+                         'number_of_shrink_cycles' : 2,
+                         }
+        analyzer = DMPhasing(parameters=dm_parameters)
+
+        self.assertIsInstance(analyzer, DMPhasing)
+
+        # Check parameters.
+        self.assertEqual( analyzer.parameters.number_of_shrink_cycles, 2 )
+
+
 
     def testBackengine(self):
         """ Test that we can start a test calculation. """
