@@ -35,6 +35,8 @@ import h5py
 import re
 
 from AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
+from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class DMPhasing(AbstractPhotonAnalyzer):
     """
@@ -45,10 +47,19 @@ class DMPhasing(AbstractPhotonAnalyzer):
         """
         Constructor for the phasing analyser.
 
-        @param  parameters : Dictionary of reconstruction parameters.
-        <br/><b>type</b> : dict
-        <br/><b>example</b> : parameters={}
+        @param  parameters : Phasing parameters.
+        <br/><b>type</b> : DMPhasingParameters instance
         """
+
+        # Check parameters.
+        if isinstance( parameters, dict ):
+            parameters = DMPhasingParameters( parameters_dictionary = parameters )
+
+        # Set default parameters is no parameters given.
+        if parameters is None:
+            parameters = checkAndSetInstance( DMPhasingParameters, parameters, DMPhasingParameters() )
+        else:
+            parameters = checkAndSetInstance( DMPhasingParameters, parameters, None )
 
         super(DMPhasing, self).__init__(parameters,input_path,output_path)
 
@@ -112,30 +123,11 @@ class DMPhasing(AbstractPhotonAnalyzer):
         s2e_recon/DM/runDM.py
         """
 
-        if 'number_of_trials' in self.parameters.keys():
-            number_of_trials = self.parameters['number_of_trials']
-        else:
-            number_of_trials = 500
-
-        if 'averaging_start' in self.parameters.keys():
-            averaging_start = self.parameters['averaging_start']
-        else:
-            averaging_start = 15
-
-        if 'number_of_iterations' in self.parameters.keys():
-            number_of_iterations = self.parameters['number_of_iterations']
-        else:
-            number_of_iterations = 50
-
-        if 'leash' in self.parameters.keys():
-            leash = self.parameters['leash']
-        else:
-            leash = 0.2
-
-        if 'number_of_shrink_cycles' in self.parameters.keys():
-            number_of_shrink_cycles = self.parameters['number_of_shrink_cycles']
-        else:
-            number_of_shrink_cycles = 10
+        number_of_trials = self.parameters.number_of_trials
+        averaging_start = self.parameters.averaging_start
+        number_of_iterations = self.parameters.number_of_iterations
+        leash = self.parameters.leash
+        number_of_shrink_cycles = self.parameters.number_of_shrink_cycles
 
         # Save current working directory.
         cwd = os.path.abspath(os.curdir)
