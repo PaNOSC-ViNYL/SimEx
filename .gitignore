@@ -1,6 +1,6 @@
 *.pyc
 *.pyo
-.*.*sw
+**.swp
 bin
 include
 lib
