@@ -33,6 +33,7 @@ import unittest
 
 from SimEx.Utilities import OpenPMDTools as opmd
 from SimEx.Utilities.wpg_to_opmd import convertToOPMD
+from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 
 from TestUtilities.TestUtilities import generateTestFilePath
 
@@ -161,6 +162,24 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.assertEqual( result_array[0], 0 )
         self.assertEqual( result_array[1], 0 )
 
+    def testHydroTxtToOpmdConverter(self):
+        """ Check that the tool for converting txt output from Esther to opmd.hdf5 works. """
+
+        hydro_data_path = generateTestFilePath("hydroTests")
+        convertTxtToOPMD(hydro_data_path)
+
+        expected_file = generateTestFilePath("hydroTests.h5")
+        self.assertTrue( os.path.isfile( expected_file ) )
+        self.__files_to_remove.append( expected_file )
+
+
+        # Open the file.
+        with h5py.File( expected_file, 'r' ) as h5:
+            self.assertIn( "data", h5.keys() )
+            self.assertIn( "rho", h5['data/0'].keys() )
+            self.assertIn( "pres", h5['data/0'].keys() )
+            self.assertIn( "vel", h5['data/0'].keys() )
+            self.assertIn( "temp", h5['data/0'].keys() )
 
 if __name__ == '__main__':
     unittest.main()
