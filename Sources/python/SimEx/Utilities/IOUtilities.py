@@ -44,7 +44,7 @@ def loadPDB( path = None ):
     @return : The dictionary expected by downstream simex modules.
     @rtype  : dict
 
-    @throws IOError is path not existing, not a pdb file or corrupt.
+    @throws IOError if path not existing, not a pdb file or corrupt.
     """
 
     if path is None:

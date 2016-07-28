@@ -68,6 +68,8 @@ class IOUtilitiesTest(unittest.TestCase):
         # Setup path to pdb file.
         pdb_path = generateTestFilePath("2nip.pdb")
 
+        self.__paths_to_remove.append('obsolete')
+
         # Attempt to load it.
         return_dict = IOUtilities.loadPDB(pdb_path)
 
@@ -92,7 +94,7 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check exception on wrong file type.
         self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("sample.h5") )
 
-    def testQueryPDB(self):
+    def notestQueryPDB(self):
         """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
 
         # Setup path to pdb file.
@@ -118,7 +120,7 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertRaises( IOError, IOUtilities.loadPDB, 'xyz.pdb' )
 
     def testQueryPDBDirectory(self):
-        """ Check that we can query a non-existing pdb from pdb.org, save in a dir, and convert it to a dict. """
+        """ Check that if the pdb does not exist in the local database, it is queried from pdb.org, save in a dir, and convert it to a dict. """
 
         # Setup path to pdb file.
         pdb_path = 'pdb/2nip.pdb'
