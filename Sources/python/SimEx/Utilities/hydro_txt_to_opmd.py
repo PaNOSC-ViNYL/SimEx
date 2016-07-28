@@ -30,21 +30,22 @@ def convertTxtToOPMD(input):
 		@type : string
 		@example: input = "test"
 	"""
+	
+	# Open output file to obtain timesteps + number of zones
+	f = open(str(input)+"/densite_massique.txt")
 
-	# Open density file to get header information (common to all input files).
-	f_rho = open(str(input)+"/densite_massique.txt")
-
-    # Open output file.
+	
+	tmp = f.readline() # Save header line as temp
+	tmp = tmp.split() # Split header line to obtain timesteps and zones
+	number_of_timesteps = int(tmp[0])
+	number_of_zones = int(tmp[1])	
+	f.close()
+	
+	# Create h5 output file
 	h5 = h5py.File(str(input)+".h5", 'w')
 
-	tmp = f_rho.readline() # Save header line as temp.
-	tmp = tmp.split() # Split header line to obtain timesteps and zones.
-	number_of_timesteps = int(tmp[0])
-	number_of_zones = int(tmp[1])
-	f_rho.close()
-
-    # Extract density, pressure, temperature, and velocity.
-	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skiprows=3,unpack=True)
+	# Load data
+	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skiprows=3,unpack=True)	
 	pres_array = np.loadtxt(str(input)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
 	temp_array = np.loadtxt(str(input)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
 	vel_array = np.loadtxt(str(input)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
@@ -56,10 +57,10 @@ def convertTxtToOPMD(input):
 	timestep = time_array[1] - time_array[0] # time step in ns
 
 	#
-	# Need to convert rho, pressure, temp, and vel to SI ready for OMPD
+	# Need to convert rho, temp, and vel to SI ready for OMPD
 	#
-
-    # Create h5 group.
+	
+	# Create group for data to be stored in file
 	datagroup = h5.create_group('data')
 
     # Loop over all timestamps.
@@ -69,8 +70,11 @@ def convertTxtToOPMD(input):
 		datagroup.create_dataset(str(row)+'/pres', data=pres_array[1:,row])
 		datagroup.create_dataset(str(row)+'/temp', data=temp_array[1:,row])
 		datagroup.create_dataset(str(row)+'/vel', data=vel_array[1:,row])
-
-        # Save time attribute
+		datagroup["unitDimension"] = \
+			np.array([-2.0, 0.0, 0.0, 0.0, 1.0, 0.0], dtype=np.float64)
+		
+		
+		# Save time attribute
 		datagroup[str(row)].attrs["time"] = rho_array[0,row]
 
 	h5.close()
