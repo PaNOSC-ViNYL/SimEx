@@ -90,6 +90,12 @@ def convertTxtToOPMD(esther_dirname=None):
             meshes.create_dataset('temp', data=temp_array[1:,it])
             meshes.create_dataset('vel',  data=vel_array[1:,it])
 
+            # Assign documentation.
+            meshes['rho'].attrs["info"] = "Mass density (mass per unit volume) stored on a 1D Lagrangian grid (zones)."
+            meshes['pres'].attrs["info"] = "Hydrostatic pressure stored on a 1D Lagrangian grid (zones)."
+            meshes['temp'].attrs["info"] = "Temperature stored on a 1D Lagrangian grid (zones)."
+            meshes['vel'].attrs["info"] = "Average velocity stored on a 1D Lagrangian grid (zones)."
+
             # Assign SI units
             #                L      M     t     I     T     N     Lum
             meshes['rho'].attrs["unitDimension"] = \
