@@ -1,8 +1,11 @@
 *.pyc
 *.pyo
-.*.*sw
+**.swp
 bin
 include
 lib
 ._quaternion*.dat
+build/
+doc/build/
+doc/doxy_build/
 
