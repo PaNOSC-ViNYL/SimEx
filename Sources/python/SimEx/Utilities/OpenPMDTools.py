@@ -66,7 +66,7 @@ def setup_base_path(f, iteration, time, time_step):
     bp.attrs["dt"] = time_step   # Value expressed in seconds
     bp.attrs["timeUnitSI"] = numpy.float64(1.0) # Conversion factor.
 
-def setup_root_attr(f, extension):
+def setup_root_attr(f, extension=None):
     """
     Write the root metadata for this file
 
@@ -75,6 +75,9 @@ def setup_root_attr(f, extension):
     f : an h5py.File object
         The file in which to write the data
     """
+
+    if extension is None:
+        extension = "ED-PIC"
 
     # Required attributes
     f.attrs["openPMD"] = numpy.string_("1.0.0")
