@@ -85,26 +85,21 @@ def convertTxtToOPMD(esther_dirname=None):
 
 
             # Create and save datasets
-            meshes.create_dataset('rho', data=rho_array[1:,it])
+            meshes.create_dataset('rho',  data=rho_array[1:,it])
             meshes.create_dataset('pres', data=pres_array[1:,it])
             meshes.create_dataset('temp', data=temp_array[1:,it])
-            meshes.create_dataset('vel', data=vel_array[1:,it])
+            meshes.create_dataset('vel',  data=vel_array[1:,it])
 
             # Assign SI units
-            #              L     M     t     I     T     N     Lum
+            #                L      M     t     I     T     N     Lum
             meshes['rho'].attrs["unitDimension"] = \
-                numpy.array([-3.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64)
+                numpy.array([-3.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # kg m^-3
             meshes['pres'].attrs["unitDimension"] = \
-                numpy.array([ 1.0, -1.0, -2.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) #  N m^-2 = kg m s^-2 m^-2 = kg m^-1 s^-2
+                numpy.array([ 1.0, -1.0, -2.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # N m^-2 = kg m s^-2 m^-2 = kg m^-1 s^-2
             meshes['temp'].attrs["unitDimension"] = \
                 numpy.array([ 0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0], dtype=numpy.float64) # K
             meshes['vel'].attrs["unitDimension"] = \
                 numpy.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m s^-1
-
-            # All data are already stored in SI units
-            meshes['pres'].attrs["unitSI"] = 1.0
-            meshes['temp'].attrs["unitSI"] = 1.0
-            meshes['vel'].attrs["unitSI"] = 1.0
 
             # Write common attributes.
             axis_label = ["Zones"]
