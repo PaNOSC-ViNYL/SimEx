@@ -31,6 +31,8 @@ def convertTxtToOPMD(input):
 		@example: input = "test"
 	"""
 	
+	# Check all input files exist in the input directory
+	
 	# Open output file to obtain timesteps + number of zones
 	f = open(str(input)+"/densite_massique.txt")
 
@@ -42,39 +44,56 @@ def convertTxtToOPMD(input):
 	f.close()
 	
 	# Create h5 output file
-	h5 = h5py.File(str(input)+".h5", 'w')
+	opmd_h5 = h5py.File(str(input)+".opmd.h5", 'w')
 
 	# Load data
-	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skiprows=3,unpack=True)	
-	pres_array = np.loadtxt(str(input)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
-	temp_array = np.loadtxt(str(input)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
-	vel_array = np.loadtxt(str(input)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
+	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skipits=3,unpack=True)	
+	pres_array = np.loadtxt(str(input)+"/pression_hydrostatique.txt",skipits=3,unpack=True)
+	temp_array = np.loadtxt(str(input)+"/temperature_du_milieu.txt",skipits=3,unpack=True)
+	vel_array = np.loadtxt(str(input)+"/vitesse_moyenne.txt",skipits=3,unpack=True)
 
     # Slice out the timestamps.
 	time_array = rho_array[0]
 	# Unit Conversions
 	time_array = time_array * 1e9 	# Convert time into nanoseconds
-	timestep = time_array[1] - time_array[0] # time step in ns
+	time_step = time_array[1] - time_array[0] # time step in ns
 
-	#
-	# Need to convert rho, temp, and vel to SI ready for OMPD
-	#
-	
-	# Create group for data to be stored in file
-	datagroup = h5.create_group('data')
 
     # Loop over all timestamps.
-	for row in range(number_of_timesteps):
+	for it in range(number_of_timesteps):
+		# Write opmd
+		# Setup the root attributes for iteration 0
+		opmd.setup_root_attr( opmd_h5 )
+		
+		full_meshes_path = opmd.get_basePath(opmd_h5, it) + opmd_h5.attrs["meshesPath"]
+		
+		# Setup basepath
+		opmd.setup_base_path( opmd_h5, iteration=it, time=rho_array[0,it], time_step=time_step)
+		opmd_h5.create_group(full_meshes_path)
+		meshes = opmd_h5[full_meshes_path]
+		
+		
 		# Create and save datasets
-		datagroup.create_dataset(str(row)+'/rho', data=rho_array[1:,row])
-		datagroup.create_dataset(str(row)+'/pres', data=pres_array[1:,row])
-		datagroup.create_dataset(str(row)+'/temp', data=temp_array[1:,row])
-		datagroup.create_dataset(str(row)+'/vel', data=vel_array[1:,row])
-		datagroup["unitDimension"] = \
-			np.array([-2.0, 0.0, 0.0, 0.0, 1.0, 0.0], dtype=np.float64)
+		meshes.create_dataset('rho', data=rho_array[1:,it])
+		meshes.create_dataset('pres', data=pres_array[1:,it])
+		meshes.create_dataset('temp', data=temp_array[1:,it])
+		meshes.create_dataset('vel', data=vel_array[1:,it])
 		
-		
-		# Save time attribute
-		datagroup[str(row)].attrs["time"] = rho_array[0,row]
+		# Assign SI units
+		meshes['rho'].attrs["unitDimension"] = \
+			np.array([-3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
+			#           L    M    t    I    T    N   Lum
+			# m, kg, s, K, N, J  
+		meshes['pres'].attrs["unitDimension"] = \
+			np.array([1.0, -1.0, -2.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64) # kg m / m ^2 s^2 (N m^-2)
+		meshes['temp'].attrs["unitDimension"] = \
+			np.array([0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, dtype=np.float64) # K
+		meshes['vel'].attrs["unitDimension"] = \
+			np.array([1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64) # m/s
+			
+		# All data are already stored in SI units
+		datagroup[str(it)+'/rho'].attrs["unitSI"] = 1.0 
+		datagroup[str(it)+'/pres'].attrs["unitSI"] = 1.0 
+		datagroup[str(it)+'/vel'].attrs["unitSI"] = 1.0	
 
-	h5.close()
+	opmd_h5.close()
