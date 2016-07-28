@@ -145,7 +145,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.__files_to_remove.append(opmd_h5_file)
 
         # Check new file was generated.
-        self.assertIn( 'prop_out_0000001.opmd.h5', os.listdir( os.path.dirname(opmd_h5_file) ) )
+        self.assertTrue( os.path.isfile( opmd_h5_file ) )
 
         # Validate the new file.
         g = opmd.open_file(opmd_h5_file)
@@ -162,8 +162,8 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.assertEqual( result_array[0], 0 )
         self.assertEqual( result_array[1], 0 )
 
-    def testHydroTxtToOpmdConverter(self):
-        """ Check that the tool for converting txt output from Esther to opmd.hdf5 works. """
+    def testHydroTxtToH5Converter(self):
+        """ Check that the tool for converting txt output from Esther to hdf5 works. """
 
         hydro_data_path = generateTestFilePath("hydroTests")
         convertTxtToOPMD(hydro_data_path)
@@ -180,6 +180,40 @@ class OpenPMDToolsTest(unittest.TestCase):
             self.assertIn( "pres", h5['data/0'].keys() )
             self.assertIn( "vel", h5['data/0'].keys() )
             self.assertIn( "temp", h5['data/0'].keys() )
+
+    def testHydroTxtToOPMDConverter(self):
+        """ Test the conversion of esther output to openPMD conform hdf5 file."""
+
+        # Get sample file.
+        esther_output = generateTestFilePath('hydroTests')
+
+        # Convert.
+        convertTxtToOPMD(esther_output)
+
+        # New file name.
+        opmd_h5_file = esther_output + 'opmd.h5'
+
+        # Make sure we clean up after test.
+        self.__files_to_remove.append(opmd_h5_file)
+
+        # Check new file was generated.
+        self.assertTrue( os.path.isfile( opmd_h5_file ) )
+
+        # Validate the new file.
+        g = opmd.open_file(opmd_h5_file)
+
+        # Setup result array.
+        result_array = numpy.array([0, 0])
+        result_array += opmd.check_root_attr(g, False, False)
+
+        # Go through all the iterations, checking both the particles.
+        # and the meshes
+        result_array += opmd.check_iterations(g,False,False)
+
+        # Assert that no errors nor warnings were issued.
+        self.assertEqual( result_array[0], 0 )
+        self.assertEqual( result_array[1], 0 )
+
 
 if __name__ == '__main__':
     unittest.main()
