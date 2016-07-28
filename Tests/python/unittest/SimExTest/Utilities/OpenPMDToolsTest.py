@@ -35,6 +35,8 @@ from SimEx.Utilities import OpenPMDTools as opmd
 from SimEx.Utilities.wpg_to_opmd import convertToOPMD
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 
+import checkOpenPMD_h5 as opmd_validator
+
 from TestUtilities.TestUtilities import generateTestFilePath
 
 class OpenPMDToolsTest(unittest.TestCase):
@@ -148,7 +150,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.assertTrue( os.path.isfile( opmd_h5_file ) )
 
         # Validate the new file.
-        g = opmd.open_file(opmd_h5_file)
+        g = opmd_validator.open_file(opmd_h5_file)
 
         # Setup result array.
         result_array = numpy.array([0, 0])
@@ -162,24 +164,6 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.assertEqual( result_array[0], 0 )
         self.assertEqual( result_array[1], 0 )
 
-    def testHydroTxtToH5Converter(self):
-        """ Check that the tool for converting txt output from Esther to hdf5 works. """
-
-        hydro_data_path = generateTestFilePath("hydroTests")
-        convertTxtToOPMD(hydro_data_path)
-
-        expected_file = generateTestFilePath("hydroTests.h5")
-        self.assertTrue( os.path.isfile( expected_file ) )
-        self.__files_to_remove.append( expected_file )
-
-
-        # Open the file.
-        with h5py.File( expected_file, 'r' ) as h5:
-            self.assertIn( "data", h5.keys() )
-            self.assertIn( "rho", h5['data/0'].keys() )
-            self.assertIn( "pres", h5['data/0'].keys() )
-            self.assertIn( "vel", h5['data/0'].keys() )
-            self.assertIn( "temp", h5['data/0'].keys() )
 
     def testHydroTxtToOPMDConverter(self):
         """ Test the conversion of esther output to openPMD conform hdf5 file."""
@@ -202,15 +186,16 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.assertTrue( os.path.isfile( opmd_h5_file ) )
 
         # Validate the new file.
-        g = opmd.open_file(opmd_h5_file)
+        g = opmd_validator.open_file(opmd_h5_file)
 
         # Setup result array.
         result_array = numpy.array([0, 0])
-        result_array += opmd.check_root_attr(g, False, False)
+        result_array += opmd_validator.check_root_attr(g, False)
 
         # Go through all the iterations, checking both the particles.
-        # and the meshes
-        result_array += opmd.check_iterations(g,False,False)
+        # and the meshes.
+        extensions = opmd_validator.get_extensions(g,False)
+        result_array += opmd_validator.check_iterations(g,False,extensions)
 
         # Assert that no errors nor warnings were issued.
         self.assertEqual( result_array[0], 0 )
