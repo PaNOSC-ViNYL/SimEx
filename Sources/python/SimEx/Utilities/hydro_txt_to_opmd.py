@@ -20,22 +20,22 @@
 ##########################################################################
 
 import h5py
-import numpy as np
+import numpy
 import os
 import sys
 from SimEx.Utilities import OpenPMDTools as opmd
 
-def convertTxtToOPMD(input):
+def convertTxtToOPMD(inumpyut):
 	""" Converts the .txt files that are output by Esther simulation program.
-		@param input: The folder containing the simulation output files to be converted.
+		@param inumpyut: The folder containing the simulation output files to be converted.
 		@type : string
-		@example: input = "test"
+		@example: inumpyut = "test"
 	"""
 
-	# Check all input files exist in the input directory
+	# Check all inumpyut files exist in the inumpyut directory
 
 	# Open output file to obtain timesteps + number of zones
-	f = open(str(input)+"/densite_massique.txt")
+	f = open(str(inumpyut)+"/densite_massique.txt")
 
 
 	tmp = f.readline() # Save header line as temp
@@ -45,13 +45,13 @@ def convertTxtToOPMD(input):
 	f.close()
 
 	# Create h5 output file
-	opmd_h5 = h5py.File(str(input)+".opmd.h5", 'w')
+	opmd_h5 = h5py.File(str(inumpyut)+".opmd.h5", 'w')
 
 	# Load data
-	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skiprows=3,unpack=True)
-	pres_array = np.loadtxt(str(input)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
-	temp_array = np.loadtxt(str(input)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
-	vel_array = np.loadtxt(str(input)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
+	rho_array = numpy.loadtxt(str(inumpyut)+"/densite_massique.txt",skiprows=3,unpack=True)
+	pres_array = numpy.loadtxt(str(inumpyut)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
+	temp_array = numpy.loadtxt(str(inumpyut)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
+	vel_array = numpy.loadtxt(str(inumpyut)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
 
     # Slice out the timestamps.
 	time_array = rho_array[0]
@@ -83,13 +83,13 @@ def convertTxtToOPMD(input):
 		# Assign SI units
         #              L     M     t     I     T     N     Lum
 		meshes['rho'].attrs["unitDimension"] = \
-			np.array([-3.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64)
+			numpy.array([-3.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64)
 		meshes['pres'].attrs["unitDimension"] = \
-			np.array([ 1.0, -1.0, -2.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64) #  N m^-2 = kg m s^-2 m^-2 = kg m^-1 s^-2
+			numpy.array([ 1.0, -1.0, -2.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) #  N m^-2 = kg m s^-2 m^-2 = kg m^-1 s^-2
 		meshes['temp'].attrs["unitDimension"] = \
-			np.array([ 0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0], dtype=np.float64) # K
+			numpy.array([ 0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0], dtype=numpy.float64) # K
 		meshes['vel'].attrs["unitDimension"] = \
-			np.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64) # m s^-1
+			numpy.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m s^-1
 
 		# All data are already stored in SI units
 		meshes['rho'].attrs["unitSI"] = 1.0
@@ -103,28 +103,28 @@ def convertTxtToOPMD(input):
 		meshes['temp'].attrs["axisLabels"] = "Zones"
 		meshes['vel'].attrs["axisLabels"] = "Zones"
 		meshes['rho'].attrs["geometry"] = numpy.string_("NA")
-		meshes['rho'].attrs["gridSpacing"] = numpy.string ("NA")
-		meshes['rho'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+		meshes['rho'].attrs["gridSpacing"] = numpy.string_("NA")
+		meshes['rho'].attrs["gridGlobalOffset"] = numpy.string_("NA")
 		meshes['rho'].attrs["gridUnitSI"] = numpy.float64(1.0)
 		meshes['rho'].attrs["timeOffset"] = 0.
 		meshes['pres'].attrs["geometry"] = numpy.string_("NA")
-		meshes['pres'].attrs["gridSpacing"] = numpy.string ("NA")
-		meshes['pres'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+		meshes['pres'].attrs["gridSpacing"] = numpy.string_("NA")
+		meshes['pres'].attrs["gridGlobalOffset"] = numpy.string_("NA")
 		meshes['pres'].attrs["gridUnitSI"] = numpy.float64(1.0)
 		meshes['pres'].attrs["timeOffset"] = 0.
 		meshes['temp'].attrs["geometry"] = numpy.string_("NA")
-		meshes['temp'].attrs["gridSpacing"] = numpy.string ("NA")
-		meshes['temp'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+		meshes['temp'].attrs["gridSpacing"] = numpy.string_("NA")
+		meshes['temp'].attrs["gridGlobalOffset"] = numpy.string_("NA")
 		meshes['temp'].attrs["gridUnitSI"] = numpy.float64(1.0)
 		meshes['temp'].attrs["timeOffset"] = 0.
 		meshes['vel'].attrs["geometry"] = numpy.string_("NA")
-		meshes['vel'].attrs["gridSpacing"] = numpy.string ("NA")
-		meshes['vel'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+		meshes['vel'].attrs["gridSpacing"] = numpy.string_("NA")
+		meshes['vel'].attrs["gridGlobalOffset"] = numpy.string_("NA")
 		meshes['vel'].attrs["gridUnitSI"] = numpy.float64(1.0)
 		meshes['vel'].attrs["timeOffset"] = 0.
-		meshes['rho']..attrs["dataOrder"] = numpy.string_("C")
-		meshes['pres']..attrs["dataOrder"] = numpy.string_("C")
-		meshes['temp']..attrs["dataOrder"] = numpy.string_("C")
-		meshes['vel']..attrs["dataOrder"] = numpy.string_("C")
+		meshes['rho'].attrs["dataOrder"] = numpy.string_("C")
+		meshes['pres'].attrs["dataOrder"] = numpy.string_("C")
+		meshes['temp'].attrs["dataOrder"] = numpy.string_("C")
+		meshes['vel'].attrs["dataOrder"] = numpy.string_("C")
 		
 	opmd_h5.close()
