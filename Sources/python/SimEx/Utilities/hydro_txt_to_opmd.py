@@ -92,8 +92,39 @@ def convertTxtToOPMD(input):
 			np.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64) # m s^-1
 
 		# All data are already stored in SI units
-		meshes['rho' ].attrs["unitSI"] = 1.0
+		meshes['rho'].attrs["unitSI"] = 1.0
 		meshes['pres'].attrs["unitSI"] = 1.0
-		meshes['vel' ].attrs["unitSI"] = 1.0
+		meshes['temp'].attrs["unitSI"] = 1.0
+		meshes['vel'].attrs["unitSI"] = 1.0
+		
+		# Write the common metadata to pass test
+		meshes['rho'].attrs["axisLabels"] = "Zones"
+		meshes['pres'].attrs["axisLabels"] = "Zones"
+		meshes['temp'].attrs["axisLabels"] = "Zones"
+		meshes['vel'].attrs["axisLabels"] = "Zones"
+		meshes['rho'].attrs["geometry"] = numpy.string_("NA")
+        meshes['rho'].attrs["gridSpacing"] = numpy.string ("NA")
+        meshes['rho'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+        meshes['rho'].attrs["gridUnitSI"] = numpy.float64(1.0)
+        meshes['rho'].attrs["timeOffset"] = 0.
+		meshes['pres'].attrs["geometry"] = numpy.string_("NA")
+        meshes['pres'].attrs["gridSpacing"] = numpy.string ("NA")
+        meshes['pres'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+        meshes['pres'].attrs["gridUnitSI"] = numpy.float64(1.0)
+        meshes['pres'].attrs["timeOffset"] = 0.
+        meshes['temp'].attrs["geometry"] = numpy.string_("NA")
+        meshes['temp'].attrs["gridSpacing"] = numpy.string ("NA")
+        meshes['temp'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+        meshes['temp'].attrs["gridUnitSI"] = numpy.float64(1.0)
+        meshes['temp'].attrs["timeOffset"] = 0.
+        meshes['vel'].attrs["geometry"] = numpy.string_("NA")
+        meshes['vel'].attrs["gridSpacing"] = numpy.string ("NA")
+        meshes['vel'].attrs["gridGlobalOffset"] = numpy.string ("NA")
+        meshes['vel'].attrs["gridUnitSI"] = numpy.float64(1.0)
+        meshes['vel'].attrs["timeOffset"] = 0.
+        meshes['rho']..attrs["dataOrder"] = numpy.string_("C")
+        meshes['pres']..attrs["dataOrder"] = numpy.string_("C")
+        meshes['temp']..attrs["dataOrder"] = numpy.string_("C")
+        meshes['vel']..attrs["dataOrder"] = numpy.string_("C")
 
 	opmd_h5.close()
