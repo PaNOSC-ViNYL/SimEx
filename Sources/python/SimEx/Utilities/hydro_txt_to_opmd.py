@@ -23,6 +23,7 @@ import h5py
 import numpy as np
 import os
 import sys
+from SimEx.Utilities import OpenPMDTools as opmd
 
 def convertTxtToOPMD(input):
 	""" Converts the .txt files that are output by Esther simulation program.
@@ -30,27 +31,27 @@ def convertTxtToOPMD(input):
 		@type : string
 		@example: input = "test"
 	"""
-	
+
 	# Check all input files exist in the input directory
-	
+
 	# Open output file to obtain timesteps + number of zones
 	f = open(str(input)+"/densite_massique.txt")
 
-	
+
 	tmp = f.readline() # Save header line as temp
 	tmp = tmp.split() # Split header line to obtain timesteps and zones
 	number_of_timesteps = int(tmp[0])
-	number_of_zones = int(tmp[1])	
+	number_of_zones = int(tmp[1])
 	f.close()
-	
+
 	# Create h5 output file
 	opmd_h5 = h5py.File(str(input)+".opmd.h5", 'w')
 
 	# Load data
-	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skipits=3,unpack=True)	
-	pres_array = np.loadtxt(str(input)+"/pression_hydrostatique.txt",skipits=3,unpack=True)
-	temp_array = np.loadtxt(str(input)+"/temperature_du_milieu.txt",skipits=3,unpack=True)
-	vel_array = np.loadtxt(str(input)+"/vitesse_moyenne.txt",skipits=3,unpack=True)
+	rho_array = np.loadtxt(str(input)+"/densite_massique.txt",skiprows=3,unpack=True)
+	pres_array = np.loadtxt(str(input)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
+	temp_array = np.loadtxt(str(input)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
+	vel_array = np.loadtxt(str(input)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
 
     # Slice out the timestamps.
 	time_array = rho_array[0]
@@ -64,36 +65,35 @@ def convertTxtToOPMD(input):
 		# Write opmd
 		# Setup the root attributes for iteration 0
 		opmd.setup_root_attr( opmd_h5 )
-		
+
 		full_meshes_path = opmd.get_basePath(opmd_h5, it) + opmd_h5.attrs["meshesPath"]
-		
+
 		# Setup basepath
 		opmd.setup_base_path( opmd_h5, iteration=it, time=rho_array[0,it], time_step=time_step)
 		opmd_h5.create_group(full_meshes_path)
 		meshes = opmd_h5[full_meshes_path]
-		
-		
+
+
 		# Create and save datasets
 		meshes.create_dataset('rho', data=rho_array[1:,it])
 		meshes.create_dataset('pres', data=pres_array[1:,it])
 		meshes.create_dataset('temp', data=temp_array[1:,it])
 		meshes.create_dataset('vel', data=vel_array[1:,it])
-		
+
 		# Assign SI units
+        #              L     M     t     I     T     N     Lum
 		meshes['rho'].attrs["unitDimension"] = \
-			np.array([-3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
-			#           L    M    t    I    T    N   Lum
-			# m, kg, s, K, N, J  
+			np.array([-3.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64)
 		meshes['pres'].attrs["unitDimension"] = \
-			np.array([1.0, -1.0, -2.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64) # kg m / m ^2 s^2 (N m^-2)
+			np.array([ 1.0, -1.0, -2.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64) #  N m^-2 = kg m s^-2 m^-2 = kg m^-1 s^-2
 		meshes['temp'].attrs["unitDimension"] = \
-			np.array([0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, dtype=np.float64) # K
+			np.array([ 0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0], dtype=np.float64) # K
 		meshes['vel'].attrs["unitDimension"] = \
-			np.array([1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64) # m/s
-			
+			np.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=np.float64) # m s^-1
+
 		# All data are already stored in SI units
-		datagroup[str(it)+'/rho'].attrs["unitSI"] = 1.0 
-		datagroup[str(it)+'/pres'].attrs["unitSI"] = 1.0 
-		datagroup[str(it)+'/vel'].attrs["unitSI"] = 1.0	
+		meshes['rho' ].attrs["unitSI"] = 1.0
+		meshes['pres'].attrs["unitSI"] = 1.0
+		meshes['vel' ].attrs["unitSI"] = 1.0
 
 	opmd_h5.close()
