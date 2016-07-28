@@ -35,7 +35,7 @@ from SimEx.Utilities import OpenPMDTools as opmd
 from SimEx.Utilities.wpg_to_opmd import convertToOPMD
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 
-import checkOpenPMD_h5 as opmd_validator
+from SimEx.Utilities import checkOpenPMD_h5 as opmd_validator
 
 from TestUtilities.TestUtilities import generateTestFilePath
 

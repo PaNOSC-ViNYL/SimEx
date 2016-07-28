@@ -24,7 +24,7 @@ import re
 import string
 import sys, getopt, os.path
 
-from checkOpenPMD_h5 import EXTENSIONS as ext_list
+from SimEx.Utilities.checkOpenPMD_h5 import EXTENSIONS as ext_list
 
 
 def get_basePath(f, iteration):
