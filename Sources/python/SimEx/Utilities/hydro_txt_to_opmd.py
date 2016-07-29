@@ -39,10 +39,10 @@ def convertTxtToOPMD(esther_dirname=None):
     dir_listing = os.listdir( esther_dirname)
 
     # We need these files.
-    expected_files = ['densite_massique.txt', 'temperature_du_milieu.txt', 'pression_hydrostatique.txt', 'vitesse_moyenne.txt']
+    expected_files = ['densite_massique.txt', 'temperature_du_milieu.txt', 'pression_hydrostatique.txt', 'vitesse_moyenne.txt', 'position_externe_relative.txt']
 
     if not all([f in dir_listing for f in expected_files]):
-        raise IOError( "%s does not contain all relevant information (density, temperature, pressure, and velocity. Will abort now." )
+        raise IOError( "%s does not contain all relevant information (density, temperature, pressure, velocity and position. Will abort now." )
 
     # Ok let's start reading header information.
     with open(esther_dirname+"/densite_massique.txt") as f:
@@ -60,6 +60,7 @@ def convertTxtToOPMD(esther_dirname=None):
 	pres_array = numpy.loadtxt(str(esther_dirname)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
 	temp_array = numpy.loadtxt(str(esther_dirname)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
 	vel_array = numpy.loadtxt(str(esther_dirname)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
+	pos_array = numpy.loadtxt(str(esther_dirname)+"/position_externe_relative.txt",skiprows=3,unpack=True)
 
     # Slice out the timestamps.
 	time_array = rho_array[0]
@@ -68,7 +69,6 @@ def convertTxtToOPMD(esther_dirname=None):
 
     # Create opmd.h5 output file
     with h5py.File(str(esther_dirname)+".opmd.h5", 'w') as opmd_h5:
-
 
         # Setup the root attributes.
         opmd.setup_root_attr( opmd_h5, extension="HYDRO1D" )
@@ -89,12 +89,14 @@ def convertTxtToOPMD(esther_dirname=None):
             meshes.create_dataset('pres', data=pres_array[1:,it])
             meshes.create_dataset('temp', data=temp_array[1:,it])
             meshes.create_dataset('vel',  data=vel_array[1:,it])
+            meshes.create_dataset('pos',  data=pos_array[1:,it])
 
             # Assign documentation.
             meshes['rho'].attrs["info"] = "Mass density (mass per unit volume) stored on a 1D Lagrangian grid (zones)."
             meshes['pres'].attrs["info"] = "Hydrostatic pressure stored on a 1D Lagrangian grid (zones)."
             meshes['temp'].attrs["info"] = "Temperature stored on a 1D Lagrangian grid (zones)."
             meshes['vel'].attrs["info"] = "Average velocity stored on a 1D Lagrangian grid (zones)."
+            meshes['pos'].attrs["info"] = "External position stored on a 1D Lagrangian grid (zones)."
 
             # Assign SI units
             #                L      M     t     I     T     N     Lum
@@ -106,6 +108,8 @@ def convertTxtToOPMD(esther_dirname=None):
                 numpy.array([ 0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0], dtype=numpy.float64) # K
             meshes['vel'].attrs["unitDimension"] = \
                 numpy.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m s^-1
+            meshes['pos'].attrs["unitDimension"] = \
+                numpy.array([ 1.0,  0.0, 0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m
 
             # Write common attributes.
             axis_label = ["Zones"]
