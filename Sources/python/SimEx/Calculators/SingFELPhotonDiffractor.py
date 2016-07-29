@@ -53,7 +53,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if isinstance( parameters, dict ):
             parameters = SingFELPhotonDiffractorParameters( parameters_dictionary = parameters )
 
-        # Set default parameters is no parameters given.
+        # Set default parameters if no parameters given.
         if parameters is None:
             self.__parameters = checkAndSetInstance( SingFELPhotonDiffractorParameters, parameters, SingFELPhotonDiffractorParameters() )
         else:
