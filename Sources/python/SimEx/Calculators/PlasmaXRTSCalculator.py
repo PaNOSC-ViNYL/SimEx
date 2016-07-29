@@ -172,7 +172,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     @property
     def data(self):
         """ Query for the field data. """
-        return self.__data
+        return self.__run_data
 
     def _readH5(self):
         """

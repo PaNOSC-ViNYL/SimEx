@@ -110,7 +110,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         opmd_h5_file = esther_output + '.opmd.h5'
 
         # Make sure we clean up after test.
-        #self.__files_to_remove.append(opmd_h5_file)
+        self.__files_to_remove.append(opmd_h5_file)
 
 
         # Check new file was generated.
