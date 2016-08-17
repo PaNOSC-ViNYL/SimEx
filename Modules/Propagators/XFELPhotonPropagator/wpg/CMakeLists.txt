@@ -1,9 +1,16 @@
 INCLUDE(ExternalProject)
 
+option (SRW_OPTIMIZED "Use optimized SRW library" FALSE)
+if (SRW_OPTIMIZED)
+	set (WPG_PATCHCMD patch build/Makefile ${CMAKE_CURRENT_SOURCE_DIR}/Makefile.patch)
+else()
+	set (WPG_PATCHCMD "")
+endif()
+
 ExternalProject_Add(
 wpg
 URL http://github.com/samoylv/WPG/archive/develop.zip
-#PATCH_COMMAND patch wpg/glossary.py ${CMAKE_CURRENT_SOURCE_DIR}/glossary.py.patch
+PATCH_COMMAND ${WPG_PATCHCMD}
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
 BUILD_IN_SOURCE 1
