@@ -234,7 +234,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             msg = "Lock file in " + tmp_out_dir + ". "
             msg += "Photons.dat likely being written to tmpDir by another process. "
             msg += "Sleeping this process for %d s." % sleep_duration
-            print_to_log(msg)
+            print_to_log(msg, log_file=outputLog)
             time.sleep(sleep_duration)
 
         if not (os.path.isfile(sparsePhotonFile) and os.path.isfile(detectorFile)):
@@ -297,7 +297,6 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             f.close()
             msg = "Output will be appended to the results of %d iterations before this."%offset_iter
             print_to_log(msg=msg, log_file=outputLog)
-
 
         ###############################################################
         # Iterate EMC
