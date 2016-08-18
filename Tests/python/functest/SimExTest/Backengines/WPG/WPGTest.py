@@ -180,25 +180,36 @@ class WPGTest(unittest.TestCase):
         # Get propagated wavefront data.
         wf_intensity = wf.get_intensity()
 
+        # Project on t axis.
+        wf_onaxis = wf_intensity.sum(axis=(0,1))
+
         # Get hash of the data.
-        wf_intensity.flags.writeable = False
-        wf_hash = hash( wf_intensity.data )
+        wf_hash = hash( wf_intensity.tostring() )
 
-        # Load reference intensity.
-        ref_intensity = numpy.load("reference_wf_gauss_10m.npy")
+        # Load reference hash.
+        with open("reference_wf_gauss_10m.hash.txt", 'r') as hashfile:
+            ref_hash = hashfile.readline()
+            hashfile.close()
+        ref_onaxis = numpy.loadtxt("reference_wf_gauss_onaxis_10m.txt")
 
-        # Get hash of the reference data.
-        ref_intensity.flags.writeable = False
-        ref_hash = hash( ref_intensity.data )
-
-        # Save intensity for future reference.
-        #numpy.save("reference_wf_gauss_10m.npy", wf_intensity)
+                # Strong test.
+        self.assertEqual( str(wf_hash), ref_hash)
 
         # Weak test.
-        self.assertAlmostEqual( wf_intensity.sum(), ref_intensity.sum() )
+        for x,y in zip(wf_onaxis, ref_onaxis):
+            self.assertAlmostEqual( x, y, 8 )
 
-        # Strong test.
-        self.assertEqual( wf_hash, ref_hash)
+        # Save wavefront data for reference.
+        ##########################################################################################
+        ### ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
+        ##########################################################################################
+        #with open("reference_wf_gauss_10m.hash.txt", 'w') as hashfile:
+            #hashfile.write(str(wf_hash))
+            #hashfile.close()
+        #numpy.savetxt( "reference_wf_gauss_onaxis_10m.txt", wf_onaxis )
+        #########################################################################################
+
+
 if __name__ == '__main__':
     unittest.main()
 
