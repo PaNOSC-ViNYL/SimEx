@@ -214,7 +214,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             # Copy value.
             self.__Sii_value = copy.deepcopy(self.__model_Sii)
             # Reset model parameter but short-cutting the setter.
-            self.__model_Sii = 'USR'
+            self.__model_Sii = 'DH'
 
     def _setSbfNormFlags(self):
         """ Set the internal Sbf norm flags used in the input deck generator. """
