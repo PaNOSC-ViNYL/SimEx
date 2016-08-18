@@ -1,17 +1,10 @@
 """ Originally copied from simS2E/packages/pmi_demo/pmi_demo.py """
 
-import sys
-import os
-
 import h5py
-
 import numpy
-
-
-import matplotlib
-matplotlib.use('Agg')
-
+import os
 import random
+import sys
 
 
 class PMIDemo(object):
@@ -113,7 +106,7 @@ class PMIDemo(object):
         xsnp['xyz'] = a_fp.get( dbase_root + 'xyz' ) .value
         xsnp['r']   = a_fp.get( dbase_root + 'r' )   .value
         N = xsnp['Z'].size
-        xsnp['q'] = numpy.array( [ xsnp['ff'][ matplotlib.mlab.find( xsnp['T'] == x ) , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
+        xsnp['q'] = numpy.array( [ xsnp['ff'][ numpy.nonzero( xsnp['T'] == x )[0] , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
         xsnp['snp'] = a_snp ;
 
         return xsnp
@@ -140,7 +133,7 @@ class PMIDemo(object):
         xfp.close()
         sample['selZ'] = dict()
         for sel_Z in numpy.unique( sample['Z'] ) :
-            sample['selZ'][sel_Z] = matplotlib.mlab.find( sel_Z == sample['Z'] )
+            sample['selZ'][sel_Z] = numpy.nonzero( sample['Z'] == sel_Z  )
         sample['N'] = len( sample['Z'] )
 
         self.g_s2e['sample'] = sample
