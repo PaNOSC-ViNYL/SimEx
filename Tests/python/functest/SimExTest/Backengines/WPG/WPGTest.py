@@ -192,12 +192,12 @@ class WPGTest(unittest.TestCase):
             hashfile.close()
         ref_onaxis = numpy.loadtxt("reference_wf_gauss_onaxis_10m.txt")
 
-                # Strong test.
-        self.assertEqual( str(wf_hash), ref_hash)
-
         # Weak test.
         for x,y in zip(wf_onaxis, ref_onaxis):
-            self.assertAlmostEqual( x, y, 8 )
+            self.assertAlmostEqual( x, y, 14 )
+
+        # Strong test.
+        self.assertEqual( str(wf_hash), ref_hash)
 
         # Save wavefront data for reference.
         ##########################################################################################
