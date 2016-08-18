@@ -193,20 +193,20 @@ class WPGTest(unittest.TestCase):
         ref_onaxis = numpy.loadtxt("reference_wf_gauss_onaxis_10m.txt")
 
         # Weak test.
-        #for x,y in zip(wf_onaxis, ref_onaxis):
-            #self.assertAlmostEqual( x, y, 14 )
+        for x,y in zip(wf_onaxis, ref_onaxis):
+            self.assertAlmostEqual( x, y, 14 )
 
-        ## Strong test.
-        #self.assertEqual( str(wf_hash), ref_hash)
+        # Strong test.
+        self.assertEqual( str(wf_hash), ref_hash)
 
         # Save wavefront data for reference.
-        ##########################################################################################
-        ### ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
-        ##########################################################################################
-        with open("reference_wf_gauss_10m.hash.txt", 'w') as hashfile:
-            hashfile.write(str(wf_hash))
-            hashfile.close()
-        numpy.savetxt( "reference_wf_gauss_onaxis_10m.txt", wf_onaxis )
+        #########################################################################################
+        ## ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
+        #########################################################################################
+        #with open("reference_wf_gauss_10m.hash.txt", 'w') as hashfile:
+            #hashfile.write(str(wf_hash))
+            #hashfile.close()
+        #numpy.savetxt( "reference_wf_gauss_onaxis_10m.txt", wf_onaxis )
         #########################################################################################
 
 
