@@ -1,0 +1,204 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+#                                                                        #
+##########################################################################
+
+""" Functional test for WPG.
+
+    @author : CFG
+    @institution : XFEL
+    @creation 20160818
+
+"""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import h5py
+import math
+import numpy
+import os, shutil
+import paths
+import unittest
+
+import wpg
+
+print (wpg.__file__)
+from wpg import Wavefront, Beamline
+from wpg.optical_elements import Drift
+from wpg.optical_elements import Aperture
+from wpg.optical_elements import CRL
+from wpg.optical_elements import WF_dist
+from wpg.optical_elements import calculateOPD
+from wpg.optical_elements import Use_PP
+
+
+#import SRW core functions
+from wpg.srwlib import srwl
+
+##Gaussian beam generator
+from wpg.generators import build_gauss_wavefront
+
+from wpg.wpg_uti_wf import calculate_fwhm
+from wpg.wpg_uti_wf import plot_t_wf, look_at_q_space
+from wpg.wpg_uti_oe import show_transmission
+
+
+class WPGTest(unittest.TestCase):
+    """
+    Test class for the WPG backengine.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__dirs_to_remove = []
+
+    def tearDown(self):
+        """ Tearing down a test. """
+
+        for f in self.__files_to_remove:
+            if os.path.isfile(f): os.remove(f)
+        for d in self.__dirs_to_remove:
+            if os.path.isdir(d): shutil.rmtree(d)
+
+    def testGaussianReference(self, debug=False):
+        """ Check that propagation of a Gaussian pulse (in t,x,y) through vacuum gives the correct result, compare
+        to analytic solution. """
+
+
+        # Central photon energy.
+        ekev = 8.4 # Energy [keV]
+
+        # Pulse parameters.
+        qnC = 0.5               # e-bunch charge, [nC]
+        pulse_duration = 9.0e-15 # [s]
+        pulseEnergy = 1.5e-3    # total pulse energy, J
+
+        # Coherence time
+        coh_time = 0.25e-15 # [s]
+
+        # Distance in free space.
+        z0 = 10. # (m), position where to build the wavefront.
+        z1 = 10. # (m), distance to travel in free space.
+
+        # Beam divergence.
+        theta_fwhm = 2.5e-6 # rad
+
+        wlambda = 12.4*1e-10/ekev # wavelength, m
+        w0 = wlambda/(numpy.pi*theta_fwhm) # beam waist, m
+        zR = (math.pi*w0**2)/wlambda #Rayleigh range, m
+        fwhm_at_zR = theta_fwhm*zR #FWHM at Rayleigh range, m
+        sigmaAmp = w0/(2.0*math.sqrt(math.log(2.0))) #sigma of amplitude, m
+
+        if debug:
+            print (" *** Pulse properties ***")
+            print (" lambda = %4.3e m" % (wlambda) )
+            print (" w0 = %4.3e m" % (w0) )
+            print (" zR = %4.3e m" % (zR) )
+            print (" fwhm at zR = %4.3e m" % (fwhm_at_zR) )
+            print (" sigma = %4.3e m" % (sigmaAmp) )
+
+        # expected beam radius after free space drift.
+        expected_beam_radius = w0*math.sqrt(1.0+(z0/zR)**2)
+
+
+        # Number of points in each x and y dimension.
+        np=400
+
+        # Sampling window = 6 sigma of initial beam.
+        range_xy = 6.*expected_beam_radius
+        dx = range_xy / (np-1)
+        nslices = 20
+
+        if debug:
+            print (" Expected beam waist at z=%4.3f m : %4.3e m." % (z0, expected_beam_radius) )
+            print ("Setting up mesh of %d points per dimension on a %4.3e x %4.3e m^2 grid with grid spacing %4.3e m." % (np, range_xy, range_xy, dx) )
+
+        # Construct srw wavefront.
+        srwl_wf = build_gauss_wavefront(np, np, nslices, ekev, -range_xy/2., range_xy/2.,
+                                        -range_xy/2., range_xy/2., coh_time/math.sqrt(2.),
+                                        sigmaAmp, sigmaAmp, z0,
+                                        pulseEn=pulseEnergy, pulseRange=8.)
+
+        # Convert to wpg.
+        wf = Wavefront(srwl_wf)
+
+        if debug:
+            print('*** z=%4.3e m ***' % (z0))
+            fwhm = calculate_fwhm(wf)
+            print('fwhm_x = %4.3e\nfwhm_y = %4.3e' % (fwhm['fwhm_x'], fwhm['fwhm_y']) )
+            plot_t_wf(wf)
+            look_at_q_space(wf)
+
+        # Construct the beamline.
+        beamline = Beamline()
+
+        # Add free space drift.
+        drift = Drift(z1)
+        beamline.append( drift, Use_PP(semi_analytical_treatment=1))
+
+        # Propagate
+        srwl.SetRepresElecField(wf._srwl_wf, 'f') # <---- switch to frequency domain
+        beamline.propagate(wf)
+        srwl.SetRepresElecField(wf._srwl_wf, 't')
+
+        if debug:
+            print('*** z=%4.3e m ***' % (z0+z1))
+            fwhm = calculate_fwhm(wf)
+            print('fwhm_x = %4.3e\nfwhm_y = %4.3e' % (fwhm['fwhm_x'], fwhm['fwhm_y']) )
+            plot_t_wf(wf)
+            look_at_q_space(wf)
+
+
+        # Get propagated wavefront data.
+        wf_intensity = wf.get_intensity()
+
+        # Get hash of the data.
+        wf_intensity.flags.writeable = False
+        wf_hash = hash( wf_intensity.data )
+
+        # Load reference intensity.
+        ref_intensity = numpy.load("reference_wf_gauss_10m.npy")
+
+        # Get hash of the reference data.
+        ref_intensity.flags.writeable = False
+        ref_hash = hash( ref_intensity.data )
+
+        # Save intensity for future reference.
+        #numpy.save("reference_wf_gauss_10m.npy", wf_intensity)
+
+        # Weak test.
+        self.assertAlmostEqual( wf_intensity.sum(), ref_intensity.sum() )
+
+        # Strong test.
+        self.assertEqual( wf_hash, ref_hash)
+if __name__ == '__main__':
+    unittest.main()
+
