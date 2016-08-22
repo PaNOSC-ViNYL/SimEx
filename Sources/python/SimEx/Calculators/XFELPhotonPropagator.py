@@ -33,6 +33,8 @@ from prop import propagateSE
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 
+from mpi4py import MPI
+
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
@@ -60,13 +62,19 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
     def backengine(self):
         """ This method drives the backengine code, in this case the WPG interface to SRW."""
 
+        # MPI info
+        comm = MPI.COMM_WORLD
+        thisProcess = comm.rank
+        numProcesses = comm.size
+
         # Check if input path is a directory.
         if os.path.isdir(self.input_path):
             input_files = [ os.path.join( self.input_path, input_file ) for \
                             input_file in os.listdir( self.input_path ) ]
             input_files.sort() # Assuming the filenames have some kind of ordering scheme.
         else:
-            propagateSE.propagate(self.input_path, self.output_path)
+            if thisProcess == 0: # other MPI processes (if any) have nothing to do
+                propagateSE.propagate(self.input_path, self.output_path)
             return 0
 
         # If we have more than one input file, we should also have more than one output file, i.e.
@@ -81,11 +89,13 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         # Loop over all input files and generate one run per source file.
         for i,input_file in enumerate(input_files):
             ### TODO: Transmit number of cpus.
-            output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
-            propagateSE.propagate(input_file, output_file)
+            # process file on a corresponding process (round-robin)
+            if i % numProcesses == thisProcess:
+                output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
+                propagateSE.propagate(input_file, output_file)
 
-            # Rewrite in openpmd conformant way.
-            wpg_to_opmd.convertToOPMD( output_file )
+                # Rewrite in openpmd conformant way.
+                wpg_to_opmd.convertToOPMD( output_file )
 
         return 0
 
