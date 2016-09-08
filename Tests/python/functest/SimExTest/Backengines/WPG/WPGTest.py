@@ -208,7 +208,7 @@ class WPGTest(unittest.TestCase):
         #numpy.savetxt( "reference_wf_gauss_onaxis_10m.txt", wf_onaxis )
         #########################################################################################
 
-    def testGaussianVsAnalytic(self, debug=False):
+    def testGaussianVsAnalytic(self, debug=True):
         """ Check that propagation of a Gaussian pulse (in t,x,y) through vacuum gives the correct result, compare
         to analytic solution. """
 
@@ -226,7 +226,7 @@ class WPGTest(unittest.TestCase):
 
         # Distance in free space.
         z0 = 10. # (m), position where to build the wavefront.
-        z1 = 10. # (m), distance to travel in free space.
+        z1 = 20. # (m), distance to travel in free space.
         z2 = z0 + z1 #  distance where to build the reference wavefront.
 
         # Beam divergence.
@@ -249,18 +249,17 @@ class WPGTest(unittest.TestCase):
         # expected beam radius after free space drift.
         expected_beam_radius = w0*math.sqrt(1.0+(z0/zR)**2)
 
-
         # Number of points in each x and y dimension.
-        np=400
+        np=600
 
         # Sampling window = 6 sigma of initial beam.
         range_xy = 6.*expected_beam_radius
         dx = range_xy / (np-1)
         nslices = 20
 
-        if debug:
-            print (" Expected beam waist at z=%4.3f m : %4.3e m." % (z0, expected_beam_radius) )
-            print ("Setting up mesh of %d points per dimension on a %4.3e x %4.3e m^2 grid with grid spacing %4.3e m." % (np, range_xy, range_xy, dx) )
+        #if debug:
+            #print (" Expected beam waist at z=%4.3f m : %4.3e m." % (z0, expected_beam_radius) )
+            #print ("Setting up mesh of %d points per dimension on a %4.3e x %4.3e m^2 grid with grid spacing %4.3e m." % (np, range_xy, range_xy, dx) )
 
         # Construct srw wavefront.
         srwl_wf = build_gauss_wavefront(np, np, nslices, ekev, -range_xy/2., range_xy/2.,
@@ -272,8 +271,8 @@ class WPGTest(unittest.TestCase):
         wf = Wavefront(srwl_wf)
 
         # Construct reference srw wavefront.
-        reference_srwl_wf = build_gauss_wavefront(np, np, nslices, ekev, -range_xy/2., range_xy/2.,
-                                        -range_xy/2., range_xy/2., coh_time/math.sqrt(2.),
+        reference_srwl_wf = build_gauss_wavefront(np, np, nslices, ekev, -1.5*range_xy/2., 1.5*range_xy/2.,
+                                        -1.5*range_xy/2., 1.5*range_xy/2., coh_time/math.sqrt(2.),
                                         sigmaAmp, sigmaAmp, z2,
                                         pulseEn=pulseEnergy, pulseRange=8.)
 
@@ -291,36 +290,32 @@ class WPGTest(unittest.TestCase):
 
         # Add free space drift.
         drift = Drift(z1)
-        beamline.append( drift, Use_PP(semi_analytical_treatment=1))
+        beamline.append( drift, Use_PP(semi_analytical_treatment=0, zoom=2.0, sampling=0.5))
 
         # Propagate
-        srwl.SetRepresElecField(wf._srwl_wf, 'f') # <---- switch to frequency domain
+        srwl.SetRepresElecField(wf._srwl_wf, 'f')
         beamline.propagate(wf)
         srwl.SetRepresElecField(wf._srwl_wf, 't')
 
+        fwhm = calculate_fwhm(wf)
+        reference_fwhm = calculate_fwhm(reference_wf)
         if debug:
             print('*** z=%4.3e m ***' % (z0+z1))
-            fwhm = calculate_fwhm(wf)
             print('wf :\nfwhm_x = %4.3e\nfwhm_y = %4.3e' % (fwhm['fwhm_x'], fwhm['fwhm_y']) )
             plot_t_wf(wf)
-
-            fwhm = calculate_fwhm(reference_wf)
-            print('ref:\nfwhm_x = %4.3e\nfwhm_y = %4.3e' % (fwhm['fwhm_x'], fwhm['fwhm_y']) )
+            print('ref:\nfwhm_x = %4.3e\nfwhm_y = %4.3e' % (reference_fwhm['fwhm_x'], reference_fwhm['fwhm_y']) )
             plot_t_wf(reference_wf)
             #look_at_q_space(wf)
 
-
-        # Get propagated wavefront data.
-        wf_intensity = wf.get_intensity()
-        references_wf_intensity = reference_wf.get_intensity()
-
-        wf_sum = wf_intensity.sum()
-        reference_sum = references_wf_intensity.sum()
-
         # Calculate difference
-        difference = 1.0 - wf_sum/reference_sum
+        reference_norm = numpy.linalg.norm(numpy.array([reference_fwhm['fwhm_x'], reference_fwhm['fwhm_y']]))
+        difference_norm = numpy.linalg.norm(numpy.array([fwhm['fwhm_x'], fwhm['fwhm_y']]) - numpy.array([reference_fwhm['fwhm_x'], reference_fwhm['fwhm_y']]))
 
-        self.assertLess(difference, 0.1)
+        if debug:
+            print ("|ref_fwhm_xy| = %4.3e" % (reference_norm) )
+            print ("|ref_fwhm_xy - fhwm_xy| = %4.3e" % (difference_norm) )
+
+        self.assertLess(difference_norm / reference_norm, 0.01)
 
 if __name__ == '__main__':
     unittest.main()
