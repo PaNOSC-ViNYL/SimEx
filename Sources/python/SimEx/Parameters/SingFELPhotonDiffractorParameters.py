@@ -55,6 +55,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 beam_parameter_file=None,
                 beam_geometry_file=None,
                 parameters_dictionary=None,
+                number_of_MPI_processes=None,
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
@@ -93,6 +94,10 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         @param beam_geometry_file : Path of the beam geometry file.
         @type : str
         @default : 'beam.geo'
+
+        @param number_of_MPI_processes : Number of MPI processes
+        @type : int
+        @default : 1
         """
         # Legacy support for dictionaries.
         if parameters_dictionary is not None:
@@ -105,6 +110,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.beam_parameter_file = parameters_dictionary['beam_parameter_file']
             self.beam_geometry_file = parameters_dictionary['beam_geometry_file']
             self.number_of_diffraction_patterns = parameters_dictionary['number_of_diffraction_patterns']
+            self.number_of_MPI_processes = parameters_dictionary['number_of_MPI_processes']
 
         else:
             # Check all parameters.
@@ -117,6 +123,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.beam_parameter_file = beam_parameter_file
             self.beam_geometry_file = beam_geometry_file
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
+            self.number_of_MPI_processes = number_of_MPI_processes
 
     ### Setters and queries.
     @property
@@ -251,4 +258,20 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         else:
             raise ValueError("The parameters 'number_of_diffraction_patterns' must be a positive integer.")
 
+
+    @property
+    def number_of_MPI_processes(self):
+        """ Query for the 'number_of_MPI_processes_file' parameter. """
+        return self.__number_of_MPI_processes
+    @number_of_MPI_processes.setter
+    def number_of_MPI_processes(self, value):
+        """ Set the 'number_of_MPI_processes' parameter to a given value.
+        @param value : The value to set 'number_of_MPI_processes' to.
+        """
+        number_of_MPI_processes = checkAndSetInstance( int, value, 1 )
+
+        if number_of_MPI_processes > 0:
+            self.__number_of_MPI_processes = number_of_MPI_processes
+        else:
+            raise ValueError("The parameters 'number_of_MPI_processes' must be a positive integer.")
 

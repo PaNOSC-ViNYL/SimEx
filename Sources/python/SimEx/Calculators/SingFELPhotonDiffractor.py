@@ -140,9 +140,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_start_ID = self.parameters.pmi_start_ID
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
-        ### TODO: Support parallel execution. Take mpi environment variables.
-        number_of_MPI_processes = 2
-        ### TODO
+        number_of_MPI_processes = self.parameters.number_of_MPI_processes
         beam_parameter_file = self.parameters.beam_parameter_file
         beam_geometry_file = self.parameters.beam_geometry_file
 

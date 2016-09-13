@@ -373,16 +373,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 2,
-                     'number_of_diffraction_patterns' : 2,
-        #             'number_of_MPI_processes' : 3,
+                     'pmi_stop_ID'  : 8,
+                     'number_of_diffraction_patterns' : 8,
+                     'number_of_MPI_processes' : 8,
                      'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                    }
 
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path=os.path.dirname( self.input_h5 ),
+                input_path='/data/fhgfs/grotec/simS2E_data/5keV_3fs_nz35/pmi',
                 output_path='diffr')
 
 
