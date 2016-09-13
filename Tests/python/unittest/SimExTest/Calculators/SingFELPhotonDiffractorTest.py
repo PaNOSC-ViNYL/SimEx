@@ -363,7 +363,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    def testBug53(self):
+    def notestBug53(self):
         """ Tests a script that was found to raise if run in parallel mode. """
 
 
