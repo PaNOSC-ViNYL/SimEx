@@ -350,7 +350,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
 
@@ -362,6 +362,31 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # Check successful completion.
         self.assertEqual(status, 0)
+
+    def testBug53(self):
+        """ Tests a script that was found to raise if run in parallel mode. """
+
+
+
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : True,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 2,
+                     'number_of_diffraction_patterns' : 2,
+        #             'number_of_MPI_processes' : 3,
+                     'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                   }
+
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                input_path=os.path.dirname( self.input_h5 ),
+                output_path='diffr')
+
+
+        photon_diffractor.backengine()
 
 if __name__ == '__main__':
     unittest.main()
