@@ -12,13 +12,18 @@ FIND_PACKAGE(GSL REQUIRED)
 ExternalProject_Add(
 singfel
 URL https://www.dropbox.com/s/nnoc78iafor0qrn/singfel.tar.gz
+### FIXME: Use this url instead and apply patches in bitbucket repo.
+#URL https://bitbucket.org/racnets/singfel/get/Nph_shape_fix.tar.gz
+###
 PATCH_COMMAND cp ${SIMEX_CMAKE_DIR}/FindArmadillo.cmake CMake/FindArmadillo.cmake &&
 	          cp -v ${CMAKE_CURRENT_SOURCE_DIR}/patches/CMakeLists.txt.patch CMakeLists.txt &&
 #	          cp ${SIMEX_CMAKE_DIR}/FindMKL.cmake CMake/ARMA_FindMKL.cmake &&
 #	          cp ${SIMEX_CMAKE_DIR}/FindPythonLibs.cmake CMake &&
 		  rm -rf CMake &&
 		  ln -s ${SIMEX_CMAKE_DIR} CMake &&
-		  patch	src/radiationDamageMPI.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/radiationDamageMPI.cpp.patch
+          ### Temporary workaround to fix Nph issue53, remove next two lines when above FIXME is addressed.
+          #patch	src/radiationDamageMPI.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/radiationDamageMPI.cpp.patch
+		  cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/radiationDamageMPI.cpp.patch src/radiationDamageMPI.cpp
 INSTALL_COMMAND ""
 )
 

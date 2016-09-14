@@ -124,14 +124,14 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Link the  python utility so the backengine can find it.
         ### Yes, this is messy.
-
         preph5_location = inspect.getsourcefile(prepHDF5)
+        if preph5_location is None:
+            raise RuntimeError("prepHDF5.py not found. Aborting the calculation.")
+
         preph5_target =  os.path.join( input_dir, 'prepHDF5.py')
         # Link the prepHDF5 utility that gets called from singFEL code.
         if not os.path.isfile( preph5_target ):
-            ln_preph5_command = 'ln -s %s %s' % ( preph5_location, preph5_target )
-            proc = subprocess.Popen(ln_preph5_command, shell=True)
-            proc.wait()
+            os.symlink(preph5_location, preph5_target)
 
         uniform_rotation = int( self.parameters.uniform_rotation)
         calculate_Compton = int( self.parameters.calculate_Compton )
@@ -140,9 +140,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_start_ID = self.parameters.pmi_start_ID
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
-        ### TODO: Support parallel execution. Take mpi environment variables.
-        number_of_MPI_processes = 2
-        ### TODO
+        number_of_MPI_processes = self.parameters.number_of_MPI_processes
         beam_parameter_file = self.parameters.beam_parameter_file
         beam_geometry_file = self.parameters.beam_geometry_file
 
