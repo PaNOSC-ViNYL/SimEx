@@ -26,8 +26,9 @@
     @creation 20151215
 
 """
-import paths
+import h5py
 import os
+import paths
 import shutil
 import unittest
 
@@ -216,8 +217,29 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
 
         self.assertEqual(status, 0 )
 
+    def testIssue53(self):
+        """ Check that xmdyn_demo writes the Nph variable according to bugfix 53."""
 
+        # Clean up.
+        self.__dirs_to_remove.append('pmi')
 
+        # Get test instance.
+        pmi_parameters = {'number_of_trajectories' : 10,
+                          'number_of_steps'        : 100,
+                         }
+
+        pmi = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters,
+                                              input_path=self.input_h5,
+                                              output_path='pmi',
+                                              sample_path=TestUtilities.generateTestFilePath('2nip.pdb') )
+
+        # Call backengine
+        status = pmi.backengine()
+
+        h5 = h5py.File('pmi/pmi_out_0000001.h5')
+        Nph = h5['/data/snp_0000001/Nph']
+
+        self.assertEqual(Nph.shape, (1,))
 
 if __name__ == '__main__':
     unittest.main()
