@@ -24,11 +24,17 @@ import unittest
 
 # Import classes to test.
 from PlasmaXRTSCalculatorParametersTest import PlasmaXRTSCalculatorParametersTest
+from SingFELPhotonDiffractorParametersTest import SingFELPhotonDiffractorParametersTest
+from EMCOrientationParametersTest import EMCOrientationParametersTest
+from DMPhasingParametersTest import DMPhasingParametersTest
 
 # Setup the suite.
 def suite():
     suites = (
              unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,    'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,    'test'),
+             unittest.makeSuite(EMCOrientationParametersTest,    'test'),
+             unittest.makeSuite(DMPhasingParametersTest,    'test'),
              )
 
     return unittest.TestSuite(suites)
