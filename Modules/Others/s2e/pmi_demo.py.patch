@@ -208,8 +208,7 @@ class PMIDemo(object):
         xfp[ grp + '/T' ]   = self.g_s2e['sys']['T'] .astype(numpy.int32)
         xfp[ grp + '/xyz' ] = self.g_s2e['sys']['xyz'] .astype(numpy.int32)
         xfp[ grp + '/r' ] = self.g_s2e['sys']['r'] .astype(numpy.float32)
-        #xfp[ grp + '/Nph' ] = self.g_s2e['sys']['Nph']
-        xfp[ grp + '/Nph' ] = self.g_s2e['pulse']['sel_int'][a_snp-1]
+        xfp[ grp + '/Nph' ] = numpy.array( [self.g_s2e['pulse']['sel_int'][a_snp-1]] )
         xfp[ grp + '/halfQ' ] = self.g_dbase['halfQ'] .astype(numpy.float32)
         xfp[ grp + '/ff' ] = ff .astype(numpy.float32)
         xfp[ grp + '/Sq_halfQ' ] = self.g_dbase['Sq_halfQ'] .astype(numpy.float32)
