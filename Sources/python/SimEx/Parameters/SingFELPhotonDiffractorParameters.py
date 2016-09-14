@@ -54,8 +54,8 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 number_of_diffraction_patterns=None,
                 beam_parameter_file=None,
                 beam_geometry_file=None,
-                parameters_dictionary=None,
                 number_of_MPI_processes=None,
+                parameters_dictionary=None,
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
@@ -219,12 +219,14 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'beam_parameter_file' parameter to a given value.
         @param value : The value to set 'beam_parameter_file' to.
         """
-        beam_parameter_file = checkAndSetInstance( str, value, 'beam.par' )
+        self.__beam_parameter_file = checkAndSetInstance( str, value, None )
 
-        if os.path.isfile( beam_parameter_file):
-            self.__beam_parameter_file = beam_parameter_file
+        if self.__beam_parameter_file is not None:
+            if not os.path.isfile( self.__beam_parameter_file):
+                raise IOError("The beam_parameter_file %s is not a valid file or filename." % (self.__beam_parameter_file) )
         else:
-            raise IOError("The beam_parameter_file (%s) is not a valid file or filename." % (beam_parameter_file) )
+            print ("WARNING: Beam parameter file not set, calculation will most probably fail.")
+
 
     @property
     def beam_geometry_file(self):
@@ -235,12 +237,14 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'beam_geometry_file' parameter to a given value.
         @param value : The value to set 'beam_geometry_file' to.
         """
-        beam_geometry_file = checkAndSetInstance( str, value, 'beam.geo' )
+        self.__beam_geometry_file = checkAndSetInstance( str, value, None )
 
-        if os.path.isfile( beam_geometry_file):
-            self.__beam_geometry_file = beam_geometry_file
+        if self.__beam_geometry_file is not None:
+            if not os.path.isfile( self.__beam_geometry_file):
+                raise IOError("The beam_parameter_file %s is not a valid file or filename." % (self.__beam_geometry_file) )
         else:
-            raise IOError("The beam_parameter_file (%s) is not a valid file or filename." % (beam_geometry_file) )
+            print ("WARNING: Geometry file not set, calculation will most probably fail.")
+
 
     @property
     def number_of_diffraction_patterns(self):
@@ -261,14 +265,14 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
 
     @property
     def number_of_MPI_processes(self):
-        """ Query for the 'number_of_MPI_processes_file' parameter. """
+        """ Query for the 'number_of_MPI_processes' parameter. """
         return self.__number_of_MPI_processes
     @number_of_MPI_processes.setter
     def number_of_MPI_processes(self, value):
         """ Set the 'number_of_MPI_processes' parameter to a given value.
         @param value : The value to set 'number_of_MPI_processes' to.
         """
-        number_of_MPI_processes = checkAndSetInstance( int, value, 1 )
+        number_of_MPI_processes = checkAndSetInstance( int, value, 2 )
 
         if number_of_MPI_processes > 0:
             self.__number_of_MPI_processes = number_of_MPI_processes

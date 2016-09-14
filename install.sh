@@ -26,7 +26,7 @@ export ARMA_DIR=/usr
 # Uncomment the next line and specify the install dir for a custom user install.
 #cmake -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
 # Uncomment the next line and specify the install dir for a developer install.
-cmake -DDEVELOPER_INSTALL=ON -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
+cmake -DSRW_OPTIMIZED=ON -DDEVELOPER_INSTALL=ON -DCMAKE_INSTALL_PREFIX=$ROOT_DIR $ROOT_DIR
 
 # Build the project.
 make -j8
