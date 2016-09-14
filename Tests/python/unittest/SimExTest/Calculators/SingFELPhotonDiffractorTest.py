@@ -81,6 +81,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
 
         # Construct the object.
@@ -99,6 +100,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        number_of_diffraction_patterns = 2,
                                                        beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
                                                        beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
+                                                       number_of_MPI_processes = 2,
                                                        )
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
@@ -117,6 +119,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
 
         # Construct the object.
@@ -145,6 +148,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters)
@@ -169,6 +173,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         # Check construction with sane parameters.
@@ -264,6 +269,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         # Construct the object.
@@ -294,6 +300,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         # Construct the object.
@@ -326,6 +333,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         # Construct the object.
@@ -348,14 +356,15 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
+                     'pmi_stop_ID'  : 2,
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=os.path.dirname( self.input_h5 ), output_path='diffr')
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=TestUtilities.generateTestFilePath('pmi_out'), output_path='diffr')
 
         # Call backengine.
         status = diffractor.backengine()
@@ -363,26 +372,26 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    def notestBug53(self):
+    def testBug53(self):
         """ Tests a script that was found to raise if run in parallel mode. """
 
-
+        self.__dirs_to_remove.append('diffr')
 
         diffraction_parameters={ 'uniform_rotation': True,
                      'calculate_Compton' : True,
                      'slice_interval' : 100,
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 8,
-                     'number_of_diffraction_patterns' : 8,
-                     'number_of_MPI_processes' : 8,
+                     'pmi_stop_ID'  : 9,
+                     'number_of_diffraction_patterns' : 1,
                      'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 10,
                    }
 
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path='/data/fhgfs/grotec/simS2E_data/5keV_3fs_nz35/pmi',
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path='diffr')
 
 
