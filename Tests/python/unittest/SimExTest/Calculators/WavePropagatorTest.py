@@ -118,7 +118,6 @@ class WavePropagatorTest(unittest.TestCase):
         # Check exception raises when attempting to read.
         self.assertRaises( IOError, propagator._readH5 )
 
-    @unittest.skip("Skipped while samoylv/WPG#74 not closed.")
     def testReadCalculateWrite(self):
         """ Test a backengine run with a single input file. """
         # Define a beamline.
