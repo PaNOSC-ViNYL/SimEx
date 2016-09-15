@@ -88,6 +88,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_slices' : 2,
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
+                     'number_of_MPI_processes' : 2,
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
@@ -129,6 +130,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                    }
@@ -174,6 +176,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                    }
@@ -300,6 +303,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                    }
@@ -372,6 +376,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
@@ -474,6 +479,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 2,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
@@ -609,6 +615,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 2,
                      'number_of_diffraction_patterns' : 2,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
@@ -699,6 +706,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 1,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
@@ -800,6 +808,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 2,
                      'number_of_diffraction_patterns' : 1,
+                     'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
                      }
