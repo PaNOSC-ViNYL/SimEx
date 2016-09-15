@@ -26,10 +26,7 @@ import os
 import sys
 import time
 
-import matplotlib
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 def print_to_log(msg, log_file=None):
     if not os.path.exists(log_file):
@@ -335,15 +332,15 @@ class EMCCaseGenerator(object):
         """
         Shows detector pixels as points on scatter plot; could be slow for large detectors.
         """
-        if self.detector is not None:
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            ax.scatter(self.detector[:,0], self.detector[:,1], self.detector[:,2], c='r', marker='s')
-            ax.set_zlim3d(-self.qmax, self.qmax)
-            plt.show()
-        else:
-            msg = "Detector not initiated."
-            print_to_log(msg, log_file=self.runLog)
+        #if self.detector is not None:
+            #fig = plt.figure()
+            #ax = fig.add_subplot(111, projection='3d')
+            #ax.scatter(self.detector[:,0], self.detector[:,1], self.detector[:,2], c='r', marker='s')
+            #ax.set_zlim3d(-self.qmax, self.qmax)
+            #plt.show()
+        #else:
+            #msg = "Detector not initiated."
+            #print_to_log(msg, log_file=self.runLog)
 
     # The following functions have not been tested. Use with caution!!!
     def makeTestParticleAndSupport(self, inParticleRadius=5.9, inDamping=1.5, inFrac=0.5, inPad=1.8):
@@ -470,12 +467,13 @@ class EMCCaseGenerator(object):
         Shows particle density as an array of sequential, equal-sized 2D sections.
         """
         subplotlen = int(numpy.ceil(numpy.sqrt(len(self.density))))
-        fig = plt.figure(figsize=(9.5, 9.5))
+        #fig = plt.figure(figsize=(9.5, 9.5))
         for i in range(len(self.density)):
-            ax = fig.add_subplot(subplotlen, subplotlen, i+1)
-            ax.imshow(self.density[:,:,i], vmin=0, vmax=1.1, interpolation='nearest', cmap=plt.cm.bone)
-            ax.set_title('z=%d'%i, color='white', position=(0.85,0.))
-        plt.show()
+            pass
+            #ax = fig.add_subplot(subplotlen, subplotlen, i+1)
+            #ax.imshow(self.density[:,:,i], vmin=0, vmax=1.1, interpolation='nearest', cmap=plt.cm.bone)
+            #ax.set_title('z=%d'%i, color='white', position=(0.85,0.))
+        #plt.show()
 
     def showLogIntensity(self, inSection=0):
         """
@@ -486,12 +484,12 @@ class EMCCaseGenerator(object):
         if(plotSection<=0):
             plotSection += self.qmax
 
-        fig = plt.figure(figsize=(13.9,9.5))
-        ax = fig.add_subplot(111)
-        ax.set_title("log(intensities) of section q=%d"%plotSection)
-        self.currPlot = plt.imshow(numpy.log(self.intensities[:,:,plotSection]), interpolation='nearest')
-        self.colorbar = plt.colorbar(self.currPlot, pad=0.02)
-        plt.show()
+        #fig = plt.figure(figsize=(13.9,9.5))
+        #ax = fig.add_subplot(111)
+        #ax.set_title("log(intensities) of section q=%d"%plotSection)
+        #self.currPlot = plt.imshow(numpy.log(self.intensities[:,:,plotSection]), interpolation='nearest')
+        #self.colorbar = plt.colorbar(self.currPlot, pad=0.02)
+        #plt.show()
 
     def showLogIntensitySlices(self):
         """
@@ -501,14 +499,15 @@ class EMCCaseGenerator(object):
         subplotlen = int(numpy.ceil(numpy.sqrt(len(self.intensities))))
         maxLogIntens = numpy.log(self.intensities.max())
         minLogIntens = numpy.log(self.intensities.min())
-        fig = plt.figure(figsize=(13.5, 9.5))
+        #fig = plt.figure(figsize=(13.5, 9.5))
         for i in range(len(self.intensities)):
-            ax = fig.add_subplot(subplotlen, subplotlen, i+1)
-            ax.imshow(numpy.log(self.intensities[:,:,i]+1.E-7), vmin=minLogIntens, vmax=maxLogIntens, interpolation='nearest')
-            ax.set_xticks(())
-            ax.set_yticks(())
-            ax.set_title('%d'%(i-self.qmax), color='white', position=(0.85,0.))
-        plt.show()
+            pass
+            #ax = fig.add_subplot(subplotlen, subplotlen, i+1)
+            #ax.imshow(numpy.log(self.intensities[:,:,i]+1.E-7), vmin=minLogIntens, vmax=maxLogIntens, interpolation='nearest')
+            #ax.set_xticks(())
+            #ax.set_yticks(())
+            #ax.set_title('%d'%(i-self.qmax), color='white', position=(0.85,0.))
+        #plt.show()
 
     def writeSupportToFile(self, filename="support.dat"):
         header = "%d\t%d\n" % (self.qmax, len(self.supportPositions))

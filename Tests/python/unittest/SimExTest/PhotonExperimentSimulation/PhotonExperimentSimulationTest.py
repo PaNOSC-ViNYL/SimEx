@@ -72,7 +72,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         """ Test the default constructor of this class. """
         # Setup a minimal experiment simulation.
         source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
-        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
@@ -92,6 +92,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
@@ -113,7 +114,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         """ Test that the calculator queries return the correct calculators. """
         # Setup a minimal experiment simulation.
         source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
-        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
@@ -133,6 +134,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
@@ -159,7 +161,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         """ Test that the appropriate exceptions are thrown if the object is constructed incorrectly. """
         # Setup a minimal experiment simulation.
         source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
-        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
@@ -179,6 +181,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
@@ -285,7 +288,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Setup a minimal experiment simulation.
         source_input = TestUtilities.generateTestFilePath('FELsource_out.h5')
-        diffr_input =  TestUtilities.generateTestFilePath('pmi_out.h5')
+        diffr_input =  TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
         pmi_input = TestUtilities.generateTestFilePath('prop_out.h5')
         photon_source = XFELPhotonSource(parameters=None, input_path=source_input, output_path='FELsource_out.h5')
         photon_propagator = XFELPhotonPropagator(parameters=None, input_path='FELsource_out.h5', output_path='prop_out.h5')
@@ -306,6 +309,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
@@ -379,11 +383,12 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path='pmi',
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path='diffr')
 
         # Perfect detector.
@@ -482,11 +487,12 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path=pmi_dir,
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path=diffr_dir)
 
         # Reconstruction: EMC+DM
@@ -618,11 +624,12 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path=pmi_dir,
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path=diffr_dir)
 
         # Reconstruction: EMC+DM
@@ -709,11 +716,12 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
         photon_diffractor = SingFELPhotonDiffractor(
                 parameters=diffraction_parameters,
-                input_path='pmi',
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path='diffr')
 
 
@@ -811,9 +819,10 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 2,
                      }
 
-        photon_diffractor = SingFELPhotonDiffractor( parameters=diffraction_parameters )
+        photon_diffractor = SingFELPhotonDiffractor( parameters=diffraction_parameters, input_path= TestUtilities.generateTestFilePath('pmi_out'))
 
 
         # Reconstruction: EMC+DM

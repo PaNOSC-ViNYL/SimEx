@@ -89,8 +89,7 @@ class WPGTest(unittest.TestCase):
             if os.path.isdir(d): shutil.rmtree(d)
 
     def testGaussianReference(self, debug=False):
-        """ Check that propagation of a Gaussian pulse (in t,x,y) through vacuum gives the correct result, compare
-        to analytic solution. """
+        """ Check that propagation of a Gaussian pulse (in t,x,y) through vacuum reproduces reference data. """
 
 
         # Central photon energy.
@@ -200,16 +199,123 @@ class WPGTest(unittest.TestCase):
         self.assertEqual( str(wf_hash), ref_hash)
 
         # Save wavefront data for reference.
-        ##########################################################################################
-        ### ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
-        ##########################################################################################
+        #########################################################################################
+        ## ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
+        #########################################################################################
         #with open("reference_wf_gauss_10m.hash.txt", 'w') as hashfile:
             #hashfile.write(str(wf_hash))
             #hashfile.close()
         #numpy.savetxt( "reference_wf_gauss_onaxis_10m.txt", wf_onaxis )
         #########################################################################################
 
+    def testGaussianVsAnalytic(self, debug=True):
+        """ Check that propagation of a Gaussian pulse (in t,x,y) through vacuum gives the correct result, compare
+        to analytic solution. """
+
+
+        # Central photon energy.
+        ekev = 8.4 # Energy [keV]
+
+        # Pulse parameters.
+        qnC = 0.5               # e-bunch charge, [nC]
+        pulse_duration = 9.0e-15 # [s]
+        pulseEnergy = 1.5e-3    # total pulse energy, J
+
+        # Coherence time
+        coh_time = 0.25e-15 # [s]
+
+        # Distance in free space.
+        z0 = 10. # (m), position where to build the wavefront.
+        z1 = 20. # (m), distance to travel in free space.
+        z2 = z0 + z1 #  distance where to build the reference wavefront.
+
+        # Beam divergence.
+        theta_fwhm = 2.5e-6 # rad
+
+        wlambda = 12.4*1e-10/ekev # wavelength, m
+        w0 = wlambda/(numpy.pi*theta_fwhm) # beam waist, m
+        zR = (math.pi*w0**2)/wlambda #Rayleigh range, m
+        fwhm_at_zR = theta_fwhm*zR #FWHM at Rayleigh range, m
+        sigmaAmp = w0/(2.0*math.sqrt(math.log(2.0))) #sigma of amplitude, m
+
+        if debug:
+            print (" *** Pulse properties ***")
+            print (" lambda = %4.3e m" % (wlambda) )
+            print (" w0 = %4.3e m" % (w0) )
+            print (" zR = %4.3e m" % (zR) )
+            print (" fwhm at zR = %4.3e m" % (fwhm_at_zR) )
+            print (" sigma = %4.3e m" % (sigmaAmp) )
+
+        # expected beam radius after free space drift.
+        expected_beam_radius = w0*math.sqrt(1.0+(z0/zR)**2)
+
+        # Number of points in each x and y dimension.
+        np=600
+
+        # Sampling window = 6 sigma of initial beam.
+        range_xy = 6.*expected_beam_radius
+        dx = range_xy / (np-1)
+        nslices = 20
+
+        #if debug:
+            #print (" Expected beam waist at z=%4.3f m : %4.3e m." % (z0, expected_beam_radius) )
+            #print ("Setting up mesh of %d points per dimension on a %4.3e x %4.3e m^2 grid with grid spacing %4.3e m." % (np, range_xy, range_xy, dx) )
+
+        # Construct srw wavefront.
+        srwl_wf = build_gauss_wavefront(np, np, nslices, ekev, -range_xy/2., range_xy/2.,
+                                        -range_xy/2., range_xy/2., coh_time/math.sqrt(2.),
+                                        sigmaAmp, sigmaAmp, z0,
+                                        pulseEn=pulseEnergy, pulseRange=8.)
+
+        # Convert to wpg.
+        wf = Wavefront(srwl_wf)
+
+        # Construct reference srw wavefront.
+        reference_srwl_wf = build_gauss_wavefront(np, np, nslices, ekev, -1.5*range_xy/2., 1.5*range_xy/2.,
+                                        -1.5*range_xy/2., 1.5*range_xy/2., coh_time/math.sqrt(2.),
+                                        sigmaAmp, sigmaAmp, z2,
+                                        pulseEn=pulseEnergy, pulseRange=8.)
+
+        reference_wf = Wavefront(reference_srwl_wf)
+
+        if debug:
+            print('*** z=%4.3e m ***' % (z0))
+            fwhm = calculate_fwhm(wf)
+            print('wf:\nfwhm_x = %4.3e\nfwhm_y = %4.3e' % (fwhm['fwhm_x'], fwhm['fwhm_y']) )
+            plot_t_wf(wf)
+            #look_at_q_space(wf)
+
+        # Construct the beamline.
+        beamline = Beamline()
+
+        # Add free space drift.
+        drift = Drift(z1)
+        beamline.append( drift, Use_PP(semi_analytical_treatment=0, zoom=2.0, sampling=0.5))
+
+        # Propagate
+        srwl.SetRepresElecField(wf._srwl_wf, 'f')
+        beamline.propagate(wf)
+        srwl.SetRepresElecField(wf._srwl_wf, 't')
+
+        fwhm = calculate_fwhm(wf)
+        reference_fwhm = calculate_fwhm(reference_wf)
+        if debug:
+            print('*** z=%4.3e m ***' % (z0+z1))
+            print('wf :\nfwhm_x = %4.3e\nfwhm_y = %4.3e' % (fwhm['fwhm_x'], fwhm['fwhm_y']) )
+            plot_t_wf(wf)
+            print('ref:\nfwhm_x = %4.3e\nfwhm_y = %4.3e' % (reference_fwhm['fwhm_x'], reference_fwhm['fwhm_y']) )
+            plot_t_wf(reference_wf)
+            #look_at_q_space(wf)
+
+        # Calculate difference
+        reference_norm = numpy.linalg.norm(numpy.array([reference_fwhm['fwhm_x'], reference_fwhm['fwhm_y']]))
+        difference_norm = numpy.linalg.norm(numpy.array([fwhm['fwhm_x'], fwhm['fwhm_y']]) - numpy.array([reference_fwhm['fwhm_x'], reference_fwhm['fwhm_y']]))
+
+        if debug:
+            print ("|ref_fwhm_xy| = %4.3e" % (reference_norm) )
+            print ("|ref_fwhm_xy - fhwm_xy| = %4.3e" % (difference_norm) )
+
+        self.assertLess(difference_norm / reference_norm, 0.01)
 
 if __name__ == '__main__':
     unittest.main()
-
