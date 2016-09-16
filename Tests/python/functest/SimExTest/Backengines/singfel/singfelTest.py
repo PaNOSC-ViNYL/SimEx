@@ -34,6 +34,8 @@ import os, shutil
 import paths
 import unittest
 
+from TestUtilities import TestUtilities
+
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 
@@ -68,23 +70,28 @@ class singfelTest(unittest.TestCase):
 
         self.__dirs_to_remove.append('diffr')
 
+        beam_file = TestUtilities.generateTestFilePath('s2e.beam')
+        geom_file = TestUtilities.generateTestFilePath('s2e.geom')
         # Setup diffraction parameters (no rotation because reference test).
-        parameters = SingFELPhotonDiffractorParameters(uniform_rotation = False,
-                                                       calculate_Compton = True,
-                                                       slice_interval = 100,
-                                                       number_of_slices = 100,
-                                                       pmi_start_ID = 1,
-                                                       pmi_stop_ID  = 1,
-                                                       number_of_diffraction_patterns = 1,
-                                                       beam_parameter_file = 's2e.beam',
-                                                       beam_geometry_file = 's2e.geom',
-                                                       number_of_MPI_processes = 2,
+        parameters = SingFELPhotonDiffractorParameters(
+                                                       uniform_rotation=False,
+                                                       calculate_Compton=True,
+                                                       slice_interval=100,
+                                                       number_of_slices=100,
+                                                       pmi_start_ID=1,
+                                                       pmi_stop_ID =1,
+                                                       number_of_diffraction_patterns=1,
+                                                       beam_parameter_file=beam_file,
+                                                       beam_geometry_file=geom_file,
+                                                       number_of_MPI_processes=2,
                                                         )
 
         # Setup diffraction calculator.
-        diffractor = SingFELPhotonDiffractor(parameters=parameters,
-                input_path='pmi_out',
-                output_path='diffr')
+        diffractor = SingFELPhotonDiffractor(
+                parameters=parameters,
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
+                output_path='diffr'
+                )
 
         # Run (reads input and write output, as well).
         diffractor.backengine()
@@ -110,7 +117,7 @@ class singfelTest(unittest.TestCase):
             #########################################################################################
             ## ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
             #########################################################################################
-            #with open("reference.hash.txt", 'w') as hashfile:
+            #with open(TestUtilities.generateTestFilePath("singfel_reference.hash.txt"), 'w') as hashfile:
                 #hashfile.write(str(this_hash))
                 #hashfile.close()
             #########################################################################################
@@ -118,7 +125,7 @@ class singfelTest(unittest.TestCase):
             self.assertEqual(math.pi, 22./7.)
 
         # Load reference hash.
-        with open("reference.hash.txt", 'r') as hashfile:
+        with open( TestUtilities.generateTestFilePath("singfel_reference.hash.txt"), 'r') as hashfile:
             ref_hash = hashfile.readline()
             hashfile.close()
 

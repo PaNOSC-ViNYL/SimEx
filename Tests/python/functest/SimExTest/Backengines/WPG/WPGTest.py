@@ -41,7 +41,6 @@ import unittest
 
 import wpg
 
-print (wpg.__file__)
 from wpg import Wavefront, Beamline
 from wpg.optical_elements import Drift
 from wpg.optical_elements import Aperture
@@ -61,6 +60,7 @@ from wpg.wpg_uti_wf import calculate_fwhm
 from wpg.wpg_uti_wf import plot_t_wf, look_at_q_space
 from wpg.wpg_uti_oe import show_transmission
 
+from TestUtilities import TestUtilities
 
 class WPGTest(unittest.TestCase):
     """
@@ -186,10 +186,10 @@ class WPGTest(unittest.TestCase):
         wf_hash = hash( wf_intensity.tostring() )
 
         # Load reference hash.
-        with open("reference_wf_gauss_10m.hash.txt", 'r') as hashfile:
+        with open(TestUtilities.generateTestFilePath("reference_wf_gauss_10m.hash.txt"), 'r') as hashfile:
             ref_hash = hashfile.readline()
             hashfile.close()
-        ref_onaxis = numpy.loadtxt("reference_wf_gauss_onaxis_10m.txt")
+        ref_onaxis = numpy.loadtxt(TestUtilities.generateTestFilePath("reference_wf_gauss_onaxis_10m.txt"))
 
         # Weak test.
         for x,y in zip(wf_onaxis, ref_onaxis):
@@ -202,13 +202,13 @@ class WPGTest(unittest.TestCase):
         #########################################################################################
         ## ATTENTION: Overwrites reference data, use only if you're sure you want to do this. ###
         #########################################################################################
-        #with open("reference_wf_gauss_10m.hash.txt", 'w') as hashfile:
+        #with open(TestUtilities.generateTestFilePath("reference_wf_gauss_10m.hash.txt", 'w')) as hashfile:
             #hashfile.write(str(wf_hash))
             #hashfile.close()
-        #numpy.savetxt( "reference_wf_gauss_onaxis_10m.txt", wf_onaxis )
+        #numpy.savetxt( TestUtilities.generateTestFilePath("reference_wf_gauss_onaxis_10m.txt", wf_onaxis ))
         #########################################################################################
 
-    def testGaussianVsAnalytic(self, debug=True):
+    def testGaussianVsAnalytic(self, debug=False):
         """ Check that propagation of a Gaussian pulse (in t,x,y) through vacuum gives the correct result, compare
         to analytic solution. """
 
