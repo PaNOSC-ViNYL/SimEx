@@ -60,7 +60,7 @@ before_script:
   - python --version
   - python -c "import numpy as np; print( np.__version__ )"
   - python -c "import h5py as h5; print( h5.__version__ )"
-  - uname -c unlimited
+  - ulimit -c unlimited
 
 script:
   # load git lfs files
