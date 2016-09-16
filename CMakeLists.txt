@@ -38,9 +38,10 @@ else()
   set (UTILITIES_DIR ${PYPATH}/SimEx/Utilities/)
   set (CALCULATORS_DIR ${PYPATH}/SimEx/Calculators/)
   add_subdirectory (Tests)
-  add_subdirectory (Sources)
 endif()
 
+  message (STATUS "************************ checking python dependencies *****************************")
+  add_subdirectory (Sources)
 
 # find and add modules
 set (SIMEX_MODULES_ROOT "${SIMEX_SOURCE_DIR}/Modules")
