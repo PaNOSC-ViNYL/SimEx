@@ -128,11 +128,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if preph5_location is None:
             raise RuntimeError("prepHDF5.py not found. Aborting the calculation.")
 
-        preph5_target =  os.path.join( input_dir, 'prepHDF5.py')
-        # Link the prepHDF5 utility that gets called from singFEL code.
-        if not os.path.isfile( preph5_target ):
-            os.symlink(preph5_location, preph5_target)
-
         uniform_rotation = int( self.parameters.uniform_rotation)
         calculate_Compton = int( self.parameters.calculate_Compton )
         slice_interval = self.parameters.slice_interval
@@ -166,13 +161,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--pmiStartID',       str(pmi_start_ID),
                             '--pmiEndID',         str(pmi_stop_ID),
                             '--numDP',            str(number_of_diffraction_patterns),
+                            '--prepHDF5File',     preph5_location,
                             ]
         proc = subprocess.Popen(command_sequence)
         proc.wait()
-
-
-        if os.path.islink(preph5_target):
-            os.remove(preph5_target)
 
         # Return the return code from the backengine.
         return proc.returncode
