@@ -1,4 +1,4 @@
-FROM max-adm01:5000/centos_mpi
+FROM yakser/centos_mpi
 MAINTAINER Sergey Yakubov <sergey.yakubov@desy.de>
 
 RUN yum install -y epel-release bash bzip2 zlib wget cmake fftw fftw-devel file which patch unzip gsl-devel blas-devel lapack-devel gcc-c++ git && yum clean all
