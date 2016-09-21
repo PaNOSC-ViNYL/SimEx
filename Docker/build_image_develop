@@ -1,0 +1,2 @@
+docker build --build-arg simex_script=simex_install_devel.h -t max-adm01:5001/simex_devel .
+
