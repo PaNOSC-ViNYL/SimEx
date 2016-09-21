@@ -88,7 +88,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual( parameters.pmi_stop_ID, 1 )
         self.assertEqual( parameters.beam_parameter_file, None )
         self.assertEqual( parameters.beam_geometry_file, None )
-        self.assertEqual( parameters.number_of_MPI_processes, 2 )
+        self.assertEqual( parameters.extra_MPI_parameters, '' )
 
     def testLegacyDictionary(self):
         """ Check parameter object can be initialized via a old-style dictionary. """
@@ -101,7 +101,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
                            'number_of_diffraction_patterns' : 2,
                            'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                            'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                           'number_of_MPI_processes' : 4,
+                           'extra_MPI_parameters' : '-np 4',
                    }
 
 
@@ -116,7 +116,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual( parameters.pmi_stop_ID, 5 )
         self.assertEqual( parameters.beam_parameter_file, TestUtilities.generateTestFilePath('s2e.beam') )
         self.assertEqual( parameters.beam_geometry_file, TestUtilities.generateTestFilePath('s2e.geom') )
-        self.assertEqual( parameters.number_of_MPI_processes, 4 )
+        self.assertEqual( parameters.extra_MPI_parameters, '-np 4' )
 
 
 if __name__ == '__main__':

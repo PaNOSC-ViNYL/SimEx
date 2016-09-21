@@ -29,6 +29,7 @@
 import inspect
 import os
 import subprocess
+import shlex
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
@@ -135,7 +136,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_start_ID = self.parameters.pmi_start_ID
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
-        number_of_MPI_processes = self.parameters.number_of_MPI_processes
+        extra_MPI_parameters = self.parameters.extra_MPI_parameters
         beam_parameter_file = self.parameters.beam_parameter_file
         beam_geometry_file = self.parameters.beam_geometry_file
 
@@ -146,9 +147,8 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         config_file = '/dev/null'
 
         # Run the backengine command.
-        command_sequence = ['mpirun',
-                            '-np',                str(number_of_MPI_processes) ,
-                            'radiationDamageMPI',
+        command_sequence = ['mpirun',]+ shlex.split(extra_MPI_parameters)+\
+                           ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(output_dir),
                             '--beamFile',         str(beam_parameter_file),

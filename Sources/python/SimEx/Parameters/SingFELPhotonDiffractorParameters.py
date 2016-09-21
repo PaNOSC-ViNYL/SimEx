@@ -45,18 +45,18 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
 
     def __init__(self,
-                uniform_rotation=None,
-                calculate_Compton=None,
-                slice_interval=None,
-                number_of_slices=None,
-                pmi_start_ID=None,
-                pmi_stop_ID =None,
-                number_of_diffraction_patterns=None,
-                beam_parameter_file=None,
-                beam_geometry_file=None,
-                number_of_MPI_processes=None,
-                parameters_dictionary=None,
-                ):
+                 uniform_rotation=None,
+                 calculate_Compton=None,
+                 slice_interval=None,
+                 number_of_slices=None,
+                 pmi_start_ID=None,
+                 pmi_stop_ID =None,
+                 number_of_diffraction_patterns=None,
+                 beam_parameter_file=None,
+                 beam_geometry_file=None,
+                 extra_MPI_parameters=None,
+                 parameters_dictionary=None,
+                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
         @param uniform_rotation : Whether to perform uniform sampling of rotation space.
@@ -95,7 +95,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         @type : str
         @default : 'beam.geo'
 
-        @param number_of_MPI_processes : Number of MPI processes
+        @param extra_MPI_parameters : Extra parameters for MPI
         @type : int
         @default : 1
         """
@@ -110,7 +110,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.beam_parameter_file = parameters_dictionary['beam_parameter_file']
             self.beam_geometry_file = parameters_dictionary['beam_geometry_file']
             self.number_of_diffraction_patterns = parameters_dictionary['number_of_diffraction_patterns']
-            self.number_of_MPI_processes = parameters_dictionary['number_of_MPI_processes']
+            self.extra_MPI_parameters = parameters_dictionary['extra_MPI_parameters']
 
         else:
             # Check all parameters.
@@ -123,7 +123,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.beam_parameter_file = beam_parameter_file
             self.beam_geometry_file = beam_geometry_file
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
-            self.number_of_MPI_processes = number_of_MPI_processes
+            self.extra_MPI_parameters = extra_MPI_parameters
 
     ### Setters and queries.
     @property
@@ -264,18 +264,13 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
 
 
     @property
-    def number_of_MPI_processes(self):
-        """ Query for the 'number_of_MPI_processes' parameter. """
-        return self.__number_of_MPI_processes
-    @number_of_MPI_processes.setter
-    def number_of_MPI_processes(self, value):
-        """ Set the 'number_of_MPI_processes' parameter to a given value.
-        @param value : The value to set 'number_of_MPI_processes' to.
+    def extra_MPI_parameters(self):
+        """ Query for the 'extra_MPI_parameters' parameter. """
+        return self.__extra_MPI_parameters
+    @extra_MPI_parameters.setter
+    def extra_MPI_parameters(self, value):
+        """ Set the 'extra_MPI_parameters' parameter to a given value.
+        @param value : The value to set 'extra_MPI_parameters' to.
         """
-        number_of_MPI_processes = checkAndSetInstance( int, value, 2 )
-
-        if number_of_MPI_processes > 0:
-            self.__number_of_MPI_processes = number_of_MPI_processes
-        else:
-            raise ValueError("The parameters 'number_of_MPI_processes' must be a positive integer.")
+        self.__extra_MPI_parameters = checkAndSetInstance( str, value, '' )
 

@@ -81,7 +81,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                    }
 
         # Construct the object.
@@ -100,7 +100,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        number_of_diffraction_patterns = 2,
                                                        beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
                                                        beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
-                                                       number_of_MPI_processes = 2,
+                                                       extra_MPI_parameters = '-np 2',
                                                        )
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
@@ -119,7 +119,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                    }
 
         # Construct the object.
@@ -148,7 +148,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                    }
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters)
@@ -173,7 +173,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                      }
 
         # Check construction with sane parameters.
@@ -269,7 +269,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                      }
 
         # Construct the object.
@@ -300,7 +300,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                      }
 
         # Construct the object.
@@ -333,7 +333,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                      }
 
         # Construct the object.
@@ -360,7 +360,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 2,
                      'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'extra_MPI_parameters' : '-np 2',
                      }
 
         # Construct the object.
@@ -386,7 +386,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_diffraction_patterns' : 1,
                      'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 10,
+                      'extra_MPI_parameters' : '-np 20',
                    }
 
         photon_diffractor = SingFELPhotonDiffractor(

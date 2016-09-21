@@ -83,7 +83,7 @@ class singfelTest(unittest.TestCase):
                                                        number_of_diffraction_patterns=1,
                                                        beam_parameter_file=beam_file,
                                                        beam_geometry_file=geom_file,
-                                                       number_of_MPI_processes=2,
+                                                       extra_MPI_parameters='-np 2',
                                                         )
 
         # Setup diffraction calculator.
