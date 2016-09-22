@@ -1,2 +1,0 @@
-docker build -t max-adm01:5001/simex .
-
