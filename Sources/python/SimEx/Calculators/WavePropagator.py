@@ -21,9 +21,9 @@
 
 """ Module that holds the WavePropagator class.
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20160321
+    :author: CFG
+    :institution: XFEL
+    :creation: 20160321
 
 """
 import os
@@ -43,14 +43,14 @@ class WavePropagator(AbstractPhotonPropagator):
         """
         Constructor for the xfel photon propagator.
 
-        @param  parameters  : Parameters steering the propagation of photons.
-        <br/><b>type</b>               : dict
+        :param  parameters: Parameters steering the propagation of photons.
+        :type parameters:   dict
 
-        @param  input_path  : Location of input data for the photon propagation.
-        <br/><b>type</b>               : string
+        :param  input_path: Location of input data for the photon propagation.
+        :type: str
 
-        @param  output_path : Location of output data for the photon propagation.
-        <br/><b>type</b>               : string
+        :param output_path: Location of output data for the photon propagation.
+        :type: str
         """
 
         # Check if beamline was given.
@@ -69,7 +69,11 @@ class WavePropagator(AbstractPhotonPropagator):
 
 
     def backengine(self):
-        """ This method drives the backengine code, in this case the WPG interface to SRW."""
+        """ This method drives the backengine code, in this case the WPG interface to SRW.
+
+        :return: 0 if WPG run was successful, 1 if not.
+
+        """
 
         # Switch to frequency representation.
         srwl.SetRepresElecField(self.__wavefront._srwl_wf, 'f') # <---- switch to frequency domain
@@ -84,7 +88,11 @@ class WavePropagator(AbstractPhotonPropagator):
 
     @property
     def data(self):
-        """ Query for the field data. """
+        """ Query for the field data.
+
+        :return: The WPG wavefront data.
+
+        """
         return self.__data
 
     def _readH5(self):
@@ -101,13 +109,12 @@ class WavePropagator(AbstractPhotonPropagator):
         self.__wavefront.load_hdf5(self.input_path)
 
     def saveH5(self):
-        """ """
         """
-        Private method to save the object to a file.
+        Method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path:   The file where to save the wavefront data.
+        :type output_path:    str, default 'prop_out.h5'
+
         """
 
         # Write data to hdf file using wpg interface function.

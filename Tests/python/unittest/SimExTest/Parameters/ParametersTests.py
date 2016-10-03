@@ -27,6 +27,7 @@ from PlasmaXRTSCalculatorParametersTest import PlasmaXRTSCalculatorParametersTes
 from SingFELPhotonDiffractorParametersTest import SingFELPhotonDiffractorParametersTest
 from EMCOrientationParametersTest import EMCOrientationParametersTest
 from DMPhasingParametersTest import DMPhasingParametersTest
+from WavePropagatorParametersTest import WavePropagatorParametersTest
 
 # Setup the suite.
 def suite():
@@ -35,6 +36,7 @@ def suite():
              unittest.makeSuite(SingFELPhotonDiffractorParametersTest,    'test'),
              unittest.makeSuite(EMCOrientationParametersTest,    'test'),
              unittest.makeSuite(DMPhasingParametersTest,    'test'),
+             unittest.makeSuite(WavePropagatorParametersTest,    'test'),
              )
 
     return unittest.TestSuite(suites)
@@ -42,4 +44,3 @@ def suite():
 # If called as script, run the suite.
 if __name__=="__main__":
     unittest.main(defaultTest="suite")
-
