@@ -22,8 +22,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 .PHONY: default help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext doxygen
 
 
-default:
-	doxygen
+default: html latexpdf
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"

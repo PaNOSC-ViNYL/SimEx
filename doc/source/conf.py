@@ -344,3 +344,4 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 
+autoclass_content = "both"
