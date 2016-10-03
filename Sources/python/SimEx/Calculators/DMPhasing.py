@@ -19,11 +19,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the S2EReconstruction class.
+""" Module that holds the DMPhasing class.
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20151104
+    :author: CFG
+    :institution: XFEL
+    :creation: 20151104
 
 """
 import os, shutil
@@ -47,8 +47,14 @@ class DMPhasing(AbstractPhotonAnalyzer):
         """
         Constructor for the phasing analyser.
 
-        @param  parameters : Phasing parameters.
-        <br/><b>type</b> : DMPhasingParameters instance
+        :param  parameters: Phasing parameters.
+        :type parameters: DMPhasingParameters instance
+
+        :param input_path: Path to input data (file or directory).
+        :type input_path: str
+
+        :param output_path: Path to output data (file or directory).
+        :type output_path: str
         """
 
         # Check parameters.
@@ -78,16 +84,23 @@ class DMPhasing(AbstractPhotonAnalyzer):
                                 ]
 
     def expectedData(self):
-        """ Query for the data expected by the Analyzer. """
+        """ Query for the data expected by the Analyzer.
+
+        :return: A list of strings telling which datasets are expected to be found in the input file.
+        """
         return self.__expected_data
 
     def providedData(self):
-        """ Query for the data provided by the Analyzer. """
+        """ Query for the data provided by the Analyzer.
+
+        :return: A list of strings indicating which datasets are produced in the output data."""
         return self.__provided_data
 
     @property
     def data(self):
-        """ Query for the field data. """
+        """ Query for the field data.
+
+        :return: The stored 3D electron density map."""
         return self.__data
 
     def _readH5(self):
@@ -99,28 +112,23 @@ class DMPhasing(AbstractPhotonAnalyzer):
         """ """
         """
         Method to save the object to a file.
-
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
         """
-        pass # No action required since output is written in backengine.
-
+        pass
 
     def backengine(self):
-        """ Start the actual calculation. """
+        """ Start the actual calculation.
+
+        :return: 0 if the DM run was successful, 1 if not. """
 
         status = self.run_dm()
-
         return status
 
 
     def run_dm(self):
         """ Run the Difference Map (DM) algorithm.
 
-        @return : 0 if DM returns successfully, 1 if not.
-        <br/><b>note</b> : Copied and adapted from the main routine in
-        s2e_recon/DM/runDM.py
+        :return: 0 if DM returns successfully, 1 if not.
+        :note: Copied and adapted from the main routine in s2e_recon/DM/runDM.py
         """
 
         number_of_trials = self.parameters.number_of_trials
