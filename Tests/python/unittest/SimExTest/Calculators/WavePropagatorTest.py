@@ -53,7 +53,7 @@ class WavePropagatorTest(unittest.TestCase):
         cls.input_h5 = TestUtilities.generateTestFilePath('FELsource_out/FELsource_out_0000000.h5')
 
         # Use this for strong testing, but takes long.
-        #cls.input_h5 = TestUtilities.generateTestFilePath('FELsource_out/0000028.h5')
+        #cls.input_h5 = TestUtilities.generateTestFilePath('0000028.h5')
 
     @classmethod
     def tearDownClass(cls):
