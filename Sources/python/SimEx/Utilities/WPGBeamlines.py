@@ -1,6 +1,7 @@
 from wpg import Beamline
 from wpg.optical_elements import Drift, Aperture, CRL
 from wpg.optical_elements import Use_PP
+from wpg.useful_code import srwutils
 
 import errno
 import numpy
@@ -8,7 +9,8 @@ import os
 import wpg
 
 # Storage location for mirror height profile data.
-mirror_data = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'mirror2.dat')
+mirror_data1 = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'mirror1.dat')
+mirror_data2 = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'mirror2.dat')
 
 def defineOPD(opTrErMirr, mdatafile, ncol, delim, orient, theta, scale=1., stretching=1.):
     """
@@ -25,15 +27,7 @@ def defineOPD(opTrErMirr, mdatafile, ncol, delim, orient, theta, scale=1., stret
     """
     heightProfData = numpy.loadtxt(mdatafile).T
     heightProfData[0,:] = heightProfData[0,:] * stretching
-    wpg.useful_code.srwutils.AuxTransmAddSurfHeightProfileScaled(opTrErMirr, heightProfData, orient, theta, scale)
-    if isIpynb:
-        pylab.figure(); pylab.plot(heightProfData[0],heightProfData[ncol-1]*1e9)
-        pylab.title('profile from %s' %mdatafile);pylab.xlabel('x (m)');pylab.ylabel('h (nm)')
-
-
-# In[ ]:
-
-
+    srwutils.AuxTransmAddSurfHeightProfileScaled(opTrErMirr, heightProfData, orient, theta, scale)
 
 def setupSPBDay1Beamline():
     """ Setup and return a WPG beamline corresponding to the SPB day 1 configuration. """
@@ -152,16 +146,13 @@ def setup_S2E_SPI_beamline():
                     thetaE=theta_kb, theta0=theta_kb, length=0.9)
     wf_dist_om = wpg.optical_elements.WF_dist(1500, 100, om_clear_ap, 2*om_clear_ap)
 
-    #defineOPD(wf_dist_om, mirror_data, 2, '\t', 'x',
-              #theta_kb, scale=2)
+    defineOPD(wf_dist_om, mirror_data2, 2, '\t', 'x', theta_kb, scale=2)
 
     wf_dist_hfm = wpg.optical_elements.WF_dist(1500, 100, kb_clear_ap, kb_clear_ap)
-    #defineOPD(wf_dist_hfm, os.path.join(mirror_data_dir,'mirror1.dat'), 2, '\t', 'x',
-              #theta_kb, scale=2, stretching=kb_mirror_length/0.8)
+    defineOPD(wf_dist_hfm,  mirror_data1, 2, '\t', 'x', theta_kb, scale=2, stretching=kb_mirror_length/0.8)
 
     wf_dist_vfm = wpg.optical_elements.WF_dist(1100, 1500, kb_clear_ap, kb_clear_ap)
-    #defineOPD(wf_dist_vfm, os.path.join(mirror_data_dir,'mirror2.dat'), 2, ' ', 'y',
-              #theta_kb, scale=2, stretching=kb_mirror_length/0.8)
+    defineOPD(wf_dist_vfm, mirror_data2, 2, ' ', 'y', theta_kb, scale=2, stretching=kb_mirror_length/0.8)
 
 
     bl0 = Beamline()

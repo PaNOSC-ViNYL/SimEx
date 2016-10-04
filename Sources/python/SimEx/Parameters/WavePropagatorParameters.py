@@ -34,6 +34,7 @@ import numpy
 import os
 import tempfile
 import wpg
+from wpg.beamline import Beamline
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -45,8 +46,8 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
     """
 
     def __init__(self,
-                 use_opmd                = None,
-                 beamline                = None,
+                 use_opmd = None,
+                 beamline = None,
                 ):
         """
         Constructor for the WavePropagatorParameters.
@@ -83,5 +84,4 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         """ Set the 'beamline' parameter.
         @param value : The value to set 'beamline' to.
         """
-        if value is None:
-            self.__beamline =WPGBeamlines.setup_S2E_SPI_beamline()
+        self.__beamline = checkAndSetInstance( Beamline, value, WPGBeamlines.setup_S2E_SPI_beamline() )

@@ -26,12 +26,15 @@
     :creation: 20160321
 
 """
-import os
-import h5py
 from wpg import Beamline, Wavefront
 from wpg.srwlib import srwl
+import h5py
+import os
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
+from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import wpg_to_opmd
 
 
 class WavePropagator(AbstractPhotonPropagator):
@@ -53,19 +56,11 @@ class WavePropagator(AbstractPhotonPropagator):
         :type: str
         """
 
-        # Check if beamline was given.
-        if isinstance(parameters, Beamline):
-            parameters = {'beamline' : parameters}
-
-        # Raise if no beamline in parameters.
-        if parameters is None or not 'beamline' in  parameters.keys():
-            raise RuntimeError( 'The parameters argument must be an instance of wpg.Beamline or a dict containing the key "beamline" and an instance of wpg.Beamline as the corresponding value.')
+        # DCheck (and set) parameters.
+        parameters = checkAndSetInstance(WavePropagatorParameters, parameters, WavePropagatorParameters() )
 
         # Initialize base class.
         super(WavePropagator, self).__init__(parameters,input_path,output_path)
-
-        # Take reference to beamline.
-        self.__beamline = parameters['beamline']
 
 
     def backengine(self):
@@ -79,7 +74,7 @@ class WavePropagator(AbstractPhotonPropagator):
         srwl.SetRepresElecField(self.__wavefront._srwl_wf, 'f') # <---- switch to frequency domain
 
         # Propagate through beamline.
-        self.__beamline.propagate(self.__wavefront)
+        self.parameters.beamline.propagate(self.__wavefront)
 
         # Switch back to time representation.
         srwl.SetRepresElecField(self.__wavefront._srwl_wf, 't')
@@ -118,5 +113,9 @@ class WavePropagator(AbstractPhotonPropagator):
         """
 
         # Write data to hdf file using wpg interface function.
-
         self.__wavefront.store_hdf5(self.output_path)
+
+        # Write openPMD file if requested.
+        if self.parameters.use_opmd:
+            wpg_to_opmd.convertToOPMD( self.output_path )
+

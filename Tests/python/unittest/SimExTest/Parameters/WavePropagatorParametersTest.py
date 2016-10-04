@@ -30,6 +30,7 @@ import paths
 import os
 import shutil
 import wpg
+from wpg.beamline import Beamline
 
 # Include needed directories in sys.path.
 import unittest
@@ -88,7 +89,7 @@ class WavePropagatorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertFalse( parameters.use_opmd )
-        #self.assertEqual( parameters.beamline, self.__beamline )
+        self.assertIsInstance( parameters.beamline, Beamline )
 
 
     def testShapedConstruction(self):
@@ -103,7 +104,7 @@ class WavePropagatorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertTrue( parameters.use_opmd )
-
+        self.assertIsInstance( parameters.beamline, Beamline )
 
 if __name__ == '__main__':
     unittest.main()
