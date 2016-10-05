@@ -196,8 +196,7 @@ class WavePropagatorTest(unittest.TestCase):
         propagator.saveH5()
 
         # Assert that opmd has been written.
-        self.assertIn('wpg_out.opmd.h5', os.listdir( os.path.abspath( os.path.dirname( __file__ ) ) ) )
+        self.assertIn('wpg_out.opmd.h5', os.listdir( os.getcwd() ) )
 
 if __name__ == '__main__':
     unittest.main()
-
