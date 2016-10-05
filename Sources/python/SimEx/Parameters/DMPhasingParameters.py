@@ -20,11 +20,12 @@
 ##########################################################################
 
 """
-    @file Module that holds the WavePropagatorParameters class.
+    @file Module that holds the DMPhasingParameters class.
 
     @author : CFG
     @institution : XFEL
-    @creation 20161003
+    @creation 20160721
+
 """
 import os
 import copy
@@ -36,50 +37,136 @@ from scipy.constants import Avogadro
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-from SimEx.Utilities impot WPGBeamlines
 
-class WavePropagatorParameters(AbstractCalculatorParameters):
+
+class DMPhasingParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the WavePropagator analyzer.
+    Class representing parameters for the DMPhasing analyzer.
     """
 
     def __init__(self,
-                 use_opmd                = None,
-                 beamline                = None,
+                 number_of_trials        = None,
+                 number_of_iterations    = None,
+                 averaging_start         = None,
+                 leash                   = None,
+                 number_of_shrink_cycles = None,
+                 parameters_dictionary = None,
                 ):
         """
-        Constructor for the WavePropagatorParameters.
+        Constructor for the DMPhasingParameters.
+        :param number_of_trials: How many trials to run in each iteration.
+        :type number_of_trials: int (n>0), default 500
 
-        :param use_opmd: Whether to use the openPMD output format.
-        :type use_opmd: bool, default False
+        :param number_of_iterations: Maximum number of DM iterations.
+        :type number_of_iterations: int (n>0), default 50
 
-        :param beamline: The WPG beamline to use in the propagation.
-        :type beamline: WPG.Beamline instance.
+        :param averaging_start : Start averaging after this many runs.
+        :type averaging: int (n>0), default 15
+
+        :param leash: DM leash parameter.
+        :type leash: float (>0), default 0.2
+
+        :param number_of_shrink_cycles: DM shrink cycles.
+        :type number_of_shrink_cycles: int (n>0), default 10
         """
 
-        # Check all parameters.
-        self.use_opmd = use_opmd
-        self.beamline = beamline
+        # Legacy support for dictionaries.
+        if parameters_dictionary is not None:
+            self.number_of_trials = parameters_dictionary['number_of_trials']
+            self.number_of_iterations = parameters_dictionary['number_of_iterations']
+            self.averaging_start = parameters_dictionary['averaging_start']
+            self.leash = parameters_dictionary['leash']
+            self.number_of_shrink_cycles = parameters_dictionary['number_of_shrink_cycles']
+
+        else:
+            # Check all parameters.
+            self.number_of_trials = number_of_trials
+            self.number_of_iterations = number_of_iterations
+            self.averaging_start = averaging_start
+            self.leash = leash
+            self.number_of_shrink_cycles = number_of_shrink_cycles
 
     ### Setters and queries.
     @property
-    def use_opmd(self):
-        """ Query for the 'use_opmd' parameter. """
-        return self.__use_opmd
-    @use_opmd.setter
-    def use_opmd(self, value):
-        """ Set the 'use_opmd' parameter to a given value.
-        @param value : The value to set 'use_opmd' to.
+    def number_of_trials(self):
+        """ Query for the 'number_of_trials' parameter. """
+        return self.__number_of_trials
+    @number_of_trials.setter
+    def number_of_trials(self, value):
+        """ Set the 'number_of_trials' parameter to a given value.
+        :param value: The value to set 'number_of_trials' to.
+        :type value: int
         """
-        self.__use_opmd = checkAndSetInstance( bool, value, False )
+        number_of_trials = checkAndSetInstance( int, value, 500 )
+
+        if all([number_of_trials > 0]):
+            self.__number_of_trials = number_of_trials
+        else:
+            raise ValueError( "Parameter 'number_of_trials' must be an integer (n > 0)")
 
     @property
-    def beamline(self):
-        """ Query for the 'beamline' parameter. """
-        return self.__beamline
-    @beamline.setter
-    def beamline(self, value):
-        """ Set the 'beamline' parameter.
-        @param value : The value to set 'beamline' to.
+    def number_of_iterations(self):
+        """ Query for the 'number_of_iterations' parameter. """
+        return self.__number_of_iterations
+    @number_of_iterations.setter
+    def number_of_iterations(self, value):
+        """ Set the 'number_of_iterations' parameter to a given value.
+        :param value: The value to set 'number_of_iterations' to.
+        :type value: int
         """
-        self.__beamline = checkAndSetInstance( WPG.Beamline, value, WPGBeamlines.setup_S2E_SPI_beamline() )
+        number_of_iterations = checkAndSetInstance( int, value, 50 )
+
+        if all([ number_of_iterations > 0]):
+            self.__number_of_iterations = number_of_iterations
+        else:
+            raise ValueError( "Parameter 'number_of_iterations' must be an integer (n > 0)")
+
+    @property
+    def leash(self):
+        """ Query for the 'leash' parameter. """
+        return self.__leash
+    @leash.setter
+    def leash(self, value):
+        """ Set the 'leash' parameter to a given value.
+        :param value: The value to set 'leash' to.
+        :type value: float
+        """
+        leash = checkAndSetInstance( float, value, 0.2 )
+
+        if leash > 0:
+            self.__leash = leash
+        else:
+            raise ValueError( "The parameter 'leash' must be a positive integer.")
+
+    @property
+    def averaging_start(self):
+        """ Query for the 'averaging_start' parameter. """
+        return self.__averaging_start
+    @averaging_start.setter
+    def averaging_start(self, value):
+        """ Set the 'averaging_start' parameter to a given value.
+        :param value: The value to set 'averaging_start' to.
+        :type value: int
+        """
+        averaging_start = checkAndSetInstance( int, value, 15 )
+
+        if averaging_start > 0:
+            self.__averaging_start = averaging_start
+        else:
+            raise ValueError( "The parameter 'averaging_start' must be a positive integer.")
+
+    @property
+    def number_of_shrink_cycles(self):
+        """ Query for the 'number_of_shrink_cycles' parameter. """
+        return self.__number_of_shrink_cycles
+    @number_of_shrink_cycles.setter
+    def number_of_shrink_cycles(self, value):
+        """ Set the 'number_of_shrink_cycles' parameter to a given value.
+        :param value : The value to set 'number_of_shrink_cycles' to.
+        :type value: int
+        """
+        number_of_shrink_cycles = checkAndSetInstance( int, value, 10 )
+        if number_of_shrink_cycles > 0:
+            self.__number_of_shrink_cycles = number_of_shrink_cycles
+        else:
+            raise ValueError( "The parameter 'number_of_shrink_cycles' must be a positive integer.")
