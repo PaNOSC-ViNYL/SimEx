@@ -45,9 +45,8 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Constructor for the xfel photon propagator.
 
-        @param  parameters : singFEL parameters.
-        <br/><b>type</b>   : SingFELPhotonDiffractorParameters instance.
-        @default : None.
+        :param  parameters: singFEL parameters.
+        :type parameters: SingFELPhotonDiffractorParameters instance, default None
         """
 
         if isinstance( parameters, dict ):
@@ -184,8 +183,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Private method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: The file where to save the object's data.
+        :type output_path: string, default b
         """
         pass # No action required since output is written in backengine.
