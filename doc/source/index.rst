@@ -80,12 +80,11 @@ The project is licensed under the GPL open source license version 3.
 
 Reference Manual
 ================
-
 .. autoclass:: SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator
 
 .. autoclass:: SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer
-    :members:
-    :private-members:
+
+.. autofunction:: SimEx.Calculators.AbstractPhotonAnalyzer.checkAndSetPhotonAnalyzer
 
 .. autoclass:: SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector
     :members:

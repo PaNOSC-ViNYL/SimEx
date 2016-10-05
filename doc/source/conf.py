@@ -345,3 +345,4 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 autoclass_content = "both"
+autodoc_default_flags = ["members", "inherited-members", "show-inheritance"]

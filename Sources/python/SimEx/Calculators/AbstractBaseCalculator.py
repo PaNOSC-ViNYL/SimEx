@@ -26,9 +26,9 @@
     @creation 20151007
 
 """
+from abc import ABCMeta, abstractmethod
 import exceptions
 import os
-from abc import ABCMeta, abstractmethod
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -45,8 +45,8 @@ class AbstractBaseCalculator(object):
         """
         Constructor for the Abstract Base Calculator.
 
-        :param control_parameters: Parameters of the calculation (not data).
-        :type control_parameters: dict || AbstractCalculatorParameters
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
 
         :param input_path: Path to hdf5 file holding the input data.
         :type input_path: str
