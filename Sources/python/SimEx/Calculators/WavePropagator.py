@@ -46,14 +46,14 @@ class WavePropagator(AbstractPhotonPropagator):
         """
         Constructor for the xfel photon propagator.
 
-        :param  parameters: Parameters steering the propagation of photons.
-        :type parameters:   dict
+        :param parameters: Parameters steering the propagation of photons.
+        :type parameters: WavePropagatorParameters instance
 
-        :param  input_path: Location of input data for the photon propagation.
-        :type: str
+        :param input_path: Location of input data for the photon propagation.
+        :type input_path: str
 
         :param output_path: Location of output data for the photon propagation.
-        :type: str
+        :type output_path: str
         """
 
         # DCheck (and set) parameters.

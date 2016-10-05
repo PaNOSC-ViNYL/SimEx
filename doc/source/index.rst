@@ -111,11 +111,19 @@ Reference Manual
     :members:
     :private-members:
 
+.. autoclass:: SimEx.Parameters.DMPhasingParameters.DMPhasingParameters
+    :members:
+    :private-members:
+
 .. autoclass:: SimEx.Calculators.EMCCaseGenerator.EMCCaseGenerator
     :members:
     :private-members:
 
 .. autoclass:: SimEx.Calculators.EMCOrientation.EMCOrientation
+    :members:
+    :private-members:
+
+.. autoclass:: SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters
     :members:
     :private-members:
 
@@ -139,7 +147,16 @@ Reference Manual
     :members:
     :private-members:
 
+.. autoclass:: SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters
+    :members:
+    :private-members:
+    :special-members:
+
 .. autoclass:: SimEx.Calculators.WavePropagator.WavePropagator
+    :members:
+    :private-members:
+
+.. autoclass:: SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters
     :members:
     :private-members:
 
@@ -160,9 +177,10 @@ Reference Manual
     :private-members:
     :special-members:
 
-.. doxygenclass:: SimEx::Parameters::PlasmaXRTSCalculatorParameters::PlasmaXRTSCalculatorParameters
+.. autoclass:: SimEx::Parameters::PlasmaXRTSCalculatorParameters::PlasmaXRTSCalculatorParameters
     :members:
     :private-members:
+    :special-members:
 
 
 .. .. inheritance-diagram::

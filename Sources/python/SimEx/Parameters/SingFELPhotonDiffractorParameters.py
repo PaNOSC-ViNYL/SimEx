@@ -35,7 +35,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the singFELPhotonDiffractor calculator.
+    Class representing parameters for the SingFELPhotonDiffractor calculator.
     """
 
     def __init__(self,
@@ -53,6 +53,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
+
         :param uniform_rotation: Whether to perform uniform sampling of rotation space.
         :type uniform_rotation: bool, default True
 
@@ -75,13 +76,14 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :type number_of_diffraction_patterns: int, default 1
 
         :param beam_parameter_file: Path of the beam parameter file.
-        :type beam_parameter_file: str, default '
+        :type beam_parameter_file: str'
 
         :param beam_geometry_file: Path of the beam geometry file.
-        :type beam_geometry_file: str, default '
+        :type beam_geometry_file: str'
 
         :param number_of_MPI_processes: Number of MPI processes
         :type number_of_MPI_processes: int, default 1
+
         """
         # Legacy support for dictionaries.
         if parameters_dictionary is not None:

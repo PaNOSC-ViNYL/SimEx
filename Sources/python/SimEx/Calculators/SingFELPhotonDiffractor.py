@@ -43,10 +43,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon propagator.
+        Constructor for the Calculator wrapping singFEL.
 
         :param  parameters: singFEL parameters.
         :type parameters: SingFELPhotonDiffractorParameters instance, default None
+
         """
 
         if isinstance( parameters, dict ):
