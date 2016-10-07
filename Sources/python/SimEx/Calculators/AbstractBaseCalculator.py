@@ -43,7 +43,6 @@ class AbstractBaseCalculator(object):
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Base Calculator.
 
         :param parameters: Parameters of the calculation (not data).
         :type parameters: dict || AbstractCalculatorParameters

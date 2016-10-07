@@ -76,10 +76,10 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :type number_of_diffraction_patterns: int, default 1
 
         :param beam_parameter_file: Path of the beam parameter file.
-        :type beam_parameter_file: str'
+        :type beam_parameter_file: str
 
         :param beam_geometry_file: Path of the beam geometry file.
-        :type beam_geometry_file: str'
+        :type beam_geometry_file: str
 
         :param number_of_MPI_processes: Number of MPI processes
         :type number_of_MPI_processes: int, default 1
@@ -264,4 +264,3 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.__number_of_MPI_processes = number_of_MPI_processes
         else:
             raise ValueError("The parameters 'number_of_MPI_processes' must be a positive integer.")
-

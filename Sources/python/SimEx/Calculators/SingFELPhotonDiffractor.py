@@ -30,11 +30,12 @@ import inspect
 import os
 import subprocess
 
+import prepHDF5
+
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
-import prepHDF5
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -43,11 +44,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Calculator wrapping singFEL.
 
-        :param  parameters: singFEL parameters.
-        :type parameters: SingFELPhotonDiffractorParameters instance, default None
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || SingFELPhotonDiffractorParameters
 
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
 
         if isinstance( parameters, dict ):

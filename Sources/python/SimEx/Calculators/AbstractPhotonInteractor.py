@@ -43,8 +43,17 @@ class AbstractPhotonInteractor(AbstractBaseCalculator):
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Photon Interactor.
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
+
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'prop')
         # Check output path. Set default if none given.

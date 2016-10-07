@@ -39,15 +39,14 @@ from SimEx.Utilities import wpg_to_opmd
 
 class WavePropagator(AbstractPhotonPropagator):
     """
-    Class representing a photon propagator using wave optics through WPG.
+    Class representing a photon propagator that uses wave optics.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon propagator.
 
         :param parameters: Parameters steering the propagation of photons.
-        :type parameters: WavePropagatorParameters instance
+        :type parameters: WavePropagatorParameters
 
         :param input_path: Location of input data for the photon propagation.
         :type input_path: str

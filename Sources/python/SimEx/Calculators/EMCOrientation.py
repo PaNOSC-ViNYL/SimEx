@@ -26,31 +26,46 @@
     @creation 20151104
 
 """
+import h5py
+import numpy
 import os
 import subprocess
 import tempfile
-import numpy
-import h5py
 import time
 
-from EMCCaseGenerator import  EMCCaseGenerator, print_to_log
+from EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 
 class EMCOrientation(AbstractPhotonAnalyzer):
     """
     Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
         """
-        Constructor for the reconstruction analyser.
 
-        @param  parameters : Parameters for the EMC orientation calculator.
-        <br/><b>type</b> : EMCOrientationParameters instance
+        :param  parameters: Parameters for the EMC orientation calculator.
+        :type parameters: EMCOrientationParameters instance
+
+        :param input_path: Path to directory holding input data for EMC.
+        :type input_path: str
+
+        :param output_path: Path to file where output data will be stored.
+        :type output_path: str
+
+        :param tmp_files_path: Path to directory where temporary files will be stored.
+        :type tmp_files_path: str
+
+        :param run_files_path: Path to directory where run data will be stored, in particular the sparse photons file 'photons.dat' and 'detector.dat'.
+        :type run_files_path: str
+
+        :note: If 'run_files_path' is an existing directory that contains data from a previous EMC run, the current run will append to the
+               existing data. A consistency check is performed.
+
         """
+
         # Check parameters.
         if isinstance( parameters, dict ):
             parameters = EMCOrientationParameters( parameters_dictionary = parameters )
@@ -109,8 +124,9 @@ class EMCOrientation(AbstractPhotonAnalyzer):
     @run_files_path.setter
     def run_files_path(self, value):
         """ Set the path to runtime files.
-        @param value: The path where runtime generated files shall be saved.
-        @type: str
+
+        :param value: The path where runtime generated files shall be saved.
+        :type value: str
         """
 
         if isinstance( value, str ) or value is None:
@@ -124,15 +140,14 @@ class EMCOrientation(AbstractPhotonAnalyzer):
     @tmp_files_path.setter
     def tmp_files_path(self, value):
         """ Set the path to tmptime files.
-        @param value: The path where tmptime generated files shall be saved.
-        @type: str
+        :param value: The path where tmptime generated files shall be saved.
+        :type value: str
         """
 
         if isinstance( value, str ) or value is None:
             self.__tmp_out_dir = value
         else:
             raise IOError( "Parameter 'tmp_files_path' must be a string or None." )
-
 
     def _readH5(self):
         """ """
@@ -144,9 +159,8 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         """
         Private method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: The file where to save the object's data.
+        :type output_path: string
         """
         pass # No action required since output is written in backengine.
 
@@ -178,16 +192,17 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
     def backengine(self):
 
-        status = self.run_emc()
+        status = self._run_emc()
 
         return status
 
-    def run_emc(self):
-        """ Run the Expand-Maximize-Compress (EMC) algorithm.
+    def _run_emc(self):
+        """ """
+        """ Private method to run the Expand-Maximize-Compress (EMC) algorithm.
 
-        @return : 0 if EMC returns successfully, 1 if not.
-        <br/><b>note</b> : Copied and adapted from the main routine in
-        s2e_recon/EMC/runEMC.py
+        :return: 0 if EMC returns successfully, 1 if not.
+
+        :note: Copied and adapted from the main routine in s2e_recon/EMC/runEMC.py
         """
         ###############################################################
         # Instantiate a reconstruction object
@@ -401,7 +416,8 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             return 1
 
 def _checkPaths(run_files_path, tmp_files_path):
-    """ Utility to check validity of paths given to constructor. """
+    """ """
+    """ Private (hidden) utility to check validity of paths given to constructor. """
 
     if not all([ (isinstance( path, str ) or path is None) for path in [run_files_path, tmp_files_path] ]):
         raise IOError( "Paths must be strings.")

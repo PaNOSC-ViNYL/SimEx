@@ -55,19 +55,19 @@ class DMPhasingParameters(AbstractCalculatorParameters):
         """
         Constructor for the DMPhasingParameters.
         :param number_of_trials: How many trials to run in each iteration.
-        :type number_of_trials: int (n>0), default 500
+        :type number_of_trials: int>0, default 500
 
         :param number_of_iterations: Maximum number of DM iterations.
-        :type number_of_iterations: int (n>0), default 50
+        :type number_of_iterations: int>0, default 50
 
-        :param averaging_start : Start averaging after this many runs.
-        :type averaging: int (n>0), default 15
+        :param averaging_start: Start averaging after this many runs.
+        :type averaging: int>0, default 15
 
         :param leash: DM leash parameter.
-        :type leash: float (>0), default 0.2
+        :type leash: float>0, default 0.2
 
         :param number_of_shrink_cycles: DM shrink cycles.
-        :type number_of_shrink_cycles: int (n>0), default 10
+        :type number_of_shrink_cycles: int>0, default 10
         """
 
         # Legacy support for dictionaries.

@@ -26,9 +26,7 @@ import os
 import sys
 import time
 
-#import matplotlib.pyplot as plt
-
-def print_to_log(msg, log_file=None):
+def _print_to_log(msg, log_file=None):
     if not os.path.exists(log_file):
         fp = open(log_file, "w")
     else:
@@ -41,23 +39,24 @@ def print_to_log(msg, log_file=None):
     print msg
     sys.stdout.flush()
 
-def create_directory(dir_name, logging=True, log_file=None, err_msg=""):
+def _create_directory(dir_name, logging=True, log_file=None, err_msg=""):
     if os.path.exists(dir_name):
         if logging:
-            print_to_log(dir_name + " exists! " + err_msg, log_file=log_file)
+            _print_to_log(dir_name + " exists! " + err_msg, log_file=log_file)
         else:
             print dir_name + " exists! "
     else:
         os.makedirs(dir_name)
         if logging:
-            print_to_log("Creating " + dir_name, log_file=log_file)
+            _print_to_log("Creating " + dir_name, log_file=log_file)
         else:
             print "Creating " + dir_name
 
 def load_intensities(ref_file):
-    fp      = h5py.File(ref_file, 'r')
-    t_intens = (fp["data/data"].value()).astype("float")
-    fp.close()
+    with h5py.File(ref_file, 'r') as fp:
+        t_intens = (fp["data/data"].value()).astype("float")
+        fp.close()
+
     intens_len = len(t_intens)
     qmax    = intens_len/2
     (q_low, q_high) = (15, int(0.9*qmax))
@@ -68,6 +67,7 @@ def load_intensities(ref_file):
     qPos2   = numpy.array([[0,i,j] for i in qRange1 for j in qRange1 if numpy.sqrt(i*i+j*j) > q_low]).astype("float")
     qPos    = numpy.concatenate((qPos0, qPos1, qPos2))
     qPos_full = numpy.array([[i,j,k] for i in qRange2 for j in qRange2 for k in qRange2]).astype("float")
+
     return (qmax, t_intens, intens_len, qPos, qPos_full)
 
 def zero_neg(x):
@@ -137,9 +137,14 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
 
 
 class EMCCaseGenerator(object):
+    """ Class that represents an EMC case. """
     def __init__(self, runLog=None):
         """
         Wrapper for initializing the essential data for EMC recon.
+
+        :param runLog: Flag that indicates where to save the runtime log.
+        :type runLog: str, default None (don't save log.)"
+
         """
         #Initialize essential parameters
         self.z = 0
@@ -161,9 +166,13 @@ class EMCCaseGenerator(object):
 
     def writeDetectorToFile(self, filename="detector.dat"):
         """
-        Writes computed detector and beamstop coordinates to output (default:detector.dat)
+        Writes computed detector and beamstop coordinates to output.
+
+        :param filename: Path of file where to write the detector data.
+        :type filename: str
         """
-        print_to_log("Writing detector to %s"%(filename), log_file=self.runLog)
+
+        _print_to_log("Writing detector to %s"%(filename), log_file=self.runLog)
         header = "%d\t%d\t%d\n" % (numpy.ceil(self.qmax), len(self.detector), len(self.beamstop))
         f = open(filename, 'w')
         f.write(header)
@@ -180,26 +189,41 @@ class EMCCaseGenerator(object):
         Gives (qx,qy,qz) position of pixels on Ewald sphere when given as input
         the (x,y,z)=(ii,jj,zL) position of pixel in the diffraction laboratory.
         The latter is measured in terms of the size of each realspace pixel.
+
+        :param ii: Pixel index in x direction
+        :type ii: int
+
+        :param jj: Pixel index in y direction
+        :type jj: int
+
+        :param zL: Distance of pixel from detector in units of detector size.
+        :type zL: float
         """
+
         v = numpy.array([ii,jj,zL])
         vDenom = numpy.sqrt(1 + (ii*ii + jj*jj)/(zL*zL))
+
         return v/vDenom - numpy.array([0,0,zL])
 
     def readGeomFromPhotonData(self, fn):
         """
-        Try to extract detector geometry from S2E photon files
+        Extract detector geometry from S2E photon files.
 
+        :param fn: Path to file to read.
+        :type fn: str
         """
-        print_to_log("Reading geometry file using file %s"%fn, log_file=self.runLog)
+
+        _print_to_log("Reading geometry file using file %s"%fn, log_file=self.runLog)
         f = h5py.File(fn, 'r')
         self.detectorDist = (f["params/geom/detectorDist"].value)
+
         #We expect the detector to always be square of length 2*self.numPixToEdge+1
         (r,c) = f["data/data"].shape
         if (r == c and (r%2==1)):
             self.numPixToEdge = (r-1)/2
         else:
             msg = "Your array has shape %d %d, Only odd-length square detectors allowed now. Quitting"%(r,c)
-            print_to_log(msg, log_file=self.runLog)
+            _print_to_log(msg, log_file=self.runLog)
             sys.exit()
         pixH = (f['params/geom/pixelHeight'].value)
         pixW = (f['params/geom/pixelWidth'].value)
@@ -216,7 +240,6 @@ class EMCCaseGenerator(object):
         self.detector = numpy.array(qualifiedDetectorPix)
 
         # qmin defaults to 2 pixel beamstop
-        # qmin = 1.4302966531242025 * (self.qmax / particleRadiusInPix)
         self.qmin = 2
         fQmin = numpy.floor(self.qmin)
         [x,y,z] = numpy.mgrid[-fQmin:fQmin+1, -fQmin:fQmin+1, -fQmin:fQmin+1]
@@ -226,25 +249,37 @@ class EMCCaseGenerator(object):
         """
         Read qx,qy,qz coordinates of detector and beamstop from detector.dat.
         """
-        f = open(fn, "r")
-        line1 = [int(x) for x in f.readline().split("\t")]
-        self.qmax = int(line1[0])
-        self.qmin = 2
+        with open(fn, "r") as f:
+            line1 = [int(x) for x in f.readline().split("\t")]
+            self.qmax = int(line1[0])
+            self.qmin = 2
 
-        d = f.readlines()
+            d = f.readlines()
+        f.close()
+
         dLoc = [[float(y) for y in x.split("\t")] for x in d]
         self.detector = numpy.array(dLoc[:line1[1]])
         self.beamstop = numpy.array(dLoc[line1[1]:])
-        f.close()
+
         return
 
     def writeSparsePhotonFile(self, fileList, outFN, outFNH5Avg):
         """
         Convert dense S2E file format to sparse EMC photons.dat format.
+
+        :param fileList: List of files to convert into one sparse photon file.
+        :type fileList: List ot str.
+
+        :param outFN: Filename of sparse photon file.
+        :type outFN: str, default 'photons.dat'
+
+        :param outFNH5Avg: Filename for averaged photon file.
+        :type outFNH5Avg: str
         """
+
         # Log: destination output to file
         msg = "Writing diffr output to %s"%outFN
-        print_to_log(msg, log_file=self.runLog)
+        _print_to_log(msg, log_file=self.runLog)
 
         # Define in-plane detector x,y coordinates
         [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
@@ -278,14 +313,14 @@ class EMCCaseGenerator(object):
 
         # Start stepping through diffraction images and writing them to sparse format
         msg = "Average intensities: %lf"%(totPhoton)
-        print_to_log(msg, log_file=self.runLog)
+        _print_to_log(msg, log_file=self.runLog)
         outf = open(outFN, "w")
         outf.write("%d %lf \n"%(len(fileList), meanPhoton))
         mask = flatMask.reshape(2*self.numPixToEdge+1, -1)
         avg = 0.*mask
 
         msg = "Converting individual data frames to sparse format %s"%("."*20)
-        print_to_log(msg, log_file=self.runLog)
+        _print_to_log(msg, log_file=self.runLog)
 
         for n,fn in enumerate(fileList):
             try:
@@ -314,11 +349,11 @@ class EMCCaseGenerator(object):
                 f.close()
             except:
                 msg = "Failed to read file #%d %s." % (n, fn)
-                print_to_log(msg, log_file=self.runLog)
+                _print_to_log(msg, log_file=self.runLog)
 
             if n%10 == 0:
                 msg = "Translated %d patterns"%n
-                print_to_log(msg, log_file=self.runLog)
+                _print_to_log(msg, log_file=self.runLog)
 
         outf.close()
 
@@ -332,6 +367,8 @@ class EMCCaseGenerator(object):
         """
         Shows detector pixels as points on scatter plot; could be slow for large detectors.
         """
+        # Commented out to avoid poping up of plots during calculation.
+        pass
         #if self.detector is not None:
             #fig = plt.figure()
             #ax = fig.add_subplot(111, projection='3d')
@@ -340,7 +377,7 @@ class EMCCaseGenerator(object):
             #plt.show()
         #else:
             #msg = "Detector not initiated."
-            #print_to_log(msg, log_file=self.runLog)
+            #_print_to_log(msg, log_file=self.runLog)
 
     # The following functions have not been tested. Use with caution!!!
     def makeTestParticleAndSupport(self, inParticleRadius=5.9, inDamping=1.5, inFrac=0.5, inPad=1.8):
@@ -411,7 +448,7 @@ class EMCCaseGenerator(object):
         self.numPixToEdge = numpy.floor(self.qmax / numpy.sqrt(zSq/(1.+zSq) + (zSq/numpy.sqrt(1+zSq) -self.z)))
         self.detectorDist = self.z * self.numPixToEdge
         msg = time.asctime() + ":: " +"(qmin, qmax, detectorDist)=(%lf, %lf, %lf)"%(self.qmin, self.qmax, self.detectorDist)
-        print_to_log(msg, log_file=self.runLog)
+        _print_to_log(msg, log_file=self.runLog)
 
         #make detector
         [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
@@ -510,22 +547,44 @@ class EMCCaseGenerator(object):
         #plt.show()
 
     def writeSupportToFile(self, filename="support.dat"):
+        """ Write the support range to a file.
+        :param filename: Path to file.
+        :type filename: str
+        """
+
         header = "%d\t%d\n" % (self.qmax, len(self.supportPositions))
-        f = open(filename, 'w')
-        f.write(header)
-        for i in self.supportPositions:
-            text = "%d\t%d\t%d\n" % (i[0], i[1], i[2])
-            f.write(text)
-        f.close()
+        with open(filename, 'w') as f:
+            f.write(header)
+            for i in self.supportPositions:
+                text = "%d\t%d\t%d\n" % (i[0], i[1], i[2])
+                f.write(text)
+            f.close()
 
     def writeDensityToFile(self, filename="density.dat"):
-        f = open(filename, "w")
-        self.density.tofile(f, sep="\t")
-        f.close()
+        """ Write electron density to a file.
+        :param filename: Path to file.
+        :type filename: str
+        """
+
+        with open(filename, "w") as f:
+            self.density.tofile(f, sep="\t")
+            f.close()
 
     def writeAllOuputToFile(self, supportFileName="support.dat", densityFileName="density.dat", detectorFileName="detector.dat", intensitiesFileName="intensity.dat"):
         """
         Convenience function for writing output
+
+        :param supportFileName: Path to file for support data.
+        :type supportFileName: str, default 'support.dat'
+
+        :param densityFileName: Path to file for density data.
+        :type densityFileName: str, default 'density.dat'
+
+        :param detectorFileName: Path to file for detector data.
+        :type detectorFileName: str, default 'detector.dat'
+
+        :param intensitiesFileName: Path to file for intensities data.
+        :type intensitiesFileName: str, default intensities.dat'
         """
         self.writeSupportToFile(supportFileName)
         self.writeDensityToFile(densityFileName)

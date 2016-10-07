@@ -27,25 +27,31 @@
 
 """
 import os
-from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
-from EMCOrientation import EMCOrientation
 from DMPhasing import DMPhasing
+from EMCOrientation import EMCOrientation
+from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
 
 class S2EReconstruction(AbstractPhotonAnalyzer):
     """
     Class representing photon data analysis for electron density reconstruction from 2D diffraction patterns.
     Uses the EMC orientation module and the DM phasing module.
+
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the reconstruction analyser.
 
-        @param  parameters : Dictionary of reconstruction parameters.
-        <br/><b>type</b> : dict
-        <br/><b>example</b> : parameters={}
+        :param parameters: The parameters for the reconstruction.
+        :type parameters: dict
+        :example parameters: parameters={'EMC_Parameters' : EMCOrientationParameters(), 'DM_Parameters' : DMPhasingParameters()} # Use default parameters for EMC and DM.
+
+        :param input_path: Path for input data.
+        :type input_path: str
+
+        :param output_path: Path where to write output to.
+        :type output_path: str
         """
 
         # Initialize base class.
@@ -96,8 +102,6 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         self.__emc = EMCOrientation(emc_parameters, self.input_path, intermediate_output_path )
         self.__dm = DMPhasing(dm_parameters, intermediate_output_path, self.output_path)
 
-
-
     def expectedData(self):
         """ Query for the data expected by the Analyzer. """
         return self.__expected_data
@@ -121,19 +125,21 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         """
         Private method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: The file where to save the object's data.
+        :type output_path: str
         """
         pass # No action required since output is written in backengine.
 
-
-
     def backengine(self):
+        """ Run the EMC and DM backengine executables. """
 
+        # Run EMC.
         emc_status = self.__emc.backengine()
+
+        # If EMC was not successful, return with error code.
         if  emc_status!= 0:
             return emc_status
-        dm_status = self.__dm.backengine()
 
-        return dm_status
+        # Else run DM.
+        return self.__dm.backengine()
+
