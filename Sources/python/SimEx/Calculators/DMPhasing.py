@@ -121,7 +121,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
 
         :return: 0 if the DM run was successful, 1 if not. """
 
-        status = self.run_dm()
+        status = self._run_dm()
         return status
 
 
@@ -157,7 +157,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
 
             # Compute autocorrelation and support
             #print_to_log("Computing autocorrelation...")
-            input_intens  = v_zero_neg(input_intens.ravel()).reshape(input_intens.shape)
+            input_intens  = _v_zero_neg(input_intens.ravel()).reshape(input_intens.shape)
             auto        = numpy.fft.fftshift(numpy.abs(numpy.fft.fftn(numpy.fft.ifftshift(input_intens))))
             #print_to_log("Using 2-means clustering to determine significant voxels in autocorrelation...")
             (a_0, a_1)  = _cluster_two_means(auto.ravel())

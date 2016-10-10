@@ -1,5 +1,5 @@
 {
-	"Name"  : "PerfectPhotonDetector",
+	"Name"  : "IdealPhotonDetector",
 	"Class" : "Detectors",
 	"Source": "default",
 	"Parameters Template" : "default"

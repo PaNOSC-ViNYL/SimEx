@@ -39,9 +39,11 @@ class IdealPhotonDetector(AbstractPhotonDetector):
     This is just a dummy calculator that copies input data to output data.
     """
 
-    def __init__(self, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
         Constructor for ideal photon detector.
+
+        :param parameters: Parameters for the Detector simulation.
 
         :param input_path: Path to input files for the detector simulation.
         :type input_path: str

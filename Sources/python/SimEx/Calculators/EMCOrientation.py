@@ -249,25 +249,25 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             msg = "Lock file in " + tmp_out_dir + ". "
             msg += "Photons.dat likely being written to tmpDir by another process. "
             msg += "Sleeping this process for %d s." % sleep_duration
-            print_to_log(msg, log_file=outputLog)
+            _print_to_log(msg, log_file=outputLog)
             time.sleep(sleep_duration)
 
         if not (os.path.isfile(sparsePhotonFile) and os.path.isfile(detectorFile)):
             msg = "Photons.dat and detector.dat not found in " + tmp_out_dir + ". Will create them now..."
-            print_to_log(msg=msg, log_file=outputLog)
+            _print_to_log(msg=msg, log_file=outputLog)
             os.system("touch %s" % lockFile)
             gen.readGeomFromPhotonData(photonFiles[0])
             #gen.readGeomFromPhotonData(photonFiles)
             gen.writeDetectorToFile(filename=detectorFile)
             gen.writeSparsePhotonFile(photonFiles, sparsePhotonFile, avgPatternFile)
-            print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=outputLog)
-            print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
+            _print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=outputLog)
+            _print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
             os.system("rm %s " % lockFile)
         else:
             msg = "Photons.dat and detector.dat already exists in " + tmp_out_dir + "."
-            print_to_log(msg=msg, log_file=outputLog)
+            _print_to_log(msg=msg, log_file=outputLog)
             gen.readGeomFromDetectorFile(detectorFile)
-            print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
+            _print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
 
 
         if not (os.path.isfile(os.path.join(run_instance_dir,"detector.dat"))):
@@ -311,7 +311,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             offset_iter = len(f["/history/intensities"].keys())
             f.close()
             msg = "Output will be appended to the results of %d iterations before this."%offset_iter
-            print_to_log(msg=msg, log_file=outputLog)
+            _print_to_log(msg=msg, log_file=outputLog)
 
         ###############################################################
         # Iterate EMC
@@ -329,10 +329,10 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                 diff = 1.
                 while (iter_num <= max_number_of_iterations):
                     if (iter_num > 1 and diff < min_error):
-                        print_to_log(msg="Error %0.3e is smaller than threshold %0.3e. Going to next quaternion."%(diff, min_error),
+                        _print_to_log(msg="Error %0.3e is smaller than threshold %0.3e. Going to next quaternion."%(diff, min_error),
                                 log_file=outputLog)
                         break
-                    print_to_log("Beginning iteration %d, with quaternion %d %s"%(iter_num+offset_iter, currQuat, "."*20),
+                    _print_to_log("Beginning iteration %d, with quaternion %d %s"%(iter_num+offset_iter, currQuat, "."*20),
                                 log_file=outputLog)
 
                     # Here is the actual timed EMC iteration, which calls the EMC.c code.
@@ -343,7 +343,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                     process_handle = subprocess.Popen(command_sequence)
                     process_handle.wait()
                     time_taken = time.clock() - start_time
-                    print_to_log("Took %lf s"%(time_taken),
+                    _print_to_log("Took %lf s"%(time_taken),
                                 log_file=outputLog)
 
                     # Read intermediate output of EMC.c and stuff them into a h5 file
@@ -372,7 +372,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
                     gg = f["history/error"]
                     gg.create_dataset("%04d"%(iter_num + offset_iter), data=diff)
-                    print_to_log("rms change in intensities %e"%(diff),
+                    _print_to_log("rms change in intensities %e"%(diff),
                                 log_file=outputLog)
 
                     gg = f["history/angle"]
@@ -400,13 +400,13 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
                     os.system("cp finish_intensity.dat start_intensity.dat")
 
-                    print_to_log("Iteration number %d completed"%(iter_num),
+                    _print_to_log("Iteration number %d completed"%(iter_num),
                                 log_file=outputLog)
                     iter_num += 1
 
                 currQuat += 1
 
-            print_to_log("All EMC iterations completed", log_file=outputLog)
+            _print_to_log("All EMC iterations completed", log_file=outputLog)
 
             os.chdir(cwd)
             return 0
