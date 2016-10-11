@@ -39,6 +39,7 @@ addons:
       - gfortran
       - unzip
       - cython
+      - sphinx-common
 
 cache:
   apt: true
