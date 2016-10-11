@@ -76,6 +76,9 @@ script:
   # unit tests
   - cd ../Tests/python/unittest/
   - python Test.py -v
+  # doc test.
+  - cd ../../doc/
+  - python Test.py -v
   # functional tests
   #- cd ../functest/
   #- python Test.py -v
