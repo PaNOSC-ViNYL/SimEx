@@ -19,10 +19,11 @@ import os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # Check if 'build' is in path
-if 'build' in os.path.split(os.path.abspath( os.path.dirname(__file__) ) ):
-    simex_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..', '..', '..', 'Sources', 'python'))
+cwd = os.getcwd()
+if 'build' in cwd:
+    simex_path = os.path.abspath(os.path.join(cwd, '..','..', '..', '..', 'Sources', 'python'))
 else:
-    simex_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..', 'python'))
+    simex_path = os.path.abspath(os.path.join(cwd, '..','..', 'python'))
 
 print "\n*********************************************\nINFO: Inserting %s in sys.path at position 1.\n*********************************************\n" % (simex_path)
 sys.path.insert(1, simex_path )
