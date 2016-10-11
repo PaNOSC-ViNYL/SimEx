@@ -68,7 +68,7 @@ script:
   # build & install
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV ..
+  - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DBUILD_DOC=ON ..
   - make
   - make install
   # unit tests

@@ -19,8 +19,4 @@ if (NOT DEVELOPER_INSTALL)
 		    PATTERN "CMakeLists.txt" EXCLUDE )
 endif()
 
-# Add documentation
-option (BUILD_DOC "Build the documentation." OFF)
-if (BUILD_DOC)
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/doc")
-endif()
+

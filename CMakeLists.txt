@@ -75,10 +75,12 @@ install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
 install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
         DESTINATION ${BINDIR})
 
-
+# Add documentation
+option (BUILD_DOC "Build the documentation." OFF)
+if (BUILD_DOC)
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Sources/doc")
+endif()
 
 if (PACKAGE_MAKE)
   add_subdirectory (Packages)
 endif()
-
-
