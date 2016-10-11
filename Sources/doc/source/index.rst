@@ -128,6 +128,38 @@ ii. Wave propagation with OpenMP::
 
     $> cmake -DSRW_OPTIMIZED=ON ..
 
+ii. Build the documentation::
+
+    $> cmake -DBUILD_DOC=ON ..
+
+iv. Developer install::
+
+    $> cmake -DCMAKE_INSTALL_PREFIX=.. ..
+
+    This is recommended for simex_platform developers. In this way, you will be able to run the unittests without having to recompile.
+
+v. Create deb packages::
+
+    $> cmake -DPACKAGE_MAKE=ON -DCMAKE_INSTALL_PREFIX=/usr ..
+    $> make package
+
+  Probably you will have to call cmake two times because for some unknown reason CMake creates `.tgz` archives in the first time.
+
+  The package can then be installed system-wide along with all necessary dependencies::
+
+    $> dpkg -i <package_name>
+    $> apt-get install -f
+
+  on another computer with Debian based OS. Simex will be
+  installed in `/usr/...` , Tests are installed in
+  `/usr/share/simex/...` and should be system-wide available.
+  Calling `dpkg` with `--instdir` option allows to change
+  installation dir. In this case `simex_vars.sh` should be
+  modified manually to set paths correctly.
+
+
+Troubleshooting
+"""""""""""""""
 On some systems cmake fails to find the paths for some of the
 third party libraries like boost, armadillo etc. If this should be the case,
 consult the corresponding FindXXX.cmake scripts in the CMake directory and
@@ -161,35 +193,6 @@ Finally, after make returns, install the compiled software into the installation
 Make sure that the user has write access to the installation directory, or use::
 
     $> sudo make install
-
-Developer mode installation
-```````````````````````````
-
-i. For simex_platform developers, it is recommended to install the platform
-directly into the source tree, e.g. give the top level directory to the DCMAKE_INSTALL_PREFIX directive, e.g::
-
-$> cmake -DCMAKE_INSTALL_PREFIX=.. ..
-
-supposing the build directory is located in the top level source directory.
-In this way, you will be able to run the unittests without having to recompile.
-
-ii. There is an option to create a debian (.deb) package::
-
-    $> cmake -DPACKAGE_MAKE=ON -DCMAKE_INSTALL_PREFIX=/usr <PATH TO SOURCE>
-    $> make package
-
-Probably you will have to call cmake two times because for some unknown reason CMake creates `.tgz` archives in the first time.
-
-The package can then be installed system-wide along with all necessary dependencies::
-
-    $> dpkg -i <package_name>
-    $> apt-get install -f
-
-on another computer with Debian based OS.
-
-Simex will be installed in `/usr/...` , Tests are installed in `/usr/share/simex/...` and should be system-wide available.
-Calling `dpkg` with `--instdir` option allows to change installation dir. In this case `simex_vars.sh` should be modified manually to set paths correctly.
-
 
 Environment settings
 --------------------
