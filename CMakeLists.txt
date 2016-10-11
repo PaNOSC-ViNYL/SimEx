@@ -58,7 +58,7 @@ foreach(module ${SIMEX_MODULES})
         add_subdirectory("${SIMEX_MODULES_ROOT}/${module}")
 	    message (STATUS "*********************************************************")
 	endif()
-endforeach()	
+endforeach()
 
 # create simex_vars.sh file
 if (DEVELOPER_INSTALL)

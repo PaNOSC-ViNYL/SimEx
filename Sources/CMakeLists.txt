@@ -15,7 +15,12 @@ FIND_PACKAGE (LAPACK REQUIRED)
 if (NOT DEVELOPER_INSTALL)
 	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/  DESTINATION ${PYPATH}
 		    PATTERN "*.pyc" EXCLUDE
-		    PATTERN ".git*" EXCLUDE 
-		    PATTERN "CMakeLists.txt" EXCLUDE )	
+		    PATTERN ".git*" EXCLUDE
+		    PATTERN "CMakeLists.txt" EXCLUDE )
 endif()
-	    
+
+# Add documentation
+option (BUILD_DOC "Build the documentation." OFF)
+if (BUILD_DOC)
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/doc")
+endif()
