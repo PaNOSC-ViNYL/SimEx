@@ -26,9 +26,9 @@
     @creation 20151007
 
 """
+from abc import ABCMeta, abstractmethod
 import exceptions
 import os
-from abc import ABCMeta, abstractmethod
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -43,18 +43,15 @@ class AbstractBaseCalculator(object):
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Base Calculator.
 
-        @param control_parameters : Dictionary for the parameters of the calculation (not data).
-        <br/><b>type</b> : dict
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
 
-        @param input_path: Path to hdf5 file holding the input data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
 
-        @param output_path: Path to hdf5 file for output.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
 
         # Check parameters.
@@ -172,10 +169,14 @@ def checkAndSetBaseCalculator(var=None, default=None):
     """
     Check if passed object is an AbstractBaseCalculator instance. If non is given, set to given default.
 
-    @param var : The object to check.
-    @param default : The default to use.
-    @return : The checked photon source object.
-    @throw : RuntimeError if no valid BaseCalculator was given.
+    :param var: The object to check.
+
+    :param default: The default to use.
+
+    :return: Te checked photon source object.
+
+    :raises RuntimeError: if no valid BaseCalculator was given.
+
     """
 
     return checkAndSetInstance(AbstractBaseCalculator, var, default)
@@ -183,9 +184,10 @@ def checkAndSetBaseCalculator(var=None, default=None):
 def checkAndSetParameters(parameters):
     """ Utility to check if the 'parameters' argument is valid input.
 
-    @param parameters : The parameters object to check.
-    <br/><b>type</b> : dict or AbstractCalculatorParameters
-    @return : The checked parameters object.
+    :param parameters: The parameters object to check.
+    :type parameters: dict or AbstractCalculatorParameters
+
+    :return: The checked parameters object.
     """
     if parameters is None:
         parameters = {}

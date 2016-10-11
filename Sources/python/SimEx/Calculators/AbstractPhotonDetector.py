@@ -45,6 +45,7 @@ class AbstractPhotonDetector(AbstractBaseCalculator):
         """
         Constructor for the Abstract Photon Detector.
         """
+
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'diffr')
         # Check output path. Set default if none given.
@@ -58,11 +59,10 @@ def checkAndSetPhotonDetector(var=None, default=None):
     """
     Check if passed object is an AbstractPhotonDetector instance. If non is given, set to given default.
 
-    @param var : The object to check.
-    @param default : The default to use.
-    @return : The checked photon source object.
-    @throw : RuntimeError if no valid PhotonDetector was given.
+    :param var: The object to check.
+    :param default: The default to use.
+    :return: The checked photon source object.
+    :raises RuntimeError:  if no valid PhotonDetector was given.
     """
 
     return checkAndSetInstance(AbstractPhotonDetector, var, default)
-

@@ -54,25 +54,20 @@ class DMPhasingParameters(AbstractCalculatorParameters):
                 ):
         """
         Constructor for the DMPhasingParameters.
-        @param number_of_trials : How many trials to run in each iteration.
-        @type : int (n>0)
-        @default : 500
+        :param number_of_trials: How many trials to run in each iteration.
+        :type number_of_trials: int>0, default 500
 
-        @param number_of_iterations : Maximum number of DM iterations.
-        @type : int (n>0)
-        @default : 50
+        :param number_of_iterations: Maximum number of DM iterations.
+        :type number_of_iterations: int>0, default 50
 
-        @param averaging_start : Start averaging after this many runs.
-        @type : int (n>0)
-        @default : 15
+        :param averaging_start: Start averaging after this many runs.
+        :type averaging: int>0, default 15
 
-        @param leash : DM leash parameter.
-        @type : float (>0)
-        @default : 0.2
+        :param leash: DM leash parameter.
+        :type leash: float>0, default 0.2
 
-        @param number_of_shrink_cycles : DM shrink cycles.
-        @type : int (n>0)
-        @default : 10
+        :param number_of_shrink_cycles: DM shrink cycles.
+        :type number_of_shrink_cycles: int>0, default 10
         """
 
         # Legacy support for dictionaries.
@@ -99,7 +94,8 @@ class DMPhasingParameters(AbstractCalculatorParameters):
     @number_of_trials.setter
     def number_of_trials(self, value):
         """ Set the 'number_of_trials' parameter to a given value.
-        @param value : The value to set 'number_of_trials' to.
+        :param value: The value to set 'number_of_trials' to.
+        :type value: int
         """
         number_of_trials = checkAndSetInstance( int, value, 500 )
 
@@ -115,7 +111,8 @@ class DMPhasingParameters(AbstractCalculatorParameters):
     @number_of_iterations.setter
     def number_of_iterations(self, value):
         """ Set the 'number_of_iterations' parameter to a given value.
-        @param value : The value to set 'number_of_iterations' to.
+        :param value: The value to set 'number_of_iterations' to.
+        :type value: int
         """
         number_of_iterations = checkAndSetInstance( int, value, 50 )
 
@@ -131,7 +128,8 @@ class DMPhasingParameters(AbstractCalculatorParameters):
     @leash.setter
     def leash(self, value):
         """ Set the 'leash' parameter to a given value.
-        @param value : The value to set 'leash' to.
+        :param value: The value to set 'leash' to.
+        :type value: float
         """
         leash = checkAndSetInstance( float, value, 0.2 )
 
@@ -147,7 +145,8 @@ class DMPhasingParameters(AbstractCalculatorParameters):
     @averaging_start.setter
     def averaging_start(self, value):
         """ Set the 'averaging_start' parameter to a given value.
-        @param value : The value to set 'averaging_start' to.
+        :param value: The value to set 'averaging_start' to.
+        :type value: int
         """
         averaging_start = checkAndSetInstance( int, value, 15 )
 
@@ -163,7 +162,8 @@ class DMPhasingParameters(AbstractCalculatorParameters):
     @number_of_shrink_cycles.setter
     def number_of_shrink_cycles(self, value):
         """ Set the 'number_of_shrink_cycles' parameter to a given value.
-        @param value : The value to set 'number_of_shrink_cycles' to.
+        :param value : The value to set 'number_of_shrink_cycles' to.
+        :type value: int
         """
         number_of_shrink_cycles = checkAndSetInstance( int, value, 10 )
         if number_of_shrink_cycles > 0:

@@ -34,7 +34,6 @@ import os
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-
 class AbstractPhotonAnalyzer(AbstractBaseCalculator):
     """
     Class representing an abstract photon analyzer, serving as API for actual photon analysis calculators.
@@ -44,8 +43,17 @@ class AbstractPhotonAnalyzer(AbstractBaseCalculator):
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Photon Analyzer.
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
+
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'detector')
         # Check output path. Set default if none given.
@@ -62,11 +70,10 @@ def checkAndSetPhotonAnalyzer(var=None, default=None):
     """
     Check if passed object is an AbstractPhotonAnalyzer instance. If non is given, set to given default.
 
-    @param var : The object to check.
-    @param default : The default to use.
-    @return : The checked photon source object.
-    @throw : RuntimeError if no valid PhotonAnalyzer was given.
+    :param var: The object to check.
+    :param default: The default to use.
+    :return: The checked photon source object.
+    :raises RuntimeError: if no valid PhotonAnalyzer was given.
     """
 
     return checkAndSetInstance(AbstractPhotonAnalyzer, var, default)
-

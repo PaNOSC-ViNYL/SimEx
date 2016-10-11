@@ -55,29 +55,23 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
                 ):
         """
         Constructor for the EMCOrientationParameters.
-        @param initial_number_of_quaternions : Number of quaternions to start the EMC algorithm.
-        @type : int (0<n<10)
-        @default : 1
+        :param initial_number_of_quaternions: Number of quaternions to start the EMC algorithm.
+        :type initial_number_of_quaternions: int (0<n<10), default 1
 
-        @param max_number_of_quaternions : Maximum number of quaternions for the EMC algorithm.
-        @type : int (initial_number_of_quaternions < n <= 10)
-        @default : initial_number_of_quaternions + 1
+        :param max_number_of_quaternions: Maximum number of quaternions for the EMC algorithm.
+        :type max_number_of_quaternions: int (initial_number_of_quaternions < n <= 10), default initial_number_of_quaternions + 1
 
-        @param min_error : Relative convergence criterion (Go to next quaternion is relative error gets below this value.)
-        @type : float (>0)
-        @default : 1.e-6
+        :param min_error: Relative convergence criterion (Go to next quaternion is relative error gets below this value.)
+        :type min_error: float (>0), default 1.e-6
 
-        @param max_number_of_iterations : Stop the EMC algorithm after this number of iterations.
-        @type : int ( >0 )
-        @default : 100
+        :param max_number_of_iterations: Stop the EMC algorithm after this number of iterations.
+        :type max_number_of_iterations: int (>0), default 100
 
-        @param beamstop : Whether to apply a "center + strip" beamstop to the pixel map.
-        @type : bool
-        @default : True
+        :param beamstop: Whether to apply a "center + strip" beamstop to the pixel map.
+        :type beamstop: bool, default True
 
-        @param detailed_output : Whether to write detailed info to log.
-        @type : bool
-        @default : True
+        :param detailed_output: Whether to write detailed info to log.
+        :type detailed_output: bool, default True
 
         """
         # Legacy support for dictionaries.
@@ -106,7 +100,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
     @initial_number_of_quaternions.setter
     def initial_number_of_quaternions(self, value):
         """ Set the 'initial_number_of_quaternions' parameter to a given value.
-        @param value : The value to set 'initial_number_of_quaternions' to.
+        :param value: The value to set 'initial_number_of_quaternions' to.
         """
         initial_number_of_quaternions = checkAndSetInstance( int, value, 1 )
 
@@ -122,7 +116,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
     @max_number_of_quaternions.setter
     def max_number_of_quaternions(self, value):
         """ Set the 'max_number_of_quaternions' parameter to a given value.
-        @param value : The value to set 'max_number_of_quaternions' to.
+        :param value: The value to set 'max_number_of_quaternions' to.
         """
         max_number_of_quaternions = checkAndSetInstance( int, value, self.__initial_number_of_quaternions+1 )
 
@@ -138,7 +132,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
     @max_number_of_iterations.setter
     def max_number_of_iterations(self, value):
         """ Set the 'max_number_of_iterations' parameter to a given value.
-        @param value : The value to set 'max_number_of_iterations' to.
+        :param value: The value to set 'max_number_of_iterations' to.
         """
         max_number_of_iterations = checkAndSetInstance( int, value, 100 )
 
@@ -154,7 +148,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
     @min_error.setter
     def min_error(self, value):
         """ Set the 'min_error' parameter to a given value.
-        @param value : The value to set 'min_error' to.
+        :param value: The value to set 'min_error' to.
         """
         min_error = checkAndSetInstance( float, value, 1.e-5 )
 
@@ -170,7 +164,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
     @beamstop.setter
     def beamstop(self, value):
         """ Set the 'beamstop' parameter to a given value.
-        @param value : The value to set 'beamstop' to.
+        :param value: The value to set 'beamstop' to.
         """
         self.__beamstop = checkAndSetInstance( bool, value, True )
 
@@ -181,7 +175,6 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
     @detailed_output.setter
     def detailed_output(self, value):
         """ Set the 'detailed_output' parameter to a given value.
-        @param value : The value to set 'detailed_output' to.
+        :param value: The value to set 'detailed_output' to.
         """
         self.__detailed_output = checkAndSetInstance( bool, value, True )
-

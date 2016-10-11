@@ -33,7 +33,6 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-
 class AbstractPhotonDiffractor(AbstractBaseCalculator):
     """
     Class representing an abstract photon diffractor, serving as API for actual photon diffraction simulation calculators.
@@ -44,8 +43,17 @@ class AbstractPhotonDiffractor(AbstractBaseCalculator):
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Photon Diffractor.
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
+
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'pmi')
         # Check output path. Set default if none given.

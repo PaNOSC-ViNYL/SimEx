@@ -30,11 +30,12 @@ import inspect
 import os
 import subprocess
 
+import prepHDF5
+
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
-import prepHDF5
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -43,11 +44,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon propagator.
 
-        @param  parameters : singFEL parameters.
-        <br/><b>type</b>   : SingFELPhotonDiffractorParameters instance.
-        @default : None.
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || SingFELPhotonDiffractorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
 
         if isinstance( parameters, dict ):
@@ -184,8 +189,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Private method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: The file where to save the object's data.
+        :type output_path: string, default b
         """
         pass # No action required since output is written in backengine.

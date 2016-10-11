@@ -21,61 +21,59 @@
 
 """ Module that holds the WavePropagator class.
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20160321
+    :author: CFG
+    :institution: XFEL
+    :creation: 20160321
 
 """
-import os
-import h5py
 from wpg import Beamline, Wavefront
 from wpg.srwlib import srwl
+import h5py
+import os
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
+from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import wpg_to_opmd
 
 
 class WavePropagator(AbstractPhotonPropagator):
     """
-    Class representing a photon propagator using wave optics through WPG.
+    Class representing a photon propagator that uses wave optics.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon propagator.
 
-        @param  parameters  : Parameters steering the propagation of photons.
-        <br/><b>type</b>               : dict
+        :param parameters: Parameters steering the propagation of photons.
+        :type parameters: WavePropagatorParameters
 
-        @param  input_path  : Location of input data for the photon propagation.
-        <br/><b>type</b>               : string
+        :param input_path: Location of input data for the photon propagation.
+        :type input_path: str
 
-        @param  output_path : Location of output data for the photon propagation.
-        <br/><b>type</b>               : string
+        :param output_path: Location of output data for the photon propagation.
+        :type output_path: str
         """
 
-        # Check if beamline was given.
-        if isinstance(parameters, Beamline):
-            parameters = {'beamline' : parameters}
-
-        # Raise if no beamline in parameters.
-        if parameters is None or not 'beamline' in  parameters.keys():
-            raise RuntimeError( 'The parameters argument must be an instance of wpg.Beamline or a dict containing the key "beamline" and an instance of wpg.Beamline as the corresponding value.')
+        # DCheck (and set) parameters.
+        parameters = checkAndSetInstance(WavePropagatorParameters, parameters, WavePropagatorParameters() )
 
         # Initialize base class.
         super(WavePropagator, self).__init__(parameters,input_path,output_path)
 
-        # Take reference to beamline.
-        self.__beamline = parameters['beamline']
-
 
     def backengine(self):
-        """ This method drives the backengine code, in this case the WPG interface to SRW."""
+        """ This method drives the backengine code, in this case the WPG interface to SRW.
+
+        :return: 0 if WPG run was successful, 1 if not.
+
+        """
 
         # Switch to frequency representation.
         srwl.SetRepresElecField(self.__wavefront._srwl_wf, 'f') # <---- switch to frequency domain
 
         # Propagate through beamline.
-        self.__beamline.propagate(self.__wavefront)
+        self.parameters.beamline.propagate(self.__wavefront)
 
         # Switch back to time representation.
         srwl.SetRepresElecField(self.__wavefront._srwl_wf, 't')
@@ -84,7 +82,11 @@ class WavePropagator(AbstractPhotonPropagator):
 
     @property
     def data(self):
-        """ Query for the field data. """
+        """ Query for the field data.
+
+        :return: The WPG wavefront data.
+
+        """
         return self.__data
 
     def _readH5(self):
@@ -101,15 +103,18 @@ class WavePropagator(AbstractPhotonPropagator):
         self.__wavefront.load_hdf5(self.input_path)
 
     def saveH5(self):
-        """ """
         """
-        Private method to save the object to a file.
+        Method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path:   The file where to save the wavefront data.
+        :type output_path:    str, default 'prop_out.h5'
+
         """
 
         # Write data to hdf file using wpg interface function.
-
         self.__wavefront.store_hdf5(self.output_path)
+
+        # Write openPMD file if requested.
+        if self.parameters.use_opmd:
+            wpg_to_opmd.convertToOPMD( self.output_path )
+

@@ -33,7 +33,7 @@ from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
 from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
 from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
-from SimEx.Calculators.PerfectPhotonDetector import PerfectPhotonDetector
+from SimEx.Calculators.IdealPhotonDetector import IdealPhotonDetector
 from SimEx.Calculators.S2EReconstruction import S2EReconstruction
 
 from SimEx.PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
@@ -95,7 +95,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
-        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_detector = IdealPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
         photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
 
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
@@ -136,7 +136,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
-        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_detector = IdealPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
         photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
 
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
@@ -182,7 +182,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
-        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_detector = IdealPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
         photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
 
         # Check wrong source.
@@ -309,7 +309,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                    }
         photon_diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=diffr_input, output_path='diffr_out.h5')
 
-        photon_detector = PerfectPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
+        photon_detector = IdealPhotonDetector(parameters = None, input_path='diffr_out.h5', output_path='detector_out.h5')
         photon_analyzer = S2EReconstruction(parameters=None, input_path='detector_out.h5', output_path='analyzer_out.h5')
 
         pxs = PhotonExperimentSimulation(photon_source=photon_source,
@@ -387,7 +387,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                 output_path='diffr')
 
         # Perfect detector.
-        photon_detector = PerfectPhotonDetector(
+        photon_detector = IdealPhotonDetector(
                 parameters = None,
                 input_path='diffr',
                 output_path='detector')

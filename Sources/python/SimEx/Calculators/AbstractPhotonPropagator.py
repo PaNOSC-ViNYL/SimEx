@@ -46,8 +46,17 @@ class AbstractPhotonPropagator(AbstractBaseCalculator):
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Photon Propagator.
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
+
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'source')
         # Check output path. Set default if none given.
@@ -136,7 +145,7 @@ class AbstractPhotonPropagator(AbstractBaseCalculator):
         """
         Return the list of expected data sets with full paths.
 
-        @return : List of strings, e.g. [/data/data1, /params/params1']
+        :return: List of strings, e.g. ['/data/data1', '/params/params1']
         """
         return self.__expected_data
 
@@ -144,7 +153,7 @@ class AbstractPhotonPropagator(AbstractBaseCalculator):
         """
         Return the list of provided data sets with full paths.
 
-        @return : List of strings, e.g. [/data/data1, /params/params1']
+        :return: List of strings, e.g. [/data/data1, /params/params1']
         """
         return self.__provided_data
 
@@ -153,11 +162,10 @@ def checkAndSetPhotonPropagator(var=None, default=None):
     """
     Check if passed object is an AbstractPhotonPropagator instance. If non is given, set to given default.
 
-    @param var : The object to check.
-    @param default : The default to use.
-    @return : The checked photon source object.
-    @throw : RuntimeError if no valid PhotonPropagator was given.
+    :param var: The object to check
+    :param default: The default to use
+    :return: The checked photon source object
+    :raise RuntimeError: if no valid PhotonPropagator was given.
     """
 
     return checkAndSetInstance(AbstractPhotonPropagator, var, default)
-
