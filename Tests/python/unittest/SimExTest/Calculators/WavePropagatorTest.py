@@ -131,7 +131,6 @@ class WavePropagatorTest(unittest.TestCase):
 
 
 
-    @unittest.skip("Triggers segfault from time to time, see #39.")
     def testReadH5ExceptionInput(self):
         """ Test exception raises if input is not a valid h5 file. """
         # Define a beamline.
@@ -147,6 +146,7 @@ class WavePropagatorTest(unittest.TestCase):
         # Check exception raises when attempting to read.
         self.assertRaises( IOError, propagator._readH5 )
 
+    @unittest.skip("Triggers segfault from time to time, see #39.")
     def testReadCalculateWrite(self):
         """ Test a backengine run with a single input file. """
         # Define a beamline.
