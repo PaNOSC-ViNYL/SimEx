@@ -18,16 +18,9 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# Check if 'build' is in path
-cwd = os.getcwd()
-if 'build' in cwd:
-    simex_path = os.path.abspath(os.path.join(cwd, '..','..', '..', '..', 'Sources', 'python'))
-else:
-    simex_path = os.path.abspath(os.path.join(cwd, '..','..', 'python'))
 
-print "\n*********************************************\nINFO: Inserting %s in sys.path at position 1.\n*********************************************\n" % (simex_path)
-sys.path.insert(1, simex_path )
-print "\n*********************************************\nINFO: sys.path =  %s.\n*********************************************\n" % (sys.path)
+# Make sure simex_vars.sh has been sourced.
+
 import breathe
 # -- General configuration ------------------------------------------------
 

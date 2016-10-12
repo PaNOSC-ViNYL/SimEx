@@ -24,7 +24,6 @@ export Boost_NO_SYSTEM_PATHS=ON
 export ARMA_DIR=/usr
 
 cmake -DSRW_OPTIMIZED=ON \
-      -DBUILD_DOC=ON \
       -DDEVELOPER_INSTALL=ON \
       -DCMAKE_INSTALL_PREFIX=$ROOT_DIR \
       $ROOT_DIR
