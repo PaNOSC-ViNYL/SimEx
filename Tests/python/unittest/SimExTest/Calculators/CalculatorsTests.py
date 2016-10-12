@@ -38,7 +38,7 @@ def suite():
              unittest.makeSuite(XFELPhotonPropagatorTest,               'test'),
              unittest.makeSuite(WavePropagatorTest,                     'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
-             unittest.makeSuite(FEFFPhotonMatterInteractorTest,         'test'),
+             #unittest.makeSuite(FEFFPhotonMatterInteractorTest,         'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
              )

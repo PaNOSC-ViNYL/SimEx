@@ -23,7 +23,7 @@
 
     @author : CFG
     @institution : XFEL
-    @creation 20151215
+    @creation 20161011
 
 """
 import h5py
@@ -76,6 +76,45 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         feff = FEFFPhotonMatterInteractor()
 
         self.assertIsInstance( feff, AbstractPhotonInteractor )
+
+
+class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
+    """ Test class for the FEFFPhotonMatterInteractorParameters class. """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__dirs_to_remove = []
+
+    def tearDown(self):
+        """ Tearing down a test. """
+        # Clean up.
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for p in self.__dirs_to_remove:
+            if os.path.isdir(p):
+                shutil.rmtree(p)
+
+    def testShapedConstruction(self):
+        """ Testing the construction of the class with parameters. """
+        self.assertTrue( False )
+
+    def testDefaultConstruction(self):
+        """ Testing the default construction of the class. """
+
+        feff = FEFFPhotonMatterInteractorParameters()
+
+        self.assertIsInstance( feff, AbstractCalculatorParameters )
+
 
 if __name__ == '__main__':
     unittest.main()
