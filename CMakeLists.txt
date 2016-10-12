@@ -58,7 +58,7 @@ foreach(module ${SIMEX_MODULES})
         add_subdirectory("${SIMEX_MODULES_ROOT}/${module}")
 	    message (STATUS "*********************************************************")
 	endif()
-endforeach()	
+endforeach()
 
 # create simex_vars.sh file
 if (DEVELOPER_INSTALL)
@@ -75,10 +75,6 @@ install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
 install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
         DESTINATION ${BINDIR})
 
-
-
 if (PACKAGE_MAKE)
   add_subdirectory (Packages)
 endif()
-
-
