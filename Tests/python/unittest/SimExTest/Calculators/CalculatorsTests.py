@@ -27,6 +27,7 @@ from XFELPhotonSourceTest import XFELPhotonSourceTest
 from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from WavePropagatorTest import WavePropagatorTest
 from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
+from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
 from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from S2EReconstructionTest import S2EReconstructionTest
 
@@ -37,6 +38,7 @@ def suite():
              unittest.makeSuite(XFELPhotonPropagatorTest,               'test'),
              unittest.makeSuite(WavePropagatorTest,                     'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
+             unittest.makeSuite(FEFFPhotonMatterInteractorTest,         'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
              )

@@ -3,6 +3,10 @@
 # Sample installation script. Adjust lines 5,15,16,17 according to system
 # and personal taste.
 
+# Compilers
+export FC=/opt/intel/bin/ifort
+#FC=/usr/bin/gfortran
+
 ROOT_DIR=$PWD
 
 # Check for existing build directory, remove if foun.d
@@ -25,12 +29,12 @@ export ARMA_DIR=/usr
 cmake -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=ON \
       -DCMAKE_INSTALL_PREFIX=$ROOT_DIR \
-      -DSingFElPhotonDiffractor=OFF \
-      -Ds2e=OFF \
-      -DS2EReconstruction_EMC=OFF\
-      -DS2EReconstruction_DM=OFF\
-      -Dwpg=OFF\
-      -Dprop=OFF\
+      -DSingFElPhotonDiffractor=ON \
+      -Ds2e=ON \
+      -DS2EReconstruction_EMC=ON\
+      -DS2EReconstruction_DM=ON\
+      -Dwpg=ON\
+      -Dprop=ON\
       -DFEFFPhotonInteractor=ON\
       $ROOT_DIR
 
