@@ -78,7 +78,7 @@ script:
   - python Test.py -v
   # build doc.
   - source $VIRTUAL_ENV/bin/simex_vars.sh
-  - cd ../../../Source/doc
+  - cd ../../../Sources/doc
   - make html
   # Test doc.
   - cd ../../Tests/doc
