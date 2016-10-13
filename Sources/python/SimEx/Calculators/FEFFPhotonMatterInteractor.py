@@ -26,9 +26,10 @@
     @creation 20161011
 
 """
-import os
+import os, sys
 import h5py
 import subprocess
+
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
@@ -266,11 +267,29 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         if self.__finalized:
             return
 
-        else: ### TODO
-            if False:
-                self.__finalized = True
+        else:
+            # Finalize potentials.
+            self.__potential_list = []
 
-    def serialize(self):
+            # Get atoms.
+            atoms = self.atoms
+            # Get potential indices.
+            potential_indices = [atom[2] for atom in atoms]
+            symbols = [atom[1] for atom in atoms]
+
+            # Sort and set.
+            unique_indices = set(potential_indices)
+
+            # Loop over all unique potential indices and aggregate the potential information.
+            for ui in unique_indices:
+                index = potential_indices.index(ui)
+                symbol = atoms[index][1] # Returns first found.
+                atomic_number = ALL_ELEMENTS.index(symbol)+1
+                self.__potential_list.append([ui, atomic_number, symbol])
+
+            self.__finalized = True
+
+    def serialize(self, stream=sys.stdout ):
         """ Serialize the parameters, i.e. write the feff.inp file. """
 
         # Only possible if finalized.
@@ -278,7 +297,24 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             raise RuntimeError("Only finalized parameters can be serialized. Call the finalize() method before serialize().")
 
         else:
-            pass ### TODO
+
+            stream.write("EDGE    %s\n" % (self.edge) )
+            stream.write("S02     %f\n" % (self.amplitude_reduction_factor) )
+            stream.write("CONTROL 1 1 1 1 1 1 \n")
+            stream.write("PRINT   0 0 0 0 0 0 \n")
+            stream.write("RPATH   %f\n" % (self.effective_path_distance) )
+            stream.write("EXAFS\n")
+            stream.write("\n")
+            stream.write("POTENTIALS\n")
+            for potential in self.__potential_list:
+                stream.write("%d      %d      %s\n" % (potential[0], potential[1], potential[2]) )
+            stream.write("\n")
+            stream.write("ATOMS\n")
+            for atom in self.atoms:
+                stream.write("%6.5f      %6.5f      %6.5f      %d\n" % (atom[0][0], atom[0][1], atom[0][2], atom[2]) )
+
+            stream.write("END")
+
 
 def _checkAndSetAtoms(value):
     """ """

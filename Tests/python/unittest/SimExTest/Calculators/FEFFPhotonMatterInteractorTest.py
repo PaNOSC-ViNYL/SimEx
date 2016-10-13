@@ -382,20 +382,134 @@ class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Float ok.
         self.assertEqual( _checkAndSetEffectivePathDistance( 0.5), 0.5 )
 
-    def testSerialize(self):
-        """ Check that the serialize() method produces a valid feff.inp file."""
-
+    def testFinalize(self):
+        # Setup parameters.
         feff_parameters = FEFFPhotonMatterInteractorParameters(
                 atoms=self.__atoms,
                 potentials=self.__potentials,
                 edge=self.__edge,
-                effective_path_distance=self.__effective_path_distance,
-                amplitude_reduction_factor=self.__amplitude_reduction_factor,
+                effective_path_distance=5.5,
+                amplitude_reduction_factor=1.0,
+                )
+
+        # Get potential list.
+        potential_list = feff_parameters._FEFFPhotonMatterInteractorParameters__potential_list
+
+        self.assertEqual( potential_list, [[0,29,'Cu'],[1,29,'Cu']] )
+
+    def notestSerialize(self):
+        """ Check that the serialize() method produces a valid feff.inp file."""
+
+        # Setup parameters.
+        feff_parameters = FEFFPhotonMatterInteractorParameters(
+                atoms=self.__atoms,
+                potentials=self.__potentials,
+                edge=self.__edge,
+                effective_path_distance=5.5,
+                amplitude_reduction_factor=1.0,
                 )
 
         # Setup a stream to write to.
         stream = StringIO.StringIO()
         feff_parameters.serialize( stream = stream )
+
+        # Compare to reference.
+        reference_inp = """EDGE    K
+S02     1.000000
+CONTROL 1 1 1 1 1 1
+PRINT   0 0 0 0 0 0
+RPATH   5.500000
+EXAFS
+
+POTENTIALS
+0      29      Cu
+1      29      Cu
+
+ATOMS
+0.00000      0.00000      0.00000      0
+0.00000      1.80500      -1.80500      1
+-1.80500      -1.80500      0.00000      1
+1.80500      0.00000      -1.80500      1
+0.00000      -1.80500      1.80500      1
+1.80500      1.80500      0.00000      1
+0.00000      -1.80500      -1.80500      1
+-1.80500      1.80500      0.00000      1
+0.00000      1.80500      1.80500      1
+-1.80500      0.00000      -1.80500      1
+-1.80500      0.00000      1.80500      1
+1.80500      0.00000      1.80500      1
+1.80500      -1.80500      0.00000      1
+0.00000      -3.61000      0.00000      1
+0.00000      0.00000      -3.61000      1
+0.00000      0.00000      3.61000      1
+-3.61000      0.00000      0.00000      1
+3.61000      0.00000      0.00000      1
+0.00000      3.61000      0.00000      1
+-1.80500      3.61000      1.80500      1
+1.80500      3.61000      1.80500      1
+-1.80500      -3.61000      -1.80500      1
+-1.80500      3.61000      -1.80500      1
+1.80500      3.61000      -1.80500      1
+-1.80500      -3.61000      1.80500      1
+-3.61000      1.80500      -1.80500      1
+1.80500      -3.61000      1.80500      1
+3.61000      1.80500      -1.80500      1
+-3.61000      1.80500      1.80500      1
+-3.61000      -1.80500      -1.80500      1
+3.61000      -1.80500      1.80500      1
+1.80500      -3.61000      -1.80500      1
+-3.61000      -1.80500      1.80500      1
+3.61000      1.80500      1.80500      1
+-1.80500      -1.80500      3.61000      1
+-1.80500      -1.80500      -3.61000      1
+1.80500      1.80500      -3.61000      1
+1.80500      -1.80500      -3.61000      1
+1.80500      -1.80500      3.61000      1
+-1.80500      1.80500      -3.61000      1
+-1.80500      1.80500      3.61000      1
+1.80500      1.80500      3.61000      1
+3.61000      -1.80500      -1.80500      1
+3.61000      -3.61000      0.00000      1
+3.61000      0.00000      -3.61000      1
+3.61000      0.00000      3.61000      1
+-3.61000      3.61000      0.00000      1
+0.00000      3.61000      3.61000      1
+-3.61000      0.00000      3.61000      1
+-3.61000      -3.61000      0.00000      1
+0.00000      -3.61000      3.61000      1
+-3.61000      0.00000      -3.61000      1
+3.61000      3.61000      0.00000      1
+0.00000      -3.61000      -3.61000      1
+0.00000      3.61000      -3.61000      1
+0.00000      -5.41500      1.80500      1
+1.80500      -5.41500      0.00000      1
+0.00000      -5.41500      -1.80500      1
+-1.80500      0.00000      5.41500      1
+-5.41500      0.00000      -1.80500      1
+5.41500      -1.80500      0.00000      1
+-1.80500      5.41500      0.00000      1
+5.41500      0.00000      -1.80500      1
+-5.41500      -1.80500      0.00000      1
+1.80500      5.41500      0.00000      1
+5.41500      1.80500      0.00000      1
+0.00000      5.41500      -1.80500      1
+0.00000      -1.80500      -5.41500      1
+0.00000      5.41500      1.80500      1
+1.80500      0.00000      5.41500      1
+0.00000      1.80500      5.41500      1
+5.41500      0.00000      1.80500      1
+1.80500      0.00000      -5.41500      1
+0.00000      1.80500      -5.41500      1
+0.00000      -1.80500      5.41500      1
+-5.41500      0.00000      1.80500      1
+-5.41500      1.80500      0.00000      1
+-1.80500      0.00000      -5.41500      1
+-1.80500      -5.41500      0.00000      1
+END"""
+
+        #print stream.getvalue()
+
+        self.assertEqual( stream.getvalue(), reference_inp )
 
 
 
