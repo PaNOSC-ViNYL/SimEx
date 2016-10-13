@@ -7,6 +7,9 @@ Software platform for simulation of advanced photon experiments.
 [![Build Status develop](https://img.shields.io/travis/eucall-software/simex_platform/develop.svg?label=develop)](https://travis-ci.org/eucall-software/simex_platform/branches)
 
 
+
+
+
 Contents
 ==============
 
@@ -15,6 +18,8 @@ Contents
 2.) Installation
 
 3.) Getting started
+
+4.) Acknowledgements
 
 
 ## 1.) Purpose of simex_platform
@@ -181,3 +186,5 @@ The test module
   `<install_prefix>/Tests/python/unittest/SimExTest/PhotonExperimentSimulation/PhotonExperimentSimulation.py`
 contains the test `testMininalWorkflow`. It illustrates how to use the platform to execute photon experiment simulations.
 
+## 4. Acknowledgements
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 654220
