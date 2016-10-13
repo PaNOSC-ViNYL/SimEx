@@ -21,6 +21,9 @@ mkdir -v build
 cd build
 echo "Changed dir to $PWD."
 
+# uncomment the next line if you want to use Intel Fotran compiler (otherwise gfortran will be used). Make sure $MKLROOT is set
+# export FC=ifort
+
 
 # Some needed environment variables.
 export BOOST_ROOT=/usr/local

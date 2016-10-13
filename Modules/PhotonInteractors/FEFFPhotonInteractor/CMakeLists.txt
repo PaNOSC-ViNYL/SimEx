@@ -3,6 +3,8 @@ INCLUDE(ExternalProject)
 cmake_minimum_required (VERSION 2.6)
 project (feff8.5light)
 
+enable_language (Fortran)
+
 #FIND_PACKAGE (MKL REQUIRED)
 
 ExternalProject_Add(
