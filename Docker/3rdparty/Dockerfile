@@ -1,7 +1,7 @@
 FROM yakser/centos_mpi
 MAINTAINER Sergey Yakubov <sergey.yakubov@desy.de>
 
-RUN yum install -y epel-release bash bzip2 zlib wget cmake fftw fftw-devel file which patch unzip gsl-devel blas-devel lapack-devel gcc-c++ git && yum clean all
+RUN yum install -y epel-release gfortran bash bzip2 zlib wget cmake fftw fftw-devel file which patch unzip gsl-devel blas-devel lapack-devel gcc-c++ git && yum clean all
 
 ADD python_install.sh /opt/python_install.sh
 RUN ["bash", "/opt/python_install.sh"]
