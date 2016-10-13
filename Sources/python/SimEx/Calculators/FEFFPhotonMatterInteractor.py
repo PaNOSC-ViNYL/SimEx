@@ -31,6 +31,7 @@ import h5py
 import subprocess
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities import IOUtilities
 
 
@@ -136,7 +137,7 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     Interface class for photon-matter interaction calculations using the FEFF code.
     """
 
-    def __init__(self,  edge=None, amplitude_reduction_factor=None, effective_path_distance=None, )
+    def __init__(self,  edge=None, amplitude_reduction_factor=None, effective_path_distance=None, ):
         """
         Constructor for the FEFF photon interactor.
 
@@ -151,78 +152,4 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """
 
         # Initialize base class.
-        super(FEFFPhotonMatterInteractor, self).__init__(parameters,input_path,output_path)
-
-        self.__provided_data = []
-
-        self.__expected_data = ['/data/arrEhor',
-                                '/data/arrEver',
-                                '/params/Mesh/nSlices',
-                                '/params/Mesh/nx',
-                                '/params/Mesh/ny',
-                                '/params/Mesh/qxMax',
-                                '/params/Mesh/qxMin',
-                                '/params/Mesh/qyMax',
-                                '/params/Mesh/qyMin',
-                                '/params/Mesh/sliceMax',
-                                '/params/Mesh/sliceMin',
-                                '/params/Mesh/xMax',
-                                '/params/xMin',
-                                '/params/yMax',
-                                '/params/yMin',
-                                '/params/zCoord',
-                                '/params/beamline/printout',
-                                '/params/Rx',
-                                '/params/Ry',
-                                '/params/dRx',
-                                '/params/dRy',
-                                '/params/nval',
-                                '/params/photonEnergy',
-                                '/params/wDomain',
-                                '/params/wEFieldUnit',
-                                '/params/wFloatType',
-                                '/params/wSpace',
-                                '/params/xCentre',
-                                '/params/yCentre',
-                                '/info/package_version',
-                                '/info/contact',
-                                '/info/data_description',
-                                '/info/method_description',
-                                '/misc/xFWHM',
-                                '/misc/yFWHM',
-                                '/version',
-                                ]
-
-
-    def expectedData(self):
-        """ Query for the data expected by the Interactor. """
-        return self.__expected_data
-
-    def providedData(self):
-        """ Query for the data provided by the Interactor. """
-        return self.__provided_data
-
-    def backengine(self):
-        """ This method drives the backengine code."""
-
-        return -1
-
-    @property
-    def data(self):
-        """ Query for the field data. """
-        return self.__data
-
-    def _readH5(self):
-        """ """
-        """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-        pass # Nothing to be done since IO happens in backengine.
-
-    def saveH5(self):
-        """ """
-        """
-        Private method to save the object to a file.
-
-        :param output_path: The file where to save the object's data.
-        :type output_path: str
-        """
-        pass # No action required since output is written in backengine.
+        super(FEFFPhotonMatterInteractorParameters, self).__init__()

@@ -1,11 +1,6 @@
 #! /bin/bash
 
-# Sample installation script. Adjust lines 5,15,16,17 according to system
-# and personal taste.
-
-# Compilers
-export FC=/opt/intel/bin/ifort
-#FC=/usr/bin/gfortran
+# Sample installation script. Adjustments might be neccessary.
 
 ROOT_DIR=$PWD
 
@@ -21,7 +16,10 @@ mkdir -v build
 cd build
 echo "Changed dir to $PWD."
 
-# uncomment the next line if you want to use Intel Fotran compiler (otherwise gfortran will be used). Make sure $MKLROOT is set
+# Uncomment the next line if you want to use Intel Fotran compiler
+# (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by sourcing
+# $INTEL_HOME/bin/compilervars.sh <arch>
+# where $INTEL_HOME is the root of the intel compiler suite (typically /opt/intel), and <arch> is either intel64 or ia32
 # export FC=ifort
 
 

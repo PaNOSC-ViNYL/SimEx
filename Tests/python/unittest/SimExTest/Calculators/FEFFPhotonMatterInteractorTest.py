@@ -34,7 +34,9 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.FEFFPhotonMatterInteractor import FEFFPhotonMatterInteractor
+from SimEx.Calculators.FEFFPhotonMatterInteractor import FEFFPhotonMatterInteractorParameters
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 from TestUtilities import TestUtilities
 
