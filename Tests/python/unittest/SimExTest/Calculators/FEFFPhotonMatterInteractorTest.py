@@ -507,7 +507,7 @@ class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
 
         self.assertEqual( potential_list, [[0,29,'Cu'],[1,29,'Cu']] )
 
-    def notestSerialize(self):
+    def testSerialize(self):
         """ Check that the serialize() method produces a valid feff.inp file."""
 
         # Setup parameters.
@@ -618,6 +618,12 @@ ATOMS
 END"""
 
         #print stream.getvalue()
+
+        comp = stream.getvalue()
+        ###############################################
+        import ipdb
+        ipdb.set_trace()
+        ###############################################
 
         self.assertEqual( stream.getvalue(), reference_inp )
 

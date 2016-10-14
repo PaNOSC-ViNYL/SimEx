@@ -300,8 +300,8 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
             stream.write("EDGE    %s\n" % (self.edge) )
             stream.write("S02     %f\n" % (self.amplitude_reduction_factor) )
-            stream.write("CONTROL 1 1 1 1 1 1 \n")
-            stream.write("PRINT   0 0 0 0 0 0 \n")
+            stream.write("CONTROL 1 1 1 1 1 1\n")
+            stream.write("PRINT   0 0 0 0 0 0\n")
             stream.write("RPATH   %f\n" % (self.effective_path_distance) )
             stream.write("EXAFS\n")
             stream.write("\n")
