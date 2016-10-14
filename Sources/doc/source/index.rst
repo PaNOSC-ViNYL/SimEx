@@ -283,6 +283,10 @@ Reference Manual
 
 .. autoclass:: SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector
 
+
+.. autoclass:: SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor
+.. autoclass:: SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractorParameters
+
 .. autoclass:: SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator
 .. autoclass:: SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters
 
