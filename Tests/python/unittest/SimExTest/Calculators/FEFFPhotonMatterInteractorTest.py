@@ -26,6 +26,7 @@
     @creation 20161011
 
 """
+from distutils.spawn import find_executable
 import h5py
 import os
 import paths
@@ -188,14 +189,67 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         self.assertEqual( parameters.amplitude_reduction_factor, self.__amplitude_reduction_factor)
         self.assertEqual( parameters.effective_path_distance, self.__effective_path_distance)
 
+    def testWorkingDirectorySetup(self):
+        """ Test the initialization of the working directory. """
 
-    def testDefaultConstruction(self):
-        """ Testing the default construction of the class. """
+        # Requirements:
+        # - By default, setup tmp dir, copy executable and write serialize parameters
+        # - User may specify working directory ### TODO
+        # - If feff.inp already exists: backup and overwrite. ### TODO
+        # - enhancement: initialize parameters from given feff.inp ### TODO
 
-        feff = FEFFPhotonMatterInteractor()
+        # Test default behavior.
+        feff = FEFFPhotonMatterInteractor(parameters = self.__parameters)
 
-        self.assertIsInstance( feff, AbstractPhotonInteractor )
+        # Setup working directory.
+        feff._setupWorkingDirectory()
 
+        # Assert it is created.
+        self.assertTrue( os.path.isdir( feff.working_directory ) )
+
+    def testBackengine(self):
+        """ Test the backengine execution. """
+
+        # Setup the calculator.
+        feff = FEFFPhotonMatterInteractor(parameters = self.__parameters)
+
+        # Execute the code.
+        status = feff.backengine()
+
+        # Check success.
+        self.assertEqual( status, 0 )
+
+        # Check directory content.
+        self.assertIn('atoms.dat', os.listdir(feff.working_directory) )
+        self.assertIn('chi.dat', os.listdir(feff.working_directory) )
+        self.assertIn('feff.bin', os.listdir(feff.working_directory) )
+        self.assertIn('feff.inp', os.listdir(feff.working_directory) )
+        self.assertIn('feff85L', os.listdir(feff.working_directory) )
+        self.assertIn('fort.38', os.listdir(feff.working_directory) )
+        self.assertIn('fort.39', os.listdir(feff.working_directory) )
+        self.assertIn('fpf0.dat', os.listdir(feff.working_directory) )
+        self.assertIn('geom.dat', os.listdir(feff.working_directory) )
+        self.assertIn('global.dat', os.listdir(feff.working_directory) )
+        self.assertIn('list.dat', os.listdir(feff.working_directory) )
+        self.assertIn('log.dat', os.listdir(feff.working_directory) )
+        self.assertIn('log1.dat', os.listdir(feff.working_directory) )
+        self.assertIn('log2.dat', os.listdir(feff.working_directory) )
+        self.assertIn('log4.dat', os.listdir(feff.working_directory) )
+        self.assertIn('log5.dat', os.listdir(feff.working_directory) )
+        self.assertIn('log6.dat', os.listdir(feff.working_directory) )
+        self.assertIn('mod1.inp', os.listdir(feff.working_directory) )
+        self.assertIn('mod2.inp', os.listdir(feff.working_directory) )
+        self.assertIn('mod3.inp', os.listdir(feff.working_directory) )
+        self.assertIn('mod4.inp', os.listdir(feff.working_directory) )
+        self.assertIn('mod5.inp', os.listdir(feff.working_directory) )
+        self.assertIn('mod6.inp', os.listdir(feff.working_directory) )
+        self.assertIn('mpse.dat', os.listdir(feff.working_directory) )
+        self.assertIn('paths.dat', os.listdir(feff.working_directory) )
+        self.assertIn('phase.bin', os.listdir(feff.working_directory) )
+        self.assertIn('pot.bin', os.listdir(feff.working_directory) )
+        self.assertIn('s02.inp', os.listdir(feff.working_directory) )
+        self.assertIn('xmu.dat', os.listdir(feff.working_directory) )
+        self.assertIn('xsect.bin', os.listdir(feff.working_directory) )
 
 class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
     """ Test class for the FEFFPhotonMatterInteractorParameters class. """
@@ -521,7 +575,7 @@ class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
 
         # Setup a stream to write to.
         stream = StringIO.StringIO()
-        feff_parameters.serialize( stream = stream )
+        feff_parameters._serialize( stream = stream )
 
         # Compare to reference.
         reference_inp = """EDGE    K
@@ -617,19 +671,12 @@ ATOMS
 -1.80500      -5.41500      0.00000      1
 END"""
 
-        #print stream.getvalue()
-
         comp = stream.getvalue()
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
+        self.assertEqual( comp, reference_inp )
 
-        self.assertEqual( stream.getvalue(), reference_inp )
-
-
-
-
+##############################
+# NO TESTS BENEATH THIS LINE #
+##############################
 if __name__ == '__main__':
     unittest.main()
 

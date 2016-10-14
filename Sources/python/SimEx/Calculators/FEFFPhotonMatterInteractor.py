@@ -26,9 +26,13 @@
     @creation 20161011
 
 """
+from distutils.spawn import find_executable
 import os, sys
 import h5py
+import shutil
 import subprocess
+import stat
+import tempfile
 
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
@@ -111,12 +115,78 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
     def backengine(self):
         """ This method drives the backengine code."""
 
-        return -1
+        # Setup the working directory.
+        self._setupWorkingDirectory()
+
+        # Setup path to executable.
+        self.path_to_executable = find_executable('feff85L')
+
+        # Copy executable.
+        shutil.copy2(self.path_to_executable, self.working_directory)
+
+        # Write parameter deck.
+        with open( os.path.join( self.working_directory, 'feff.inp'), 'w' ) as deck:
+            self.parameters._serialize( deck )
+            deck.close()
+
+        # Execute the code.
+        try:
+            old_wd = os.getcwd()
+            os.chdir( self.working_directory)
+            command_line = 'feff85L'
+            proc = subprocess.Popen( command_line, shell=True)
+            proc.wait()
+
+            # Return.
+
+            os.chdir( old_wd )
+            return 0
+
+        except:
+            os.chdir( old_wd )
+            return 1
 
     @property
     def data(self):
         """ Query for the field data. """
         return self.__data
+
+    @property
+    def working_directory(self):
+        """ Query the working directory """
+        return self.__working_directory
+    @working_directory.setter
+    def working_directory(self, value):
+        """ Set the working directory to a value. """
+        if not isinstance( value, str ):
+            raise TypeError( "working_directory must be a string (path)." )
+
+        if not os.path.isdir( value ):
+            raise RuntimeError( "working_directory must be an existing directory (or link).")
+
+        # All sane, set attribute.
+        self.__working_directory = value
+
+    @property
+    def path_to_executable(self):
+        """ Query the path to the feff executable. """
+        return self.__path_to_executable
+    @path_to_executable.setter
+    def path_to_executable(self, value):
+        """ Set the path_to_executable to a value. """
+        # Check type.
+        if not isinstance( value, str ):
+            raise TypeError( "path_to_executable must be a string (path)." )
+        # Check is file.
+        if not os.path.isfile( value ):
+            raise RuntimeError( "path_to_executable must be an existing file (or link).")
+        # Check is executable.
+        if not stat.S_IXUSR & os.stat(value)[stat.ST_MODE]:
+            raise RuntimeError( "path_to_executable must be executable by the user.")
+
+        # All sane, set attribute.
+        self.__path_to_executable = value
+
 
     def _readH5(self):
         """ """
@@ -133,6 +203,10 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
         """
         pass # No action required since output is written in backengine.
 
+    def _setupWorkingDirectory(self):
+        """ Create a temporary directory where to execute the calculation. """
+
+        self.working_directory = tempfile.mkdtemp(prefix='tmp_feff')
 
 class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     """
@@ -289,15 +363,15 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
             self.__finalized = True
 
-    def serialize(self, stream=sys.stdout ):
-        """ Serialize the parameters, i.e. write the feff.inp file. """
+    def _serialize(self, stream=sys.stdout ):
+        """ """
+        """ Private method to serialize the parameters, i.e. write the feff.inp file. """
 
         # Only possible if finalized.
         if not self.__finalized:
             raise RuntimeError("Only finalized parameters can be serialized. Call the finalize() method before serialize().")
 
         else:
-
             stream.write("EDGE    %s\n" % (self.edge) )
             stream.write("S02     %f\n" % (self.amplitude_reduction_factor) )
             stream.write("CONTROL 1 1 1 1 1 1\n")
@@ -314,8 +388,9 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 stream.write("%6.5f      %6.5f      %6.5f      %d\n" % (atom[0][0], atom[0][1], atom[0][2], atom[2]) )
 
             stream.write("END")
-
-
+#
+##########################################
+# Utility functions
 def _checkAndSetAtoms(value):
     """ """
     """ Private function to check if input is a valid atoms list.
