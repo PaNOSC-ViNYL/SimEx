@@ -385,11 +385,8 @@ class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( feff_parameters._FEFFPhotonMatterInteractorParameters__effective_path_distance, self.__effective_path_distance)
 
     def testDefaultConstruction(self):
-        """ Testing the default construction of the class. """
-
-        feff = FEFFPhotonMatterInteractorParameters()
-
-        self.assertIsInstance( feff, AbstractCalculatorParameters )
+        """ Testing that construction without arguments fails. """
+        self.assertRaises( TypeError, FEFFPhotonMatterInteractorParameters )
 
     def testQueries(self):
         """ Test that all queries return the correct value. """
