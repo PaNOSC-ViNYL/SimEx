@@ -210,7 +210,6 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         self.assertEqual( parameters.effective_path_distance, self.__effective_path_distance)
 
         self.assertEqual( feff.output_path, os.path.join( os.getcwd(), 'absorption.h5' ) )
-        self.assertTrue( os.path.isfile( feff.output_path ) )
 
 
     def testWorkingDirectorySetup(self):
@@ -329,7 +328,23 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
             for st in expected_sets:
                 self.assertIsInstance( h5[st], h5py.Dataset )
 
+            # Check attributes
+            self.assertEqual( h5['data/snp_0000001/r'].attrs['unit'], 'Angstrom' )
+            self.assertEqual( h5['data/snp_0000001/E'].attrs['unit'], 'eV')
+            self.assertEqual( h5['data/snp_0000001/DeltaE'].attrs['unit'], 'eV')
+            self.assertEqual( h5['data/snp_0000001/k'].attrs['unit'], '1')
+            self.assertEqual( h5['data/snp_0000001/mu'].attrs['unit'], '1/Angstrom')
+            self.assertEqual( h5['data/snp_0000001/mu0'].attrs['unit'], '1/Angstrom')
+            self.assertEqual( h5['data/snp_0000001/chi'].attrs['unit'], '1')
+            self.assertEqual( h5['data/snp_0000001/ampl'].attrs['unit'], '1')
+            self.assertEqual( h5['data/snp_0000001/phase'].attrs['unit'], 'rad')
+            self.assertEqual( h5['data/snp_0000001/potential_index'].attrs['unit'], '1')
+            self.assertEqual( h5['params/amplitude_reduction_factor'].attrs['unit'], '1')
+            self.assertEqual( h5['params/edge'].attrs['unit'], '')
+            self.assertEqual( h5['params/effective_path_distance'].attrs['unit'], 'Angstrom')
+
             h5.close()
+
 
 class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
     """ Test class for the FEFFPhotonMatterInteractorParameters class. """

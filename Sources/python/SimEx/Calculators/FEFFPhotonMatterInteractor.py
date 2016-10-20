@@ -168,6 +168,17 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
         self.__data.create_dataset('data/snp_0000001/ampl', data=chi[:,0])
         self.__data.create_dataset('data/snp_0000001/phase', data=chi[:,1])
         self.__data.create_dataset('data/snp_0000001/potential_index', data=atoms[:,3])
+
+        self.__data['data/snp_0000001/r'].attrs['unit'] = 'Angstrom'
+        self.__data['data/snp_0000001/DeltaE'].attrs['unit'] = 'eV'
+        self.__data['data/snp_0000001/E'].attrs['unit'] = 'eV'
+        self.__data['data/snp_0000001/k'].attrs['unit'] = '1'
+        self.__data['data/snp_0000001/mu'].attrs['unit'] = '1/Angstrom'
+        self.__data['data/snp_0000001/mu0'].attrs['unit'] = '1/Angstrom'
+        self.__data['data/snp_0000001/chi'].attrs['unit'] = '1'
+        self.__data['data/snp_0000001/ampl'].attrs['unit'] = '1'
+        self.__data['data/snp_0000001/phase'].attrs['unit'] = 'rad'
+        self.__data['data/snp_0000001/potential_index'].attrs['unit'] = '1'
         #self.__data.create_dataset('misc/polarization_tensor', data=None)
         #self.__data.create_dataset('misc/evec', data=None)
         #self.__data.create_dataset('misc/xivec', data=None)
@@ -180,6 +191,8 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
         #self.__data.create_dataset('misc/le2', data=None)
         #self.__data.create_dataset('misc/elpty', data=None)
         #self.__data.create_dataset('misc/angks', data=None)
+
+        return 0
 
     @property
     def data(self):
@@ -244,9 +257,13 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
         data.create_dataset('info/interface_version', data='1.0')
         data.create_dataset('info/credits', data='J. J. Rehr et al, "Ab initio theory and calculations of X-ray spectra", Comptes Rendus Physique _10_, 548 (2009). DOI: dx.doi.org/10.1016/j.crhy.2008.08.004')
         data.create_dataset('info/package_version', data='FEFF8.5L')
+
         data.create_dataset('params/edge', data=self.parameters.edge)
         data.create_dataset('params/amplitude_reduction_factor', data=self.parameters.amplitude_reduction_factor)
         data.create_dataset('params/effective_path_distance', data=self.parameters.effective_path_distance)
+        data['params/amplitude_reduction_factor'].attrs['unit'] = '1'
+        data['params/edge'].attrs['unit'] = ''
+        data['params/effective_path_distance'].attrs['unit'] = 'Angstrom'
 
         # Close the dataset, this writes the data to disk.
         data.close()
