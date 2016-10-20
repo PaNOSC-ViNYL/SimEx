@@ -189,6 +189,30 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         self.assertEqual( parameters.amplitude_reduction_factor, self.__amplitude_reduction_factor)
         self.assertEqual( parameters.effective_path_distance, self.__effective_path_distance)
 
+    def testShapedConstructionPaths(self):
+        """ Testing the construction of the class with parameters. """
+
+        # Construct.
+        feff  = FEFFPhotonMatterInteractor(parameters=self.__parameters,
+                                           input_path=TestUtilities.generateTestFilePath('prop'),
+                                           output_path='absorption.h5')
+
+        # Check type.
+        self.assertIsInstance( feff, FEFFPhotonMatterInteractor )
+
+        # Get parameters and check.
+        parameters = feff.parameters
+
+        self.assertEqual( parameters.atoms, self.__atoms)
+        self.assertEqual( parameters.potentials, self.__potentials)
+        self.assertEqual( parameters.edge, self.__edge)
+        self.assertEqual( parameters.amplitude_reduction_factor, self.__amplitude_reduction_factor)
+        self.assertEqual( parameters.effective_path_distance, self.__effective_path_distance)
+
+        self.assertEqual( feff.output_path, os.path.join( os.getcwd(), 'absorption.h5' ) )
+        self.assertTrue( os.path.isfile( feff.output_path ) )
+
+
     def testWorkingDirectorySetup(self):
         """ Test the initialization of the working directory. """
 
@@ -250,6 +274,62 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         self.assertIn('s02.inp', os.listdir(feff.working_directory) )
         self.assertIn('xmu.dat', os.listdir(feff.working_directory) )
         self.assertIn('xsect.bin', os.listdir(feff.working_directory) )
+
+    def testSaveH5(self):
+        # Setup the calculator.
+        feff = FEFFPhotonMatterInteractor(parameters = self.__parameters, output_path='feff.h5')
+
+        self.__files_to_remove.append(feff.output_path)
+
+        # Execute the code.
+        status = feff.backengine()
+
+        # Save.
+        feff.saveH5()
+
+        # Check content of newly generated file.
+        expected_sets = [
+                            'data/snp_0000001/r',
+                            #'data/snp_0000001/xyz',
+                            #'data/snp_0000001/Z',
+                            #'data/snp_0000001/T',
+                            'data/snp_0000001/E',
+                            'data/snp_0000001/DeltaE',
+                            'data/snp_0000001/k',
+                            'data/snp_0000001/mu',
+                            'data/snp_0000001/mu0',
+                            'data/snp_0000001/chi',
+                            'data/snp_0000001/ampl',
+                            'data/snp_0000001/phase',
+                            'data/snp_0000001/potential_index',
+                            'params/amplitude_reduction_factor',
+                            'params/edge',
+                            'params/effective_path_distance',
+                            #'history/parent',
+                            #'misc/polarization_tensor',
+                            #'misc/evec',
+                            #'misc/xivec',
+                            #'misc/spvec',
+                            #'misc/nabs',
+                            #'misc/iphabs',
+                            #'misc/cf_average_data',
+                            #'misc/ipol',
+                            #'misc/ispin',
+                            #'misc/le2',
+                            #'misc/elpty',
+                            #'misc/angks',
+                            'info/contact',
+                            'info/data_description',
+                            'info/interface_version',
+                            'info/credits',
+                            'info/package_version',
+                          ]
+
+        with h5py.File( feff.output_path, 'r') as h5:
+            for st in expected_sets:
+                self.assertIsInstance( h5[st], h5py.Dataset )
+
+            h5.close()
 
 class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
     """ Test class for the FEFFPhotonMatterInteractorParameters class. """

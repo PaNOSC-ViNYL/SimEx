@@ -26,20 +26,20 @@
     @creation 20161011
 
 """
-from distutils.spawn import find_executable
-import os, sys
 import h5py
+import numpy
+import os
 import shutil
-import subprocess
 import stat
+import subprocess
+import sys
 import tempfile
 
+from distutils.spawn import find_executable
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities import IOUtilities
 from SimEx.Utilities.Utilities import ALL_ELEMENTS
-
 
 class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
     """
@@ -140,11 +140,46 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
             # Return.
 
             os.chdir( old_wd )
-            return 0
 
         except:
             os.chdir( old_wd )
             return 1
+
+        # Setup data object. This will be a h5py File object residing purely in memory until closed,
+        # at which moment it will be written to disk.
+        self.__data = h5py.File(self.output_path, driver='core', backing_store=True, mode='w' )
+
+        # Read raw data files.
+        atoms = numpy.loadtxt( os.path.join( self.working_directory, 'atoms.dat'), skiprows=2)
+        xmu = numpy.loadtxt( os.path.join( self.working_directory, 'xmu.dat'), comments='#')
+        chi = numpy.loadtxt( os.path.join( self.working_directory, 'chi.dat'), comments='#', usecols=(2,3))
+
+        # Setup tree and write data on the fly.
+        self.__data.create_dataset('data/snp_0000001/r', data=atoms[:,:3])
+        #self.__data.create_dataset('data/snp_0000001/xyz', data=None)
+        #self.__data.create_dataset('data/snp_0000001/Z', data=None)
+        #self.__data.create_dataset('data/snp_0000001/T', data=None)
+        self.__data.create_dataset('data/snp_0000001/E', data=xmu[:,0])
+        self.__data.create_dataset('data/snp_0000001/DeltaE', data=xmu[:,1])
+        self.__data.create_dataset('data/snp_0000001/k', data=xmu[:,2])
+        self.__data.create_dataset('data/snp_0000001/mu', data=xmu[:,3])
+        self.__data.create_dataset('data/snp_0000001/mu0', data=xmu[:,4])
+        self.__data.create_dataset('data/snp_0000001/chi', data=xmu[:,5])
+        self.__data.create_dataset('data/snp_0000001/ampl', data=chi[:,0])
+        self.__data.create_dataset('data/snp_0000001/phase', data=chi[:,1])
+        self.__data.create_dataset('data/snp_0000001/potential_index', data=atoms[:,3])
+        #self.__data.create_dataset('misc/polarization_tensor', data=None)
+        #self.__data.create_dataset('misc/evec', data=None)
+        #self.__data.create_dataset('misc/xivec', data=None)
+        #self.__data.create_dataset('misc/spvec', data=None)
+        #self.__data.create_dataset('misc/nabs', data=None)
+        #self.__data.create_dataset('misc/iphabs', data=None)
+        #self.__data.create_dataset('misc/cf_average_data', data=None)
+        #self.__data.create_dataset('misc/ipol', data=None)
+        #self.__data.create_dataset('misc/ispin', data=None)
+        #self.__data.create_dataset('misc/le2', data=None)
+        #self.__data.create_dataset('misc/elpty', data=None)
+        #self.__data.create_dataset('misc/angks', data=None)
 
     @property
     def data(self):
@@ -198,10 +233,23 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
         """
         Private method to save the object to a file.
 
-        :param output_path: The file where to save the object's data.
+        :param output_path: The file where to save the object's data. Default: self.output_path
         :type output_path: str
         """
-        pass # No action required since output is written in backengine.
+
+        # Get the handle to the data.
+        data = self.__data
+        data.create_dataset('info/contact', data='Carsten Fortmann-Grote <carsten.grote@xfel.eu>')
+        data.create_dataset('info/data_description', data='Absorption spectrum and associated data.')
+        data.create_dataset('info/interface_version', data='1.0')
+        data.create_dataset('info/credits', data='J. J. Rehr et al, "Ab initio theory and calculations of X-ray spectra", Comptes Rendus Physique _10_, 548 (2009). DOI: dx.doi.org/10.1016/j.crhy.2008.08.004')
+        data.create_dataset('info/package_version', data='FEFF8.5L')
+        data.create_dataset('params/edge', data=self.parameters.edge)
+        data.create_dataset('params/amplitude_reduction_factor', data=self.parameters.amplitude_reduction_factor)
+        data.create_dataset('params/effective_path_distance', data=self.parameters.effective_path_distance)
+
+        # Close the dataset, this writes the data to disk.
+        data.close()
 
     def _setupWorkingDirectory(self):
         """ Create a temporary directory where to execute the calculation. """
