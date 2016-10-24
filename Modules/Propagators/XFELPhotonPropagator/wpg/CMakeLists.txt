@@ -9,7 +9,7 @@ endif()
 
 ExternalProject_Add(
 wpg
-URL http://github.com/samoylv/WPG/archive/develop.zip
+URL https://github.com/samoylv/WPG/archive/a3c4f3cef591c1c2beca20f2218483248385d2c7.zip
 PATCH_COMMAND ${WPG_PATCHCMD}
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
