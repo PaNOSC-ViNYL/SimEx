@@ -175,6 +175,7 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         """ Testing the construction of the class with parameters. """
 
         # Construct.
+        self.__dirs_to_remove.append( 'pmi' )
         feff  = FEFFPhotonMatterInteractor(parameters=self.__parameters)
 
         # Check type.
@@ -222,6 +223,7 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         # - enhancement: initialize parameters from given feff.inp ### TODO
 
         # Test default behavior.
+        self.__dirs_to_remove.append( 'pmi' )
         feff = FEFFPhotonMatterInteractor(parameters = self.__parameters)
 
         # Setup working directory.
@@ -230,11 +232,39 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         # Assert it is created.
         self.assertTrue( os.path.isdir( feff.working_directory ) )
 
+    def testOutputPathFail(self):
+        """ Test that default output path raises if file of same name exists."""
+
+        # Cleanup.
+        self.__files_to_remove.append( 'pmi' )
+
+        # Create file of same name as default output path.
+        shutil.copy2( __file__, 'pmi' )
+
+        # Check exception.
+        self.assertRaises( IOError, FEFFPhotonMatterInteractor )
+
+    def testOutputPath(self):
+        """ Check that the default path is set correctly. """
+        # Setup the calculator.
+        feff = FEFFPhotonMatterInteractor(parameters = self.__parameters)
+        self.__dirs_to_remove.append( 'pmi' )
+
+        # Execute the code.
+        status = feff.backengine()
+
+        # Check that the pmi dir was created.
+        self.assertTrue( os.path.isdir( 'pmi' ) )
+
+
+
     def testBackengine(self):
         """ Test the backengine execution. """
 
         # Setup the calculator.
         feff = FEFFPhotonMatterInteractor(parameters = self.__parameters)
+
+        self.__dirs_to_remove.append( 'pmi' )
 
         # Execute the code.
         status = feff.backengine()

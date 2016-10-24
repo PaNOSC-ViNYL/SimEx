@@ -60,6 +60,14 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
         :type output_path: str
         """
 
+        # Handle default output_path
+        if output_path is None:
+            if not os.path.exists('pmi'):
+                os.mkdir('pmi')
+            if os.path.isfile( 'pmi' ):
+                raise IOError( "A file named 'pmi' already exists, cowardly refusing to overwrite.")
+            output_path = 'pmi/pmi_out_0000001.h5'
+
         # Initialize base class.
         super(FEFFPhotonMatterInteractor, self).__init__(parameters,input_path,output_path)
 
