@@ -38,11 +38,16 @@ from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
+import dill
+import subprocess
+import sys
+
 
 class EMCOrientation(AbstractPhotonAnalyzer):
     """
     Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
-
+    def save(self,fname):
+        dill.dump(self, open(fname, "w"))
     def __init__(self, parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
         """
 
@@ -190,6 +195,20 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         # Return.
         return run_instance_dir, tmp_out_dir
 
+    def parallel_backengine(self):
+
+        fname=__name__+"_tmpobj"
+        self.save(fname)
+        command_sequence = ['mpirun',
+                            '-np', '1',
+                            'python', __file__,fname,
+                            ]
+        proc = subprocess.Popen(command_sequence,universal_newlines=True)
+        proc.wait()
+        os.remove(fname)
+
+    # Return the return code from the backengine.
+        return proc.returncode
     def backengine(self):
 
         status = self._run_emc()
@@ -427,3 +446,10 @@ def _checkPaths(run_files_path, tmp_files_path):
             raise IOError( "Run files path already exists, cowardly refusing to overwrite.")
 
     return True
+
+if __name__ == '__main__':
+    fname = sys.argv[1]
+    t = dill.load(open(fname))
+    status = t.backengine()
+    sys.exit(status)
+

@@ -134,9 +134,10 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         """ Run the EMC and DM backengine executables. """
 
         # Run EMC.
-        emc_status = self.__emc.backengine()
+        emc_status = self.__emc.parallel_backengine()
 
         # If EMC was not successful, return with error code.
+        print emc_status
         if  emc_status!= 0:
             return emc_status
 
