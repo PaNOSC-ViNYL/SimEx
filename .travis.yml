@@ -73,8 +73,13 @@ script:
   - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON ..
   - make
   - make install
+  # Set environment
+  - cd ../
+  - source bin/simex_vars.sh
+  # Test environment
+  - python -c "import SimEx"
   # unit tests
-  - cd ../Tests/python/unittest/
+  - cd Tests/python/unittest/
   - python Test.py -v
   # build doc.
   - source $VIRTUAL_ENV/bin/simex_vars.sh
