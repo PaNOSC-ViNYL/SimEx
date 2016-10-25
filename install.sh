@@ -18,7 +18,7 @@ echo "Changed dir to $PWD."
 
 # Uncomment the next line if you want to use Intel Fotran compiler
 # (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by sourcing
- $INTEL_HOME/bin/compilervars.sh intel64
+/opt/intel/bin/compilervars.sh intel64
 # where $INTEL_HOME is the root of the intel compiler suite (typically /opt/intel), and <arch> is either intel64 or ia32
  export FC=ifort
 
