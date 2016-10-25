@@ -75,7 +75,7 @@ script:
   - make install
   # Set environment
   - cd ../
-  - source bin/simex_vars.sh
+  - source $VIRTUAL_ENV/bin/simex_vars.sh
   # Test environment
   - python -c "import SimEx"
   # unit tests
