@@ -19,6 +19,8 @@ matrix:
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
+    - ENCRYPTION_LABEL: b5edaf0a5fc2
+    - COMMIT_AUTHOR_EMAIL: "carsten.grote@xfel.eu"
 
 addons:
   apt:
@@ -86,3 +88,7 @@ script:
   # functional tests
   #- cd ../functest/
   #- python Test.py -v
+  #
+  #after_success:
+      #bash ./deploy_doc_to_gh-pages.sh
+
