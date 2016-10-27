@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -140,7 +139,7 @@ class AbstractPhotonSourceTest(unittest.TestCase):
         # Construct with no output path given.
         source = Source2()
 
-        self.assertEqual(source.output_path, os.path.abspath('source_out.h5'))
+        self.assertEqual(source.output_path, os.path.abspath('source'))
 
 
 if __name__ == '__main__':

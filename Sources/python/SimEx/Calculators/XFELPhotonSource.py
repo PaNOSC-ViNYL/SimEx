@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -29,9 +28,6 @@
 """
 import os
 import shutil
-from subprocess import Popen
-import numpy
-import h5py
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 
@@ -45,18 +41,18 @@ class XFELPhotonSource(AbstractPhotonSource):
         """
         Constructor for the xfel photon source.
 
-        @param parameters : Photon source parameters.
-        <br/><b>type</b> : dict
+        :param parameters : Photon source parameters.
+        :type parameters: dict
 
-        @param input_path : The path to the input data for the photon source.
-        <br/><b>type</b> : string
+        :param input_path: The path to the input data for the photon source.
+        :type input_path:  str, default FELsource_in.h5
 
-        @param output_path : The path where to save output data.
-        <br/><b>type</b> : string
+        :param output_path: The path where to save output data.
+        :type output: str, default FELsource_out.h5
         """
 
         # Initialize base class.
-        super(XFELPhotonSource, self).__init__(parameters,input_path,output_path)
+        super(XFELPhotonSource, self).__init__(parameters, input_path, output_path)
 
 
     def backengine(self):
@@ -82,22 +78,8 @@ class XFELPhotonSource(AbstractPhotonSource):
 
     def _readH5(self):
         """ """
-        """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-
         pass
 
     def saveH5(self):
         """ """
-        """
-        Private method to save the object to a file.
-
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
-        """
-
         pass
-
-
-
-

@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -37,15 +36,29 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonInteractor(AbstractBaseCalculator):
     """
-    Class representing an abstract photon source, serving as API for actual photon source simulation calculators.
+    Class representing an abstract photon(-matter) interactor, serving as API for actual photon matter simulation calculators.
     """
 
     __metaclass__  = ABCMeta
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
-        #"""
-        #Constructor for the Abstract Photon Interactor.
-        #"""
+        """
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
+        """
+
+        # Check input path. Set to default if none given.
+        input_path = checkAndSetInstance(str, input_path, 'prop')
+        # Check output path. Set default if none given.
+        output_path = checkAndSetInstance(str, output_path, 'pmi')
+
         super(AbstractPhotonInteractor, self).__init__(parameters, input_path, output_path)
 
 def checkAndSetPhotonInteractor(var=None, default=None):

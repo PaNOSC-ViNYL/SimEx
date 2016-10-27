@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -35,7 +34,8 @@ import unittest
 
 
 # Import the class to test.
-from SimEx.Calculators.EMCOrientation import EMCOrientation
+from SimEx.Calculators.EMCOrientation import EMCOrientation, _checkPaths
+from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from TestUtilities import TestUtilities
 
 class EMCOrientationTest(unittest.TestCase):
@@ -56,7 +56,7 @@ class EMCOrientationTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
         self.__files_to_remove = []
-        self.__dirs_to_remove = []
+        self.__dirs_to_remove = ['analysis']
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -71,7 +71,46 @@ class EMCOrientationTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+        analyzer = EMCOrientation()
+
+        # Test a parameter.
+        self.assertEqual( analyzer.parameters.initial_number_of_quaternions, 1 )
+
+        self.assertIsInstance(analyzer, EMCOrientation)
+
+    def testConstructionParameters(self):
+        """ Testing the construction of the class with a parameters object. """
+
+        # Construct the object.
+        emc_parameters = EMCOrientationParameters( initial_number_of_quaternions = 2,
+                                                   max_number_of_quaternions     = 4,
+                                                   max_number_of_iterations      = 5,
+                                                   min_error                     = 1.e-6,
+                                                   beamstop                      = False,
+                                                   detailed_output               = False )
+
+        analyzer = EMCOrientation(parameters=emc_parameters)
+
+        # Test a parameter.
+        self.assertEqual( analyzer.parameters.initial_number_of_quaternions, 2 )
+
+        self.assertIsInstance(analyzer, EMCOrientation)
+
+    def testConstructionParametersDict(self):
+        """ Testing the construction of the class with a parameters dictionary. """
+
+        # Construct the object.
+        emc_parameters = { 'initial_number_of_quaternions' : 2,
+                           'max_number_of_quaternions'     : 4,
+                           'max_number_of_iterations'      : 5,
+                           'min_error'                     : 1.e-6,
+                           'beamstop'                      : False,
+                           'detailed_output'               : False }
+
+        analyzer = EMCOrientation(parameters=emc_parameters)
+
+        # Test a parameter.
+        self.assertEqual( analyzer.parameters.initial_number_of_quaternions, 2 )
 
         self.assertIsInstance(analyzer, EMCOrientation)
 
@@ -82,6 +121,9 @@ class EMCOrientationTest(unittest.TestCase):
 
         # Construct the object.
         analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+
+        # Keep the test short.
+        analyzer.parameters.max_number_of_iterations=2
 
         # Call backengine.
         status = analyzer.backengine()
@@ -95,6 +137,9 @@ class EMCOrientationTest(unittest.TestCase):
 
         # Construct the object.
         analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+
+        # Keep the test short.
+        analyzer.parameters.max_number_of_iterations=2
 
         # Call backengine.
         status = analyzer.backengine()
@@ -118,6 +163,165 @@ class EMCOrientationTest(unittest.TestCase):
 
         for ef in expected_run_files:
             self.assertIn( ef, os.listdir(run_files_path) )
+
+    def testSetupPaths( self ):
+        """ Check that setting up paths works correctly. """
+
+        # Clean up no matter how tests go.
+        self.__dirs_to_remove.append("emc_run")
+        self.__dirs_to_remove.append("emc_tmp")
+
+        # Construct the object with very nonsensical iteration control parameters.
+        emc_parameters = {"initial_number_of_quaternions" : 1,
+                          "max_number_of_quaternions"     : 2,
+                          "max_number_of_iterations"      : 2,
+                          "min_error"                     : 5.e-6,
+                          "beamstop"                      : True,
+                          "detailed_output"               : True,
+                          }
+
+        # Case 1: no paths given, make dirs in /tmp
+        emc = EMCOrientation(parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out.h5',
+                             tmp_files_path=None,
+                             run_files_path=None,)
+
+        run, tmp = emc._setupPaths()
+
+        # Check.
+        self.assertTrue( os.path.isdir( emc.run_files_path ) )
+        self.assertTrue( os.path.isdir( emc.tmp_files_path ) )
+        self.assertEqual( run, emc.run_files_path )
+        self.assertEqual( tmp, emc.tmp_files_path )
+
+        # Case 1: non-existing paths given, make dirs.
+        emc2 = EMCOrientation(parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out.h5',
+                             tmp_files_path="emc_tmp",
+                             run_files_path="emc_run",)
+
+        run, tmp = emc2._setupPaths()
+
+        # Check.
+        self.assertEqual( emc2.run_files_path, "emc_run" )
+        self.assertEqual( emc2.tmp_files_path, "emc_tmp" )
+        self.assertEqual( emc2.run_files_path, run )
+        self.assertEqual( emc2.tmp_files_path, tmp )
+
+        # Case 3: existing tmp path given, make dirs.
+        emc3 = EMCOrientation(parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out.h5',
+                             tmp_files_path="emc_tmp",
+                             run_files_path=None,)
+
+        run, tmp = emc3._setupPaths()
+
+        # Check.
+        self.assertTrue( os.path.dirname( emc3.run_files_path ), "tmp" )
+        self.assertEqual( emc3.tmp_files_path, "emc_tmp" )
+        self.assertEqual( emc3.run_files_path, run )
+        self.assertEqual( emc3.tmp_files_path, tmp )
+
+        # Case 4: existing run path given, raise exception.
+        self.assertRaises( IOError, EMCOrientation,
+                             parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out.h5',
+                             tmp_files_path="emc_tmp",
+                             run_files_path=emc3.run_files_path
+                             )
+
+    def testCheckPaths( self ):
+        """ Check path check utility. """
+
+        self.assertTrue( _checkPaths( None, None ) )
+        self.assertTrue( _checkPaths( None, "emc_tmp" ) )
+        self.assertTrue( _checkPaths( "emc_run", None ) )
+        self.assertTrue( _checkPaths( "emc_run", "emc_tmp" ) )
+        self.assertRaises( IOError, _checkPaths, "/tmp", "emc_tmp")
+        self.assertRaises( IOError, _checkPaths, 1, "emc_tmp")
+        self.assertRaises( IOError, _checkPaths, "emc_run", [1,2] )
+
+
+    def testPhotonFileConsecutiveRuns(self):
+        """ Check that the photons.dat from the previous run is reused. """
+
+        self.__files_to_remove.append('orient_out.h5')
+        self.__files_to_remove.append('orient_out2.h5')
+
+        # Construct the object.
+        emc_parameters = {"initial_number_of_quaternions" : 1,
+                          "max_number_of_quaternions"     : 2,
+                          "max_number_of_iterations"      : 2,
+                          "min_error"                     : 1.e-6,
+                          "beamstop"                      : True,
+                          "detailed_output"               : True,
+                          }
+
+        emc = EMCOrientation(parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out.h5',
+                             tmp_files_path=None,
+                             run_files_path=None,)
+
+        # Call backengine.
+        status = emc.backengine()
+
+        # Check paths exist and are populated.
+        run_files_path = emc.run_files_path
+        tmp_files_path = emc.tmp_files_path
+
+        self.assertTrue( os.path.isdir( run_files_path ) )
+        self.assertTrue( os.path.isdir( tmp_files_path ) )
+
+        expected_run_files = ["finish_intensity.dat", "quaternion.dat",
+                              "detector.dat",
+                              "most_likely_orientations.dat",
+                              "start_intensity.dat",
+                              "EMC_extended.log",
+                              "mutual_info.dat",
+                              "EMC.log",
+                              "photons.dat",
+                              ]
+
+        for ef in expected_run_files:
+            self.assertIn( ef, os.listdir(run_files_path) )
+
+        # Second run.
+
+        emc2 = EMCOrientation(parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out2.h5',
+                             tmp_files_path=emc.tmp_files_path,
+                             run_files_path=None)
+
+        # Call backengine.
+        status = emc2.backengine()
+
+        # Check paths exist and are populated.
+        run_files_path2 = emc2.run_files_path
+        tmp_files_path2 = emc2.tmp_files_path
+
+        self.assertNotEqual( run_files_path, run_files_path2 )
+        self.assertEqual( tmp_files_path, tmp_files_path2 )
+
+
+        expected_run_files2 = ["finish_intensity.dat", "quaternion.dat",
+                              "detector.dat",
+                              "most_likely_orientations.dat",
+                              "start_intensity.dat",
+                              "EMC_extended.log",
+                              "mutual_info.dat",
+                              "EMC.log",
+                              "photons.dat",
+                              ]
+
+        for ef in expected_run_files2:
+            self.assertIn( ef, os.listdir(run_files_path2) )
+
 
 
 

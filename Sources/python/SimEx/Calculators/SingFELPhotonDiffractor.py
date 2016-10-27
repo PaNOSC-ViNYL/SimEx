@@ -26,14 +26,16 @@
     @creation 20151104
 
 """
-import os
 import inspect
+import os
 import subprocess
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
-
 
 import prepHDF5
+
+from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
+
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -42,88 +44,29 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon propagator.
 
-        @param  parameters : singFEL parameters.
-        <br/><b>type</b>              : dict
-        <br/><b>example</b> : parameters={ 'uniform_rotation'    : True,
-                     'calculate_Compton'              : False,
-                     'pmi_start_ID'                   : 1,
-                     'pmi_stop_ID'                    : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'number_of_MPI_processes'        : 2,
-                     'slice_interval'                 : 10,
-                     'number_of_slices'               : 100,
-                     'beam_parameter_file'            : 's2e.beam',
-                     'beam_geometry_file'             : 's2e.geom',
-                     }
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || SingFELPhotonDiffractorParameters
 
-        @param parameters['uniform_rotation']  : Whether or not to apply uniform sampling of the sample's rotations.
-        <br/><b>type</b> : boolean
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
 
-        @param parameters['calculate_Compton'] : Whether or not to calculate incoherent (Compton) scattering.
-        <br/><b>type</b> : Bool
-
-        @param parameters['pmi_start_ID'] : Index of the pmi file to start from.
-        <br/><b>type</b> : int
-
-        @param parameters['pmi_stop_ID'] : Index of the pmi file to stop at.
-        <br/><b>type</b> : int
-
-        @param parameters['number_of_diffraction_patterns'] : The number of diffraction patterns to calculate from each photon-matter interaction trajectory.
-        <br/><b>type</b> : int
-
-        @param parameters['number_of_MPI_processes'] : The number of MPI processes to use
-        <br/><b>type</b> : int
-
-        @param parameters['slice_interval'] : The number of time slices to skip between two samplings of the photon-matter interaction trajectory.
-        <br/><b>type</b> : int
-
-        @param parameters['number_of_slices'] : Total number of slices in the pmi files."
-        <br/><b>type</b> : int
-
-        @param parameters['beam_parameter_file'] : Path of the beam parameter (.beam) file.
-        <br/><b>type</b> : string
-
-        @param parameters['beam_geometry_file'] : Path of the beam geometry (.geom) file.
-        <br/><b>type</b> : string
-
-        <br/><b>note</b>: The number of generated files is the number of pmi data files * number_of_diffraction_patterns.
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
         """
 
+        if isinstance( parameters, dict ):
+            parameters = SingFELPhotonDiffractorParameters( parameters_dictionary = parameters )
+
+        # Set default parameters if no parameters given.
+        if parameters is None:
+            self.__parameters = checkAndSetInstance( SingFELPhotonDiffractorParameters, parameters, SingFELPhotonDiffractorParameters() )
+        else:
+            self.__parameters = checkAndSetInstance( SingFELPhotonDiffractorParameters, parameters, None )
+
+
+        # Init base class.
         super(SingFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
-
-        # Check parameters.
-        # Check that only accepted parameters are present.
-        accepted_keys = ['uniform_rotation',
-                         'calculate_Compton',
-                         'slice_interval',
-                         'number_of_slices',
-                         'number_of_diffraction_patterns',
-                         'number_of_MPI_processes',
-                         'pmi_start_ID',
-                         'pmi_stop_ID',
-                         'beam_parameter_file',
-                         'beam_geometry_file']
-
-        for k in self.parameters.keys():
-            if k not in accepted_keys:
-                raise RuntimeError( "The parameter '%s' is not a valid parameter for the SingFELPhotonDiffractor. " % (k))
-        # Check each parameter individually and set defaults if not set.
-        self.parameters['uniform_rotation'] = checkAndSetInstance(bool, self.parameters['uniform_rotation'], True)
-        self.parameters['calculate_Compton'] = checkAndSetInstance(bool, self.parameters['calculate_Compton'], True)
-        self.parameters['slice_interval'] = checkAndSetPositiveInteger(self.parameters['slice_interval'], 1)
-        self.parameters['number_of_slices'] = checkAndSetPositiveInteger(self.parameters['number_of_slices'], 1)
-        self.parameters['number_of_diffraction_patterns'] = checkAndSetPositiveInteger(self.parameters['number_of_diffraction_patterns'], 1)
-        self.parameters['number_of_MPI_processes'] = checkAndSetPositiveInteger(self.parameters.get('number_of_MPI_processes',2))
-        self.parameters['pmi_start_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_start_ID'], 1)
-        self.parameters['pmi_stop_ID'] = checkAndSetPositiveInteger(self.parameters['pmi_stop_ID'], 1)
-        self.parameters['beam_parameter_file'] = checkAndSetInstance(str, self.parameters['beam_parameter_file'])
-        if not os.path.isfile(self.parameters['beam_parameter_file']):
-            raise IOError("%s is not a file." % (self.parameters['beam_parameter_file']))
-        self.parameters['beam_geometry_file'] = checkAndSetInstance(str, self.parameters['beam_geometry_file'])
-        if not os.path.isfile(self.parameters['beam_geometry_file']):
-            raise IOError("%s is not a file." % (self.parameters['beam_geometry_file']))
 
         self.__expected_data = ['/data/snp_<7 digit index>/ff',
                                 '/data/snp_<7 digit index>/halfQ',
@@ -186,64 +129,20 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Link the  python utility so the backengine can find it.
         ### Yes, this is messy.
-
         preph5_location = inspect.getsourcefile(prepHDF5)
-        preph5_target =  os.path.join( input_dir, 'prepHDF5.py')
-        # Link the prepHDF5 utility that gets called from singFEL code.
-        if not os.path.isfile( preph5_target ):
-            ln_preph5_command = 'ln -s %s %s' % ( preph5_location, preph5_target )
-            proc = subprocess.Popen(ln_preph5_command, shell=True)
-            proc.wait()
+        if preph5_location is None:
+            raise RuntimeError("prepHDF5.py not found. Aborting the calculation.")
 
-        # If parameters are given, map them to command line arguments.
-        if 'uniform_rotation' in self.parameters.keys():
-            uniform_rotation = {True : '1', False : '0'}[self.parameters['uniform_rotation']]
-        else:
-            uniform_rotation = 1
-
-        if 'calculate_Compton' in self.parameters.keys():
-            calculate_Compton = {True : 1, False : 0}[self.parameters['calculate_Compton']]
-        else:
-            calculate_Compton = 0
-
-        if 'slice_interval' in self.parameters.keys():
-            slice_interval = self.parameters['slice_interval']
-        else:
-            slice_interval = 100
-
-        if 'number_of_slices' in self.parameters.keys():
-            number_of_slices = self.parameters['number_of_slices']
-
-        if 'pmi_start_ID' in self.parameters.keys():
-            pmi_start_ID = self.parameters['pmi_start_ID']
-        else:
-            pmi_start_ID = 0
-
-        if 'pmi_stop_ID' in self.parameters.keys():
-            pmi_stop_ID = self.parameters['pmi_stop_ID']
-        else:
-            pmi_stop_ID = 0
-
-        if 'number_of_diffraction_patterns' in self.parameters.keys():
-            number_of_diffraction_patterns = self.parameters['number_of_diffraction_patterns']
-        else:
-            number_of_diffraction_patterns = 1
-
-        if 'number_of_MPI_processes' in self.parameters.keys():
-            number_of_MPI_processes = self.parameters['number_of_MPI_processes']
-        else:
-            number_of_MPI_processes = 2
-
-        if 'beam_parameter_file' in self.parameters.keys():
-            beam_parameter_file = self.parameters['beam_parameter_file']
-        else:
-            raise RuntimeError("Beam parameter file must be given.")
-
-        if 'beam_geometry_file' in self.parameters.keys():
-            beam_geometry_file = self.parameters['beam_geometry_file']
-        else:
-            raise RuntimeError("Beam geometry file must be given.")
-
+        uniform_rotation = int( self.parameters.uniform_rotation)
+        calculate_Compton = int( self.parameters.calculate_Compton )
+        slice_interval = self.parameters.slice_interval
+        number_of_slices = self.parameters.number_of_slices
+        pmi_start_ID = self.parameters.pmi_start_ID
+        pmi_stop_ID = self.parameters.pmi_stop_ID
+        number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
+        number_of_MPI_processes = self.parameters.number_of_MPI_processes
+        beam_parameter_file = self.parameters.beam_parameter_file
+        beam_geometry_file = self.parameters.beam_geometry_file
 
         if not os.path.isdir( self.output_path ):
             os.mkdir( self.output_path )
@@ -267,13 +166,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--pmiStartID',       str(pmi_start_ID),
                             '--pmiEndID',         str(pmi_stop_ID),
                             '--numDP',            str(number_of_diffraction_patterns),
+                            '--prepHDF5File',     preph5_location,
                             ]
         proc = subprocess.Popen(command_sequence)
         proc.wait()
-
-
-        if os.path.islink(preph5_target):
-            os.remove(preph5_target)
 
         # Return the return code from the backengine.
         return proc.returncode
@@ -293,8 +189,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Private method to save the object to a file.
 
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: The file where to save the object's data.
+        :type output_path: string, default b
         """
         pass # No action required since output is written in backengine.

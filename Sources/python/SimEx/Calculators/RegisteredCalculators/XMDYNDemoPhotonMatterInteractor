@@ -1,0 +1,6 @@
+{
+	"Name"  : "XMDYNDemoPhotonMatterInteractor",
+	"Class" : "Interactors",
+	"Source": "default",
+	"Parameters Template" : "default"
+}

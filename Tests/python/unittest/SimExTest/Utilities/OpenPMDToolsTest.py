@@ -33,6 +33,9 @@ import unittest
 
 from SimEx.Utilities import OpenPMDTools as opmd
 from SimEx.Utilities.wpg_to_opmd import convertToOPMD
+from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
+
+from SimEx.Utilities import checkOpenPMD_h5 as opmd_validator
 
 from TestUtilities.TestUtilities import generateTestFilePath
 
@@ -59,75 +62,6 @@ class OpenPMDToolsTest(unittest.TestCase):
             if os.path.isfile(f):
                 os.remove(f)
 
-    def testSampleScript(self):
-        """ Testing the generic openpmd-Validator script from  https://github.com/openPMD/openPMD-validator/createExamples_h5.py """
-
-        h5_name = "openpmd_example.h5"
-
-        # Trigger cleanup.
-        self.__files_to_remove.append(h5_name)
-
-        # Open plain h5 file.
-        f = h5py.File(h5_name, "w")
-
-        # Setup the root attributes for iteration 0
-        opmd.setup_root_attr(f)
-
-        # Setup basepath
-        opmd.setup_base_path(f, iteration=0)
-
-        # Write the field records
-        opmd.write_meshes(f, iteration=0)
-
-        # Write the particle records
-        opmd.write_particles(f, iteration=0)
-
-        # Close the file
-        f.close()
-
-        # Assert file exists.
-        self.assertIn( h5_name, os.listdir('.') )
-
-    def testValidate(self):
-        """ Test validation of an existing openpmd conformant file. """
-
-        h5_name = "openpmd_example.h5"
-
-        # Trigger cleanup.
-        self.__files_to_remove.append(h5_name)
-
-        # Get file handle.
-        f = h5py.File(h5_name, "w")
-
-        # Setup the root attributes for iteration 0
-        opmd.setup_root_attr(f)
-
-        # Setup basepath
-        opmd.setup_base_path(f, iteration=0)
-
-        # Write the field records
-        opmd.write_meshes(f, iteration=0)
-
-        # Write the particle records
-        opmd.write_particles(f, iteration=0)
-
-        f.close()
-
-        g = opmd.open_file(h5_name)
-
-        # root attributes at "/"
-        result_array = numpy.array([0, 0])
-        result_array += opmd.check_root_attr(g, False, False)
-
-        # Go through all the iterations, checking both the particles.
-        # and the meshes
-        result_array += opmd.check_iterations(g,False,False)
-
-        # Assert that no errors nor warnings were issued.
-        self.assertEqual( result_array[0], 0 )
-        self.assertEqual( result_array[1], 0 )
-
-
     def testWpgToOPMDConverter(self):
         """ Test the conversion of wpg output to openPMD conform file."""
 
@@ -144,18 +78,55 @@ class OpenPMDToolsTest(unittest.TestCase):
         self.__files_to_remove.append(opmd_h5_file)
 
         # Check new file was generated.
-        self.assertIn( 'prop_out_0000001.opmd.h5', os.listdir( os.path.dirname(opmd_h5_file) ) )
+        self.assertTrue( os.path.isfile( opmd_h5_file ) )
 
         # Validate the new file.
-        g = opmd.open_file(opmd_h5_file)
+        g = opmd_validator.open_file(opmd_h5_file)
 
         # Setup result array.
         result_array = numpy.array([0, 0])
-        result_array += opmd.check_root_attr(g, False, False)
+        result_array += opmd_validator.check_root_attr(g, False)
 
         # Go through all the iterations, checking both the particles.
         # and the meshes
-        result_array += opmd.check_iterations(g,False,False)
+        extensions = {'ED-PIC': False, 'HYDRO1D': False}
+        result_array += opmd_validator.check_iterations(g,False,extensions)
+
+        # Assert that no errors nor warnings were issued.
+        self.assertEqual( result_array[0], 0 )
+        self.assertEqual( result_array[1], 0 )
+
+
+    def testHydroTxtToOPMDConverter(self):
+        """ Test the conversion of esther output to openPMD conform hdf5 file."""
+
+        # Get sample file.
+        esther_output = generateTestFilePath('hydroTests')
+
+        # Convert.
+        convertTxtToOPMD(esther_output)
+
+        # New file name.
+        opmd_h5_file = esther_output + '.opmd.h5'
+
+        # Make sure we clean up after test.
+        self.__files_to_remove.append(opmd_h5_file)
+
+
+        # Check new file was generated.
+        self.assertTrue( os.path.isfile( opmd_h5_file ) )
+
+        # Validate the new file.
+        g = opmd_validator.open_file(opmd_h5_file)
+
+        # Setup result array.
+        result_array = numpy.array([0, 0])
+        result_array += opmd_validator.check_root_attr(g, False)
+
+        # Go through all the iterations, checking both the particles.
+        # and the meshes.
+        extensions = {'ED-PIC': False, 'HYDRO1D': True}
+        result_array += opmd_validator.check_iterations(g,False,extensions)
 
         # Assert that no errors nor warnings were issued.
         self.assertEqual( result_array[0], 0 )

@@ -19,22 +19,25 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the S2EReconstruction class.
+""" Module that holds the DMPhasing class.
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20151104
+    :author: CFG
+    :institution: XFEL
+    :creation: 20151104
 
 """
-import os, shutil
-import subprocess
-import tempfile
-import numpy
 import glob
 import h5py
+import numpy
+import os
 import re
+import shutil
+import subprocess
+import tempfile
 
 from AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
+from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class DMPhasing(AbstractPhotonAnalyzer):
     """
@@ -45,10 +48,25 @@ class DMPhasing(AbstractPhotonAnalyzer):
         """
         Constructor for the phasing analyser.
 
-        @param  parameters : Dictionary of reconstruction parameters.
-        <br/><b>type</b> : dict
-        <br/><b>example</b> : parameters={}
+        :param  parameters: Phasing parameters.
+        :type parameters: DMPhasingParameters instance
+
+        :param input_path: Path to input data (file or directory).
+        :type input_path: str
+
+        :param output_path: Path to output data (file or directory).
+        :type output_path: str
         """
+
+        # Check parameters.
+        if isinstance( parameters, dict ):
+            parameters = DMPhasingParameters( parameters_dictionary = parameters )
+
+        # Set default parameters is no parameters given.
+        if parameters is None:
+            parameters = checkAndSetInstance( DMPhasingParameters, parameters, DMPhasingParameters() )
+        else:
+            parameters = checkAndSetInstance( DMPhasingParameters, parameters, None )
 
         super(DMPhasing, self).__init__(parameters,input_path,output_path)
 
@@ -67,16 +85,23 @@ class DMPhasing(AbstractPhotonAnalyzer):
                                 ]
 
     def expectedData(self):
-        """ Query for the data expected by the Analyzer. """
+        """ Query for the data expected by the Analyzer.
+
+        :return: A list of strings telling which datasets are expected to be found in the input file.
+        """
         return self.__expected_data
 
     def providedData(self):
-        """ Query for the data provided by the Analyzer. """
+        """ Query for the data provided by the Analyzer.
+
+        :return: A list of strings indicating which datasets are produced in the output data."""
         return self.__provided_data
 
     @property
     def data(self):
-        """ Query for the field data. """
+        """ Query for the field data.
+
+        :return: The stored 3D electron density map."""
         return self.__data
 
     def _readH5(self):
@@ -88,54 +113,32 @@ class DMPhasing(AbstractPhotonAnalyzer):
         """ """
         """
         Method to save the object to a file.
-
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
         """
-        pass # No action required since output is written in backengine.
-
+        pass
 
     def backengine(self):
-        """ Start the actual calculation. """
+        """ Start the actual calculation.
 
-        status = self.run_dm()
+        :return: 0 if the DM run was successful, 1 if not. """
 
+        status = self._run_dm()
         return status
 
 
-    def run_dm(self):
+    def _run_dm(self):
+        """ """
         """ Run the Difference Map (DM) algorithm.
 
-        @return : 0 if DM returns successfully, 1 if not.
-        <br/><b>note</b> : Copied and adapted from the main routine in
-        s2e_recon/DM/runDM.py
+        :return: 0 if DM returns successfully, 1 if not.
+        :note: Copied and adapted from the main routine in s2e_recon/DM/runDM.py
+        :private:
         """
 
-        if 'number_of_trials' in self.parameters.keys():
-            number_of_trials = self.parameters['number_of_trials']
-        else:
-            number_of_trials = 500
-
-        if 'averaging_start' in self.parameters.keys():
-            averaging_start = self.parameters['averaging_start']
-        else:
-            averaging_start = 15
-
-        if 'number_of_iterations' in self.parameters.keys():
-            number_of_iterations = self.parameters['number_of_iterations']
-        else:
-            number_of_iterations = 50
-
-        if 'leash' in self.parameters.keys():
-            leash = self.parameters['leash']
-        else:
-            leash = 0.2
-
-        if 'number_of_shrink_cycles' in self.parameters.keys():
-            number_of_shrink_cycles = self.parameters['number_of_shrink_cycles']
-        else:
-            number_of_shrink_cycles = 10
+        number_of_trials = self.parameters.number_of_trials
+        averaging_start = self.parameters.averaging_start
+        number_of_iterations = self.parameters.number_of_iterations
+        leash = self.parameters.leash
+        number_of_shrink_cycles = self.parameters.number_of_shrink_cycles
 
         # Save current working directory.
         cwd = os.path.abspath(os.curdir)
@@ -148,19 +151,19 @@ class DMPhasing(AbstractPhotonAnalyzer):
             output_file          = os.path.join(out_dir, "phase_out.h5")
 
             #Read intensity and translate into ASCII *.dat format
-            (qmax, t_intens, intens_len, qPos, qPos_full) = load_intensities(input_intensity_file)
+            (qmax, t_intens, intens_len, qPos, qPos_full) = _load_intensities(input_intensity_file)
             input_intens = t_intens
             input_intens.tofile(intensity_tmp, sep=" ")
 
             # Compute autocorrelation and support
             #print_to_log("Computing autocorrelation...")
-            input_intens  = v_zero_neg(input_intens.ravel()).reshape(input_intens.shape)
+            input_intens  = _v_zero_neg(input_intens.ravel()).reshape(input_intens.shape)
             auto        = numpy.fft.fftshift(numpy.abs(numpy.fft.fftn(numpy.fft.ifftshift(input_intens))))
             #print_to_log("Using 2-means clustering to determine significant voxels in autocorrelation...")
-            (a_0, a_1)  = cluster_two_means(auto.ravel())
+            (a_0, a_1)  = _cluster_two_means(auto.ravel())
             #print_to_log("cluster averages: %lf %lf"%(a_0, a_1))
             #print_to_log("Determining support from autocorrelation (will write to support.dat by default)...")
-            support     = support_from_autocorr(auto, qmax, a_0, a_1, support_file)
+            support     = _support_from_autocorr(auto, qmax, a_0, a_1, support_file)
 
             #Start phasing
             #Store parameters into phase_out.h5.
@@ -192,16 +195,16 @@ class DMPhasing(AbstractPhotonAnalyzer):
             g_err       = fp.create_group("/history/error")
             g_hist_obj  = fp.create_group("/history/object")
             for n, mo in enumerate(logFiles):
-                err = parse_error_log(mo)
+                err = _parse_error_log(mo)
                 g_err.create_dataset("%0.4d"%(n+1), data=err, compression="gzip")
                 os.remove(mo)
 
             for n, ob_fn in enumerate(min_objects):
-                obj = extract_object(ob_fn)
+                obj = _extract_object(ob_fn)
                 g_hist_obj.create_dataset("%0.4d"%(n+1), data=obj, compression="gzip")
                 os.remove(ob_fn)
 
-            finish_object = extract_object("finish_object.dat")
+            finish_object = _extract_object("finish_object.dat")
             g_data.create_dataset("electronDensity", data=finish_object, compression="gzip")
             os.system("cp finish_object.dat start_object.dat")
 
@@ -212,7 +215,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
             g_params.create_dataset("DM_leashParameter",    data=leash)
             g_params.create_dataset("DM_shrinkwrapCycles",  data=number_of_shrink_cycles)
 
-            shrinkWrap = parse_shrinkwrap_log(shrinkWrapFile)
+            shrinkWrap = _parse_shrinkwrap_log(shrinkWrapFile)
             fp.create_dataset("/history/shrinkwrap", data=shrinkWrap, compression="gzip")
             fp.create_dataset("version", data=h5py.version.hdf5_version)
 
@@ -221,12 +224,20 @@ class DMPhasing(AbstractPhotonAnalyzer):
             shutil.copy( output_file, os.path.join( cwd, self.output_path ) )
             os.chdir(cwd)
             return 0
+
         except:
             os.chdir(cwd)
             return 1
 
 
-def load_intensities(ref_file):
+def _load_intensities(ref_file):
+    """ """
+    """ Private function for loading 3D intensity maps from a file.
+
+    :param ref_file: Filename holding the data to load.
+    :type ref_file: str
+    """
+
     fp      = h5py.File(ref_file, 'r')
     t_intens = (fp["data/data"].value).astype("float")
     fp.close()
@@ -242,12 +253,12 @@ def load_intensities(ref_file):
     qPos_full = numpy.array([[i,j,k] for i in qRange2 for j in qRange2 for k in qRange2]).astype("float")
     return (qmax, t_intens, intens_len, qPos, qPos_full)
 
-def zero_neg(x):
+def _zero_neg(x):
     return 0. if x<=0. else x
 
-v_zero_neg  = numpy.vectorize(zero_neg)
+_v_zero_neg  = numpy.vectorize(_zero_neg)
 
-def find_two_means(vals, v0, v1):
+def _find_two_means(vals, v0, v1):
     v0_t    = 0.
     v0_t_n  = 0.
     v1_t    = 0.
@@ -265,18 +276,17 @@ def find_two_means(vals, v0, v1):
         v1_t /= v1_t_n
     return (v0_t, v1_t)
 
-def cluster_two_means(vals):
+def _cluster_two_means(vals):
     (v0,v1)     = (0.,0.1)
-    (v00, v11)  = find_two_means(vals, v0, v1)
+    (v00, v11)  = _find_two_means(vals, v0, v1)
     err = 0.5*(numpy.abs(v00-v0)+numpy.abs(v11-v1))
     while(err > 1.E-5):
-        (v00, v11)  = find_two_means(vals, v0, v1)
+        (v00, v11)  = _find_two_means(vals, v0, v1)
         err         = 0.5*(numpy.abs(v00-v0)+numpy.abs(v11-v1))
         (v0, v1)    = (v00, v11)
     return (v0, v1)
 
-def support_from_autocorr(auto, qmax, thr_0, thr_1, supp_file, kl=1, write=True):
-
+def _support_from_autocorr(auto, qmax, thr_0, thr_1, supp_file, kl=1, write=True):
     pos     = numpy.argwhere(numpy.abs(auto-thr_0) > numpy.abs(auto-thr_1))
     pos_set = set()
     pos_list= []
@@ -315,23 +325,23 @@ def show_support(support):
     #plt.show()
     pass
 
-
-def parse_shrinkwrap_log(shrinkwrap_fn):
-    fp = open(shrinkwrap_fn, "r")
-    lines = fp.readlines()
-    fp.close()
+def _parse_shrinkwrap_log(shrinkwrap_fn):
+    with open(shrinkwrap_fn, "r") as fp:
+        lines = fp.readlines()
+        fp.close()
     lst = []
     for ll in lines:
         m = re.match("supp_vox = (\d+)\s", ll)
         if m:
             (supp_size,) = m.groups()
             lst.append(int(supp_size))
+
     return numpy.array(lst)
 
-def parse_error_log(err_fn):
-    fp = open(err_fn, "r")
-    lines = fp.readlines()[2:]
-    fp.close()
+def _parse_error_log(err_fn):
+    with open(err_fn, "r") as fp:
+        lines = fp.readlines()[2:]
+        fp.close()
     lst = []
     for ll in lines:
         m = re.match("iter = (\d+)\s+error = (\d+\.\d+)", ll)
@@ -340,10 +350,9 @@ def parse_error_log(err_fn):
             lst.append(float(err))
     return numpy.array(lst)
 
-def extract_object(object_fn):
+def _extract_object(object_fn):
     tmp = numpy.fromfile(object_fn, sep=" ")
     s = tmp.shape[0]
     l = int(round(s**(1./3.)))
+
     return tmp.reshape(l,l,l)
-
-

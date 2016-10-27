@@ -1,0 +1,6 @@
+{
+	"Name"  : "SingFELPhotonDiffractor",
+	"Class" : "Diffractors",
+	"Source": "default",
+	"Parameters Template" : "default"
+}

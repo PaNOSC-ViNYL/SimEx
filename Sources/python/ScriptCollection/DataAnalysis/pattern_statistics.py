@@ -91,62 +91,62 @@ for i, file_index in enumerate(file_indices):
         continue
 
 # Convert to numpy.
-#number_of_photons = numpy.array( number_of_photons  )
+number_of_photons = numpy.array( number_of_photons  )
 
-## Take average and std.
-#number_of_photons_avg = numpy.mean( number_of_photons )
-#number_of_photons_std = numpy.std( number_of_photons )
+# Take average and std.
+number_of_photons_avg = numpy.mean( number_of_photons )
+number_of_photons_std = numpy.std( number_of_photons )
 
-#print "***********************"
-#print "avg = %s, std = %s" % (number_of_photons_avg, number_of_photons_std)
-#print "***********************"
+print "***********************"
+print "avg = %s, std = %s" % (number_of_photons_avg, number_of_photons_std)
+print "***********************"
 
 
-## Plot number of photons as function of frame.
-#min_number_of_photons = 150
-#max_number_of_photons = 400
-#pylab.figure(0)
-#pylab.plot( number_of_photons, 'or' )
-#pylab.plot( numpy.ones(len(number_of_photons) ) * number_of_photons_avg, '-k',linewidth=2.0 )
-#pylab.plot( numpy.ones(len(number_of_photons) ) * (number_of_photons_avg+number_of_photons_std ), '-b' )
-#pylab.plot( numpy.ones(len(number_of_photons) ) * (number_of_photons_avg-number_of_photons_std ), '-b' )
-#pylab.xlabel("Diffraction pattern ")
-#pylab.ylabel("Detected photons")
-#pylab.title("Total number of photons per diffraction pattern")
-#pylab.xlim([0,number_of_samples])
-#pylab.ylim([min_number_of_photons, max_number_of_photons])
+# Plot number of photons as function of frame.
+min_number_of_photons = 150
+max_number_of_photons = 400
+pylab.figure(0)
+pylab.plot( number_of_photons, 'or' )
+pylab.plot( numpy.ones(len(number_of_photons) ) * number_of_photons_avg, '-k',linewidth=2.0 )
+pylab.plot( numpy.ones(len(number_of_photons) ) * (number_of_photons_avg+number_of_photons_std ), '-b' )
+pylab.plot( numpy.ones(len(number_of_photons) ) * (number_of_photons_avg-number_of_photons_std ), '-b' )
+pylab.xlabel("Diffraction pattern ")
+pylab.ylabel("Detected photons")
+pylab.title("Total number of photons per diffraction pattern")
+pylab.xlim([0,number_of_samples])
+pylab.ylim([min_number_of_photons, max_number_of_photons])
 
-## Plot histogram.
-#pylab.figure(1)
-#max_photon_number = numpy.max( number_of_photons )
-#min_photon_number = numpy.min( number_of_photons )
-#binwidth = max_photon_number - min_photon_number
-#number_of_bins = 20
-#binwidth = int( binwidth / number_of_bins )
+# Plot histogram.
+pylab.figure(1)
+max_photon_number = numpy.max( number_of_photons )
+min_photon_number = numpy.min( number_of_photons )
+binwidth = max_photon_number - min_photon_number
+number_of_bins = 20
+binwidth = int( binwidth / number_of_bins )
 
-#pylab.hist(number_of_photons, bins=xrange(min_photon_number, max_photon_number, binwidth), facecolor='red', alpha=0.75)
-#pylab.xlim([min_number_of_photons, max_number_of_photons])
-#pylab.xlabel("Photons")
-#pylab.ylabel("Histogram")
-#pylab.title("Photon number histogram")
-##pylab.show()
+pylab.hist(number_of_photons, bins=xrange(min_photon_number, max_photon_number, binwidth), facecolor='red', alpha=0.75)
+pylab.xlim([min_number_of_photons, max_number_of_photons])
+pylab.xlabel("Photons")
+pylab.ylabel("Histogram")
+pylab.title("Photon number histogram")
+#pylab.show()
 
-pylab.figure(2)
-# Average
-sum_over_images = 1.0*sum_over_images / number_of_samples
-# Offset for log scale.
-#sum_over_images += 0.01 * numpy.min(sum_over_images[numpy.where(sum_over_images > 0)])
-sum_over_images += 1e-4
-vmax=10.
-vmin=1.0e-4
-raw_input([vmin, vmax])
-pylab.pcolor(sum_over_images,norm=LogNorm(vmax=vmax, vmin=vmin), cmap='YlGnBu_r')
-#pylab.pcolor(sum_over_images, cmap='YlGnBu_r')
-pylab.colorbar()
+#pylab.figure(2)
+## Average
+#sum_over_images = 1.0*sum_over_images / number_of_samples
+## Offset for log scale.
+##sum_over_images += 0.01 * numpy.min(sum_over_images[numpy.where(sum_over_images > 0)])
+#sum_over_images += 1e-4
+#vmax=10.
+#vmin=1.0e-4
+#raw_input([vmin, vmax])
+#pylab.pcolor(sum_over_images,norm=LogNorm(vmax=vmax, vmin=vmin), cmap='YlGnBu_r')
+##pylab.pcolor(sum_over_images, cmap='YlGnBu_r')
+#pylab.colorbar()
 
-pylab.figure(3)
-pylab.semilogy( numpy.sum( sum_over_images, axis=0 ), label='x axis projection')
-pylab.semilogy( numpy.sum( sum_over_images, axis=1 ), label='y axis projection')
+#pylab.figure(3)
+#pylab.semilogy( numpy.sum( sum_over_images, axis=0 ), label='x axis projection')
+#pylab.semilogy( numpy.sum( sum_over_images, axis=1 ), label='y axis projection')
 
-pylab.legend()
-pylab.show()
+#pylab.legend()
+#pylab.show()

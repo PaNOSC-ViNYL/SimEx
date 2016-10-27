@@ -1,4 +1,0 @@
-327c327
-< 			sstm << inputDir << "/pmi/pmi_out_" << setfill('0') << setw(7) \
----
-> 			sstm << inputDir << "/pmi_out_" << setfill('0') << setw(7) \

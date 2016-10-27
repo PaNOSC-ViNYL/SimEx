@@ -528,7 +528,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         xrts_parameters.model_Sii = 1.5
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__Sii_value, 1.5 )
         self.assertEqual( xrts_parameters._PlasmaXRTSCalculatorParameters__use_Sii_value, 1 )
-        self.assertEqual( xrts_parameters.model_Sii, 'USR' )
+        self.assertEqual( xrts_parameters.model_Sii, 'DH' )
 
     def testSetSbfNormFlags(self):
         """ Test setting the internal Sbf norm flags. """

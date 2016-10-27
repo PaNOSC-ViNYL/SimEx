@@ -19,7 +19,7 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the SingFELPhotonDiffractor.
+""" Test module for the S2EReconstruction.
 
     @author : CFG
     @institution : XFEL
@@ -57,6 +57,59 @@ class S2EReconstructionTest(unittest.TestCase):
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
+    def testDefaultConstruction(self):
+        """ Testing the default construction of the class. """
+
+        # Ensure proper cleanup.
+        self.__dirs_to_remove.append( 'analysis' )
+
+        # Construct the object.
+        analyzer = S2EReconstruction()
+        self.assertIsInstance(analyzer, S2EReconstruction)
+
+        # Check.
+        self.assertEqual( analyzer.input_path,  os.path.abspath( 'detector' ) )
+        self.assertEqual( analyzer.output_path, os.path.abspath( 'analysis' ) )
+
+    def testBackengineDefaultPath(self):
+        """ Test that we can start a test calculation. """
+
+        # Prepare path.
+        shutil.copytree( TestUtilities.generateTestFilePath( 'diffr' ), 'detector' )
+
+        # Ensure proper cleanup.
+        self.__dirs_to_remove.append( 'detector' )
+        self.__dirs_to_remove.append( 'analysis' )
+
+        emc_parameters = {'initial_number_of_quaternions' : 1,
+                          'max_number_of_quaternions'     : 2,
+                          'max_number_of_iterations'      : 10,
+                          'min_error'                     : 1.0e-6,
+                          'beamstop'                      : True,
+                          'detailed_output'               : False
+                               }
+
+        dm_parameters = {'number_of_trials'        : 5,
+                         'number_of_iterations'    : 2,
+                         'averaging_start'         : 15,
+                         'leash'                   : 0.2,
+                         'number_of_shrink_cycles' : 2,
+                         }
+
+        # Construct the object.
+        analyzer = S2EReconstruction(parameters={'EMC_Parameters' : emc_parameters, 'DM_Parameters' : dm_parameters})
+
+        # Call backengine.
+        status = analyzer.backengine()
+
+        # Check return value.
+        self.assertEqual(status, 0)
+
+        # Check presence of output files.
+        self.assertTrue( os.path.isdir( 'analysis' ) )
+        self.assertIn( 'orient_out.h5', os.listdir( 'analysis' ) )
+        self.assertIn( 'phase_out.h5', os.listdir( 'analysis' ) )
+
     def tearDown(self):
         """ Tearing down a test. """
 
@@ -67,7 +120,7 @@ class S2EReconstructionTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def testConstruction(self):
+    def testShapedConstruction(self):
         """ Testing the default construction of the class. """
 
         self.__files_to_remove.append('orient_out.h5')
@@ -87,7 +140,7 @@ class S2EReconstructionTest(unittest.TestCase):
                           'max_number_of_quaternions'     : 2,
                           'max_number_of_iterations'      : 10,
                           'min_error'                     : 1.0e-6,
-                          'beamstop'                      : 1.0e-5,
+                          'beamstop'                      : True,
                           'detailed_output'               : False
                                }
 

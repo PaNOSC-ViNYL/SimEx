@@ -16,7 +16,6 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
@@ -28,6 +27,8 @@
 
 """
 import paths
+
+import os
 import unittest
 
 
@@ -36,6 +37,20 @@ from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 
 from TestUtilities import TestUtilities
+
+class TestPhotonDetector(AbstractPhotonDetector):
+    """ Implements a dummy child of the AbstractPhotonDetector base class for testing purposes."""
+
+    def __init__(self):
+        super (TestPhotonDetector, self).__init__(parameters=None, input_path=None, output_path=None)
+    def backengine(self):
+        pass
+    def _readH5(self):
+        pass
+    def saveH5(self):
+        pass
+    def expectedData(self): pass
+    def providedData(self): pass
 
 
 class AbstractPhotonDetectorTest(unittest.TestCase):
@@ -70,15 +85,6 @@ class AbstractPhotonDetectorTest(unittest.TestCase):
     def testConstructionDerived(self):
         """ Test that we can construct a derived class and it has the correct inheritance. """
 
-        class TestPhotonDetector(AbstractPhotonDetector):
-
-            def __init__(self):
-                input_path = TestUtilities.generateTestFilePath('FELsource_out.h5')
-                super(TestPhotonDetector, self).__init__(parameters=None, input_path=input_path, output_path='test_out.h5')
-
-            def backengine(self):
-                pass
-
         test_source = TestPhotonDetector()
 
         self.assertIsInstance( test_source, TestPhotonDetector )
@@ -86,6 +92,14 @@ class AbstractPhotonDetectorTest(unittest.TestCase):
         self.assertIsInstance( test_source, AbstractBaseCalculator )
         self.assertIsInstance( test_source, AbstractPhotonDetector )
 
+    def testDefaultPaths(self):
+        """ Check that default pathnames are chosen correctly. """
+
+        # Construct with no paths given.
+        instance = TestPhotonDetector()
+
+        self.assertEqual(instance.output_path, os.path.abspath('detector'))
+        self.assertEqual(instance.input_path, os.path.abspath('diffr'))
 
 
 if __name__ == '__main__':

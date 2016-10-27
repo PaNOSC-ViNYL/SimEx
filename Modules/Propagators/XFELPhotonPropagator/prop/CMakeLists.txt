@@ -2,7 +2,7 @@ INCLUDE(ExternalProject)
 
 ExternalProject_Add(
 prop
-URL  https://github.com/samoylv/prop/archive/develop.zip
+URL  https://github.com/samoylv/prop/archive/b5e918fc8da58a91b2d131a84ff4b6024f7ffc24.zip
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
 PATCH_COMMAND patch propagateSE.py ${CMAKE_CURRENT_SOURCE_DIR}/propagateSE.py.patch &&

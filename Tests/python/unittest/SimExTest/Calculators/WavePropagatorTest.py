@@ -32,12 +32,15 @@ import unittest
 
 import numpy
 import h5py
+from wpg.beamline import Beamline
 
 # Import the class to test.
 from SimEx.Calculators.WavePropagator import WavePropagator
 from TestUtilities import TestUtilities
 
 from SimEx.Utilities.WPGBeamlines import setupSPBDay1Beamline
+from SimEx.Utilities.WPGBeamlines import setup_S2E_SPI_beamline
+from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 
 class WavePropagatorTest(unittest.TestCase):
     """
@@ -48,6 +51,9 @@ class WavePropagatorTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         cls.input_h5 = TestUtilities.generateTestFilePath('FELsource_out/FELsource_out_0000000.h5')
+
+        # Use this for strong testing, but takes long.
+        #cls.input_h5 = TestUtilities.generateTestFilePath('0000028.h5')
 
     @classmethod
     def tearDownClass(cls):
@@ -66,28 +72,39 @@ class WavePropagatorTest(unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d): shutil.rmtree(d)
 
+    def testConstructionDefault(self):
+        """ Test the construction with default parameters. """
 
-    def testConstruction(self):
+        # Construct the object.
+        propagator = WavePropagator(input_path=self.input_h5,
+                                    output_path='wpg_out_0000000.h5')
+
+        self.assertIsInstance(propagator, WavePropagator)
+        self.assertIsInstance(propagator.parameters.beamline, Beamline )
+
+    def testConstructionParameters1(self):
         """ Testing the default construction of the class. """
 
         # Define a beamline.
         beamline = setupSPBDay1Beamline()
 
         # Construct the object.
-        propagator = WavePropagator(parameters={'beamline' : beamline},
-                                         input_path=self.input_h5,
-                                         output_path='wpg_out_0000000.h5')
+        propagator = WavePropagator(parameters=WavePropagatorParameters(beamline=beamline),
+                                    input_path=self.input_h5,
+                                    output_path='wpg_out_0000000.h5')
 
         self.assertIsInstance(propagator, WavePropagator)
 
-    def testConstructionBeamline(self):
-        """ Testing the construction of the class with the beamline given instead of a dictionary. """
+    def testConstructionParameters2(self):
+        """ Testing the construction of the class with a parameters object. """
 
         # Define a beamline.
         beamline = setupSPBDay1Beamline()
 
+        parameters = WavePropagatorParameters(beamline=beamline, use_opmd=True)
+
         # Construct the object.
-        propagator = WavePropagator(parameters=beamline,
+        propagator = WavePropagator(parameters=parameters,
                                          input_path=self.input_h5,
                                          output_path='wpg_out_0000000.h5')
 
@@ -97,12 +114,21 @@ class WavePropagatorTest(unittest.TestCase):
     def testConstructionFailParameters(self):
         """ Testing that faulty construction raises an exception. """
 
+        # Define a beamline.
+        beamline = setupSPBDay1Beamline()
 
-        # Construct the object without parameters.
-        self.assertRaises( RuntimeError, WavePropagator,
-                                    parameters=None,
+        # Construct the object with beamline as parameter.
+        self.assertRaises( TypeError, WavePropagator,
+                                    parameters=beamline,
                                     input_path=self.input_h5,
                                     output_path='wpg_out_0000001.h5')
+
+        # Construct the object with a parameters dict.
+        self.assertRaises( TypeError, WavePropagator,
+                parameters={'beamline' : beamline},
+                            input_path=self.input_h5,
+                            output_path='wpg_out_0000001.h5')
+
 
 
     def testReadH5ExceptionInput(self):
@@ -110,22 +136,24 @@ class WavePropagatorTest(unittest.TestCase):
         # Define a beamline.
         beamline = setupSPBDay1Beamline()
 
+        parameters = WavePropagatorParameters(beamline=beamline)
+
         # Construct the object.
-        propagator = WavePropagator(parameters=beamline,
-                                         input_path='/tmp',
-                                         output_path='wpg_out_0000001.h5')
+        propagator = WavePropagator(parameters=parameters,
+                                    input_path='/tmp',
+                                    output_path='wpg_out_0000001.h5')
 
         # Check exception raises when attempting to read.
         self.assertRaises( IOError, propagator._readH5 )
 
-    @unittest.skip("Skipped while samoylv/WPG#74 not closed.")
+    @unittest.skip("Triggers segfault from time to time, see #39.")
     def testReadCalculateWrite(self):
         """ Test a backengine run with a single input file. """
         # Define a beamline.
         beamline = setupSPBDay1Beamline()
 
         # Construct the object.
-        propagator = WavePropagator( parameters=beamline, input_path=self.input_h5, output_path='wpg_out.h5' )
+        propagator = WavePropagator( parameters=WavePropagatorParameters(beamline=beamline), input_path=self.input_h5, output_path='wpg_out.h5' )
 
         # Read the data.
         propagator._readH5()
@@ -146,7 +174,30 @@ class WavePropagatorTest(unittest.TestCase):
         self.__files_to_remove.append(propagator.output_path)
 
 
+    def testOPMD(self):
+        """ Test usage of the use_opmd parameter. """
+
+        # Make sure we clean up after the fact.
+        self.__files_to_remove.append('wpg_out.h5')
+        self.__files_to_remove.append('wpg_out.opmd.h5')
+
+        # Define a beamline.
+        beamline = setup_S2E_SPI_beamline()
+
+        # Construct the object.
+        propagator = WavePropagator( parameters=WavePropagatorParameters(beamline=beamline, use_opmd=True), input_path=self.input_h5, output_path='wpg_out.h5' )
+
+        # Read the data.
+        propagator._readH5()
+
+        # Call the backengine.
+        status = propagator.backengine()
+
+        # Write the data.
+        propagator.saveH5()
+
+        # Assert that opmd has been written.
+        self.assertIn('wpg_out.opmd.h5', os.listdir( os.getcwd() ) )
 
 if __name__ == '__main__':
     unittest.main()
-

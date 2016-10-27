@@ -11,26 +11,21 @@ FIND_PACKAGE(GSL REQUIRED)
 
 ExternalProject_Add(
 singfel
-URL https://www.dropbox.com/s/nnoc78iafor0qrn/singfel.tar.gz
-PATCH_COMMAND cp ${SIMEX_CMAKE_DIR}/FindArmadillo.cmake CMake/FindArmadillo.cmake &&
-	          cp -v ${CMAKE_CURRENT_SOURCE_DIR}/patches/CMakeLists.txt.patch CMakeLists.txt &&
-#	          cp ${SIMEX_CMAKE_DIR}/FindMKL.cmake CMake/ARMA_FindMKL.cmake &&
-#	          cp ${SIMEX_CMAKE_DIR}/FindPythonLibs.cmake CMake &&
-		  rm -rf CMake &&
-		  ln -s ${SIMEX_CMAKE_DIR} CMake &&
-		  patch	src/radiationDamageMPI.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/radiationDamageMPI.cpp.patch
+URL https://github.com/eucall-software/singfel/archive/master.zip
+PATCH_COMMAND ""
 INSTALL_COMMAND ""
 )
 
 # cannot find iomp5 unless using intel compiler!
 
+ExternalProject_Get_Property(singfel BINARY_DIR)
 ExternalProject_Get_Property(singfel SOURCE_DIR)
 
-install(DIRECTORY ${SOURCE_DIR}/bin/ DESTINATION ${BINDIR}/
+install(DIRECTORY ${BINARY_DIR}/bin/ DESTINATION ${BINDIR}
         USE_SOURCE_PERMISSIONS
         )
 
-install(DIRECTORY ${SOURCE_DIR}/libsingfel/ DESTINATION ${INCLUDEDIR}/singfel/
+install(DIRECTORY ${SOURCE_DIR}/libsingfel/ DESTINATION ${INCLUDEDIR}/singfel
                                         USE_SOURCE_PERMISSIONS
                                         FILES_MATCHING
                                         PATTERN "*.h"
@@ -38,7 +33,7 @@ install(DIRECTORY ${SOURCE_DIR}/libsingfel/ DESTINATION ${INCLUDEDIR}/singfel/
 #                                        PATTERN ".*" EXCLUDE
                                         )
 
-install(DIRECTORY ${SOURCE_DIR}/lib/ DESTINATION ${LIBDIR}/
+install(DIRECTORY ${SOURCE_DIR}/lib/ DESTINATION ${LIBDIR}
                                         USE_SOURCE_PERMISSIONS
                                         FILES_MATCHING
                                         PATTERN "*.so"

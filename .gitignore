@@ -1,8 +1,11 @@
 *.pyc
 *.pyo
-.*.*sw
+**.swp
 bin
 include
 lib
-
-
+build/
+doc/build/
+doc/doxy_build/
+._quaternion*.dat
+.idea

@@ -16,15 +16,14 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
 """ Module that holds the XFELPhotonPropagator class.
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20151104
+    :author: CFG
+    :institution: XFEL
+    :creation: 20151104
 
 """
 import os
@@ -34,24 +33,26 @@ from prop import propagateSE
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 
+from mpi4py import MPI
+
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
     Class representing a x-ray free electron laser photon propagator.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon propagator.
+        Constructor for the XFEL photon propagator.
 
-        @param  parameters  : Parameters steering the propagation of photons.
-        <br/><b>type</b>               : dict
+        :param parameters: Parameters for the photon propagation.
+        :type parameters: XFELPhotonPropagatorParameters instance.
 
-        @param  input_path  : Location of input data for the photon propagation.
-        <br/><b>type</b>               : string
+        :param  input_path: Location of input data for photon propagation.
+        :type input_path:   str, default 'FELsource/'
 
-        @param  output_path : Location of output data for the photon propagation.
-        <br/><b>type</b>               : string
+        :param output_path: Location of propagation output data.
+        :type output_path:  str, default 'prop/'
         """
 
         # Initialize base class.
@@ -59,7 +60,16 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
 
     def backengine(self):
-        """ This method drives the backengine code, in this case the WPG interface to SRW."""
+        """ This method drives the WPG backengine.
+
+        :return: 0 if WPG returns successfully, 1 if not.
+
+        """
+
+        # MPI info
+        comm = MPI.COMM_WORLD
+        thisProcess = comm.rank
+        numProcesses = comm.size
 
         # Check if input path is a directory.
         if os.path.isdir(self.input_path):
@@ -67,7 +77,8 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
                             input_file in os.listdir( self.input_path ) ]
             input_files.sort() # Assuming the filenames have some kind of ordering scheme.
         else:
-            propagateSE.propagate(self.input_path, self.output_path)
+            if thisProcess == 0: # other MPI processes (if any) have nothing to do
+                propagateSE.propagate(self.input_path, self.output_path)
             return 0
 
         # If we have more than one input file, we should also have more than one output file, i.e.
@@ -82,11 +93,13 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         # Loop over all input files and generate one run per source file.
         for i,input_file in enumerate(input_files):
             ### TODO: Transmit number of cpus.
-            output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
-            propagateSE.propagate(input_file, output_file)
+            # process file on a corresponding process (round-robin)
+            if i % numProcesses == thisProcess:
+                output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
+                propagateSE.propagate(input_file, output_file)
 
-            # Rewrite in openpmd conformant way.
-            wpg_to_opmd.convertToOPMD( output_file )
+                # Rewrite in openpmd conformant way.
+                wpg_to_opmd.convertToOPMD( output_file )
 
         return 0
 
@@ -104,10 +117,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
     def saveH5(self):
         """ """
         """
-        Private method to save the object to a file.
-
-        @param output_path : The file where to save the object's data.
-        <br/><b>type</b> : string
-        <br/><b>default</b> : None
+        :param output_path: Path to propagation output.
+        :type output_path: string
         """
         pass # No action required since output is written in backengine.

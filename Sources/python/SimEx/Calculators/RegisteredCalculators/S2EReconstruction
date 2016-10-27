@@ -1,0 +1,6 @@
+{
+	"Name"  : "S2EReconstruction",
+	"Class" : "Analysers",
+	"Source": "default",
+	"Parameters Template" : "default"
+}
