@@ -1,0 +1,3 @@
+docker pull centos:7
+docker build -t yakser/centos_mpi .
+
