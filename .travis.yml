@@ -89,6 +89,9 @@ script:
   #- cd ../functest/
   #- python Test.py -v
   #
-  #after_success:
+  after_success:
       #bash ./deploy_doc_to_gh-pages.sh
-
+      # Go back to root.
+      cd ../../../
+      # Copy docs so gh-pages finds it.
+      cp -avr Sources/doc/build/html/* docs/.
