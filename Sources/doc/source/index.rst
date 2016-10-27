@@ -219,8 +219,8 @@ This will run the entire test suite and pipe the output to the file `Test.log`.
 A final test report is appended.
 
 NOTE 4 (Large Test Files): If you pulled the sources via git and encounter test failures where
-the test log mentions something like "hdf file could not be read", make sure you issued a "git lsf pull" command at least once.
-This is not a standard git command, you have to install git-lsf (e.g. via https://git-lfs.github.com/).
+the test log mentions something like "hdf file could not be read", make sure you issued a "git lfs pull" command at least once.
+This is not a standard git command, you have to install git-lfs (e.g. via https://git-lfs.github.com/).
 
 NOTE 5 (segfault in WavePropagatorTest.py): If you receive a segfault when
 running the test module WavePropagatorTest.py, try the following command to fix:
