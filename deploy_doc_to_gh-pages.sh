@@ -19,6 +19,13 @@ COMMIT_AUTHOR_EMAIL=`git config user.email`
 SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}
 SHA=`git rev-parse --verify HEAD`
 
+echo "REPO=${REPO}"
+echo "COMMIT_AUTHOR_EMAIL=${COMMIT_AUTHOR_EMAIL}"
+echo "SSH_REPO=${SSH_REPO}"
+echo "SHA=${SHA}"
+echo "SOURCE_BRANCH=${SOURCE_BRANCH}"
+echo "TARGET_BRANCH=${TARGET_BRANCH}"
+
 # Save html content to a place not tracked by git.
 cp -arv Sources/doc/build/html ._html
 
