@@ -43,8 +43,8 @@ rm -v simex_vars.sh.in
 mv -v ._html/* .
 
 # Configure git.
-git config user.name "Travis CI"
-git config user.email "${COMMIT_AUTHOR_EMAIL}"
+git config user.name "Carsten Fortmann-Grote"
+git config user.email "carsten.grote@xfel.eu"
 # Commit.
 git add --all
 git commit -m "Installed gh-pages content for ${SHA}"
