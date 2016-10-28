@@ -1,0 +1,2007 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Users Manual &mdash; simex_platform 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="simex_platform 0.2.0 documentation" href="#" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">simex_platform 0.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="users-manual">
+<h1>Users Manual<a class="headerlink" href="#users-manual" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 654220</p>
+</div>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>simex_platform provides a software platform for simulation of experiments at advanced laser and x-ray light sources.
+All aspects of a typical experiment,
+the photon source, light transport through optics elements in the beamline,
+interaction with a target or sample,
+scattering from the latter,
+photon detection, and data analysis can be modelled.
+A simulation can contain, one, several, or all of these parts.</p>
+<p>As an example, consider a coherent imaging experiment using x-ray free electron laser (XFEL)
+radiation:
+A molecule, cluster, or nanocrystal is irradiated by highly brilliant,
+ultrashort x-ray pulses, these scatter from the sample get detected in an x-ray detector.</p>
+<p>The x-ray photons will ionize and destroy the sample after a very short time, typically of the order
+of a few tens to a few hundreds of femtoseconds (1 fs = 1x10^-15 s). By using x-ray pulses that
+are even shorter, of the order of a few femtoseconds, this radiation damage can, at least partly,
+be avoided, i.e. the sample is probed before destruction. The scattered photons are registered in
+a area pixel detector and the scattering (diffraction) pattern can be analyzed to infer structural informaton about the sample, i.e. the 3D electron density and the position of atoms within the molecule.</p>
+<p>simex_platforms provides scriptable python user interfaces to a number of advanced simulation codes for the various stages of the experiment: Photon Source, Photon Propagation, Photon-Matter Interaction, Photon Diffraction and Scattering, Photon Detection, and Photon Data Analysis. Additionaly, simex_platform defines data interfaces such that the involved simulation codes can &#8220;talk&#8221; to each other. E.g. output from a photon source calculation can be fed into the photon propagation simulation.</p>
+<p>The simex_platform library is open-source, but some of the interfaced simulation codes are not. In such cases, the user has to acquire the simulation code and install on his system.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="preliminaries">
+<h3>Preliminaries<a class="headerlink" href="#preliminaries" title="Permalink to this headline">¶</a></h3>
+<p>First obtain the source code by either cloning the repository:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; git clone https://github.com/eucall-software/simex_platform
+</pre></div>
+</div>
+<p>or by downloading and extracting the <a class="reference external" href="https://github.com/eucall-software/simex_platform/archive/master.zip">zip</a> archive.</p>
+<p>After downloading (and extracting), switch into the top level directory:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cd simex_platform
+</pre></div>
+</div>
+</div>
+<div class="section" id="software-dependencies">
+<h3>Software dependencies<a class="headerlink" href="#software-dependencies" title="Permalink to this headline">¶</a></h3>
+<p>The build process will fetch and install a number of third party libraries,
+such as hdf5, mpich, and boost. Resolving all dependencies for all libraries
+certainly goes beyond the scope of this project at the present time and has to
+be taken care of by the user. The following lists the minimum required
+software needed to build the external simulation tools:</p>
+<ul class="simple">
+<li>wget</li>
+<li>boost (version &gt; 1.54) + header files</li>
+<li>armadillo (version &gt;= 4.600) + header files</li>
+<li>hdf (version &gt;= 1.8.4) + header files</li>
+<li>python2.7</li>
+<li>python-numpy</li>
+<li>python-scipy</li>
+<li>python-h5py</li>
+<li>python-cython</li>
+<li>python-setuptools</li>
+<li>python-matplotlib</li>
+<li>build-essential</li>
+<li>bz2 libraries (libbz2-dev)</li>
+<li>GSL (libgsl0-dev)</li>
+<li>FFTW3 (libfftw3-dev) or MKL</li>
+<li>lapack</li>
+<li>cmake</li>
+<li>C/C++ and Fortran compilers, e.g. gcc</li>
+<li>unzip</li>
+</ul>
+<p>NOTE 1 (Intel(R) MKL(R)): If you want to link against Intel(R) MKL(R), make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the
+scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation,
+e.g. /opt/intel/2015 for a recent version of MKL(R).</p>
+<p>NOTE 2 (BOOST): Sometimes boost_mpi is not built although all libraries (default) where requested as per project.conf in
+the boost build directory. Append a &#8220;using mpi ;&#8221; to that file (without the quotes) to enforce building boost_mpi.</p>
+<p>NOTE 3 (BOOST): It has been observed that newer versions of boost (&gt;1.61), if linked against mpich, require libmpich.so.12,
+which might not be available on all systems, especially not completely updated clusters. Use boost.1.60 or lower if this problem occurs.
+You can find out by running ldd on libboost_mpi.so.</p>
+</div>
+<div class="section" id="building">
+<h3>Building<a class="headerlink" href="#building" title="Permalink to this headline">¶</a></h3>
+<p>The build process has three stages: configuration, building, and installing.</p>
+<div class="section" id="configuration-via-cmake">
+<h4>Configuration via cmake<a class="headerlink" href="#configuration-via-cmake" title="Permalink to this headline">¶</a></h4>
+<p>This step requires a dedicated build directory. Create one, and change into it:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; mkdir build
+$&gt; cd build
+</pre></div>
+</div>
+<p>Configuration is done by issuing:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cmake ..
+</pre></div>
+</div>
+<p>Usefull cmake flags are:</p>
+<ol class="lowerroman">
+<li><p class="first">Installation prefix:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cmake -DCMAKE_INSTALL_PREFIX=/path/to/some/directory ..
+</pre></div>
+</div>
+</li>
+<li><p class="first">Wave propagation with OpenMP:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cmake -DSRW_OPTIMIZED=ON ..
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="lowerroman" start="2">
+<li><p class="first">Build the documentation:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cmake -DBUILD_DOC=ON ..
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="lowerroman" start="4">
+<li><p class="first">Developer install:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cmake -DCMAKE_INSTALL_PREFIX=.. ..
+</pre></div>
+</div>
+<p>This is recommended for simex_platform developers. In this way, you will be able to run the unittests without having to recompile.</p>
+</li>
+<li><p class="first">Create deb packages:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cmake -DPACKAGE_MAKE=ON -DCMAKE_INSTALL_PREFIX=/usr ..
+$&gt; make package
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><p>Probably you will have to call cmake two times because for some unknown reason CMake creates <cite>.tgz</cite> archives in the first time.</p>
+<p>The package can then be installed system-wide along with all necessary dependencies:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; dpkg -i &lt;package_name&gt;
+$&gt; apt-get install -f
+</pre></div>
+</div>
+<p>on another computer with Debian based OS. Simex will be
+installed in <cite>/usr/...</cite> , Tests are installed in
+<cite>/usr/share/simex/...</cite> and should be system-wide available.
+Calling <cite>dpkg</cite> with <cite>&#8211;instdir</cite> option allows to change
+installation dir. In this case <cite>simex_vars.sh</cite> should be
+modified manually to set paths correctly.</p>
+</div></blockquote>
+<div class="section" id="troubleshooting">
+<h5>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h5>
+<p>On some systems cmake fails to find the paths for some of the
+third party libraries like boost, armadillo etc. If this should be the case,
+consult the corresponding FindXXX.cmake scripts in the CMake directory and
+in your system&#8217;s configuration for how to help cmake find these libraries.
+An example for how to specify paths for boost and armadillo are given in
+the install.sh script that comes with the sources.</p>
+</div>
+</div>
+<div class="section" id="building-the-library">
+<h4>Building the library<a class="headerlink" href="#building-the-library" title="Permalink to this headline">¶</a></h4>
+<p>After successful completion of cmake, just type:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; make
+</pre></div>
+</div>
+<p>On machines with more than 1 CPU, compilation can be sped up with:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; make -jN
+</pre></div>
+</div>
+<p>where N is the number of CPUs to consume.</p>
+<p>An example build &amp; installation script is provided (install.sh). It might need manual adjustment as indicated.</p>
+</div>
+<div class="section" id="id1">
+<h4>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>Finally, after make returns, install the compiled software into the installation directory:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; make install
+</pre></div>
+</div>
+<p>Make sure that the user has write access to the installation directory, or use:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; sudo make install
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="environment-settings">
+<h2>Environment settings<a class="headerlink" href="#environment-settings" title="Permalink to this headline">¶</a></h2>
+<p>simex_platform is a python library, hence python needs to be aware of its location. To this end,
+run the command:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; source &lt;install_prefix&gt;/bin/simex_vars.sh
+</pre></div>
+</div>
+<p>after installation.</p>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>Testing the installation.</p>
+<p>By default, the installation also creates the unittest suite.
+You can switch this option off by appending the flag <cite>-DINSTALL_TESTS=OFF</cite> to the cmake command.</p>
+<p>It is advised to run the test suite to check your installation:</p>
+<div class="highlight-default"><div class="highlight"><pre>$&gt; cd Tests/python/unittest
+$&gt; python Test.py -v 2&gt;&amp;1 | tee Test.log
+</pre></div>
+</div>
+<p>This will run the entire test suite and pipe the output to the file <cite>Test.log</cite>.
+A final test report is appended.</p>
+<p>NOTE 4 (Large Test Files): If you pulled the sources via git and encounter test failures where
+the test log mentions something like &#8220;hdf file could not be read&#8221;, make sure you issued a &#8220;git lfs pull&#8221; command at least once.
+This is not a standard git command, you have to install git-lfs (e.g. via <a class="reference external" href="https://git-lfs.github.com/">https://git-lfs.github.com/</a>).</p>
+<p>NOTE 5 (segfault in WavePropagatorTest.py): If you receive a segfault when
+running the test module WavePropagatorTest.py, try the following command to fix:
+$&gt; ulimit -c unlimited</p>
+<p>If this does not fix the problem, please post a bug report on github.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>The intended usage scheme of simex_platform is that of a python module in either an interactive (i)python session or a python script. Hence, the first thing to do is to import the module.</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">SimEX</span>
+</pre></div>
+</div>
+<p>A good starting point for finding examples on how to use simex_platform modules are the tests under `
+<cite>Tests/python/unittest/SimExTest/</cite>. Each Calculator is tested, and the test-suite <cite>PhotonExperimentSimulation/PhotonExperimentSimulationTest.py</cite> contains some simex_platform workflow examples for complete start-to-end simulations.</p>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Source Code github.com/eucall-software/simex_platform</li>
+<li>Issue Tracker: github.com/eucall-software/simex_platform/issues</li>
+</ul>
+</div>
+<div class="section" id="support">
+<h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<p>If you are having issues, please let us know at carstendotgroteatxfeldoteu .</p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>The project is licensed under the GPL open source license version 3.</p>
+</div>
+<div class="section" id="reference-manual">
+<h2>Reference Manual<a class="headerlink" href="#reference-manual" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractBaseCalculator.</code><code class="descname">AbstractBaseCalculator</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractBaseCalculator.html#AbstractBaseCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Abstract class for all simulation calculators.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || AbstractCalculatorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractBaseCalculator.html#AbstractBaseCalculator.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractBaseCalculator.html#AbstractBaseCalculator.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields expected by this calculator.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractBaseCalculator.html#AbstractBaseCalculator.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields provided by this calculator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractPhotonAnalyzer.</code><code class="descname">AbstractPhotonAnalyzer</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonAnalyzer.html#AbstractPhotonAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator</span></code></a></p>
+<p>Class representing an abstract photon analyzer, serving as API for actual photon analysis calculators.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || AbstractCalculatorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields expected by this calculator.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields provided by this calculator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SimEx.Calculators.AbstractPhotonAnalyzer.checkAndSetPhotonAnalyzer">
+<code class="descclassname">SimEx.Calculators.AbstractPhotonAnalyzer.</code><code class="descname">checkAndSetPhotonAnalyzer</code><span class="sig-paren">(</span><em>var=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonAnalyzer.html#checkAndSetPhotonAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonAnalyzer.checkAndSetPhotonAnalyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if passed object is an AbstractPhotonAnalyzer instance. If non is given, set to given default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; The object to check.</li>
+<li><strong>default</strong> &#8211; The default to use.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The checked photon source object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><strong>RuntimeError</strong> &#8211; if no valid PhotonAnalyzer was given.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractPhotonDetector.</code><code class="descname">AbstractPhotonDetector</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonDetector.html#AbstractPhotonDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator</span></code></a></p>
+<p>Class representing an abstract photon detector, serving as API for actual photon detector simulation calculators.</p>
+<p>Constructor for the Abstract Photon Detector.</p>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields expected by this calculator.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields provided by this calculator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SimEx.Calculators.AbstractPhotonDetector.checkAndSetPhotonDetector">
+<code class="descclassname">SimEx.Calculators.AbstractPhotonDetector.</code><code class="descname">checkAndSetPhotonDetector</code><span class="sig-paren">(</span><em>var=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonDetector.html#checkAndSetPhotonDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDetector.checkAndSetPhotonDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if passed object is an AbstractPhotonDetector instance. If non is given, set to given default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; The object to check.</li>
+<li><strong>default</strong> &#8211; The default to use.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The checked photon source object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><strong>RuntimeError</strong> &#8211; if no valid PhotonDetector was given.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractPhotonDiffractor.</code><code class="descname">AbstractPhotonDiffractor</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonDiffractor.html#AbstractPhotonDiffractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator</span></code></a></p>
+<p>Class representing an abstract photon diffractor, serving as API for actual photon diffraction simulation calculators.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || AbstractCalculatorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields expected by this calculator.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields provided by this calculator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SimEx.Calculators.AbstractPhotonDiffractor.checkAndSetPhotonDiffractor">
+<code class="descclassname">SimEx.Calculators.AbstractPhotonDiffractor.</code><code class="descname">checkAndSetPhotonDiffractor</code><span class="sig-paren">(</span><em>var=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonDiffractor.html#checkAndSetPhotonDiffractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonDiffractor.checkAndSetPhotonDiffractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if passed object is an AbstractPhotonDiffractor instance. If non is given, set to given default.</p>
+<p>&#64;param var : The object to check.
+&#64;param default : The default to use.
+&#64;return : The checked photon source object.
+&#64;throw : RuntimeError if no valid PhotonDiffractor was given.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractPhotonInteractor.</code><code class="descname">AbstractPhotonInteractor</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonInteractor.html#AbstractPhotonInteractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator</span></code></a></p>
+<p>Class representing an abstract photon(-matter) interactor, serving as API for actual photon matter simulation calculators.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || AbstractCalculatorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields expected by this calculator.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data fields provided by this calculator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SimEx.Calculators.AbstractPhotonInteractor.checkAndSetPhotonInteractor">
+<code class="descclassname">SimEx.Calculators.AbstractPhotonInteractor.</code><code class="descname">checkAndSetPhotonInteractor</code><span class="sig-paren">(</span><em>var=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonInteractor.html#checkAndSetPhotonInteractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonInteractor.checkAndSetPhotonInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if passed object is an AbstractPhotonInteractor instance. If non is given, set to given default.</p>
+<p>&#64;param var : The object to check.
+&#64;param default : The default to use.
+&#64;return : The checked photon source object.
+&#64;throw : RuntimeError if no valid PhotonInteractor was given.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractPhotonPropagator.</code><code class="descname">AbstractPhotonPropagator</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonPropagator.html#AbstractPhotonPropagator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator</span></code></a></p>
+<p>Class representing an abstract photon propagator, serving as API for actual photon propagation calculators.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || AbstractCalculatorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonPropagator.html#AbstractPhotonPropagator.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of expected data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [&#8216;/data/data1&#8217;, &#8216;/params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonPropagator.html#AbstractPhotonPropagator.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of provided data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [/data/data1, /params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SimEx.Calculators.AbstractPhotonPropagator.checkAndSetPhotonPropagator">
+<code class="descclassname">SimEx.Calculators.AbstractPhotonPropagator.</code><code class="descname">checkAndSetPhotonPropagator</code><span class="sig-paren">(</span><em>var=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonPropagator.html#checkAndSetPhotonPropagator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonPropagator.checkAndSetPhotonPropagator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if passed object is an AbstractPhotonPropagator instance. If non is given, set to given default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; The object to check</li>
+<li><strong>default</strong> &#8211; The default to use</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The checked photon source object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><strong>RuntimeError</strong> &#8211; if no valid PhotonPropagator was given.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.AbstractPhotonSource.</code><code class="descname">AbstractPhotonSource</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonSource.html#AbstractPhotonSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator" title="SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator</span></code></a></p>
+<p>Class representing an abstract photon source, serving as API for actual photon source simulation calculators.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || AbstractCalculatorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to call the backengine for the calculator.
+To be implemented on the derived classes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonSource.html#AbstractPhotonSource.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of expected data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [/data/data1, /params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonSource.html#AbstractPhotonSource.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of provided data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [/data/data1, /params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SimEx.Calculators.AbstractPhotonSource.checkAndSetPhotonSource">
+<code class="descclassname">SimEx.Calculators.AbstractPhotonSource.</code><code class="descname">checkAndSetPhotonSource</code><span class="sig-paren">(</span><em>var=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/AbstractPhotonSource.html#checkAndSetPhotonSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.AbstractPhotonSource.checkAndSetPhotonSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if passed object is an AbstractPhotonSource instance. If non is given, set to given default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; The object to check.</li>
+<li><strong>default</strong> &#8211; The default to use.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The checked photon source object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Throw:</th><td class="field-body"><p class="first last">RuntimeError if no valid PhotonSource was given.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.DMPhasing.</code><code class="descname">DMPhasing</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/DMPhasing.html#DMPhasing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer" title="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer</span></code></a></p>
+<p>Class representing photon data analysis for electron density reconstruction from oriented 3D diffraction patterns.</p>
+<p>Constructor for the phasing analyser.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>DMPhasingParameters instance</em>) &#8211; Phasing parameters.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to input data (file or directory).</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to output data (file or directory).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/DMPhasing.html#DMPhasing.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the actual calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">0 if the DM run was successful, 1 if not.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The stored 3D electron density map.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/DMPhasing.html#DMPhasing.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Analyzer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of strings telling which datasets are expected to be found in the input file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/DMPhasing.html#DMPhasing.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Analyzer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of strings indicating which datasets are produced in the output data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.DMPhasing.DMPhasing.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/DMPhasing.html#DMPhasing.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.DMPhasing.DMPhasing.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Parameters.DMPhasingParameters.DMPhasingParameters">
+<em class="property">class </em><code class="descclassname">SimEx.Parameters.DMPhasingParameters.</code><code class="descname">DMPhasingParameters</code><span class="sig-paren">(</span><em>number_of_trials=None</em>, <em>number_of_iterations=None</em>, <em>averaging_start=None</em>, <em>leash=None</em>, <em>number_of_shrink_cycles=None</em>, <em>parameters_dictionary=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/DMPhasingParameters.html#DMPhasingParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
+<p>Class representing parameters for the DMPhasing analyzer.</p>
+<p>Constructor for the DMPhasingParameters.
+:param number_of_trials: How many trials to run in each iteration.
+:type number_of_trials: int&gt;0, default 500</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>number_of_iterations</strong> (<em>int&gt;0, default 50</em>) &#8211; Maximum number of DM iterations.</li>
+<li><strong>averaging_start</strong> &#8211; Start averaging after this many runs.</li>
+<li><strong>leash</strong> (<em>float&gt;0, default 0.2</em>) &#8211; DM leash parameter.</li>
+<li><strong>number_of_shrink_cycles</strong> (<em>int&gt;0, default 10</em>) &#8211; DM shrink cycles.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.averaging_start">
+<code class="descname">averaging_start</code><a class="headerlink" href="#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.averaging_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;averaging_start&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.leash">
+<code class="descname">leash</code><a class="headerlink" href="#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.leash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;leash&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.number_of_iterations">
+<code class="descname">number_of_iterations</code><a class="headerlink" href="#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.number_of_iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;number_of_iterations&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.number_of_shrink_cycles">
+<code class="descname">number_of_shrink_cycles</code><a class="headerlink" href="#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.number_of_shrink_cycles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;number_of_shrink_cycles&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.number_of_trials">
+<code class="descname">number_of_trials</code><a class="headerlink" href="#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters.number_of_trials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;number_of_trials&#8217; parameter.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.EMCOrientation.</code><code class="descname">EMCOrientation</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em>, <em>tmp_files_path=None</em>, <em>run_files_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EMCOrientation.html#EMCOrientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer" title="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer</span></code></a></p>
+<p>Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameters</strong> (<em>EMCOrientationParameters instance</em>) &#8211; Parameters for the EMC orientation calculator.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to directory holding input data for EMC.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to file where output data will be stored.</li>
+<li><strong>tmp_files_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to directory where temporary files will be stored.</li>
+<li><strong>run_files_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to directory where run data will be stored, in particular the sparse photons file &#8216;photons.dat&#8217; and &#8216;detector.dat&#8217;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body"><p class="first last">If &#8216;run_files_path&#8217; is an existing directory that contains data from a previous EMC run, the current run will append to the
+existing data. A consistency check is performed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EMCOrientation.html#EMCOrientation.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Analyzer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EMCOrientation.html#EMCOrientation.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Analyzer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.EMCOrientation.EMCOrientation.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EMCOrientation.html#EMCOrientation.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EMCOrientation.EMCOrientation.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters">
+<em class="property">class </em><code class="descclassname">SimEx.Parameters.EMCOrientationParameters.</code><code class="descname">EMCOrientationParameters</code><span class="sig-paren">(</span><em>initial_number_of_quaternions=None</em>, <em>max_number_of_quaternions=None</em>, <em>max_number_of_iterations=None</em>, <em>min_error=None</em>, <em>beamstop=None</em>, <em>detailed_output=None</em>, <em>parameters_dictionary=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/EMCOrientationParameters.html#EMCOrientationParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
+<p>Class representing parameters for the EMCOrientation analyzer.</p>
+<p>Constructor for the EMCOrientationParameters.
+:param initial_number_of_quaternions: Number of quaternions to start the EMC algorithm.
+:type initial_number_of_quaternions: int (0&lt;n&lt;10), default 1</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>max_number_of_quaternions</strong> (<em>int (initial_number_of_quaternions &lt; n &lt;= 10), default initial_number_of_quaternions + 1</em>) &#8211; Maximum number of quaternions for the EMC algorithm.</li>
+<li><strong>min_error</strong> (<em>float (&gt;0), default 1.e-6</em>) &#8211; Relative convergence criterion (Go to next quaternion is relative error gets below this value.)</li>
+<li><strong>max_number_of_iterations</strong> (<em>int (&gt;0), default 100</em>) &#8211; Stop the EMC algorithm after this number of iterations.</li>
+<li><strong>beamstop</strong> (<em>bool, default True</em>) &#8211; Whether to apply a &#8220;center + strip&#8221; beamstop to the pixel map.</li>
+<li><strong>detailed_output</strong> (<em>bool, default True</em>) &#8211; Whether to write detailed info to log.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.beamstop">
+<code class="descname">beamstop</code><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.beamstop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;beamstop&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.detailed_output">
+<code class="descname">detailed_output</code><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.detailed_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;detailed_output&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.initial_number_of_quaternions">
+<code class="descname">initial_number_of_quaternions</code><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.initial_number_of_quaternions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;initial_number_of_quaternions&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.max_number_of_iterations">
+<code class="descname">max_number_of_iterations</code><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.max_number_of_iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;max_number_of_iterations&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.max_number_of_quaternions">
+<code class="descname">max_number_of_quaternions</code><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.max_number_of_quaternions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;max_number_of_quaternions&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.min_error">
+<code class="descname">min_error</code><a class="headerlink" href="#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters.min_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;min_error&#8217; parameter.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.IdealPhotonDetector.</code><code class="descname">IdealPhotonDetector</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/IdealPhotonDetector.html#IdealPhotonDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector" title="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector</span></code></a></p>
+<p>Class representing an ideal photon detector.
+This is just a dummy calculator that copies input data to output data.</p>
+<p>Constructor for ideal photon detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> &#8211; Parameters for the Detector simulation.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to input files for the detector simulation.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path where output is stored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/IdealPhotonDetector.html#IdealPhotonDetector.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method drives the backengine code.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/IdealPhotonDetector.html#IdealPhotonDetector.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Interactor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/IdealPhotonDetector.html#IdealPhotonDetector.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Interactor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/IdealPhotonDetector.html#IdealPhotonDetector.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.PlasmaXRTSCalculator.</code><code class="descname">PlasmaXRTSCalculator</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/PlasmaXRTSCalculator.html#PlasmaXRTSCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor" title="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor</span></code></a></p>
+<p>Class representing a plasma x-ray Thomson scattering calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<a class="reference internal" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters" title="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters"><em>PlasmaXRTSCalculatorParameters</em></a>) &#8211; Parameters for the PlasmaXRTSCalculator.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to the input data for this calculator.</li>
+<li><strong>output_path</strong> (<em>str, default 'xrts.h5'</em>) &#8211; Where to write output data generated by this calculator.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/PlasmaXRTSCalculator.html#PlasmaXRTSCalculator.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method drives the backengine xrts.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/PlasmaXRTSCalculator.html#PlasmaXRTSCalculator.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Diffractor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/PlasmaXRTSCalculator.html#PlasmaXRTSCalculator.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Diffractor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/PlasmaXRTSCalculator.html#PlasmaXRTSCalculator.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to save the data to a file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters">
+<em class="property">class </em><code class="descclassname">SimEx.Parameters.PlasmaXRTSCalculatorParameters.</code><code class="descname">PlasmaXRTSCalculatorParameters</code><span class="sig-paren">(</span><em>elements=None</em>, <em>photon_energy=None</em>, <em>scattering_angle=None</em>, <em>electron_temperature=None</em>, <em>electron_density=None</em>, <em>ion_temperature=None</em>, <em>ion_charge=None</em>, <em>mass_density=None</em>, <em>debye_temperature=None</em>, <em>band_gap=None</em>, <em>energy_range=None</em>, <em>model_Sii=None</em>, <em>model_See=None</em>, <em>model_Sbf=None</em>, <em>model_IPL=None</em>, <em>model_Mix=None</em>, <em>lfc=None</em>, <em>Sbf_norm=None</em>, <em>source_spectrum=None</em>, <em>source_spectrum_fwhm=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/PlasmaXRTSCalculatorParameters.html#PlasmaXRTSCalculatorParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
+<p>Class representing parameters for the plasma x-ray Thomson scattering calculator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>elements</strong> (<em>list [[element symbol, stochiometric number, charge], ...], default None</em>) &#8211; The chemical elements in the scattering target.</li>
+<li><strong>photon_energy</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The central energy of incoming x-ray photons.</li>
+<li><strong>scattering_angle</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The scattering angle.</li>
+<li><strong>electron_temperature</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The temperature of the electron subsystems (units of eV).</li>
+<li><strong>electron_density</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The electron number density (units of 1/m^3)</li>
+<li><strong>ion_temperature</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The temperature of the ion subsystem (units of eV).</li>
+<li><strong>ion_charge</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The average ion charge (units of elementary charge e).</li>
+<li><strong>mass_density</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The mass density of the target (units of g/cm^3).</li>
+<li><strong>debye_temperature</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The Debye temperature (units of eV).</li>
+<li><strong>band_gap</strong> (<em>float, default 0</em>) &#8211; The band gap of the target (units of eV).</li>
+<li><strong>energy_range</strong> (<em>dict, default 0</em>) &#8211; The energy range over which to calculate the scattering spectrum.</li>
+<li><strong>model_Sii</strong> (<em>str ('DH' || 'OCP' || 'SOCP' || 'SOCPN') || float, default 'DH'</em>) &#8211; The model to use for the ion-ion structure factor.</li>
+<li><strong>model_See</strong> (<em>str ('RPA' || 'BMA' || 'BMA+sLFC'), default 'RPA'</em>) &#8211; The model of the dynamic (high frequency) part of the electron-electron structure factor.</li>
+<li><strong>model_Sbf</strong> (<em>str ('IA' || 'FA'), default 'IA'</em>) &#8211; The model for the bound-free structure factor.</li>
+<li><strong>model_IPL</strong> (<em>str ('SP' || 'EK') || float, default 'SP'</em>) &#8211; Model for ionization potential lowering.</li>
+<li><strong>model_Mix</strong> (<em>str, default None</em>) &#8211; The model to use for mixing (of species).</li>
+<li><strong>lfc</strong> (<em>float, default 0.0</em>) &#8211; The local field correction to use.</li>
+<li><strong>Sbf_norm</strong> (<em>str || float, default None</em>) &#8211; How to normalize the bound-free structure factor.</li>
+<li><strong>source_spectrum</strong> (<em>str, default None</em>) &#8211; Path to a file holding the x-ray probe energy spectrum.</li>
+<li><strong>source_spectrum_fwhm</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The x-ray probe energy spectrum fwhm.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Example elements:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">[[&#8216;B&#8217;, 1, 2], [&#8216;N&#8217;, 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Example elements:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">[[&#8216;C&#8217;, 1, 4], [&#8216;H&#8217;, 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Example energy_range:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">energy_range={&#8216;min&#8217;  -100.0, &#8216;max&#8217;  100, &#8216;step&#8217;  0.5} to go from -100 eV to 100 eV in steps of 0.5 eV.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Example model_Sii:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Sii=1.5 to use a fixed value of Sii=1.5</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Example model_IPL:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">model_IPL=100.0 # Set the ionization potential difference (lowering) to 100 eV.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.Sbf_norm">
+<code class="descname">Sbf_norm</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.Sbf_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the norm of the bound-free structure factor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.band_gap">
+<code class="descname">band_gap</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.band_gap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the band gap.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.debye_temperature">
+<code class="descname">debye_temperature</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.debye_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the Debye temperature.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.electron_density">
+<code class="descname">electron_density</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.electron_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the electron density.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.electron_temperature">
+<code class="descname">electron_temperature</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.electron_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the electron temperature.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.elements">
+<code class="descname">elements</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.energy_range">
+<code class="descname">energy_range</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.energy_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the energy range.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.ion_charge">
+<code class="descname">ion_charge</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.ion_charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the ion charge.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.ion_temperature">
+<code class="descname">ion_temperature</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.ion_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the ion temperature.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.lfc">
+<code class="descname">lfc</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.lfc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the local field factor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.mass_density">
+<code class="descname">mass_density</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.mass_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the mass density.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_IPL">
+<code class="descname">model_IPL</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_IPL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the ionization potential lowering model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_Mix">
+<code class="descname">model_Mix</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_Mix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the mixing model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_Sbf">
+<code class="descname">model_Sbf</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_Sbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the bound-free structure factor model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_See">
+<code class="descname">model_See</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_See" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the electron-electron (high-frequency) structure factor model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_Sii">
+<code class="descname">model_Sii</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.model_Sii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the ion-ion structure factor model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.photon_energy">
+<code class="descname">photon_energy</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.photon_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the photon energy.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.scattering_angle">
+<code class="descname">scattering_angle</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.scattering_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the scattering angle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.source_spectrum">
+<code class="descname">source_spectrum</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.source_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the source spectrum identifier.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.source_spectrum_fwhm">
+<code class="descname">source_spectrum_fwhm</code><a class="headerlink" href="#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters.source_spectrum_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the source spectrum fwhm identifier.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.S2EReconstruction.</code><code class="descname">S2EReconstruction</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/S2EReconstruction.html#S2EReconstruction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer" title="SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer</span></code></a></p>
+<p>Class representing photon data analysis for electron density reconstruction from 2D diffraction patterns.
+Uses the EMC orientation module and the DM phasing module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameters</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; The parameters for the reconstruction.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path for input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path where to write output to.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Example parameters:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">parameters={&#8216;EMC_Parameters&#8217; : EMCOrientationParameters(), &#8216;DM_Parameters&#8217; : DMPhasingParameters()} # Use default parameters for EMC and DM.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/S2EReconstruction.html#S2EReconstruction.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the EMC and DM backengine executables.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/S2EReconstruction.html#S2EReconstruction.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Analyzer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/S2EReconstruction.html#S2EReconstruction.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Analyzer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.S2EReconstruction.S2EReconstruction.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/S2EReconstruction.html#S2EReconstruction.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.S2EReconstruction.S2EReconstruction.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.SingFELPhotonDiffractor.</code><code class="descname">SingFELPhotonDiffractor</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/SingFELPhotonDiffractor.html#SingFELPhotonDiffractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor" title="SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonDiffractor.AbstractPhotonDiffractor</span></code></a></p>
+<p>Class representing a x-ray free electron laser photon propagator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<em>dict || SingFELPhotonDiffractorParameters</em>) &#8211; Parameters of the calculation (not data).</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to hdf5 file for output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/SingFELPhotonDiffractor.html#SingFELPhotonDiffractor.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method drives the backengine singFEL.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/SingFELPhotonDiffractor.html#SingFELPhotonDiffractor.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Diffractor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/SingFELPhotonDiffractor.html#SingFELPhotonDiffractor.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Diffractor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/SingFELPhotonDiffractor.html#SingFELPhotonDiffractor.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters">
+<em class="property">class </em><code class="descclassname">SimEx.Parameters.SingFELPhotonDiffractorParameters.</code><code class="descname">SingFELPhotonDiffractorParameters</code><span class="sig-paren">(</span><em>uniform_rotation=None</em>, <em>calculate_Compton=None</em>, <em>slice_interval=None</em>, <em>number_of_slices=None</em>, <em>pmi_start_ID=None</em>, <em>pmi_stop_ID=None</em>, <em>number_of_diffraction_patterns=None</em>, <em>beam_parameter_file=None</em>, <em>beam_geometry_file=None</em>, <em>number_of_MPI_processes=None</em>, <em>parameters_dictionary=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/SingFELPhotonDiffractorParameters.html#SingFELPhotonDiffractorParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
+<p>Class representing parameters for the SingFELPhotonDiffractor calculator.</p>
+<p>Constructor for the SingFELPhotonDiffractorParameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>uniform_rotation</strong> (<em>bool, default True</em>) &#8211; Whether to perform uniform sampling of rotation space.</li>
+<li><strong>calculate_Compton</strong> (<em>bool, default False</em>) &#8211; Whether to calculate incoherent (Compton) scattering.</li>
+<li><strong>slice_interval</strong> (<em>int, default 100</em>) &#8211; Length of time slice interval to extract from each trajectory.</li>
+<li><strong>number_of_slices</strong> (<em>int, default 1</em>) &#8211; Number of time slices to read from each trajectory.</li>
+<li><strong>pmi_start_ID</strong> (<em>int, default 1</em>) &#8211; Identifier for the first pmi trajectory to read in.</li>
+<li><strong>pmi_stop_ID</strong> (<em>int, default 1</em>) &#8211; Identifier for the last pmi trajectory to read in.</li>
+<li><strong>number_of_diffraction_patterns</strong> (<em>int, default 1</em>) &#8211; Number of diffraction patterns to calculate from each trajectory.</li>
+<li><strong>beam_parameter_file</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path of the beam parameter file.</li>
+<li><strong>beam_geometry_file</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path of the beam geometry file.</li>
+<li><strong>number_of_MPI_processes</strong> (<em>int, default 1</em>) &#8211; Number of MPI processes</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.beam_geometry_file">
+<code class="descname">beam_geometry_file</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.beam_geometry_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;beam_geometry_file&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.beam_parameter_file">
+<code class="descname">beam_parameter_file</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.beam_parameter_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;beam_parameter_file&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.calculate_Compton">
+<code class="descname">calculate_Compton</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.calculate_Compton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;calculate_Compton&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.number_of_MPI_processes">
+<code class="descname">number_of_MPI_processes</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.number_of_MPI_processes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;number_of_MPI_processes&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.number_of_diffraction_patterns">
+<code class="descname">number_of_diffraction_patterns</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.number_of_diffraction_patterns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;number_of_diffraction_patterns_file&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.number_of_slices">
+<code class="descname">number_of_slices</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.number_of_slices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;number_of_slices&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.pmi_start_ID">
+<code class="descname">pmi_start_ID</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.pmi_start_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;pmi_start_ID&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.pmi_stop_ID">
+<code class="descname">pmi_stop_ID</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.pmi_stop_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;pmi_stop_ID&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.slice_interval">
+<code class="descname">slice_interval</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.slice_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;slice_interval&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.uniform_rotation">
+<code class="descname">uniform_rotation</code><a class="headerlink" href="#SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters.uniform_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;uniform_rotation&#8217; parameter.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.WavePropagator.</code><code class="descname">WavePropagator</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/WavePropagator.html#WavePropagator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator" title="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator</span></code></a></p>
+<p>Class representing a photon propagator that uses wave optics.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<a class="reference internal" href="#SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters" title="SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters"><em>WavePropagatorParameters</em></a>) &#8211; Parameters steering the propagation of photons.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Location of input data for the photon propagation.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Location of output data for the photon propagation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/WavePropagator.html#WavePropagator.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method drives the backengine code, in this case the WPG interface to SRW.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">0 if WPG run was successful, 1 if not.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The WPG wavefront data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of expected data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [&#8216;/data/data1&#8217;, &#8216;/params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of provided data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [/data/data1, /params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.WavePropagator.WavePropagator.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/WavePropagator.html#WavePropagator.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.WavePropagator.WavePropagator.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to save the object to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_path</strong> (<em>str, default 'prop_out.h5'</em>) &#8211; The file where to save the wavefront data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters">
+<em class="property">class </em><code class="descclassname">SimEx.Parameters.WavePropagatorParameters.</code><code class="descname">WavePropagatorParameters</code><span class="sig-paren">(</span><em>use_opmd=None</em>, <em>beamline=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/WavePropagatorParameters.html#WavePropagatorParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
+<p>Class representing parameters for the WavePropagator analyzer.</p>
+<p>Constructor for the WavePropagatorParameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>use_opmd</strong> (<em>bool, default False</em>) &#8211; Whether to use the openPMD output format.</li>
+<li><strong>beamline</strong> (<em>WPG.Beamline instance.</em>) &#8211; The WPG beamline to use in the propagation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters.beamline">
+<code class="descname">beamline</code><a class="headerlink" href="#SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters.beamline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;beamline&#8217; parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters.use_opmd">
+<code class="descname">use_opmd</code><a class="headerlink" href="#SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters.use_opmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the &#8216;use_opmd&#8217; parameter.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.XFELPhotonSource.</code><code class="descname">XFELPhotonSource</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XFELPhotonSource.html#XFELPhotonSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource" title="SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource</span></code></a></p>
+<p>Class representing a x-ray free electron laser photon source.</p>
+<p>Constructor for the xfel photon source.</p>
+<p>:param parameters : Photon source parameters.
+:type parameters: dict</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_path</strong> (<em>str, default FELsource_in.h5</em>) &#8211; The path to the input data for the photon source.</li>
+<li><strong>output_path</strong> &#8211; The path where to save output data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of expected data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [/data/data1, /params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of provided data sets with full paths.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of strings, e.g. [/data/data1, /params/params1&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XFELPhotonSource.html#XFELPhotonSource.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XFELPhotonSource.XFELPhotonSource.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.</code><code class="descname">XMDYNDemoPhotonMatterInteractor</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em>, <em>sample_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XMDYNDemoPhotonMatterInteractor.html#XMDYNDemoPhotonMatterInteractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor" title="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor</span></code></a></p>
+<p>Interface class for photon-matter interaction calculations using the XMDYN code.</p>
+<p>Constructor for the xfel photon propagator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameters</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Parameters that govern the PMI calculation.</li>
+<li><strong>input_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Location of data needed by the PMI calculation (Laser source wavefront data).</li>
+<li><strong>output_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Where to store the data generated by the PMI calculation.</li>
+<li><strong>sample_path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Location of the sample/target geometry file. Can be either a simS2E sample file or a pdb file. Specifying a pdb will first check if it&#8217;s present in a database, if not, it will issue a query for the basename of the file to the RCSB protein data bank.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XMDYNDemoPhotonMatterInteractor.html#XMDYNDemoPhotonMatterInteractor.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method drives the backengine code.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.data">
+<code class="descname">data</code><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the field data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.expectedData">
+<code class="descname">expectedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XMDYNDemoPhotonMatterInteractor.html#XMDYNDemoPhotonMatterInteractor.expectedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.expectedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data expected by the Interactor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the control parameters of the calculator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.providedData">
+<code class="descname">providedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XMDYNDemoPhotonMatterInteractor.html#XMDYNDemoPhotonMatterInteractor.providedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.providedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the data provided by the Interactor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XMDYNDemoPhotonMatterInteractor.html#XMDYNDemoPhotonMatterInteractor.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Users Manual</a><ul>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#preliminaries">Preliminaries</a></li>
+<li><a class="reference internal" href="#software-dependencies">Software dependencies</a></li>
+<li><a class="reference internal" href="#building">Building</a><ul>
+<li><a class="reference internal" href="#configuration-via-cmake">Configuration via cmake</a><ul>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building-the-library">Building the library</a></li>
+<li><a class="reference internal" href="#id1">Installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#environment-settings">Environment settings</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#contribute">Contribute</a></li>
+<li><a class="reference internal" href="#support">Support</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#reference-manual">Reference Manual</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">simex_platform 0.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

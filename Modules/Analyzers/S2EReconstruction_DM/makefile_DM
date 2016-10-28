@@ -1,5 +1,0 @@
-default:
-	gcc -O3 object_recon.c -lm -Wno-unused-result -lfftw3 -o object_recon
-mkl:
-	gcc -O3 object_recon.c -o object_recon -m64 -I${MKLROOT}/include -I${MKLROOT}/include/fftw -Wl,--no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
-

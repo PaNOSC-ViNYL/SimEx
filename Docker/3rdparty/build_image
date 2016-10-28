@@ -1,2 +1,0 @@
-docker build -t yakser/simex_3rdparty .
-docker push yakser/simex_3rdparty

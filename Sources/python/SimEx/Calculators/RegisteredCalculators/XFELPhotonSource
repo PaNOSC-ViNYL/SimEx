@@ -1,6 +1,0 @@
-{
-	"Name"  : "XFELPhotonSource",
-	"Class" : "Sources",
-	"Source": "default",
-	"Parameters Template" : "default"
-}
