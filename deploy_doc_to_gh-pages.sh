@@ -22,7 +22,7 @@ SHA=`git rev-parse --verify HEAD`
 cp -arv Sources/doc/build/html ._html
 
 # Checkout target branch ( = gh-pages).
-git checkout ${TARGET_BRANCH}
+git checkout -b ${TARGET_BRANCH} --track origin/${TARGET_BRANCH}
 
 # Cleanup.
 rm -rfv */
