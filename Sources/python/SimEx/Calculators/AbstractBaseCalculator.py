@@ -48,7 +48,9 @@ class AbstractBaseCalculator(object):
     def runFromCLI(cls):
         """
         Method to start calculator computations from command line.
+
         :return: exit with status code
+
         """
         if len(sys.argv) == 2:
             fname = sys.argv[1]
@@ -60,11 +62,15 @@ class AbstractBaseCalculator(object):
     def dumpLoader(cls,fname):
         """
         Creates calculator object from a dump file
-        :param fname: path to the dump file
+
+        :param fname: path to the dump file.
+
         :return: Created calculator object.
+
         :raises RuntimeError: if cannot create object.
 
         """
+
         try:
             calculator = dill.load(open(fname))
         except:
@@ -135,6 +141,7 @@ class AbstractBaseCalculator(object):
     def dumpToFile(self, fname):
         """
         dump class instance to file.
+
         :param fname: Path to file to dump.
 
         """
