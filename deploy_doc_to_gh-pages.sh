@@ -22,7 +22,7 @@ SHA=`git rev-parse --verify HEAD`
 cp -arv Sources/doc/build/html ._html
 
 # Checkout target branch ( = gh-pages).
-git checkout -b ${TARGET_BRANCH} --track origin/${TARGET_BRANCH}
+git checkout -b ${TARGET_BRANCH}
 
 # Cleanup.
 rm -rfv */
@@ -60,7 +60,7 @@ eval `ssh-agent -s`
 ssh-add deploy_rsa
 
 # Now that we're all set up, we can push.
-git push $SSH_REPO $TARGET_BRANCH
+git push -u origin $TARGET_BRANCH
 
 # Go back to where we came from.
 git checkout ${SOURCE_BRANCH}
