@@ -25,7 +25,19 @@ cp -arv Sources/doc/build/html ._html
 git checkout ${TARGET_BRANCH}
 
 # Cleanup.
-rm -rfv ./**/*
+rm -rfv */
+rm -v CMakeLists.txt
+rm -v copyright_notice.py
+rm -v deploy_doc_to_gh-page
+rm -v deploy_rsa.enc
+rm -v install.exfl.sh
+rm -v install.sh
+rm -v README.md
+rm -v requirements.txt
+rm -v simex_dev.in
+rm -v simex.in
+rm -v simex_vars_dev.sh.in
+rm -v simex_vars.sh.in
 
 # Move html content to root.
 mv -v ._html/* .
