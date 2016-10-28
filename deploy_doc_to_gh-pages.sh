@@ -15,6 +15,7 @@ fi
 
 # Save some useful information
 REPO=`git config remote.origin.url`
+COMMIT_AUTHOR_EMAIL=`git config user.email`
 SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}
 SHA=`git rev-parse --verify HEAD`
 
@@ -43,7 +44,7 @@ mv -v ._html/* .
 
 # Configure git.
 git config user.name "Travis CI"
-git config user.email "$COMMIT_AUTHOR_EMAIL"
+git config user.email "${COMMIT_AUTHOR_EMAIL}"
 # Commit.
 git add --all
 git commit -m "Installed gh-pages content for ${SHA}"
