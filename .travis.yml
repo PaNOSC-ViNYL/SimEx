@@ -1,96 +1,68 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "nightly"
-
+- '2.7'
+- '3.4'
+- '3.5'
+- nightly
 sudo: required
 dist: trusty
-
 matrix:
   allow_failures:
-    # not yet Python 3 compatible
-    - python: "3.4"
-    - python: "3.5"
-    # Python 3.6 "nightly" (upcoming)
-    - python: "nightly"
-
+  - python: '3.4'
+  - python: '3.5'
+  - python: nightly
 env:
   global:
-    - C_INCLUDE_PATH=/usr/lib/openmpi/include
-    - ENCRYPTION_LABEL: "b5edaf0a5fc2"
-    - COMMIT_AUTHOR_EMAIL: "carsten.grote@xfel.eu"
-
+  - C_INCLUDE_PATH=/usr/lib/openmpi/include
+  - COMMIT_AUTHOR_EMAIL: "carsten.grote@xfel.eu"
 addons:
   apt:
     packages:
-      - openmpi-bin
-      - libopenmpi-dev
-      - wget
-      - libboost1.55-dev
-      - libboost1.55-all-dev
-      - libarmadillo-dev
-      - libhdf5-dev # non-MPI but with HL & CPP bindings
-      - build-essential
-      - libbz2-dev
-      - libgsl0-dev
-      - libfftw3-dev
-      - liblapack-dev
-      - cmake
-      - gfortran
-      - unzip
-      - cython
-      - sphinx-common
-      - python-sphinx
-
+    - openmpi-bin
+    - libopenmpi-dev
+    - wget
+    - libboost1.55-dev
+    - libboost1.55-all-dev
+    - libarmadillo-dev
+    - libhdf5-dev
+    - build-essential
+    - libbz2-dev
+    - libgsl0-dev
+    - libfftw3-dev
+    - liblapack-dev
+    - cmake
+    - gfortran
+    - unzip
+    - cython
+    - sphinx-common
+    - python-sphinx
 cache:
   apt: true
   directories:
-    - $HOME/.cache/pip
-    - $HOME/lib
-
-# install git lfs
-#   see https://github.com/travis-ci/travis-ci/issues/3634
+  - "$HOME/.cache/pip"
+  - "$HOME/lib"
 before_install:
+- openssl aes-256-cbc -K $encrypted_b5edaf0a5fc2_key -iv $encrypted_b5edaf0a5fc2_iv
+  -in deploy_rsa.enc -out deploy_rsa -d
 - mkdir -p $HOME/bin
 - wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
 - tar xvfz git-lfs-linux-amd64-1.1.2.tar.gz
 - mv git-lfs-1.1.2/git-lfs $HOME/bin/git-lfs
 - export PATH=$PATH:$HOME/bin/
-
-
 before_script:
-  # print interesting versions
-  - python --version
-  - python -c "import numpy as np; print( np.__version__ )"
-  - python -c "import h5py as h5; print( h5.__version__ )"
-  - ulimit -c unlimited
-
+- python --version
+- python -c "import numpy as np; print( np.__version__ )"
+- python -c "import h5py as h5; print( h5.__version__ )"
+- ulimit -c unlimited
 script:
-  # load git lfs files
-  - git lfs pull
-  # build & install
-  - mkdir build
-  - cd build
-    #- cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON ..
-    #- make -j2
-    #- make install
-  # unit tests
-  - cd ../Tests/python/unittest/
-    # no tests for now to check if doc deployment works.
-    #- python Test.py -v
-  # build doc.
-  #- source $VIRTUAL_ENV/bin/simex_vars.sh
-  - cd ../../../Sources/doc
-  - make html
-  # Test doc.
-  - cd ../../Tests/doc
-  - python Test.py -v
-  # functional tests
-  #- cd ../functest/
-  #- python Test.py -v
-  #
+- git lfs pull
+- mkdir build
+- cd build
+- cd ../Tests/python/unittest/
+- cd ../../../Sources/doc
+- make html
+- cd ../../Tests/doc
+- python Test.py -v
 after_success:
-    - cd ../..
-    - bash ./deploy_doc_to_gh-pages.sh
+- cd ../..
+- bash ./deploy_doc_to_gh-pages.sh

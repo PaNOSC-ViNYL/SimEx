@@ -15,7 +15,6 @@ fi
 
 # Save some useful information
 REPO=`git config remote.origin.url`
-COMMIT_AUTHOR_EMAIL=`git config user.email`
 SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}
 SHA=`git rev-parse --verify HEAD`
 
@@ -50,18 +49,13 @@ rm -v simex_vars.sh.in
 mv -v ._html/* .
 
 # Configure git.
-git config user.name "Carsten Fortmann-Grote"
-git config user.email "carsten.grote@xfel.eu"
+git config user.name "Travis CI"
+git config user.email "$COMMIT_AUTHOR_EMAIL"
 # Commit.
 git add --all
 git commit -m "Installed gh-pages content for ${SHA}"
 
-# Get the deploy key by using Travis's stored variables to decrypt deploy_key.enc
-ENCRYPTED_KEY_VAR="encrypted_${ENCRYPTION_LABEL}_key"
-ENCRYPTED_IV_VAR="encrypted_${ENCRYPTION_LABEL}_iv"
-ENCRYPTED_KEY=${!ENCRYPTED_KEY_VAR}
-ENCRYPTED_IV=${!ENCRYPTED_IV_VAR}
-openssl aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in deploy_rsa.enc -out deploy_rsa -d
+# Acquire push credentials.
 chmod 600 deploy_rsa
 eval `ssh-agent -s`
 ssh-add deploy_rsa
