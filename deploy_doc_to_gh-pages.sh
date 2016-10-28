@@ -28,7 +28,7 @@ git checkout -b ${TARGET_BRANCH}
 rm -rfv */
 rm -v CMakeLists.txt
 rm -v copyright_notice.py
-rm -v deploy_doc_to_gh-page.sh
+rm -v deploy_doc_to_gh-pages.sh
 rm -v install.exfl.sh
 rm -v install.sh
 rm -v README.md
