@@ -72,15 +72,15 @@ script:
   # build & install
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON ..
-  - make
-  - make install
+    #- cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON ..
+    #- make
+    #- make install
   # unit tests
   - cd ../Tests/python/unittest/
     # no tests for now to check if doc deployment works.
     #- python Test.py -v
   # build doc.
-  - source $VIRTUAL_ENV/bin/simex_vars.sh
+  #- source $VIRTUAL_ENV/bin/simex_vars.sh
   - cd ../../../Sources/doc
   - make html
   # Test doc.
