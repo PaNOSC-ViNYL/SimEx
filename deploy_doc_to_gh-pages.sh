@@ -18,18 +18,23 @@ REPO=`git config remote.origin.url`
 SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}
 SHA=`git rev-parse --verify HEAD`
 
-# Save html content
-mv -v Sources/doc/build/html ._html
-# Remove all subdirs.
+# Save html content to a place not tracked by git.
+cp -arv Sources/doc/build/html ._html
+
+# Checkout target branch ( = gh-pages).
+git checkout ${TARGET_BRANCH}
+
+# Cleanup.
 rm -rfv ./**/*
-# cp html content to root.
+
+# Move html content to root.
 mv -v ._html/* .
 
 # Configure git.
 git config user.name "Travis CI"
 git config user.email "$COMMIT_AUTHOR_EMAIL"
 # Commit.
-git add .
+git add --all
 git commit -m "Installed gh-pages content for ${SHA}"
 
 # Get the deploy key by using Travis's stored variables to decrypt deploy_key.enc
@@ -44,6 +49,9 @@ ssh-add deploy_rsa
 
 # Now that we're all set up, we can push.
 git push $SSH_REPO $TARGET_BRANCH
+
+# Go back to where we came from.
+git checkout ${SOURCE_BRANCH}
 
 ## Now let's go have some fun with the cloned repo
 #cd gh_pages_clone
