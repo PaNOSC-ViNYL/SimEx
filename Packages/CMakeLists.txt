@@ -8,23 +8,20 @@ SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 SET(CPACK_PACKAGE_NAME "simex")
 SET(CPACK_PACKAGE_VENDOR "XEFL")
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "2")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SimEx Debian package")
 
 #(>= 2.3.1-6), libgcc1 (>= 1:3.4.2-12)")
 SET (PACKAGE_DEPENDS
-#"libarmadillo4"
 "libarmadillo-dev"
-#"wget"
 "python2.7"
 "python-numpy"
 "python-scipy"
 "python-h5py"
 "python-setuptools"
 "python-matplotlib"
-#"build-essential"
 "libbz2-dev"
 "libgsl0-dev"
 "libfftw3-dev"
@@ -33,8 +30,7 @@ SET (PACKAGE_DEPENDS
 "libopenmpi-dev"
 "ssh"
 "libboost1.55-all-dev"
-#"unzip"
-#"cython"
+"python-biopython"
 )
 
 STRING(REGEX REPLACE ";" "," PACKAGE_DEPENDS "${PACKAGE_DEPENDS}")
