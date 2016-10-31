@@ -73,15 +73,13 @@ script:
   - cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON ..
   - make
   - make install
+# build & install docs
+  - make docs install
   # unit tests
-  - cd ../Tests/python/unittest/
+  - cd $VIRTUAL_ENV/Tests/python/unittest/
   - python Test.py -v
-  # build doc.
-  - source $VIRTUAL_ENV/bin/simex_vars.sh
-  - cd ../../../Sources/doc
-  - make html
   # Test doc.
-  - cd ../../Tests/doc
+  - cd $VIRTUAL_ENV/Tests/doc
   - python Test.py -v
   # functional tests
   #- cd ../functest/

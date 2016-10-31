@@ -22,14 +22,15 @@ option (INSTALL_TESTS "Install tests" ON)
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (DOCDIR 	doc)
 set (PYPATH     ${LIBDIR}/python2.7)
 
 option (PACKAGE_MAKE "Use this option to create linux packages" OFF)
 if (PACKAGE_MAKE)
  set (TESTSDIR   share/simex/Tests)
+ set (DOCDIR share/docs/simex)
 else()
  set (TESTSDIR   Tests)
+ set (DOCDIR doc)
 endif()
 
 if (DEVELOPER_INSTALL)
@@ -83,3 +84,8 @@ install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
 if (PACKAGE_MAKE)
   add_subdirectory (Packages)
 endif()
+
+
+add_subdirectory("Sources/doc")
+
+
