@@ -5,7 +5,7 @@ bin
 include
 lib
 build/
-doc/
+/doc
 doc/build/
 doc/doxy_build/
 ._quaternion*.dat
