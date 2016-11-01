@@ -28,7 +28,7 @@ add_dependencies(docs check-sphinx clean-docs)
 
 
 ExternalProject_Get_Property(docs SOURCE_DIR)
-set (DOCS_BUILDDIR ${SOURCE_DIR}/build/)
+set (DOCS_BUILDDIR ${SOURCE_DIR}/build/html/)
 
 install(DIRECTORY ${DOCS_BUILDDIR}
         DESTINATION ${DOCDIR}
@@ -38,3 +38,8 @@ install(DIRECTORY ${DOCS_BUILDDIR}
 	    PATTERN "CMakeLists.txt" EXCLUDE
 )
 
+
+install(FILES ${SOURCE_DIR}/.nojekyll
+        DESTINATION ${DOCDIR}
+        OPTIONAL
+)

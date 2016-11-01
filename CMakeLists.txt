@@ -30,7 +30,7 @@ if (PACKAGE_MAKE)
  set (DOCDIR share/docs/simex)
 else()
  set (TESTSDIR   Tests)
- set (DOCDIR doc)
+ set (DOCDIR docs)
 endif()
 
 if (DEVELOPER_INSTALL)
