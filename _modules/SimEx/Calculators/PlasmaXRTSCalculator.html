@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>SimEx.Calculators.PlasmaXRTSCalculator &mdash; simex_platform 0.2.0 documentation</title>
+    <title>SimEx.Calculators.PlasmaXRTSCalculator &#8212; simex_platform 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -24,6 +24,8 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
     <link rel="top" title="simex_platform 0.2.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
@@ -34,8 +36,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -45,7 +47,7 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.PlasmaXRTSCalculator</h1><div class="highlight"><pre>
-<span class="c1">##########################################################################</span>
+<span></span><span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
@@ -78,17 +80,17 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="kn">import</span> <span class="n">AbstractPhotonDiffractor</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="kn">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
 
-<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="kn">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
 
 <div class="viewcode-block" id="PlasmaXRTSCalculator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator">[docs]</a><span class="k">class</span> <span class="nc">PlasmaXRTSCalculator</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class representing a plasma x-ray Thomson scattering calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parameters: Parameters for the PlasmaXRTSCalculator.</span>
 <span class="sd">        :type parameters: PlasmaXRTSCalculatorParameters</span>
@@ -105,14 +107,14 @@
         <span class="n">parameters</span> <span class="o">=</span> <span class="n">checkAndSetParameters</span><span class="p">(</span> <span class="n">parameters</span> <span class="p">)</span>
 
         <span class="c1"># Set default output.</span>
-        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">output_path</span> <span class="o">=</span> <span class="s1">&#39;xrts_out.h5&#39;</span>
 
         <span class="c1"># Init base class.</span>
         <span class="nb">super</span><span class="p">(</span> <span class="n">PlasmaXRTSCalculator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
 
         <span class="c1"># Set state to not-initialized (e.g. input deck is not written).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Overwrite provided_data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/ff&#39;</span><span class="p">,</span>
@@ -192,7 +194,7 @@
         <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="n">command_sequence</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_tmp_dir</span> <span class="p">)</span>
 
         <span class="c1"># Catch stdout and stderr, wait until process terminates.</span>
-        <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Error handling.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
@@ -317,7 +319,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span> <span class="n">source_spectrum_path</span><span class="p">,</span> <span class="n">source_spectrum_data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">print</span>  <span class="s2">&quot;Source spectrum could not be saved. Please check temporary directory </span><span class="si">%s</span><span class="s2"> exists. Backtrace follows.&quot;</span>
+            <span class="nb">print</span>  <span class="s2">&quot;Source spectrum could not be saved. Please check temporary directory </span><span class="si">%s</span><span class="s2"> exists. Backtrace follows.&quot;</span>
             <span class="k">raise</span></div>
 
 <span class="k">def</span> <span class="nf">_parseStaticData</span><span class="p">(</span><span class="n">data_string</span><span class="p">):</span>
@@ -397,8 +399,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -414,13 +416,13 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../../genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+        &#169; Copyright 2016, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
   </body>
 </html>

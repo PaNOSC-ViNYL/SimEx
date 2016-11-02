@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>SimEx.Parameters.EMCOrientationParameters &mdash; simex_platform 0.2.0 documentation</title>
+    <title>SimEx.Parameters.EMCOrientationParameters &#8212; simex_platform 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -24,6 +24,8 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
     <link rel="top" title="simex_platform 0.2.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
@@ -34,8 +36,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -45,7 +47,7 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Parameters.EMCOrientationParameters</h1><div class="highlight"><pre>
-<span class="c1">##########################################################################</span>
+<span></span><span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
@@ -79,11 +81,11 @@
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">physical_constants</span>
-<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">Avogadro</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">Avogadro</span>
 
-<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="kn">import</span> <span class="n">AbstractCalculatorParameters</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="kn">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
 
 
 <div class="viewcode-block" id="EMCOrientationParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters">[docs]</a><span class="k">class</span> <span class="nc">EMCOrientationParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
@@ -92,13 +94,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">initial_number_of_quaternions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">max_number_of_quaternions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">max_number_of_iterations</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">min_error</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">beamstop</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">detailed_output</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">parameters_dictionary</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">initial_number_of_quaternions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">max_number_of_quaternions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">max_number_of_iterations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">min_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">beamstop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">detailed_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">parameters_dictionary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the EMCOrientationParameters.</span>
@@ -122,7 +124,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Legacy support for dictionaries.</span>
-        <span class="k">if</span> <span class="n">parameters_dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parameters_dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">initial_number_of_quaternions</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;initial_number_of_quaternions&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_number_of_quaternions</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;max_number_of_quaternions&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min_error</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;min_error&#39;</span><span class="p">]</span>
@@ -144,7 +146,7 @@
     <span class="k">def</span> <span class="nf">initial_number_of_quaternions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the &#39;initial_number_of_quaternions&#39; parameter. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__initial_number_of_quaternions</span>
-    <span class="nd">@initial_number_of_quaternions.setter</span>
+    <span class="nd">@initial_number_of_quaternions</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">initial_number_of_quaternions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;initial_number_of_quaternions&#39; parameter to a given value.</span>
 <span class="sd">        :param value: The value to set &#39;initial_number_of_quaternions&#39; to.</span>
@@ -160,7 +162,7 @@
     <span class="k">def</span> <span class="nf">max_number_of_quaternions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the &#39;max_number_of_quaternions&#39; parameter. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_number_of_quaternions</span>
-    <span class="nd">@max_number_of_quaternions.setter</span>
+    <span class="nd">@max_number_of_quaternions</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">max_number_of_quaternions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;max_number_of_quaternions&#39; parameter to a given value.</span>
 <span class="sd">        :param value: The value to set &#39;max_number_of_quaternions&#39; to.</span>
@@ -176,7 +178,7 @@
     <span class="k">def</span> <span class="nf">max_number_of_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the &#39;max_number_of_iterations&#39; parameter. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_number_of_iterations</span>
-    <span class="nd">@max_number_of_iterations.setter</span>
+    <span class="nd">@max_number_of_iterations</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">max_number_of_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;max_number_of_iterations&#39; parameter to a given value.</span>
 <span class="sd">        :param value: The value to set &#39;max_number_of_iterations&#39; to.</span>
@@ -192,7 +194,7 @@
     <span class="k">def</span> <span class="nf">min_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the &#39;min_error&#39; parameter. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__min_error</span>
-    <span class="nd">@min_error.setter</span>
+    <span class="nd">@min_error</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">min_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;min_error&#39; parameter to a given value.</span>
 <span class="sd">        :param value: The value to set &#39;min_error&#39; to.</span>
@@ -208,23 +210,23 @@
     <span class="k">def</span> <span class="nf">beamstop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the &#39;beamstop&#39; parameter. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__beamstop</span>
-    <span class="nd">@beamstop.setter</span>
+    <span class="nd">@beamstop</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">beamstop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;beamstop&#39; parameter to a given value.</span>
 <span class="sd">        :param value: The value to set &#39;beamstop&#39; to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__beamstop</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">True</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__beamstop</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="kc">True</span> <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">detailed_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the &#39;detailed_output&#39; parameter. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__detailed_output</span>
-    <span class="nd">@detailed_output.setter</span>
+    <span class="nd">@detailed_output</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">detailed_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;detailed_output&#39; parameter to a given value.</span>
 <span class="sd">        :param value: The value to set &#39;detailed_output&#39; to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__detailed_output</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">True</span> <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__detailed_output</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="kc">True</span> <span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -238,8 +240,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -255,13 +257,13 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../../genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+        &#169; Copyright 2016, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
   </body>
 </html>

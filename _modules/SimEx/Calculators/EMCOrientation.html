@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>SimEx.Calculators.EMCOrientation &mdash; simex_platform 0.2.0 documentation</title>
+    <title>SimEx.Calculators.EMCOrientation &#8212; simex_platform 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -24,6 +24,8 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
     <link rel="top" title="simex_platform 0.2.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
@@ -34,8 +36,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -45,7 +47,7 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.EMCOrientation</h1><div class="highlight"><pre>
-<span class="c1">##########################################################################</span>
+<span></span><span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># Copyright (C) 2015 Carsten Fortmann-Grote                              #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
@@ -80,17 +82,17 @@
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
-<span class="kn">from</span> <span class="nn">EMCCaseGenerator</span> <span class="kn">import</span>  <span class="n">EMCCaseGenerator</span><span class="p">,</span> <span class="n">_print_to_log</span>
-<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonAnalyzer</span> <span class="kn">import</span> <span class="n">AbstractPhotonAnalyzer</span>
-<span class="kn">from</span> <span class="nn">SimEx.Parameters.EMCOrientationParameters</span> <span class="kn">import</span> <span class="n">EMCOrientationParameters</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="kn">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">EMCCaseGenerator</span> <span class="k">import</span>  <span class="n">EMCCaseGenerator</span><span class="p">,</span> <span class="n">_print_to_log</span>
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonAnalyzer</span> <span class="k">import</span> <span class="n">AbstractPhotonAnalyzer</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.EMCOrientationParameters</span> <span class="k">import</span> <span class="n">EMCOrientationParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
 
 
 <div class="viewcode-block" id="EMCOrientation"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.EMCOrientation.EMCOrientation">[docs]</a><span class="k">class</span> <span class="nc">EMCOrientation</span><span class="p">(</span><span class="n">AbstractPhotonAnalyzer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tmp_files_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">run_files_path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tmp_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">run_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param  parameters: Parameters for the EMC orientation calculator.</span>
@@ -118,10 +120,10 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">EMCOrientationParameters</span><span class="p">(</span> <span class="n">parameters_dictionary</span> <span class="o">=</span> <span class="n">parameters</span> <span class="p">)</span>
 
         <span class="c1"># Set default parameters is no parameters given.</span>
-        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">EMCOrientationParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">EMCOrientationParameters</span><span class="p">()</span> <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">EMCOrientationParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="bp">None</span> <span class="p">)</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">EMCOrientationParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
 
 
         <span class="c1"># Initialize base class.</span>
@@ -168,7 +170,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">run_files_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_instance_dir</span>
-    <span class="nd">@run_files_path.setter</span>
+    <span class="nd">@run_files_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">run_files_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the path to runtime files.</span>
 
@@ -176,7 +178,7 @@
 <span class="sd">        :type value: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__run_instance_dir</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;run_files_path&#39; must be a string or None.&quot;</span> <span class="p">)</span>
@@ -184,14 +186,14 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tmp_files_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmp_out_dir</span>
-    <span class="nd">@tmp_files_path.setter</span>
+    <span class="nd">@tmp_files_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">tmp_files_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the path to tmptime files.</span>
 <span class="sd">        :param value: The path where tmptime generated files shall be saved.</span>
 <span class="sd">        :type value: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__tmp_out_dir</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;tmp_files_path&#39; must be a string or None.&quot;</span> <span class="p">)</span>
@@ -215,7 +217,7 @@
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="sd">&quot;&quot;&quot; Private method do setup all needed directories for temp and persistant output. &quot;&quot;&quot;</span>
         <span class="c1"># If tmp dir is set to None, create a temporary directory and store path on object and return value.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_files_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_files_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tmp_out_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;emc_out_&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tmp_files_path</span> <span class="o">=</span> <span class="n">tmp_out_dir</span>
         <span class="c1"># Else, check if path exists and store on return value.</span>
@@ -225,7 +227,7 @@
             <span class="n">tmp_out_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_files_path</span>
 
         <span class="c1"># Same for run dir.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_files_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_files_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">run_instance_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;emc_run_&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__run_instance_dir</span> <span class="o">=</span> <span class="n">run_instance_dir</span>
         <span class="k">else</span><span class="p">:</span>
@@ -466,14 +468,14 @@
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="sd">&quot;&quot;&quot; Private (hidden) utility to check validity of paths given to constructor. &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span> <span class="n">path</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">run_files_path</span><span class="p">,</span> <span class="n">tmp_files_path</span><span class="p">]</span> <span class="p">]):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span> <span class="n">path</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">run_files_path</span><span class="p">,</span> <span class="n">tmp_files_path</span><span class="p">]</span> <span class="p">]):</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Paths must be strings.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">run_files_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">run_files_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="n">run_files_path</span> <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Run files path already exists, cowardly refusing to overwrite.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="kc">True</span>
 </pre></div>
 
           </div>
@@ -487,8 +489,8 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -504,13 +506,13 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../../genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+        &#169; Copyright 2016, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
   </body>
 </html>
