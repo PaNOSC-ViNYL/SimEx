@@ -20,6 +20,7 @@ env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
     - DEPLOY_DOCS_FOR_PYTHON: '2.7'
+    - TRIGGER_DOCKER_FOR_PYTHON: '2.7'
 
 addons:
   apt:
@@ -64,6 +65,8 @@ before_script:
   - python -c "import numpy as np; print( np.__version__ )"
   - python -c "import h5py as h5; print( h5.__version__ )"
   - ulimit -c unlimited
-
 script:
   - bash $TRAVIS_BUILD_DIR/TravisCI/build_and_test_simex.sh && bash $TRAVIS_BUILD_DIR/TravisCI/deploy_docs.sh
+after_success:
+  - bash $TRAVIS_BUILD_DIR/TravisCI/trigger_docker.sh
+
