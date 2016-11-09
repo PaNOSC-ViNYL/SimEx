@@ -1,4 +1,4 @@
-BRANCH=docker
+BRANCH=develop
 URL=https://github.com/eucall-software/simex_platform/archive/${BRANCH}.zip
 
 
@@ -48,8 +48,4 @@ rm -rf $ROOT_DIR/Tests
 echo "source /opt/simex_platform/bin/simex_vars.sh" > /etc/profile.d/scripts-simex.sh && \
 	chmod 755 /etc/profile.d/scripts-simex.sh
 chmod og+rwX -R /opt/simex_platform
-
-
-
-yum install -y hwloc
 
