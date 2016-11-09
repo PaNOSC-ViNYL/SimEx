@@ -10,7 +10,7 @@ if [ "$DEPLOY_DOCS_FOR_PYTHON" != "$TRAVIS_PYTHON_VERSION" ]; then
 fi
 
 
-SOURCE_BRANCH="develop"
+SOURCE_BRANCH="master"
 TARGET_BRANCH="gh-pages"
 
 #path to gh-pages content
