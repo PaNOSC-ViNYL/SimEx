@@ -62,8 +62,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
     def backengine(self):
         """ Starts WPG simulations in parallel in a subprocess """
-        #self._run()
-        #return 0
 
         fname = __name__+"_tmpobj"
         self.dumpToFile(fname)
@@ -71,7 +69,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
                             '-np',
                             '1', # will be set later
 #                            '-x','OMP_NUM_THREADS=4',
-                            '--map-by','node',
+                            '-bynode',
                             'python',
                             __file__,
                             fname,
