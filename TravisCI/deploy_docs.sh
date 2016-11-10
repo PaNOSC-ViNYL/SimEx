@@ -42,8 +42,12 @@ rm -rf ghpages_content/* || exit 0
 # fill content with newly generated one
 cp -r $CONTENT/* ghpages_content/
 
+
 # Now let's go have some fun with the cloned repo
 cd ghpages_content
+# Create the .nojekyll file
+touch .nojekyll
+
 # set real user name and email
 git config user.name  $NAME
 git config user.email $EMAIL
