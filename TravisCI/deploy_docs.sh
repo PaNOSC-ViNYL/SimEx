@@ -29,8 +29,8 @@ fi
 REPO=`git config remote.origin.url`
 SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}
 SHA=`git rev-parse --verify HEAD`
-EMAIL=`git log HEAD^..HEAD --pretty='%aE'`
-NAME=`git log HEAD^..HEAD --pretty='%aN'`
+EMAIL=`git log -1 --pretty='%aE'`
+NAME=`git log -1 --pretty='%aN'`
 
 # Clone the existing branch
 # we assume $TARGET_BRANCH exists
