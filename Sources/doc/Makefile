@@ -178,3 +178,12 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+
+install: html
+	@cp -auvr build/html/* ../../docs/.
+	@echo "Installed documentation in ../../docs"
+
+all-clean: clean
+	rm -rvf ../../docs/*
+

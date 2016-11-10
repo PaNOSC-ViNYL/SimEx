@@ -5,7 +5,11 @@ bin
 include
 lib
 build/
+/docs
 doc/build/
 doc/doxy_build/
 ._quaternion*.dat
 .idea
+deploy_rsa
+deploy_doc_to_gh-pages.sh
+deploy_rsa.enc
