@@ -34,6 +34,8 @@ from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 
 from mpi4py import MPI
+import subprocess
+
 
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
@@ -58,8 +60,30 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
 
-
     def backengine(self):
+        """ Starts WPG simulations in parallel in a subprocess """
+        #self._run()
+        #return 0
+
+        fname = __name__+"_tmpobj"
+        self.dumpToFile(fname)
+        command_sequence = ['mpirun',
+                            '-np',
+                            '1', # will be set later
+#                            '-x','OMP_NUM_THREADS=4',
+                            '--map-by','node',
+                            'python',
+                            __file__,
+                            fname,
+                            ]
+        proc = subprocess.Popen(command_sequence,universal_newlines=True)
+        proc.wait()
+        os.remove(fname)
+
+        return proc.returncode
+
+    def _run(self):
+
         """ This method drives the WPG backengine.
 
         :return: 0 if WPG returns successfully, 1 if not.
@@ -121,3 +145,8 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :type output_path: string
         """
         pass # No action required since output is written in backengine.
+
+
+
+if __name__ == '__main__':
+    XFELPhotonPropagator.runFromCLI()
