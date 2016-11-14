@@ -46,7 +46,7 @@ class EMCOrientationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath('diffr_out_0000001.h5')
+        cls.input_h5 = TestUtilities.generateTestFilePath('diffr')
 
     @classmethod
     def tearDownClass(cls):
@@ -322,7 +322,28 @@ class EMCOrientationTest(unittest.TestCase):
         for ef in expected_run_files2:
             self.assertIn( ef, os.listdir(run_files_path2) )
 
+    def testSingleDiffrFileMultiplePatterns(self):
+        """ Test that EMC accepts a single (new style) input file from diffraction containing multiple patterns. """
+        # Construct the object.
+        emc_parameters = {"initial_number_of_quaternions" : 3,
+                          "max_number_of_quaternions"     : 4,
+                          "max_number_of_iterations"      : 3,
+                          "min_error"                     : 1.e-6,
+                          "beamstop"                      : True,
+                          "detailed_output"               : True,
+                          }
 
+        emc = EMCOrientation(parameters=emc_parameters,
+                             input_path=TestUtilities.generateTestFilePath("diffr_newstyle.h5"),
+                             output_path='orient_out.h5',
+                             tmp_files_path=None,
+                             run_files_path=None,)
+
+        # Call backengine.
+        status = emc.backengine()
+
+        # Check success.
+        self.assertEqual(status, 0)
 
 
 if __name__ == '__main__':
