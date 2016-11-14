@@ -765,7 +765,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'source',
                           'prop',
                           'pmi',
-                          'detector',
                           'diffr',
                           'analysis',
                           ]
@@ -779,14 +778,16 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'pmi/pmi_out_0000002.h5',
                           'diffr/diffr_out_0000001.h5',
                           'diffr/diffr_out_0000002.h5',
-                          'detector/diffr_out_0000001.h5',
-                          'detector/diffr_out_0000002.h5',
+                          'diffr.h5',
+                          'detector',
                           'analysis/orient_out.h5',
                           'analysis/phase_out.h5',
                           ]
 
         # Ensure proper cleanup.
         self.__dirs_to_remove = expected_dirs
+        self.__files_to_remove.append('diffr.h5')
+        self.__files_to_remove.append('detector')
 
         # Get proper FEL source files to start from.
         shutil.copytree( TestUtilities.generateTestFilePath('FELsource_out'), 'source_in')
@@ -847,6 +848,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Check that all output files and directories are present.
         for directory in expected_dirs:
+            print directory
             self.assertTrue( os.path.isdir( directory ) )
         for f in expected_files:
             print f

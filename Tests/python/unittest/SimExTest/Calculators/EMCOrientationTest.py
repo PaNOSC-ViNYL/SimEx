@@ -324,6 +324,10 @@ class EMCOrientationTest(unittest.TestCase):
 
     def testSingleDiffrFileMultiplePatterns(self):
         """ Test that EMC accepts a single (new style) input file from diffraction containing multiple patterns. """
+
+        # Cleanup.
+        self.__files_to_remove.append('orient_out.h5')
+
         # Construct the object.
         emc_parameters = {"initial_number_of_quaternions" : 3,
                           "max_number_of_quaternions"     : 4,
