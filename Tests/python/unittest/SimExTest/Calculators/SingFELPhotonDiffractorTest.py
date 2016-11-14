@@ -27,6 +27,7 @@
 
 """
 import os
+import h5py
 import shutil
 import subprocess
 
@@ -394,8 +395,57 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                 input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path='diffr')
 
-
         photon_diffractor.backengine()
+
+    def testSingleFile(self):
+        """ Test that saveH5() generates only one linked hdf. """
+
+
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : True,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 2,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 4,
+                     'number_of_diffraction_patterns' : 2,
+                     'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 8,
+                   }
+
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
+                output_path='diffr_newstyle')
+
+        # Cleanup.
+        self.__dirs_to_remove.append(photon_diffractor.output_path)
+
+        # Run backengine and convert files.
+        photon_diffractor.backengine()
+        photon_diffractor.saveH5()
+
+        # Cleanup new style files.
+        self.__files_to_remove.append(photon_diffractor.output_path)
+
+        # Check that only one file was generated.
+        self.assertTrue( os.path.isfile( photon_diffractor.output_path ))
+
+        # Open the file for reading.
+        h5_filehandle = h5py.File( photon_diffractor.output_path, 'r')
+
+        # Count groups under /data.
+        number_of_patterns = len(h5_filehandle.keys()) - 3
+
+        self.assertEqual( number_of_patterns, 8 )
+
+        # Assert global metadata is present.
+        self.assertIn("params", h5_filehandle.keys() )
+        self.assertIn("version", h5_filehandle.keys() )
+        self.assertIn("info", h5_filehandle.keys() )
+        self.assertIn("geom", h5_filehandle["params"].keys() )
+
+        # Assert detector dimensions are saved as parameters.
 
 if __name__ == '__main__':
     unittest.main()

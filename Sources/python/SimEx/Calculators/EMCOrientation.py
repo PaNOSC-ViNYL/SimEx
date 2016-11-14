@@ -225,11 +225,11 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         if os.path.isdir(self.input_path):
             photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
             photonFiles.sort()
-
         elif os.path.isfile(self.input_path):
             photonFiles = [self.input_path]
         else:
             raise IOError( " Input file %s not found." % self.input_path )
+
         sparsePhotonFile    = os.path.join(tmp_out_dir, "photons.dat")
         avgPatternFile      = os.path.join(tmp_out_dir, "avg_photon.h5")
         detectorFile        = os.path.join(tmp_out_dir, "detector.dat")
@@ -257,7 +257,6 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             _print_to_log(msg=msg, log_file=outputLog)
             os.system("touch %s" % lockFile)
             gen.readGeomFromPhotonData(photonFiles[0])
-            #gen.readGeomFromPhotonData(photonFiles)
             gen.writeDetectorToFile(filename=detectorFile)
             gen.writeSparsePhotonFile(photonFiles, sparsePhotonFile, avgPatternFile)
             _print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=outputLog)
