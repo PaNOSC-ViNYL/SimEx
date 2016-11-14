@@ -29,6 +29,7 @@ import os
 import unittest
 
 from SimEx.Utilities import ParallelUtilities
+from distutils.version import StrictVersion
 
 class ParallelUtilitiesTest(unittest.TestCase):
     """ Test class for the ParallelUtilities. """
@@ -131,6 +132,69 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
         self.assertEqual(resource['NCores'],200)
         self.assertEqual(resource['NNodes'],3)
+
+    def testGetVersionInfo_ReturnsCorrectData(self):
+
+        version=ParallelUtilities._getMPIVersionInfo()
+
+        self.assertIn('Vendor',version)
+        self.assertIn('Version',version)
+        self.assertIn(version['Vendor'],["OpenMPI","MPICH"])
+
+        self.assertIsInstance(version['Version'],str)
+        self.assertGreater(StrictVersion(version['Version']),StrictVersion("0.0.0"))
+
+    def testMPICommandArguments_ExceptionWhenCannotDefine(self):
+
+        os.environ["SIMEX_MPICOMMAND"]='blabla'
+
+        self.assertRaises(IOError,ParallelUtilities.prepareMPICommandArguments,1)
+
+        del os.environ["SIMEX_MPICOMMAND"]
+
+
+    def testVendorSpecificMPIArguments_OpenMPIOldVersion(self):
+        version=dict([("Vendor", "OpenMPI"),("Version",'1.6.0')])
+
+        str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
+        self.assertEqual(str," --bynode -x OMP_NUM_THREADS=1")
+
+    def testVendorSpecificMPIArguments_OpenMPINewVersion(self):
+        version=dict([("Vendor", "OpenMPI"),("Version",'1.9.0')])
+
+        str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
+        self.assertEqual(str," --map-by node -x OMP_NUM_THREADS=1")
+
+
+    def testVendorSpecificMPIArguments_MPICH(self):
+        version=dict([("Vendor", "MPICH"),("Version",'1.9.0')])
+
+        str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
+        self.assertEqual(str," -map-by node -env OMP_NUM_THREADS 1")
+
+    def testVendorSpecificMPIArguments_UseAllThreads(self):
+        version=dict([("Vendor", "OpenMPI"),("Version",'1.6.0')])
+
+        str=ParallelUtilities._getVendorSpecificMPIArguments(version,0)
+        self.assertNotIn("OMP_NUM_THREADS",str)
+
+    def testVendorSpecificMPIArguments_Exception_OnNoneVersion(self):
+        version=None
+        self.assertRaises(IOError,ParallelUtilities._getVendorSpecificMPIArguments,version,0)
+
+    def testPrepareMPICommandArguments_Exception_OnNegativeNTasks(self):
+        self.assertRaises(IOError,ParallelUtilities.prepareMPICommandArguments,-1,0)
+
+    def testPrepareMPICommandArguments_Adds_NumberOfTasks(self):
+        self.assertIn("-np 10",ParallelUtilities.prepareMPICommandArguments(10,0))
+
+    def testPrepareMPICommandArguments_Adds_ExtraMPIParameters(self):
+
+        os.environ["SIMEX_EXTRA_MPI_PARAMETERS"]='blabla'
+
+        self.assertIn("blabla",ParallelUtilities.prepareMPICommandArguments(10,0))
+
+        del os.environ["SIMEX_EXTRA_MPI_PARAMETERS"]
 
 
 

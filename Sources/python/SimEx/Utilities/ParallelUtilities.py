@@ -26,7 +26,8 @@
 """
 
 import os
-from subprocess import Popen, PIPE
+import subprocess
+from distutils.version import StrictVersion
 
 
 def _getParallelResourceInfoFromEnv():
@@ -65,18 +66,24 @@ def _getParallelResourceInfoFromSlurm():
 
     return resource
 
+def _MPICommandName():
+    if 'SIMEX_MPICOMMAND' in os.environ:
+        mpicmd=os.environ['SIMEX_MPICOMMAND']
+    else:
+        mpicmd='mpirun'
+
+    return mpicmd
+
 def _getParallelResourceInfoFromMpirun():
     try:
-        if 'SIMEX_MPICOMMAND' in os.environ:
-            mpicmd=os.environ['SIMEX_MPICOMMAND']
-        else:
-            mpicmd='mpirun'
-
-        process = Popen([mpicmd, "hostname"], stdout=PIPE)
+        mpicmd = _MPICommandName()
+        process = subprocess.Popen([mpicmd, "hostname"], stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
-        exit_code = process.wait()
-        if exit_code!=0:
+
+        if process.returncode !=0:
             return None
+
         listnodes=output.strip().split('\n')
         resource = {}
         resource['NNodes']=len(set(listnodes))
@@ -110,4 +117,73 @@ def getParallelResourceInfo():
         print("Was unable to determine parallel resources, will run in serial mode")
         return dict([("NCores", 0),("NNodes",1)])
 
+
+
+def _getMPIVersionInfo():
+    try:
+        mpicmd = _MPICommandName()
+        process = subprocess.Popen([mpicmd, "--version"], stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT)
+        (output, err) = process.communicate()
+
+        version = {}
+        if "(Open MPI)" in output:
+            version['Vendor']="OpenMPI"
+            version['Version']=output.split("(Open MPI)")[1].split('\n')[0].strip()
+            return version
+        if "HYDRA" in output:
+            version['Vendor']="MPICH"
+            version['Version']=output.split("Version:")[1].split('\n')[0].strip()
+            return version
+
+    except:
+        return None
+
+
+def _getVendorSpecificMPIArguments(version,threadsPerTask):
+
+    if version == None:
+        raise IOError( "Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or "
+                       "provide backengine_mpicommand calculator parameter")
+
+    mpicmd=""
+    # mapping by node is required to distribute tasks in round-robin mode.
+    if version['Vendor'] == "OpenMPI":
+        if StrictVersion(version['Version'])>StrictVersion("1.8.0"):
+            mpicmd+=" --map-by node"
+        else:
+            mpicmd+=" --bynode"
+        # by default, all cores will be available, no need to set OMP_NUM_THREADS
+        if threadsPerTask > 0:
+            mpicmd+=" -x OMP_NUM_THREADS="+str(threadsPerTask)
+    elif version['Vendor'] == "MPICH":
+        mpicmd+=" -map-by node"
+        if threadsPerTask > 0:
+            mpicmd+=" -env OMP_NUM_THREADS "+str(threadsPerTask)
+
+    return mpicmd
+
+
+def prepareMPICommandArguments(ntasks, threadsPerTask=0):
+    """
+    Utility prepares mpi arguments based on mpi version found in the system.
+
+    @return : String with mpi command and arguments
+    @rtype  : string
+
+    """
+
+    if ntasks < 0:
+        raise IOError("number of tasks should be positive")
+
+    mpicmd = _MPICommandName() + " -np " + str(ntasks)
+
+    version = _getMPIVersionInfo()
+    mpicmd+=_getVendorSpecificMPIArguments(version,threadsPerTask)
+
+    if 'SIMEX_EXTRA_MPI_PARAMETERS' in os.environ:
+        mpicmd+=" "+os.environ['SIMEX_EXTRA_MPI_PARAMETERS']
+
+
+    return mpicmd
 

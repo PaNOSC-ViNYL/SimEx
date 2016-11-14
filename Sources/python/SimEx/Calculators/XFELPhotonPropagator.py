@@ -32,9 +32,10 @@ from prop import propagateSE
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
+from SimEx.Utilities import ParallelUtilities
 
 from mpi4py import MPI
-import subprocess
+import subprocess,shlex
 
 
 
@@ -60,21 +61,45 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
 
+
+    def computeNTasks(self):
+        resources=ParallelUtilities.getParallelResourceInfo()
+        nnodes=resources['NNodes']
+        ncores=resources['NCores']
+
+# TODO: put it to calculator parameters
+        cpusPerTask="1"
+
+        if cpusPerTask=="MAX":
+            np=nnodes
+            ncores=0
+        else:
+            np=max(1,int(ncores/int(cpusPerTask)))
+            ncores=int(cpusPerTask)
+
+        return (np,ncores)
+
+
     def backengine(self):
         """ Starts WPG simulations in parallel in a subprocess """
 
         fname = __name__+"_tmpobj"
         self.dumpToFile(fname)
-        command_sequence = ['mpirun',
-                            '-np',
-                            '1', # will be set later
-#                            '-x','OMP_NUM_THREADS=4',
-                            '-bynode',
-                            'python',
-                            __file__,
-                            fname,
-                            ]
-        proc = subprocess.Popen(command_sequence,universal_newlines=True)
+
+# TODO: put it to calculator parameters
+        forcedMPIcommand=""
+
+        if forcedMPIcommand=="":
+            (np,ncores)=self.computeNTasks()
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np,ncores)
+        else:
+            mpicommand=forcedMPIcommand
+
+        mpicommand+=" python "+__file__+" "+fname
+
+        args = shlex.split(mpicommand)
+
+        proc = subprocess.Popen(args,universal_newlines=True)
         proc.wait()
         os.remove(fname)
 

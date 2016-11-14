@@ -28,13 +28,14 @@
 """
 import inspect
 import os
-import subprocess
+import subprocess,shlex
 
 import prepHDF5
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
+from SimEx.Utilities import ParallelUtilities
 
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
@@ -115,6 +116,22 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         """ Query for the data provided by the Diffractor. """
         return self.__provided_data
 
+
+    def computeNTasks(self):
+        resources=ParallelUtilities.getParallelResourceInfo()
+        ncores=resources['NCores']
+        nnodes=resources['NNodes']
+
+        # TODO: put it to calculator parameters
+        cpusPerTask="8"
+
+        if cpusPerTask=="MAX":
+            np=nnodes
+        else:
+            np=max(int(ncores/int(cpusPerTask)),1)
+
+        return np
+
     def backengine(self):
         """ This method drives the backengine singFEL."""
 
@@ -150,10 +167,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         config_file = '/dev/null'
 
-        # Run the backengine command.
-        command_sequence = ['mpirun',
-                            '-np',                str(number_of_MPI_processes) ,
-                            'radiationDamageMPI',
+# collect MPI arguments
+        forcedMPIcommand=""
+        if forcedMPIcommand=="":
+            np=self.computeNTasks()
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
+        else:
+            mpicommand=forcedMPIcommand
+# collect program arguments
+        command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(output_dir),
                             '--beamFile',         str(beam_parameter_file),
@@ -168,7 +190,12 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--numDP',            str(number_of_diffraction_patterns),
                             '--prepHDF5File',     preph5_location,
                             ]
-        proc = subprocess.Popen(command_sequence)
+# put MPI and program arguments together
+
+        args = shlex.split(mpicommand) + command_sequence
+
+        # Run the backengine command.
+        proc = subprocess.Popen(args)
         proc.wait()
 
         # Return the return code from the backengine.
