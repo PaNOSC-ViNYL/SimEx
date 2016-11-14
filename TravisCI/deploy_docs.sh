@@ -10,7 +10,7 @@ if [ "$DEPLOY_DOCS_FOR_PYTHON" != "$TRAVIS_PYTHON_VERSION" ]; then
 fi
 
 
-SOURCE_BRANCH="develop"
+SOURCE_BRANCH="master"
 TARGET_BRANCH="gh-pages"
 
 #path to gh-pages content
@@ -29,8 +29,8 @@ fi
 REPO=`git config remote.origin.url`
 SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}
 SHA=`git rev-parse --verify HEAD`
-EMAIL=`git log HEAD^..HEAD --pretty='%aE'`
-NAME=`git log HEAD^..HEAD --pretty='%aN'`
+EMAIL=`git log -1 --pretty='%aE'`
+NAME=`git log -1 --pretty='%aN'`
 
 # Clone the existing branch
 # we assume $TARGET_BRANCH exists
@@ -42,8 +42,12 @@ rm -rf ghpages_content/* || exit 0
 # fill content with newly generated one
 cp -r $CONTENT/* ghpages_content/
 
+
 # Now let's go have some fun with the cloned repo
 cd ghpages_content
+# Create the .nojekyll file
+touch .nojekyll
+
 # set real user name and email
 git config user.name  $NAME
 git config user.email $EMAIL

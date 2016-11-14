@@ -69,4 +69,3 @@ script:
   - bash $TRAVIS_BUILD_DIR/TravisCI/build_and_test_simex.sh && bash $TRAVIS_BUILD_DIR/TravisCI/deploy_docs.sh
 after_success:
   - bash $TRAVIS_BUILD_DIR/TravisCI/trigger_docker.sh
-

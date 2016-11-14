@@ -39,7 +39,3 @@ install(DIRECTORY ${DOCS_BUILDDIR}
 )
 
 
-install(FILES ${SOURCE_DIR}/.nojekyll
-        DESTINATION ${DOCDIR}
-        OPTIONAL
-)
