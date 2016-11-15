@@ -97,7 +97,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print("XFELPhotonPropagator backengine mpicommand: "+mpicommand)
-        exit(0)
 
         mpicommand+=" python "+__file__+" "+fname
 

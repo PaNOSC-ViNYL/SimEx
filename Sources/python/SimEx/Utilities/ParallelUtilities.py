@@ -156,6 +156,7 @@ def _getVendorSpecificMPIArguments(version,threadsPerTask):
         # by default, all cores will be available, no need to set OMP_NUM_THREADS
         if threadsPerTask > 0:
             mpicmd+=" -x OMP_NUM_THREADS="+str(threadsPerTask)
+        mpicmd+=" -x OMPI_MCA_mpi_warn_on_fork=0"
     elif version['Vendor'] == "MPICH":
         mpicmd+=" -map-by node"
         if threadsPerTask > 0:
