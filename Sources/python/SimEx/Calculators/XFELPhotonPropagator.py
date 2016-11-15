@@ -34,7 +34,6 @@ from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 from SimEx.Utilities import ParallelUtilities
 
-from mpi4py import MPI
 import subprocess,shlex
 
 
@@ -68,7 +67,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         ncores=resources['NCores']
 
 # TODO: put it to calculator parameters
-        cpusPerTask="1"
+        cpusPerTask="MAX"
 
         if cpusPerTask=="MAX":
             np=nnodes
@@ -112,6 +111,10 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :return: 0 if WPG returns successfully, 1 if not.
 
         """
+
+        # import should be here, not in header as it calls MPI_Init when imported. We want MPI to be
+        # initialized on this stage only.
+        from mpi4py import MPI
 
         # MPI info
         comm = MPI.COMM_WORLD
