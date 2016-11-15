@@ -123,7 +123,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         nnodes=resources['NNodes']
 
         # TODO: put it to calculator parameters
-        cpusPerTask="8"
+        cpusPerTask="1"
 
         if cpusPerTask=="MAX":
             np=nnodes
@@ -195,6 +195,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         args = shlex.split(mpicommand) + command_sequence
 
         # Run the backengine command.
+
+        if 'SIMEX_VERBOSE' in os.environ:
+            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
+                print("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand)
+
         proc = subprocess.Popen(args)
         proc.wait()
 
