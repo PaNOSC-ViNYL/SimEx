@@ -102,7 +102,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         args = shlex.split(mpicommand)
 
-
         proc = subprocess.Popen(args,universal_newlines=True)
         proc.wait()
         os.remove(fname)

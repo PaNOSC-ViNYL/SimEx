@@ -190,16 +190,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--numDP',            str(number_of_diffraction_patterns),
                             '--prepHDF5File',     preph5_location,
                             ]
-# put MPI and program arguments together
-
+        # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
 
-        # Run the backengine command.
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand)
 
+        # Run the backengine command.
         proc = subprocess.Popen(args)
         proc.wait()
 
