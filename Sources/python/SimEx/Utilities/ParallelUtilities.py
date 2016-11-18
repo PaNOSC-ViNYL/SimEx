@@ -46,9 +46,10 @@ def _getParallelResourceInfoFromSlurm():
     resource = {}
     try:
         resource['NNodes'] = int(os.environ['SLURM_NNODES'])
-        uniqnodes=os.environ['SLURM_CPUS_PER_NODE'].split(",")
+        uniq_nodes=os.environ['SLURM_CPUS_PER_NODE'].split(",")
+        # SLURM sets this variable to something like 40x(2),20x(1),10x(10). We extract ncores from this
         ncores=0
-        for node in uniqnodes:
+        for node in uniq_nodes:
             ind=node.find("(")
             if ind==-1:
                 cores=node
@@ -75,6 +76,8 @@ def _MPICommandName():
     return mpicmd
 
 def _getParallelResourceInfoFromMpirun():
+# we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be
+# listed several times that gives us number of cores available for mpirun on this node
     try:
         mpicmd = _MPICommandName()
         process = subprocess.Popen([mpicmd, "hostname"], stdout=subprocess.PIPE,
@@ -84,10 +87,10 @@ def _getParallelResourceInfoFromMpirun():
         if process.returncode !=0:
             return None
 
-        listnodes=output.strip().split('\n')
+        nodes=output.strip().split('\n')
         resource = {}
-        resource['NNodes']=len(set(listnodes))
-        resource['NCores']=len(listnodes)
+        resource['NNodes']=len(set(nodes))
+        resource['NCores']=len(nodes)
         return resource
     except:
         return None
@@ -121,8 +124,8 @@ def getParallelResourceInfo():
 
 def _getMPIVersionInfo():
     try:
-        mpicmd = _MPICommandName()
-        process = subprocess.Popen([mpicmd, "--version"], stdout=subprocess.PIPE,
+        mpi_cmd = _MPICommandName()
+        process = subprocess.Popen([mpi_cmd, "--version"], stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
 
@@ -140,34 +143,40 @@ def _getMPIVersionInfo():
         return None
 
 
-def _getVendorSpecificMPIArguments(version,threadsPerTask):
+def _getVendorSpecificMPIArguments(version, threads_per_task):
 
     if version == None:
         raise IOError( "Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or "
                        "provide backengine_mpicommand calculator parameter")
 
-    mpicmd=""
+    mpi_cmd=""
     # mapping by node is required to distribute tasks in round-robin mode.
     if version['Vendor'] == "OpenMPI":
         if StrictVersion(version['Version'])>StrictVersion("1.8.0"):
-            mpicmd+=" --map-by node"
+            mpi_cmd+=" --map-by node"
         else:
-            mpicmd+=" --bynode"
+            mpi_cmd+=" --bynode"
         # by default, all cores will be available, no need to set OMP_NUM_THREADS
-        if threadsPerTask > 0:
-            mpicmd+=" -x OMP_NUM_THREADS="+str(threadsPerTask)
-        mpicmd+=" -x OMPI_MCA_mpi_warn_on_fork=0"
+        if threads_per_task > 0:
+            mpi_cmd+=" -x OMP_NUM_THREADS="+str(threads_per_task)
+        mpi_cmd+=" -x OMPI_MCA_mpi_warn_on_fork=0"
     elif version['Vendor'] == "MPICH":
-        mpicmd+=" -map-by node"
-        if threadsPerTask > 0:
-            mpicmd+=" -env OMP_NUM_THREADS "+str(threadsPerTask)
+        mpi_cmd+=" -map-by node"
+        if threads_per_task > 0:
+            mpi_cmd+=" -env OMP_NUM_THREADS "+str(threads_per_task)
 
-    return mpicmd
+    return mpi_cmd
 
 
-def prepareMPICommandArguments(ntasks, threadsPerTask=0):
+def prepareMPICommandArguments(ntasks, threads_per_task=0):
     """
     Utility prepares mpi arguments based on mpi version found in the system.
+
+    :param ntasks: Number of MPI tasks
+    :type ntasks: int
+
+    :param threads_per_task: Number of threads per task
+    :type threads_per_task: int
 
     @return : String with mpi command and arguments
     @rtype  : string
@@ -177,14 +186,14 @@ def prepareMPICommandArguments(ntasks, threadsPerTask=0):
     if ntasks < 0:
         raise IOError("number of tasks should be positive")
 
-    mpicmd = _MPICommandName() + " -np " + str(ntasks)
+    mpi_cmd = _MPICommandName() + " -np " + str(ntasks)
 
     version = _getMPIVersionInfo()
-    mpicmd+=_getVendorSpecificMPIArguments(version,threadsPerTask)
+    mpi_cmd+=_getVendorSpecificMPIArguments(version, threads_per_task)
 
     if 'SIMEX_EXTRA_MPI_PARAMETERS' in os.environ:
-        mpicmd+=" "+os.environ['SIMEX_EXTRA_MPI_PARAMETERS']
+        mpi_cmd+=" "+os.environ['SIMEX_EXTRA_MPI_PARAMETERS']
 
 
-    return mpicmd
+    return mpi_cmd
 
