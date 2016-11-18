@@ -260,7 +260,7 @@ def checkAndSetParameters(parameters):
     """
     if parameters is None:
         parameters = {}
-    if not ( isinstance( parameters, dict ) or isinstance( parameters, AbstractCalculatorParameters) ):
+    if (isinstance( parameters, dict ) or isinstance( parameters, AbstractCalculatorParameters) ):
         raise TypeError( "The 'parameters' argument to the constructor must be of type dict or AbstractCalculatorParameters.")
 
     # Return.

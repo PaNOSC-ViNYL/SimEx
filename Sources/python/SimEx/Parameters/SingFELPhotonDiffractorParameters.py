@@ -111,6 +111,8 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
             self.number_of_MPI_processes = number_of_MPI_processes
 
+    super(SingFELPhotonDiffractorParameters, self).__init__()
+
     ### Setters and queries.
     @property
     def uniform_rotation(self):

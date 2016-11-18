@@ -40,10 +40,12 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 
 # Test parameter class.
 class DerivedParameters(AbstractCalculatorParameters):
-    def __init__(self, a, b, c):
+    def __init__(self, a=None, b=None, c=None):
         self.__a = a
         self.__b = b
         self.__c = c
+
+        super(DerivedParameters, self).__init__()
 
 # Derive a class from the abc.
 class DerivedCalculator(AbstractBaseCalculator):
@@ -176,6 +178,37 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         parameters = DerivedParameters(a=1, b=2, c=3)
         self.assertEqual( parameters, checkAndSetParameters( parameters ) )
 
+
+class AbstractCalculatorParametersTest(unittest.TestCase):
+    """
+    Test class for the AbstractCalculatorParameters class.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+        self.__files_to_be_removed = []
+
+    def tearDown(self):
+        """ Tearing down a test. """
+        for f in self.__files_to_be_removed:
+            if os.path.isfile(f): os.remove(f)
+
+
+    def testInheritedParameters(self):
+        """ Test that inherited parameters are correctly initialized. """
+
+        parameters = DerivedParameters()
+
+        self.assertEqual( parameters.cpus_per_task, 1)
+        self.assertEqual( parameters.forced_mpi_command, "")
+
 if __name__ == '__main__':
     unittest.main()
-

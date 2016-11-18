@@ -33,6 +33,7 @@ from prop import propagateSE
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 from SimEx.Utilities import ParallelUtilities
+from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 
 import subprocess,shlex
 
@@ -48,7 +49,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         Constructor for the XFEL photon propagator.
 
         :param parameters: Parameters for the photon propagation.
-        :type parameters: XFELPhotonPropagatorParameters instance.
+        :type parameters: WavePropagatorParameters instance.
 
         :param  input_path: Location of input data for photon propagation.
         :type input_path:   str, default 'FELsource/'
@@ -59,7 +60,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
-
 
     def computeNTasks(self):
         resources=ParallelUtilities.getParallelResourceInfo()

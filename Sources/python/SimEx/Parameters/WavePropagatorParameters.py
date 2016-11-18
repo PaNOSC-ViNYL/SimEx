@@ -63,6 +63,9 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         self.use_opmd = use_opmd
         self.beamline = beamline
 
+        # Initialize base class.
+        super(WavePropagatorParameters, self).__init__()
+
     ### Setters and queries.
     @property
     def use_opmd(self):
