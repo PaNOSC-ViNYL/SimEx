@@ -38,26 +38,26 @@ class AbstractCalculatorParameters(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, cpus_per_task=None, forced_mpi_command=None, parameters_dict=None, **kwargs):
+    def __init__(self, **kwargs):
         """
         Constructor for the Abstract Calculator Parameters.
 
-        :param cpus_per_task: How many CPUs per simulation task to request from the compute environment.
-        :type cpus_per_task: (int | str)
-        :note cpus_per_task: Only "MAX" is accepted as a str.
-
-        :param forced_mpi_command: Overrides the default system command to launch an mpi calculation. Default "".
-        :type forced_mpi_command: str
-
-        :parameters_dict: Dictionary of parameters.
-        :type parameters_dict: dict
-
-        :param **kwargs:  key=value pairs for further calculator specific parameters.
+        :param **kwargs:  key=value pairs for calculator specific parameters.
         """
+        # Set default for parameters that have to be defined on every Parameters class but
+        # depend on the specific calculator.
+        self._setDefaults() # Calls the specialized method!
 
         # Check and set parameters.
-        self.cpus_per_task = cpus_per_task
-        self.forced_mpi_command = forced_mpi_command
+        if 'cpus_per_task' in kwargs.keys():
+            self.cpus_per_task = kwargs['cpus_per_task']
+        else:
+            self.cpus_per_task = self.__cpus_per_task_default
+
+        if 'forced_mpi_command' in kwargs.keys():
+            self.forced_mpi_command = kwargs['forced_mpi_command']
+        else:
+            self.forced_mpi_command = None # Will set default "".
 
     # Queries and
     @property
@@ -79,6 +79,10 @@ class AbstractCalculatorParameters(object):
     def forced_mpi_command(self, value):
         """ Set the number of cpus per task."""
         self.__forced_mpi_command = _checkAndSetForcedMPICommand(value)
+
+    @abstractmethod
+    def _setDefaults(self):
+        pass
 
 def _checkAndSetCPUsPerTask(value=None):
     """ """

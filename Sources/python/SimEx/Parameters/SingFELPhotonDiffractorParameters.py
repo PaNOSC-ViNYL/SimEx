@@ -50,6 +50,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 beam_geometry_file=None,
                 number_of_MPI_processes=None,
                 parameters_dictionary=None,
+                **kwargs
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
@@ -111,7 +112,11 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
             self.number_of_MPI_processes = number_of_MPI_processes
 
-    super(SingFELPhotonDiffractorParameters, self).__init__()
+        super(SingFELPhotonDiffractorParameters, self).__init__(**kwargs)
+
+    def _setDefaults(self):
+        """ Set default for required inherited parameters. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     ### Setters and queries.
     @property

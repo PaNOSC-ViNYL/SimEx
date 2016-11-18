@@ -107,7 +107,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                                 '/params/info',
                                 ]
 
-
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
         return self.__expected_data
@@ -122,13 +121,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         ncores=resources['NCores']
         nnodes=resources['NNodes']
 
-        # TODO: put it to calculator parameters
-        cpusPerTask="1"
-
-        if cpusPerTask=="MAX":
+        if self.parameters.cpus_per_task=="MAX":
             np=nnodes
         else:
-            np=max(int(ncores/int(cpusPerTask)),1)
+            np=max(int(ncores/int(self.parameters.cpus_per_task)),1)
 
         return np
 
@@ -168,12 +164,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         config_file = '/dev/null'
 
 # collect MPI arguments
-        forcedMPIcommand=""
-        if forcedMPIcommand=="":
+        if self.parameters.forced_mpi_command=="":
             np=self.computeNTasks()
             mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
         else:
-            mpicommand=forcedMPIcommand
+            mpicommand=self.parameters.forced_mpi_command
 # collect program arguments
         command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),

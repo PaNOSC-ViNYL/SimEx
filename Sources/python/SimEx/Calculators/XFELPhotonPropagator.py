@@ -33,6 +33,7 @@ from prop import propagateSE
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 from SimEx.Utilities import ParallelUtilities
+from SimEx.Utilities import EntityChecks
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 
 import subprocess,shlex
@@ -58,6 +59,10 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :type output_path:  str, default 'prop/'
         """
 
+
+        # Handle default parameters if None.
+        parameters = EntityChecks.checkAndSetInstance( WavePropagatorParameters, parameters, WavePropagatorParameters() )
+
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
 
@@ -66,8 +71,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         nnodes=resources['NNodes']
         ncores=resources['NCores']
 
-# TODO: put it to calculator parameters
-        cpusPerTask="MAX"
+        cpusPerTask=self.parameters.cpus_per_task
 
         if cpusPerTask=="MAX":
             np=nnodes
@@ -85,8 +89,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         fname = __name__+"_tmpobj"
         self.dumpToFile(fname)
 
-# TODO: put it to calculator parameters
-        forcedMPIcommand=""
+        forcedMPIcommand=self.parameters.forced_mpi_command
 
         if forcedMPIcommand=="":
             (np,ncores)=self.computeNTasks()

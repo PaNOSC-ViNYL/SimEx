@@ -68,6 +68,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
                  Sbf_norm=None,
                  source_spectrum=None,
                  source_spectrum_fwhm=None,
+                 **kwargs
                  ):
 
         """
@@ -170,6 +171,11 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
 
         # Set state to not-initialized (e.g. input deck is not written).
         self.__is_initialized = False
+
+    def _setDefaults(self):
+        """ """
+        """ Set the inherited parameters defaults that depend on the special calculator. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = '1'
 
     def _setSeeFlags(self):
         """ Set the See parameters as used in the input deck generator. """
