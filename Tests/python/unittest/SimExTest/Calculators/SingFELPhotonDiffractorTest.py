@@ -271,7 +271,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
                      beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
                      number_of_MPI_processes = 2,
-                     forced_mpi_command='mpirun.mpich',
+                     forced_mpi_command='mpirun',
                      )
 
         # Construct the object.
@@ -304,7 +304,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
                      beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
                      number_of_MPI_processes= 2,
-                     forced_mpi_command='mpirun.mpich')
+                     forced_mpi_command='mpirun')
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters)
@@ -338,7 +338,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
                      beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
                      number_of_MPI_processes= 2,
-                     forced_mpi_command='mpirun.mpich')
+                     forced_mpi_command='mpirun')
 
 
         # Construct the object.
@@ -367,7 +367,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
                      beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
                      number_of_MPI_processes= 2,
-                     forced_mpi_command='mpirun.mpich')
+                     forced_mpi_command='mpirun')
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=TestUtilities.generateTestFilePath('pmi_out'), output_path='diffr')
