@@ -1,2 +1,2 @@
-docker build -t simex_devel .
+docker build -t yakser/simex:devel .
 
