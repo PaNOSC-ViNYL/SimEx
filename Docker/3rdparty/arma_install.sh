@@ -6,7 +6,7 @@ tar -xf armadillo-6.600.4.tar.gz
 cd armadillo-6.600.4 
 ./configure
 make install
-
+cd ..
 rm -rf armadillo-6.600.4.tar.gz armadillo-6.600.4
 
 

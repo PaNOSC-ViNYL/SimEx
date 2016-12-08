@@ -19,7 +19,11 @@ RUN yum install -y ibibverbs-utils libibverbs-devel libibverbs-devel-static libm
 	librdmacm-devel librdmacm libibumad-devel perftest
 
 # install mpi
-RUN yum install -y openmpi openmpi-devel make
+RUN yum install -y wget make gcc-c++
+ADD openmpi_install.sh /opt/openmpi_install.sh
+RUN ["bash", "/opt/openmpi_install.sh"]
+#RUN yum install -y openmpi openmpi-devel make
+
 ENV PATH=/usr/lib64/openmpi/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH  
 RUN echo "export PATH=/usr/lib64/openmpi/bin:${PATH}" > /etc/profile.d/scripts-path.sh && \
