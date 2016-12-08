@@ -318,7 +318,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check expected files exist.
         self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
-        self.assertIn( 'diffr_out_0000002.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
 
 
     def testBackengineInputFile(self):
