@@ -243,7 +243,7 @@ class EMCCaseGenerator(object):
         self.detectorDist = (f["params/geom/detectorDist"].value)
 
         #We expect the detector to always be square of length 2*self.numPixToEdge+1
-        (r,c) = f["data/data"].shape
+        (r,c) = f["params/geom/mask"].shape
         if (r == c and (r%2==1)):
             self.numPixToEdge = (r-1)/2
         else:
@@ -348,9 +348,10 @@ class EMCCaseGenerator(object):
         _print_to_log(msg, log_file=self.runLog)
 
         for n,fn in enumerate(fileList):
-            try:
+            #try:
+            if True:
                 f = h5py.File(fn, 'r')
-                data_format_version = (f["version"].value()).astype("float")
+                data_format_version = (f["version"].value).astype("float")
                 if data_format_version < 0.2:
                     v = f["data/data"].value
                     avg += v
@@ -378,7 +379,8 @@ class EMCCaseGenerator(object):
                 else:
                     tasks = f["data"].keys()
                     for task in tasks:
-                        v = f["data"][taks]["data"].value
+                        v = f["data"][task]["data"].value
+                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
                         avg += v
                         temp = {"o":[], "m":[]}
 
@@ -401,7 +403,8 @@ class EMCCaseGenerator(object):
                         outf.write(' '.join([strNumO, ssO, strNumM, ssM]) + "\n")
                     f.close()
 
-            except:
+            #except:
+            else:
                 msg = "Failed to read file #%d %s." % (n, fn)
                 _print_to_log(msg, log_file=self.runLog)
 

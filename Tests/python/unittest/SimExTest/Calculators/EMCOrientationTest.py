@@ -322,6 +322,30 @@ class EMCOrientationTest(unittest.TestCase):
         for ef in expected_run_files2:
             self.assertIn( ef, os.listdir(run_files_path2) )
 
+    def testDiffr0_2(self):
+        """ Test that we can handle diffr input version 0.2 """
+
+        self.__files_to_remove.append('orient_out.h5')
+
+        # Construct the object.
+        emc_parameters = {"initial_number_of_quaternions" : 4,
+                          "max_number_of_quaternions"     : 9,
+                          "max_number_of_iterations"      : 100,
+                          "min_error"                     : 4.e-8,
+                          "beamstop"                      : True,
+                          "detailed_output"               : True,
+                          }
+
+        emc = EMCOrientation(parameters=emc_parameters,
+                             input_path=TestUtilities.generateTestFilePath("diffr_0.2"),
+                             output_path='orient_out.h5',
+                             tmp_files_path=None,
+                             run_files_path=None,)
+
+        # Call backengine.
+        status = emc.backengine()
+
+        self.assertEqual(status, 0)
 
 
 
