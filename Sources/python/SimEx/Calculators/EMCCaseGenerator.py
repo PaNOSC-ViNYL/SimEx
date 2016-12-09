@@ -323,18 +323,31 @@ class EMCCaseGenerator(object):
                     flatMask[p] = 1.
                     currPos += 1
 
-        # Compute mean photon count from the first 200 diffraction images
-        # (or total number of images, whichever is smaller)
-        #numFilesToAvgForMeanCount = min([200, len(fileList)])
+        # Compute mean photon count.
         meanPhoton = 0.
         totPhoton = 0.
-        #for fn in fileList[:numFilesToAvgForMeanCount]:
-            #f = h5py.File(fn, 'r')
-            #meanPhoton += numpy.mean((f["data/data"].value).flatten())
-            #totPhoton += numpy.sum((f["data/data"].value).flatten())
-            #f.close()
-        #meanPhoton /= 1.*numFilesToAvgForMeanCount
-        #totPhoton /= 1.*numFilesToAvgForMeanCount
+        count=0 # counts the processed images. Loop breaks if count goes above 200.
+        for fn in fileList:
+            f = h5py.File(fn, 'r')
+            data_format_version = (f["version"].value).astype("float")
+            if data_format_version < 0.2:
+                meanPhoton += numpy.mean((f["data/data"].value).flatten())
+                totPhoton += numpy.sum((f["data/data"].value).flatten())
+                f.close()
+                count +=1
+            else:
+                tasks = f["data"].keys()
+                for task in tasks:
+                    meanPhoton += numpy.mean((f["data"][task]["data"].value).flatten())
+                    totPhoton += numpy.sum((f["data"][task]["data"].value).flatten())
+                    count += 1
+                f.close()
+            if count >= 200:
+                break
+        meanPhoton /= 1.*count
+        totPhoton /= 1.*count
+
+        print "Found %f mean and %f total photons on average." % (meanPhoton, totPhoton)
 
         # Start stepping through diffraction images and writing them to sparse format
         msg = "Average intensities: %lf"%(totPhoton)

@@ -191,6 +191,8 @@ class EMCOrientation(AbstractPhotonAnalyzer):
     def backengine(self):
         """ Starts EMC simulations in parallel in a subprocess """
 
+        run_instance_dir, tmp_out_dir = self._setupPaths()
+
         fname = __name__+"_tmpobj"
         self.dumpToFile(fname)
         command_sequence = ['mpirun',

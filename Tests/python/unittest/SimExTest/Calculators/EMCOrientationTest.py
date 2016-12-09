@@ -135,18 +135,32 @@ class EMCOrientationTest(unittest.TestCase):
 
         self.__files_to_remove.append('orient_out.h5')
 
-        # Construct the object.
-        analyzer = EMCOrientation(parameters=None, input_path=self.input_h5, output_path='orient_out.h5')
+        # Construct the object with very nonsensical iteration control parameters.
+        emc_parameters = {"initial_number_of_quaternions" : 1,
+                          "max_number_of_quaternions"     : 2,
+                          "max_number_of_iterations"      : 2,
+                          "min_error"                     : 5.e-6,
+                          "beamstop"                      : True,
+                          "detailed_output"               : True,
+                          }
 
+        # Case 1: no paths given, make dirs in /tmp
+        emc = EMCOrientation(parameters=emc_parameters,
+                             input_path=self.input_h5,
+                             output_path='orient_out.h5',
+                             tmp_files_path=None,
+                             run_files_path=None,)
+
+        # Construct the object.
         # Keep the test short.
-        analyzer.parameters.max_number_of_iterations=2
+        emc.parameters.max_number_of_iterations=2
 
         # Call backengine.
-        status = analyzer.backengine()
+        status = emc.backengine()
 
         # Check paths exist and are populated.
-        run_files_path = analyzer.run_files_path
-        tmp_files_path = analyzer.tmp_files_path
+        run_files_path = emc.run_files_path
+        tmp_files_path = emc.tmp_files_path
 
         self.assertTrue( os.path.isdir( run_files_path ) )
         self.assertTrue( os.path.isdir( tmp_files_path ) )
@@ -328,10 +342,10 @@ class EMCOrientationTest(unittest.TestCase):
         self.__files_to_remove.append('orient_out.h5')
 
         # Construct the object.
-        emc_parameters = {"initial_number_of_quaternions" : 4,
-                          "max_number_of_quaternions"     : 9,
-                          "max_number_of_iterations"      : 100,
-                          "min_error"                     : 4.e-8,
+        emc_parameters = {"initial_number_of_quaternions" : 2,
+                          "max_number_of_quaternions"     : 4,
+                          "max_number_of_iterations"      : 10,
+                          "min_error"                     : 1.e-6,
                           "beamstop"                      : True,
                           "detailed_output"               : True,
                           }
