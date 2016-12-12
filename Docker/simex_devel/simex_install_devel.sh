@@ -35,7 +35,7 @@ cmake -DSRW_OPTIMIZED=ON -DDEVELOPER_INSTALL=ON -DCMAKE_INSTALL_PREFIX=$ROOT_DIR
 chmod og+rwX -R $ROOT_DIR
 
 # Build the project.
-make -j8
+make -j
 
 
 # Install the project.
