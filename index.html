@@ -241,14 +241,56 @@ the install.sh script that comes with the sources.</p>
 <div class="section" id="docker">
 <h3>Docker<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h3>
 <p>We also provide docker images. Docker is a rather new technology, think of it as a &#8220;lightweight virtualbox&#8221;, i.e. a docker container ships all
-software dependencies including hardware abstraction and OS components along with the executable. To run a docker container, you first need the docker
-environment. Get it from <a class="reference external" href="https://www.docker.com/products/overview">https://www.docker.com/products/overview</a>. Then, download the simex docker via:</p>
+software dependencies including hardware abstraction and OS components
+along with the executable. To run a docker container, you first need the docker
+environment. Get it for your OS from <a class="reference external" href="https://www.docker.com/products/overview">https://www.docker.com/products/overview</a>.
+Then, download the simex docker container using the following shell command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">yakser</span><span class="o">/</span><span class="n">simex</span>
 </pre></div>
 </div>
+<p>or:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">yakser</span><span class="o">/</span><span class="n">simex</span><span class="p">:</span><span class="n">devel</span>
+</pre></div>
+</div>
+<p>The latter contains all test files.</p>
 <div class="section" id="getting-started">
 <h4>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h4>
-<p>Coming soon ...</p>
+<p>The docker command accepts certain parameters on the command line. Of special interest here are:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">it</span>  <span class="o">-&gt;</span> <span class="n">to</span> <span class="n">have</span> <span class="n">interactive</span> <span class="n">session</span> <span class="ow">and</span> <span class="n">pseudo</span><span class="o">-</span><span class="n">TTY</span><span class="p">)</span><span class="o">.</span>
+<span class="o">-</span><span class="n">v</span> <span class="o">&lt;</span><span class="n">full_path_to_source_dir</span><span class="o">/</span><span class="n">dest_dir</span><span class="o">&gt;</span> <span class="o">-&gt;</span> <span class="n">to</span> <span class="n">mount</span> <span class="n">data</span> <span class="kn">from</span> <span class="nn">host</span> <span class="p">(</span><span class="n">should</span> <span class="n">contain</span> <span class="n">your</span> <span class="n">script</span> <span class="ow">and</span> <span class="n">necessary</span> <span class="n">data</span><span class="p">)</span><span class="o">.</span> <span class="n">Several</span> <span class="n">mounts</span> <span class="n">are</span> <span class="n">possible</span> <span class="k">as</span> <span class="n">well</span> <span class="p">(</span><span class="n">repeat</span> <span class="o">-</span><span class="n">v</span> <span class="o">...</span><span class="p">)</span><span class="o">.</span> <span class="n">All</span> <span class="n">data</span> <span class="n">that</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">should</span> <span class="n">be</span> <span class="n">mounted</span><span class="p">,</span> <span class="n">otherwise</span> <span class="n">it</span> <span class="n">will</span> <span class="n">be</span> <span class="n">unavailable</span> <span class="n">inside</span> <span class="n">a</span> <span class="n">Docker</span> <span class="n">container</span><span class="o">.</span>
+<span class="o">-</span><span class="n">w</span> <span class="o">-&gt;</span> <span class="n">working</span> <span class="n">directory</span> <span class="n">inside</span> <span class="n">the</span> <span class="n">container</span><span class="o">.</span> <span class="n">Set</span> <span class="n">it</span> <span class="k">if</span> <span class="n">relative</span> <span class="n">paths</span> <span class="n">are</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">python</span> <span class="n">script</span><span class="o">.</span>
+<span class="o">-</span><span class="n">u</span> <span class="o">&lt;</span><span class="n">UID</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">GID</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">user</span> <span class="nb">id</span> <span class="ow">and</span> <span class="n">group</span> <span class="nb">id</span> <span class="p">(</span><span class="ow">not</span> <span class="n">names</span><span class="p">,</span> <span class="n">because</span> <span class="n">they</span> <span class="n">are</span> <span class="ow">not</span> <span class="nb">set</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">container</span><span class="p">)</span><span class="o">.</span> <span class="n">Container</span> <span class="n">will</span> <span class="n">run</span> <span class="k">as</span> <span class="n">root</span> <span class="k">if</span> <span class="n">this</span> <span class="ow">is</span> <span class="n">omitted</span> <span class="ow">and</span> <span class="n">mpirun</span> <span class="n">will</span> <span class="n">complain</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="section" id="examples">
+<h5>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h5>
+<ol class="arabic">
+<li><p class="first">Run unit tests. We do not need to mount any additional folders:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; docker run -it -u `id -u`:`id -g` -w /opt/simex_platform/Tests/python/unittest yakser/simex:devel Test.py
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Some tests will fail in the moment due to known bugs in the diffraction calculator &#8220;singfel&#8221;.</p>
+<ol class="arabic" start="2">
+<li><p class="first">Run some user script script.py in /home/user/somedata_and_script directory:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; docker run -it -v /home/user/somedata_and_script:/data -u `id -u`:`id -g` -w /data yakser/simex script.py
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="updating-docker-container">
+<h4>Updating docker container<a class="headerlink" href="#updating-docker-container" title="Permalink to this headline">¶</a></h4>
+<p>To update an existing container, simply do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; docker pull simex
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; docker pull simex:devel
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -1988,7 +2030,11 @@ Uses the EMC orientation module and the DM phasing module.</p>
 </li>
 <li><a class="reference internal" href="#binary-packages">Binary packages</a></li>
 <li><a class="reference internal" href="#docker">Docker</a><ul>
-<li><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li><a class="reference internal" href="#getting-started">Getting started</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#updating-docker-container">Updating docker container</a></li>
 </ul>
 </li>
 </ul>
