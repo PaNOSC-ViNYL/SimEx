@@ -17,6 +17,8 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SIMEX_CMAKE_DIR})
 
 option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF)
 
+option (INSTALL_TESTS "Install tests" ON)
+
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
@@ -25,8 +27,10 @@ set (PYPATH     ${LIBDIR}/python2.7)
 option (PACKAGE_MAKE "Use this option to create linux packages" OFF)
 if (PACKAGE_MAKE)
  set (TESTSDIR   share/simex/Tests)
+ set (DOCDIR share/docs/simex)
 else()
  set (TESTSDIR   Tests)
+ set (DOCDIR docs)
 endif()
 
 if (DEVELOPER_INSTALL)
@@ -37,7 +41,9 @@ if (DEVELOPER_INSTALL)
 else()
   set (UTILITIES_DIR ${PYPATH}/SimEx/Utilities/)
   set (CALCULATORS_DIR ${PYPATH}/SimEx/Calculators/)
-  add_subdirectory (Tests)
+  if (INSTALL_TESTS)
+    add_subdirectory (Tests)
+  endif()
 endif()
 
   message (STATUS "************************ checking python dependencies *****************************")
@@ -78,3 +84,8 @@ install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
 if (PACKAGE_MAKE)
   add_subdirectory (Packages)
 endif()
+
+
+add_subdirectory("Sources/doc")
+
+

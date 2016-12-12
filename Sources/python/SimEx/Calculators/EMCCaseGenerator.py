@@ -218,13 +218,14 @@ class EMCCaseGenerator(object):
         self.detectorDist = (f["params/geom/detectorDist"].value)
 
         #We expect the detector to always be square of length 2*self.numPixToEdge+1
-        (r,c) = f["data/data"].shape
+        (r,c) = f["params/geom/mask"].shape
         if (r == c and (r%2==1)):
             self.numPixToEdge = (r-1)/2
         else:
             msg = "Your array has shape %d %d, Only odd-length square detectors allowed now. Quitting"%(r,c)
             _print_to_log(msg, log_file=self.runLog)
             sys.exit()
+
         pixH = (f['params/geom/pixelHeight'].value)
         pixW = (f['params/geom/pixelWidth'].value)
         if(pixH == pixW):
@@ -276,6 +277,11 @@ class EMCCaseGenerator(object):
         :param outFNH5Avg: Filename for averaged photon file.
         :type outFNH5Avg: str
         """
+
+        # Check if we deal with v0.2 file.
+        if len(fileList) == 1 and h5py.File(fileList[0], 'r')['version'].value == 0.2:
+            self._writeSparsePhotonFileFromSingleH5(fileList[0], outFN, outFNH5Avg)
+            return
 
         # Log: destination output to file
         msg = "Writing diffr output to %s"%outFN
@@ -363,6 +369,117 @@ class EMCCaseGenerator(object):
         outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
         outh5.close()
 
+    def _writeSparsePhotonFileFromSingleH5(self, dense_file, outFN, outFNH5Avg):
+        """
+        Convert dense S2E file format to sparse EMC photons.dat format.
+
+        :param dense_file: List of files to convert into one sparse photon file.
+        :type dense_file: List ot str.
+
+        :param outFN: Filename of sparse photon file.
+        :type outFN: str, default 'photons.dat'
+
+        :param outFNH5Avg: Filename for averaged photon file.
+        :type outFNH5Avg: str
+        """
+
+        # Log: destination output to file
+        msg = "Writing diffr output to %s"%outFN
+        _print_to_log(msg, log_file=self.runLog)
+
+        # Define in-plane detector x,y coordinates
+        [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
+
+        # Compute qx,qy,qz positions of detector
+        zL = self.detectorDist / self.pixSize
+        tmpQ = numpy.array([self.placePixel(i,j,zL) for i,j in zip(x.flat, y.flat)])
+
+        # Enumerate qualified detector pixels with a running index, currPos
+        pos = -1 + 0*x.flatten()
+        currPos = 0
+        flatMask = 0.*pos
+        for p,v in enumerate(tmpQ):
+            if numpy.sqrt(v[0]*v[0] +v[1]*v[1] + v[2]*v[2])<self.qmax and numpy.sqrt(v[0]*v[0] +v[1]*v[1] + v[2]*v[2])>self.qmin and numpy.abs(v[0])>3:
+                    pos[p] = currPos
+                    flatMask[p] = 1.
+                    currPos += 1
+
+        # Compute mean photon count from the first 200 diffraction images
+        # (or total number of images, whichever is smaller)
+        # Open dense file.
+        h5_dense = h5py.File( dense_file, 'r')
+        number_of_patterns = len(h5_dense.keys()) - 3
+        numFilesToAvgForMeanCount = min([200, number_of_patterns])
+        meanPhoton = 0.
+        totPhoton = 0.
+
+        # Open dense file.
+        h5_dense = h5py.File( dense_file, 'r')
+        excluded_keys = ["version", "params", "info"]
+        all_keys = h5_dense.keys()
+        relevant_keys = [k for k in all_keys if not k in excluded_keys]
+        relevant_keys.sort()
+        for fn in relevant_keys[:numFilesToAvgForMeanCount]:
+            f = h5_dense[fn]
+            meanPhoton += numpy.mean((f["data/data"].value).flatten())
+            totPhoton += numpy.sum((f["data/data"].value).flatten())
+
+        meanPhoton /= 1.*numFilesToAvgForMeanCount
+        totPhoton /= 1.*numFilesToAvgForMeanCount
+
+        # Start stepping through diffraction images and writing them to sparse format
+        msg = "Average intensities: %lf"%(totPhoton)
+        _print_to_log(msg, log_file=self.runLog)
+        outf = open(outFN, "w")
+        outf.write("%d %lf \n"%(number_of_patterns, meanPhoton))
+        mask = flatMask.reshape(2*self.numPixToEdge+1, -1)
+        avg = 0.*mask
+
+        msg = "Converting individual data frames to sparse format %s"%("."*20)
+        _print_to_log(msg, log_file=self.runLog)
+
+        for n,fn in enumerate(h5_dense.keys()):
+            try:
+                f = h5_dense[fn]
+                v = f["data/data"].value
+                avg += v
+                temp = {"o":[], "m":[]}
+
+                for p,vv in zip(pos, v.flat):
+                    # Todo: remove this
+                    vv = int(vv)
+                    if (p < 0) or (vv==0):
+                        pass
+                    else:
+                        if vv == 1:
+                            temp["o"].append(p)
+                        if vv > 1:
+                            temp["m"].append([p,vv])
+
+                [num_o, num_m] = [len(temp["o"]), len(temp["m"])]
+                strNumO = str(num_o)
+                ssO = ' '.join([str(i) for i in temp["o"]])
+                strNumM = str(num_m)
+                ssM = ' '.join(["%d %d "%(i[0], i[1]) for i in temp["m"]])
+                outf.write(' '.join([strNumO, ssO, strNumM, ssM]) + "\n")
+            except:
+                msg = "Failed to read pattern #%d %s." % (n, fn)
+                _print_to_log(msg, log_file=self.runLog)
+
+            if n%10 == 0:
+                msg = "Translated %d patterns"%n
+                _print_to_log(msg, log_file=self.runLog)
+
+        h5_dense.close()
+        outf.close()
+
+        # Write average photon and mask patterns to file
+        outh5 = h5py.File(outFNH5Avg, 'w')
+        outh5.create_dataset("average", data=avg, compression="gzip", compression_opts=9)
+        outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
+        outh5.close()
+
+
     def showDetector(self):
         """
         Shows detector pixels as points on scatter plot; could be slow for large detectors.
@@ -380,6 +497,8 @@ class EMCCaseGenerator(object):
             #_print_to_log(msg, log_file=self.runLog)
 
     # The following functions have not been tested. Use with caution!!!
+
+
     def makeTestParticleAndSupport(self, inParticleRadius=5.9, inDamping=1.5, inFrac=0.5, inPad=1.8):
         """
         Recipe for creating random, "low-passed-filtered binary" contrast by
