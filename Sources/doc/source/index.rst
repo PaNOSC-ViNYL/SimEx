@@ -48,8 +48,11 @@ The simex_platform library is open-source, but some of the interfaced simulation
 Installation
 ------------
 
-Preliminaries
-`````````````
+From sources
+____________
+
+Download
+````````
 
 First obtain the source code by either cloning the repository::
 
@@ -93,7 +96,7 @@ software needed to build the external simulation tools:
 
 NOTE 1 (Intel(R) MKL(R)): If you want to link against Intel(R) MKL(R), make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the
 scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation,
-e.g. /opt/intel/2015 for a recent version of MKL(R).
+e.g. /opt/intel/2015.
 
 NOTE 2 (BOOST): Sometimes boost_mpi is not built although all libraries (default) where requested as per project.conf in
 the boost build directory. Append a "using mpi ;" to that file (without the quotes) to enforce building boost_mpi.
@@ -193,6 +196,33 @@ Finally, after make returns, install the compiled software into the installation
 Make sure that the user has write access to the installation directory, or use::
 
     $> sudo make install
+
+
+Binary packages
+_____________________
+Binary (.deb) packages are provided for Ubuntu (currently supporting version 16.04).
+https://github.com/eucall-software/simex_platform/releases/download/v0.2.0/simex-0.2.0-Ubuntu16.04.deb
+
+Simply download and install, e.g. using the command (might require root privileges)::
+
+    $> dpkg --install simex-0.2.0-Ubuntu16.04.deb
+
+
+Docker
+____________
+
+We also provide docker images. Docker is a rather new technology, think of it as a "lightweight virtualbox", i.e. a docker container ships all
+software dependencies including hardware abstraction and OS components along with the executable. To run a docker container, you first need the docker
+environment. Get it from https://www.docker.com/products/overview. Then, download the simex docker via::
+
+    docker pull yakser/simex
+
+Getting started
+```````````````
+
+Coming soon ...
+
+
 
 Environment settings
 --------------------
