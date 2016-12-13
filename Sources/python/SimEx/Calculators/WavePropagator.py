@@ -87,7 +87,7 @@ class WavePropagator(AbstractPhotonPropagator):
         :return: The WPG wavefront data.
 
         """
-        return self.__data
+        return self.__wavefront
 
     def _readH5(self):
         """ """

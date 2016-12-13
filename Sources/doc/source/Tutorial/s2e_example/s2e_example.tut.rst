@@ -43,9 +43,10 @@ Beamline propagation
 ```````````````````````````````````
 
 Propagation of x-ray pulses through the SPB-SFX beamline will be performed by means of the
-:code:`WavePropagator` class, that comes with simex_platform. It interfaces the wavefront propagation code
-WPG. Below is a commented python script that demonstrates setup and execution of the propagation.
-:download:`Download it here.<Tutorial/s2e_example/resources/propagation.py>`
+:code:`WavePropagator` class (:py:class:`SimEx.Calculators.WavePropagator.WavePropagator`), that comes with simex_platform. It interfaces the wavefront propagation code
+WPG. Below is a commented :download:`python script<Tutorial/s2e_example/resources/propagation.py>`
+that demonstrates setup and execution of the propagation.
+
 
 .. literalinclude:: Tutorial/s2e_example/resources/propagation.py
    :linenos:
@@ -55,12 +56,50 @@ the beamline, the user has to specify the location of the source files (see `Pre
 input`_). The variable :code:`input_path` can be either a file or a directory. In the latter case, all valid source
 files in the directory will be processed.
 
-The :code:`WavePropagator` class requires two input parameters, a parameters object (of type
+The :code:`WavePropagator` class
+requires two input parameters, a parameters object (of type
 :code:`WavePropagationParameters`, defined in line 10),
 and the :code:`input_path`. After construction, the input files are read in using the method :code:`_readH5`,
 and the calculation is executed by calling the :code:`backengine` method.
 
-A third input parameter for the :code:`WavePropagator` class, :code:`output_path` can be used to specify where the results of the wavefront
-propagation shall be saved. By default, they are stored in a directory called "prop" below the
+A third input parameter for the :code:`WavePropagator`  class, :code:`output_path` can be used to specify where the results of the wavefront
+propagation shall be saved. By default, they are stored in a directory called "prop/" below the
 current working directory.
+
+Analysis of wavefront propagation results
+'''''''''''''''''''''''''''''''''''''''''
+
+Confirm that the results of the wavefront propagation are saved to "prop/".
+The script :code:`ScriptCollection/DataAnalysis/propagation/prop_diagnostics.py` provides utilities
+to quickly diagnose single propagated x-ray pulses. The syntax is::
+
+    $> prop_diagnostics <input_file>
+
+The tool will generate plots for the intensity distribution in the x-y plane, the average on-axis
+intensity as a function of time, and the intensity distribution in reciprocal space as function of
+scattering angles, similar to these (taken from a different example, hence don't expect to
+reproduce these results):
+
+.. image:: Tutorial/s2e_example/resources/prop_diagnostics_power_vs_time.png
+   :width: 50%
+   :alt: Intensity distribution in x-y plane.
+   :align: center
+
+
+.. image:: Tutorial/s2e_example/resources/prop_diagnostics_intensity_x-y.png
+   :width: 50%
+   :alt: Intensity distribution in x-y plane.
+   :align: center
+
+.. image:: Tutorial/s2e_example/resources/prop_diagnostics_intensity_qx-qy.png
+   :width: 50%
+   :alt: Intensity distribution in x-y plane.
+   :align: center
+
+Confirm that the focus has a full width at half maximum of approximately 200 nm and that the pulse
+duration is 9 fs (fwhm) as well as that the reciprocal intensity distribution is smooth.
+
+
+
+
 

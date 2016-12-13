@@ -4,7 +4,7 @@ from SimEx.Utilities.WPGBeamlines import setup_S2E_SPI_beamline
 import sys
 
 # Define a beamline.
-beamline = setupSPBDay1Beamline()
+beamline = setup_S2E_SPI_beamline()
 
 # Setup propagation parameters.
 parameters=WavePropagatorParameters(beamline=beamline)
