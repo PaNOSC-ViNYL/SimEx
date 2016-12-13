@@ -370,3 +370,8 @@ Reference Manual
 
 .. .. autoclass:: SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters
 
+
+Tutorials
+---------
+.. include:: Tutorial/s2e_example/s2e_example.tut.rst
+.. .. include:: Tutorial/wpg_beamlines
