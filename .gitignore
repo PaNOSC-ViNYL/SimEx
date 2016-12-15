@@ -10,6 +10,7 @@ doc/build/
 doc/doxy_build/
 ._quaternion*.dat
 .idea
+/*.iml
 deploy_rsa
 deploy_doc_to_gh-pages.sh
 deploy_rsa.enc

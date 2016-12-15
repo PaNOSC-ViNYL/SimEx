@@ -48,6 +48,7 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
     def __init__(self,
                  use_opmd = None,
                  beamline = None,
+                 **kwargs
                 ):
         """
         Constructor for the WavePropagatorParameters.
@@ -62,6 +63,13 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         # Check all parameters.
         self.use_opmd = use_opmd
         self.beamline = beamline
+
+        # Initialize base class.
+        super(WavePropagatorParameters, self).__init__(**kwargs)
+
+    def _setDefaults(self):
+        """ Sets defaults for parameters that must be defined. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = "MAX"
 
     ### Setters and queries.
     @property

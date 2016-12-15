@@ -342,9 +342,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'prop_out_0000001.h5',
                           'pmi/pmi_out_0000001.h5',
                           'diffr/diffr_out_0000001.h5',
-                          'diffr/diffr_out_0000002.h5',
                           'detector/diffr_out_0000001.h5',
-                          'detector/diffr_out_0000002.h5',
                           'orient_out.h5',
                           ]
 
@@ -547,14 +545,16 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # diffr.
         with h5py.File( os.path.join( diffr_dir, 'diffr_out_0000001.h5'), 'r') as diffr_h5:
 
-            self.assertIn( 'history', diffr_h5.keys() )
-            self.assertIn( 'parent', diffr_h5['history'].keys() )
-            self.assertIn( 'detail', diffr_h5['history/parent'].keys() )
-            self.assertIn( 'parent', diffr_h5['history/parent'].keys() )
-            self.assertIn( 'parent', diffr_h5['history/parent/parent'].keys() )
-            self.assertIn( 'detail', diffr_h5['history/parent/parent'].keys() )
-            self.assertIn( 'parent', diffr_h5['history/parent/parent/parent'].keys() )
-            self.assertIn( 'detail', diffr_h5['history/parent/parent/parent'].keys() )
+            tasks = diffr_h5['data'].keys()
+            for task in tasks:
+                self.assertIn( 'history', diffr_h5["data"][task].keys() )
+                self.assertIn( 'parent',  diffr_h5["data"][task]['history'].keys() )
+                self.assertIn( 'detail',  diffr_h5["data"][task]['history/parent'].keys() )
+                self.assertIn( 'parent',  diffr_h5["data"][task]['history/parent'].keys() )
+                self.assertIn( 'parent',  diffr_h5["data"][task]['history/parent/parent'].keys() )
+                self.assertIn( 'detail',  diffr_h5["data"][task]['history/parent/parent'].keys() )
+                self.assertIn( 'parent',  diffr_h5["data"][task]['history/parent/parent/parent'].keys() )
+                self.assertIn( 'detail',  diffr_h5["data"][task]['history/parent/parent/parent'].keys() )
 
             diffr_h5.close()
 
@@ -777,9 +777,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'pmi/pmi_out_0000001.h5',
                           'pmi/pmi_out_0000002.h5',
                           'diffr/diffr_out_0000001.h5',
-                          'diffr/diffr_out_0000002.h5',
-                          'diffr.h5',
-                          'detector',
+                          'detector/diffr_out_0000001.h5',
                           'analysis/orient_out.h5',
                           'analysis/phase_out.h5',
                           ]
@@ -811,10 +809,12 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                      'number_of_diffraction_patterns' : 1,
                      'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
                      'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
+                     'number_of_MPI_processes' : 2
                      }
 
         photon_diffractor = SingFELPhotonDiffractor( parameters=diffraction_parameters, input_path= TestUtilities.generateTestFilePath('pmi_out'))
+
+        photon_diffractor.parameters.cpus_per_task=1
 
 
         # Reconstruction: EMC+DM

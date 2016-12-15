@@ -137,6 +137,7 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         emc_status = self.__emc.backengine()
 
         # If EMC was not successful, return with error code.
+
         if  emc_status!= 0:
             return emc_status
 

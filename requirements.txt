@@ -10,3 +10,4 @@ biopython >= 1.66
 setuptools
 mpi4py
 breathe
+dill

@@ -52,6 +52,7 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
                 beamstop=None,
                 detailed_output=None,
                 parameters_dictionary=None,
+                **kwargs
                 ):
         """
         Constructor for the EMCOrientationParameters.
@@ -91,6 +92,11 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
             self.max_number_of_iterations = max_number_of_iterations
             self.beamstop = beamstop
             self.detailed_output = detailed_output
+
+    def _setDefaults(self):
+        """ """
+        """ Set the inherited parameters defaults that depend on the special calculator. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = 'MAX'
 
     ### Setters and queries.
     @property

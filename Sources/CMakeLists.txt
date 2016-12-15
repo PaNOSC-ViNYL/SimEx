@@ -7,6 +7,7 @@ find_python_module(matplotlib REQUIRED)
 find_python_module(scipy REQUIRED)
 find_python_module(mpi4py REQUIRED)
 find_python_module(periodictable REQUIRED)
+find_python_module(dill REQUIRED)
 #find_python_module(biopython REQUIRED)
 
 FIND_PACKAGE (LAPACK REQUIRED)

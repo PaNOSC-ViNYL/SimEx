@@ -38,14 +38,12 @@ from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-
 class EMCOrientation(AbstractPhotonAnalyzer):
+
     """
     Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
-
     def __init__(self, parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
         """
-
         :param  parameters: Parameters for the EMC orientation calculator.
         :type parameters: EMCOrientationParameters instance
 
@@ -191,12 +189,27 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         return run_instance_dir, tmp_out_dir
 
     def backengine(self):
+        """ Starts EMC simulations in parallel in a subprocess """
 
-        status = self._run_emc()
+        run_instance_dir, tmp_out_dir = self._setupPaths()
 
-        return status
+        fname = __name__+"_tmpobj"
+        self.dumpToFile(fname)
+        command_sequence = ['mpirun',
+                            '-np',
+                            '1',
+                            'python',
+                            __file__,
+                            fname,
+                            ]
+        proc = subprocess.Popen(command_sequence,universal_newlines=True)
+        proc.wait()
+        os.remove(fname)
 
-    def _run_emc(self):
+        return proc.returncode
+
+    def _run(self):
+
         """ """
         """ Private method to run the Expand-Maximize-Compress (EMC) algorithm.
 
@@ -426,3 +439,7 @@ def _checkPaths(run_files_path, tmp_files_path):
             raise IOError( "Run files path already exists, cowardly refusing to overwrite.")
 
     return True
+
+if __name__ == '__main__':
+    EMCOrientation.runFromCLI()
+

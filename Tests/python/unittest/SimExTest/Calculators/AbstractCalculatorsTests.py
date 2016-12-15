@@ -24,6 +24,7 @@ import unittest
 
 # Import classes to test.
 from AbstractBaseCalculatorTest import AbstractBaseCalculatorTest
+from AbstractBaseCalculatorTest import AbstractCalculatorParametersTest
 from AbstractPhotonSourceTest import AbstractPhotonSourceTest
 from AbstractPhotonPropagatorTest import AbstractPhotonPropagatorTest
 from AbstractPhotonInteractorTest import AbstractPhotonInteractorTest
@@ -33,12 +34,13 @@ from AbstractPhotonDetectorTest import AbstractPhotonDetectorTest
 # Setup the suite.
 def suite():
     suites = (
-             unittest.makeSuite(AbstractBaseCalculatorTest,    'test'),
-             unittest.makeSuite(AbstractPhotonSourceTest,      'test'),
-             unittest.makeSuite(AbstractPhotonPropagatorTest,  'test'),
-             unittest.makeSuite(AbstractPhotonInteractorTest,  'test'),
-             unittest.makeSuite(AbstractPhotonDiffractorTest,  'test'),
-             unittest.makeSuite(AbstractPhotonDetectorTest,    'test'),
+             unittest.makeSuite(AbstractBaseCalculatorTest,          'test'),
+             unittest.makeSuite(AbstractCalculatorParametersTest,    'test'),
+             unittest.makeSuite(AbstractPhotonSourceTest,            'test'),
+             unittest.makeSuite(AbstractPhotonPropagatorTest,        'test'),
+             unittest.makeSuite(AbstractPhotonInteractorTest,        'test'),
+             unittest.makeSuite(AbstractPhotonDiffractorTest,        'test'),
+             unittest.makeSuite(AbstractPhotonDetectorTest,          'test'),
              )
 
     return unittest.TestSuite(suites)

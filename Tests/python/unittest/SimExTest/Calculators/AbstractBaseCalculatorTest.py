@@ -40,10 +40,17 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 
 # Test parameter class.
 class DerivedParameters(AbstractCalculatorParameters):
-    def __init__(self, a, b, c):
-        self.__a = a
-        self.__b = b
-        self.__c = c
+    def __init__(self, **kwargs):
+
+        super(DerivedParameters, self).__init__(**kwargs)
+
+    def _setDefaults(self):
+        """ """
+        """ Implements the virtual method to define default parameters.
+            Default parameters should be stored as private on the super class, to be accessible there.
+        """
+        self._AbstractCalculatorParameters__cpus_per_task_default = 123
+
 
 # Derive a class from the abc.
 class DerivedCalculator(AbstractBaseCalculator):
@@ -102,7 +109,7 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
 
     def testConstructionParametersClass(self):
         """ Testing the construction with a parameters class instance. """
-        abc =  DerivedCalculator( parameters=DerivedParameters(1,2,3),
+        abc =  DerivedCalculator( parameters=DerivedParameters(),
                                   input_path=__file__,
                                   output_path='out.h5' )
 
@@ -173,9 +180,96 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
         self.assertRaises( TypeError, checkAndSetParameters, ['list', 'of', 'parameters'] )
 
         # Check return from correct input.
-        parameters = DerivedParameters(a=1, b=2, c=3)
+        parameters = DerivedParameters()
         self.assertEqual( parameters, checkAndSetParameters( parameters ) )
+
+
+class AbstractCalculatorParametersTest(unittest.TestCase):
+    """
+    Test class for the AbstractCalculatorParameters class.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+        self.__files_to_be_removed = []
+
+    def tearDown(self):
+        """ Tearing down a test. """
+        for f in self.__files_to_be_removed:
+            if os.path.isfile(f): os.remove(f)
+
+
+    def testInheritedParameters(self):
+        """ Test that inherited parameters are correctly initialized. """
+
+        # Construct the parameter class.
+        parameters = DerivedParameters()
+
+        # Check defaults for inherited parameters.
+        self.assertEqual( parameters.cpus_per_task, 123)
+        self.assertEqual( parameters.forced_mpi_command, "")
+
+    def testInheritedParametersInitialization(self):
+        """ Check that the inherited parameter can be initialized at construction of the derived parameters class."""
+
+        # Construct parameter object with non-default values for inherited parameters.
+        parameters = DerivedParameters(cpus_per_task=10, forced_mpi_command='mpiexec.mpich')
+
+        # Check for inherited parameters.
+        self.assertEqual( parameters.cpus_per_task, 10)
+        self.assertEqual( parameters.forced_mpi_command, "mpiexec.mpich")
+
+    def testInheritedParametersSetters(self):
+        """ Check that the inherited parameter can be initialized at construction of the derived parameters class."""
+
+        # Construct parameter object with non-default values for inherited parameters.
+        parameters = DerivedParameters(cpus_per_task=10, forced_mpi_command='mpiexec.mpich')
+
+        # Check for inherited parameters.
+        self.assertEqual( parameters.cpus_per_task, 10)
+        self.assertEqual( parameters.forced_mpi_command, "mpiexec.mpich")
+
+        # Reset the parameters.
+        parameters.cpus_per_task = 90
+        parameters.forced_mpi_command = 'mpirun.openmpi'
+
+        # Check again.
+        self.assertEqual( parameters.cpus_per_task, 90)
+        self.assertEqual( parameters.forced_mpi_command, "mpirun.openmpi")
+
+        # Paranoia check.
+        self.assertEqual( parameters._AbstractCalculatorParameters__cpus_per_task, 90)
+        self.assertEqual( parameters._AbstractCalculatorParameters__forced_mpi_command, "mpirun.openmpi")
+
+    def testCheckAndSetCPUsPerTask(self):
+        """ Test the _checkAndSetCPUsPerTask utility function """
+        from SimEx.Parameters.AbstractCalculatorParameters import _checkAndSetCPUsPerTask as uti
+
+        self.assertRaises( TypeError, uti, 0 )
+        self.assertRaises( TypeError, uti, -10 )
+        self.assertRaises( TypeError, uti, 2.5 )
+        self.assertRaises( ValueError, uti, "1" )
+        self.assertRaises( ValueError, uti, "hundred" )
+        self.assertRaises( TypeError, uti, [1,2] )
+
+    def testCheckAndSetForcedMPICommand(self):
+        """ Test the _checkAndSetForcedMPICommand utility function """
+        from SimEx.Parameters.AbstractCalculatorParameters import _checkAndSetForcedMPICommand as uti
+
+        self.assertRaises( TypeError, uti, 1 )
+        self.assertRaises( TypeError, uti, 0 )
+        self.assertRaises( TypeError, uti, 2.5 )
+        self.assertRaises( TypeError, uti, [1,2] )
+
+
 
 if __name__ == '__main__':
     unittest.main()
-

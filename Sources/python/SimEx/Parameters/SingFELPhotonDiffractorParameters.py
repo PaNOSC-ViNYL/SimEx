@@ -50,6 +50,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 beam_geometry_file=None,
                 number_of_MPI_processes=None,
                 parameters_dictionary=None,
+                **kwargs
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
@@ -96,7 +97,6 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.beam_parameter_file = parameters_dictionary['beam_parameter_file']
             self.beam_geometry_file = parameters_dictionary['beam_geometry_file']
             self.number_of_diffraction_patterns = parameters_dictionary['number_of_diffraction_patterns']
-            self.number_of_MPI_processes = parameters_dictionary['number_of_MPI_processes']
 
         else:
             # Check all parameters.
@@ -109,7 +109,12 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.beam_parameter_file = beam_parameter_file
             self.beam_geometry_file = beam_geometry_file
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
-            self.number_of_MPI_processes = number_of_MPI_processes
+
+        super(SingFELPhotonDiffractorParameters, self).__init__(**kwargs)
+
+    def _setDefaults(self):
+        """ Set default for required inherited parameters. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     ### Setters and queries.
     @property
@@ -249,18 +254,3 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             raise ValueError("The parameters 'number_of_diffraction_patterns' must be a positive integer.")
 
 
-    @property
-    def number_of_MPI_processes(self):
-        """ Query for the 'number_of_MPI_processes' parameter. """
-        return self.__number_of_MPI_processes
-    @number_of_MPI_processes.setter
-    def number_of_MPI_processes(self, value):
-        """ Set the 'number_of_MPI_processes' parameter to a given value.
-        :param value: The value to set 'number_of_MPI_processes' to.
-        """
-        number_of_MPI_processes = checkAndSetInstance( int, value, 2 )
-
-        if number_of_MPI_processes > 0:
-            self.__number_of_MPI_processes = number_of_MPI_processes
-        else:
-            raise ValueError("The parameters 'number_of_MPI_processes' must be a positive integer.")
