@@ -22,7 +22,7 @@ conda config --set always_yes True
 conda install --no-deps nomkl numpy Cython matplotlib six scipy dateutil pyparsing cycler openblas libpng
 conda install --no-deps libgfortran=1 
 conda install --no-deps -c anaconda biopython=1.67
-$PREFIX/bin/pip install periodictable mpi4py
+$PREFIX/bin/pip install periodictable mpi4py dill
 #yum install -y hdf5-devel
 ## clean to reduce image size
 

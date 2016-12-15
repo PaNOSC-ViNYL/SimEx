@@ -51,6 +51,7 @@ class DMPhasingParameters(AbstractCalculatorParameters):
                  leash                   = None,
                  number_of_shrink_cycles = None,
                  parameters_dictionary = None,
+                 **kwargs
                 ):
         """
         Constructor for the DMPhasingParameters.
@@ -85,6 +86,11 @@ class DMPhasingParameters(AbstractCalculatorParameters):
             self.averaging_start = averaging_start
             self.leash = leash
             self.number_of_shrink_cycles = number_of_shrink_cycles
+
+    def _setDefaults(self):
+        """ """
+        """ Set the defaults for needed inherited parameters. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = "1"
 
     ### Setters and queries.
     @property

@@ -32,8 +32,12 @@ from prop import propagateSE
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
+from SimEx.Utilities import ParallelUtilities
+from SimEx.Utilities import EntityChecks
+from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 
-from mpi4py import MPI
+import subprocess,shlex
+
 
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
@@ -46,7 +50,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         Constructor for the XFEL photon propagator.
 
         :param parameters: Parameters for the photon propagation.
-        :type parameters: XFELPhotonPropagatorParameters instance.
+        :type parameters: WavePropagatorParameters instance.
 
         :param  input_path: Location of input data for photon propagation.
         :type input_path:   str, default 'FELsource/'
@@ -55,16 +59,69 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :type output_path:  str, default 'prop/'
         """
 
+
+        # Handle default parameters if None.
+        parameters = EntityChecks.checkAndSetInstance( WavePropagatorParameters, parameters, WavePropagatorParameters() )
+
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
 
+    def computeNTasks(self):
+        resources=ParallelUtilities.getParallelResourceInfo()
+        nnodes=resources['NNodes']
+        ncores=resources['NCores']
+
+        cpusPerTask=self.parameters.cpus_per_task
+
+        if cpusPerTask=="MAX":
+            np=nnodes
+            ncores=0
+        else:
+            np=max(1,int(ncores/int(cpusPerTask)))
+            ncores=int(cpusPerTask)
+
+        return (np,ncores)
+
 
     def backengine(self):
+        """ Starts WPG simulations in parallel in a subprocess """
+
+        fname = __name__+"_tmpobj"
+        self.dumpToFile(fname)
+
+        forcedMPIcommand=self.parameters.forced_mpi_command
+
+        if forcedMPIcommand=="":
+            (np,ncores)=self.computeNTasks()
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np,ncores)
+        else:
+            mpicommand=forcedMPIcommand
+
+        if 'SIMEX_VERBOSE' in os.environ:
+            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
+                print("XFELPhotonPropagator backengine mpicommand: "+mpicommand)
+
+        mpicommand+=" python "+__file__+" "+fname
+
+        args = shlex.split(mpicommand)
+
+        proc = subprocess.Popen(args,universal_newlines=True)
+        proc.wait()
+        os.remove(fname)
+
+        return proc.returncode
+
+    def _run(self):
+
         """ This method drives the WPG backengine.
 
         :return: 0 if WPG returns successfully, 1 if not.
 
         """
+
+        # import should be here, not in header as it calls MPI_Init when imported. We want MPI to be
+        # initialized on this stage only.
+        from mpi4py import MPI
 
         # MPI info
         comm = MPI.COMM_WORLD
@@ -121,3 +178,8 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :type output_path: string
         """
         pass # No action required since output is written in backengine.
+
+
+
+if __name__ == '__main__':
+    XFELPhotonPropagator.runFromCLI()

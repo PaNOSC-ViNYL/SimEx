@@ -91,6 +91,10 @@ class WavePropagatorParametersTest(unittest.TestCase):
         self.assertFalse( parameters.use_opmd )
         self.assertIsInstance( parameters.beamline, Beamline )
 
+        # Check default inherited parameters.
+        self.assertEqual( parameters.cpus_per_task, "MAX")
+        self.assertEqual( parameters.forced_mpi_command, "")
+
 
     def testShapedConstruction(self):
         """ Testing the construction of the class with non-default parameters. """

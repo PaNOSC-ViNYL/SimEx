@@ -33,12 +33,52 @@ import os
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
+import dill
+import sys
+
+
 
 class AbstractBaseCalculator(object):
     """
     Abstract class for all simulation calculators.
     """
     __metaclass__ = ABCMeta
+
+    @classmethod
+    def runFromCLI(cls):
+        """
+        Method to start calculator computations from command line.
+
+        :return: exit with status code
+
+        """
+        if len(sys.argv) == 2:
+            fname = sys.argv[1]
+            calculator=cls.dumpLoader(fname)
+            status = calculator._run()
+            sys.exit(status)
+
+    @classmethod
+    def dumpLoader(cls,fname):
+        """
+        Creates calculator object from a dump file
+
+        :param fname: path to the dump file.
+
+        :return: Created calculator object.
+
+        :raises RuntimeError: if cannot create object.
+
+        """
+
+        try:
+            calculator = dill.load(open(fname))
+        except:
+            raise exceptions.IOError("Cannot read  from file "+fname)
+        if not issubclass(type(calculator),AbstractBaseCalculator):
+            raise TypeError( "The argument to the script should be a path to a file "
+                             "with object of subclass of AbstractBaseCalculator")
+        return calculator
 
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
@@ -82,6 +122,35 @@ class AbstractBaseCalculator(object):
         """
         # To be implemented by specialized calculator.
         pass
+
+# TODO : think - should we make it abstract and remove default call of backengine?
+#    @abstractmethod
+    def _run(self):
+        """
+        Method to do computations. By default starts backengine.
+        :return: status code.
+        """
+        result=self.backengine()
+
+        if result is None:
+            result=0
+
+        return result
+        # Can be reimplemented by specialized calculator.
+
+    def dumpToFile(self, fname):
+        """
+        dump class instance to file.
+
+        :param fname: Path to file to dump.
+
+        """
+
+        try:
+            dill.dump(self, open(fname, "w"))
+        except:
+            raise exceptions.IOError("Cannot dump to file "+fname)
+
 
 
     @abstractmethod
@@ -191,7 +260,7 @@ def checkAndSetParameters(parameters):
     """
     if parameters is None:
         parameters = {}
-    if not ( isinstance( parameters, dict ) or isinstance( parameters, AbstractCalculatorParameters) ):
+    if not (isinstance( parameters, dict ) or isinstance( parameters, AbstractCalculatorParameters) ):
         raise TypeError( "The 'parameters' argument to the constructor must be of type dict or AbstractCalculatorParameters.")
 
     # Return.
