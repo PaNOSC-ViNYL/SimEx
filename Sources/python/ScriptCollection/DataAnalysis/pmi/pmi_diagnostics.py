@@ -1,36 +1,29 @@
-#!/usr/bin/python2.6
+#!/usr/bin/env python2.7
 
-import sys
-import os
+
+from argparse import ArgumentParser
+import cPickle
 import commands
-
+import copy
 import datetime
+import h5py
+import matplotlib
+import numpy
+import os
+import pylab
+import scipy
+import scipy.interpolate
+import select
+import shelve
+import string
+import sys
 import time
 
-import string
-import copy
-
-import shelve
-import cPickle
-import h5py
-
-import select
-import numpy
-import scipy.interpolate
-
-import scipy
-
-import matplotlib
-matplotlib.use('Agg')
-import pylab
-
-#try:
-#    import plot_disp
-#except:
-#    print 'plot_disp not loaded.'
-
+from SimEx.Utilities.IOUtilities import loadPDB
 
 global g_s2e_setup
+
+pdb = '2nip.pdb'
 
 ##############################################################################
 
@@ -103,15 +96,6 @@ def f_num_snp( all_real ) :
             xfp.close()
             return cc - 1
         cc = cc + 1
-
-#        try:
-#            if type( a_fp.get( "/data/snp_" + str( cc ).zfill(NUM_DIGITS) + '/Nph' ) ) == 'NoneType' :
-#                print 'N'
-#            else :
-#                print 1
-#
-#        except:
-#            return cc
 
 
 ##############################################################################
@@ -207,9 +191,6 @@ Usage - Quick (predefined):
 
     """
 
-
-##############################################################################
-##############################################################################
 ##############################################################################
 
 
@@ -220,7 +201,7 @@ def pmi_diagnostics( *args ) :
     xcolors = [ 'b', 'r', 'g', 'k', 'm', 'c',  'b--', 'r--', 'g--', 'k--', 'm--', 'c--'  ]
     element_symbol = [ '-' , 'H' , 'He' , 'Li' , 'Be' , 'B' , 'C' , 'N' , 'O' , 'F' , 'Ne' , 'Na' , 'Mg' , 'Al' , 'Si' , 'P' , 'S' , 'Cl' , 'Ar' , 'K' , 'Ca' , 'Sc' , 'Ti' , 'V' , 'Cr' , 'Mn' , 'Fe' , 'Co' , 'Ni' , 'Cu' , 'Zn' , 'Ga' , 'Ge' , 'As' , 'Se' , 'Br' , 'Kr' , 'Rb' , 'Sr' , 'Y' , 'Zr' , 'Nb' , 'Mo' , 'Tc' , 'Ru' , 'Rh' , 'Pd' , 'Ag' , 'Cd' , 'In' , 'Sn' , 'Sb' , 'Te' , 'I' , 'Xe' , 'Cs' , 'Ba' , 'La' , 'Ce' , 'Pr' , 'Nd' , 'Pm' , 'Sm' , 'Eu' , 'Gd' , 'Tb' , 'Dy' , 'Ho' , 'Er' , 'Tm' , 'Yb' , 'Lu' , 'Hf' , 'Ta' , 'W' , 'Re' , 'Os' , 'Ir' , 'Pt' , 'Au' , 'Hg' , 'Tl' , 'Pb' , 'Bi' , 'Po' , 'At' , 'Rn' , 'Fr' , 'Ra' , 'Ac' , 'Th' , 'Pa' , 'U' , 'Np' , 'Pu' , 'Am' , 'Cm' , 'Bk' , 'Cf' , 'Es' , 'Fm' , 'Md' , 'No' , 'Lr' , 'Rf' , 'Db' , 'Sg' , 'Bh' , 'Hs' , 'Mt' , 'Ds' , 'Rg' , 'Cp' , 'Uut' , 'Uuq' , 'Uup' , 'Uuh' , 'Uus' , 'Uuo' ]
 
-    OPT_real_test    = numpy.arange(1,2) ; OPT_num_snp_test  = numpy.array( [5] )
+    OPT_real_test    = numpy.array([1]) ; OPT_num_snp_test  = numpy.array( [50] )
     OPT_real_quick   = numpy.arange(1,6) ; OPT_num_snp_quick = numpy.array( [10] )
     OPT_real_default = numpy.arange(1,21) ;
 
@@ -259,10 +240,9 @@ def pmi_diagnostics( *args ) :
 
 
 #-------------------------------------------------------------------------
-
     if a_comm == 'load' :
 
-        ref_prop_out = g_s2e_setup['prj'] + '/prop/prop_out_' + str( 1 ).zfill(g_s2e_setup['num_digits'])  + '.h5'
+        ref_prop_out = g_s2e_setup['prj'] + '/pmi/pmi_out_' + str( 1 ).zfill(g_s2e_setup['num_digits'])  + '.h5'
 
         data = dict() ;
         data['prj'] = os.path.abspath(  g_s2e_setup['prj'] ).split('/')[-1]
@@ -276,14 +256,21 @@ def pmi_diagnostics( *args ) :
             data['snp'] = numpy.arange( 1 ,  f_num_snp( data['real'] ) + 1 )
 
         if len( data['snp'] ) == 1 :
-                data['snp'] = numpy.around( numpy.linspace( 1 ,  f_num_snp( data['real'] ) ,  data['snp'] ) ) .astype(int)
+            data['snp'] = numpy.around( numpy.linspace( 1 ,  f_num_snp( data['real'] ) ,  data['snp'] ) ) .astype(int)
 
-        data['sample']   = f_load_sample()
+        # Read sample data.
+        try:
+            data['sample']   = f_load_sample()
+        except:
+            # Assume it's a pdb file. Will raise if not.
+            data['sample'] = loadPDB(pdb)
+
+
         data['num_real'] = data['real'].size
         data['num_snp'] = data['snp'].size
         data['time'] = ( data['snp'] \
-                * ( f_hdf5_simple_read( ref_prop_out , '/params/Mesh/sliceMax' ) - f_hdf5_simple_read( ref_prop_out , '/params/Mesh/sliceMin' ) ) \
-                / f_num_snp( data['real'] ) +  f_hdf5_simple_read( ref_prop_out , '/params/Mesh/sliceMin' ) )  \
+                * ( f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMax' ) - f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMin' ) ) \
+                / f_num_snp( data['real'] ) +  f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMin' ) )  \
                 / 1e-15
         print 'Project:    ' , data['prj']
         print "Num. real.: " , data['num_real']
@@ -337,7 +324,7 @@ def pmi_diagnostics( *args ) :
                 legendtxt.append( element_symbol[sel_Z] )   #  legendtxt.append( str( sel_Z ) )
                 cc += 1
 
-            pylab.legend( legendtxt , 2 )
+            #pylab.legend( legendtxt , 2 )
             return
 
         sel_Z = args[1]
@@ -365,7 +352,7 @@ def pmi_diagnostics( *args ) :
                 legendtxt.append( str( sel_Z ) )
                 cc += 1
 
-            pylab.legend( legendtxt , 1 )
+            #pylab.legend( legendtxt , 1 )
             return
 
         sel_Z = args[1]
@@ -590,12 +577,6 @@ def pmi_diagnostics( *args ) :
         print 'TEST OPTION'
 
     return
-
-
-
-
-##############################################################################
-
 
 
 ### if to be called from command line:

@@ -12,6 +12,7 @@ import wpg
 mirror_data1 = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'mirror1.dat')
 mirror_data2 = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'mirror2.dat')
 
+
 def defineOPD(opTrErMirr, mdatafile, ncol, delim, orient, theta, scale=1., stretching=1.):
     """
     Define optical path difference (OPD) from mirror profile

@@ -52,11 +52,15 @@ def loadPDB( path = None ):
     if not isinstance (path, str):
         raise IOError( "The parameter 'path' must be a path to a valid pdb file.")
 
+    # Setup paths and filenames.
+    pdb_target_name = os.path.basename(path).split('.pdb')[0]
+    pdb_target_dir = os.path.dirname(path)
+    source = os.path.join(pdb_target_dir, 'pdb'+pdb_target_name.lower()+'.ent')
+    target = os.path.join(pdb_target_dir, pdb_target_name.lower()+'.pdb')
+
     if not os.path.isfile( path ):
         # Query from pdb.org
         pdb_list = PDB.PDBList()
-        pdb_target_name = os.path.basename(path).split('.pdb')[0]
-        pdb_target_dir = os.path.dirname(path)
         if pdb_target_dir == '':
             pdb_target_dir = '.'
 
@@ -65,8 +69,9 @@ def loadPDB( path = None ):
             pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir )
         except:
             raise IOError( "Database query failed.")
-        shutil.move(os.path.join(pdb_target_dir, 'pdb'+pdb_target_name.lower()+'.ent'), os.path.join(pdb_target_dir, pdb_target_name.lower()+'.pdb') )
 
+        # Move and rename the downloaded file.
+        shutil.move( source, target  )
 
 
     # Setup the return dictionary.
@@ -80,7 +85,7 @@ def loadPDB( path = None ):
     # Attempt loading the pdb.
     try:
         parser = PDB.PDBParser()
-        structure = parser.get_structure("sample", path)
+        structure = parser.get_structure("sample", target)
 
         # Get the atoms.
         atoms = structure.get_atoms()

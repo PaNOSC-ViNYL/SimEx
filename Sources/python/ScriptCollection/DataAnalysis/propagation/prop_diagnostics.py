@@ -29,27 +29,45 @@ from matplotlib import pyplot
 
 import wpg
 from wpg.wpg_uti_wf import plot_t_wf,look_at_q_space
+from wpg.useful_code.wfrutils import plot_wfront
 
 
 ### TODO
 # Plot phase distribution
 # Plot average and rms intensity distribution over given patterns.
 
-
-def main(args):
-
-    # Get wavefront file name.
-    wavefront_file = args.input_file
-
-    wavefront = wpg.Wavefront()
-    wavefront.load_hdf5(wavefront_file)
+def plot(wavefront):
 
     if args._do_intensity_distribution:
+        plot_wfront(wavefront, title_fig='',
+            isHlog=False, isVlog=False,
+            i_x_min=1e-5, i_y_min=1e-5,
+            orient='x', onePlot=True)
+        pyplot.colorbar()
         plot_t_wf(wavefront)
+
+    if args._do_phase_distribution:
+        pyplot.imshow(wavefront.get_phase(slice_number=0,polarization='horizontal'), cmap='hsv')
+        pyplot.colorbar()
 
     if args._do_qspace_intensity:
         look_at_q_space(wavefront)
 
+
+
+
+def main(args):
+
+    # Get wavefront file name.
+    print "Setting up wavefront."
+    wavefront_file = args.input_file
+
+    wavefront = wpg.Wavefront()
+    print "Loading wavefront from %s." % (wavefront_file)
+    wavefront.load_hdf5(wavefront_file)
+
+    print "Plotting wavefront as reqested"
+    plot(wavefront)
 
     pyplot.show()
 
@@ -67,15 +85,24 @@ if __name__ == "__main__":
                         "--intensity",
                         action="store_true",
                         dest="_do_intensity_distribution",
-                        default=True,
+                        default=False,
                         help="Plot the intensity distribution in x-y.")
 
     parser.add_argument("-R",
                         "--reciprocal",
                         action="store_true",
                         dest="_do_qspace_intensity",
-                        default=True,
+                        default=False,
                         help="Plot the intensity distribution in qx-qy.")
+
+    parser.add_argument("-P",
+                        "--phase",
+                        action="store_true",
+                        dest="_do_phase_distribution",
+                        default=False,
+                        help="Plot the phase distribution in x-y.")
+
+
 
 
     args = parser.parse_args()
