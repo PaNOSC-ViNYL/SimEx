@@ -14,10 +14,10 @@ parameters= SingFELPhotonDiffractorParameters(uniform_rotation=True,            
              number_of_slices = 2,                    # Take two snapshots from this interval
              pmi_start_ID = 1,                        # Start with this pmi file ID.
              pmi_stop_ID  = 1,                        # Stop after this pmi file ID.
-             number_of_diffraction_patterns = 1000,   # Calculate 1000 patterns from each trajectory.
+             number_of_diffraction_patterns = 100,   # Calculate 100 patterns from each trajectory.
              beam_parameter_file = beam,              # Beam file.
              beam_geometry_file = geom,               # Geometry file (detector).
-             cpus_per_task =  'MAX',                  # Use all available CPUs.
+             cpus_per_task =  1,                      # Use one CPU per MPI process. Number of processes is guessed from machine parameters.
              )
 
 # Construct the object.
