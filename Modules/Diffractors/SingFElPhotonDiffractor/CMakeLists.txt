@@ -11,7 +11,7 @@ FIND_PACKAGE(GSL REQUIRED)
 
 ExternalProject_Add(
 singfel
-URL https://github.com/eucall-software/singfel/archive/v0.1.zip
+URL https://github.com/eucall-software/singfel/archive/master.zip
 PATCH_COMMAND ""
 INSTALL_COMMAND ""
 )
