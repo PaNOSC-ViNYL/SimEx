@@ -31,11 +31,19 @@ echo "export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH" >> /etc/pr
 chmod 755 /etc/profile.d/scripts-path.sh
 
 
-COPY docker-entrypoint.sh /bin/docker-entrypoint.sh
-ENV DOCKER_USER=dockeruser
+# nss_wrapper stuff (to add user inside a container without sudo)
 
-# set entry point
-ENTRYPOINT ["/bin/docker-entrypoint.sh"]
+RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm && rpm -ivh epel-release-7-8.noarch.rpm && yum -y install nss_wrapper
+
+ENV NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper
+ENV NSS_WRAPPER_GROUP=/tmp/group.nss_wrapper
+
+RUN echo "export NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper" >> /etc/profile.d/nss_wrapper.sh && \
+    echo "export NSS_WRAPPER_GROUP=/tmp/group.nss_wrapper" >> /etc/profile.d/nss_wrapper.sh && \
+    echo "export LD_PRELOAD=libnss_wrapper.so" >> /etc/profile.d/nss_wrapper.sh && \
+    cp /etc/group $NSS_WRAPPER_GROUP && chmod og+wr $NSS_WRAPPER_GROUP && \
+    cp /etc/passwd $NSS_WRAPPER_PASSWD && chmod og+wr $NSS_WRAPPER_PASSWD
+ENV LD_PRELOAD=libnss_wrapper.so
 
 
 
