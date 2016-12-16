@@ -461,7 +461,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         h5_filehandle = h5py.File( photon_diffractor.output_path, 'r')
 
         # Count groups under /data.
-        number_of_patterns = len(h5_filehandle.keys()) - 3
+        number_of_patterns = len(h5_filehandle['data'].keys())
 
         self.assertEqual( number_of_patterns, 8 )
 
@@ -469,9 +469,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("params", h5_filehandle.keys() )
         self.assertIn("version", h5_filehandle.keys() )
         self.assertIn("info", h5_filehandle.keys() )
-        self.assertIn("geom", h5_filehandle["params"].keys() )
-
-        # Assert detector dimensions are saved as parameters.
 
 if __name__ == '__main__':
     unittest.main()

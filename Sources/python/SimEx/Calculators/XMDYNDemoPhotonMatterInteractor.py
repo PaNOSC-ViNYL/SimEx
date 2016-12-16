@@ -67,7 +67,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
         if sample_path is None:
             raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
         if not os.path.isfile( sample_path):
-            raise IOError( "%s is not a a regular sample/target file." % (sample_path) )
+            print "Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path)
 
         self.__sample_path = sample_path
 
@@ -198,7 +198,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
 
             # Check if sample is a h5 file. Horrible hack.
             try:
-                h5 = h5py.File(self.__sample_path)
+                h5 = h5py.File(self.__sample_path, 'r')
                 h5.close()
                 pmi_demo.f_load_sample(self.__sample_path)
             except:

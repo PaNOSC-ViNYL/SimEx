@@ -1,0 +1,12 @@
+# Example beam file
+# Line starting with "#" or ";" are ignored. ";" is compatible with CrystFEL files.
+; [Beam]
+; photon energy (eV)
+#beam/photon_energy = 4960.0
+
+; Number of photons per pulse
+#beam/fluence = 9e14
+
+; Radius of X-ray beam
+#beam/radius = 0.5e-6
+

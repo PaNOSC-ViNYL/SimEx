@@ -246,18 +246,16 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             if not global_parameters:
                 global_parameters = True
 
-                h5_outfile["params/geom"] = h5py.ExternalLink(relative_link_target, "params/geom")
+                h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
                 h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
-                h5_outfile["version"] = 0.2
+                h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
+                h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
 
-            for key in h5_infile.keys():
-                # Skip version
-                if key == 'version':
-                    continue
+            for key in h5_infile['data']:
 
-                # Setup path to dataset.
-                ds_path = "%s/%s" % (file_ID, key)
-                h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, key)
+                # Link in the data.
+                ds_path = "data/%s" % (key)
+                h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
 
             # Close input file.
             h5_infile.close()

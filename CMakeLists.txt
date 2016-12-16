@@ -81,11 +81,15 @@ install(FILES ${CMAKE_BINARY_DIR}/simex_vars.sh
 install(PROGRAMS ${CMAKE_BINARY_DIR}/simex
         DESTINATION ${BINDIR})
 
+# Copy diagnostic scripts to bin dir.
+install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysis/propagation/prop_diagnostics.py DESTINATION ${BINDIR})
+install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysis/pmi/pmi_diagnostics.py DESTINATION ${BINDIR})
+install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysis/scattering/pattern_statistics.py DESTINATION ${BINDIR})
+
 if (PACKAGE_MAKE)
   add_subdirectory (Packages)
 endif()
 
-
+# Add documentation target.
 add_subdirectory("Sources/doc")
-
 
