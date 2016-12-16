@@ -777,7 +777,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
                           'pmi/pmi_out_0000001.h5',
                           'pmi/pmi_out_0000002.h5',
                           'diffr/diffr_out_0000001.h5',
-                          'detector/diffr_out_0000001.h5',
                           'analysis/orient_out.h5',
                           'analysis/phase_out.h5',
                           ]

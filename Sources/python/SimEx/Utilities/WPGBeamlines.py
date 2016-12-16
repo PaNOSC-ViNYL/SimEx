@@ -3,6 +3,9 @@ from wpg.optical_elements import Drift, Aperture, CRL
 from wpg.optical_elements import Use_PP
 from wpg.useful_code import srwutils
 
+# Import the prop beamline.
+from prop import my_s2e_beamline as s2e_spb_beamline
+
 import errno
 import numpy
 import os
@@ -115,9 +118,10 @@ def setupSPBDay1Beamline():
 
     return beamline
 
-
 def setup_S2E_SPI_beamline():
     """ Utility function that returns the S2E SPI beamline (Yoon et al. Scientific Reports (2016). """
+
+    #return s2e_spb_beamline.get_beamline()
 
     distance0 = 300.
     distance1 = 630.
