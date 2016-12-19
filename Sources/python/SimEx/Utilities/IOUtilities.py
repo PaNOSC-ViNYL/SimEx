@@ -32,18 +32,15 @@ import os, shutil
 from Bio import PDB
 import periodictable
 
-def loadPDB( path = None ):
-    """
-    Utility to load a pdb file and convert it to a dict that will be taken by e.g.
-    PMI calculators.
+def checkAndGetPDB( path ):
+    """ Query a given pdb code from the PDB.
 
-    @param path: Path to the pdb file to be loaded.
-    @type : string
+    :param pdb_code: The PDB code of the molecule to query.
+    :type pdb_code: str
 
-    @return : The dictionary expected by downstream simex modules.
-    @rtype  : dict
+    :return: The queried molecule pdb dataset.
+    :rtype: ???
 
-    @throws IOError if path not existing, not a pdb file or corrupt.
     """
 
     if path is None:
@@ -73,6 +70,44 @@ def loadPDB( path = None ):
         # Move and rename the downloaded file.
         shutil.move( source, target  )
 
+    return target
+
+
+def loadPDB( path = None ):
+    """ Wrapper to convert a given pdb file to a sample dictionary used by e.g. the XMDYNCalculator.
+
+    :param path: The path to the pdb file to be converted.
+    :type path: str
+
+    :return: The dictionary describing the sample molecule.
+    :rtype: dict
+    """
+
+    # Check if the sample is present, retrieve it from the pdb if not.
+    target = checkAndGetPDB(path)
+
+    # Convert to dict and return.
+    return _pdbToS2ESampleDict(target)
+
+def _pdbToS2ESampleDict(path=None):
+    """ """
+    """
+    Workhorse function that converts a pdb file to the sample dictionary.
+
+    :param path: Path to the pdb file to be loaded.
+    :type path : string
+
+    :return: The dictionary expected by downstream simex modules.
+    :rtype : dict
+
+    :throws IOError: Path not existing, not a pdb file or corrupt.
+    """
+
+    try:
+        if not os.path.isfile( path ):
+            raise IOError()
+    except:
+        raise IOError( "Parameter 'path' must be a valid pdb file.")
 
     # Setup the return dictionary.
     atoms_dict = {'Z' : [],     # Atomic number.
@@ -81,11 +116,10 @@ def loadPDB( path = None ):
                   'N' : 0,      # Number of atoms.
                   }
 
-
     # Attempt loading the pdb.
     try:
         parser = PDB.PDBParser()
-        structure = parser.get_structure("sample", target)
+        structure = parser.get_structure("sample", path)
 
         # Get the atoms.
         atoms = structure.get_atoms()

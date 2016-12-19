@@ -84,54 +84,40 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check that return type is a dict.
         self.assertIsInstance( return_dict, dict )
 
-        # Check exception on corrupt file.
-        # does not raise due to highly tolerant default acceptance levels in Bio.PDB.
-        #self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("2nip_corrupt.pdb" ) )
-
         # Check exception on wrong input type.
         self.assertRaises( IOError, IOUtilities.loadPDB, [1,2] )
 
         # Check exception on wrong file type.
         self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("sample.h5") )
 
-    def notestQueryPDB(self):
+    def testQueryPDB(self):
         """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
-
         # Setup path to pdb file.
         pdb_path = '2nip.pdb'
         self.__files_to_remove.append(pdb_path)
         self.__paths_to_remove.append('obsolete')
 
         # Attempt to load it.
-        return_dict = IOUtilities.loadPDB(pdb_path)
+        pdb_path = IOUtilities.checkAndGetPDB(pdb_path)
 
-        # Check items on dict.
-        self.assertIsInstance( return_dict['Z'], numpy.ndarray )
-        self.assertIsInstance( return_dict['r'], numpy.ndarray )
-        self.assertIsInstance( return_dict['selZ'], dict )
-        self.assertIsInstance( return_dict['N'], int )
-        self.assertEqual( return_dict['Z'].shape, (4728,) )
-        self.assertEqual( return_dict['r'].shape, (4728,3) )
-
-        # Check that return type is a dict.
-        self.assertIsInstance( return_dict, dict )
+        # Check it's there.
+        self.assertTrue( os.path.isfile( pdb_path ) )
 
         # Check exception on wrong input type.
-        self.assertRaises( IOError, IOUtilities.loadPDB, 'xyz.pdb' )
+        self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
 
-    def testQueryPDBDirectory(self):
-        """ Check that if the pdb does not exist in the local database, it is queried from pdb.org, save in a dir, and convert it to a dict. """
+    def testPdbToS2ESampleDict(self):
+        """ Check the utility that converts a pdb file to an s2e sample dict.
+        """
 
         # Setup path to pdb file.
-        pdb_path = 'pdb/2nip.pdb'
-        self.__files_to_remove.append(pdb_path)
-
-        self.__paths_to_remove.append('obsolete')
-        self.__paths_to_remove.append('pdb')
-        os.mkdir('pdb')
+        pdb_path = generateTestFilePath("2nip.pdb")
 
         # Attempt to load it.
-        return_dict = IOUtilities.loadPDB(pdb_path)
+        return_dict = IOUtilities._pdbToS2ESampleDict(pdb_path)
+
+        # Check that return type is a dict.
+        self.assertIsInstance( return_dict, dict )
 
         # Check items on dict.
         self.assertIsInstance( return_dict['Z'], numpy.ndarray )
@@ -141,8 +127,12 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertEqual( return_dict['Z'].shape, (4728,) )
         self.assertEqual( return_dict['r'].shape, (4728,3) )
 
-        # Check that return type is a dict.
-        self.assertIsInstance( return_dict, dict )
+    def testPdbToS2ESampleDictExceptions(self):
+        """ Check that improper input raises in converter utility. """
+
+        self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, None )
+        self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, "xyz.pdb" )
+        self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, 1234 )
 
 
 if __name__ == '__main__':
