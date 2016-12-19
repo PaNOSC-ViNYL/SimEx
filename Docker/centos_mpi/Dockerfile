@@ -7,9 +7,7 @@ MAINTAINER Sergey Yakubov <sergey.yakubov@desy.de>
 
 # install ssh
 RUN yum install -y openssh-clients openssh-server && ssh-keygen -A && \
-	sed -i 's/required\(.*pam_loginuid\)/optional\1/' /etc/pam.d/sshd && \
-	echo StrictHostKeyChecking no >> /etc/ssh/ssh_config && \
-	ssh-keygen -f /root/id_rsa -t rsa -N ''
+	sed -i 's/required\(.*pam_loginuid\)/optional\1/' /etc/pam.d/sshd
 
 
 
@@ -19,10 +17,10 @@ RUN yum install -y ibibverbs-utils libibverbs-devel libibverbs-devel-static libm
 	librdmacm-devel librdmacm libibumad-devel perftest
 
 # install mpi
-RUN yum install -y wget make gcc-c++
-ADD openmpi_install.sh /opt/openmpi_install.sh
-RUN ["bash", "/opt/openmpi_install.sh"]
-#RUN yum install -y openmpi openmpi-devel make
+#RUN yum install -y wget make gcc-c++
+#ADD openmpi_install.sh /opt/openmpi_install.sh
+#RUN ["bash", "/opt/openmpi_install.sh"]
+RUN yum install -y openmpi openmpi-devel make
 
 ENV PATH=/usr/lib64/openmpi/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH  
@@ -30,20 +28,6 @@ RUN echo "export PATH=/usr/lib64/openmpi/bin:${PATH}" > /etc/profile.d/scripts-p
 echo "export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH" >> /etc/profile.d/scripts-path.sh && \
 chmod 755 /etc/profile.d/scripts-path.sh
 
-
-# nss_wrapper stuff (to add user inside a container without sudo)
-
-RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm && rpm -ivh epel-release-7-8.noarch.rpm && yum -y install nss_wrapper
-
-ENV NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper
-ENV NSS_WRAPPER_GROUP=/tmp/group.nss_wrapper
-
-RUN echo "export NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper" >> /etc/profile.d/nss_wrapper.sh && \
-    echo "export NSS_WRAPPER_GROUP=/tmp/group.nss_wrapper" >> /etc/profile.d/nss_wrapper.sh && \
-    echo "export LD_PRELOAD=libnss_wrapper.so" >> /etc/profile.d/nss_wrapper.sh && \
-    cp /etc/group $NSS_WRAPPER_GROUP && chmod og+wr $NSS_WRAPPER_GROUP && \
-    cp /etc/passwd $NSS_WRAPPER_PASSWD && chmod og+wr $NSS_WRAPPER_PASSWD
-ENV LD_PRELOAD=libnss_wrapper.so
 
 
 

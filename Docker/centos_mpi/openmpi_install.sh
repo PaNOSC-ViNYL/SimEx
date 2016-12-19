@@ -4,7 +4,7 @@ wget -q $URL
 
 tar -xf openmpi-2.0.1.tar.gz
 cd openmpi-2.0.1
-./configure --prefix=/usr/lib64/openmpi --disable-getpwuid
+./configure --prefix=/usr/lib64/openmpi --disable-getpwuid --enable-orterun-prefix-by-default
 make
 make install
 cd ..
