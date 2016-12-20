@@ -153,7 +153,7 @@ def _getVendorSpecificMPIArguments(version, threads_per_task):
     # mapping by node is required to distribute tasks in round-robin mode.
     if version['Vendor'] == "OpenMPI":
         if StrictVersion(version['Version'])>StrictVersion("1.8.0"):
-            mpi_cmd+=" --map-by node --bind-to none "
+            mpi_cmd+=" --map-by node --bind-to none"
         else:
             mpi_cmd+=" --bynode"
         # by default, all cores will be available, no need to set OMP_NUM_THREADS

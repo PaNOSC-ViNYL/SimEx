@@ -163,7 +163,7 @@ class ParallelUtilitiesTest(unittest.TestCase):
         version=dict([("Vendor", "OpenMPI"),("Version",'1.9.0')])
 
         str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
-        self.assertEqual(str," --map-by node -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0")
+        self.assertEqual(str," --map-by node --bind-to none -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0")
 
 
     def testVendorSpecificMPIArguments_MPICH(self):
