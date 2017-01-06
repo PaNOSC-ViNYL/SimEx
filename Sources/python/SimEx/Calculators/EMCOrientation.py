@@ -318,6 +318,8 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         gen.writeSparsePhotonFile(photonFiles, self._sparsePhotonFile+ "_"+str(thisProcess),
                                                self._avgPatternFile + "_"+str(thisProcess),
                                                thisProcess,numProcesses)
+        comm.Barrier()
+
         if thisProcess == 0:
             self._join_photon_files(numProcesses)
 

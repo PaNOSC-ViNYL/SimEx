@@ -383,7 +383,7 @@ class EMCCaseGenerator(object):
                     v = f["data/data"].value
                     avg += v
                     temp = {"o":[], "m":[]}
-
+                
                     for p,vv in zip(pos, v.flat):
                         # Todo: remove this
                         vv = int(vv)
@@ -407,7 +407,7 @@ class EMCCaseGenerator(object):
                     tasks = f["data"].keys()
                     for task in tasks:
                         v = f["data"][task]["data"].value
-                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
+#                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
                         avg += v
                         temp = {"o":[], "m":[]}
 
