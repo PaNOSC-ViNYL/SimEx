@@ -86,8 +86,8 @@ class HydroParameters:
         
         # Check and set all parameters
         self.__Ablator = checkAndSetAblator(Ablator)
-        #self.__AblatorThickness = checkAndSetAblatorThickness(AblatorThickness)
-        #self.__Sample = checkAndSetSample(Sample)
+        self.__AblatorThickness = checkAndSetAblatorThickness(AblatorThickness)
+        self.__Sample = checkAndSetSample(Sample)
         #self.__SampleThickness = checkAndSet(SampleThickness)
         #self.__Window = checkAndSet(Window)
         #self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
@@ -107,31 +107,34 @@ class HydroParameters:
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
         
-        def _serialize(self):
-        	""" Write the input deck for the Esther hydrocode. """
-        	# Make a temporary directory
-        	self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
+    def _serialize(self):
+       	""" Write the input deck for the Esther hydrocode. """
+       	# Make a temporary directory
+       	self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
         	
-        	# Write the input file
-        	input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
-        	with open(input_deck_path, 'w') as input_deck:
-        		input_deck.write('--Hydrocode input_file----------\n')
-        		input_deck.write('\n')
-        		input_deck.write('fini\n')
+    	# Write the input file
+     	input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
+        with open(input_deck_path, 'w') as input_deck:
+        	input_deck.write('--Hydrocode input_file----------\n')
+        	input_deck.write('\n')
+        	input_deck.write('fini\n')
+        	input_deck.write('Sample is ' % (self.Sample))
         
-        @property
-        def Ablator(self):
-        	""" Query for the ablator type. """
-        	return self.Ablator
-        @Ablator.setter
-        def Ablator(self, value):
-        	""" Set the ablator to the value. """
-        	self.Ablator = checkAndSetAblator(value)                
+    @property
+    def Ablator(self):
+       	""" Query for the ablator type. """
+       	return self.Ablator
+    @Ablator.setter
+    def Ablator(self, value):
+       	""" Set the ablator to the value. """
+       	self.Ablator = checkAndSetAblator(value)                
         
 
 ###########################
 # Check and set functions #
+# CHECKANDSETINSTANCE() IS NOT INCLUDED YET
 ###########################
+
 def checkAndSetAblator(Ablator):
 	"""
 	Utility to check if the ablator exists in the EOS database.
@@ -141,10 +144,6 @@ def checkAndSetAblator(Ablator):
 	"""
 	if Ablator is None:
 		raise RuntimeError( "Ablator is not defined.")
-	
-	# ???
-	#Ablator = checkAndSetInstance( string, Ablator, None) 
-	# ???
 	
 	# Check if ablator is CH, Al or diamond
 	if Ablator is 'CH':
@@ -157,8 +156,69 @@ def checkAndSetAblator(Ablator):
 		raise ValueError( "Ablator is not valid. Use CH, Al or dia.")       
 	
 	return Ablator
-        
-        
-        
-                   
+
+
+def checkAndSetAblatorThickness(AblatorThickness):
+	"""
+	Utility to check that the ablator thickness is > 5 um and < 100 um
+	"""
+	# Set default
+	if AblatorThickness is None:
+		raise RuntimeError( "Ablator thickness not specified.")
+	
+	# Check if ablator is between 5 and 100 um
+	if AblatorThickness <= 5.0 or AblatorThickness > 100.0:
+		raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
+	
+	return AblatorThickness
+
+
+def checkAndSetSample(Sample):
+	"""
+	Utility to check if the sample is in the list of known EOS materials
+	"""
+	
+	elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
+		
+	# Set default
+	if Sample is None:
+		raise RuntimeError( "Sample not specified.")
+	
+	# Check each element
+	if Sample in elements:
+		pass
+	else:
+		raise ValueError( "Sample is not in list of known EOS materials")
+		
+	return Sample
+
+def checkAndSetSampleThickness(SampleThickness):
+	"""
+	Utility to check that the sample thickness is > 1 um and < 200 um
+	"""
+	
+	# Set default
+	if SampleThickness is None:
+		raise RuntimeError( "Sample thickness not specified.")
+	
+	# Check if ablator is between 1 and 100 um
+	if SampleThickness < 1.0 or SampleThickness > 200.0:
+		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+	
+	return SampleThickness
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
 
