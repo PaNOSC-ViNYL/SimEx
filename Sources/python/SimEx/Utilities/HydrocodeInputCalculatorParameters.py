@@ -21,8 +21,9 @@
 
 
 import os
-import numpy
+import numpy as np
 import sys
+import tempfile
 
 #from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 #from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -88,7 +89,7 @@ class HydroParameters:
         self.__Ablator = checkAndSetAblator(Ablator)
         self.__AblatorThickness = checkAndSetAblatorThickness(AblatorThickness)
         self.__Sample = checkAndSetSample(Sample)
-        #self.__SampleThickness = checkAndSet(SampleThickness)
+        self.__SampleThickness = checkAndSetSampleThickness(SampleThickness)
         #self.__Window = checkAndSet(Window)
         #self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
         #self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
@@ -97,15 +98,25 @@ class HydroParameters:
         #self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
         
         # Set internal parameters
-        """ PLACE HOLDER
-        Can update this so that you can choose which EOS model to run.
-        E.g.
+        """ TO DO PLACEHOLDER -------------------------------------------------------------->
+        List of DEMARRAGE (translates as "Start up") parameters
+        TRANSFERT_RADIATIF
+        USI
+        
+        "Expert user mode to choose the correct demarrage parameters"
+        
+        Can also update this so that you can choose which EOS model to run???
         self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
         """
+        self._setDemmargeFlags()
         
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
+    
+    def _setDemmargeFlags(self):
+    	self.__use_usi = "USI"
+        
         
     def _serialize(self):
        	""" Write the input deck for the Esther hydrocode. """
@@ -114,20 +125,91 @@ class HydroParameters:
         	
     	# Write the input file
      	input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
+     	print input_deck_path
         with open(input_deck_path, 'w') as input_deck:
-        	input_deck.write('--Hydrocode input_file----------\n')
+        	input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
         	input_deck.write('\n')
-        	input_deck.write('fini\n')
-        	input_deck.write('Sample is ' % (self.Sample))
+        	input_deck.write('MILIEUX_INT_VERS_EXT\n')
+        	input_deck.write('\n')
+        	# Need a loop to create the layers from the window to the ablator
         
+        
+    
+    def _CalculateFeather(self,AblatorThickness):
+    	"""
+    	TO DO PLACEHOLDER -------------------------------------------------------------->
+    	Used to calculate the zone thickness for the hydrocode.
+    	Can be updated later to allow user to change values (for resolution)
+    	"""
+    	
+    	# Used for displaying number of zones in each material
+    	# SHOULD BE SOMEWHERE ELSE?
+    	NumberZones = [0] 
+    	
+    	
+    	# Default variables for feathering 
+    	n = 250
+    	NumberZones[0] = n
+    	FeatherZoneWidth = float(5.0)
+    	MinZoneWidth = float(1E-4)
+    	NonFeatherZoneWidth = self.AblatorThickness-FeatherZoneWidth
+    	
+    	# Determine the correct feathering
+    	list=[0]*(n+1)
+    	list[0]=1
+    	list[-2]=-FeatherZoneWidth/MinZoneWidth
+    	list[-1]=FeatherZoneWidth/MinZoneWidth-1
+    	
+    	f = np.poly1d(list)
+    	roots = np.roots(f)
+    	root_found = False
+    	
+    	for i in range(n):
+    		if roots[i].imag == 0 and roots[i].real > 1.000001:
+    			r = round(roots[i].real,4)
+    			root_found = True
+    	
+    	if root_found == False:
+    		raise ValueError( "No ratio bigger than 1.000001 was found.")
+    	
+    	finalFeatherZoneWidth = round(MinZoneWidth*(r**n),4)
+    	RemainingZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
+    	NumberZones[1] = RemainingZones
+    	
+    	return NumberZones,NonFeatherZoneWidth,finalFeatherZoneWidth
+    	
     @property
     def Ablator(self):
        	""" Query for the ablator type. """
-       	return self.Ablator
+       	return self.__Ablator
     @Ablator.setter
     def Ablator(self, value):
        	""" Set the ablator to the value. """
-       	self.Ablator = checkAndSetAblator(value)                
+       	self.__Ablator = checkAndSetAblator(value)
+    @property
+    def AblatorThickness(self):
+       	""" Query for the ablator type. """
+       	return self.__AblatorThickness
+    @Ablator.setter
+    def AblatorThickness(self, value):
+       	""" Set the ablator to the value. """
+       	self.__AblatorThickness = checkAndSetAblatorThickness(value)
+    @property
+    def Sample(self):
+       	""" Query for the Sample type. """
+       	return self.__Sample
+    @Sample.setter
+    def Sample(self, value):
+       	""" Set the ablator to the value. """
+       	self.__Sample = checkAndSetSample(value)
+    @property
+    def SampleThickness(self):
+       	""" Query for the Sample Thickness type. """
+       	return self.__SampleThickness
+    @SampleThickness.setter
+    def SampleThickness(self, value):
+       	""" Set the sample thickness to the value. """
+       	self.__SampleThickness = checkAndSetSampleThickness(value)
         
 
 ###########################
@@ -169,7 +251,8 @@ def checkAndSetAblatorThickness(AblatorThickness):
 	# Check if ablator is between 5 and 100 um
 	if AblatorThickness <= 5.0 or AblatorThickness > 100.0:
 		raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
-	
+		
+		
 	return AblatorThickness
 
 
