@@ -110,49 +110,27 @@ class HydroParameters:
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
         """
         self._setDemmargeFlags()
+        self._setWindowFlags()
         
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
     
     def _setDemmargeFlags(self):
     	self.__use_usi = "USI"
-        
+    	
+    def _setWindowFlags(self):
+    	self.__use_window = False       
         
     def _serialize(self):
-       	""" Write the input deck for the Esther hydrocode. """
-       	# Make a temporary directory
-       	self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
-        	
-    	# Write the input file
-     	input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
-     	print input_deck_path
-        with open(input_deck_path, 'w') as input_deck:
-        	input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
-        	input_deck.write('\n')
-        	input_deck.write('MILIEUX_INT_VERS_EXT\n')
-        	input_deck.write('\n')
-        	# Need a loop to create the layers from the window to the ablator
-        
-        
-    
-    def _CalculateFeather(self,AblatorThickness):
-    	"""
-    	TO DO PLACEHOLDER -------------------------------------------------------------->
-    	Used to calculate the zone thickness for the hydrocode.
-    	Can be updated later to allow user to change values (for resolution)
-    	"""
-    	
-    	# Used for displaying number of zones in each material
-    	# SHOULD BE SOMEWHERE ELSE?
+    	""" Write the input deck for the Esther hydrocode. """
     	NumberZones = [0] 
-    	
     	
     	# Default variables for feathering 
     	n = 250
-    	NumberZones[0] = n
+    	NumberZones = n
     	FeatherZoneWidth = float(5.0)
     	MinZoneWidth = float(1E-4)
-    	NonFeatherZoneWidth = self.AblatorThickness-FeatherZoneWidth
+    	NonFeatherZoneWidth = self.AblatorThickness - FeatherZoneWidth
     	
     	# Determine the correct feathering
     	list=[0]*(n+1)
@@ -173,11 +151,34 @@ class HydroParameters:
     		raise ValueError( "No ratio bigger than 1.000001 was found.")
     	
     	finalFeatherZoneWidth = round(MinZoneWidth*(r**n),4)
-    	RemainingZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
-    	NumberZones[1] = RemainingZones
-    	
-    	return NumberZones,NonFeatherZoneWidth,finalFeatherZoneWidth
-    	
+    	FeatherZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
+       	
+
+       	# Make a temporary directory
+       	self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
+        	
+    	# Write the input file
+     	input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
+     	print input_deck_path
+        with open(input_deck_path, 'w') as input_deck:
+        	input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
+        	input_deck.write('\n')
+        	input_deck.write('MILIEUX_INT_VERS_EXT\n')
+        	input_deck.write('\n')
+        	# TO DO PLACEHOLDER -------------------------------------------------------------->
+        	if self.__use_window == True:
+        		# Do window write
+        		input_deck.write('This is the window layer')
+        	input_deck.write('- %.1f um %s layer\n' % (self.SampleThickness, self.Sample))
+        	input_deck.write('NOM_MILIEU=EOS_LIST\n')
+        	input_deck.write('EQUATION_ETAT=EOS_LIST\n')
+        	if self.__use_window == False:
+        		input_deck.write('EPAISSEUR_VIDE=100e-6\n')
+        	input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.SampleThickness))
+        	input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')	
+        	
+        	       		
+    	   	
     @property
     def Ablator(self):
        	""" Query for the ablator type. """
@@ -190,7 +191,7 @@ class HydroParameters:
     def AblatorThickness(self):
        	""" Query for the ablator type. """
        	return self.__AblatorThickness
-    @Ablator.setter
+    @AblatorThickness.setter
     def AblatorThickness(self, value):
        	""" Set the ablator to the value. """
        	self.__AblatorThickness = checkAndSetAblatorThickness(value)
@@ -251,7 +252,8 @@ def checkAndSetAblatorThickness(AblatorThickness):
 	# Check if ablator is between 5 and 100 um
 	if AblatorThickness <= 5.0 or AblatorThickness > 100.0:
 		raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
-		
+	
+	print ( "Ablator thickness is %4.1f " % AblatorThickness)
 		
 	return AblatorThickness
 
