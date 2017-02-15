@@ -36,7 +36,7 @@ if not os.path.isfile(pic_file_path):
     raise RuntimeError("%s is not a file." % (pic_file_name))
 
 with h5py.File( pic_file_path, 'r' ) as h5_handle:
-    
+
     inf0 = '/data/%d/particles/e/position/' % (timestep)
     print inf0
     inf1 = '/data/%d/particles/e/momentum/' % (timestep)
@@ -48,11 +48,11 @@ with h5py.File( pic_file_path, 'r' ) as h5_handle:
     y_data = h5_handle[inf0]['y'].value;
     y_data_unit = h5_handle[inf0]['y'].attrs['unitSI'];
     y = y_data*y_data_unit;
-    
+
     z_data = h5_handle[inf0]['z'].value;
     z_data_unit = h5_handle[inf0]['z'].attrs['unitSI'];
     z = z_data*z_data_unit;
-   
+
     px_data = h5_handle[inf1]['x'].value;
     px_data_unit = h5_handle[inf1]['x'].attrs['unitSI'];
     px = px_data*px_data_unit;
@@ -60,7 +60,7 @@ with h5py.File( pic_file_path, 'r' ) as h5_handle:
     py_data = h5_handle[inf1]['y'].value;
     py_data_unit = h5_handle[inf1]['y'].attrs['unitSI'];
     py = py_data*py_data_unit;
-    
+
     pz_data = h5_handle[inf1]['z'].value;
     pz_data_unit = h5_handle[inf1]['z'].attrs['unitSI'];
     pz = pz_data*pz_data_unit;
@@ -69,20 +69,8 @@ with h5py.File( pic_file_path, 'r' ) as h5_handle:
     c0 = 3e8
     psquare = px**2 + py**2 + pz**2
     gamma = numpy.sqrt( 1. + psquare/((me*c0)**2))
-     
+
     h5_handle.close()
-    
+
 out_data = numpy.vstack([ x, px, z, pz, y, gamma]).transpose()
 numpy.savetxt( 'beam.dat', out_data)
-
-    #Genesis distributions file format: x, px, y, py, z, gamma
-    # in simData_8000.h5 y is the propagation direction
-    #DATA = cat( 6, x, px, z, pz, y, gamma);
-# Read in the electron data and form a 6D phase space distribution
- 
-# Setup datastructure for genesis
-
-# Outout
-#genesis_input_file = engine.PIC_DATA(InData_GENESIS.txt) 
-
-#print "Writing %s done." % (InData_GENESIS)
