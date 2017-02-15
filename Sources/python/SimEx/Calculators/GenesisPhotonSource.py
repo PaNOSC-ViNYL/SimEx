@@ -36,6 +36,8 @@ from scipy.constants import m_e, c
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 
+from ocelot.test.workshop import 5_Genesis_preprocessor as GenPre
+
 
 class GenesisPhotonSource(AbstractPhotonSource):
     """
@@ -59,6 +61,8 @@ class GenesisPhotonSource(AbstractPhotonSource):
 
         # Initialize base class.
         super(GenesisPhotonSource, self).__init__(parameters, input_path, output_path)
+
+        self.__
 
     def backengine(self):
 
