@@ -23,22 +23,46 @@
 
 import numpy
 import h5py
+import sys, os
+import platform
 
-pic_file_name = sys.argv([1])
-pic_file = h5py.File( pic_file_name )
 
+pic_file_name = "simData_8000.h5"
+pic_file_path = os.path.abspath(pic_file_name)
+print pic_file_path
+#  Check path.
+if not os.path.isfile(pic_file_name):
+    raise RuntimeError("%s is not a file." % (pic_file_name))
+
+
+if platform.system() == 'Linux':
+    from oct2py import octave as engine
+elif platform.system() == 'Windows':
+   import matlab.engine
+   engine = matlab.engine.start_matlab()
+
+
+#
+ml_lib_path = os.path.join(os.path.dirname(__file__))
+print ml_lib_path
+# Add path 
+if platform.system() == 'Windows':
+    engine.addpath(ml_lib_path, nargout=0)
+elif platform.system() == 'Linux':
+    engine.addpath(ml_lib_path)
+# Load .m module.
+beam_file_path = engine.pic2genesis(pic_file_path) 
+
+print beam_file_path
+
+#engine.read_pic_data(pic_file_name)
+if platform.system() == 'Windows':
+        engine.quit()
 # Read in the electron data and form a 6D phase space distribution
-
+ 
 # Setup datastructure for genesis
 
 # Outout
-genesis_beam_file_name = "beam.dat"
-with open( genesis_beam_file_name, 'w' ) as g:
-    # Write a header
-    # Write the data
-    g.write("")
+#genesis_input_file = engine.PIC_DATA(InData_GENESIS.txt) 
 
-
-    g.close()
-
-print "Writing %s done." % (genesis_beam_file_name)
+#print "Writing %s done." % (InData_GENESIS)
