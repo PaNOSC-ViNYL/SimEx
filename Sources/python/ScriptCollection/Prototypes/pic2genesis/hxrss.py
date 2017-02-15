@@ -7,6 +7,7 @@ import sys, os
 sys.path.insert(0, '/home/grotec/Codes')
 import matplotlib.pyplot as plt
 from ocelot.gui.accelerator import *
+from ocelot.utils import xfel_utils
 from ocelot.utils.xfel_utils import *
 from ocelot.cpbd.magnetic_lattice import MagneticLattice
 from ocelot.gui.genesis_plot import *
@@ -14,9 +15,8 @@ import time
 from ocelot.common.globals import *  #import of constants like "h_eV_s" and "speed_of_light"
 from ocelot.rad.undulator_params import *
 
-param_dir = '/data/netapp/xfel/svitozar/projects/XFEL/parameters/'
-sys.path.append(param_dir + 'sase1/')
-from sase1 import * #import sase1 undulator parameters
+param_dir = os.path.join( os.getcwd(), 'parameters' )
+from parameters.sase1.sase1 import * #import sase1 undulator parameters
 
 ##################################################
 ###########                            ###########
@@ -29,11 +29,10 @@ debug = 1 #show plots and write info in console
 savefig = 0 #save figures to project directory
 
 # exp_dir = '/gpfs/exfel/data/scratch/svitozar/projects/ocelot_test/Shan/Replica_2_cut_noquantum/' #directory where the output will be stored
-exp_dir = os.getcwd()
+exp_dir = os.path.join( os.getcwd(), 'exp')
 
-#beam_fileName = param_dir + 'beams/non-nominal/beam_0.02nC_wake.txt' #path to beam file
-beam_fileName = 'beamdist.dat'
-# beam_fileName = '/gpfs/exfel/data/scratch/svitozar/projects/ocelot_test/Shan/_scipt/sase2.20pC_cut.bds' #path to beam file
+#beam_fileName = os.path.join( param_dir , 'beams', 'non-nominal', 'beam_0.02nC_wake.txt') #path to beam file
+dist_fileName = os.path.join( param_dir , 'beams', 'non-nominal', '0.5nC_8.5GeV_slotted_2um_Feng_collim_core.dist') #path to dist file
 
 # Beam and photon parameters.
 beta_av = 25.0 # beta function for the ebeam in undulator
@@ -79,21 +78,24 @@ t0 = time.time()
 launcher = get_genesis_launcher()
 
 create_exp_dir(exp_dir, run_ids) # creates experimental directory with 'run_# subdirectories
-copy_this_script(os.path.basename(__file__),os.path.realpath(__file__),exp_dir) # write copy of this script to the exp_dir
+#copy_this_script(os.path.basename(__file__),os.path.realpath(__file__),exp_dir) # write copy of this script to the exp_dir
 
 # read and prepare beam file
 #beam = read_beam_file(beam_fileName)
+distribution = read_dist_file(dist_fileName)
+beam = dist2beam(distribution)
+setattr(beam,'zsep', zsep)
 # beam.ex*=1.2
 # beam.ey*=1.2
-#beam = cut_beam(beam,[-4e-6, 1e-6])
+beam = cut_beam(beam,[-4e-6, 1e-6])
 # beam=set_beam_energy(beam, E_beam)
-#beam_pk=get_beam_peak(beam) #another object containing beam parameters at peak current position, get_beam_s() gets parameters at given position s
+beam_pk=get_beam_peak(beam) #another object containing beam parameters at peak current position, get_beam_s() gets parameters at given position s
 #beam=zero_wake_at_ipk(beam)
 
 lat = MagneticLattice(sase1_segment(n=20))
 und_l=l_fodo # undulator cell length
 # lat,beam_pk=lat_beam_rematch(lat,beam_pk,beta_av) tbd
-#rematch(beta_av, l_fodo, qdh, lat, extra_fodo, beam_pk, qf, qd) # jeez...
+rematch(beta_av, l_fodo, qdh, lat, extra_fodo, beam_pk, qf, qd) # jeez...
 #beam =transform_beam_twiss(beam,transform=[ [beam_pk.beta_x,beam_pk.alpha_x], [beam_pk.beta_y,beam_pk.alpha_y] ])
 #plot_beam(beam,showfig=0,savefig=0)
 
@@ -110,9 +112,9 @@ a0 = und.Kx
 taper_func_5 = lambda n : f1(n, n0, a0, a1, a2 )
 
 lat1 = deepcopy(lat)
-lat3 = cut_lattice(lat1,N1)
-lat5 = cut_lattice(lat3,N3)
-lat5 = taper(lat5, taper_func_5)
+#lat3 = cut_lattice(lat1,N1)
+#lat5 = cut_lattice(lat3,N3)
+#lat5 = taper(lat5, taper_func_5)
 
 # possibility to override the automatic zsep calculations (based on rho)
 if zsep==0:
@@ -129,11 +131,13 @@ if start_stage <= stage and stop_stage >= stage:
         inp = generate_input(up, beam_pk, itdp=True)
         inp.stageid=stage
         inp.runid = run_id
-        inp.exp_dir = exp_dir
+        inp.run_dir = exp_dir+'run_'+str(run_id)
         # inp.ipseed = 6123*(run_id + 1)
         inp.ipseed = 26 + run_id*200
 
         inp.lat=lat1
+        inp.lattice_str = generate_lattice(lattice=lat1, energy=beam.E)
+#def generate_lattice(lattice, unit=1.0, energy = None, debug = False):
         inp.beam=beam
 
         inp.iphsty = 2 # Generate output in the main output file at each IPHSTYth integration step. To disable output set IPHSTY to zero.
@@ -159,7 +163,7 @@ if start_stage <= stage and stop_stage >= stage:
         #
         print(inp.fbess0)
 
-        out = run_genesis(inp, launcher, read_level=0)
+        out = xfel_utils.run(inp, launcher, readout=0)
 
         if savefig:
             background('''plot_gen_out_all("'''+out.filePath+'''",savefig='png',choice=(1,1,1,1,6.14,1,0,0,0,1,0),showfig=False)''')
