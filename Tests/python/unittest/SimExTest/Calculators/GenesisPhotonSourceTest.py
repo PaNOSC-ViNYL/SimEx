@@ -1,0 +1,103 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                              #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+#                                                                        #
+##########################################################################
+
+""" Test module for the GenesisPhotonSource.
+
+    @author : CFG
+    @institution : XFEL
+    @creation 20170215
+
+"""
+import paths
+import unittest
+
+import numpy
+import h5py
+import os
+
+# Import the class to test.
+from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
+from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
+from TestUtilities import TestUtilities
+
+class GenesisPhotonSourceTest(unittest.TestCase):
+    """
+    Test class for the GenesisPhotonSource class.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+
+    def tearDown(self):
+        """ Tearing down a test. """
+
+    def testConstructionNativeBeamFile(self):
+        """ Testing the construction of the class with a native genesis beam file."""
+
+        # Construct the object.
+        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('genesis_beam.dat'))
+
+        self.assertIsInstance(xfel_source, AbstractPhotonSource)
+        self.assertIsInstance(xfel_source, GenesisPhotonSource)
+
+    def testConstructionPicH5(self):
+        """ Testing the construction of the class with a given PIC snapshot. """
+
+        # Construct the object.
+        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'))
+
+        self.assertIsInstance(xfel_source, AbstractPhotonSource)
+        self.assertIsInstance(xfel_source, GenesisPhotonSource)
+
+    def testReadH5(self):
+        """ Testing the read function and conversion of openpmd input to native beam file."""
+
+        # Construct the object.
+        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
+
+        xfel_source._readH5()
+        self.assertTrue( hasattr( xfel_source, '_GenesisPhotonSource__input_data' ) )
+
+    def testBackengine(self):
+        """ Testing the read function and conversion of openpmd input to native beam file."""
+
+        # Construct the object.
+        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
+
+        xfel_source._readH5()
+
+        xfel_source.backengine()
+
+        self.assertTrue( os.path.isfile( 'beam.dat' ) )
+
+
+if __name__ == '__main__':
+    unittest.main()
+
