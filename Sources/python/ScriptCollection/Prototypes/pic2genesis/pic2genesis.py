@@ -27,37 +27,57 @@ import sys, os
 import platform
 
 
-pic_file_name = "simData_8000.h5"
-pic_file_path = os.path.abspath(pic_file_name)
+pic_file_name = "simData_8000.h5" # relative to cwd.
+timestep = 8000
+pic_file_path = os.path.abspath( os.path.join( os.path.dirname(__file__), pic_file_name))
 print pic_file_path
 #  Check path.
-if not os.path.isfile(pic_file_name):
+if not os.path.isfile(pic_file_path):
     raise RuntimeError("%s is not a file." % (pic_file_name))
 
+with h5py.File( pic_file_path, 'r' ) as h5_handle:
+    
+    inf0 = '/data/%d/particles/e/position/' % (timestep)
+    print inf0
+    inf1 = '/data/%d/particles/e/momentum/' % (timestep)
 
-if platform.system() == 'Linux':
-    from oct2py import octave as engine
-elif platform.system() == 'Windows':
-   import matlab.engine
-   engine = matlab.engine.start_matlab()
+    x_data = h5_handle[inf0]['x'].value;
+    x_data_unit = h5_handle[inf0]['x'].attrs['unitSI'];
+    x = x_data*x_data_unit;
 
+    y_data = h5_handle[inf0]['y'].value;
+    y_data_unit = h5_handle[inf0]['y'].attrs['unitSI'];
+    y = y_data*y_data_unit;
+    
+    z_data = h5_handle[inf0]['z'].value;
+    z_data_unit = h5_handle[inf0]['z'].attrs['unitSI'];
+    z = z_data*z_data_unit;
+   
+    px_data = h5_handle[inf1]['x'].value;
+    px_data_unit = h5_handle[inf1]['x'].attrs['unitSI'];
+    px = px_data*px_data_unit;
 
-#
-ml_lib_path = os.path.join(os.path.dirname(__file__))
-print ml_lib_path
-# Add path 
-if platform.system() == 'Windows':
-    engine.addpath(ml_lib_path, nargout=0)
-elif platform.system() == 'Linux':
-    engine.addpath(ml_lib_path)
-# Load .m module.
-beam_file_path = engine.pic2genesis(pic_file_path) 
+    py_data = h5_handle[inf1]['y'].value;
+    py_data_unit = h5_handle[inf1]['y'].attrs['unitSI'];
+    py = py_data*py_data_unit;
+    
+    pz_data = h5_handle[inf1]['z'].value;
+    pz_data_unit = h5_handle[inf1]['z'].attrs['unitSI'];
+    pz = pz_data*pz_data_unit;
 
-print beam_file_path
+    me = 9.1E-31
+    c0 = 3e8
+    psquare = px**2 + py**2 + pz**2
+    gamma = numpy.sqrt( 1. + psquare/((me*c0)**2))
+     
+    h5_handle.close()
+    
+out_data = numpy.vstack([ x, px, z, pz, y, gamma]).transpose()
+numpy.savetxt( 'beam.dat', out_data)
 
-#engine.read_pic_data(pic_file_name)
-if platform.system() == 'Windows':
-        engine.quit()
+    #Genesis distributions file format: x, px, y, py, z, gamma
+    # in simData_8000.h5 y is the propagation direction
+    #DATA = cat( 6, x, px, z, pz, y, gamma);
 # Read in the electron data and form a 6D phase space distribution
  
 # Setup datastructure for genesis
