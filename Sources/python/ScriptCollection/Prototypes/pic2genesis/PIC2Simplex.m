@@ -34,14 +34,6 @@ pz_data = h5read(filename000,strcat(inf1,'z'));
 pz_data_unit = hdf5read(filename000,strcat(inf1,'z'),'unitSI');
 pz = pz_data*pz_data_unit;
 
-charge = h5read(filename000, inf2);
-charge_unit = hdf5read(filename000,inf2,'unitSI');
-charge = charge*charge_unit;
-
-numParticles = h5read(filename000, inf3);
-numParticles_unit = hdf5read(filename000, inf3,'unitSI');
-numParticles = numParticles*numParticles_unit;
-
 me = 9.1E-31;
 c0 = 3e8;
 psquare = px.^2 + py.^2 + pz.^2;
@@ -53,7 +45,7 @@ timey = y./c0;
 Energy = 0.511*gamma;
 
 
-DATA = cat( 8, charge, numParticles, timey, x, thetax, z, thetaz, gamma);
+DATA = cat( 8, timey, x, thetax, z, thetaz, Energy);
 
 dlmwrite('Data_PIC2Simplex.txt',DATA,'delimiter','\t');
 
