@@ -84,13 +84,13 @@ def pic2genesis( pic_file_name):
         
         # Get number of particles and total charge.
         particle_patches = h5_handle['/data/%s/particles/e/particlePatches/numParticles' %(timestep)].value
-        total_number_of_electrons = numpy.sum( particle_patches )
-        total_charge = total_number_of_electrons * charge 
+        total_number_of_particles = numpy.sum( particle_patches )
+        total_charge = total_number_of_particles * charge 
 
         # Calculate momentum
         psquare = px**2 + py**2 + pz**2
         #gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
-        P = numpy.sqrt(psquare/((total_number_of_electrons * m_e*c)**2))
+        P = numpy.sqrt(psquare/((total_number_of_particles * m_e*c)**2))
         
         h5_handle.close()
         

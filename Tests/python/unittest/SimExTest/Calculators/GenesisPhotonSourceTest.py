@@ -97,7 +97,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         """ Tests the method that sets up input files and directories for a genesis run. """
 
         # Ensure proper cleanup.
-        self.__files_to_remove.append("beam.dist")
+        #self.__files_to_remove.append("beam.dist")
 
         # Construct the object.
         xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
@@ -134,7 +134,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
         xfel_source.backengine()
 
-        self.assertTrue( os.path.isfile( 'beam.dat' ) )
+        self.assertTrue( os.path.isfile( 'beam.dist' ) )
 
 
 if __name__ == '__main__':

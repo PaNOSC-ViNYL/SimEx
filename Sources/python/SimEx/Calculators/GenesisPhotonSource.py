@@ -96,7 +96,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
 
     def _readH5(self):
         """ """
-        self.__input_data, self.__charge = pic2genesis( self.__input_path )
+        self.__input_data, self.__charge = pic2genesis( self.input_path )
 
 
     def saveH5(self):
