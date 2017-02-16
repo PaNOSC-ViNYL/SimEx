@@ -113,12 +113,13 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         self.assertIn( genesis_dist_file, os.listdir(os.getcwd()) )
 
         # Check distribution file header.
-        with open(genesis_dist_file) as dist_file:
-            header = dist_file.readlines()[:4]
-            self.assertEqual("? VERSION = 1.0\n", header[0])
-            self.assertIn("? SIZE = ", header[1])
-            self.assertIn("? CHARGE = ", header[2])
-            self.assertEqual("? COLUMNS X XPRIME Y YPRIME T P\n", header[3])
+        with open(genesis_dist_file, 'r') as dist_file:
+            self.assertEqual("? VERSION = 1.0\n", dist_file.readline())
+            self.assertIn("? SIZE = ", dist_file.readline())
+            self.assertIn("? CHARGE = ", dist_file.readline())
+            self.assertEqual("? COLUMNS X XPRIME Y YPRIME T P\n", dist_file.readline())
+
+            dist_file.close()
 
     def testBackengine(self):
         """ Testing the read function and conversion of openpmd input to native beam file."""
