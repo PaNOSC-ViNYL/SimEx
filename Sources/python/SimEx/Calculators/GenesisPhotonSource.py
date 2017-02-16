@@ -36,7 +36,7 @@ from scipy.constants import m_e, c
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 
-from ScriptCollection.Prototypes.pic2genesis.pic2genesis import pic2genesis
+from ScriptCollection.Prototypes.pic2genesis.pic2dist import pic2dist
 
 #from ocelot.test.workshop import 5_Genesis_preprocessor as GenPre
 
@@ -96,7 +96,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
 
     def _readH5(self):
         """ """
-        self.__input_data, self.__charge = pic2genesis( self.input_path )
+        self.__input_data, self.__charge = pic2dist( self.input_path, 'genesis' )
         return
 
         ### TODO: Support beam file/ dist file input.
