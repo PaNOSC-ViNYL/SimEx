@@ -19,7 +19,7 @@
 #                                                                        #
 ##########################################################################
 
-""" :module pic2genesis: Script to convert openpmd output from picongpu to a genesis beam.dat file. """
+""" :module pic2dist: Script to convert openpmd output from picongpu to a genesis beam.dat file. """
 
 import numpy
 import h5py
@@ -27,10 +27,15 @@ import sys, os
 
 from scipy.constants import m_e, c, e
 
-def pic2genesis( pic_file_name):
+def pic2dist( pic_file_name, target='genesis'):
     """ Utility to extract particle data from openPMD and write into genesis distribution file.
     
-    :params pic_file_name: Filename of openpmd input data file.
+    :param pic_file_name: Filename of openpmd input data file.
+    :type pic_file_name: str
+
+    :param target: The targeted file format (genesis || simplex).
+    :type target: str
+
     """
     
     #  Check path.
@@ -61,8 +66,6 @@ def pic2genesis( pic_file_name):
         px_data_unit = h5_handle[h5_momenta]['x'].attrs['unitSI']
         px = px_data*px_data_unit
         
-
-
         py_data = h5_handle[h5_momenta]['y'].value
         py_data_unit = h5_handle[h5_momenta]['y'].attrs['unitSI']
         py = py_data*py_data_unit
@@ -88,21 +91,31 @@ def pic2genesis( pic_file_name):
 
         # Calculate momentum
         psquare = px**2 + py**2 + pz**2
-        #gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
+        gamma = numpy.sqrt( 1. + psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
         P = numpy.sqrt(psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
+
         print "Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle
         print "Total charge = ", total_charge
         print "Number of macroparticles = ", number_of_macroparticles
+        
         h5_handle.close()
         
-        return numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose(),  total_charge
+    if target == 'genesis':
+	return numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose(),  total_charge
+    elif target == 'simplex':
+	return numpy.vstack([ y/c, x, xprime, z, zprime,  gamma]).transpose(),  total_charge
+		
+		
 
 if __name__ == "__main__":
-    data, charge = pic2genesis(sys.argv[1])
+    data, charge = pic2dist(sys.argv[1], sys.argv[2])
     # Setup header for distribution file.
     comments = "? "
     size = data.shape[0]
     header = "VERSION = 1.0\nSIZE = %d\nCHARGE = %7.6E\nCOLUMNS X XPRIME Y YPRIME T P" % (size, charge)
 
-    numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
+    if sys.argv[2] == 'genesis':
+        numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
+    if sys.argv[2] == 'simplex':
+        numpy.savetxt( fname='beam.dist', X=data)
 
