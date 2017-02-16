@@ -36,6 +36,8 @@ from scipy.constants import m_e, c
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 
+from ScriptCollection.Prototypes.pic2genesis.pic2genesis import pic2genesis
+
 #from ocelot.test.workshop import 5_Genesis_preprocessor as GenPre
 
 
@@ -94,70 +96,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
 
     def _readH5(self):
         """ """
-
-        # Check if input is native or openPMD.
-        with h5py.File( self.input_path, 'r' ) as h5_handle:
-
-            timestep = h5_handle['data'].keys()[-1]
-
-            h5_positions = '/data/%s/particles/e/position/' % (timestep)
-            h5_momenta = '/data/%s/particles/e/momentum/' % (timestep)
-
-            x_data = h5_handle[h5_positions]['x'].value
-            x_data_unit = h5_handle[h5_positions]['x'].attrs['unitSI']
-            x = x_data*x_data_unit
-
-            y_data = h5_handle[h5_positions]['y'].value
-            y_data_unit = h5_handle[h5_positions]['y'].attrs['unitSI']
-            y = y_data*y_data_unit
-
-            z_data = h5_handle[h5_positions]['z'].value
-            z_data_unit = h5_handle[h5_positions]['z'].attrs['unitSI']
-            z = z_data*z_data_unit
-
-            px_data = h5_handle[h5_momenta]['x'].value
-            px_data_unit = h5_handle[h5_momenta]['x'].attrs['unitSI']
-            px = px_data*px_data_unit
-            
-
-
-            py_data = h5_handle[h5_momenta]['y'].value
-            py_data_unit = h5_handle[h5_momenta]['y'].attrs['unitSI']
-            py = py_data*py_data_unit
-
-            pz_data = h5_handle[h5_momenta]['z'].value
-            pz_data_unit = h5_handle[h5_momenta]['z'].attrs['unitSI']
-            pz = pz_data*pz_data_unit
-            
-            # Convert to xprime, yprime.
-            xprime = numpy.arctan(px/py)
-            zprime = numpy.arctan(pz/py)            
-            
-            # Calculate particle charge.
-            charge_group = h5_handle['/data/%d/particles/e/charge/' %(timestep)]
-    
-            charge_value = charge_group.attrs['value']
-            charge_unit = charge_group.attrs['unitSI']
-            charge = charge_value * charge_unit # 1e in As
-            
-            # Get number of particles and total charge.
-            particle_patches = h5_handle['/data/%d/particles/e/particlePatches/numParticles' %(timestep)].value
-            total_number_of_electrons = numpy.sum( particle_patches )
-            total_charge = total_number_of_electrons * charge
-    
-            # Calculate momentum
-            psquare = px**2 + py**2 + pz**2
-            #gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
-            P = numpy.sqrt(psquare/((m_e*c)**2))
-            
-            # Store on object.
-            self.__input_data = numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose()
-            self.__charge = total_charge
-
-            return
-
-        ### TODO: Support beam file/ dist file input.
-        #self.__input_data = numpy.loadtxt( self.__input_path )
+        self.__input_data, self.__charge = pic2genesis( self.__input_path )
 
 
     def saveH5(self):
