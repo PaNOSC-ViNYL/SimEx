@@ -64,7 +64,20 @@ with h5py.File( pic_file_path, 'r' ) as h5_handle:
     pz_data = h5_handle[inf1]['z'].value;
     pz_data_unit = h5_handle[inf1]['z'].attrs['unitSI'];
     pz = pz_data*pz_data_unit;
-
+    
+    charge_group = h5_handle['/data/%d/particles/e/charge/' %(timestep)]
+    
+    charge_value = charge_group.attrs['value']
+    charge_unit = charge_group.attrs['unitSI']
+    charge = charge_value * charge_unit # 1e in As
+    
+    particle_patches = h5_handle['/data/%d/particles/e/particlePatches/numParticles' %(timestep)].value
+    total_number_of_electrons = numpy.sum( particle_patches )
+    
+    total_charge = total_number_of_electrons * charge
+    
+    print total_charge
+    
     me = 9.1E-31
     c0 = 3e8
     psquare = px**2 + py**2 + pz**2

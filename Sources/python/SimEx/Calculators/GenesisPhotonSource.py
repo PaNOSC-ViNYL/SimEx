@@ -126,7 +126,18 @@ class GenesisPhotonSource(AbstractPhotonSource):
             pz_data = h5_handle[h5_momenta]['z'].value
             pz_data_unit = h5_handle[h5_momenta]['z'].attrs['unitSI']
             pz = pz_data*pz_data_unit
-
+            
+            charge_group = h5_handle['/data/%d/particles/e/charge/' %(timestep)]
+    
+            charge_value = charge_group.attrs['value']
+            charge_unit = charge_group.attrs['unitSI']
+            charge = charge_value * charge_unit # 1e in As
+    
+            particle_patches = h5_handle['/data/%d/particles/e/particlePatches/numParticles' %(timestep)].value
+            total_number_of_electrons = numpy.sum( particle_patches )
+    
+            total_charge = total_number_of_electrons * charge
+    
             psquare = px**2 + py**2 + pz**2
             gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
 
@@ -134,7 +145,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
             self.__input_data = numpy.vstack([ x, px, z, pz, y, gamma]).transpose()
 
             ### TODO Get total charge from h5 file.
-            self.__charge = 1.e-10
+            self.__charge = total_charge
 
             return
 
