@@ -25,7 +25,7 @@ import numpy
 import h5py
 import sys, os
 
-from scipy.constants import m_e, c
+from scipy.constants import m_e, c, e
 
 def pic2genesis( pic_file_name):
     """ Utility to extract particle data from openPMD and write into genesis distribution file.
@@ -77,20 +77,23 @@ def pic2genesis( pic_file_name):
         
         # Calculate particle charge.
         charge_group = h5_handle['/data/%s/particles/e/charge/' %(timestep)]
-
-        charge_value = charge_group.attrs['value']
-        charge_unit = charge_group.attrs['unitSI']
-        charge = charge_value * charge_unit * (-1.) # 1e in As
+        macroparticle_charge = charge_group.attrs['unitSI']
         
         # Get number of particles and total charge.
         particle_patches = h5_handle['/data/%s/particles/e/particlePatches/numParticles' %(timestep)].value
-        total_number_of_electrons = numpy.sum( particle_patches )
-        total_charge = total_number_of_electrons * charge 
+        number_of_macroparticles = numpy.sum( particle_patches )
+    
+        number_of_electrons_per_macroparticle = macroparticle_charge / e
+        total_charge = number_of_macroparticles * macroparticle_charge 
 
         # Calculate momentum
         psquare = px**2 + py**2 + pz**2
         #gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
-        P = numpy.sqrt(psquare/((total_number_of_electrons * m_e*c)**2))
+
+        P = numpy.sqrt(psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
+        print "Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle
+        print "Total charge = ", total_charge
+        print "Number of macroparticles = ", number_of_macroparticles
         
         h5_handle.close()
         
