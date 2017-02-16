@@ -97,6 +97,10 @@ class GenesisPhotonSource(AbstractPhotonSource):
     def _readH5(self):
         """ """
         self.__input_data, self.__charge = pic2genesis( self.input_path )
+        return
+
+        ### TODO: Support beam file/ dist file input.
+        #self.__input_data = numpy.loadtxt( self.__input_path )
 
 
     def saveH5(self):

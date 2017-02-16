@@ -32,18 +32,21 @@ savefig = 0 #save figures to project directory
 exp_dir = os.path.join( os.getcwd(), 'exp')
 
 #beam_fileName = os.path.join( param_dir , 'beams', 'non-nominal', 'beam_0.02nC_wake.txt') #path to beam file
-dist_fileName = os.path.join( param_dir , 'beams', 'non-nominal', '0.5nC_8.5GeV_slotted_2um_Feng_collim_core.dist') #path to dist file
+#dist_fileName = os.path.join( param_dir , 'beams', 'non-nominal', '0.5nC_8.5GeV_slotted_2um_Feng_collim_core.dist') #path to dist file
+dist_fileName = 'beam.dist'
 
 # Beam and photon parameters.
 beta_av = 25.0 # beta function for the ebeam in undulator
-E_beam = 17.5   # Electon beam energy (e.g.14.4) [GeV]
-E_photon   = 15000.0   # FEL Resonance photon energy e.g. 8000.0 [eV]
+E_beam = 2.0   # Electon beam energy (e.g.14.4) [GeV]
+E_photon   = 800.0   # FEL Resonance photon energy e.g. 8000.0 [eV]
 
 # Range of statistical runs to execute, from 0 to n-1 - (0,n)
-run_ids = range(1,11)
+#run_ids = range(1,11)
+run_ids = [1]
 # Simulation stages to execute
 start_stage = 0
-stop_stage = 6
+#stop_stage = 6
+stop_stage = 1
 
 # Length of undulator cells for stages 1,3,5
 N1 = 7
@@ -83,7 +86,12 @@ create_exp_dir(exp_dir, run_ids) # creates experimental directory with 'run_# su
 # read and prepare beam file
 #beam = read_beam_file(beam_fileName)
 distribution = read_dist_file(dist_fileName)
-beam = dist2beam(distribution)
+beam = dist2beam(distribution, step=1e-9)
+###############################################
+import ipdb
+ipdb.set_trace()
+###############################################
+
 setattr(beam,'zsep', zsep)
 # beam.ex*=1.2
 # beam.ey*=1.2
@@ -136,7 +144,7 @@ if start_stage <= stage and stop_stage >= stage:
         inp.ipseed = 26 + run_id*200
 
         inp.lat=lat1
-        inp.lattice_str = generate_lattice(lattice=lat1, energy=beam.E)
+        inp.lattice_str = generate_lattice(lattice=lat1, energy=E_beam)
 #def generate_lattice(lattice, unit=1.0, energy = None, debug = False):
         inp.beam=beam
 
