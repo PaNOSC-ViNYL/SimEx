@@ -118,6 +118,8 @@ class GenesisPhotonSource(AbstractPhotonSource):
             px_data = h5_handle[h5_momenta]['x'].value
             px_data_unit = h5_handle[h5_momenta]['x'].attrs['unitSI']
             px = px_data*px_data_unit
+            
+
 
             py_data = h5_handle[h5_momenta]['y'].value
             py_data_unit = h5_handle[h5_momenta]['y'].attrs['unitSI']
@@ -127,30 +129,35 @@ class GenesisPhotonSource(AbstractPhotonSource):
             pz_data_unit = h5_handle[h5_momenta]['z'].attrs['unitSI']
             pz = pz_data*pz_data_unit
             
+            # Convert to xprime, yprime.
+            xprime = numpy.arctan(px/py)
+            zprime = numpy.arctan(pz/py)            
+            
+            # Calculate particle charge.
             charge_group = h5_handle['/data/%d/particles/e/charge/' %(timestep)]
     
             charge_value = charge_group.attrs['value']
             charge_unit = charge_group.attrs['unitSI']
             charge = charge_value * charge_unit # 1e in As
-    
+            
+            # Get number of particles and total charge.
             particle_patches = h5_handle['/data/%d/particles/e/particlePatches/numParticles' %(timestep)].value
             total_number_of_electrons = numpy.sum( particle_patches )
-    
             total_charge = total_number_of_electrons * charge
     
+            # Calculate momentum
             psquare = px**2 + py**2 + pz**2
-            gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
-
-            ### TODO: Adjust format.
-            self.__input_data = numpy.vstack([ x, px, z, pz, y, gamma]).transpose()
-
-            ### TODO Get total charge from h5 file.
+            #gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
+            P = numpy.sqrt(psquare/((m_e*c)**2))
+            
+            # Store on object.
+            self.__input_data = numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose()
             self.__charge = total_charge
 
             return
 
-        # Reach here only in case the file is a native beam file.
-        self.__input_data = numpy.loadtxt( self.__input_path )
+        ### TODO: Support beam file/ dist file input.
+        #self.__input_data = numpy.loadtxt( self.__input_path )
 
 
     def saveH5(self):
