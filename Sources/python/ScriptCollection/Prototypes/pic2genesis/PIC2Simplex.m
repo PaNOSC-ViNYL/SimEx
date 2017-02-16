@@ -7,6 +7,8 @@ timestep = 8000;
 filename000 = strcat('simData_',int2str(timestep),'.h5');
 inf0 = strcat('/data/',int2str(timestep),'/particles/e/position/');
 inf1 = strcat('/data/',int2str(timestep),'/particles/e/momentum/');
+inf2 = strcat('/data/',int2str(timestep),'/particles/e/charge/');
+inf3 = strcat('/data/',int2str(timestep),'/particles/e/particlePatches/numParticles/');
 
 x_data = h5read(filename000,strcat(inf0,'x'));
 x_data_unit = hdf5read(filename000,strcat(inf0,'x'),'unitSI');
@@ -32,6 +34,8 @@ pz_data = h5read(filename000,strcat(inf1,'z'));
 pz_data_unit = hdf5read(filename000,strcat(inf1,'z'),'unitSI');
 pz = pz_data*pz_data_unit;
 
+
+
 me = 9.1E-27;
 c0 = 3e8;
 psquare = px.^2 + py.^2 + pz.^2;
@@ -44,7 +48,6 @@ Energy = 0.511*gamma;
 
 
 DATA = cat( 6, timey, x, thetax, z, thetaz, gamma);
-
 
 dlmwrite('Data_PIC2Simplex.txt',DATA,'delimiter','\t');
 
