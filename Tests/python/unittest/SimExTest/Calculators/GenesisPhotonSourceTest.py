@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -54,9 +54,17 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
     def setUp(self):
         """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__dirs_to_remove = []
 
     def tearDown(self):
         """ Tearing down a test. """
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for d in self.__dirs_to_remove:
+            if os.path.isdir(d):
+                shutil.rmtree(d)
 
     def testConstructionNativeBeamFile(self):
         """ Testing the construction of the class with a native genesis beam file."""
@@ -85,8 +93,38 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         xfel_source._readH5()
         self.assertTrue( hasattr( xfel_source, '_GenesisPhotonSource__input_data' ) )
 
+    def testPrepareRun(self):
+        """ Tests the method that sets up input files and directories for a genesis run. """
+
+        # Ensure proper cleanup.
+        self.__files_to_remove.append("beam.dist")
+
+        # Construct the object.
+        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
+
+        # Read the input distribution.
+        xfel_source._readH5()
+
+        # Prepare the run.
+        xfel_source._prepareGenesisRun()
+
+        # Check input files were written.
+        genesis_dist_file = "beam.dist"
+        self.assertIn( genesis_dist_file, os.listdir(os.getcwd()) )
+
+        # Check distribution file header.
+        with open(genesis_dist_file) as dist_file:
+            header = dist_file.readlines()[:4]
+            self.assertEqual("? VERSION = 1.0\n", header[0])
+            self.assertIn("? SIZE = ", header[1])
+            self.assertIn("? CHARGE = ", header[2])
+            self.assertEqual("? COLUMNS X XPRIME Y YPRIME T P\n", header[3])
+
     def testBackengine(self):
         """ Testing the read function and conversion of openpmd input to native beam file."""
+
+        # Ensure proper cleanup.
+        self.__files_to_remove.append("beam.dist")
 
         # Construct the object.
         xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')

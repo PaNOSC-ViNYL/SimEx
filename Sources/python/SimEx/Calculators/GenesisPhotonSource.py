@@ -62,12 +62,22 @@ class GenesisPhotonSource(AbstractPhotonSource):
         # Initialize base class.
         super(GenesisPhotonSource, self).__init__(parameters, input_path, output_path)
 
+    def _prepareGenesisRun(self):
+        """ """
+        """ Private method to setup the genesis run. """
+
+        # Setup header for distribution file.
+        comments = "? "
+        size = self.__input_data.shape[0]
+        header = "VERSION = 1.0\nSIZE = %d\nCHARGE = %7.6E\nCOLUMNS X XPRIME Y YPRIME T P" % (size, self.__charge)
+
+        numpy.savetxt( fname='beam.dist', X=self.__input_data, header=header, comments=comments)
 
     def backengine(self):
 
-        numpy.savetxt( 'beam.dat', self.__input_data)
+        self._prepareGenesisRun()
 
-        command_sequence = 'genesis < beam.dat'
+        command_sequence = 'genesis < beam.dist'
 
         # Run the backengine command.
         proc = subprocess.Popen(command_sequence, shell=True)
@@ -120,7 +130,11 @@ class GenesisPhotonSource(AbstractPhotonSource):
             psquare = px**2 + py**2 + pz**2
             gamma = numpy.sqrt( 1. + psquare/((m_e*c)**2))
 
+            ### TODO: Adjust format.
             self.__input_data = numpy.vstack([ x, px, z, pz, y, gamma]).transpose()
+
+            ### TODO Get total charge from h5 file.
+            self.__charge = 1.e-10
 
             return
 
