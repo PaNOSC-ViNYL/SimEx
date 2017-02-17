@@ -38,7 +38,7 @@ from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 
 from ScriptCollection.Prototypes.pic2genesis.pic2dist import pic2dist
 
-#from ocelot.test.workshop import 5_Genesis_preprocessor as GenPre
+from ocelot.adaptors import genesis
 
 
 class GenesisPhotonSource(AbstractPhotonSource):
@@ -68,16 +68,45 @@ class GenesisPhotonSource(AbstractPhotonSource):
         """ """
         """ Private method to setup the genesis run. """
 
-        # Setup header for distribution file.
-        comments = "? "
-        size = self.__input_data.shape[0]
-        header = "VERSION = 1.0\nSIZE = %d\nCHARGE = %7.6E\nCOLUMNS X XPRIME Y YPRIME T P" % (size, self.__charge)
+        # Setup empty distribution.
+        edist = GenesisElectronDist()
 
-        numpy.savetxt( fname='beam.dist', X=self.__input_data, header=header, comments=comments)
+        # Fill in the data. Reverse time axis.
+        edist.x  = self.__input_data[:,0].flipud()
+        edist.xp = self.__input_data[:,1].flipud()
+        edist.y  = self.__input_data[:,2].flipud()
+        edist.yp = self.__input_data[:,3].flipud()
+        edist.t  = self.__input_data[:,4].flipud()
+        edist.g  = self.__input_data[:,5].flipud()
+        edist.part_charge = charge / edist.len()
+
+        # Produce a genesis beam
+        self.__beam = genesis.edist2beam(edist, step=self.parameters.time_averaging_window)
+
+        # Generate genesis input with defaults and guesses from beam peak parameters.
+        genesis_input = genesis.generate_input( up = self.parameters.undulator_parameters,
+                                                       beam=genesis.get_beam_peak(beam),
+                                                       itdp=self.parameters.is_time_dependent )
+
+        # Merge guessed and external input.
+        if self.__genesis_input is not None:
+            for key,value in self.__genesis_input.__dict__.items():
+                if value != 0.0:
+                    setattr(genesis_input, key, value)
+
+        # Store merged genesis input.
+        self.__genesis_input = genesis_input
+
+        # Set beam to actual beam, not the peak parameters.
+        self.__genesis_input.beam = self.__beam
+
 
     def backengine(self):
 
         self._prepareGenesisRun()
+
+        # Write genesis files to disk.
+        # Run  genesis
 
         command_sequence = 'genesis < beam.dist'
 
