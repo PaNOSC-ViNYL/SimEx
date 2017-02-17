@@ -29,7 +29,7 @@ from scipy.constants import m_e, c, e
 
 def pic2dist( pic_file_name, target='genesis'):
     """ Utility to extract particle data from openPMD and write into genesis distribution file.
-    
+
     :param pic_file_name: Filename of openpmd input data file.
     :type pic_file_name: str
 
@@ -37,11 +37,11 @@ def pic2dist( pic_file_name, target='genesis'):
     :type target: str
 
     """
-    
+
     #  Check path.
     if not os.path.isfile(pic_file_name):
         raise RuntimeError("%s is not a file." % (pic_file_name))
-        
+
     # Check if input is native or openPMD.
     with h5py.File( pic_file_name, 'r' ) as h5_handle:
 
@@ -65,7 +65,7 @@ def pic2dist( pic_file_name, target='genesis'):
         px_data = h5_handle[h5_momenta]['x'].value
         px_data_unit = h5_handle[h5_momenta]['x'].attrs['unitSI']
         px = px_data*px_data_unit
-        
+
         py_data = h5_handle[h5_momenta]['y'].value
         py_data_unit = h5_handle[h5_momenta]['y'].attrs['unitSI']
         py = py_data*py_data_unit
@@ -73,21 +73,21 @@ def pic2dist( pic_file_name, target='genesis'):
         pz_data = h5_handle[h5_momenta]['z'].value
         pz_data_unit = h5_handle[h5_momenta]['z'].attrs['unitSI']
         pz = pz_data*pz_data_unit
-        
+
         # Convert to xprime, yprime.
         xprime = numpy.arctan(px/py)
-        zprime = numpy.arctan(pz/py)            
-        
+        zprime = numpy.arctan(pz/py)
+
         # Calculate particle charge.
         charge_group = h5_handle['/data/%s/particles/e/charge/' %(timestep)]
         macroparticle_charge = charge_group.attrs['unitSI']
-        
+
         # Get number of particles and total charge.
         particle_patches = h5_handle['/data/%s/particles/e/particlePatches/numParticles' %(timestep)].value
         number_of_macroparticles = numpy.sum( particle_patches )
-    
+
         number_of_electrons_per_macroparticle = macroparticle_charge / e
-        total_charge = number_of_macroparticles * macroparticle_charge 
+        total_charge = number_of_macroparticles * macroparticle_charge
 
         # Calculate momentum
         psquare = px**2 + py**2 + pz**2
@@ -97,15 +97,15 @@ def pic2dist( pic_file_name, target='genesis'):
         print "Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle
         print "Total charge = ", total_charge
         print "Number of macroparticles = ", number_of_macroparticles
-        
+
         h5_handle.close()
-        
+
     if target == 'genesis':
-	return numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose(),  total_charge
+	    return numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose(),  total_charge
     elif target == 'simplex':
-	return numpy.vstack([ y/c, x, xprime, z, zprime,  gamma]).transpose(),  total_charge
-		
-		
+	    return numpy.vstack([ y/c, x, xprime, z, zprime,  gamma]).transpose(),  total_charge
+
+
 
 if __name__ == "__main__":
     data, charge = pic2dist(sys.argv[1], sys.argv[2])
