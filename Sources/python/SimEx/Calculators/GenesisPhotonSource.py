@@ -69,7 +69,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
         """ Private method to setup the genesis run. """
 
         # Setup empty distribution.
-        edist = GenesisElectronDist()
+        edist = genesis.GenesisElectronDist()
 
         # Fill in the data. Reverse time axis.
         edist.x  = self.__input_data[:,0].flipud()
@@ -81,7 +81,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
         edist.part_charge = charge / edist.len()
 
         # Produce a genesis beam
-        self.__beam = genesis.edist2beam(edist, step=self.parameters.time_averaging_window)
+        self.__genesis_beam = genesis.edist2beam(edist, step=self.parameters.time_averaging_window)
 
         # Generate genesis input with defaults and guesses from beam peak parameters.
         genesis_input = genesis.generate_input( up = self.parameters.undulator_parameters,
@@ -98,15 +98,21 @@ class GenesisPhotonSource(AbstractPhotonSource):
         self.__genesis_input = genesis_input
 
         # Set beam to actual beam, not the peak parameters.
-        self.__genesis_input.beam = self.__beam
+        self.__genesis_input.beam = self.__genesis_beam
+
+        # Call "run_genesis" to setup run directories, which also issues the launcher.launch() command, which, naturall, fails here.
+        try:
+            genesis.run_genesis( self.__genesis_input, launcher=None, debug=0)
+        except RuntimeError:
+            pass
+        except:
+            raise
 
 
     def backengine(self):
 
+        # Setup genesis backengine.
         self._prepareGenesisRun()
-
-        # Write genesis files to disk.
-        # Run  genesis
 
         command_sequence = 'genesis < beam.dist'
 

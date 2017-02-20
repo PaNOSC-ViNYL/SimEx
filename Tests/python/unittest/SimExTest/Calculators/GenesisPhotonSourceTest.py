@@ -36,6 +36,7 @@ import os
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
+from ocelot.adaptors import genesis
 from TestUtilities import TestUtilities
 
 class GenesisPhotonSourceTest(unittest.TestCase):
@@ -96,9 +97,6 @@ class GenesisPhotonSourceTest(unittest.TestCase):
     def testPrepareRun(self):
         """ Tests the method that sets up input files and directories for a genesis run. """
 
-        # Ensure proper cleanup.
-        #self.__files_to_remove.append("beam.dist")
-
         # Construct the object.
         xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
 
@@ -108,18 +106,10 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         # Prepare the run.
         xfel_source._prepareGenesisRun()
 
-        # Check input files were written.
-        genesis_dist_file = "beam.dist"
-        self.assertIn( genesis_dist_file, os.listdir(os.getcwd()) )
+        # Check generated data.
+        self.assertIsInstance( xfel_source._GenesisPhotonSource__genesis_input, genesis.GenesisInput )
+        self.assertIsInstance( xfel_source._GenesisPhotonSource__genesis_beam, genesis.GenesisBeam )
 
-        # Check distribution file header.
-        with open(genesis_dist_file, 'r') as dist_file:
-            self.assertEqual("? VERSION = 1.0\n", dist_file.readline())
-            self.assertIn("? SIZE = ", dist_file.readline())
-            self.assertIn("? CHARGE = ", dist_file.readline())
-            self.assertEqual("? COLUMNS X XPRIME Y YPRIME T P\n", dist_file.readline())
-
-            dist_file.close()
 
     def testBackengine(self):
         """ Testing the read function and conversion of openpmd input to native beam file."""

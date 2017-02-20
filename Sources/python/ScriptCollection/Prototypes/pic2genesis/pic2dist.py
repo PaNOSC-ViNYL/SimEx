@@ -47,31 +47,31 @@ def pic2dist( pic_file_name, target='genesis'):
 
         timestep = h5_handle['data'].keys()[-1]
 
-        h5_positions = '/data/%s/particles/e/position/' % (timestep)
-        h5_momenta = '/data/%s/particles/e/momentum/' % (timestep)
+        positions = '/data/%s/particles/e/position/' % (timestep)
+        momenta = '/data/%s/particles/e/momentum/' % (timestep)
 
-        x_data = h5_handle[h5_positions]['x'].value
-        x_data_unit = h5_handle[h5_positions]['x'].attrs['unitSI']
+        x_data = h5_handle[positions]['x'].value
+        x_data_unit = h5_handle[positions]['x'].attrs['unitSI']
         x = x_data*x_data_unit
 
-        y_data = h5_handle[h5_positions]['y'].value
-        y_data_unit = h5_handle[h5_positions]['y'].attrs['unitSI']
+        y_data = h5_handle[positions]['y'].value
+        y_data_unit = h5_handle[positions]['y'].attrs['unitSI']
         y = y_data*y_data_unit
 
-        z_data = h5_handle[h5_positions]['z'].value
-        z_data_unit = h5_handle[h5_positions]['z'].attrs['unitSI']
+        z_data = h5_handle[positions]['z'].value
+        z_data_unit = h5_handle[positions]['z'].attrs['unitSI']
         z = z_data*z_data_unit
 
-        px_data = h5_handle[h5_momenta]['x'].value
-        px_data_unit = h5_handle[h5_momenta]['x'].attrs['unitSI']
+        px_data = h5_handle[momenta]['x'].value
+        px_data_unit = h5_handle[momenta]['x'].attrs['unitSI']
         px = px_data*px_data_unit
 
-        py_data = h5_handle[h5_momenta]['y'].value
-        py_data_unit = h5_handle[h5_momenta]['y'].attrs['unitSI']
+        py_data = h5_handle[momenta]['y'].value
+        py_data_unit = h5_handle[momenta]['y'].attrs['unitSI']
         py = py_data*py_data_unit
 
-        pz_data = h5_handle[h5_momenta]['z'].value
-        pz_data_unit = h5_handle[h5_momenta]['z'].attrs['unitSI']
+        pz_data = h5_handle[momenta]['z'].value
+        pz_data_unit = h5_handle[momenta]['z'].attrs['unitSI']
         pz = pz_data*pz_data_unit
 
         # Convert to xprime, yprime.
