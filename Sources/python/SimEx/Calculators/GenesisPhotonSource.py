@@ -32,14 +32,10 @@ import os
 import shutil
 import subprocess
 
-from scipy.constants import m_e, c
-
-from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
-
-from ScriptCollection.Prototypes.pic2genesis.pic2dist import pic2dist
-
 from ocelot.adaptors import genesis
 
+from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
+from SimEx.Utilities.IOUtilities import pic2dist
 
 class GenesisPhotonSource(AbstractPhotonSource):
     """

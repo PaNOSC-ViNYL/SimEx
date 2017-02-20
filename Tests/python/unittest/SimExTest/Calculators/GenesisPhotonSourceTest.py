@@ -40,7 +40,8 @@ from ocelot.adaptors import genesis
 from ocelot.rad.undulator_params import UndulatorParameters
 from TestUtilities import TestUtilities
 
-from ocelot.parameters.sase1 import sase1
+from SimEx.Utilities import sase1
+
 from ocelot.rad.undulator_params import Ephoton2K
 
 class GenesisPhotonSourceTest(unittest.TestCase):
