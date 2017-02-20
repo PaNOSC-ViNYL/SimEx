@@ -31,13 +31,17 @@ import unittest
 
 import numpy
 import h5py
-import os
+import os, shutil
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
 from ocelot.adaptors import genesis
+from ocelot.rad.undulator_params import UndulatorParameters
 from TestUtilities import TestUtilities
+
+from ocelot.parameters.sase1 import sase1
+from ocelot.rad.undulator_params import Ephoton2K
 
 class GenesisPhotonSourceTest(unittest.TestCase):
     """
@@ -97,8 +101,28 @@ class GenesisPhotonSourceTest(unittest.TestCase):
     def testPrepareRun(self):
         """ Tests the method that sets up input files and directories for a genesis run. """
 
+        # Ensure proper cleanup.
+        self.__dirs_to_remove.append('source')
+
+        # Get SASE1 template undulator object.
+        undulator = sase1.und
+        photon_energy = 200.0 # eV
+        electron_energy = 16.0e-3 # GeV
+        undulator.Kx = Ephoton2K(photon_energy, undulator.lperiod, electron_energy)
+
+        # Calculate undulator-radiator parameters.
+        undulator_parameters = UndulatorParameters(undulator, electron_energy)
+
+
+        # Setup parameters.
+        parameters_dict = {
+                'time_averaging_window': 1e-8,
+                'is_time_dependent': False,
+                'undulator_parameters': undulator_parameters,
+                }
+
         # Construct the object.
-        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
+        xfel_source = GenesisPhotonSource(parameters=parameters_dict, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='source')
 
         # Read the input distribution.
         xfel_source._readH5()

@@ -72,28 +72,35 @@ class GenesisPhotonSource(AbstractPhotonSource):
         edist = genesis.GenesisElectronDist()
 
         # Fill in the data. Reverse time axis.
-        edist.x  = self.__input_data[:,0].flipud()
-        edist.xp = self.__input_data[:,1].flipud()
-        edist.y  = self.__input_data[:,2].flipud()
-        edist.yp = self.__input_data[:,3].flipud()
-        edist.t  = self.__input_data[:,4].flipud()
-        edist.g  = self.__input_data[:,5].flipud()
-        edist.part_charge = charge / edist.len()
+        edist.x  = numpy.flipud(self.__input_data[:,0])
+        edist.xp = numpy.flipud(self.__input_data[:,1])
+        edist.y  = numpy.flipud(self.__input_data[:,2])
+        edist.yp = numpy.flipud(self.__input_data[:,3])
+        edist.t  = numpy.flipud(self.__input_data[:,4])
+        edist.g  = numpy.flipud(self.__input_data[:,5])
+
+        edist.part_charge = self.__charge / edist.len()
+
+        ###############################################
+        import ipdb
+        ipdb.set_trace()
+        ###############################################
 
         # Produce a genesis beam
-        self.__genesis_beam = genesis.edist2beam(edist, step=self.parameters.time_averaging_window)
+        self.__genesis_beam = genesis.edist2beam(edist, step=self.parameters['time_averaging_window'])
 
         # Generate genesis input with defaults and guesses from beam peak parameters.
-        genesis_input = genesis.generate_input( up = self.parameters.undulator_parameters,
-                                                       beam=genesis.get_beam_peak(beam),
-                                                       itdp=self.parameters.is_time_dependent )
+        genesis_input = genesis.generate_input( up = self.parameters['undulator_parameters'],
+                                                       beam=genesis.get_beam_peak(self.__genesis_beam),
+                                                       itdp=self.parameters['is_time_dependent'] )
 
         # Merge guessed and external input.
-        if self.__genesis_input is not None:
+        if hasattr(self, '_GenesisPhotonSource__genesis_input') and self.__genesis_input is not None:
             for key,value in self.__genesis_input.__dict__.items():
                 if value != 0.0:
                     setattr(genesis_input, key, value)
 
+        genesis_input.exp_dir = genesis_input.run_dir = self.output_path
         # Store merged genesis input.
         self.__genesis_input = genesis_input
 
@@ -103,22 +110,24 @@ class GenesisPhotonSource(AbstractPhotonSource):
         # Call "run_genesis" to setup run directories, which also issues the launcher.launch() command, which, naturall, fails here.
         try:
             genesis.run_genesis( self.__genesis_input, launcher=None, debug=0)
-        except RuntimeError:
+        except AttributeError:
             pass
         except:
             raise
-
 
     def backengine(self):
 
         # Setup genesis backengine.
         self._prepareGenesisRun()
 
-        command_sequence = 'genesis < beam.dist'
+        command_sequence = 'genesis < tmp.cmd'
 
         # Run the backengine command.
+        oldpwd = os.getcwd()
+        os.chdir(self.output_path)
         proc = subprocess.Popen(command_sequence, shell=True)
         proc.wait()
+        os.chdir(oldpwd)
 
         # FIXME
         self.__data = None
@@ -133,10 +142,6 @@ class GenesisPhotonSource(AbstractPhotonSource):
         """ """
         self.__input_data, self.__charge = pic2dist( self.input_path, 'genesis' )
         return
-
-        ### TODO: Support beam file/ dist file input.
-        #self.__input_data = numpy.loadtxt( self.__input_path )
-
 
     def saveH5(self):
         """ """

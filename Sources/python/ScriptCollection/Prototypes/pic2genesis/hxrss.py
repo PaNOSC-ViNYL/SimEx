@@ -31,7 +31,7 @@ savefig = 0 #save figures to project directory
 # exp_dir = '/gpfs/exfel/data/scratch/svitozar/projects/ocelot_test/Shan/Replica_2_cut_noquantum/' #directory where the output will be stored
 exp_dir = os.path.join( os.getcwd(), 'exp')
 
-#beam_fileName = os.path.join( param_dir , 'beams', 'non-nominal', 'beam_0.02nC_wake.txt') #path to beam file
+beam_fileName = os.path.join( param_dir , 'beams', 'non-nominal', 'beam_0.02nC_wake.txt') #path to beam file
 #dist_fileName = os.path.join( param_dir , 'beams', 'non-nominal', '0.5nC_8.5GeV_slotted_2um_Feng_collim_core.dist') #path to dist file
 dist_fileName = 'beam.dist'
 
@@ -84,15 +84,7 @@ create_exp_dir(exp_dir, run_ids) # creates experimental directory with 'run_# su
 #copy_this_script(os.path.basename(__file__),os.path.realpath(__file__),exp_dir) # write copy of this script to the exp_dir
 
 # read and prepare beam file
-#beam = read_beam_file(beam_fileName)
-distribution = read_dist_file(dist_fileName)
-beam = dist2beam(distribution, step=1e-9)
-###############################################
-import ipdb
-ipdb.set_trace()
-###############################################
-
-setattr(beam,'zsep', zsep)
+beam = read_beam_file(beam_fileName)
 # beam.ex*=1.2
 # beam.ey*=1.2
 beam = cut_beam(beam,[-4e-6, 1e-6])
@@ -114,7 +106,13 @@ rematch(beta_av, l_fodo, qdh, lat, extra_fodo, beam_pk, qf, qd) # jeez...
 und.Kx = Ephoton2K(E_photon, und.lperiod, E_beam)
 # calculate UR parameters (required later for input generation)
 up = UndulatorParameters(und,E_beam)
+
 if debug: up.printParameters()
+###############################################
+import ipdb
+ipdb.set_trace()
+###############################################
+
 
 a0 = und.Kx
 taper_func_5 = lambda n : f1(n, n0, a0, a1, a2 )
