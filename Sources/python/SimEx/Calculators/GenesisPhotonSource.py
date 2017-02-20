@@ -78,13 +78,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
         edist.yp = numpy.flipud(self.__input_data[:,3])
         edist.t  = numpy.flipud(self.__input_data[:,4])
         edist.g  = numpy.flipud(self.__input_data[:,5])
-
         edist.part_charge = self.__charge / edist.len()
-
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
 
         # Produce a genesis beam
         self.__genesis_beam = genesis.edist2beam(edist, step=self.parameters['time_averaging_window'])

@@ -139,17 +139,42 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         """ Testing the read function and conversion of openpmd input to native beam file."""
 
         # Ensure proper cleanup.
-        self.__files_to_remove.append("beam.dist")
+        self.__dirs_to_remove.append('source')
+
+        # Get SASE1 template undulator object.
+        undulator = sase1.und
+        photon_energy = 200.0 # eV
+        electron_energy = 16.0e-3 # GeV
+        undulator.Kx = Ephoton2K(photon_energy, undulator.lperiod, electron_energy)
+
+        # Calculate undulator-radiator parameters.
+        undulator_parameters = UndulatorParameters(undulator, electron_energy)
+
+
+        # Setup parameters.
+        parameters_dict = {
+                'time_averaging_window': 1e-8,
+                'is_time_dependent': False,
+                'undulator_parameters': undulator_parameters,
+                }
 
         # Construct the object.
-        xfel_source = GenesisPhotonSource(parameters=None, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='FELsource_out.h5')
+        xfel_source = GenesisPhotonSource(parameters=parameters_dict, input_path=TestUtilities.generateTestFilePath('simData_8000.h5'), output_path='source')
 
+        # Read the input distribution.
         xfel_source._readH5()
 
-        xfel_source.backengine()
+        # Prepare the run.
+        xfel_source._prepareGenesisRun()
 
-        self.assertTrue( os.path.isfile( 'beam.dist' ) )
+        # This should not throw.
+        try:
+            xfel_source.backengine()
+            throws = False
+        except:
+            throws = True
 
+        self.assertFalse( throws )
 
 if __name__ == '__main__':
     unittest.main()
