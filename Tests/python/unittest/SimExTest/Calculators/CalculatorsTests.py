@@ -40,7 +40,7 @@ def suite():
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
-             unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
+             #unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
              )
 
     return unittest.TestSuite(suites)
