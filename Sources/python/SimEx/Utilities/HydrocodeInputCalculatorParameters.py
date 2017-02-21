@@ -38,6 +38,7 @@ class HydroParameters:
     class representing parameters for the Hydrocode Input Calculator
     """
     def __init__(self,
+                 NumLayers,
                  Ablator=None,
                  AblatorThickness=None,
                  Sample=None,
@@ -85,16 +86,17 @@ class HydroParameters:
         """
         
         # Check and set all parameters
+        self.__NumLayers = checkAndSetNumLayers(NumLayers)
         self.__Ablator = checkAndSetAblator(Ablator)
         self.__AblatorThickness = checkAndSetAblatorThickness(AblatorThickness)
         self.__Sample = checkAndSetSample(Sample)
         self.__SampleThickness = checkAndSetSampleThickness(SampleThickness)
-        self.__Window = checkAndSet(Window)
+        self.__Window = checkAndSetWindow(Window)
         self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
-        self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
-        self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
-        self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
-        self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
+        #self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
+        #self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
+        #self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
+        #self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
         
         # Set internal parameters
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
@@ -121,63 +123,108 @@ class HydroParameters:
     	self.__use_window = False       
         
     def _serialize(self):
-    	""" Write the input deck for the Esther hydrocode. """
-    	NumberZones = [0] 
-    	
-    	# Default variables for feathering 
-    	n = 250
-    	NumberZones = n
-    	FeatherZoneWidth = float(5.0)
-    	MinZoneWidth = float(1E-4)
-    	NonFeatherZoneWidth = self.AblatorThickness - FeatherZoneWidth
-    	
-    	# Determine the correct feathering
-    	list=[0]*(n+1)
-    	list[0]=1
-    	list[-2]=-FeatherZoneWidth/MinZoneWidth
-    	list[-1]=FeatherZoneWidth/MinZoneWidth-1
-    	
-    	f = np.poly1d(list)
-    	roots = np.roots(f)
-    	root_found = False
-    	
-    	for i in range(n):
-    		if roots[i].imag == 0 and roots[i].real > 1.000001:
-    			r = round(roots[i].real,4)
-    			root_found = True
-    	
-    	if root_found == False:
-    		raise ValueError( "No ratio bigger than 1.000001 was found.")
-    	
-    	finalFeatherZoneWidth = round(MinZoneWidth*(r**n),4)
-    	FeatherZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
+        """ Write the input deck for the Esther hydrocode. """
+        NumberZones = [0] 
+        
+        # Default variables for feathering 
+        n = 250
+        NumberZones = n
+        FeatherZoneWidth = float(5.0)
+        MinZoneWidth = float(1E-4)
+        ExterneValue = MinZoneWidth*10000
+        NonFeatherZoneWidth = self.AblatorThickness - FeatherZoneWidth
+        
+        # Determine the correct feathering
+        list=[0]*(n+1)
+        list[0]=1
+        list[-2]=-FeatherZoneWidth/MinZoneWidth
+        list[-1]=FeatherZoneWidth/MinZoneWidth-1
+        
+        f = np.poly1d(list)
+        roots = np.roots(f)
+        root_found = False
+        
+        for i in range(n):
+            if roots[i].imag == 0 and roots[i].real > 1.000001:
+                r = round(roots[i].real,4)
+                root_found = True
+        
+        if root_found == False:
+            raise ValueError( "No ratio bigger than 1.000001 was found.")
+        
+        finalFeatherZoneWidth = round(MinZoneWidth*(r**n),4)
+        NonFeatherZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
+        
+        # Materials: [name, EOS shortname, EOS longname, density]
+        # material_type = [0]*13
+        # material_type[1] = ["Aluminium","Al#","Al#_e_ses",2.7]
+        # material_type[2] = ["Diamond","Dia","Dia_e_ses",3.51]
+        # material_type[3] = ["CH","CH2", "CH2_e_ses",1.044]
+        # material_type[4] = ["Kapton","Kap","Kap_e_ses",1.42]
+        # material_type[5] = ["Mo","Mo#","Mo#_e_ses",10.2]
+        # material_type[6] = ["Gold","Au#","Au#_e_ses",19.3]
+        # material_type[7] = ["Iron","Fe#","Fe#_e_ses",7.85]
+        # material_type[8] = ["Copper","Cu#","Cu#_e_ses",8.93]
+        # material_type[9] = ["Tin","Sn#","Sn#_e_ses",7.31]
+        # material_type[10] = ["LiF","LiF","LiF_e_ses",2.64]
+        # material_type[11] = ["Tantalum","Ta#","Ta#_e_ses",16.65]
+        # material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
+        
+        
+        
+        # Make a temporary directory
+        self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
 
-       	# Make a temporary directory
-       	self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
-
-    	# Write the input file
+        # Write the input file
         input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
-     	print input_deck_path
+        print input_deck_path
         with open(input_deck_path, 'w') as input_deck:
-        	input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
-        	input_deck.write('\n')
-        	input_deck.write('MILIEUX_INT_VERS_EXT\n')
-        	input_deck.write('\n')
-        	# TO DO PLACEHOLDER -------------------------------------------------------------->
-        	if self.__use_window == True:
-        		# Do window write
-        		input_deck.write('This is the window layer')
-        	input_deck.write('- %.1f um %s layer\n' % (self.SampleThickness, self.Sample))
-        	input_deck.write('NOM_MILIEU=EOS_LIST\n')
-        	input_deck.write('EQUATION_ETAT=EOS_LIST\n')
-        	if self.__use_window == False:
-        		input_deck.write('EPAISSEUR_VIDE=100e-6\n')
-        	input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.SampleThickness))
-        	input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')
+            input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
+            input_deck.write('\n')
+            input_deck.write('MILIEUX_INT_VERS_EXT\n')
+            input_deck.write('\n')
+            # TO DO PLACEHOLDER -------------------------------------------------------------->
+            if self.__use_window == True:
+                # Do window write
+                input_deck.write('This is the window layer')
             
-        	
-        	       		
-    	   	
+            # If more than one layer, loop the layer construction here.
+            # TO DO PLACEHOLDER -------------------------------------------------------------->
+            input_deck.write('- %.1f um %s layer\n' % (self.SampleThickness, self.Sample))
+            input_deck.write('NOM_MILIEU=\n')
+            input_deck.write('EQUATION_ETAT=EOS_LIST\n')
+            if self.__use_window == False:
+                input_deck.write('EPAISSEUR_VIDE=100e-6\n')
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.SampleThickness))
+            input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')
+            input_deck.write('\n')
+            
+            # Write ablator
+            input_deck.write('- %.1f um %s layer\n' % (self.AblatorThickness, self.Ablator))
+            input_deck.write('NOM_MILIEU=abl1\n') # 1ST PART OF ABLATOR
+            input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
+            # if only simulating ablator layer, then must include empty (VIDE) layer
+            if self.NumLayers == 1:
+                input_deck.write('EPAISSEUR_VIDE=100e-6\n')               
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (NonFeatherZoneWidth)) # Non-feather thickness
+            input_deck.write('NOMBRE_MAILLES=%d\n' % (NonFeatherZones)) # Number of zones
+            input_deck.write('\n')
+            input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
+            input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (FeatherZoneWidth)) # Feather thickness
+            input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (finalFeatherZoneWidth)) # Feather final zone width
+            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (ExterneValue)) #Min zone width
+            input_deck.write('\n')
+            
+    
+    @property
+    def NumLayers(self):
+       	""" Query for the Number of Layers. """
+       	return self.__NumLayers
+    @NumLayers.setter
+    def NumLayers(self, value):
+       	""" Set the NumLayers to the value. """
+       	self.__NumLayers = checkAndSetNumLayers(value)
     @property
     def Ablator(self):
        	""" Query for the ablator type. """
@@ -210,11 +257,42 @@ class HydroParameters:
     def SampleThickness(self, value):
        	""" Set the sample thickness to the value. """
        	self.__SampleThickness = checkAndSetSampleThickness(value)
+    @property
+    def Window(self):
+       	""" Query for the Window type. """
+       	return self.__Window
+    @Window.setter
+    def Window(self, value):
+       	""" Set the Window to the value. """
+       	self.__Window = checkAndSetWindow(value)
+    @property
+    def WindowThickness(self):
+       	""" Query for the Window Thickness type. """
+       	return self.__WindowThickness
+    @WindowThickness.setter
+    def WindowThickness(self, value):
+       	""" Set the Window thickness to the value. """
+       	self.__WindowThickness = checkAndSetWindowThickness(value)
         
 
 ###########################
 # Check and set functions #
 ###########################
+
+def checkAndSetNumLayers(NumLayers):
+    """
+    Utility to check if the number of layers is reasonable.
+    @param NumLayers : The number of layers to check
+    @return : Number of layers
+    @raise ValueError if not 1 layer or more than 5
+    """
+    if NumLayers is None:
+        raise RuntimeError( "Number of layers is not defined.")
+    
+    if NumLayers <=1 or NumLayers > 5:
+        raise ValueError( "Number of layers must be between 1 and 5 only.")
+    
+    return NumLayers
 
 def checkAndSetAblator(Ablator):
 	"""
@@ -292,24 +370,22 @@ def checkAndSetSampleThickness(SampleThickness):
 	return SampleThickness
 
 def checkAndSetWindow(Window):
-	"""
-	Utility to check if the Window is in the list of known EOS materials
-	"""
-	
+    """
+	Utility to check that the sample thickness is > 1 um and < 200 um
+	"""    
     # Change this to be just window materials (LiF, Quartz etc.)
     # TO DO PLACEHOLDER ------------------------------------------------------------------------------>
-	elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+    elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
 				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
-		
-	# Set default
-	if Window is None:
-		raise RuntimeError( "Window not specified.")
-	
-	# Check each element
-	if Window in elements:
-		pass
-	else:
-		raise ValueError( "Window is not in list of known EOS materials")
+    
+    if Window is None:
+		print ( "Running simulation without window material")
+    else:
+        # Check each element
+        if Window in elements:
+            pass
+        else:
+            raise ValueError( "Window is not in list of known EOS materials")
 		
 	return Window
 	
@@ -323,19 +399,22 @@ def checkAndSetWindow(Window):
 
 	
 def checkAndSetWindowThickness(WindowThickness):
-	"""
+    """
 	Utility to check that the sample thickness is > 1 um and < 500 um
 	"""
-	
-	# Set default
-	if WindowThickness is None:
-		raise RuntimeError( "Window thickness not specified.")
-	
-	# Check if ablator is between 1 and 100 um
-	if WindowThickness < 1.0 or WindowThickness > 500.0:
-		raise ValueError( "Window must be between 1.0 and 500.0 microns")
-	
-	return SampleThickness
+    # FIND THE BEST WAY TO IGNORE THIS IF THERE IS NO WINDOW.
+    # TO DO PLACE HOLDER--------------------------------------------------------------------------------->
+    # Set default
+    if WindowThickness is None:
+      	raise RuntimeError( "Window thickness not specified.")
+    
+    # Check if ablator is between 1 and 100 um
+    if WindowThickness == 0.0:
+        pass
+    elif WindowThickness < 1.0 or WindowThickness > 500.0:
+        raise ValueError( "Window must be between 1.0 and 500.0 microns")
+        
+    return WindowThickness
 
 def checkAndSetSampleThickness(SampleThickness):
 	"""
