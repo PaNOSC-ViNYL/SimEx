@@ -29,14 +29,14 @@ INSTALL_COMMAND ""
 ExternalProject_Get_Property(genesis SOURCE_DIR)
 install(PROGRAMS ${SOURCE_DIR}/genesis DESTINATION ${BINDIR})
 
-ExternalProject_Add(
-    pic_test_file
-    DOWNLOAD_COMMAND wget https://docs.xfel.eu/alfresco/d/a/workspace/SpacesStore/4d00d480-34a5-462e-8459-5483a75445c5/simData_8000.h5
-    PATCH_COMMAND ""
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-)
+#ExternalProject_Add(
+    #pic_test_file
+    #DOWNLOAD_COMMAND wget https://docs.xfel.eu/alfresco/d/a/workspace/SpacesStore/4d00d480-34a5-462e-8459-5483a75445c5/simData_8000.h5
+    #PATCH_COMMAND ""
+    #CONFIGURE_COMMAND ""
+    #BUILD_COMMAND ""
+    #INSTALL_COMMAND ""
+#)
 
-ExternalProject_Get_Property(pic_test_file DOWNLOAD_DIR)
-install(FILES ${DOWNLOAD_DIR}/simData_8000.h5 DESTINATION ${SIMEX_SOURCE_DIR}/Tests/python/unittest/TestFiles/)
+#ExternalProject_Get_Property(pic_test_file DOWNLOAD_DIR)
+#install(FILES ${DOWNLOAD_DIR}/simData_8000.h5 DESTINATION ${SIMEX_SOURCE_DIR}/Tests/python/unittest/TestFiles/)

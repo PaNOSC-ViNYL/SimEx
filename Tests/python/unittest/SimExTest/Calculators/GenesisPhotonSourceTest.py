@@ -84,6 +84,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         self.assertIsInstance(xfel_source, AbstractPhotonSource)
         self.assertIsInstance(xfel_source, GenesisPhotonSource)
 
+    @unittest.skip("Depends on large test file")
     def testConstructionPicH5(self):
         """ Testing the construction of the class with a given PIC snapshot. """
 
@@ -93,6 +94,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         self.assertIsInstance(xfel_source, AbstractPhotonSource)
         self.assertIsInstance(xfel_source, GenesisPhotonSource)
 
+    @unittest.skip("Depends on large test file")
     def testReadH5(self):
         """ Testing the read function and conversion of openpmd input to native beam file."""
 
@@ -102,6 +104,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         xfel_source._readH5()
         self.assertTrue( hasattr( xfel_source, '_GenesisPhotonSource__input_data' ) )
 
+    @unittest.skip("Depends on large test file")
     def testPrepareRun(self):
         """ Tests the method that sets up input files and directories for a genesis run. """
 
@@ -139,6 +142,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         self.assertIsInstance( xfel_source._GenesisPhotonSource__genesis_beam, genesis.GenesisBeam )
 
 
+    @unittest.skip("Depends on large test file")
     def testBackengine(self):
         """ Testing the read function and conversion of openpmd input to native beam file."""
 
