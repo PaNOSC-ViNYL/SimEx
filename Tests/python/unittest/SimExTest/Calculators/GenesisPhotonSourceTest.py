@@ -53,15 +53,12 @@ class GenesisPhotonSourceTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         # Get pic test data.
-        oldpwd = os.getcwd()
-        os.chdir ( TestUtilities.generateTestFilePath('.') )
-        os.system( './get_pic_lwfa_sample.sh')
-        os.chdir( oldpwd )
+        pass
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        os.remove(  TestUtilities.generateTestFilePath('simData_8000.h5') )
+        pass
 
 
     def setUp(self):
