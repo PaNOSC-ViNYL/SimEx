@@ -45,9 +45,9 @@ class HydroParameters:
                  SampleThickness=None,
                  Window=None,
                  WindowThickness=None,
+                 LaserWavelength=None,
                  LaserPulse=None,
                  LaserPulseLength=None,
-                 LaserWavelenght=None,
                  LaserIntensity=None,
                  ):
 
@@ -93,9 +93,9 @@ class HydroParameters:
         self.__SampleThickness = checkAndSetSampleThickness(SampleThickness)
         self.__Window = checkAndSetWindow(Window)
         self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
+        self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
         #self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
         #self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
-        #self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
         #self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
         
         # Set internal parameters
@@ -216,6 +216,13 @@ class HydroParameters:
             input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (ExterneValue)) #Min zone width
             input_deck.write('\n')
             
+            # Internal parameters to add to flags
+            # TO DO PLACEHOLDER -------------------------------------------------------------->
+            input_deck.write('INDICE_REEL_LASER=1.46\n')
+            input_deck.write('INDICE_IMAG_LASER=1.0\n')
+            input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n')
+            input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.LaserWavelength))
+            
     
     @property
     def NumLayers(self):
@@ -273,7 +280,14 @@ class HydroParameters:
     def WindowThickness(self, value):
        	""" Set the Window thickness to the value. """
        	self.__WindowThickness = checkAndSetWindowThickness(value)
-        
+    @property
+    def LaserWavelength(self):
+       	""" Query for the Laser wavelength type. """
+       	return self.__LaserWavelength
+    @LaserWavelength.setter
+    def LaserWavelength(self, value):
+       	""" Set the laser wavelength to the value. """
+       	self.__LaserWavelength = checkAndSetLaserWavelength(value)
 
 ###########################
 # Check and set functions #
@@ -417,26 +431,31 @@ def checkAndSetWindowThickness(WindowThickness):
     return WindowThickness
 
 def checkAndSetSampleThickness(SampleThickness):
-	"""
-	Utility to check that the sample thickness is > 1 um and < 200 um
-	"""
-	
-	# Set default
-	if SampleThickness is None:
-		raise RuntimeError( "Sample thickness not specified.")
-	
-	# Check if ablator is between 1 and 100 um
-	if SampleThickness < 1.0 or SampleThickness > 200.0:
-		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
-	
-	return SampleThickness
-	
-	
-	
-	
-	
-	
-	
+    """
+    Utility to check that the sample thickness is > 1 um and < 200 um
+    """
+    
+    # Set default
+    if SampleThickness is None:
+        raise RuntimeError( "Sample thickness not specified.")
+    
+    # Check if ablator is between 1 and 100 um
+    if SampleThickness < 1.0 or SampleThickness > 200.0:
+        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+    
+    return SampleThickness
 
-
-
+def checkAndSetLaserWavelength(LaserWavelength):
+    """
+    Utility to check that the laser wavelength is correct.
+    """
+    
+    print (LaserWavelength)
+    
+    if LaserWavelength is None:
+        raise RuntimeError( "Laser wavelength is not defined")
+    
+    LaserWavelength = float(LaserWavelength)/1000
+    print ("Laser wavelength = %.3fe-6" % (LaserWavelength))
+    
+    return LaserWavelength
