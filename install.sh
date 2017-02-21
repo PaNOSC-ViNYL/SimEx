@@ -36,6 +36,9 @@ cmake -DSRW_OPTIMIZED=ON \
       -DS2EReconstruction_DM=ON\
       -Dwpg=ON\
       -Dprop=ON\
+      -Dgenesis=ON\
+      -Docelot=ON\
+      -Dpic_test_file=OFF\
       $ROOT_DIR
 
 # Build the project.

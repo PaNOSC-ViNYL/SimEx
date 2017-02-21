@@ -29,6 +29,7 @@ from WavePropagatorTest import WavePropagatorTest
 from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from S2EReconstructionTest import S2EReconstructionTest
+from GenesisPhotonSourceTest import GenesisPhotonSourceTest
 
 # Setup the suite.
 def suite():
@@ -39,6 +40,7 @@ def suite():
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
+             #unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
              )
 
     return unittest.TestSuite(suites)
