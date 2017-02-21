@@ -19,7 +19,6 @@
 #                                                                        #
 ##########################################################################
 
-
 import os
 import numpy as np
 import sys
@@ -90,12 +89,12 @@ class HydroParameters:
         self.__AblatorThickness = checkAndSetAblatorThickness(AblatorThickness)
         self.__Sample = checkAndSetSample(Sample)
         self.__SampleThickness = checkAndSetSampleThickness(SampleThickness)
-        #self.__Window = checkAndSet(Window)
-        #self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
-        #self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
-        #self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
-        #self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
-        #self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
+        self.__Window = checkAndSet(Window)
+        self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
+        self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
+        self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
+        self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
+        self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
         
         # Set internal parameters
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
@@ -152,13 +151,12 @@ class HydroParameters:
     	
     	finalFeatherZoneWidth = round(MinZoneWidth*(r**n),4)
     	FeatherZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
-       	
 
        	# Make a temporary directory
        	self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
-        	
+
     	# Write the input file
-     	input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
+        input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
      	print input_deck_path
         with open(input_deck_path, 'w') as input_deck:
         	input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
@@ -175,7 +173,8 @@ class HydroParameters:
         	if self.__use_window == False:
         		input_deck.write('EPAISSEUR_VIDE=100e-6\n')
         	input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.SampleThickness))
-        	input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')	
+        	input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')
+            
         	
         	       		
     	   	
@@ -215,7 +214,6 @@ class HydroParameters:
 
 ###########################
 # Check and set functions #
-# CHECKANDSETINSTANCE() IS NOT INCLUDED YET
 ###########################
 
 def checkAndSetAblator(Ablator):
@@ -292,11 +290,67 @@ def checkAndSetSampleThickness(SampleThickness):
 		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
 	
 	return SampleThickness
+
+def checkAndSetWindow(Window):
+	"""
+	Utility to check if the Window is in the list of known EOS materials
+	"""
 	
+    # Change this to be just window materials (LiF, Quartz etc.)
+    # TO DO PLACEHOLDER ------------------------------------------------------------------------------>
+	elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
+		
+	# Set default
+	if Window is None:
+		raise RuntimeError( "Window not specified.")
 	
+	# Check each element
+	if Window in elements:
+		pass
+	else:
+		raise ValueError( "Window is not in list of known EOS materials")
+		
+	return Window
 	
+
+        self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
+        self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
+        self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
+        self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
+        self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
 	
+
 	
+def checkAndSetWindowThickness(WindowThickness):
+	"""
+	Utility to check that the sample thickness is > 1 um and < 500 um
+	"""
+	
+	# Set default
+	if WindowThickness is None:
+		raise RuntimeError( "Window thickness not specified.")
+	
+	# Check if ablator is between 1 and 100 um
+	if WindowThickness < 1.0 or WindowThickness > 500.0:
+		raise ValueError( "Window must be between 1.0 and 500.0 microns")
+	
+	return SampleThickness
+
+def checkAndSetSampleThickness(SampleThickness):
+	"""
+	Utility to check that the sample thickness is > 1 um and < 200 um
+	"""
+	
+	# Set default
+	if SampleThickness is None:
+		raise RuntimeError( "Sample thickness not specified.")
+	
+	# Check if ablator is between 1 and 100 um
+	if SampleThickness < 1.0 or SampleThickness > 200.0:
+		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+	
+	return SampleThickness
 	
 	
 	
