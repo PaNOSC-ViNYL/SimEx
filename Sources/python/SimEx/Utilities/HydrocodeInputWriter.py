@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Richard Briggs, Carsten Fortmann-Grote              #
+# Copyright (C) 2016,2017 Richard Briggs, Carsten Fortmann-Grote         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -43,31 +43,29 @@ material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
 # Ask question for raw input
 def ask(question, options):
     choice = raw_input(question).lower() # Turn choice to lower case so we only have to check those
-    
+
     while choice not in options:
         print "You must pick one of the options above"
         choice = raw_input("Try again:").lower()
     return choice
 
 # Ask question for raw input with default values set as int, float or str
-def ask_default(question, default, type):
-    choice = raw_input(question)
-    
+def ask_default(question, default):
+
+    ### State default
+    choice = raw_input("%s [%s]:" % (question, str(default)))
+
     if choice == "":
-        choice = default
         print default
-    
-    if type == "int":
-        choice = int(choice)
-    elif type == "float":
-        choice = float(choice)
-    elif type == "str":
-        choice = str(choice)
-    
-    return choice
+        return default
+
+    tpe = type(default)
+    return tpe(choice)
 
 # Creates the target layers (IMPORTANT: Currently starts from window to ablator)
+
 def write_layer(i, start_zone, start_r):
+    ### f not defined.
     f.write("\n- " + str(thickness[i]) + " um " + material_type[material_in_zone[i]][0] + " layer")
     f.write("\nNOM_MILIEU="+ material_type[material_in_zone[i]][1] +"_"+ str(i) + "")
     f.write("\nEQUATION_ETAT="+ material_type[material_in_zone[i]][2] +"")
@@ -77,8 +75,8 @@ def write_layer(i, start_zone, start_r):
     f.write("\nNOMBRE_MAILLES="+ str(number_of_zones[i]) +"")
     f.write("\nMECANIQUE_RAM")
     f.write("\n")
-    return [start_zone + number_of_zones[i],thickness[i]*1E-4 + start_r]
 
+    return [start_zone + number_of_zones[i],thickness[i]*1E-4 + start_r]
 
 # Definitions for creating the laser pulse information
 def flat_top(pulse_length,laser_intensity):
@@ -125,18 +123,20 @@ for i in range(number_of_layers):
 # Provide list of materials for ablator
 # CHANGE THIS SO THAT IT ONLY SHOWS PLASTIC, DIAMOND ETC.
 print "\nAblating material:"
-for i in range(1,len(material_type)):
-    print "\n\t", i, "\b.", material_type[i][0],
-material_in_zone[1] = ask_default("\n\nChoice (default 3): ", "3", "int")
-thick = ask_default("Enter ablator thickness in um (default (20 um): ", "20", "float")
-n = ask_default("Enter number of mesh points in feathered zone (default 250): ", "250", "int")
+for i,mtp in enumerate(material_type):
+    print "\n\t", i, "\b.", mtp[0],
+
+material_in_zone[1] = ask_default("\n\nChoice", 3)
+thick = ask_default("Enter ablator thickness in um", 20.0)
+n = ask_default("Enter number of mesh points in feathered zone", 250)
 number_of_zones[0] = n
-S = ask_default("Enter width of feathered region in um (default 5): ", "5", "float")
-a = ask_default("Enter minimum zone width allowed in um (default 1E-4): ", "1E-4", "float")
+S = ask_default("Enter width of feathered region in um", 5.0)
+a = ask_default("Enter minimum zone width allowed in um", 1E-4)
 
 width = thick-S
 
 # Determine the correct feathering
+### code duplication with relevant Parameters class.
 list = [0]*(n+1)
 list[0]=1
 list[-2]=-S/a
@@ -214,10 +214,10 @@ if print_to_file == "y":
     	f.write("TRANSFERT_RADIATIF\n")
     f.write("\n")
     f.write("MILIEUX_INT_VERS_EXT\n")
-    
+
     start_zone = N+n
     start_r = S*1E-4+width*1E-4
-    
+
     for i in range(2,number_of_layers+1):
         start_values = write_layer(i,start_zone,start_r)
         start_zone = start_values[0]
@@ -244,7 +244,7 @@ if print_to_file == "y":
     f.write("\n")
     f.write("\nDEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ")
     f.write("\nLONGUEUR_ONDE_LASER=1.06e-6")
-    
+
     # Choose laser pulse type
     #---------------------------------------------------------------------------
 
@@ -291,7 +291,7 @@ if print_to_file == "y":
     f.write("\nTEMPS_ARRET=16e-9") # NEED TO BE ABLE TO ADJUST THIS
     f.write("\n")
     f.write("\nFIN_DES_INSTRUCTIONS")
-    
+
     f.close()
 
     plt.xlabel('Time (ns)')
