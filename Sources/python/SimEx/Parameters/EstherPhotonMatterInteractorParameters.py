@@ -222,11 +222,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                                "mass_density" : 4.43,
                                }
         # Determine the mazz of one zone
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
-
         mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
 
         #al_density = material_dict["Al"]["mass_density"]
