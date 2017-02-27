@@ -135,6 +135,7 @@ class HydroParameters(AbstractCalculatorParameters):
         externe_value = minimum_zone_width*1.e4
         non_feather_zone_width = self.ablator_thickness - feather_zone_width
 
+
         # Determine the correct feathering
         ### More verbose comments.
         # Setup feather zones.
@@ -224,11 +225,10 @@ class HydroParameters(AbstractCalculatorParameters):
                                "eos_name" : "Ti#_e_ses",
                                "mass_density" : 4.43,
                                },
+        # Determine the mazz of one zone
+        mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
 
-
-        al_density = material_dict["Al"]["mass_density"]
-
-
+        #al_density = material_dict["Al"]["mass_density"]
 
         # Make a temporary directory
         self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
