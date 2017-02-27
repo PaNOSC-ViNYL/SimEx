@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Richard Briggs, Carsten Fortmann-Grote              #
+# Copyright (C) 2016, 2017 Richard Briggs, Carsten Fortmann-Grote        #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,8 +19,8 @@
 #                                                                        #
 ##########################################################################
 
+import numpy
 import os
-import numpy as np
 import sys
 import tempfile
 
@@ -32,129 +32,136 @@ import tempfile
 
 BOOL_TO_INT = {True : 1, False : 0}
 
-class HydroParameters:
+class HydroParameters(AbstractCalculatorParameters):
     """
-    !!! Need to include the (AbstractCalculatorParameters) !!!
     class representing parameters for the Hydrocode Input Calculator
     """
     def __init__(self,
-                 NumLayers,
-                 Ablator=None,
-                 AblatorThickness=None,
-                 Sample=None,
-                 SampleThickness=None,
-                 Window=None,
-                 WindowThickness=None,
-                 LaserWavelength=None,
-                 LaserPulse=None,
-                 LaserPulseLength=None,
-                 LaserIntensity=None,
+                 number_of_layers,
+                 ablator=None,
+                 ablator_thickness=None,
+                 sample=None,
+                 sample_thickness=None,
+                 window=None,
+                 window_thickness=None,
+                 laser_wavelength=None,
+                 laser_pulse=None,
+                 laser_pulse_duration=None,
+                 laser_intensity=None,
                  ):
 
         """
         Constructor for the HydroParameters
-        
-        @param Ablator The ablating material, Al, CH, or diamond
-        </br><b>type</b> String
-        
-        @param AblatorThickness The ablator thickness (um)
-        </br><b>type</b> float
-                
-        @param Sample The sample material (from limited list of materials)
-        </br><b>type</b> String
-                
-        @param SampleThickness The sample thickness (um)
-        </br><b>type</b> String 
-        
-        @param Window The window material, LiF, SiO2 or diamond
-        </br><b>type</b> String 
-        
-        @param WindowThickness The window thickness, if using window, in (um)
-        </br><b>type</b> Float 
-        
-        @param LaserPulse Pulse type (flat top, ramp pulse, other)
-        </br><b>type</b> String
-        
-        @param LaserPulseLength Pulse length of laser (ns)
-        </br><b>type</b> float 
-        
-        @param LaserWavelength Laser wavelength (nm)
-        </br><b>type</b> float
-        
-        @param LaserIntensity Laser intensity (TW/cm2)
-        </br><b>type</b> float
+
+        :param ablator: The ablating material ( "Al" | "CH" | "Diamond" )
+        :type ablator: str
+
+        :param ablator_thickness: The ablator thickness (micrometers)
+        :type ablator_thickness:
+
+        :param sample: The sample material (from limited list of materials)
+        :type sample: str
+
+        :param sample_thickness: The sample thickness (micrometers)
+        :type sample_thickness: float
+
+        :param window: The window material (LiF | SiO2 | Diamond)
+        :type window: str
+
+        :param window_thickness: The window thickness, if using window (micrometers)
+        :type window_thickness: float
+
+        :param laser_pulse: Pulse type ("flat" | "ramp" | "other")
+        :type laser_pulse: str
+
+        :param laser_pulse_duration: Pulse duration of the pump laser (ns)
+        :type laser_pulse_duration: float
+
+        :param laser_wavelength: Laser wavelength (nm)
+        :type laser_wavelength: float
+
+        :param laser_intensity: Laser intensity (TW/cm2)
+        :type laser_intensity: float
         """
-        
+
         # Check and set all parameters
-        self.__NumLayers = checkAndSetNumLayers(NumLayers)
-        self.__Ablator = checkAndSetAblator(Ablator)
-        self.__AblatorThickness = checkAndSetAblatorThickness(AblatorThickness)
-        self.__Sample = checkAndSetSample(Sample)
-        self.__SampleThickness = checkAndSetSampleThickness(SampleThickness)
-        self.__Window = checkAndSetWindow(Window)
-        self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
-        self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
-        #self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
-        #self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
-        #self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
-        
+        self.__number_of_layers = checkAndSetNumberOfLayers(number_of_layers)
+        self.__ablator = checkAndSetAblator(ablator)
+        self.__ablator_thickness = checkAndSetAblatorThickness(ablator_thickness)
+        self.__sample = checkAndSetSample(sample)
+        self.__sample_thickness = checkAndSetSampleThickness(sample_thickness)
+        self.__window = checkAndSetWindow(window)
+        self.__window_thickness = checkAndSetWindowThickness(window_thickness)
+        self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
+        #self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
+        #self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
+        #self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+
         # Set internal parameters
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
         List of DEMARRAGE (translates as "Start up") parameters
         TRANSFERT_RADIATIF
         USI
-        
+
         "Expert user mode to choose the correct demarrage parameters"
-        
+
         Can also update this so that you can choose which EOS model to run???
         self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
         """
         self._setDemmargeFlags()
         self._setWindowFlags()
-        
+
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
-    
+
     def _setDemmargeFlags(self):
     	self.__use_usi = "USI"
-    	
+
     def _setWindowFlags(self):
-    	self.__use_window = False       
-        
+    	self.__use_window = False
+
     def _serialize(self):
         """ Write the input deck for the Esther hydrocode. """
-        NumberZones = [0] 
-        
-        # Default variables for feathering 
+        NumberZones = [0]
+
+        # Default variables for feathering
         n = 250
-        NumberZones = n
-        FeatherZoneWidth = float(5.0)
-        MinZoneWidth = float(1E-4)
-        ExterneValue = MinZoneWidth*10000
-        NonFeatherZoneWidth = self.AblatorThickness - FeatherZoneWidth
-        
+        ### variables names: all_small_with_underscores
+        ### methods (except property get/set/delete) camelCase()
+        number_of_zones = n
+        feather_zone_width = 5.0
+        minimum_zone_width = 1.E-4
+        externe_value = minimum_zone_width*1.e4
+        non_feather_zone_width = self.ablator_thickness - feather_zone_width
+
         # Determine the correct feathering
-        list=[0]*(n+1)
-        list[0]=1
-        list[-2]=-FeatherZoneWidth/MinZoneWidth
-        list[-1]=FeatherZoneWidth/MinZoneWidth-1
-        
-        f = np.poly1d(list)
-        roots = np.roots(f)
+        ### "list" is a py keyword
+        ### More verbose comments.
+        # Setup feather zones.
+        feather_list=numpy.zeros(n+1)
+        feather_list[0]=1
+        feather_list[-2]=-feather_zone_width/minimum_zone_width
+        feather_list[-1]=-feather_list[-2] - 1
+
+        # Find roots in polynomial over the feathers
+        f = numpy.poly1d(list)
+        roots = numpy.roots(f)
         root_found = False
-        
+
+        # Get all purely real roots above 1.
         for i in range(n):
-            if roots[i].imag == 0 and roots[i].real > 1.000001:
+            if roots[i].imag == 0 and roots[i].real > 1.000001: # Why not > 1.? This would exclude 1.0f
                 r = round(roots[i].real,4)
                 root_found = True
-        
+
         if root_found == False:
-            raise ValueError( "No ratio bigger than 1.000001 was found.")
-        
-        finalFeatherZoneWidth = round(MinZoneWidth*(r**n),4)
-        NonFeatherZones = int(NonFeatherZoneWidth/(MinZoneWidth*(r**n)))
-        
+            raise RuntimeError( "No ratio bigger than 1.000001 was found.")
+
+        # Set final values for zone widths.
+        final_feather_zone_width = round(minimum_zone_width*(r**n),4)
+        non_feather_zones = int(non_feather_zone_width/(minimum_zone_width*(r**n)))
+
         # Materials: [name, EOS shortname, EOS longname, density]
         # material_type = [0]*13
         # material_type[1] = ["Aluminium","Al#","Al#_e_ses",2.7]
@@ -169,15 +176,17 @@ class HydroParameters:
         # material_type[10] = ["LiF","LiF","LiF_e_ses",2.64]
         # material_type[11] = ["Tantalum","Ta#","Ta#_e_ses",16.65]
         # material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
-        
-        
-        
+
+
+
         # Make a temporary directory
         self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
 
         # Write the input file
         input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
-        print input_deck_path
+        print "Writing input deck to ", input_deck_path, "."
+
+        # Write the file.
         with open(input_deck_path, 'w') as input_deck:
             input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
             input_deck.write('\n')
@@ -187,275 +196,284 @@ class HydroParameters:
             if self.__use_window == True:
                 # Do window write
                 input_deck.write('This is the window layer')
-            
+
             # If more than one layer, loop the layer construction here.
             # TO DO PLACEHOLDER -------------------------------------------------------------->
-            input_deck.write('- %.1f um %s layer\n' % (self.SampleThickness, self.Sample))
+            input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
             input_deck.write('NOM_MILIEU=\n')
             input_deck.write('EQUATION_ETAT=EOS_LIST\n')
             if self.__use_window == False:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
-            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.SampleThickness))
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')
             input_deck.write('\n')
-            
+
             # Write ablator
-            input_deck.write('- %.1f um %s layer\n' % (self.AblatorThickness, self.Ablator))
+            input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
             input_deck.write('NOM_MILIEU=abl1\n') # 1ST PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
             # if only simulating ablator layer, then must include empty (VIDE) layer
-            if self.NumLayers == 1:
-                input_deck.write('EPAISSEUR_VIDE=100e-6\n')               
-            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (NonFeatherZoneWidth)) # Non-feather thickness
-            input_deck.write('NOMBRE_MAILLES=%d\n' % (NonFeatherZones)) # Number of zones
+            if self.number_of_layers == 1:
+                input_deck.write('EPAISSEUR_VIDE=100e-6\n')
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (non)) # Non-feather thickness
+            input_deck.write('NOMBRE_MAILLES=%d\n' % (non_feather_zones)) # Number of zones
             input_deck.write('\n')
             input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
-            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (FeatherZoneWidth)) # Feather thickness
-            input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (finalFeatherZoneWidth)) # Feather final zone width
-            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (ExterneValue)) #Min zone width
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (feather_zone_width)) # Feather thickness
+            input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (final_feather_zone_width)) # Feather final zone width
+            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (externe_value)) #Min zone width
             input_deck.write('\n')
-            
+
             # Internal parameters to add to flags
             # TO DO PLACEHOLDER -------------------------------------------------------------->
             input_deck.write('INDICE_REEL_LASER=1.46\n')
             input_deck.write('INDICE_IMAG_LASER=1.0\n')
             input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n')
-            input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.LaserWavelength))
-            
-    
+            input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
+
+
     @property
-    def NumLayers(self):
-       	""" Query for the Number of Layers. """
-       	return self.__NumLayers
-    @NumLayers.setter
-    def NumLayers(self, value):
-       	""" Set the NumLayers to the value. """
-       	self.__NumLayers = checkAndSetNumLayers(value)
+    def number_of_layers(self):
+       	""" Query for the number of layers. """
+       	return self.__number_of_layers
+    @number_of_layers.setter
+    def number_of_layers(self, value):
+       	""" Set the number of layers to the value. """
+       	self.__number_of_layers = checkAndSetnumber_of_layers(value)
     @property
-    def Ablator(self):
+    def ablator(self):
        	""" Query for the ablator type. """
-       	return self.__Ablator
-    @Ablator.setter
-    def Ablator(self, value):
+       	return self.__ablator
+    @ablator.setter
+    def ablator(self, value):
        	""" Set the ablator to the value. """
-       	self.__Ablator = checkAndSetAblator(value)
+       	self.__ablator = checkAndSetAblator(value)
     @property
-    def AblatorThickness(self):
-       	""" Query for the ablator type. """
-       	return self.__AblatorThickness
-    @AblatorThickness.setter
-    def AblatorThickness(self, value):
-       	""" Set the ablator to the value. """
-       	self.__AblatorThickness = checkAndSetAblatorThickness(value)
+    def ablator_thickness(self):
+       	""" Query for the ablator thickness. """
+       	return self.__ablator_thickness
+    @ablator_thickness.setter
+    def ablator_thickness(self, value):
+       	""" Set the ablator thickness to the value. """
+       	self.__ablator_thickness = checkAndSetAblatorThickness(value)
     @property
-    def Sample(self):
-       	""" Query for the Sample type. """
-       	return self.__Sample
-    @Sample.setter
-    def Sample(self, value):
-       	""" Set the ablator to the value. """
-       	self.__Sample = checkAndSetSample(value)
+    def sample(self):
+       	""" Query for the sample type. """
+       	return self.__sample
+    @sample.setter
+    def sample(self, value):
+       	""" Set the sample type to the value. """
+       	self.__sample = checkAndSetSample(value)
     @property
-    def SampleThickness(self):
-       	""" Query for the Sample Thickness type. """
-       	return self.__SampleThickness
-    @SampleThickness.setter
-    def SampleThickness(self, value):
+    def sample_thickness(self):
+       	""" Query for the sample thickness type. """
+       	return self.__sample_thickness
+    @sample_thickness.setter
+    def sample_thickness(self, value):
        	""" Set the sample thickness to the value. """
-       	self.__SampleThickness = checkAndSetSampleThickness(value)
+       	self.__sample_thickness = checkAndSetSampleThickness(value)
     @property
-    def Window(self):
-       	""" Query for the Window type. """
-       	return self.__Window
-    @Window.setter
-    def Window(self, value):
-       	""" Set the Window to the value. """
-       	self.__Window = checkAndSetWindow(value)
+    def window(self):
+       	""" Query for the window type. """
+       	return self.__window
+    @window.setter
+    def window(self, value):
+       	""" Set the window to the value. """
+       	self.__window = checkAndSetWindow(value)
     @property
-    def WindowThickness(self):
-       	""" Query for the Window Thickness type. """
-       	return self.__WindowThickness
-    @WindowThickness.setter
-    def WindowThickness(self, value):
-       	""" Set the Window thickness to the value. """
-       	self.__WindowThickness = checkAndSetWindowThickness(value)
+    def window_thickness(self):
+       	""" Query for the window thickness type. """
+       	return self.__window_thickness
+    @window_thickness.setter
+    def window_thickness(self, value):
+       	""" Set the window thickness to the value. """
+       	self.__window_thickness = checkAndSetWindowThickness(value)
     @property
     def LaserWavelength(self):
-       	""" Query for the Laser wavelength type. """
-       	return self.__LaserWavelength
-    @LaserWavelength.setter
-    def LaserWavelength(self, value):
+       	""" Query for the laser wavelength type. """
+       	return self.__laser_wavelength
+    @laser_wavelength.setter
+    def laser_wavelength(self, value):
        	""" Set the laser wavelength to the value. """
-       	self.__LaserWavelength = checkAndSetLaserWavelength(value)
+       	self.__laser_wavelength = checkAndSetLaserWavelength(value)
 
 ###########################
 # Check and set functions #
 ###########################
 
-def checkAndSetNumLayers(NumLayers):
+def checkAndSetNumberOfLayers(number_of_layers):
     """
     Utility to check if the number of layers is reasonable.
-    @param NumLayers : The number of layers to check
-    @return : Number of layers
-    @raise ValueError if not 1 layer or more than 5
-    """
-    if NumLayers is None:
-        raise RuntimeError( "Number of layers is not defined.")
-    
-    if NumLayers <=1 or NumLayers > 5:
-        raise ValueError( "Number of layers must be between 1 and 5 only.")
-    
-    return NumLayers
 
-def checkAndSetAblator(Ablator):
+    :param number_of_layers: The number of layers to check
+    :return: Checked number of layers
+    :raise ValueError: not (1 < number_of_layers <=5 )
+
+    """
+    if number_of_layers is None:
+        raise RuntimeError( "Number of layers is not defined.")
+
+    if number_of_layers <=1 or number_of_layers > 5:
+        raise ValueError( "Number of layers must be between 1 and 5 only.")
+
+    return number_of_layers
+
+def checkAndSetAblator(ablator):
 	"""
 	Utility to check if the ablator exists in the EOS database.
-	@param Ablator : The ablator material to check
-	@return : The ablator choice after being checked
-	@raise ValueError if ablator not CH, Al, or diamond     
+
+    :param ablator: The ablator material to check.
+    :return: The ablator choice after being checked.
+    :raise ValueError: ablator not in ["CH", "Al", "Diamond"].
+
 	"""
-	if Ablator is None:
-		raise RuntimeError( "Ablator is not defined.")
-	
+
+	if ablator is None:
+		raise RuntimeError( "The parameter 'ablator' is not defined.")
+
+    ### Could check if isinstance(ablator, str)
 	# Check if ablator is CH, Al or diamond
-	if Ablator is 'CH':
+	if ablator == 'CH':
 		print ( "Setting CH as ablator.")
-	elif Ablator is 'Al':
+	elif ablator == 'Al':
 		print ( "Setting Al as ablator.")
-	elif Ablator is 'dia':
+	elif ablator.lower() in ['dia', 'diamond']:
 		print ( "Setting diamond as ablator.")
 	else:
-		raise ValueError( "Ablator is not valid. Use CH, Al or dia.")       
-	
-	return Ablator
+		raise ValueError( "Ablator is not valid. Use 'CH', 'Al' or 'dia'.")
+
+	return ablator
 
 
-def checkAndSetAblatorThickness(AblatorThickness):
+def checkAndSetAblatorThickness(ablator_thickness):
 	"""
 	Utility to check that the ablator thickness is > 5 um and < 100 um
 	"""
-	# Set default
-	if AblatorThickness is None:
+
+	# Raise if not set.
+	if ablator_thickness is None:
 		raise RuntimeError( "Ablator thickness not specified.")
-	
+
 	# Check if ablator is between 5 and 100 um
-	if AblatorThickness <= 5.0 or AblatorThickness > 100.0:
+	if ablator_thickness <= 5.0 or ablator_thickness > 100.0:
 		raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
-	
-	print ( "Ablator thickness is %4.1f " % AblatorThickness)
-		
-	return AblatorThickness
+
+	print ( "Ablator thickness is %4.1f " % ablator_thickness)
+
+	return ablator_thickness
 
 
-def checkAndSetSample(Sample):
+def checkAndSetSample(sample):
 	"""
 	Utility to check if the sample is in the list of known EOS materials
 	"""
-	
+
+    ### Could utilize periodictable module...
 	elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
 				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
-		
+
 	# Set default
-	if Sample is None:
-		raise RuntimeError( "Sample not specified.")
-	
+	if sample is None:
+		raise RuntimeError( "sample not specified.")
+
 	# Check each element
-	if Sample in elements:
+	if sample in elements:
 		pass
 	else:
-		raise ValueError( "Sample is not in list of known EOS materials")
-		
-	return Sample
+		raise ValueError( "sample is not in list of known EOS materials")
 
-def checkAndSetSampleThickness(SampleThickness):
+	return sample
+
+def checkAndSetSampleThickness(sample_thickness):
 	"""
 	Utility to check that the sample thickness is > 1 um and < 200 um
 	"""
-	
+
 	# Set default
-	if SampleThickness is None:
-		raise RuntimeError( "Sample thickness not specified.")
-	
-	# Check if ablator is between 1 and 100 um
-	if SampleThickness < 1.0 or SampleThickness > 200.0:
-		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
-	
-	return SampleThickness
+	if sample_thickness is None:
+		raise RuntimeError( "sample thickness not specified.")
 
-def checkAndSetWindow(Window):
+	# Check if ablator is between 1 and 100 um
+	if sample_thickness < 1.0 or sample_thickness > 200.0:
+		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+
+	return sample_thickness
+
+def checkAndSetWindow(window):
     """
-	Utility to check that the sample thickness is > 1 um and < 200 um
-	"""    
+	Utility to check that the window thickness is > 1 um and < 200 um
+	"""
     # Change this to be just window materials (LiF, Quartz etc.)
-    # TO DO PLACEHOLDER ------------------------------------------------------------------------------>
+    ### TODO PLACEHOLDER ------------------------------------------------------------------------------>
     elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
 				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
-    
-    if Window is None:
+
+    if window is None:
 		print ( "Running simulation without window material")
     else:
         # Check each element
-        if Window in elements:
+        if window in elements:
             pass
         else:
-            raise ValueError( "Window is not in list of known EOS materials")
-		
-	return Window
-	
+            raise ValueError( "window is not in list of known EOS materials")
 
-        self.__WindowThickness = checkAndSetWindowThickness(WindowThickness)
-        self.__LaserPulse = checkAndSetLaserPulse(LaserPulse)
-        self.__LaserPulseLength = checkAndSetLaserPulseLength(LaserPulseLength)
-        self.__LaserWavelength = checkAndSetLaserWavelength(LaserWavelength)
-        self.__LaserIntensity = checkAndSetLaserIntensity(LaserIntensity)
-	
+	return window
 
-	
-def checkAndSetWindowThickness(WindowThickness):
+
+    ### Why this block?
+        self.__window_thickness = checkAndSetWindowThickness(window_thickness)
+        self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
+        self.__laser_pulse_duration = checkAndSetLaserPulseLength(laser_pulse_duration)
+        self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
+        self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+
+def checkAndSetWindowThickness(window_thickness):
     """
-	Utility to check that the sample thickness is > 1 um and < 500 um
+	Utility to check that the window thickness is > 1 um and < 500 um
 	"""
     # FIND THE BEST WAY TO IGNORE THIS IF THERE IS NO WINDOW.
     # TO DO PLACE HOLDER--------------------------------------------------------------------------------->
+    ### One solution could be to call this function from within checkAndSetWindow if window is not None.
     # Set default
-    if WindowThickness is None:
+    if window_thickness is None:
       	raise RuntimeError( "Window thickness not specified.")
-    
-    # Check if ablator is between 1 and 100 um
-    if WindowThickness == 0.0:
-        pass
-    elif WindowThickness < 1.0 or WindowThickness > 500.0:
-        raise ValueError( "Window must be between 1.0 and 500.0 microns")
-        
-    return WindowThickness
 
-def checkAndSetSampleThickness(SampleThickness):
+    # Check if ablator is between 1 and 100 um
+    if window_thickness == 0.0:
+        pass
+    elif window_thickness < 1.0 or window_thickness > 500.0:
+        raise ValueError( "Window must be between 1.0 and 500.0 microns")
+
+    return window_thickness
+
+def checkAndSetSampleThickness(sample_thickness):
     """
     Utility to check that the sample thickness is > 1 um and < 200 um
     """
-    
-    # Set default
-    if SampleThickness is None:
-        raise RuntimeError( "Sample thickness not specified.")
-    
-    # Check if ablator is between 1 and 100 um
-    if SampleThickness < 1.0 or SampleThickness > 200.0:
-        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
-    
-    return SampleThickness
 
-def checkAndSetLaserWavelength(LaserWavelength):
+    # Set default
+    if sample_thickness is None:
+        raise RuntimeError( "Sample thickness not specified.")
+
+    # Check if ablator is between 1 and 100 um
+    if sample_thickness < 1.0 or sample_thickness > 200.0:
+        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+
+    return sample_thickness
+
+def checkAndSetLaserWavelength(laser_wavelength):
     """
     Utility to check that the laser wavelength is correct.
     """
-    
-    print (LaserWavelength)
-    
-    if LaserWavelength is None:
+
+    print (laser_wavelength)
+
+    if laser_wavelength is None:
         raise RuntimeError( "Laser wavelength is not defined")
-    
-    LaserWavelength = float(LaserWavelength)/1000
-    print ("Laser wavelength = %.3fe-6" % (LaserWavelength))
-    
-    return LaserWavelength
+
+    # Convert to microns.
+    laser_wavelength = laser_wavelength*1e-3
+    print ("Laser wavelength = %.3fe-6" % (laser_wavelength))
+
+    return laser_wavelength
