@@ -24,11 +24,7 @@ import os
 import sys
 import tempfile
 
-#from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-#from SimEx.Utilities.EntityChecks import checkAndSetInstance
-#from SimEx.Utilities.EntityChecks import checkAndSetInteger
-#from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
-#from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 BOOL_TO_INT = {True : 1, False : 0}
 
@@ -37,7 +33,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     class representing parameters for the Hydrocode Input Calculator
     """
     def __init__(self,
-                 number_of_layers,
+                 number_of_layers=None,
                  ablator=None,
                  ablator_thickness=None,
                  sample=None,
@@ -145,7 +141,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         feather_list[-1]=-feather_list[-2] - 1
 
         # Find roots in polynomial over the feathers
-        f = numpy.poly1d(list)
+        f = numpy.poly1d(feather_list)
         roots = numpy.roots(f)
         root_found = False
 
@@ -165,67 +161,72 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Dictionary for Esther EOS files
         # TO DO: Add remaining elements from the esther eos folder
         material_dict = {}
-        material_dict["Al"] = {"name" : "Aluminum",
+        material_dict["Aluminum"] = {"name" : "Aluminum",
                                "shortname" : "Al#",
                                "eos_name" : "Al#_e_ses",
                                "mass_density" : 2.7,
-                               },
+                               }
         material_dict["CH"] = {"name" : "CH",
                                "shortname" : "CH2",
                                "eos_name" : "CH2_e_ses",
                                "mass_density" : 1.044,
-                               },
-        material_dict["Dia"] = {"name" : "Diamond",
+                               }
+        material_dict["Diamond"] = {"name" : "Diamond",
                                "shortname" : "Dia",
                                "eos_name" : "Dia_e_ses",
                                "mass_density" : 3.51,
-                               },
-        material_dict["Kap"] = {"name" : "Kapton",
+                               }
+        material_dict["Kapton"] = {"name" : "Kapton",
                                "shortname" : "Kap",
                                "eos_name" : "Kap_e_ses",
                                "mass_density" : 1.42,
-                               },
-        material_dict["Mo"] = {"name" : "Mo",
+                               }
+        material_dict["Molybdenum"] = {"name" : "Mo",
                                "shortname" : "Mo#",
                                "eos_name" : "Mo#_e_ses",
                                "mass_density" : 10.2,
-                               },
-        material_dict["Au"] = {"name" : "Gold",
+                               }
+        material_dict["Gold"] = {"name" : "Gold",
                                "shortname" : "Au#",
                                "eos_name" : "Au#_e_ses",
                                "mass_density" : 19.3,
-                               },
-        material_dict["Fe"] = {"name" : "Iron",
+                               }
+        material_dict["Iron"] = {"name" : "Iron",
                                "shortname" : "Fe#",
                                "eos_name" : "Fe#_e_ses",
                                "mass_density" : 7.85,
-                               },
-        material_dict["Cu"] = {"name" : "Copper",
+                               }
+        material_dict["Copper"] = {"name" : "Copper",
                                "shortname" : "Cu#",
                                "eos_name" : "Cu#_e_ses",
                                "mass_density" : 8.93,
-                               },
-        material_dict["Sn"] = {"name" : "Tin",
+                               }
+        material_dict["Tin"] = {"name" : "Tin",
                                "shortname" : "Sn#",
                                "eos_name" : "Sn#_e_ses",
                                "mass_density" : 7.31,
-                               },
+                               }
         material_dict["LiF"] = {"name" : "Lithium Fluoride",
                                "shortname" : "LiF",
                                "eos_name" : "LiF_e_ses",
                                "mass_density" : 2.64,
-                               },
-        material_dict["Ta"] = {"name" : "Tantalum",
+                               }
+        material_dict["Tantalum"] = {"name" : "Tantalum",
                                "shortname" : "Ta#",
                                "eos_name" : "Ta#_e_ses",
                                "mass_density" : 16.65,
-                               },
-        material_dict["Ti"] = {"name" : "Titanium",
+                               }
+        material_dict["Titanium"] = {"name" : "Titanium",
                                "shortname" : "Ti#",
                                "eos_name" : "Ti#_e_ses",
                                "mass_density" : 4.43,
-                               },
+                               }
         # Determine the mazz of one zone
+        ###############################################
+        import ipdb
+        ipdb.set_trace()
+        ###############################################
+
         mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
 
         #al_density = material_dict["Al"]["mass_density"]
@@ -258,12 +259,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             # Calculate number of zones
-            width_of_sample_zone = mass_of_zone/material_type[self.sample]["mass_density"]
-            number_of_sample_zones=int(self.samplethickness/width_of_sample_zone)
+            width_of_sample_zone = mass_of_zone/material_dict[self.sample]["mass_density"]
+            number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
             input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
 
-            #width_of_zone[i] = mass_of_zone/material_type[material_in_zone[i]][3]
+            #width_of_zone[i] = mass_of_zone/material_dict[material_in_zone[i]][3]
             #number_of_zones[i] = int(thickness[i]/width_of_zone[i])
 
             # Write ablator
@@ -273,7 +274,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # if only simulating ablator layer, then must include empty (VIDE) layer
             if self.number_of_layers == 1:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
-            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (non)) # Non-feather thickness
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (non_feather_zone_width)) # Non-feather thickness
             input_deck.write('NOMBRE_MAILLES=%d\n' % (non_feather_zones)) # Number of zones
             input_deck.write('\n')
             input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
@@ -348,13 +349,17 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
        	""" Set the window thickness to the value. """
        	self.__window_thickness = checkAndSetWindowThickness(value)
     @property
-    def LaserWavelength(self):
+    def laser_wavelength(self):
        	""" Query for the laser wavelength type. """
        	return self.__laser_wavelength
     @laser_wavelength.setter
     def laser_wavelength(self, value):
        	""" Set the laser wavelength to the value. """
        	self.__laser_wavelength = checkAndSetLaserWavelength(value)
+
+    def _setDefaults(self):
+        """ Method to pick sensible defaults for all parameters. """
+        pass
 
 ###########################
 # Check and set functions #

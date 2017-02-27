@@ -65,7 +65,19 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         self.__dirs_to_remove = []
 
         # Setup parameters.
-        self.esther_parameters = EstherPhotonMatterInteractorParameters()
+        self.esther_parameters = EstherPhotonMatterInteractorParameters(
+                 number_of_layers=5,
+                 ablator="CH",
+                 ablator_thickness=10.0,
+                 sample="Iron",
+                 sample_thickness=20.0,
+                 window=None,
+                 window_thickness=0.0,
+                 laser_wavelength=800.0,
+                 laser_pulse='rect',
+                 laser_pulse_duration=1.0,
+                 laser_intensity=0.1,
+            )
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -75,7 +87,6 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d):
                 shutil.rmtree(d)
-        del self.xrts_parameters
 
     def testConstruction(self):
         """ Testing the default construction of the class. """

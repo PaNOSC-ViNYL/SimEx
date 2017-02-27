@@ -46,9 +46,6 @@ class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
 
         """
 
-        # Check parameters.
-        parameters = checkAndSetParameters( parameters )
-
         # Init base class.
         super( EstherPhotonMatterInteractor, self).__init__(parameters, input_path, output_path)
 
@@ -87,4 +84,3 @@ class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
         ### TODO
         pass
 
-#if __name__ == "__main__":
