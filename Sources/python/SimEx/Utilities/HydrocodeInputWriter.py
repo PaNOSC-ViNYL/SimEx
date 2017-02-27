@@ -215,7 +215,7 @@ if print_to_file == "y":
     f.write("\n")
     f.write("MILIEUX_INT_VERS_EXT\n")
     
-    start_zone = N+n
+    start_zone = N+nstart
     start_r = S*1E-4+width*1E-4
     
     for i in range(2,number_of_layers+1):
