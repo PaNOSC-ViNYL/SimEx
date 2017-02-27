@@ -249,15 +249,22 @@ class HydroParameters(AbstractCalculatorParameters):
                 input_deck.write('This is the window layer')
 
             # If more than one layer, loop the layer construction here.
+            # Then change number_of_sample_zones to number_of_zones[i] for i < number of layers
             # TO DO PLACEHOLDER -------------------------------------------------------------->
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
-            input_deck.write('NOM_MILIEU=\n')
-            input_deck.write('EQUATION_ETAT=EOS_LIST\n')
+            input_deck.write('NOM_MILIEU=%s\n' % (self.sample)) # DOES material_dict[self.sample]["shortname"] work here?
+            input_deck.write('EQUATION_ETAT=EOS_LIST\n') # %s DOES material_dict[self.sample]["eos_name"] work here?
             if self.__use_window == False:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
-            input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')
+            # Calculate number of zones
+            width_of_sample_zone = mass_of_zone/material_type[self.sample]["mass_density"]
+            number_of_sample_zones=int(self.samplethickness/width_of_sample_zone)
+            input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
+            
+            #width_of_zone[i] = mass_of_zone/material_type[material_in_zone[i]][3]
+            #number_of_zones[i] = int(thickness[i]/width_of_zone[i])
 
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
@@ -453,15 +460,15 @@ def checkAndSetSampleThickness(sample_thickness):
 
 def checkAndSetWindow(window):
     """
-	Utility to check that the window thickness is > 1 um and < 200 um
-	"""
+    Utility to check that the window thickness is > 1 um and < 200 um
+    """
     # Change this to be just window materials (LiF, Quartz etc.)
     ### TODO PLACEHOLDER ------------------------------------------------------------------------------>
     elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
-				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
 
     if window is None:
-		print ( "Running simulation without window material")
+        print ( "Running simulation without window material")
     else:
         # Check each element
         if window in elements:
@@ -469,26 +476,18 @@ def checkAndSetWindow(window):
         else:
             raise ValueError( "window is not in list of known EOS materials")
 
-	return window
-
-
-    ### Why this block?
-        self.__window_thickness = checkAndSetWindowThickness(window_thickness)
-        self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
-        self.__laser_pulse_duration = checkAndSetLaserPulseLength(laser_pulse_duration)
-        self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
-        self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+    return window
 
 def checkAndSetWindowThickness(window_thickness):
     """
-	Utility to check that the window thickness is > 1 um and < 500 um
-	"""
+    Utility to check that the window thickness is > 1 um and < 500 um
+    """
     # FIND THE BEST WAY TO IGNORE THIS IF THERE IS NO WINDOW.
     # TO DO PLACE HOLDER--------------------------------------------------------------------------------->
     ### One solution could be to call this function from within checkAndSetWindow if window is not None.
     # Set default
     if window_thickness is None:
-      	raise RuntimeError( "Window thickness not specified.")
+        raise RuntimeError( "Window thickness not specified.")
 
     # Check if ablator is between 1 and 100 um
     if window_thickness == 0.0:
