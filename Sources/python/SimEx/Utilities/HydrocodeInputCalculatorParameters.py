@@ -136,7 +136,6 @@ class HydroParameters(AbstractCalculatorParameters):
         non_feather_zone_width = self.ablator_thickness - feather_zone_width
 
         # Determine the correct feathering
-        ### "list" is a py keyword
         ### More verbose comments.
         # Setup feather zones.
         feather_list=numpy.zeros(n+1)
@@ -176,6 +175,16 @@ class HydroParameters(AbstractCalculatorParameters):
         # material_type[10] = ["LiF","LiF","LiF_e_ses",2.64]
         # material_type[11] = ["Tantalum","Ta#","Ta#_e_ses",16.65]
         # material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
+
+        material_dict = {}
+        material_dict["Al"] = {"name" : "Aluminum",
+                               "shortname" : "Al#",
+                               "eos_name" : "Al#_e_ses",
+                               "mass_density" : 2.7,
+                               },
+        material_dict["Mo"] = {}
+
+        al_density = material_dict["Al"]["mass_density"]
 
 
 
