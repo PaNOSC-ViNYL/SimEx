@@ -87,15 +87,4 @@ class EstherPhotonMatterInteractor(AbstractPhotonDiffractor):
         ### TODO
         pass
 
-if __name__ == "__main__":
-    # Launch interactive terminal Q&A session here.
-
-
-    # Setup parameters instance.
-    esther_parameters = EstherPhotonMatterInteractorParameters(...)
-
-    # Setup calculator.
-    esther_calculator = EstherPhotonMatterInteractor(parameters=esther_parameters, input_path=xxx, output_path=...)
-
-    # Run.
-    esther_calculator.backengine()
+#if __name__ == "__main__":
