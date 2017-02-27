@@ -24,13 +24,17 @@ import os
 import sys
 import tempfile
 
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+#from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+#from SimEx.Utilities.EntityChecks import checkAndSetInstance
+#from SimEx.Utilities.EntityChecks import checkAndSetInteger
+#from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
+#from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 BOOL_TO_INT = {True : 1, False : 0}
 
 class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     """
-    class representing parameters for the Esther Hydrocode Input Calculator
+    class representing parameters for the Hydrocode Input Calculator
     """
     def __init__(self,
                  number_of_layers,
@@ -131,6 +135,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         externe_value = minimum_zone_width*1.e4
         non_feather_zone_width = self.ablator_thickness - feather_zone_width
 
+
         # Determine the correct feathering
         ### More verbose comments.
         # Setup feather zones.
@@ -157,32 +162,73 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         final_feather_zone_width = round(minimum_zone_width*(r**n),4)
         non_feather_zones = int(non_feather_zone_width/(minimum_zone_width*(r**n)))
 
-        # Materials: [name, EOS shortname, EOS longname, density]
-        # material_type = [0]*13
-        # material_type[1] = ["Aluminium","Al#","Al#_e_ses",2.7]
-        # material_type[2] = ["Diamond","Dia","Dia_e_ses",3.51]
-        # material_type[3] = ["CH","CH2", "CH2_e_ses",1.044]
-        # material_type[4] = ["Kapton","Kap","Kap_e_ses",1.42]
-        # material_type[5] = ["Mo","Mo#","Mo#_e_ses",10.2]
-        # material_type[6] = ["Gold","Au#","Au#_e_ses",19.3]
-        # material_type[7] = ["Iron","Fe#","Fe#_e_ses",7.85]
-        # material_type[8] = ["Copper","Cu#","Cu#_e_ses",8.93]
-        # material_type[9] = ["Tin","Sn#","Sn#_e_ses",7.31]
-        # material_type[10] = ["LiF","LiF","LiF_e_ses",2.64]
-        # material_type[11] = ["Tantalum","Ta#","Ta#_e_ses",16.65]
-        # material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
-
+        # Dictionary for Esther EOS files
+        # TO DO: Add remaining elements from the esther eos folder
         material_dict = {}
         material_dict["Al"] = {"name" : "Aluminum",
                                "shortname" : "Al#",
                                "eos_name" : "Al#_e_ses",
                                "mass_density" : 2.7,
                                },
-        material_dict["Mo"] = {}
+        material_dict["CH"] = {"name" : "CH",
+                               "shortname" : "CH2",
+                               "eos_name" : "CH2_e_ses",
+                               "mass_density" : 1.044,
+                               },
+        material_dict["Dia"] = {"name" : "Diamond",
+                               "shortname" : "Dia",
+                               "eos_name" : "Dia_e_ses",
+                               "mass_density" : 3.51,
+                               },
+        material_dict["Kap"] = {"name" : "Kapton",
+                               "shortname" : "Kap",
+                               "eos_name" : "Kap_e_ses",
+                               "mass_density" : 1.42,
+                               },
+        material_dict["Mo"] = {"name" : "Mo",
+                               "shortname" : "Mo#",
+                               "eos_name" : "Mo#_e_ses",
+                               "mass_density" : 10.2,
+                               },
+        material_dict["Au"] = {"name" : "Gold",
+                               "shortname" : "Au#",
+                               "eos_name" : "Au#_e_ses",
+                               "mass_density" : 19.3,
+                               },
+        material_dict["Fe"] = {"name" : "Iron",
+                               "shortname" : "Fe#",
+                               "eos_name" : "Fe#_e_ses",
+                               "mass_density" : 7.85,
+                               },
+        material_dict["Cu"] = {"name" : "Copper",
+                               "shortname" : "Cu#",
+                               "eos_name" : "Cu#_e_ses",
+                               "mass_density" : 8.93,
+                               },
+        material_dict["Sn"] = {"name" : "Tin",
+                               "shortname" : "Sn#",
+                               "eos_name" : "Sn#_e_ses",
+                               "mass_density" : 7.31,
+                               },
+        material_dict["LiF"] = {"name" : "Lithium Fluoride",
+                               "shortname" : "LiF",
+                               "eos_name" : "LiF_e_ses",
+                               "mass_density" : 2.64,
+                               },
+        material_dict["Ta"] = {"name" : "Tantalum",
+                               "shortname" : "Ta#",
+                               "eos_name" : "Ta#_e_ses",
+                               "mass_density" : 16.65,
+                               },
+        material_dict["Ti"] = {"name" : "Titanium",
+                               "shortname" : "Ti#",
+                               "eos_name" : "Ti#_e_ses",
+                               "mass_density" : 4.43,
+                               },
+        # Determine the mazz of one zone
+        mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
 
-        al_density = material_dict["Al"]["mass_density"]
-
-
+        #al_density = material_dict["Al"]["mass_density"]
 
         # Make a temporary directory
         self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
@@ -203,15 +249,22 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('This is the window layer')
 
             # If more than one layer, loop the layer construction here.
+            # Then change number_of_sample_zones to number_of_zones[i] for i < number of layers
             # TO DO PLACEHOLDER -------------------------------------------------------------->
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
-            input_deck.write('NOM_MILIEU=\n')
-            input_deck.write('EQUATION_ETAT=EOS_LIST\n')
+            input_deck.write('NOM_MILIEU=%s\n' % (self.sample)) # DOES material_dict[self.sample]["shortname"] work here?
+            input_deck.write('EQUATION_ETAT=EOS_LIST\n') # %s DOES material_dict[self.sample]["eos_name"] work here?
             if self.__use_window == False:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
-            input_deck.write('NOMBRE_MAILLES=NUMBER_OF_SAMPLE_ZONES\n')
+            # Calculate number of zones
+            width_of_sample_zone = mass_of_zone/material_type[self.sample]["mass_density"]
+            number_of_sample_zones=int(self.samplethickness/width_of_sample_zone)
+            input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
+
+            #width_of_zone[i] = mass_of_zone/material_type[material_in_zone[i]][3]
+            #number_of_zones[i] = int(thickness[i]/width_of_zone[i])
 
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
@@ -295,7 +348,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
        	""" Set the window thickness to the value. """
        	self.__window_thickness = checkAndSetWindowThickness(value)
     @property
-    def laser_wavelength(self):
+    def LaserWavelength(self):
        	""" Query for the laser wavelength type. """
        	return self.__laser_wavelength
     @laser_wavelength.setter
@@ -407,15 +460,15 @@ def checkAndSetSampleThickness(sample_thickness):
 
 def checkAndSetWindow(window):
     """
-	Utility to check that the window thickness is > 1 um and < 200 um
-	"""
+    Utility to check that the window thickness is > 1 um and < 200 um
+    """
     # Change this to be just window materials (LiF, Quartz etc.)
     ### TODO PLACEHOLDER ------------------------------------------------------------------------------>
     elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
-				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
 
     if window is None:
-		print ( "Running simulation without window material")
+        print ( "Running simulation without window material")
     else:
         # Check each element
         if window in elements:
@@ -423,26 +476,18 @@ def checkAndSetWindow(window):
         else:
             raise ValueError( "window is not in list of known EOS materials")
 
-	return window
-
-
-    ### Why this block?
-        self.__window_thickness = checkAndSetWindowThickness(window_thickness)
-        self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
-        self.__laser_pulse_duration = checkAndSetLaserPulseLength(laser_pulse_duration)
-        self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
-        self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+    return window
 
 def checkAndSetWindowThickness(window_thickness):
     """
-	Utility to check that the window thickness is > 1 um and < 500 um
-	"""
+    Utility to check that the window thickness is > 1 um and < 500 um
+    """
     # FIND THE BEST WAY TO IGNORE THIS IF THERE IS NO WINDOW.
     # TO DO PLACE HOLDER--------------------------------------------------------------------------------->
     ### One solution could be to call this function from within checkAndSetWindow if window is not None.
     # Set default
     if window_thickness is None:
-      	raise RuntimeError( "Window thickness not specified.")
+        raise RuntimeError( "Window thickness not specified.")
 
     # Check if ablator is between 1 and 100 um
     if window_thickness == 0.0:
