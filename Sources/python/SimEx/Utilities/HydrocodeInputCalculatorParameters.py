@@ -161,28 +161,70 @@ class HydroParameters(AbstractCalculatorParameters):
         final_feather_zone_width = round(minimum_zone_width*(r**n),4)
         non_feather_zones = int(non_feather_zone_width/(minimum_zone_width*(r**n)))
 
-        # Materials: [name, EOS shortname, EOS longname, density]
-        # material_type = [0]*13
-        # material_type[1] = ["Aluminium","Al#","Al#_e_ses",2.7]
-        # material_type[2] = ["Diamond","Dia","Dia_e_ses",3.51]
-        # material_type[3] = ["CH","CH2", "CH2_e_ses",1.044]
-        # material_type[4] = ["Kapton","Kap","Kap_e_ses",1.42]
-        # material_type[5] = ["Mo","Mo#","Mo#_e_ses",10.2]
-        # material_type[6] = ["Gold","Au#","Au#_e_ses",19.3]
-        # material_type[7] = ["Iron","Fe#","Fe#_e_ses",7.85]
-        # material_type[8] = ["Copper","Cu#","Cu#_e_ses",8.93]
-        # material_type[9] = ["Tin","Sn#","Sn#_e_ses",7.31]
-        # material_type[10] = ["LiF","LiF","LiF_e_ses",2.64]
-        # material_type[11] = ["Tantalum","Ta#","Ta#_e_ses",16.65]
-        # material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
-
+        # Dictionary for Esther EOS files
+        # TO DO: Add remaining elements from the esther eos folder
         material_dict = {}
         material_dict["Al"] = {"name" : "Aluminum",
                                "shortname" : "Al#",
                                "eos_name" : "Al#_e_ses",
                                "mass_density" : 2.7,
                                },
-        material_dict["Mo"] = {}
+        material_dict["CH"] = {"name" : "CH",
+                               "shortname" : "CH2",
+                               "eos_name" : "CH2_e_ses",
+                               "mass_density" : 1.044,
+                               },
+        material_dict["Dia"] = {"name" : "Diamond",
+                               "shortname" : "Dia",
+                               "eos_name" : "Dia_e_ses",
+                               "mass_density" : 3.51,
+                               },
+        material_dict["Kap"] = {"name" : "Kapton",
+                               "shortname" : "Kap",
+                               "eos_name" : "Kap_e_ses",
+                               "mass_density" : 1.42,
+                               },
+        material_dict["Mo"] = {"name" : "Mo",
+                               "shortname" : "Mo#",
+                               "eos_name" : "Mo#_e_ses",
+                               "mass_density" : 10.2,
+                               },
+        material_dict["Au"] = {"name" : "Gold",
+                               "shortname" : "Au#",
+                               "eos_name" : "Au#_e_ses",
+                               "mass_density" : 19.3,
+                               },
+        material_dict["Fe"] = {"name" : "Iron",
+                               "shortname" : "Fe#",
+                               "eos_name" : "Fe#_e_ses",
+                               "mass_density" : 7.85,
+                               },
+        material_dict["Cu"] = {"name" : "Copper",
+                               "shortname" : "Cu#",
+                               "eos_name" : "Cu#_e_ses",
+                               "mass_density" : 8.93,
+                               },
+        material_dict["Sn"] = {"name" : "Tin",
+                               "shortname" : "Sn#",
+                               "eos_name" : "Sn#_e_ses",
+                               "mass_density" : 7.31,
+                               },
+        material_dict["LiF"] = {"name" : "Lithium Fluoride",
+                               "shortname" : "LiF",
+                               "eos_name" : "LiF_e_ses",
+                               "mass_density" : 2.64,
+                               },
+        material_dict["Ta"] = {"name" : "Tantalum",
+                               "shortname" : "Ta#",
+                               "eos_name" : "Ta#_e_ses",
+                               "mass_density" : 16.65,
+                               },
+        material_dict["Ti"] = {"name" : "Titanium",
+                               "shortname" : "Ti#",
+                               "eos_name" : "Ti#_e_ses",
+                               "mass_density" : 4.43,
+                               },
+
 
         al_density = material_dict["Al"]["mass_density"]
 
