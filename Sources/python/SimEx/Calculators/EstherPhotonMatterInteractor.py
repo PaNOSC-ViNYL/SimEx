@@ -26,8 +26,9 @@
     @creation 20170222
 
 """
+from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 
-class EstherPhotonMatterInteractor(AbstractPhotonDiffractor):
+class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """
     Class interfacing the Esther Radiation-Hydrodynamics simulation backengine.
     """
@@ -57,7 +58,6 @@ class EstherPhotonMatterInteractor(AbstractPhotonDiffractor):
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
         return None
-    #return self.__expected_data
 
     def providedData(self):
         """ Query for the data provided by the Diffractor. """
