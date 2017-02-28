@@ -287,7 +287,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n') # TO DO: These could be expert options
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
             input_deck.write('DUREE_IMPULSION=%.2fe-9\n' % (self.laser_pulse_duration))
-            input_deck.write('INTENSITE_IMPUL_MAX=%.3e16\n' % (self.laser_pulse_intensity)) # TO DO: Check e16 is TW/cm**2
+            input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_pulse_intensity)) # TO DO: Check e16 is TW/cm**2
             input_deck.write('IMPULSION_FICHIER\n')
             input_deck.write('\n')
             
@@ -303,6 +303,38 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('TEMP_ARRET=20e-9\n') # TO DO: Must be same as BORNE_TEMPS
             input_deck.write('\n')
             input_deck.write('FIN_DES_INSTRUCTIONS')
+        
+        # Write the laser input file
+        laser_input_deck_path = os.path.join( self._tmp_dir, 'input_intensite_impulsion.txt')
+        print "Writing laser input deck to ", laser_input_deck_path, "."
+
+        # Write the parameters file (_intensitie_impulsion)
+        with open(laser_input_deck_path, 'w') as laser_input_deck:
+            if self.laser_pulse == "flat":
+                # Write flat top pulse shape to file
+                laser_input_deck.write('4\n')
+                laser_input_deck.write('temps (s ou u.a.) intensite (W/m2 ou u.a.)\n')
+                laser_input_deck.write('0. \t 0\n')
+                laser_input_deck.write('0.1e-9\t%.3f\n' % (self.laser_pulse_intensity))
+                laser_input_deck.write('%.2fe-9\t%.3f\n' % (self.laser_pulse_duration-0.1, self.laser_pulse_intensity))
+                laser_input_deck.write('%.2fe-9\t0.0\n' % (self.laser_pulse_duration))
+                laser_input_deck.write('fin_de_fichier')
+            elif self.laser_pulse == "ramp":
+                # Write ramp pulse shape to file
+                x = numpy.arange(0.,self.laser_pulse_duration+1.0,1)
+                y = x**3
+                y = y/numpy.amax(y)
+                Number_lines = len(x)
+                x[Number_lines-1]=self.laser_pulse_duration-0.1 # Set the max intensity at 100 ps before final pulse time
+                laser_input_deck.write('%d\n' % (Number_lines+1)) # Number of lines to add in pulse shape
+                laser_input_deck.write('temps (s ou u.a.) intensite (W/m2 ou u.a.)\n')
+                for i in range(0,Number_lines):
+                    laser_input_deck.write('%.2fe-9\t%0.3f\n' % (x[i],y[i]*self.laser_pulse_intensity))
+                laser_input_deck.write('%.2fe-9\t0.0\n' % (self.laser_pulse_duration))
+                laser_input_deck.write('fin_de_fichier')
+            else:
+                # Use a default Gaussian? or quit?
+                print ("No default laser chosen?")
             
 
     @property
