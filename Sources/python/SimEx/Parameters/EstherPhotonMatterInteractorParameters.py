@@ -97,7 +97,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
         List of DEMARRAGE (translates as "Start up") parameters
         "Expert user mode to choose the correct demarrage parameters"
-        
+
         Can also update this so that you can choose which EOS model to run???
         self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
@@ -107,7 +107,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
- 
+
     # TO DO: How to utilize expert mode for choosing Demmarge (start up) options
     def _setDemmargeFlags(self):
     	self.__use_usi = "USI"
@@ -281,7 +281,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('INDICE_REEL_LASER=1.46\n')
             input_deck.write('INDICE_IMAG_LASER=1.0\n')
             input_deck.write('\n')
-            
+
             # Laser parameters
              # TO DO PLACEHOLDER ----------------------------------------------------------------------------------------->
             input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n') # TO DO: These could be expert options
@@ -290,20 +290,20 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_pulse_intensity)) # TO DO: Check e16 is TW/cm**2
             input_deck.write('IMPULSION_FICHIER\n')
             input_deck.write('\n')
-            
+
             # Output parameters
             input_deck.write('SORTIES_GRAPHIQUES\n')
             input_deck.write('DECOUPAGE_TEMPS\n')
             input_deck.write('BORNE_TEMPS=20e-9\n') # TO DO: User to set the run time here
             input_deck.write('INCREMENT_TEMPS=0.05e-9\n') # TO DO: User to set the time resolution here
             input_deck.write('\n')
-            
+
             # End of input file
             input_deck.write('ARRET\n')
             input_deck.write('TEMP_ARRET=20e-9\n') # TO DO: Must be same as BORNE_TEMPS
             input_deck.write('\n')
             input_deck.write('FIN_DES_INSTRUCTIONS')
-        
+
         # Write the laser input file
         laser_input_deck_path = os.path.join( self._tmp_dir, 'input_intensite_impulsion.txt')
         print "Writing laser input deck to ", laser_input_deck_path, "."
@@ -335,7 +335,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             else:
                 # Use a default Gaussian? or quit?
                 print ("No default laser chosen?")
-            
+
 
     @property
     def number_of_layers(self):
@@ -627,22 +627,22 @@ def checkAndSetLaserPulseDuration(laser_pulse_duration):
 
     if laser_pulse_duration is None:
         raise RuntimeError( "Laser pulse duration has not been set")
-    
+
     if laser_pulse_duration < 1.0 or laser_pulse_duration > 50.0:
         raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
 
     return laser_pulse_duration
 
-def checkAndSetLaserPulseIntensity(laser_pulse_intensity):
+def checkAndSetLaserIntensity(laser_pulse_intensity):
     """
     Utility to check that the laser pulse Intensity is valid.
     """
 
     if laser_pulse_intensity is None:
         raise RuntimeError( "Laser intensity has not been set")
-    
+
     # TO DO: Check these for more realistic limits of TW/cm**2
     if laser_pulse_intensity < 0.001 or laser_pulse_intensity > 100.0:
         raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
 
-    return laser_pulse_duration
+    return laser_pulse_intensity
