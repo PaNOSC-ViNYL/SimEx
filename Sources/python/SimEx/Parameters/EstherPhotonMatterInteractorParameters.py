@@ -44,6 +44,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                  laser_pulse=None,
                  laser_pulse_duration=None,
                  laser_intensity=None,
+                 run_time=None,
+                 delta_time=None,
                  ):
 
         """
@@ -78,6 +80,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         :param laser_intensity: Laser intensity (TW/cm2)
         :type laser_intensity: float
+        
+        :param run_time: Simulation run time (ns)
+        :type run_time: float
+        
+        :param delta_time: Time steps resolution (ns)
+        :type delta_time: float
         """
 
         # Check and set all parameters
@@ -92,6 +100,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
         self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
         self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+        self.__run_time = checkAndSetRunTime(run_time)
+        self.__delta_time = checkAndSetDeltaTime(delta_time)
 
         # Set internal parameters
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
@@ -111,10 +121,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     # TO DO: How to utilize expert mode for choosing Demmarge (start up) options
     def _setDemmargeFlags(self):
         self.__use_usi = "USI"
-
-    # TO DO: Better way of choosing if window is to be used or not (user dependent)
-    def _setWindowFlags(self):
-        self.__use_window = False
 
     def _serialize(self):
         """ Write the input deck for the Esther hydrocode. """
@@ -237,9 +243,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')
             # TO DO PLACEHOLDER -------------------------------------------------------------->
-            if self.__use_window == True:
-                # Do window write
-                input_deck.write('This is the window layer')
+            # WINDOW flags here.
 
             # If more than one layer, loop the layer construction here.
             # Then change number_of_sample_zones to number_of_zones[i] for i < number of layers
@@ -294,13 +298,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # Output parameters
             input_deck.write('SORTIES_GRAPHIQUES\n')
             input_deck.write('DECOUPAGE_TEMPS\n')
-            input_deck.write('BORNE_TEMPS=20e-9\n') # TO DO: User to set the run time here
-            input_deck.write('INCREMENT_TEMPS=0.05e-9\n') # TO DO: User to set the time resolution here
+            input_deck.write('BORNE_TEMPS=%.2fe-9\n' % (self.run_time))
+            input_deck.write('INCREMENT_TEMPS=%.2fe-9\n' % (self.delta_time))
             input_deck.write('\n')
 
             # End of input file
             input_deck.write('ARRET\n')
-            input_deck.write('TEMP_ARRET=20e-9\n') # TO DO: Must be same as BORNE_TEMPS
+            input_deck.write('TEMP_ARRET=%.2fe-9\n' % (self.run_time))
             input_deck.write('\n')
             input_deck.write('FIN_DES_INSTRUCTIONS')
 
@@ -425,6 +429,23 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def laser_intensity(self,value):
         """ Set laser intensity """
         self.__laser_intensity = checkAndSetLaserPulseIntensity(value)
+    @property
+    def run_time(self):
+        """ Query for simulation run time """
+        return self.__run_time
+    @run_time.setter
+    def run_time(self,value):
+        """ Set simulation run time """
+        self.__run_time = checkAndSetRunTime(value)
+    @property
+    def delta_time(self):
+        """ Query for simulation time resolution (delta t ns) """
+        return self.__delta_time
+    @delta_time.setter
+    def delta_time(self,value):
+        """ Set simulation time resolution delta t, ns"""
+        self.__delta_time = checkAndSetDeltaTime(value)
+        
 
     def _setDefaults(self):
         """ Method to pick sensible defaults for all parameters. """
@@ -677,14 +698,40 @@ def checkAndSetLaserIntensity(laser_intensity):
 
     if laser_intensity is None:
         raise RuntimeError( "Laser intensity has not been set")
-
-    # TODO: Check these for more realistic limits of TW/cm**2
-
+    
     # Check if number.
     if not isinstance( laser_intensity, (float, int)):
         raise TypeError( "The parameter 'laser_intensity' must be a numerical type (float or int.)")
 
+    # TODO: Check these for more realistic limits of TW/cm**2
     if laser_intensity < 0.001 or laser_intensity > 100.0:
         raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
 
     return laser_intensity
+
+def checkAndSetRunTime(run_time):
+    """
+    Utility for checking the simulation run time is valid
+    """
+    
+    if run_time is None:
+        raise RuntimeError( "Simulation run time is not set")
+    
+    # TODO: Check run times
+    if run_time < 1.0 or run_time > 50.0:
+        raise ValueError( "Simulation run time should be > 5.0 ns and < 50.0 ns")
+    
+    return run_time
+
+def checkAndSetDeltaTime(delta_time):
+    """
+    Utility for checking the simulation delta time (resolution) is valid
+    """
+    
+    if delta_time is None:
+        raise RuntimeError( "Simulation delta time (time resolution) is not set")
+    
+    if delta_time < 0.001 or delta_time > 0.5:
+        raise ValueError( "Simulation delta time should be > 10 ps and < 500 ps")
+    
+    return delta_time
