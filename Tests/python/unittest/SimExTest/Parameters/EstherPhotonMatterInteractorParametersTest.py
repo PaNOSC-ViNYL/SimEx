@@ -140,15 +140,15 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
     def testCheckAndSetAblatorThickness(self):
         """ Test the check and set method for the ablator thickness. """
 
-        self.assertRaises( TypeError, checkAndSetAblatorThickness, 1 )
         self.assertRaises( TypeError, checkAndSetAblatorThickness, "ten microns" )
         self.assertRaises( TypeError, checkAndSetAblatorThickness, [10.0, 10.0] )
 
         # Value raises.
-        self.assertRaises( ValueError, checkAndSetAblator, -10.0 )
-        self.assertRaises( ValueError, checkAndSetAblator, 0.0 )
+        self.assertRaises( ValueError, checkAndSetAblatorThickness, -10.0 )
+        self.assertRaises( ValueError, checkAndSetAblatorThickness, 0.0 )
 
         self.assertEqual( checkAndSetAblatorThickness(10.0), 10.0 )
+        self.assertEqual( checkAndSetAblatorThickness(6), 6.0 )
 
 
     def testCheckAndSetSample(self):
@@ -168,15 +168,15 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
     def testCheckAndSetSampleThickness(self):
         """ Test the check and set method for the ablator thickness. """
 
-        self.assertRaises( TypeError, checkAndSetSampleThickness, 1 )
         self.assertRaises( TypeError, checkAndSetSampleThickness, "ten microns" )
         self.assertRaises( TypeError, checkAndSetSampleThickness, [10.0, 10.0] )
 
         # Value raises.
-        self.assertRaises( ValueError, checkAndSetSample, -10.0 )
-        self.assertRaises( ValueError, checkAndSetSample, 0.0 )
+        self.assertRaises( ValueError, checkAndSetSampleThickness, -10.0 )
+        self.assertRaises( ValueError, checkAndSetSampleThickness, 0.0 )
 
         self.assertEqual( checkAndSetSampleThickness(10.0), 10.0 )
+        self.assertEqual( checkAndSetSampleThickness(10), 10.0 )
 
     def testCheckAndSetWindow(self):
         """ Test the check and set method for the sample material. """
@@ -190,33 +190,32 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertRaises( ValueError, checkAndSetWindow, "Boron" )
 
         # Ok.
-        self.assertEqual( checkAndSetWindow("LiF"), "LiF" )
+        self.assertEqual( checkAndSetWindow("SiO2"), "SiO2" )
 
     def testCheckAndSetWindowThickness(self):
         """ Test the check and set method for the ablator thickness. """
 
-        self.assertRaises( TypeError, checkAndSetWindowThickness, 1 )
         self.assertRaises( TypeError, checkAndSetWindowThickness, "ten microns" )
         self.assertRaises( TypeError, checkAndSetWindowThickness, [10.0, 10.0] )
 
         # Value raises.
-        self.assertRaises( ValueError, checkAndSetWindow, -10.0 )
-        self.assertRaises( ValueError, checkAndSetWindow, 0.0 )
+        self.assertRaises( ValueError, checkAndSetWindowThickness, -10.0 )
 
         self.assertEqual( checkAndSetWindowThickness(10.0), 10.0 )
+        self.assertEqual( checkAndSetWindowThickness(10), 10.0 )
 
     def testCheckAndSetLaserWavelength(self):
         """ Test the check and set method for the laser wavelength. """
 
         # Type raises.
-        self.assertRaises( TypeError, checkAndSetLaserWavelength, 1 )
         self.assertRaises( TypeError, checkAndSetLaserWavelength, [100.0, 1024.0] )
         self.assertRaises( TypeError, checkAndSetLaserWavelength, "2 omega" )
 
         # Value raises.
         self.assertRaises( ValueError, checkAndSetLaserWavelength, -1024.0 )
 
-        self.assertEqual( checkAndSetLaserWavelength( 800.0 ) , 800.0 )
+        self.assertEqual( checkAndSetLaserWavelength(800.0), 0.8 )
+        self.assertEqual( checkAndSetLaserWavelength(800),   0.8 )
 
     def testCheckAndSetLaserPulse(self):
         """ Test the check and set method for the laser pulse type. """
@@ -224,33 +223,32 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Type raises.
         self.assertRaises( TypeError, checkAndSetLaserPulse, 1 )
         self.assertRaises( TypeError, checkAndSetLaserPulse, 1.0 )
-        self.assertRaises( TypeError, checkAndSetLaserPulse, ["flat", "ramp"] )
+        self.assertRaises( TypeError, checkAndSetLaserPulse, ["flat", "quasiflat"] )
 
         # Value raises.
         self.assertRaises( ValueError, checkAndSetLaserPulse, "rectangular" )
 
         self.assertEqual( checkAndSetLaserPulse("flat"), "flat")
         self.assertEqual( checkAndSetLaserPulse("ramp"), "ramp")
-        self.assertEqual( checkAndSetLaserPulse("other"), "other")
+        self.assertEqual( checkAndSetLaserPulse("quasiflat"), "quasiflat")
 
     def testCheckAndSetLaserPulseDuration(self):
         """ Test the check and set method for the laser pulse duration. """
 
         # Type raises.
-        self.assertRaises( TypeError, checkAndSetLaserPulseDuration, 1 )
         self.assertRaises( TypeError, checkAndSetLaserPulseDuration, [10.0, 24.0] )
         self.assertRaises( TypeError, checkAndSetLaserPulseDuration, "2 ns" )
 
         # Value raises.
         self.assertRaises( ValueError, checkAndSetLaserPulseDuration, -10.0 )
 
-        self.assertEqual( checkAndSetLaserPulseDuration( 0.1 ) , 0.1 )
+        self.assertEqual( checkAndSetLaserPulseDuration( 2.0 ) , 2.0 )
+        self.assertEqual( checkAndSetLaserPulseDuration( 10 ) , 10 )
 
 
     def testCheckAndSetLaserIntensity(self):
         """ Test the check and set method for the laser intensity. """
         # Type raises.
-        self.assertRaises( TypeError, checkAndSetLaserIntensity, 1 )
         self.assertRaises( TypeError, checkAndSetLaserIntensity, [0.1, 0.2] )
         self.assertRaises( TypeError, checkAndSetLaserIntensity, "2 TW/cm2" )
 
@@ -258,6 +256,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertRaises( ValueError, checkAndSetLaserIntensity, -1.0 )
 
         self.assertEqual( checkAndSetLaserIntensity( 0.1 ) , 0.1 )
+        self.assertEqual( checkAndSetLaserIntensity( 1 ) , 1.0 )
 
 
     def testSerialize(self):

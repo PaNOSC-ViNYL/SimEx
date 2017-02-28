@@ -110,11 +110,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
     # TO DO: How to utilize expert mode for choosing Demmarge (start up) options
     def _setDemmargeFlags(self):
-    	self.__use_usi = "USI"
+        self.__use_usi = "USI"
 
     # TO DO: Better way of choosing if window is to be used or not (user dependent)
     def _setWindowFlags(self):
-    	self.__use_window = False
+        self.__use_window = False
 
     def _serialize(self):
         """ Write the input deck for the Esther hydrocode. """
@@ -339,68 +339,68 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
     @property
     def number_of_layers(self):
-       	""" Query for the number of layers. """
-       	return self.__number_of_layers
+           """ Query for the number of layers. """
+           return self.__number_of_layers
     @number_of_layers.setter
     def number_of_layers(self, value):
-       	""" Set the number of layers to the value. """
-       	self.__number_of_layers = checkAndSetnumber_of_layers(value)
+           """ Set the number of layers to the value. """
+           self.__number_of_layers = checkAndSetnumber_of_layers(value)
     @property
     def ablator(self):
-       	""" Query for the ablator type. """
-       	return self.__ablator
+           """ Query for the ablator type. """
+           return self.__ablator
     @ablator.setter
     def ablator(self, value):
-       	""" Set the ablator to the value. """
-       	self.__ablator = checkAndSetAblator(value)
+           """ Set the ablator to the value. """
+           self.__ablator = checkAndSetAblator(value)
     @property
     def ablator_thickness(self):
-       	""" Query for the ablator thickness. """
-       	return self.__ablator_thickness
+           """ Query for the ablator thickness. """
+           return self.__ablator_thickness
     @ablator_thickness.setter
     def ablator_thickness(self, value):
-       	""" Set the ablator thickness to the value. """
-       	self.__ablator_thickness = checkAndSetAblatorThickness(value)
+           """ Set the ablator thickness to the value. """
+           self.__ablator_thickness = checkAndSetAblatorThickness(value)
     @property
     def sample(self):
-       	""" Query for the sample type. """
-       	return self.__sample
+           """ Query for the sample type. """
+           return self.__sample
     @sample.setter
     def sample(self, value):
-       	""" Set the sample type to the value. """
-       	self.__sample = checkAndSetSample(value)
+           """ Set the sample type to the value. """
+           self.__sample = checkAndSetSample(value)
     @property
     def sample_thickness(self):
-       	""" Query for the sample thickness type. """
-       	return self.__sample_thickness
+           """ Query for the sample thickness type. """
+           return self.__sample_thickness
     @sample_thickness.setter
     def sample_thickness(self, value):
-       	""" Set the sample thickness to the value. """
-       	self.__sample_thickness = checkAndSetSampleThickness(value)
+           """ Set the sample thickness to the value. """
+           self.__sample_thickness = checkAndSetSampleThickness(value)
     @property
     def window(self):
-       	""" Query for the window type. """
-       	return self.__window
+           """ Query for the window type. """
+           return self.__window
     @window.setter
     def window(self, value):
-       	""" Set the window to the value. """
-       	self.__window = checkAndSetWindow(value)
+           """ Set the window to the value. """
+           self.__window = checkAndSetWindow(value)
     @property
     def window_thickness(self):
-       	""" Query for the window thickness type. """
-       	return self.__window_thickness
+           """ Query for the window thickness type. """
+           return self.__window_thickness
     @window_thickness.setter
     def window_thickness(self, value):
-       	""" Set the window thickness to the value. """
-       	self.__window_thickness = checkAndSetWindowThickness(value)
+           """ Set the window thickness to the value. """
+           self.__window_thickness = checkAndSetWindowThickness(value)
     @property
     def laser_wavelength(self):
-       	""" Query for the laser wavelength type. """
-       	return self.__laser_wavelength
+           """ Query for the laser wavelength type. """
+           return self.__laser_wavelength
     @laser_wavelength.setter
     def laser_wavelength(self, value):
-       	""" Set the laser wavelength to the value. """
-       	self.__laser_wavelength = checkAndSetLaserWavelength(value)
+           """ Set the laser wavelength to the value. """
+           self.__laser_wavelength = checkAndSetLaserWavelength(value)
     @property
     def laser_pulse(self):
         """Query for laser pulse type"""
@@ -418,13 +418,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """ Set laser pulse duration """
         self.__laser_pulse_duration = checkAndSetLaserPulseDuration(value)
     @property
-    def laser_pulse_intensity(self):
-        """ Query for laser pulse intensity """
-        return self.__laser_pulse_intensity
-    @laser_pulse_intensity.setter
-    def laser_pulse_intensity(self,value):
-        """ Set laser pulse intensity """
-        self.__laser_pulse_intensity = checkAndSetLaserPulseIntensity(value)
+    def laser_intensity(self):
+        """ Query for laser intensity """
+        return self.__laser_intensity
+    @laser_intensity.setter
+    def laser_intensity(self,value):
+        """ Set laser intensity """
+        self.__laser_intensity = checkAndSetLaserPulseIntensity(value)
 
     def _setDefaults(self):
         """ Method to pick sensible defaults for all parameters. """
@@ -446,91 +446,102 @@ def checkAndSetNumberOfLayers(number_of_layers):
     if number_of_layers is None:
         raise RuntimeError( "Number of layers is not defined.")
 
+    if not isinstance( number_of_layers, int ):
+        raise TypeError("The parameter 'number_of_layers' must be an int.")
+
     if number_of_layers <=1 or number_of_layers > 5:
         raise ValueError( "Number of layers must be between 1 and 5 only.")
 
     return number_of_layers
 
 def checkAndSetAblator(ablator):
-	"""
-	Utility to check if the ablator exists in the EOS database.
+    """
+    Utility to check if the ablator exists in the EOS database.
 
     :param ablator: The ablator material to check.
     :return: The ablator choice after being checked.
     :raise ValueError: ablator not in ["CH", "Al", "Diamond"].
 
-	"""
+    """
 
-	if ablator is None:
-		raise RuntimeError( "The parameter 'ablator' is not defined.")
+    if ablator is None:
+        raise RuntimeError( "The parameter 'ablator' is not defined.")
+
+    # Check type.
+    if not isinstance( ablator, str):
+        raise TypeError("The parameters 'ablator' must be a str.")
 
     ### Could check if isinstance(ablator, str)
-	# Check if ablator is CH, Al or diamond
-	if ablator == 'CH':
-		print ( "Setting CH as ablator.")
-	elif ablator == 'Al':
-		print ( "Setting Al as ablator.")
-	elif ablator.lower() in ['dia', 'diamond']:
-		print ( "Setting diamond as ablator.")
-	else:
-		raise ValueError( "Ablator is not valid. Use 'CH', 'Al' or 'dia'.")
+    # Check if ablator is CH, Al or diamond
+    if ablator == 'CH':
+        print ( "Setting CH as ablator.")
+    elif ablator == 'Al':
+        print ( "Setting Al as ablator.")
+    elif ablator.lower() in ['dia', 'diamond']:
+        print ( "Setting diamond as ablator.")
+    else:
+        raise ValueError( "Ablator is not valid. Use 'CH', 'Al' or 'dia'.")
 
-	return ablator
+    return ablator
 
 
 def checkAndSetAblatorThickness(ablator_thickness):
-	"""
-	Utility to check that the ablator thickness is > 5 um and < 100 um
-	"""
+    """
+    Utility to check that the ablator thickness is > 5 um and < 100 um
+    """
 
-	# Raise if not set.
-	if ablator_thickness is None:
-		raise RuntimeError( "Ablator thickness not specified.")
+    # Raise if not set.
+    if ablator_thickness is None:
+        raise RuntimeError( "Ablator thickness not specified.")
 
-	# Check if ablator is between 5 and 100 um
-	if ablator_thickness <= 5.0 or ablator_thickness > 100.0:
-		raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
+    # Check type.
+    if not isinstance( ablator_thickness, (int, float)):
+        raise TypeError("The parameters 'ablator_thickness' must be of numeric type (int or float).")
 
-	print ( "Ablator thickness is %4.1f " % ablator_thickness)
+    # Check if ablator is between 5 and 100 um
+    if ablator_thickness <= 5.0 or ablator_thickness > 100.0:
+        raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
 
-	return ablator_thickness
+    print ( "Ablator thickness is %4.1f " % ablator_thickness)
+
+    return ablator_thickness
 
 
 def checkAndSetSample(sample):
-	"""
-	Utility to check if the sample is in the list of known EOS materials
-	"""
+    """
+    Utility to check if the sample is in the list of known EOS materials
+    """
 
-    ### Could utilize periodictable module...
-	elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
-				"Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond", "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum", ]
 
-	# Set default
-	if sample is None:
-		raise RuntimeError( "sample not specified.")
+    # Set default
+    if sample is None:
+        raise RuntimeError( "sample not specified.")
 
-	# Check each element
-	if sample in elements:
-		pass
-	else:
-		raise ValueError( "sample is not in list of known EOS materials")
+    if not isinstance(sample, str): raise TypeError("The parameter 'sample' must be a str.")
 
-	return sample
+    # Check each element
+    if sample in elements:
+        pass
+    else:
+        raise ValueError( "sample is not in list of known EOS materials")
+
+    return sample
 
 def checkAndSetSampleThickness(sample_thickness):
-	"""
-	Utility to check that the sample thickness is > 1 um and < 200 um
-	"""
+    """
+    Utility to check that the sample thickness is > 1 um and < 200 um
+    """
 
-	# Set default
-	if sample_thickness is None:
-		raise RuntimeError( "sample thickness not specified.")
+    # Set default
+    if sample_thickness is None:
+        raise RuntimeError( "sample thickness not specified.")
 
-	# Check if ablator is between 1 and 100 um
-	if sample_thickness < 1.0 or sample_thickness > 200.0:
-		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+    # Check if ablator is between 1 and 100 um
+    if sample_thickness < 1.0 or sample_thickness > 200.0:
+        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
 
-	return sample_thickness
+    return sample_thickness
 
 def checkAndSetWindow(window):
     """
@@ -538,17 +549,21 @@ def checkAndSetWindow(window):
     """
     # Change this to be just window materials (LiF, Quartz etc.)
     ### TODO PLACEHOLDER ------------------------------------------------------------------------------>
-    elements = ["Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
-                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum"]
+    elements = ["LiF",
+                "SiO2",
+                "Diamond",
+                ]
 
     if window is None:
         print ( "Running simulation without window material")
-    else:
-        # Check each element
-        if window in elements:
-            pass
-        else:
-            raise ValueError( "window is not in list of known EOS materials")
+        return None
+
+    if not isinstance( window, str):
+        raise TypeError("The parameter 'window' must be a str.")
+
+    # Check each element
+    if window not in elements:
+        raise ValueError( "window is not in list of known EOS materials")
 
     return window
 
@@ -561,7 +576,11 @@ def checkAndSetWindowThickness(window_thickness):
     ### One solution could be to call this function from within checkAndSetWindow if window is not None.
     # Set default
     if window_thickness is None:
-        raise RuntimeError( "Window thickness not specified.")
+        return 0.0
+
+    # Check if number.
+    if not isinstance( window_thickness, (float, int)):
+        raise TypeError( "The parameter 'window_thickness' must be a numerical type (float or int.)")
 
     # Check if ablator is between 1 and 100 um
     if window_thickness == 0.0:
@@ -580,6 +599,10 @@ def checkAndSetSampleThickness(sample_thickness):
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
 
+    # Check if number.
+    if not isinstance( sample_thickness, (float, int)):
+        raise TypeError( "The parameter 'sample_thickness' must be a numerical type (float or int.)")
+
     # Check if ablator is between 1 and 100 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
         raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
@@ -591,12 +614,18 @@ def checkAndSetLaserWavelength(laser_wavelength):
     Utility to check that the laser wavelength is correct.
     """
 
-    print (laser_wavelength)
-
     if laser_wavelength is None:
         raise RuntimeError( "Laser wavelength is not defined")
 
-    # Convert to microns.
+    # Check if number.
+    if not isinstance( laser_wavelength, (float, int)):
+        raise TypeError( "The parameter 'laser_wavelength' must be a numerical type (float or int.)")
+
+    if laser_wavelength <= 0.0:
+        raise ValueError( "The parameter 'laser_wavelength' must be a positive number.")
+
+
+ # Convert to microns.
     laser_wavelength = laser_wavelength*1e-3
     print ("Laser wavelength = %.3fe-6" % (laser_wavelength))
 
@@ -611,6 +640,10 @@ def checkAndSetLaserPulse(laser_pulse):
         raise RuntimeError( "Laser pulse type has not been chosen")
 
     pulse_shapes = ["flat","quasiflat","ramp"]
+
+    # Check if str.
+    if not isinstance(laser_pulse, str):
+        raise TypeError("The parameter 'laser_pulse' must be a str.")
 
     # Check if pulseshape exists
     if laser_pulse in pulse_shapes:
@@ -628,21 +661,30 @@ def checkAndSetLaserPulseDuration(laser_pulse_duration):
     if laser_pulse_duration is None:
         raise RuntimeError( "Laser pulse duration has not been set")
 
+    # Check if number.
+    if not isinstance( laser_pulse_duration, (float, int)):
+        raise TypeError( "The parameter 'laser_pulse_duration' must be a numerical type (float or int.)")
+
     if laser_pulse_duration < 1.0 or laser_pulse_duration > 50.0:
         raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
 
     return laser_pulse_duration
 
-def checkAndSetLaserIntensity(laser_pulse_intensity):
+def checkAndSetLaserIntensity(laser_intensity):
     """
-    Utility to check that the laser pulse Intensity is valid.
+    Utility to check that the laser intensity is valid.
     """
 
-    if laser_pulse_intensity is None:
+    if laser_intensity is None:
         raise RuntimeError( "Laser intensity has not been set")
 
-    # TO DO: Check these for more realistic limits of TW/cm**2
-    if laser_pulse_intensity < 0.001 or laser_pulse_intensity > 100.0:
+    # TODO: Check these for more realistic limits of TW/cm**2
+
+    # Check if number.
+    if not isinstance( laser_intensity, (float, int)):
+        raise TypeError( "The parameter 'laser_intensity' must be a numerical type (float or int.)")
+
+    if laser_intensity < 0.001 or laser_intensity > 100.0:
         raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
 
-    return laser_pulse_intensity
+    return laser_intensity
