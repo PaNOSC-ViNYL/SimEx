@@ -280,7 +280,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         esther_parameters._serialize()
 
         path_to_esther_files = esther_parameters._esther_files_path
-        
+
         # The function readParametersFromFile needs to set this parameters below from the param.dat file.
         # For now, obtaining the tmp path of esther files is working.
         new_esther_parameters = EstherPhotonMatterInteractorParameters(
@@ -310,8 +310,8 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         esther_parameters._setupFeathering(number_of_zones=300, feather_zone_width=4.0, minimum_zone_width=2e-4)
 
         self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0807)
+        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.0842508, 6)
         self.assertEqual( esther_parameters._non_feather_zones, 74)
-        self.assertEqual( esther_parameters._mass_of_zone, 74)
 
 
 
