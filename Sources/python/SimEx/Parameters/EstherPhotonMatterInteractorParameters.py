@@ -89,18 +89,15 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__window = checkAndSetWindow(window)
         self.__window_thickness = checkAndSetWindowThickness(window_thickness)
         self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
-        #self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
-        #self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
-        #self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+        self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
+        self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
+        self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
 
         # Set internal parameters
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
         List of DEMARRAGE (translates as "Start up") parameters
-        TRANSFERT_RADIATIF
-        USI
-
         "Expert user mode to choose the correct demarrage parameters"
-
+        
         Can also update this so that you can choose which EOS model to run???
         self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
@@ -110,10 +107,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
-
+ 
+    # TO DO: How to utilize expert mode for choosing Demmarge (start up) options
     def _setDemmargeFlags(self):
     	self.__use_usi = "USI"
 
+    # TO DO: Better way of choosing if window is to be used or not (user dependent)
     def _setWindowFlags(self):
     	self.__use_window = False
 
@@ -224,8 +223,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Determine the mazz of one zone
         mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
 
-        #al_density = material_dict["Al"]["mass_density"]
-
         # Make a temporary directory
         self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
 
@@ -283,9 +280,30 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # TO DO PLACEHOLDER -------------------------------------------------------------->
             input_deck.write('INDICE_REEL_LASER=1.46\n')
             input_deck.write('INDICE_IMAG_LASER=1.0\n')
-            input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n')
+            input_deck.write('\n')
+            
+            # Laser parameters
+             # TO DO PLACEHOLDER ----------------------------------------------------------------------------------------->
+            input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n') # TO DO: These could be expert options
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
-
+            input_deck.write('DUREE_IMPULSION=%.2fe-9\n' % (self.laser_pulse_duration))
+            input_deck.write('INTENSITE_IMPUL_MAX=%.3e16\n' % (self.laser_pulse_intensity)) # TO DO: Check e16 is TW/cm**2
+            input_deck.write('IMPULSION_FICHIER\n')
+            input_deck.write('\n')
+            
+            # Output parameters
+            input_deck.write('SORTIES_GRAPHIQUES\n')
+            input_deck.write('DECOUPAGE_TEMPS\n')
+            input_deck.write('BORNE_TEMPS=20e-9\n') # TO DO: User to set the run time here
+            input_deck.write('INCREMENT_TEMPS=0.05e-9\n') # TO DO: User to set the time resolution here
+            input_deck.write('\n')
+            
+            # End of input file
+            input_deck.write('ARRET\n')
+            input_deck.write('TEMP_ARRET=20e-9\n') # TO DO: Must be same as BORNE_TEMPS
+            input_deck.write('\n')
+            input_deck.write('FIN_DES_INSTRUCTIONS')
+            
 
     @property
     def number_of_layers(self):
@@ -351,6 +369,30 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def laser_wavelength(self, value):
        	""" Set the laser wavelength to the value. """
        	self.__laser_wavelength = checkAndSetLaserWavelength(value)
+    @property
+    def laser_pulse(self):
+        """Query for laser pulse type"""
+        return self.__laser_pulse
+    @laser_pulse.setter
+    def laser_pulse(self,value):
+        """ Set the laser pulse to type value """
+        self.__laser_pulse = checkAndSetLaserPulse(value)
+    @property
+    def laser_pulse_duration(self):
+        """ Query for laser pulse duration """
+        return self.__laser_pulse_duration
+    @laser_pulse_duration.setter
+    def laser_pulse_duration(self,value):
+        """ Set laser pulse duration """
+        self.__laser_pulse_duration = checkAndSetLaserPulseDuration(value)
+    @property
+    def laser_pulse_intensity(self):
+        """ Query for laser pulse intensity """
+        return self.__laser_pulse_intensity
+    @laser_pulse_intensity.setter
+    def laser_pulse_intensity(self,value):
+        """ Set laser pulse intensity """
+        self.__laser_pulse_intensity = checkAndSetLaserPulseIntensity(value)
 
     def _setDefaults(self):
         """ Method to pick sensible defaults for all parameters. """
@@ -527,3 +569,48 @@ def checkAndSetLaserWavelength(laser_wavelength):
     print ("Laser wavelength = %.3fe-6" % (laser_wavelength))
 
     return laser_wavelength
+
+def checkAndSetLaserPulse(laser_pulse):
+    """
+    Utility to check that the laser pulse type is correct.
+    """
+
+    if laser_pulse is None:
+        raise RuntimeError( "Laser pulse type has not been chosen")
+
+    pulse_shapes = ["flat","quasiflat","ramp"]
+
+    # Check if pulseshape exists
+    if laser_pulse in pulse_shapes:
+        pass
+    else:
+        raise ValueError( "Laser pulse shape is not in specified list.")
+
+    return laser_pulse
+
+def checkAndSetLaserPulseDuration(laser_pulse_duration):
+    """
+    Utility to check that the laser pulse duration is valid.
+    """
+
+    if laser_pulse_duration is None:
+        raise RuntimeError( "Laser pulse duration has not been set")
+    
+    if laser_pulse_duration < 1.0 or laser_pulse_duration > 50.0:
+        raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
+
+    return laser_pulse_duration
+
+def checkAndSetLaserPulseIntensity(laser_pulse_intensity):
+    """
+    Utility to check that the laser pulse Intensity is valid.
+    """
+
+    if laser_pulse_intensity is None:
+        raise RuntimeError( "Laser intensity has not been set")
+    
+    # TO DO: Check these for more realistic limits of TW/cm**2
+    if laser_pulse_intensity < 0.001 or laser_pulse_intensity > 100.0:
+        raise ValueError( "Laser pulse must be between 1.0 and 50.0 ns")
+
+    return laser_pulse_duration
