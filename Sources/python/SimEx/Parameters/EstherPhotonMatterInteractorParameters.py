@@ -28,6 +28,68 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 
 BOOL_TO_INT = {True : 1, False : 0}
 
+ESTHER_MATERIAL_DICT = { "Aluminum" : {"name" : "Aluminum",
+                       "shortname" : "Al#",
+                       "eos_name" : "Al#_e_ses",
+                       "mass_density" : 2.7,
+                       },
+                       "CH" : {"name" : "CH",
+                       "shortname" : "CH2",
+                       "eos_name" : "CH2_e_ses",
+                       "mass_density" : 1.044,
+                       },
+                       "Diamond" : {"name" : "Diamond",
+                       "shortname" : "Dia",
+                       "eos_name" : "Dia_e_ses",
+                       "mass_density" : 3.51,
+                       },
+                       "Kapton" : {"name" : "Kapton",
+                       "shortname" : "Kap",
+                       "eos_name" : "Kap_e_ses",
+                       "mass_density" : 1.42,
+                       },
+                       "Molybdenum" : {"name" : "Mo",
+                       "shortname" : "Mo#",
+                       "eos_name" : "Mo#_e_ses",
+                       "mass_density" : 10.2,
+                       },
+                       "Gold" : {"name" : "Gold",
+                       "shortname" : "Au#",
+                       "eos_name" : "Au#_e_ses",
+                       "mass_density" : 19.3,
+                       },
+                       "Iron" : {"name" : "Iron",
+                       "shortname" : "Fe#",
+                       "eos_name" : "Fe#_e_ses",
+                       "mass_density" : 7.85,
+                       },
+                       "Copper" : {"name" : "Copper",
+                       "shortname" : "Cu#",
+                       "eos_name" : "Cu#_e_ses",
+                       "mass_density" : 8.93,
+                       },
+                       "Tin" : {"name" : "Tin",
+                       "shortname" : "Sn#",
+                       "eos_name" : "Sn#_e_ses",
+                       "mass_density" : 7.31,
+                       },
+                       "LiF" : {"name" : "Lithium Fluoride",
+                       "shortname" : "LiF",
+                       "eos_name" : "LiF_e_ses",
+                       "mass_density" : 2.64,
+                       },
+                       "Tantalum" : {"name" : "Tantalum",
+                       "shortname" : "Ta#",
+                       "eos_name" : "Ta#_e_ses",
+                       "mass_density" : 16.65,
+                       },
+                       "Titanium" : {"name" : "Titanium",
+                       "shortname" : "Ti#",
+                       "eos_name" : "Ti#_e_ses",
+                       "mass_density" : 4.43,
+                       },
+           }
+
 class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     """
     class representing parameters for the Hydrocode Input Calculator
@@ -80,10 +142,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         :param laser_intensity: Laser intensity (TW/cm2)
         :type laser_intensity: float
-        
+
         :param run_time: Simulation run time (ns)
         :type run_time: float
-        
+
         :param delta_time: Time steps resolution (ns)
         :type delta_time: float
         """
@@ -114,7 +176,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
         """
         self._setDemmargeFlags()
-        self._setWindowFlags()
+
+        # Setup the feathering. Expert parameters can be set here.
+        self._setupFeathering()
 
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
@@ -123,23 +187,30 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def _setDemmargeFlags(self):
         self.__use_usi = "USI"
 
-    def _serialize(self):
-        """ Write the input deck for the Esther hydrocode. """
-        ### variables names: all_small_with_underscores
-        ### methods (except property get/set/delete) camelCase()
-        # Default variables for feathering
-        n = 250
-        number_of_zones = n
-        feather_zone_width = 5.0
-        minimum_zone_width = 1.E-4
+    def _setupFeathering(self, number_of_zones=250, feather_zone_width=5.0, minimum_zone_width=1e-4):
+        """ """
+        """ Method to fix feathering
+
+        :param number_of_zones: The number of zones in the first ablator section (default 250).
+        :type number_of_zones: int
+
+        :param feather_zone_width: Width of feather zone (default 5.0 [microns]).
+        :type feather_zone_width: float
+
+        :param minimum_zone_width: Minimal zone width (default 1e-4 [microns]).
+        :type minimum_zone_width: float
+
+        """
+
         externe_value = minimum_zone_width*1.e4
         non_feather_zone_width = self.ablator_thickness - feather_zone_width
-        
+
         # Determine the correct zone feathering for ablator
+        n = number_of_zones
         feather_list=numpy.zeros(n+1) # Create list of n zones
-        feather_list[0]=1 # First zone is 1
+        feather_list[0]=1. # First zone is 1
         feather_list[-2]=-feather_zone_width/minimum_zone_width
-        feather_list[-1]=-feather_list[-2] - 1
+        feather_list[-1]=-feather_list[-2] - 1.
 
         # Find roots in polynomial over the feather list
         f = numpy.poly1d(feather_list)
@@ -147,6 +218,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         root_found = False
 
         # Get all purely real roots above 1.
+        ### TODO: Improve algorithm.
         for i in range(n):
             if roots[i].imag == 0 and roots[i].real > 1.000001: # Why not > 1.? This would exclude 1.0f
                 r = round(roots[i].real,4)
@@ -155,75 +227,14 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         if root_found == False:
             raise RuntimeError( "No ratio bigger than 1.000001 was found.")
 
-        # Set final values for zone widths.
-        final_feather_zone_width = round(minimum_zone_width*(r**n),4)
-        non_feather_zones = int(non_feather_zone_width/(minimum_zone_width*(r**n)))
+        # Store feather information on object.
+        self._final_feather_zone_width = round(minimum_zone_width*(r**n),4)
+        self._non_feather_zones = int(non_feather_zone_width/(minimum_zone_width*(r**n)))
 
-        # Dictionary for Esther EOS files
-        # TO DO: Add remaining elements from the esther eos folder
-        material_dict = {}
-        material_dict["Aluminum"] = {"name" : "Aluminum",
-                               "shortname" : "Al#",
-                               "eos_name" : "Al#_e_ses",
-                               "mass_density" : 2.7,
-                               }
-        material_dict["CH"] = {"name" : "CH",
-                               "shortname" : "CH2",
-                               "eos_name" : "CH2_e_ses",
-                               "mass_density" : 1.044,
-                               }
-        material_dict["Diamond"] = {"name" : "Diamond",
-                               "shortname" : "Dia",
-                               "eos_name" : "Dia_e_ses",
-                               "mass_density" : 3.51,
-                               }
-        material_dict["Kapton"] = {"name" : "Kapton",
-                               "shortname" : "Kap",
-                               "eos_name" : "Kap_e_ses",
-                               "mass_density" : 1.42,
-                               }
-        material_dict["Molybdenum"] = {"name" : "Mo",
-                               "shortname" : "Mo#",
-                               "eos_name" : "Mo#_e_ses",
-                               "mass_density" : 10.2,
-                               }
-        material_dict["Gold"] = {"name" : "Gold",
-                               "shortname" : "Au#",
-                               "eos_name" : "Au#_e_ses",
-                               "mass_density" : 19.3,
-                               }
-        material_dict["Iron"] = {"name" : "Iron",
-                               "shortname" : "Fe#",
-                               "eos_name" : "Fe#_e_ses",
-                               "mass_density" : 7.85,
-                               }
-        material_dict["Copper"] = {"name" : "Copper",
-                               "shortname" : "Cu#",
-                               "eos_name" : "Cu#_e_ses",
-                               "mass_density" : 8.93,
-                               }
-        material_dict["Tin"] = {"name" : "Tin",
-                               "shortname" : "Sn#",
-                               "eos_name" : "Sn#_e_ses",
-                               "mass_density" : 7.31,
-                               }
-        material_dict["LiF"] = {"name" : "Lithium Fluoride",
-                               "shortname" : "LiF",
-                               "eos_name" : "LiF_e_ses",
-                               "mass_density" : 2.64,
-                               }
-        material_dict["Tantalum"] = {"name" : "Tantalum",
-                               "shortname" : "Ta#",
-                               "eos_name" : "Ta#_e_ses",
-                               "mass_density" : 16.65,
-                               }
-        material_dict["Titanium"] = {"name" : "Titanium",
-                               "shortname" : "Ti#",
-                               "eos_name" : "Ti#_e_ses",
-                               "mass_density" : 4.43,
-                               }
-        # Determine the mass of one zone
-        mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
+        self._mass_of_zone = self._final_feather_zone_width*ESTHER_MATERIAL_DICT[self.ablator]["mass_density"]
+
+    def _serialize(self):
+        """ Write the input deck for the Esther hydrocode. """
 
         # Make a temporary directory
         self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
@@ -239,7 +250,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')
-            
+
             # If using a window, write the window layer here
             if self.window is not None:
                 input_deck.write('- %.1f um %s layer\n' % (self.window_thickness, self.window))
@@ -248,11 +259,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
                 input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.window_thickness))
                 # Calculate number of zones in window
-                width_of_window_zone = mass_of_zone/material_dict[self.window]["mass_density"]
+                width_of_window_zone = self._mass_of_zone/material_dict[self.window]["mass_density"]
                 number_of_window_zones=int(self.window_thickness/width_of_window_zone)
                 input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_window_zones))
                 input_deck.write('\n')
-            
+
             # TO DO: GIT ISSUE #95: Complex targets
             # Change number_of_sample_zones to number_of_zones[i] for i < number of layers
             # The empty layer (epaisseur_vide) should be in the first layer construction
@@ -263,11 +274,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             # Calculate number of zones
-            width_of_sample_zone = mass_of_zone/material_dict[self.sample]["mass_density"]
+            width_of_sample_zone = self._mass_of_zone/material_dict[self.sample]["mass_density"]
             number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
             input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
-            
+
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
             input_deck.write('NOM_MILIEU=abl1\n') # 1ST PART OF ABLATOR
@@ -276,15 +287,15 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             if self.number_of_layers == 1:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (non_feather_zone_width)) # Non-feather thickness
-            input_deck.write('NOMBRE_MAILLES=%d\n' % (non_feather_zones)) # Number of zones
+            input_deck.write('NOMBRE_MAILLES=%d\n' % (self._non_feather_zones)) # Number of zones
             input_deck.write('\n')
             input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (feather_zone_width)) # Feather thickness
-            input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (final_feather_zone_width)) # Feather final zone width
+            input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
             input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (externe_value)) #Min zone width
             input_deck.write('\n')
-            
+
             # TO DO: GIT ISSUE #96: Expert mode
             # Internal parameters to add to input flags
             input_deck.write('INDICE_REEL_LASER=1.46\n')
@@ -346,7 +357,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 # Use a default Gaussian? or quit?
                 # TO DO: GIT ISSUE #96: Expert mode: User defined pulse shape?
                 print ("No default laser chosen?")
-    
+
     @property
     def number_of_layers(self):
            """ Query for the number of layers. """
@@ -451,19 +462,19 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def delta_time(self,value):
         """ Set simulation time resolution delta t, ns"""
         self.__delta_time = checkAndSetDeltaTime(value)
-        
+
 
     def _setDefaults(self):
         """ Method to pick sensible defaults for all parameters. """
         pass
-    
-    def checkConsistency():
+
+    def checkConsistency(self):
         if self.window is not None:
             if self.window_thickness == 0.0:
                 raise ValueError( "Window thickness cannot be 0.0")
-                
-        
-        
+
+
+
 ###########################
 # Check and set functions #
 ###########################
@@ -607,7 +618,7 @@ def checkAndSetWindowThickness(window_thickness):
     """
     Utility to check that the window thickness is > 1 um and < 500 um
     """
-    
+
     # Set default
     if window_thickness is None:
         return 0.0
@@ -628,7 +639,7 @@ def checkAndSetSampleThickness(sample_thickness):
     """
     Utility to check that the sample thickness is > 1 um and < 200 um
     """
-    
+
     # Set default
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
@@ -711,7 +722,7 @@ def checkAndSetLaserIntensity(laser_intensity):
 
     if laser_intensity is None:
         raise RuntimeError( "Laser intensity has not been set")
-    
+
     # Check if number.
     if not isinstance( laser_intensity, (float, int)):
         raise TypeError( "The parameter 'laser_intensity' must be a numerical type (float or int.)")
@@ -726,25 +737,25 @@ def checkAndSetRunTime(run_time):
     """
     Utility for checking the simulation run time is valid
     """
-    
+
     if run_time is None:
         raise RuntimeError( "Simulation run time is not set")
-    
+
     # TODO: Check run times
     if run_time < 1.0 or run_time > 50.0:
         raise ValueError( "Simulation run time should be > 5.0 ns and < 50.0 ns")
-    
+
     return run_time
 
 def checkAndSetDeltaTime(delta_time):
     """
     Utility for checking the simulation delta time (resolution) is valid
     """
-    
+
     if delta_time is None:
         raise RuntimeError( "Simulation delta time (time resolution) is not set")
-    
+
     if delta_time < 0.001 or delta_time > 0.5:
         raise ValueError( "Simulation delta time should be > 10 ps and < 500 ps")
-    
+
     return delta_time
