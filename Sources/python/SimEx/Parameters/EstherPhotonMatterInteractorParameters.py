@@ -287,7 +287,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n') # TO DO: These could be expert options
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
             input_deck.write('DUREE_IMPULSION=%.2fe-9\n' % (self.laser_pulse_duration))
-            input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_pulse_intensity)) # TO DO: Check e16 is TW/cm**2
+            input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_intensity)) # TO DO: Check e16 is TW/cm**2
             input_deck.write('IMPULSION_FICHIER\n')
             input_deck.write('\n')
 
@@ -315,8 +315,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 laser_input_deck.write('4\n')
                 laser_input_deck.write('temps (s ou u.a.) intensite (W/m2 ou u.a.)\n')
                 laser_input_deck.write('0. \t 0\n')
-                laser_input_deck.write('0.1e-9\t%.3f\n' % (self.laser_pulse_intensity))
-                laser_input_deck.write('%.2fe-9\t%.3f\n' % (self.laser_pulse_duration-0.1, self.laser_pulse_intensity))
+                laser_input_deck.write('0.1e-9\t%.3f\n' % (self.laser_intensity))
+                laser_input_deck.write('%.2fe-9\t%.3f\n' % (self.laser_pulse_duration-0.1, self.laser_intensity))
                 laser_input_deck.write('%.2fe-9\t0.0\n' % (self.laser_pulse_duration))
                 laser_input_deck.write('fin_de_fichier')
             elif self.laser_pulse == "ramp":
@@ -329,7 +329,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 laser_input_deck.write('%d\n' % (Number_lines+1)) # Number of lines to add in pulse shape
                 laser_input_deck.write('temps (s ou u.a.) intensite (W/m2 ou u.a.)\n')
                 for i in range(0,Number_lines):
-                    laser_input_deck.write('%.2fe-9\t%0.3f\n' % (x[i],y[i]*self.laser_pulse_intensity))
+                    laser_input_deck.write('%.2fe-9\t%0.3f\n' % (x[i],y[i]*self.laser_intensity))
                 laser_input_deck.write('%.2fe-9\t0.0\n' % (self.laser_pulse_duration))
                 laser_input_deck.write('fin_de_fichier')
             else:
