@@ -102,6 +102,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
         self.__run_time = checkAndSetRunTime(run_time)
         self.__delta_time = checkAndSetDeltaTime(delta_time)
+        self.checkConsistency()
 
         # Set internal parameters
         """ TO DO PLACEHOLDER -------------------------------------------------------------->
@@ -238,19 +239,31 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
-            input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi)) # This should be user option
+            # TO DO: GIT ISSUE: #96: Expert user mode for demarrage parameters
+            input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi))
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')
-            # TO DO PLACEHOLDER -------------------------------------------------------------->
-            # WINDOW flags here.
-
-            # If more than one layer, loop the layer construction here.
-            # Then change number_of_sample_zones to number_of_zones[i] for i < number of layers
-            # TO DO PLACEHOLDER -------------------------------------------------------------->
+            
+            # If using a window, write the window layer here
+            if self.window is not None:
+                input_deck.write('- %.1f um %s layer\n' % (self.window_thickness, self.window))
+                input_deck.write('NOM_MILIEU=%s\n' % (material_dict[self.window]["shortname"]))
+                input_deck.write('EQUATION_ETAT=%s\n' % (material_dict[self.window]["eos_name"]))
+                input_deck.write('EPAISSEUR_VIDE=100e-6\n')
+                input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.window_thickness))
+                # Calculate number of zones in window
+                width_of_window_zone = mass_of_zone/material_dict[self.window]["mass_density"]
+                number_of_window_zones=int(self.window_thickness/width_of_window_zone)
+                input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_window_zones))
+                input_deck.write('\n')
+            
+            # TO DO: GIT ISSUE #95: Complex targets
+            # Change number_of_sample_zones to number_of_zones[i] for i < number of layers
+            # The empty layer (epaisseur_vide) should be in the first layer construction
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
-            input_deck.write('NOM_MILIEU=%s\n' % (self.sample)) # DOES material_dict[self.sample]["shortname"] work here?
-            input_deck.write('EQUATION_ETAT=EOS_LIST\n') # %s DOES material_dict[self.sample]["eos_name"] work here?
+            input_deck.write('NOM_MILIEU=%s\n' % (self.sample))
+            input_deck.write('EQUATION_ETAT=EOS_LIST\n')
             if self.__use_window == False:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
@@ -450,10 +463,19 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def _setDefaults(self):
         """ Method to pick sensible defaults for all parameters. """
         pass
-
+    
+    def checkConsistency():
+        if self.window is not None:
+            if self.window_thickness == 0.0:
+                raise ValueError( "Window thickness cannot be 0.0")
+                
+        
+        
 ###########################
 # Check and set functions #
 ###########################
+
+
 
 def checkAndSetNumberOfLayers(number_of_layers):
     """
@@ -595,6 +617,9 @@ def checkAndSetWindowThickness(window_thickness):
     # FIND THE BEST WAY TO IGNORE THIS IF THERE IS NO WINDOW.
     # TO DO PLACE HOLDER--------------------------------------------------------------------------------->
     ### One solution could be to call this function from within checkAndSetWindow if window is not None.
+
+    
+    
     # Set default
     if window_thickness is None:
         return 0.0
