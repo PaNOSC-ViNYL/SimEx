@@ -105,10 +105,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.checkConsistency()
 
         # Set internal parameters
-        """ TO DO PLACEHOLDER -------------------------------------------------------------->
+        # TO DO: Git issue: #96: Expert mode: Demarrage parameters
+        """
         List of DEMARRAGE (translates as "Start up") parameters
         "Expert user mode to choose the correct demarrage parameters"
-
         Can also update this so that you can choose which EOS model to run???
         self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
         self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
@@ -119,34 +119,29 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
 
-    # TO DO: How to utilize expert mode for choosing Demmarge (start up) options
+    # TO DO: Git issue: #96: Expert mode: Demarrage parameters
     def _setDemmargeFlags(self):
         self.__use_usi = "USI"
 
     def _serialize(self):
         """ Write the input deck for the Esther hydrocode. """
-        NumberZones = [0]
-
-        # Default variables for feathering
-        n = 250
         ### variables names: all_small_with_underscores
         ### methods (except property get/set/delete) camelCase()
+        # Default variables for feathering
+        n = 250
         number_of_zones = n
         feather_zone_width = 5.0
         minimum_zone_width = 1.E-4
         externe_value = minimum_zone_width*1.e4
         non_feather_zone_width = self.ablator_thickness - feather_zone_width
-
-
-        # Determine the correct feathering
-        ### More verbose comments.
-        # Setup feather zones.
-        feather_list=numpy.zeros(n+1)
-        feather_list[0]=1
+        
+        # Determine the correct zone feathering for ablator
+        feather_list=numpy.zeros(n+1) # Create list of n zones
+        feather_list[0]=1 # First zone is 1
         feather_list[-2]=-feather_zone_width/minimum_zone_width
         feather_list[-1]=-feather_list[-2] - 1
 
-        # Find roots in polynomial over the feathers
+        # Find roots in polynomial over the feather list
         f = numpy.poly1d(feather_list)
         roots = numpy.roots(f)
         root_found = False
@@ -227,7 +222,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                                "eos_name" : "Ti#_e_ses",
                                "mass_density" : 4.43,
                                }
-        # Determine the mazz of one zone
+        # Determine the mass of one zone
         mass_of_zone = final_feather_zone_width*material_dict[self.ablator]["mass_density"]
 
         # Make a temporary directory
@@ -272,10 +267,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
             input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
-
-            #width_of_zone[i] = mass_of_zone/material_dict[material_in_zone[i]][3]
-            #number_of_zones[i] = int(thickness[i]/width_of_zone[i])
-
+            
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
             input_deck.write('NOM_MILIEU=abl1\n') # 1ST PART OF ABLATOR
@@ -292,23 +284,24 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (final_feather_zone_width)) # Feather final zone width
             input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (externe_value)) #Min zone width
             input_deck.write('\n')
-
-            # Internal parameters to add to flags
-            # TO DO PLACEHOLDER -------------------------------------------------------------->
+            
+            # TO DO: GIT ISSUE #96: Expert mode
+            # Internal parameters to add to input flags
             input_deck.write('INDICE_REEL_LASER=1.46\n')
             input_deck.write('INDICE_IMAG_LASER=1.0\n')
             input_deck.write('\n')
 
             # Laser parameters
-             # TO DO PLACEHOLDER ----------------------------------------------------------------------------------------->
-            input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n') # TO DO: These could be expert options
+            # TO DO: GIT ISSUE #96: Expert mode
+            input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n') # Expert mode option
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
             input_deck.write('DUREE_IMPULSION=%.2fe-9\n' % (self.laser_pulse_duration))
-            input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_intensity)) # TO DO: Check e16 is TW/cm**2
+            input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_intensity))
             input_deck.write('IMPULSION_FICHIER\n')
             input_deck.write('\n')
 
             # Output parameters
+            # TO DO: GIT ISSUE #96: Expert mode
             input_deck.write('SORTIES_GRAPHIQUES\n')
             input_deck.write('DECOUPAGE_TEMPS\n')
             input_deck.write('BORNE_TEMPS=%.2fe-9\n' % (self.run_time))
@@ -351,9 +344,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 laser_input_deck.write('fin_de_fichier')
             else:
                 # Use a default Gaussian? or quit?
+                # TO DO: GIT ISSUE #96: Expert mode: User defined pulse shape?
                 print ("No default laser chosen?")
-
-
+    
     @property
     def number_of_layers(self):
            """ Query for the number of layers. """
@@ -614,11 +607,6 @@ def checkAndSetWindowThickness(window_thickness):
     """
     Utility to check that the window thickness is > 1 um and < 500 um
     """
-    # FIND THE BEST WAY TO IGNORE THIS IF THERE IS NO WINDOW.
-    # TO DO PLACE HOLDER--------------------------------------------------------------------------------->
-    ### One solution could be to call this function from within checkAndSetWindow if window is not None.
-
-    
     
     # Set default
     if window_thickness is None:
@@ -640,7 +628,7 @@ def checkAndSetSampleThickness(sample_thickness):
     """
     Utility to check that the sample thickness is > 1 um and < 200 um
     """
-
+    
     # Set default
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
