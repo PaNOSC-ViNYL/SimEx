@@ -152,7 +152,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """
 
         if read_from_file is not None:
-            self.readParametersFromFile(read_from_file)
+            print ( "Parameters file is located here: %s" % (read_from_file))
+            self._readParametersFromFile(read_from_file)
+        
         # Check and set all parameters
         self.__number_of_layers = checkAndSetNumberOfLayers(number_of_layers)
         self.__ablator = checkAndSetAblator(ablator)
@@ -187,8 +189,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__is_initialized = False
     
     def _readParametersFromFile(self,path):
+        # Read from parameters file, for now, just set all parameters again
         pass
-        
     
     
     # TO DO: Git issue: #96: Expert mode: Demarrage parameters
@@ -233,8 +235,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             raise RuntimeError( "No ratio bigger than 1.000001 was found.")
 
         # Store feather information on object.
+        self._feather_zone_width = feather_zone_width
+        self._minimum_zone_width = minimum_zone_width
         self._final_feather_zone_width = round(minimum_zone_width*(r**n),4)
-        self._non_feather_zones = int(non_feather_zone_width/(minimum_zone_width*(r**n)))
+        self._non_feather_zone_width = self.ablator_thickness-feather_zone_width
+        self._non_feather_zones = int(self._non_feather_zone_width/(minimum_zone_width*(r**n)))
 
         self._mass_of_zone = self._final_feather_zone_width*ESTHER_MATERIAL_DICT[self.ablator]["mass_density"]
 
@@ -243,11 +248,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Make a temporary directory
         self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
+        self._esther_files_path = self._tmp_dir
 
         # Write the input file
         input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
         print "Writing input deck to ", input_deck_path, "."
-
+        
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
             # TO DO: GIT ISSUE: #96: Expert user mode for demarrage parameters
@@ -259,12 +265,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # If using a window, write the window layer here
             if self.window is not None:
                 input_deck.write('- %.1f um %s layer\n' % (self.window_thickness, self.window))
-                input_deck.write('NOM_MILIEU=%s\n' % (material_dict[self.window]["shortname"]))
-                input_deck.write('EQUATION_ETAT=%s\n' % (material_dict[self.window]["eos_name"]))
+                input_deck.write('NOM_MILIEU=%s\n' % (ESTHER_MATERIAL_DICT[self.window]["shortname"]))
+                input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.window]["eos_name"]))
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
                 input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.window_thickness))
                 # Calculate number of zones in window
-                width_of_window_zone = self._mass_of_zone/material_dict[self.window]["mass_density"]
+                width_of_window_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.window]["mass_density"]
                 number_of_window_zones=int(self.window_thickness/width_of_window_zone)
                 input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_window_zones))
                 input_deck.write('\n')
@@ -275,11 +281,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
             input_deck.write('NOM_MILIEU=%s\n' % (self.sample))
             input_deck.write('EQUATION_ETAT=EOS_LIST\n')
-            if self.__use_window == False:
+            if self.window is None:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             # Calculate number of zones
-            width_of_sample_zone = self._mass_of_zone/material_dict[self.sample]["mass_density"]
+            width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
             number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
             input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
@@ -291,14 +297,14 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # if only simulating ablator layer, then must include empty (VIDE) layer
             if self.number_of_layers == 1:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
-            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (non_feather_zone_width)) # Non-feather thickness
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._non_feather_zone_width)) # Non-feather thickness
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self._non_feather_zones)) # Number of zones
             input_deck.write('\n')
             input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
-            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (feather_zone_width)) # Feather thickness
+            input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
-            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (externe_value)) #Min zone width
+            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (self._minimum_zone_width)) #Min zone width
             input_deck.write('\n')
 
             # TO DO: GIT ISSUE #96: Expert mode
@@ -363,7 +369,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 # Use a default Gaussian? or quit?
                 # TO DO: GIT ISSUE #96: Expert mode: User defined pulse shape?
                 print ("No default laser chosen?")
-
+    
     @property
     def number_of_layers(self):
            """ Query for the number of layers. """
