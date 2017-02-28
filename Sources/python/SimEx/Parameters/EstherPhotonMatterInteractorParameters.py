@@ -108,6 +108,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                  laser_intensity=None,
                  run_time=None,
                  delta_time=None,
+                 read_from_file=None,
                  ):
 
         """
@@ -150,6 +151,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         :type delta_time: float
         """
 
+        if read_from_file is not None:
+            self.readParametersFromFile(read_from_file)
         # Check and set all parameters
         self.__number_of_layers = checkAndSetNumberOfLayers(number_of_layers)
         self.__ablator = checkAndSetAblator(ablator)
@@ -182,10 +185,16 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
-
+    
+    def _readParametersFromFile(self,path):
+        pass
+        
+    
+    
     # TO DO: Git issue: #96: Expert mode: Demarrage parameters
     def _setDemmargeFlags(self):
         self.__use_usi = "USI"
+
 
     def _setupFeathering(self, number_of_zones=250, feather_zone_width=5.0, minimum_zone_width=1e-4):
         """ """
@@ -201,10 +210,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         :type minimum_zone_width: float
 
         """
-
-        externe_value = minimum_zone_width*1.e4
-        non_feather_zone_width = self.ablator_thickness - feather_zone_width
-
         # Determine the correct zone feathering for ablator
         n = number_of_zones
         feather_list=numpy.zeros(n+1) # Create list of n zones
@@ -327,6 +332,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Write the laser input file
         laser_input_deck_path = os.path.join( self._tmp_dir, 'input_intensite_impulsion.txt')
+        
         print "Writing laser input deck to ", laser_input_deck_path, "."
 
         # Write the parameters file (_intensitie_impulsion)

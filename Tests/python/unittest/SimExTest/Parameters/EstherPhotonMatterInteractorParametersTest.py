@@ -83,8 +83,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
                                          laser_pulse='flat',
                                          laser_pulse_duration=1.0,
                                          laser_intensity=0.1,
-                                         run_time=10.0,
-                                         delta_time=0.001,
                                                          )
 
     def tearDown(self):
@@ -273,30 +271,20 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( esther_parameters._tmp_dir ) )
 
         self.assertTrue( 'input.dat' in os.listdir( esther_parameters._tmp_dir ) )
-
-    def testSetupFeatheringDefault(self):
-        """ Test the utility responsible for setting up the feathering with defaults."""
-        # Setup parameters object.
+    
+      def testReadFromFile(self):
+        """ """
         esther_parameters = self.esther_parameters
-
-        esther_parameters._setupFeathering()
-
-        self.assertEqual( esther_parameters._final_feather_zone_width, 0.1469)
-        self.assertEqual( esther_parameters._non_feather_zones, 34)
-
-    def testSetupFeathering(self):
-        """ Test the utility responsible for setting up the feathering. """
-        # Setup parameters object.
-        esther_parameters = self.esther_parameters
-
-        esther_parameters._setupFeathering(number_of_zones=300, feather_zone_width=4.0, minimum_zone_width=2e-4)
-
-        self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0807)
-        self.assertEqual( esther_parameters._non_feather_zones, 74)
-        self.assertEqual( esther_parameters._mass_of_zone, 74)
-
-
-
+        
+        esther_parameters._serialize()
+        
+        path_to_esther_files = esther_parameters._esther_files_path
+        
+        new_esther_parameters = EstherPhotonMatterInteractorParameters(read_from_file = path_to_esther_files)
+        
+        self.assertEqual( esther_parameters.laser_wavelength, new_esther_parameters.laser_wavelength)
+        #repeat
+  
 if __name__ == '__main__':
     unittest.main()
 
