@@ -24,9 +24,11 @@ import os
 import sys
 import tempfile
 
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
+
 class EstherExperimentConstruction():
     """
-    TO DO: Description here.
+    Class to represent iterative Rad-Hydro simulations.
     """
     def __init__(self,
                  parameters=None,
@@ -36,28 +38,48 @@ class EstherExperimentConstruction():
                  esther_sims_path=None,
                  sim_name=None,
                  ):
-        
+
         """
-        Check if run files pathway exists and then look for existing directories.
-        Directory setup should be incremental numbers
+        Constructor for the Esther Experiment.
+
+        :param parameters: Esther parameters.
+        :type parameters: EstherPhotonMatterInteractorParameters
+        :type parameters: str
+
+        :param input_path: Location of input parameters from e.g. light source simulation.
+        :type input_path: str
+
+        :param output_path: Location where to store final results from the rad-hydro simulations.
+        :type output_path: str
+
+        :param tmp_files_path: Where to store temporary files produced by Rad-Hydro code or parameters object.
+        :type tmp_files_path: str
+
+        :param esther_sims_path: Top level directory where all experiments are stored.
+        :type esther_sims_path: str
+
+        :param sim_name: Name of this experiment
+        :type sim_name: str
+
         """
         # TO DO: CHECK IF PARAMETERS HAVE BEEN INCLUDED
-        
+
         # Check if the simulation root path has been set
         if esther_sims_path is None:
             raise RuntimeError( "Esther simulation folder path is not set!")
-        
+
         # Check if the simulation root path exists
         if os.path.isdir(esther_sims_path) is not True:
             raise ValueError( "Esther simulation folder path does not exist!")
-        
+
         # Check if the simulation name has been set
         if sim_name is None:
             raise RuntimeError ("Simulation name is not specified")
+
         else:
             # Define simulation path to the simulation name's folder
-            sim_path=esther_sims_path+sim_name+"/"
-            if os.path.isdir(sim_path) is True:
+            sim_path=os.path.join(esther_sims_path,sim_name)
+            if os.path.isdir(sim_path):
                 # List all iterations within the simulation name's folder
                 print ("These are the current simulations within %s" % sim_name)
                 for sims in os.listdir(sim_path):
@@ -67,11 +89,24 @@ class EstherExperimentConstruction():
                 # TO DO: Generate updated parameters from SimName
                 output_sim = int(sims)+1
                 print ("New simulation iteration is %d" % output_sim)
-                output_path=(sim_path+"%s/" % (output_sim))
+                output_path=os.path.join(sim_path,str(output_sim))
                 print ("Output path is set to %s" % (output_path))
             else:
                 # Create new simulation folder called Sim_name and start first iteration /1/
                 print ("No simulation exists. Creating new simulation if asked to do so")
-                output_path = sim_path+"1/"
+                output_path = os.path.join(sim_path,"1")
                 print ("Output path is set to %s" % (output_path))
-                # TO DO: Generate new parameters for new simulations from parameterss
+                # TODO: Generate new parameters for new simulations from parameters.
+
+
+            # Create directory.
+            os.makedirs(output_path)
+
+            if parameters is not None:
+                ### TODO check parameter
+                if not isinstance(parameters, EstherPhotonMatterInteractorParameters):
+                    raise TypeError("Parameters is not a valid EstherPhotonMatterInteractorParameters instance.")
+                self._parameters = parameters
+
+            parameters._serialize(output_path)
+

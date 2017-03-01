@@ -269,19 +269,20 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         self._mass_of_zone = self._final_feather_zone_width*ESTHER_MATERIAL_DICT[self.ablator]["mass_density"]
 
-    def _serialize(self):
+    def _serialize(self, path=None):
         """ Write the input deck for the Esther hydrocode. """
 
         # Make a temporary directory
-        self._tmp_dir = tempfile.mkdtemp(prefix='esther_')
-        self._esther_files_path = self._tmp_dir
+        self._esther_files_path = path
+        if path is None:
+            self._esther_files_path = tempfile.mkdtemp(prefix='esther_')
 
         # Write the input file
-        input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
+        input_deck_path = os.path.join( self._esther_files_path, 'input.dat')
         print "Writing input deck to ", input_deck_path, "."
 
         # Write json file of this parameter class instance.
-        json_path = os.path.join( self._tmp_dir, 'parameters.json')
+        json_path = os.path.join( self._esther_files_path, 'parameters.json')
         with open( json_path, 'w') as j:
             json.dump( self.__dict__, j)
             j.close()
@@ -369,7 +370,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('FIN_DES_INSTRUCTIONS')
 
         # Write the laser input file
-        laser_input_deck_path = os.path.join( self._tmp_dir, 'input_intensite_impulsion.txt')
+        laser_input_deck_path = os.path.join( self._esther_files_path, 'input_intensite_impulsion.txt')
 
         print "Writing laser input deck to ", laser_input_deck_path, "."
 
