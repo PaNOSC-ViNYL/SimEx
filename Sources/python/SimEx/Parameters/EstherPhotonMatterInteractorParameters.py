@@ -23,6 +23,7 @@ import numpy
 import os
 import sys
 import tempfile
+import json
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
@@ -154,21 +155,40 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         if read_from_file is not None:
             print ( "Parameters file is located here: %s" % (read_from_file))
             self._readParametersFromFile(read_from_file)
-        
-        # Check and set all parameters
-        self.__number_of_layers = checkAndSetNumberOfLayers(number_of_layers)
-        self.__ablator = checkAndSetAblator(ablator)
-        self.__ablator_thickness = checkAndSetAblatorThickness(ablator_thickness)
-        self.__sample = checkAndSetSample(sample)
-        self.__sample_thickness = checkAndSetSampleThickness(sample_thickness)
-        self.__window = checkAndSetWindow(window)
-        self.__window_thickness = checkAndSetWindowThickness(window_thickness)
-        self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
-        self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
-        self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
-        self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
-        self.__run_time = checkAndSetRunTime(run_time)
-        self.__delta_time = checkAndSetDeltaTime(delta_time)
+
+            # Update parameters from arguments.
+            for key,val in {
+                    'number_of_layers':number_of_layers,
+                    'ablator':ablator,
+                    'ablator_thickness':ablator_thickness,
+                    'sample' :sample ,
+                    'sample_thickness':sample_thickness,
+                    'window':window,
+                    'window_thickness':window_thickness,
+                    'laser_wavelength':laser_wavelength,
+                    'laser_pulse':laser_pulse,
+                    'laser_pulse_duration':laser_pulse_duration,
+                    'laser_intensity':laser_intensity,
+                    'run_time':run_time,
+                    'delta_time':delta_time}.items():
+                if val is not None:
+                    setattr(self, key, val)
+        else:
+            # Check and set all parameters
+            self.__number_of_layers = checkAndSetNumberOfLayers(number_of_layers)
+            self.__ablator = checkAndSetAblator(ablator)
+            self.__ablator_thickness = checkAndSetAblatorThickness(ablator_thickness)
+            self.__sample = checkAndSetSample(sample)
+            self.__sample_thickness = checkAndSetSampleThickness(sample_thickness)
+            self.__window = checkAndSetWindow(window)
+            self.__window_thickness = checkAndSetWindowThickness(window_thickness)
+            self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
+            self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
+            self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
+            self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
+            self.__run_time = checkAndSetRunTime(run_time)
+            self.__delta_time = checkAndSetDeltaTime(delta_time)
+
         self.checkConsistency()
 
         # Set internal parameters
@@ -187,12 +207,18 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
-    
+
     def _readParametersFromFile(self,path):
-        # Read from parameters file, for now, just set all parameters again
-        pass
-    
-    
+        # Read from parameters file, for now, just set all parameters again.
+
+        json_path = os.path.join(path, 'parameters.json')
+        with open(json_path, 'r') as j:
+            dictionary = json.load(j)
+            j.close()
+
+        self.__dict__ = dictionary
+
+
     # TO DO: Git issue: #96: Expert mode: Demarrage parameters
     def _setDemmargeFlags(self):
         self.__use_usi = "USI"
@@ -253,7 +279,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Write the input file
         input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
         print "Writing input deck to ", input_deck_path, "."
-        
+
+        # Write json file of this parameter class instance.
+        json_path = os.path.join( self._tmp_dir, 'parameters.json')
+        with open( json_path, 'w') as j:
+            json.dump( self.__dict__, j)
+            j.close()
+
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
             # TO DO: GIT ISSUE: #96: Expert user mode for demarrage parameters
@@ -338,7 +370,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Write the laser input file
         laser_input_deck_path = os.path.join( self._tmp_dir, 'input_intensite_impulsion.txt')
-        
+
         print "Writing laser input deck to ", laser_input_deck_path, "."
 
         # Write the parameters file (_intensitie_impulsion)
@@ -369,7 +401,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 # Use a default Gaussian? or quit?
                 # TO DO: GIT ISSUE #96: Expert mode: User defined pulse shape?
                 print ("No default laser chosen?")
-    
+
     @property
     def number_of_layers(self):
            """ Query for the number of layers. """
@@ -377,7 +409,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     @number_of_layers.setter
     def number_of_layers(self, value):
            """ Set the number of layers to the value. """
-           self.__number_of_layers = checkAndSetnumber_of_layers(value)
+           self.__number_of_layers = checkAndSetNumberOfLayers(value)
     @property
     def ablator(self):
            """ Query for the ablator type. """
@@ -457,7 +489,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     @laser_intensity.setter
     def laser_intensity(self,value):
         """ Set laser intensity """
-        self.__laser_intensity = checkAndSetLaserPulseIntensity(value)
+        self.__laser_intensity = checkAndSetLaserIntensity(value)
     @property
     def run_time(self):
         """ Query for simulation run time """

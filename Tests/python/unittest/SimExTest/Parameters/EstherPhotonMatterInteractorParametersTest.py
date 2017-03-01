@@ -273,6 +273,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( esther_parameters._tmp_dir ) )
 
         self.assertTrue( 'input.dat' in os.listdir( esther_parameters._tmp_dir ) )
+        self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._tmp_dir ) )
 
     def testReadFromFile(self):
         """ """
@@ -284,23 +285,28 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # The function readParametersFromFile needs to set this parameters below from the param.dat file.
         # For now, obtaining the tmp path of esther files is working.
         new_esther_parameters = EstherPhotonMatterInteractorParameters(
-                                         number_of_layers=2,
-                                         ablator="CH",
-                                         ablator_thickness=10.0,
-                                         sample="Iron",
-                                         sample_thickness=20.0,
-                                         window=None,
-                                         window_thickness=0.0,
-                                         laser_wavelength=800.0,
-                                         laser_pulse='flat',
-                                         laser_pulse_duration=1.0,
-                                         laser_intensity=0.1,
-                                         run_time=10.0,
-                                         delta_time=0.05,
                                          read_from_file=path_to_esther_files)
 
-        self.assertEqual( esther_parameters.laser_wavelength, new_esther_parameters.laser_wavelength)
-        #repeat other options to ensure all are correct.
+        # Check all members are equal.
+        for key,val in esther_parameters.__dict__.items():
+            self.assertEqual( val, getattr(new_esther_parameters, key) )
+
+    def testReadFromFileWithUpdate(self):
+        """ """
+        esther_parameters = self.esther_parameters
+        esther_parameters._serialize()
+
+        path_to_esther_files = esther_parameters._esther_files_path
+
+        # The function readParametersFromFile needs to set this parameters below from the param.dat file.
+        # For now, obtaining the tmp path of esther files is working.
+        new_esther_parameters = EstherPhotonMatterInteractorParameters(
+                                         laser_wavelength = 900.0,
+                                         read_from_file=path_to_esther_files)
+
+        # Check laser wavelength has been updated.
+        self.assertEqual( new_esther_parameters.laser_wavelength, 0.9 )
+
 
     def testSetupFeathering(self):
         """ Test the utility responsible for setting up the feathering. """
