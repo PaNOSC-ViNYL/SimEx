@@ -86,10 +86,12 @@ class EstherExperimentConstructionTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         self.assertRaises( RuntimeError, EstherExperimentConstruction )
+    
     def testShapedConstruction(self):
         
-        parameters = (2,"CH",25.0,"Iron",4.0,None,None,1064,"flat",10.0,0.1,10.0,0.05)
-        esther_experiment = EstherExperimentConstruction(parameters,run_files_path="/Users/richardbriggs/EstherTemp/")
+        #esther_sims_path="/Users/richardbriggs/Simulations/"
+        esther_experiment = EstherExperimentConstruction(esther_sims_path="/Users/richardbriggs/Simulations/",sim_name="NickelShock")
+        
         # Check instance and inheritance.
         self.assertIsInstance( esther_experiment, EstherExperimentConstruction )
 
