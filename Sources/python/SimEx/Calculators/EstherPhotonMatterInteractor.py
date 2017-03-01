@@ -27,6 +27,7 @@
 
 """
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
+from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 
 class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """
@@ -81,6 +82,7 @@ class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
         """
         Method to save the data to a file.
         """
-        ### TODO
-        pass
 
+        h5_path = convertTxtToOPMD(self.parameters._esther_files_path)
+        if self.output_path is not None:
+            shutil.move(h5_path, self.output_path)

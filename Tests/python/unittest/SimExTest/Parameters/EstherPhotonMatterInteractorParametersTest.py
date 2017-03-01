@@ -307,7 +307,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Check laser wavelength has been updated.
         self.assertEqual( new_esther_parameters.laser_wavelength, 0.9 )
 
-
     def testSetupFeathering(self):
         """ Test the utility responsible for setting up the feathering. """
         # Setup parameters object.
