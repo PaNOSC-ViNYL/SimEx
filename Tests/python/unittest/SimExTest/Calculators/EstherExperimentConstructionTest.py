@@ -133,8 +133,8 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         expected_dir = "Simulations/Iron/1"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "input.dat", os.listdir(expected_dir) )
-        self.assertIn( "input_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "Iron1.dat", os.listdir(expected_dir) )
+        self.assertIn( "Iron1_intensite_impulsion.dat", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         # Create new experiment from previous.
@@ -146,8 +146,8 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         expected_dir = "Simulations/Iron/2"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "input.dat", os.listdir(expected_dir) )
-        self.assertIn( "input_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "Iron2.dat", os.listdir(expected_dir) )
+        self.assertIn( "Iron2_intensite_impulsion.dat", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         with open(os.path.join(expected_dir,"parameters.json")) as j:
@@ -170,8 +170,8 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         expected_dir = "Simulations/Iron/3"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "input.dat", os.listdir(expected_dir) )
-        self.assertIn( "input_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "Iron3.dat", os.listdir(expected_dir) )
+        self.assertIn( "Iron3_intensite_impulsion.dat", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         with open(os.path.join(expected_dir,"parameters.json")) as j:

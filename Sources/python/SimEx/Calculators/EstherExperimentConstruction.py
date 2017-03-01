@@ -34,7 +34,6 @@ class EstherExperimentConstruction():
                  parameters=None,
                  input_path=None,
                  output_path=None,
-                 tmp_files_path=None,
                  esther_sims_path=None,
                  sim_name=None,
                  ):
@@ -62,8 +61,6 @@ class EstherExperimentConstruction():
         :type sim_name: str
 
         """
-        # TO DO: CHECK IF PARAMETERS HAVE BEEN INCLUDED
-
         # Check if the simulation root path has been set
         if esther_sims_path is None:
             raise RuntimeError( "Esther simulation folder path is not set!")
@@ -90,12 +87,16 @@ class EstherExperimentConstruction():
                 output_sim = int(sims)+1
                 print ("New simulation iteration is %d" % output_sim)
                 output_path=os.path.join(sim_path,str(output_sim))
+                filename = (sim_name+str(output_sim))
                 print ("Output path is set to %s" % (output_path))
+                print ("Output filename is set to %s" % (filename))
             else:
                 # Create new simulation folder called Sim_name and start first iteration /1/
                 print ("No simulation exists. Creating new simulation if asked to do so")
                 output_path = os.path.join(sim_path,"1")
+                filename = (sim_name+"1")
                 print ("Output path is set to %s" % (output_path))
+                print ("Output filename is set to %s" % (filename))
                 # TODO: Generate new parameters for new simulations from parameters.
 
 
@@ -108,5 +109,5 @@ class EstherExperimentConstruction():
                     raise TypeError("Parameters is not a valid EstherPhotonMatterInteractorParameters instance.")
                 self._parameters = parameters
 
-            parameters._serialize(output_path)
+            parameters._serialize(output_path,filename)
 
