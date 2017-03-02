@@ -110,6 +110,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                  run_time=None,
                  delta_time=None,
                  read_from_file=None,
+                 force_passage=None,
+                 without_therm_conduc=None,
+                 rad_transfer=None,
                  ):
 
         """
@@ -150,12 +153,23 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         :param delta_time: Time steps resolution (ns)
         :type delta_time: float
+        
+        :param force_passage: Expert option to force passage of simulation through minor errors
+        :type force_passage: boolean
+        
+        :param without_therm_conduc: Expert option to use without thermal conductivity options
+        :type without_therm_conduc: boolean
+        
+        :param rad_transfer: Expert option to use radiative transfer
+        :type rad_transfer: boolean
+        
         """
 
         if read_from_file is not None:
             print ( "Parameters file is located here: %s" % (read_from_file))
             self._readParametersFromFile(read_from_file)
 
+            # TO DO #96 expert mode : Add expert parameters (if they are set by user)
             # Update parameters from arguments.
             for key,val in {
                     'number_of_layers':number_of_layers,
@@ -188,44 +202,50 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
             self.__run_time = checkAndSetRunTime(run_time)
             self.__delta_time = checkAndSetDeltaTime(delta_time)
-
+            # TO DO #96 expert mode: CheckAndSet expert mode parameters to ensure they do not conflict
+            self.force_passage = force_passage
+            self.without_therm_conduc = without_therm_conduc
+            self.rad_transfer = rad_transfer
         self.checkConsistency()
 
-        # Set internal parameters
-        # TO DO: Git issue: #96: Expert mode: Demarrage parameters
-        """
-        List of DEMARRAGE (translates as "Start up") parameters
-        "Expert user mode to choose the correct demarrage parameters"
-        Can also update this so that you can choose which EOS model to run???
-        self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
-        self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
-        """
+        # Define start up options (called Demmarage in esther)
         self._setDemmargeFlags()
+        
+        # TO DO #96 expert mode: Define EOS options here, SESAME or BLF, SESAME default
+        #self._set EOS options(), SESAME or BLF
 
-        # Setup the feathering. Expert parameters can be set here.
+        # TO DO #96 expert mode: Expert parameters to improve spatial resolution can be set here.
+        # Setup the feathering. 
         self._setupFeathering()
 
         # Set state to not-initialized (e.g. input deck is not written)
         self.__is_initialized = False
 
     def _readParametersFromFile(self,path):
-        # Read from parameters file, for now, just set all parameters again.
-
+        # Read from parameters file
         json_path = os.path.join(path, 'parameters.json')
         with open(json_path, 'r') as j:
             dictionary = json.load(j)
             j.close()
 
         self.__dict__ = dictionary
-
-
-    # TO DO: Git issue: #96: Expert mode: Demarrage parameters
+    
     def _setDemmargeFlags(self):
-        self.__use_usi = "USI"
-
+        # Expert users options to include in the start up options
+        self.__use_usi = "USI" # TO DO: Check this option in esther
+        self.__use_force_passage = "FORCER_LE_PASSAGE" # Forces simulation through ignoring minor issues
+        self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
+        self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
+        
+        # What other options to include from Esther start up options
+    
+    # TO DO: #96 expert mode: Set EOS options here
+    #def _setEOS(self):
+        # Which EOS model to run???
+        #self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
+        #self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
 
     def _setupFeathering(self, number_of_zones=250, feather_zone_width=5.0, minimum_zone_width=1e-4):
-        """ """
         """ Method to fix feathering
 
         :param number_of_zones: The number of zones in the first ablator section (default 250).
@@ -272,13 +292,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def _serialize(self, path=None, filename=None):
         """ Write the input deck for the Esther hydrocode. """
 
-        # Make a temporary directory / filename
+        # Make a temporary directory or use existing path and filename
         self._esther_files_path = path
         self._esther_filename = filename
         if path is None:
             self._esther_files_path = tempfile.mkdtemp(prefix='esther_')
         if filename is None:
-            self._esther_filename='tmp_input.dat'
+            self._esther_filename='tmp_input'
         
         # Write the input file
         input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.dat')
@@ -292,8 +312,14 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
-            # TO DO: GIT ISSUE: #96: Expert user mode for demarrage parameters
             input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi))
+            # TO DO: 96 expert mode: Need better way of including these expert options (after checks of conflict)
+            if self.force_passage is True:
+                input_deck.write('%s\n' % (self.__use_force_passage)) # Use force passage
+            if self.without_therm_conduc is True:
+                input_deck.write('%s\n' % (self.__use_without_therm_conduc)) # Use without thermal conductivity option
+            if self.without_therm_conduc is True:
+                input_deck.write('%s\n' % (self.__use_rad_transfer)) # Use without thermal conductivity option
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')
@@ -312,7 +338,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('\n')
 
             # TO DO: GIT ISSUE #95: Complex targets
-            # Change number_of_sample_zones to number_of_zones[i] for i < number of layers
+            # Make a loop of layer constructions with number_of_zones[i] for i < number of layers
             # The empty layer (epaisseur_vide) should be in the first layer construction
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
             input_deck.write('NOM_MILIEU=%s\n' % (self.sample))

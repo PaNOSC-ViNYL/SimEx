@@ -274,6 +274,32 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
 
         self.assertTrue( 'input.dat' in os.listdir( esther_parameters._tmp_dir ) )
         self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._tmp_dir ) )
+        
+    def testExpert(self):
+        """ Testing the expert mode parameters pass """
+
+        # Setup parameters object.
+        esther_parameters = EstherPhotonMatterInteractorParameters(
+                                         number_of_layers=2,
+                                         ablator="CH",
+                                         ablator_thickness=10.0,
+                                         sample="Iron",
+                                         sample_thickness=20.0,
+                                         window=None,
+                                         window_thickness=0.0,
+                                         laser_wavelength=800.0,
+                                         laser_pulse='flat',
+                                         laser_pulse_duration=1.0,
+                                         laser_intensity=0.1,
+                                         run_time=10.0,
+                                         delta_time=0.05,
+                                         force_passage=True,
+                                         without_therm_conduc=True,
+                                         rad_transfer=True)
+        
+        esther_parameters._serialize()
+        
+        # Assert equal, self.__use_force_passage, "FORCE_PASSAGE" for input.dat?
 
     def testReadFromFile(self):
         """ """
