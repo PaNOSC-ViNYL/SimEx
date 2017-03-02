@@ -325,7 +325,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             if self.without_therm_conduc is True:
                 input_deck.write('%s\n' % (self.__use_without_therm_conduc)) # Use without thermal conductivity option
             if self.without_therm_conduc is True:
-                input_deck.write('%s\n' % (self.__use_rad_transfer)) # Use without thermal conductivity option
+                input_deck.write('%s\n' % (self.__use_radiative_transfer)) # Use without thermal conductivity option
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')

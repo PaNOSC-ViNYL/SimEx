@@ -273,7 +273,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( esther_parameters._esther_files_path ) )
 
         self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
-        self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._tmp_dir ) )
+        self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._esther_files_path ) )
 
     def testExpert(self):
         """ Testing the expert mode parameters pass """
