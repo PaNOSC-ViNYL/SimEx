@@ -153,16 +153,16 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         :param delta_time: Time steps resolution (ns)
         :type delta_time: float
-        
+
         :param force_passage: Expert option to force passage of simulation through minor errors
         :type force_passage: boolean
-        
+
         :param without_therm_conduc: Expert option to use without thermal conductivity options
         :type without_therm_conduc: boolean
-        
+
         :param rad_transfer: Expert option to use radiative transfer
         :type rad_transfer: boolean
-        
+
         """
 
         if read_from_file is not None:
@@ -210,12 +210,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Define start up options (called Demmarage in esther)
         self._setDemmargeFlags()
-        
+
         # TO DO #96 expert mode: Define EOS options here, SESAME or BLF, SESAME default
         #self._set EOS options(), SESAME or BLF
 
         # TO DO #96 expert mode: Expert parameters to improve spatial resolution can be set here.
-        # Setup the feathering. 
+        # Setup the feathering.
         self._setupFeathering()
 
         # Set state to not-initialized (e.g. input deck is not written)
@@ -229,16 +229,16 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             j.close()
 
         self.__dict__ = dictionary
-    
+
     def _setDemmargeFlags(self):
         # Expert users options to include in the start up options
         self.__use_usi = "USI" # TO DO: Check this option in esther
         self.__use_force_passage = "FORCER_LE_PASSAGE" # Forces simulation through ignoring minor issues
         self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
         self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
-        
+
         # What other options to include from Esther start up options
-    
+
     # TO DO: #96 expert mode: Set EOS options here
     #def _setEOS(self):
         # Which EOS model to run???
@@ -288,6 +288,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self._non_feather_zones = int(self._non_feather_zone_width/(minimum_zone_width*(r**n)))
 
         self._mass_of_zone = self._final_feather_zone_width*ESTHER_MATERIAL_DICT[self.ablator]["mass_density"]
+        width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
+        self.__number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
+
+        if self.window is not None:
+            width_of_window_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.window]["mass_density"]
+            self.__number_of_window_zones=int(self.window_thickness/width_of_window_zone)
 
     def _serialize(self, path=None, filename=None):
         """ Write the input deck for the Esther hydrocode. """
@@ -299,7 +305,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self._esther_files_path = tempfile.mkdtemp(prefix='esther_')
         if filename is None:
             self._esther_filename='tmp_input'
-        
+
         # Write the input file
         input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.dat')
         print "Writing input deck to ", input_deck_path, "."
@@ -332,9 +338,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
                 input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.window_thickness))
                 # Calculate number of zones in window
-                width_of_window_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.window]["mass_density"]
-                number_of_window_zones=int(self.window_thickness/width_of_window_zone)
-                input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_window_zones))
+                input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_window_zones))
                 input_deck.write('\n')
 
             # TO DO: GIT ISSUE #95: Complex targets
@@ -347,9 +351,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             # Calculate number of zones
-            width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
-            number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
-            input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
+            input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_sample_zones))
             input_deck.write('\n')
 
             # Write ablator

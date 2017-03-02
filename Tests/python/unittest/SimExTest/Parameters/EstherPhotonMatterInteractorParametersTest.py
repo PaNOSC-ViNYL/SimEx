@@ -270,11 +270,11 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         esther_parameters._serialize()
 
         # Check that the input deck has been generated.
-        self.assertTrue( os.path.isdir( esther_parameters._tmp_dir ) )
+        self.assertTrue( os.path.isdir( esther_parameters._esther_files_path ) )
 
-        self.assertTrue( 'input.dat' in os.listdir( esther_parameters._tmp_dir ) )
+        self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
         self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._tmp_dir ) )
-        
+
     def testExpert(self):
         """ Testing the expert mode parameters pass """
 
@@ -296,10 +296,12 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
                                          force_passage=True,
                                          without_therm_conduc=True,
                                          rad_transfer=True)
-        
+
         esther_parameters._serialize()
-        
+
         # Assert equal, self.__use_force_passage, "FORCE_PASSAGE" for input.dat?
+        self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
+        self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._esther_files_path ) )
 
     def testReadFromFile(self):
         """ """
