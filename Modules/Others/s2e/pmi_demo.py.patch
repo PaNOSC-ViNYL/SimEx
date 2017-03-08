@@ -280,8 +280,7 @@ class PMIDemo(object):
 
         NPH *= 1e6 *  dt * self.g_s2e['pulse']['xFWHM'] * self.g_s2e['pulse']['yFWHM'] / ( Eph * 1.6022e-19 )
 
-        self.g_s2e['pulse']['sel_int'] = numpy.ones( (self.g_s2e['steps'],) ) * ( NPH / self.g_s2e['steps'].astype(numpy.float32) )
- )
+        self.g_s2e['pulse']['sel_int'] = numpy.ones( (self.g_s2e['steps'],) ) * ( NPH / (1.0*self.g_s2e['steps']) )
 
     #    print self.g_s2e['pulse']['arrEhor'].shape , dt , dx , dy ,  NPH
 
