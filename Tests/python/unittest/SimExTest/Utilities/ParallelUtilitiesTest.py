@@ -56,8 +56,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
         except:
             pass
         try:
-            del os.environ['SLURM_NNODES']
-            del os.environ['SLURM_CPUS_PER_NODE']
+            del os.environ['SLURM_JOB_NUM_NODES']
+            del os.environ['SLURM_JOB_CPUS_PER_NODE']
         except:
             pass
 
@@ -105,8 +105,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
     def testResourceInfoFromSlurm_WorksForSingleNode(self):
 
-        os.environ['SLURM_NNODES']='1'
-        os.environ['SLURM_CPUS_PER_NODE']='40'
+        os.environ['SLURM_JOB_NUM_NODES']='1'
+        os.environ['SLURM_JOB_CPUS_PER_NODE']='40'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
@@ -115,8 +115,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
     def testResourceInfoFromSlurm_WorksForMultipleNodeWithSameAmountOfCores(self):
 
-        os.environ['SLURM_NNODES']='3'
-        os.environ['SLURM_CPUS_PER_NODE']='40x(3)'
+        os.environ['SLURM_JOB_NUM_NODES']='3'
+        os.environ['SLURM_JOB_CPUS_PER_NODE']='40x(3)'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
@@ -125,8 +125,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
     def testResourceInfoFromSlurm_WorksForMultipleNodeWithDifferentAmountOfCores(self):
 
-        os.environ['SLURM_NNODES']='3'
-        os.environ['SLURM_CPUS_PER_NODE']='40x(2),20x(1),10x(10)'
+        os.environ['SLURM_JOB_NUM_NODES']='3'
+        os.environ['SLURM_JOB_CPUS_PER_NODE']='40x(2),20x(1),10x(10)'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
