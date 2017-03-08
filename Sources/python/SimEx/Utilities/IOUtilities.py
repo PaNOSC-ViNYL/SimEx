@@ -73,9 +73,9 @@ def checkAndGetPDB( path ):
             raise IOError( "Database query failed.")
 
         # Move and rename the downloaded file.
-        shutil.move( source, target  )
+        shutil.move( source, path  )
 
-    return target
+    return path
 
 
 def loadPDB( path = None ):
@@ -146,7 +146,7 @@ def _pdbToS2ESampleDict(path=None):
 
             # Write to dict.
             atoms_dict['Z'].append(charge)
-            atoms_dict['r'].append(coordinates)
+            atoms_dict['r'].append(coordinates*1e-10)
 
     except:
         raise IOError( "Input file %s is not a valid pdb file. " % (path) )
