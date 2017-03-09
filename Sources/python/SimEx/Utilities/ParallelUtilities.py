@@ -33,8 +33,8 @@ from distutils.version import StrictVersion
 def _getParallelResourceInfoFromEnv():
     resource = {}
     try:
-        resource['NCores'] = int(os.environ['SIMEX_NNODES'])
-        resource['NNodes'] = int(os.environ['SIMEX_NCORES'])
+        resource['NCores'] = int(os.environ['SIMEX_NCORES'])
+        resource['NNodes'] = int(os.environ['SIMEX_NNODES'])
         if resource['NNodes']<=0 or resource['NCores']<=0:
             raise IOError()
     except:
