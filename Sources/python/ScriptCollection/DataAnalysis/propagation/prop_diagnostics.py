@@ -33,7 +33,6 @@ from wpg.useful_code.wfrutils import plot_wfront
 
 
 ### TODO
-# Plot phase distribution
 # Plot average and rms intensity distribution over given patterns.
 
 def plot(wavefront):
