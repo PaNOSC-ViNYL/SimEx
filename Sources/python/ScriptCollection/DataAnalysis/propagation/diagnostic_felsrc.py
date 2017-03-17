@@ -6,7 +6,7 @@ import pylab as plt
 
 import numpy as np
 from wpg import Wavefront
-
+from wpg.wpg_uti_wf import plot_t_wf,look_at_q_space
 
 def show_diagnostics(FELsource_out_number):
 
@@ -18,6 +18,9 @@ def show_diagnostics(FELsource_out_number):
 
       wf = Wavefront()
       wf.load_hdf5(FELsource_out_file)
+
+      plot_t_wf(wf)
+      look_at_q_space(wf)
       # show two figures window 1: image of I(x,y) integral intensity, with real
       # x and y axis and title with file name
       J2eV = 6.24150934e18;
