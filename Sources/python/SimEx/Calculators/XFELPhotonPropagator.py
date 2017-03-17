@@ -28,7 +28,8 @@
 """
 import os
 
-from prop import propagateSE
+from SimEx.Utilities import propagateSE_BL as propagate
+from SimEx.Utilities import my_s2e_beamline as s2e_beamline
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
@@ -65,6 +66,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
+
 
     def computeNTasks(self):
         resources=ParallelUtilities.getParallelResourceInfo()
@@ -135,7 +137,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             input_files.sort() # Assuming the filenames have some kind of ordering scheme.
         else:
             if thisProcess == 0: # other MPI processes (if any) have nothing to do
-                propagateSE.propagate(self.input_path, self.output_path)
+                propagate.propagate(self.input_path, self.output_path, s2e_beamline.get_beamline)
             return 0
 
         # If we have more than one input file, we should also have more than one output file, i.e.
