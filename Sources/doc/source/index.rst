@@ -292,12 +292,6 @@ NOTE 4 (Large Test Files): If you pulled the sources via git and encounter test 
 the test log mentions something like "hdf file could not be read", make sure you issued a "git lfs pull" command at least once.
 This is not a standard git command, you have to install git-lfs (e.g. via https://git-lfs.github.com/).
 
-NOTE 5 (segfault in WavePropagatorTest.py): If you receive a segfault when
-running the test module WavePropagatorTest.py, try the following command to fix:
-$> ulimit -c unlimited
-
-If this does not fix the problem, please post a bug report on github.
-
 
 Usage
 -----
@@ -361,7 +355,6 @@ Reference Manual
 .. autoclass:: SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor
 .. autoclass:: SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters
 
-.. autoclass:: SimEx.Calculators.WavePropagator.WavePropagator
 .. autoclass:: SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters
 
 .. autoclass:: SimEx.Calculators.XFELPhotonSource.XFELPhotonSource
