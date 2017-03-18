@@ -11,3 +11,5 @@ setuptools
 mpi4py
 breathe
 dill
+sqlalchemy
+json
