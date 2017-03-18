@@ -33,8 +33,8 @@ from distutils.version import StrictVersion
 def _getParallelResourceInfoFromEnv():
     resource = {}
     try:
-        resource['NCores'] = int(os.environ['SIMEX_NNODES'])
-        resource['NNodes'] = int(os.environ['SIMEX_NCORES'])
+        resource['NCores'] = int(os.environ['SIMEX_NCORES'])
+        resource['NNodes'] = int(os.environ['SIMEX_NNODES'])
         if resource['NNodes']<=0 or resource['NCores']<=0:
             raise IOError()
     except:
@@ -45,8 +45,8 @@ def _getParallelResourceInfoFromEnv():
 def _getParallelResourceInfoFromSlurm():
     resource = {}
     try:
-        resource['NNodes'] = int(os.environ['SLURM_NNODES'])
-        uniq_nodes=os.environ['SLURM_CPUS_PER_NODE'].split(",")
+        resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
+        uniq_nodes=os.environ['SLURM_JOB_CPUS_PER_NODE'].split(",")
         # SLURM sets this variable to something like 40x(2),20x(1),10x(10). We extract ncores from this
         ncores=0
         for node in uniq_nodes:
@@ -63,7 +63,7 @@ def _getParallelResourceInfoFromSlurm():
         if resource['NNodes']<=0 or resource['NCores']<=0:
             raise IOError()
     except:
-        raise IOError( "Cannot use SLURM_NNODES and/or SLURM_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead")
+        raise IOError( "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead")
 
     return resource
 
@@ -77,7 +77,7 @@ def _MPICommandName():
 
 def _getParallelResourceInfoFromMpirun():
 # we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be
-# listed several times that gives us number of cores available for mpirun on this node
+# listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node
     try:
         mpicmd = _MPICommandName()
         process = subprocess.Popen([mpicmd, "hostname"], stdout=subprocess.PIPE,
@@ -109,7 +109,7 @@ def getParallelResourceInfo():
         return _getParallelResourceInfoFromEnv()
 
 
-    if 'SLURM_NNODES' in os.environ and 'SLURM_CPUS_PER_NODE' in os.environ:
+    if 'SLURM_JOB_NUM_NODES' in os.environ and 'SLURM_JOB_CPUS_PER_NODE' in os.environ:
         return _getParallelResourceInfoFromSlurm()
 
     resource=_getParallelResourceInfoFromMpirun()

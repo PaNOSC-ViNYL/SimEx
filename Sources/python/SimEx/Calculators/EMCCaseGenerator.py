@@ -230,15 +230,15 @@ class EMCCaseGenerator(object):
 
         return v/vDenom - numpy.array([0,0,zL])
 
-    def readGeomFromPhotonData(self, fn):
+    def readGeomFromPhotonData(self, fn,thisProcess):
         """
         Extract detector geometry from S2E photon files.
 
         :param fn: Path to file to read.
         :type fn: str
         """
-
-        _print_to_log("Reading geometry file using file %s"%fn, log_file=self.runLog)
+        if thisProcess==0:
+            _print_to_log("Reading geometry file using file %s"%fn, log_file=self.runLog)
         f = h5py.File(fn, 'r')
         self.detectorDist = (f["params/geom/detectorDist"].value)
 
@@ -289,7 +289,7 @@ class EMCCaseGenerator(object):
 
         return
 
-    def writeSparsePhotonFile(self, fileList, outFN, outFNH5Avg):
+    def writeSparsePhotonFile(self, fileList, outFN, outFNH5Avg,thisProcess,numProcesses):
         """
         Convert dense S2E file format to sparse EMC photons.dat format.
 
@@ -305,12 +305,14 @@ class EMCCaseGenerator(object):
 
         # Check if we deal with v0.2 file.
         if len(fileList) == 1 and h5py.File(fileList[0], 'r')['version'].value == 0.2:
-            self._writeSparsePhotonFileFromSingleH5(fileList[0], outFN, outFNH5Avg)
+            if thisProcess==0:
+                self._writeSparsePhotonFileFromSingleH5(fileList[0], outFN, outFNH5Avg)
             return
 
         # Log: destination output to file
-        msg = "Writing diffr output to %s"%outFN
-        _print_to_log(msg, log_file=self.runLog)
+        if thisProcess==0:
+            msg = "Writing diffr output to %s"%os.path.dirname(outFN)
+            _print_to_log(msg, log_file=self.runLog)
 
         # Define in-plane detector x,y coordinates
         [x,y] = numpy.mgrid[-self.numPixToEdge:self.numPixToEdge+1, -self.numPixToEdge:self.numPixToEdge+1]
@@ -329,44 +331,50 @@ class EMCCaseGenerator(object):
                     flatMask[p] = 1.
                     currPos += 1
 
-        # Compute mean photon count.
-        meanPhoton = 0.
-        totPhoton = 0.
-        count=0 # counts the processed images. Loop breaks if count goes above 200.
-        for fn in fileList:
-            f = h5py.File(fn, 'r')
-            data_format_version = (f["version"].value).astype("float")
-            if data_format_version < 0.2:
-                meanPhoton += numpy.mean((f["data/data"].value).flatten())
-                totPhoton += numpy.sum((f["data/data"].value).flatten())
-                f.close()
-                count +=1
-            else:
-                tasks = f["data"].keys()
-                for task in tasks:
-                    meanPhoton += numpy.mean((f["data"][task]["data"].value).flatten())
-                    totPhoton += numpy.sum((f["data"][task]["data"].value).flatten())
-                    count += 1
-                f.close()
-            if count >= 200:
-                break
-        meanPhoton /= 1.*count
-        totPhoton /= 1.*count
-
-        print "Found %f mean and %f total photons on average." % (meanPhoton, totPhoton)
-
-        # Start stepping through diffraction images and writing them to sparse format
-        msg = "Average intensities: %lf"%(totPhoton)
-        _print_to_log(msg, log_file=self.runLog)
         outf = open(outFN, "w")
-        outf.write("%d %lf \n"%(len(fileList), meanPhoton))
+        if thisProcess==0:
+            # Compute mean photon count.
+            meanPhoton = 0.
+            totPhoton = 0.
+            count=0 # counts the processed images. Loop breaks if count goes above 200.
+            for fn in fileList:
+                f = h5py.File(fn, 'r')
+                data_format_version = (f["version"].value).astype("float")
+                if data_format_version < 0.2:
+                    meanPhoton += numpy.mean((f["data/data"].value).flatten())
+                    totPhoton += numpy.sum((f["data/data"].value).flatten())
+                    f.close()
+                    count +=1
+                else:
+                    tasks = f["data"].keys()
+                    for task in tasks:
+                        meanPhoton += numpy.mean((f["data"][task]["data"].value).flatten())
+                        totPhoton += numpy.sum((f["data"][task]["data"].value).flatten())
+                        count += 1
+                    f.close()
+                if count >= 200:
+                    break
+            meanPhoton /= 1.*count
+            totPhoton /= 1.*count
+
+            print "Found %f mean and %f total photons on average." % (meanPhoton, totPhoton)
+
+            # Start stepping through diffraction images and writing them to sparse format
+            msg = "Average intensities: %lf"%(totPhoton)
+            _print_to_log(msg, log_file=self.runLog)
+            outf.write("%d %lf \n"%(len(fileList), meanPhoton))
+
+
         mask = flatMask.reshape(2*self.numPixToEdge+1, -1)
         avg = 0.*mask
 
-        msg = "Converting individual data frames to sparse format %s"%("."*20)
-        _print_to_log(msg, log_file=self.runLog)
+        if thisProcess==0:
+            msg = "Converting individual data frames to sparse format %s"%("."*20)
+            _print_to_log(msg, log_file=self.runLog)
 
         for n,fn in enumerate(fileList):
+            if n % numProcesses != thisProcess:
+                continue
             #try:
             if True:
                 f = h5py.File(fn, 'r')
@@ -375,7 +383,7 @@ class EMCCaseGenerator(object):
                     v = f["data/data"].value
                     avg += v
                     temp = {"o":[], "m":[]}
-
+                
                     for p,vv in zip(pos, v.flat):
                         # Todo: remove this
                         vv = int(vv)
@@ -399,7 +407,7 @@ class EMCCaseGenerator(object):
                     tasks = f["data"].keys()
                     for task in tasks:
                         v = f["data"][task]["data"].value
-                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
+#                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
                         avg += v
                         temp = {"o":[], "m":[]}
 
@@ -436,7 +444,8 @@ class EMCCaseGenerator(object):
         # Write average photon and mask patterns to file
         outh5 = h5py.File(outFNH5Avg, 'w')
         outh5.create_dataset("average", data=avg, compression="gzip", compression_opts=9)
-        outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
+        if thisProcess==0:
+            outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
         outh5.close()
 
     def _writeSparsePhotonFileFromSingleH5(self, dense_file, outFN, outFNH5Avg):

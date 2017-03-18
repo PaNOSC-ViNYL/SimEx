@@ -93,10 +93,12 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
             self.beamstop = beamstop
             self.detailed_output = detailed_output
 
+        super(EMCOrientationParameters, self).__init__(**kwargs)
+
     def _setDefaults(self):
         """ """
         """ Set the inherited parameters defaults that depend on the special calculator. """
-        self._AbstractCalculatorParameters__cpus_per_task_default = 'MAX'
+        self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     ### Setters and queries.
     @property

@@ -77,7 +77,7 @@ software needed to build the external simulation tools:
 * wget
 * boost (version > 1.54) + header files
 * armadillo (version >= 4.600) + header files
-* hdf (version >= 1.8.4) + header files
+* hdf5 (version >= 1.8.4) + header files
 * python2.7
 * python-numpy
 * python-scipy
@@ -85,6 +85,7 @@ software needed to build the external simulation tools:
 * python-cython
 * python-setuptools
 * python-matplotlib
+* python-dill
 * build-essential
 * bz2 libraries (libbz2-dev)
 * GSL (libgsl0-dev)
@@ -93,6 +94,8 @@ software needed to build the external simulation tools:
 * cmake
 * C/C++ and Fortran compilers, e.g. gcc
 * unzip
+
+See also requirements.txt in the simex_platform root directory.
 
 NOTE 1 (Intel(R) MKL(R)): If you want to link against Intel(R) MKL(R), make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the
 scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation,
@@ -292,12 +295,6 @@ NOTE 4 (Large Test Files): If you pulled the sources via git and encounter test 
 the test log mentions something like "hdf file could not be read", make sure you issued a "git lfs pull" command at least once.
 This is not a standard git command, you have to install git-lfs (e.g. via https://git-lfs.github.com/).
 
-NOTE 5 (segfault in WavePropagatorTest.py): If you receive a segfault when
-running the test module WavePropagatorTest.py, try the following command to fix:
-$> ulimit -c unlimited
-
-If this does not fix the problem, please post a bug report on github.
-
 
 Usage
 -----
@@ -361,7 +358,6 @@ Reference Manual
 .. autoclass:: SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor
 .. autoclass:: SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters
 
-.. autoclass:: SimEx.Calculators.WavePropagator.WavePropagator
 .. autoclass:: SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters
 
 .. autoclass:: SimEx.Calculators.XFELPhotonSource.XFELPhotonSource

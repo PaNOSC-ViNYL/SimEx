@@ -12,9 +12,7 @@ matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as pylab
 from matplotlib.colors import LogNorm
 
-# 3fs, no Compton, 200k patterns
-root_path = os.path.abspath("/home/grotec/exflst_data/simS2E_data/5keV_3fs_nz35/diffr_200k_noCompton")
-
+root_path = sys.argv[1]
 ## 3fs, w/ Compton, 200k patterns
 #root_path = os.path.abspath("/home/grotec/exflst_data/simS2E_data/5keV_3fs_nz35/diffr")
 
@@ -33,24 +31,20 @@ if not os.path.isdir( root_path ):
     sys.exit()
 
 # Common part of all filenames.
-basename = "diffr_out_"
+basename = "diffr.h5"
 
-# Start and stop file.
-min_index = 1
-max_index = 100000
-number_of_samples = 2000
-# Take into account 1 based indexing scheme in filenames.
-file_indices = numpy.arange(min_index, max_index+1)
-
-file_indices = numpy.random.choice(file_indices, number_of_samples, replace=False)
-
-# Empty list to store total number of photons per frame.
+ #Empty list to store total number of photons per frame.
 number_of_photons = []
 # Loop over all files.
 
 # Take photons or fields
 #data = 'diffr' # fields
 data = 'data'  # photons
+
+###############################################
+import ipdb
+ipdb.set_trace()
+###############################################
 
 for i, file_index in enumerate(file_indices):
 
@@ -131,22 +125,22 @@ pylab.ylabel("Histogram")
 pylab.title("Photon number histogram")
 #pylab.show()
 
-#pylab.figure(2)
-## Average
-#sum_over_images = 1.0*sum_over_images / number_of_samples
-## Offset for log scale.
-##sum_over_images += 0.01 * numpy.min(sum_over_images[numpy.where(sum_over_images > 0)])
-#sum_over_images += 1e-4
-#vmax=10.
-#vmin=1.0e-4
-#raw_input([vmin, vmax])
-#pylab.pcolor(sum_over_images,norm=LogNorm(vmax=vmax, vmin=vmin), cmap='YlGnBu_r')
-##pylab.pcolor(sum_over_images, cmap='YlGnBu_r')
-#pylab.colorbar()
+pylab.figure(2)
+# Average
+sum_over_images = 1.0*sum_over_images / number_of_samples
+# Offset for log scale.
+#sum_over_images += 0.01 * numpy.min(sum_over_images[numpy.where(sum_over_images > 0)])
+sum_over_images += 1e-4
+vmax=10.
+vmin=1.0e-4
+raw_input([vmin, vmax])
+pylab.pcolor(sum_over_images,norm=LogNorm(vmax=vmax, vmin=vmin), cmap='YlGnBu_r')
+#pylab.pcolor(sum_over_images, cmap='YlGnBu_r')
+pylab.colorbar()
 
-#pylab.figure(3)
-#pylab.semilogy( numpy.sum( sum_over_images, axis=0 ), label='x axis projection')
-#pylab.semilogy( numpy.sum( sum_over_images, axis=1 ), label='y axis projection')
+pylab.figure(3)
+pylab.semilogy( numpy.sum( sum_over_images, axis=0 ), label='x axis projection')
+pylab.semilogy( numpy.sum( sum_over_images, axis=1 ), label='y axis projection')
 
-#pylab.legend()
-#pylab.show()
+pylab.legend()
+pylab.show()

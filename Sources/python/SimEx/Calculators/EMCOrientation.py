@@ -29,7 +29,7 @@
 import h5py
 import numpy
 import os
-import subprocess
+import subprocess,shlex
 import tempfile
 import time
 
@@ -37,6 +37,7 @@ from EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import ParallelUtilities
 
 class EMCOrientation(AbstractPhotonAnalyzer):
 
@@ -185,28 +186,149 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                 # If run dir already existed, this would have been caught earlier.
             run_instance_dir = self.run_files_path
 
-        # Return.
-        return run_instance_dir, tmp_out_dir
+        self._sparsePhotonFile    = os.path.join(tmp_out_dir, "photons.dat")
+        self._detectorFile        = os.path.join(tmp_out_dir, "detector.dat")
+        self._outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
+        self._avgPatternFile      = os.path.join(tmp_out_dir, "avg_photon.h5")
+        self._lockFile            = os.path.join(tmp_out_dir, "write.lock")
+
+        self._run_instance_dir = run_instance_dir
+        self._tmp_out_dir = tmp_out_dir
+
+        return run_instance_dir,tmp_out_dir
+
+    def computeNTasks(self):
+        resources=ParallelUtilities.getParallelResourceInfo()
+        ncores=resources['NCores']
+        nnodes=resources['NNodes']
+
+        if self.parameters.cpus_per_task=="MAX":
+            np=nnodes
+        else:
+            np=max(int(ncores/int(self.parameters.cpus_per_task)),1)
+
+        return np
 
     def backengine(self):
         """ Starts EMC simulations in parallel in a subprocess """
 
-        run_instance_dir, tmp_out_dir = self._setupPaths()
+        # Set paths.
+        self._setupPaths()
 
         fname = __name__+"_tmpobj"
         self.dumpToFile(fname)
-        command_sequence = ['mpirun',
-                            '-np',
-                            '1',
-                            'python',
+
+        # collect MPI arguments
+        if self.parameters.forced_mpi_command=="":
+            np=self.computeNTasks()
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
+        else:
+            mpicommand=self.parameters.forced_mpi_command
+        # collect program arguments
+        command_sequence = ['python',
                             __file__,
                             fname,
                             ]
-        proc = subprocess.Popen(command_sequence,universal_newlines=True)
+        # put MPI and program arguments together
+        args = shlex.split(mpicommand) + command_sequence
+
+
+        if 'SIMEX_VERBOSE' in os.environ:
+            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
+                print("EMCOrientation backengine mpicommand: "+mpicommand)
+
+        # Run the backengine command.
+        proc = subprocess.Popen(args)
         proc.wait()
+
         os.remove(fname)
 
+
+        # Return the return code from the backengine.
         return proc.returncode
+
+    def _need_prepare_photon_files(self,thisProcess):
+        ###############################################################
+        # A lock file is created if subprocess is converting sparse photons
+        #   so that another subprocess does not clobber an ongoing conversion.
+        # Make photons.dat and detector.dat if they don't exist.
+        # Create time-tagged output subdirectory for intermediate states.
+        ###############################################################
+
+        while (os.path.isfile(self._lockFile)):
+            # Sleep in 30 s intervals, then check if sparse photon lock has been released.
+            sleep_duration = 30
+            msg = "Lock file in " + self._tmp_out_dir + ". "
+            msg += "Photons.dat likely being written to tmpDir by another programm. "
+            msg += "Sleeping this programm for %d s." % sleep_duration
+            if thisProcess == 0:
+                _print_to_log(msg, log_file=self._outputLog)
+            time.sleep(sleep_duration)
+
+        return not (os.path.isfile(self._sparsePhotonFile) and os.path.isfile(self._detectorFile))
+
+    def _join_photon_files(self,numProcesses):
+
+        outf = open(self._sparsePhotonFile, "w")
+
+        for n in range(0,numProcesses):
+            fname=self._sparsePhotonFile + "_"+str(n)
+            with open(fname) as infile:
+                    for line in infile:
+                        outf.write(line)
+            os.system("rm %s " % fname)
+        outf.close()
+
+        outh5 = h5py.File(self._avgPatternFile, 'w')
+        for n in range(0,numProcesses):
+            fname=self._avgPatternFile + "_"+str(n)
+            f = h5py.File(fname, 'r')
+            if n == 0:
+                mask = f["mask"].value
+                avg = f["average"].value
+            else:
+                avg += f["average"].value
+            os.system("rm %s " % fname)
+
+        outh5.create_dataset("average", data=avg, compression="gzip", compression_opts=9)
+        outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
+        outh5.close()
+
+
+    def _prepare_photon_files(self,comm):
+        thisProcess = comm.rank
+        numProcesses = comm.size
+
+        # Prepare for reading input.
+        if os.path.isdir(self.input_path):
+            photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
+            photonFiles.sort()
+        elif os.path.isfile(self.input_path):
+            photonFiles = [self.input_path]
+        else:
+            raise IOError( " Input file %s not found." % self.input_path )
+
+        gen = EMCCaseGenerator(self._outputLog)
+        gen.readGeomFromPhotonData(photonFiles[0],thisProcess)
+
+        if thisProcess == 0:
+            os.system("touch %s" % self._lockFile)
+            gen.writeDetectorToFile(filename=self._detectorFile)
+
+        gen.writeSparsePhotonFile(photonFiles, self._sparsePhotonFile+ "_"+str(thisProcess),
+                                               self._avgPatternFile + "_"+str(thisProcess),
+                                               thisProcess,numProcesses)
+        comm.Barrier()
+
+        if thisProcess == 0:
+            self._join_photon_files(numProcesses)
+
+        comm.Barrier()
+
+        if thisProcess == 0:
+            _print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=self._outputLog)
+            #        _print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=self._outputLog)
+            os.system("rm %s " % self._lockFile)
 
     def _run(self):
 
@@ -217,6 +339,26 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         :note: Copied and adapted from the main routine in s2e_recon/EMC/runEMC.py
         """
+        from mpi4py import MPI
+
+        # MPI info
+        comm = MPI.COMM_WORLD
+        thisProcess = comm.rank
+
+        if self._need_prepare_photon_files(thisProcess):
+            if thisProcess == 0:
+                msg = "Photons.dat and detector.dat not found in " + self._tmp_out_dir + ". Will create them now..."
+                _print_to_log(msg=msg, log_file=self._outputLog)
+            self._prepare_photon_files(comm)
+        else:
+            if thisProcess == 0:
+                msg = "Photons.dat and detector.dat already exists in " + self._tmp_out_dir + "."
+                _print_to_log(msg=msg, log_file=self._outputLog)
+
+# the rest is non-parallel (yet)
+        if thisProcess != 0:
+            return 0
+
         ###############################################################
         # Instantiate a reconstruction object
         ###############################################################
@@ -228,70 +370,23 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         beamstop = self.parameters.beamstop
         detailed_output = self.parameters.detailed_output
 
-        # Get paths.
-        run_instance_dir, tmp_out_dir = self._setupPaths()
-
-        # Get path to log.
-        outputLog           = os.path.join(run_instance_dir, "EMC_extended.log")
-
-        # Prepare for reading input.
-        if os.path.isdir(self.input_path):
-            photonFiles         = [ os.path.join(self.input_path, pf) for pf in os.listdir( self.input_path ) ]
-            photonFiles.sort()
-        elif os.path.isfile(self.input_path):
-            photonFiles = [self.input_path]
-        else:
-            raise IOError( " Input file %s not found." % self.input_path )
-
-        sparsePhotonFile    = os.path.join(tmp_out_dir, "photons.dat")
-        avgPatternFile      = os.path.join(tmp_out_dir, "avg_photon.h5")
-        detectorFile        = os.path.join(tmp_out_dir, "detector.dat")
-        lockFile            = os.path.join(tmp_out_dir, "write.lock")
         quaternion_dir      = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'CalculatorUtilities', 'quaternions')
 
-        gen = EMCCaseGenerator(outputLog)
-        ###############################################################
-        # A lock file is created if subprocess is converting sparse photons
-        #   so that another subprocess does not clobber an ongoing conversion.
-        # Make photons.dat and detector.dat if they don't exist.
-        # Create time-tagged output subdirectory for intermediate states.
-        ###############################################################
-        while (os.path.isfile(lockFile)):
-            # Sleep in 30 s intervals, then check if sparse photon lock has been released.
-            sleep_duration = 30
-            msg = "Lock file in " + tmp_out_dir + ". "
-            msg += "Photons.dat likely being written to tmpDir by another process. "
-            msg += "Sleeping this process for %d s." % sleep_duration
-            _print_to_log(msg, log_file=outputLog)
-            time.sleep(sleep_duration)
-
-        if not (os.path.isfile(sparsePhotonFile) and os.path.isfile(detectorFile)):
-            msg = "Photons.dat and detector.dat not found in " + tmp_out_dir + ". Will create them now..."
-            _print_to_log(msg=msg, log_file=outputLog)
-            os.system("touch %s" % lockFile)
-            gen.readGeomFromPhotonData(photonFiles[0])
-            gen.writeDetectorToFile(filename=detectorFile)
-            gen.writeSparsePhotonFile(photonFiles, sparsePhotonFile, avgPatternFile)
-            _print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=outputLog)
-            _print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
-            os.system("rm %s " % lockFile)
-        else:
-            msg = "Photons.dat and detector.dat already exists in " + tmp_out_dir + "."
-            _print_to_log(msg=msg, log_file=outputLog)
-            gen.readGeomFromDetectorFile(detectorFile)
-            _print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=outputLog)
+        gen = EMCCaseGenerator(self._outputLog)
+        gen.readGeomFromDetectorFile(self._detectorFile)
+        _print_to_log(msg="Detector parameters: %d %d %d"%(gen.qmax, len(gen.detector),len(gen.beamstop)), log_file=self._outputLog)
 
 
-        if not (os.path.isfile(os.path.join(run_instance_dir,"detector.dat"))):
-            os.symlink(os.path.join(tmp_out_dir,"detector.dat"), os.path.join(run_instance_dir,"detector.dat"))
-        if not (os.path.isfile(os.path.join(run_instance_dir,"photons.dat"))):
-            os.symlink(os.path.join(tmp_out_dir,"photons.dat"), os.path.join(run_instance_dir,"photons.dat"))
+        if not (os.path.isfile(os.path.join(self._run_instance_dir,"detector.dat"))):
+            os.symlink(os.path.join(self._tmp_out_dir,"detector.dat"), os.path.join(self._run_instance_dir,"detector.dat"))
+        if not (os.path.isfile(os.path.join(self._run_instance_dir,"photons.dat"))):
+            os.symlink(os.path.join(self._tmp_out_dir,"photons.dat"), os.path.join(self._run_instance_dir,"photons.dat"))
 
         ###############################################################
         # Create dummy destination h5 for intermediate output from EMC
         ###############################################################
         cwd = os.path.abspath(os.curdir)
-        os.chdir(run_instance_dir)
+        os.chdir(self._run_instance_dir)
         #Output file is kept in tmpOutDir.
         outFile = self.output_path
         offset_iter = 0
@@ -323,7 +418,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             offset_iter = len(f["/history/intensities"].keys())
             f.close()
             msg = "Output will be appended to the results of %d iterations before this."%offset_iter
-            _print_to_log(msg=msg, log_file=outputLog)
+            _print_to_log(msg=msg, log_file=self._outputLog)
 
         ###############################################################
         # Iterate EMC
@@ -334,18 +429,18 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         try:
             while(currQuat <= max_number_of_quaternions):
-                if os.path.isfile(os.path.join(run_instance_dir,"quaternion.dat")):
-                    os.remove(os.path.join(run_instance_dir,"quaternion.dat"))
-                os.symlink(os.path.join(quaternion_dir ,"quaternion"+str(currQuat)+".dat"), os.path.join(run_instance_dir,"quaternion.dat"))
+                if os.path.isfile(os.path.join(self._run_instance_dir,"quaternion.dat")):
+                    os.remove(os.path.join(self._run_instance_dir,"quaternion.dat"))
+                os.symlink(os.path.join(quaternion_dir ,"quaternion"+str(currQuat)+".dat"), os.path.join(self._run_instance_dir,"quaternion.dat"))
 
                 diff = 1.
                 while (iter_num <= max_number_of_iterations):
                     if (iter_num > 1 and diff < min_error):
                         _print_to_log(msg="Error %0.3e is smaller than threshold %0.3e. Going to next quaternion."%(diff, min_error),
-                                log_file=outputLog)
+                                log_file=self._outputLog)
                         break
                     _print_to_log("Beginning iteration %d, with quaternion %d %s"%(iter_num+offset_iter, currQuat, "."*20),
-                                log_file=outputLog)
+                                log_file=self._outputLog)
 
                     # Here is the actual timed EMC iteration, which calls the EMC.c code.
                     start_time = time.clock()
@@ -356,7 +451,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                     process_handle.wait()
                     time_taken = time.clock() - start_time
                     _print_to_log("Took %lf s"%(time_taken),
-                                log_file=outputLog)
+                                log_file=self._outputLog)
 
                     # Read intermediate output of EMC.c and stuff them into a h5 file
                     # Delete these EMC.c-generated intermediate files afterwards,
@@ -385,7 +480,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                     gg = f["history/error"]
                     gg.create_dataset("%04d"%(iter_num + offset_iter), data=diff)
                     _print_to_log("rms change in intensities %e"%(diff),
-                                log_file=outputLog)
+                                log_file=self._outputLog)
 
                     gg = f["history/angle"]
                     gg.create_dataset("%04d"%(iter_num + offset_iter), data=most_likely_orientations, compression="gzip", compression_opts=9)
@@ -406,19 +501,19 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
                     f.close()
 
-                    f = open(outputLog, "a")
+                    f = open(self._outputLog, "a")
                     f.write("%e\t %lf\n"%(diff, time_taken))
                     f.close()
 
                     os.system("cp finish_intensity.dat start_intensity.dat")
 
                     _print_to_log("Iteration number %d completed"%(iter_num),
-                                log_file=outputLog)
+                                log_file=self._outputLog)
                     iter_num += 1
 
                 currQuat += 1
 
-            _print_to_log("All EMC iterations completed", log_file=outputLog)
+            _print_to_log("All EMC iterations completed", log_file=self._outputLog)
 
             os.chdir(cwd)
             return 0

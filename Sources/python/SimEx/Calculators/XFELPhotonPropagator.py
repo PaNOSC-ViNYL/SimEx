@@ -28,7 +28,7 @@
 """
 import os
 
-from prop import propagateSE
+from prop import propagate_s2e as propagate
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
@@ -65,6 +65,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         # Initialize base class.
         super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
+
 
     def computeNTasks(self):
         resources=ParallelUtilities.getParallelResourceInfo()
@@ -135,7 +136,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             input_files.sort() # Assuming the filenames have some kind of ordering scheme.
         else:
             if thisProcess == 0: # other MPI processes (if any) have nothing to do
-                propagateSE.propagate(self.input_path, self.output_path)
+                propagate.propagate(self.input_path, self.output_path, self.parameters.beamline.get_beamline)
             return 0
 
         # If we have more than one input file, we should also have more than one output file, i.e.
@@ -153,7 +154,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             # process file on a corresponding process (round-robin)
             if i % numProcesses == thisProcess:
                 output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
-                propagateSE.propagate(input_file, output_file)
+                propagate.propagate(input_file, output_file, self.parameters.beamline.get_beamline)
 
                 # Rewrite in openpmd conformant way.
                 wpg_to_opmd.convertToOPMD( output_file )
