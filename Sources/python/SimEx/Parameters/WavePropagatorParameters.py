@@ -39,7 +39,6 @@ from prop import exfel_spb_kb_beamline as s2e_beamline
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-from SimEx.Utilities import WPGBeamlines
 
 class WavePropagatorParameters(AbstractCalculatorParameters):
     """
