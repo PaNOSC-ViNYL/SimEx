@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -21,6 +21,7 @@
 ##########################################################################
 
 """ :module: Holding functions for quick diagnostics of wavefront propagation results. """
+
 from argparse import ArgumentParser
 
 import matplotlib
@@ -28,29 +29,38 @@ matplotlib.use('Qt4Agg')
 from matplotlib import pyplot
 
 import wpg
-from wpg.wpg_uti_wf import plot_t_wf,look_at_q_space
-from wpg.useful_code.wfrutils import plot_wfront
+from wpg.wpg_uti_wf import plot_intensity_qmap, plot_intensity_map, integral_intensity
 
 
 ### TODO
+# Plot phase distribution for maximum intensity slices.
 # Plot average and rms intensity distribution over given patterns.
 
 def plot(wavefront):
 
     if args._do_intensity_distribution:
-        plot_wfront(wavefront, title_fig='',
-            isHlog=False, isVlog=False,
-            i_x_min=1e-5, i_y_min=1e-5,
-            orient='x', onePlot=True)
-        pyplot.colorbar()
-        plot_t_wf(wavefront)
+        integral_intensity(wavefront, bPlot=True)
+        plot_intensity_map(wavefront)
+
+    if args._do_spectra:
+        spectrum0 = wavefront.custom_fields['misc']['spectrum0']
+        spectrum1 = wavefront.custom_fields['misc']['spectrum1']
+
+        pyplot.plot(spectrum0[:,0],spectrum0[:,1], label="initial")
+        pyplot.plot(spectrum1[:,0],spectrum1[:,1], label="final")
+        pyplot.xlabel("Energy (eV)")
+        pyplot.ylabel("Power spectrum (normalized)")
+        pyplot.legend()
+
+        pyplot.show()
 
     if args._do_phase_distribution:
+
         pyplot.imshow(wavefront.get_phase(slice_number=0,polarization='horizontal'), cmap='hsv')
         pyplot.colorbar()
 
     if args._do_qspace_intensity:
-        look_at_q_space(wavefront)
+        plot_intensity_qmap(wavefront)
 
 
 
@@ -84,14 +94,14 @@ if __name__ == "__main__":
                         "--intensity",
                         action="store_true",
                         dest="_do_intensity_distribution",
-                        default=False,
+                        default=True,
                         help="Plot the intensity distribution in x-y.")
 
     parser.add_argument("-R",
                         "--reciprocal",
                         action="store_true",
                         dest="_do_qspace_intensity",
-                        default=False,
+                        default=True,
                         help="Plot the intensity distribution in qx-qy.")
 
     parser.add_argument("-P",
@@ -100,6 +110,13 @@ if __name__ == "__main__":
                         dest="_do_phase_distribution",
                         default=False,
                         help="Plot the phase distribution in x-y.")
+
+    parser.add_argument("-S",
+                        "--spectrum",
+                        action="store_true",
+                        dest="_do_spectra",
+                        default=True,
+                        help="Plot the power spectra (before and after propagation.")
 
 
 

@@ -35,10 +35,10 @@ import os
 import tempfile
 import wpg
 from wpg.beamline import Beamline
+from prop import exfel_spb_kb_beamline as s2e_beamline
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-from SimEx.Utilities import WPGBeamlines
 
 class WavePropagatorParameters(AbstractCalculatorParameters):
     """
@@ -92,4 +92,8 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         """ Set the 'beamline' parameter.
         @param value : The value to set 'beamline' to.
         """
-        self.__beamline = checkAndSetInstance( Beamline, value, WPGBeamlines.setup_S2E_SPI_beamline() )
+        if value is None:
+            self.__beamline = s2e_beamline
+            return
+        if not hasattr(value, "get_beamline"):
+            raise AttributeError('The beamline module must define a function "get_beamline()".')

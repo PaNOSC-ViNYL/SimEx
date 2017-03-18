@@ -31,6 +31,7 @@ import os
 import shutil
 import wpg
 from wpg.beamline import Beamline
+from prop import exfel_spb_kb_beamline as s2e_beamline
 
 # Include needed directories in sys.path.
 import unittest
@@ -38,7 +39,6 @@ import unittest
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
-from SimEx.Utilities.WPGBeamlines import setup_S2E_SPI_beamline
 
 
 class WavePropagatorParametersTest(unittest.TestCase):
@@ -62,7 +62,7 @@ class WavePropagatorParametersTest(unittest.TestCase):
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
-        self.__beamline = setup_S2E_SPI_beamline()
+        self.__beamline = s2e_beamline
 
 
     def tearDown(self):
@@ -89,7 +89,6 @@ class WavePropagatorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertFalse( parameters.use_opmd )
-        self.assertIsInstance( parameters.beamline, Beamline )
 
         # Check default inherited parameters.
         self.assertEqual( parameters.cpus_per_task, "MAX")
@@ -100,7 +99,7 @@ class WavePropagatorParametersTest(unittest.TestCase):
         """ Testing the construction of the class with non-default parameters. """
 
         # Attempt to construct an instance of the class.
-        parameters = WavePropagatorParameters(use_opmd=True, beamline=setup_S2E_SPI_beamline())
+        parameters = WavePropagatorParameters(use_opmd=True, beamline=s2e_beamline)
 
         # Check instance and inheritance.
         self.assertIsInstance( parameters, WavePropagatorParameters )
@@ -108,7 +107,6 @@ class WavePropagatorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertTrue( parameters.use_opmd )
-        self.assertIsInstance( parameters.beamline, Beamline )
 
 if __name__ == '__main__':
     unittest.main()
