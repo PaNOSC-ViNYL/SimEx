@@ -11,4 +11,3 @@ setuptools
 mpi4py
 breathe
 dill
-xraydb

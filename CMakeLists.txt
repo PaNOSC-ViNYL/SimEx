@@ -93,3 +93,5 @@ endif()
 # Add documentation target.
 add_subdirectory("Sources/doc")
 
+# Add extra stuff, e.g. python libs not pip'able.
+add_subdirectory("Sources/python/extra")
