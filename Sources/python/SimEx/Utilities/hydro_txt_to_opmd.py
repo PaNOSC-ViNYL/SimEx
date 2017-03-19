@@ -68,7 +68,8 @@ def convertTxtToOPMD(esther_dirname=None):
     time_step = time_array[1] - time_array[0]
 
     # Create opmd.h5 output file
-    with h5py.File(str(esther_dirname)+".opmd.h5", 'w') as opmd_h5:
+    h5_path = str(esther_dirname)+".opmd.h5"
+    with h5py.File(h5_path, 'w') as opmd_h5:
 
         # Setup the root attributes.
         opmd.setup_root_attr( opmd_h5, extension="HYDRO1D" )
@@ -133,4 +134,6 @@ def convertTxtToOPMD(esther_dirname=None):
                 meshes[key].attrs["position"] = numpy.array([0.5, 0.5], dtype=numpy.float32)
 
         opmd_h5.close()
+
+        return os.path.abspath(h5_path)
 
