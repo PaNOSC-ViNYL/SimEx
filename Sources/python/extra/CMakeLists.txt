@@ -11,5 +11,5 @@ INSTALL_COMMAND ""
 
 ExternalProject_Get_Property(xraydb SOURCE_DIR)
 
-execute_process(COMMAND python setup.py build COMMAND ls -l build WORKING_DIRECTORY ${SOURCE_DIR}/python)
-install(DIRECTORY ${SOURCE_DIR}/python/build/lib.linux-x86_64-2.7/xraydb DESTINATION  ${PYPATH})
+install(DIRECTORY ${SOURCE_DIR}/python/xraydb DESTINATION  ${PYPATH})
+install(FILES ${SOURCE_DIR}/xraydb.sqlite DESTINATION  ${PYPATH}/xraydb)
