@@ -45,12 +45,16 @@ def plot(wavefront):
     if args._do_spectra:
         spectrum0 = wavefront.custom_fields['misc']['spectrum0']
         spectrum1 = wavefront.custom_fields['misc']['spectrum1']
-
-        pyplot.plot(spectrum0[:,0],spectrum0[:,1], label="initial")
-        pyplot.plot(spectrum1[:,0],spectrum1[:,1], label="final")
-        pyplot.xlabel("Energy (eV)")
+        pyplot.figure(0)
+        pyplot.plot(spectrum0[:,0],spectrum0[:,1], 'b', label="source")
+        pyplot.xlabel("Photon energy (eV)")
         pyplot.ylabel("Power spectrum (normalized)")
-        pyplot.legend()
+
+        pyplot.figure(1)
+        pyplot.plot(spectrum1[:,0],spectrum1[:,1], 'b', label="focus")
+        pyplot.xlabel("Photon energy (eV)")
+        pyplot.ylabel("Power spectrum (normalized)")
+        #pyplot.legend()
 
         pyplot.show()
 
@@ -94,14 +98,14 @@ if __name__ == "__main__":
                         "--intensity",
                         action="store_true",
                         dest="_do_intensity_distribution",
-                        default=True,
+                        default=False,
                         help="Plot the intensity distribution in x-y.")
 
     parser.add_argument("-R",
                         "--reciprocal",
                         action="store_true",
                         dest="_do_qspace_intensity",
-                        default=True,
+                        default=False,
                         help="Plot the intensity distribution in qx-qy.")
 
     parser.add_argument("-P",
@@ -115,7 +119,7 @@ if __name__ == "__main__":
                         "--spectrum",
                         action="store_true",
                         dest="_do_spectra",
-                        default=True,
+                        default=False,
                         help="Plot the power spectra (before and after propagation.")
 
 
