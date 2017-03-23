@@ -25,8 +25,6 @@ from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
 import numpy
 import wpg
 
-J2eV = 6.24150934e18
-
 class XFELPhotonAnalysis(AbstractAnalysis):
     """
     :class XFELPhotonAnalysis: Class that implements common data analysis tasks for wavefront (radiation field) data.

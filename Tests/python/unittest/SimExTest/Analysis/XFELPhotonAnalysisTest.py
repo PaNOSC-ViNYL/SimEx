@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
+RENDER_PLOT=True # Set to True to show plots.
 """ Test module for the XFELPhotonAnalysis.
 
     @author : CFG
@@ -65,8 +65,8 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d): shutil.rmtree(d)
 
-        # To actually see the plots, uncomment this line.
-        #plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
@@ -92,13 +92,11 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
 
         xfel_photon_analyzer.plotTotalPower()
 
-
     def testPlotTotalPowerVsEnergy(self):
         """ Test plotting the total power spectrum."""
         xfel_photon_analyzer = XFELPhotonAnalysis(input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'))
 
         xfel_photon_analyzer.plotTotalPower(spectrum=True)
-
 
     def testPlotOnAxisPowerDensityVsTime(self):
         """ Test plotting the on-axis power as function of time. """
@@ -106,13 +104,11 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
 
         xfel_photon_analyzer.plotOnAxisPowerDensity()
 
-
     def testPlotOnAxisPowerDensityVsEnergy(self):
         """ Test plotting the total power spectrum."""
         xfel_photon_analyzer = XFELPhotonAnalysis(input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'))
 
         xfel_photon_analyzer.plotOnAxisPowerDensity(spectrum=True)
-
 
     def testPlotIntensityMap(self):
         """ Test plotting the intensity map."""
@@ -132,7 +128,13 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
 
         xfel_photon_analyzer.plotIntensityMap(qspace=True)
 
+    def testMultiplePlots(self):
+        """ Check that we can plot multiple times without clashes."""
+
+        xfel_photon_analyzer = XFELPhotonAnalysis(input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'))
+
+        xfel_photon_analyzer.plotIntensityMap(qspace=False)
+        xfel_photon_analyzer.plotIntensityMap(qspace=True)
 
 if __name__ == '__main__':
     unittest.main()
-
