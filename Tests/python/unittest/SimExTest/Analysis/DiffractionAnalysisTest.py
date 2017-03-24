@@ -38,6 +38,7 @@ from TestUtilities import TestUtilities
 # Import the class to test.
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis
+from SimEx.Analysis.DiffractionAnalysis import get_pattern_from_file, generate_patterns_from_file, diffraction_parameters, plot_image
 
 class DiffractionAnalysisTest(unittest.TestCase):
     """
@@ -98,32 +99,75 @@ class DiffractionAnalysisTest(unittest.TestCase):
     def testPlotOnePattern(self):
         """ Check we can plot one diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern=4, operation=None)
+        analyzer.plotPattern(4, operation=None)
         plt.show()
 
     def testPlotSumPatternLogscale(self):
         """ Check we can plot one diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern="all", operation=numpy.sum, logscale=True, poissonized=False)
+        analyzer.plotPattern("all", operation=numpy.sum, logscale=True, poissonized=False)
         plt.show()
 
     def testPlotOnePatternLegacy(self):
         """ Check we can plot one diffraction pattern from a v0.1 dir as a color map. """
         analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'))
-        analyzer.plotPattern(pattern=4, operation=None)
+        analyzer.plotPattern(4, operation=None)
         plt.show()
 
     def testPlotAvgPattern(self):
         """ Check we can plot the average diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern="all", operation=numpy.mean)
+        analyzer.plotPattern(pattern_indices="all", operation=numpy.mean)
         plt.show()
+
+    def testPlotAvgPatternLegacy(self):
+        """ Check we can plot the average diffraction pattern as a color map. """
+        analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'))
+        analyzer.plotPattern(pattern_indices="all", operation=numpy.mean)
+        plt.show()
+
+
+    def testPlotPatternDefault(self):
+        """ Check we the sum image of all patterns is plotted by default. """
+        analyzer = DiffractionAnalysis(input_path=self.__test_data)
+        analyzer.plotPattern()
+        plt.show()
+
 
     def testPlotRMSPattern(self):
         """ Check we can plot the rms diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern="all", operation=numpy.std)
+        analyzer.plotPattern(pattern_indices="all", operation=numpy.std)
         plt.show()
+
+    def testPlotAvgSequenceInt(self):
+        """ Check we can plot the avg over a subset of patterns given as list of ints."""
+        analyzer = DiffractionAnalysis(input_path=self.__test_data)
+        analyzer.plotPattern(pattern_indices=[1,3,6], operation=numpy.mean)
+        plt.show()
+
+    def testPlotImage(self):
+        """ Check we can plot an ndarray."""
+        image = numpy.random.random((100, 100))
+        plot_image(image)
+        plt.show()
+
+    def testDiffractionParameters(self):
+        """ Test the utility to extract parameters from a h5 file."""
+
+        # Setup test file path.
+        path = self.__test_data
+
+        # Extract.
+        parameters = diffraction_parameters(path)
+
+        # Check for some keys.
+        self.assertIn('beam', parameters.keys())
+        self.assertIn('geom', parameters.keys())
+        self.assertIn('photonEnergy', parameters['beam'].keys())
+        self.assertIn('pixelWidth', parameters['geom'].keys())
+
+
 
 if __name__ == '__main__':
     unittest.main()

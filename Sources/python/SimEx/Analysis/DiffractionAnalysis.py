@@ -45,43 +45,54 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Initialize base class. This takes care of parameter checking.
         super(DiffractionAnalysis, self).__init__(input_path)
 
-    def plotPattern(self, pattern=None, logscale=False, operation=None, poissonized=True ):
+    def plotPattern(self, pattern_indices=None, logscale=False, operation=None, poissonized=True ):
         """ Plot a pattern.
         :param pattern: Identify which pattern to plot.
-        :type pattern: int || sequence of int || 2D numpy.array || sequence of 2D numpy arrays || "all"
+        :type pattern: int || sequence of int || "all"
 
         :param operation: Operation to apply to the given pattern(s).
         :type operation: function
+        :note operation: Function must accept the "axis" keyword-argument. Axis will always be chosen as axis=0.
         :rtype operation: 2D numpy.array
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
 
         """
-        if pattern is None:
-            pattern = 1
+        # Get new reference to pattern_indices.
+        indices = pattern_indices
+        if indices is None:
+            indices = 'all'
 
-        patterns = None
-        if hasattr(pattern, '__iter__'):
-            if isinstance(pattern[0], int):
-                patterns = [p for p in generate_patterns_from_file(self.input_path, indices=pattern, poissonized=poissonized)] # Iterator!
-                file_path = self.input_path
-            elif isinstance(pattern[0], numpy.ndarray):
-                patterns = pattern # Array!
+        # Convert int to list.
+        if isinstance(pattern_indices, int):
+            indices = [pattern_indices]
+
+        # Handle default operation
+        if operation is None:
+            operation = numpy.sum
+
+        # Complain if operating on single pattern.
         else:
-            if isinstance(pattern, int):
-                pattern_to_plot, file_path = get_pattern_from_file(self.input_path, index=pattern, poissonized=poissonized)
-            elif isinstance(pattern, numpy.ndarray):
-                pattern_to_plot = pattern
-            elif pattern == "all":
-                patterns = [p for p in generate_patterns_from_file(self.input_path, indices=None, poissonized=poissonized)]
-                file_path = self.input_path
+            if len(pattern_indices) == 1:
+                print "WARNING: Giving an operation with a single pattern has no effect."
+        # Get iterator over queried patterns.
+        patterns_iterator = generate_patterns_from_file(self.input_path, indices=indices, poissonized=poissonized)
 
-        if patterns is not None:
-            pattern_to_plot = operation(patterns, axis=0)
+        # Get pattern to plot.
+        if len(indices) == 1:
+            pattern_to_plot = patterns_iterator.next()
+        else:
+            pattern_to_plot = operation(numpy.array([p for p in patterns_iterator]), axis=0)
 
+        # Get beam and geometry parameters.
+        parameters_dict = diffraction_parameters(self.input_path)
+
+        # Plot image and colorbar.
         plot_image(pattern_to_plot, logscale)
-        plot_resolution_rings(file_path)
+
+        # Plot resolution rings.
+        plot_resolution_rings(parameters_dict)
 
 def plot_image(pattern, logscale=False):
     """ Workhorse function to plot an image """
@@ -99,38 +110,36 @@ def plot_image(pattern, logscale=False):
     plt.ylabel(r'$y$ (pixel)')
     plt.colorbar()
 
-def plot_resolution_rings(path):
+def plot_resolution_rings(parameters):
     """ """
-    # Get parameters from file.
-    with h5py.File(path, 'r') as h5:
-        beam = h5['params/beam']
-        geom = h5['params/geom']
+    beam = parameters['beam']
+    geom = parameters['geom']
 
-        # Photon energy and wavelength
-        E0 = beam['photonEnergy'].value
-        lmd = 1239.8 / E0
+    # Photon energy and wavelength
+    E0 = beam['photonEnergy']
+    lmd = 1239.8 / E0
 
-        # Pixel dimension
-        apix = geom['pixelWidth'].value
-        # Sample-detector distance
-        Ddet = geom['detectorDist'].value
-        # Number of pixels in each dimension
-        Npix = geom['mask'].shape[0]
+    # Pixel dimension
+    apix = geom['pixelWidth']
+    # Sample-detector distance
+    Ddet = geom['detectorDist']
+    # Number of pixels in each dimension
+    Npix = geom['mask'].shape[0]
 
     # Max. scattering angle.
     theta_max = math.atan( 0.5*Npix * apix / Ddet )
     # Min resolution.
     d_min = 0.5*lmd/math.sin(theta_max)
 
-    #print "**** Geometry ****"
-    #print "E0     = ", E0
-    #print "lmd    = ", lmd
-    #print "apix   = ", apix
-    #print "Ddet   = ", Ddet
-    #print "Npix   = ", Npix
-    #print "th_max = ", theta_max
-    #print "d_min  = ", d_min
-    #print "**** Geometry ****"
+    print "**** Info ****"
+    print "E0     = ", E0
+    print "lmd    = ", lmd
+    print "apix   = ", apix
+    print "Ddet   = ", Ddet
+    print "Npix   = ", Npix
+    print "th_max = ", theta_max
+    print "d_min  = ", d_min
+    print "**** Info ****"
 
     # Next integer resolution.
     d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
@@ -155,6 +164,30 @@ def plot_resolution_rings(path):
     plt.xlim(0,Npix)
     plt.ylim(0,Npix)
 
+def diffraction_parameters(path):
+    """ Extract beam parameters and geometry from given file or directory. """
+    # Check if old style.
+    if os.path.isdir(path):
+        h5_file = os.path.join(path, "diffr_out_0000001.h5")
+    elif os.path.isfile(path):
+        h5_file = path
+    else:
+        raise IOError("%s: no such file or directory." % (path))
+
+    # Setup return dictionary.
+    parameters_dict = {'beam':{}, 'geom':{}}
+
+    # Open file.
+    with h5py.File(h5_file, 'r') as h5:
+        # Loop over entries in /params.
+        for top_key in ['beam', 'geom']:
+            # Loop over groups.
+            for key, val in h5['params/%s' % (top_key)].iteritems():
+                # Insert into return dictionary.
+                parameters_dict[top_key][key] = val.value
+
+    # Return.
+    return parameters_dict
 
 def get_pattern_from_file(path, index=None, poissonized=False):
     """ Workhorse function to extract a given pattern from a diffraction file. """
@@ -174,27 +207,48 @@ def get_pattern_from_file(path, index=None, poissonized=False):
 
         return diffr,path
 
-def generate_patterns_from_file(path, indices, poissonized=False):
+def generate_patterns_from_file(path, indices=None, poissonized=False):
     """ Workhorse function to yield an iterator over a given pattern sequence from a diffraction file. """
-    if os.path.isdir(path):
-        raise RuntimeError("Not implemented for this version.")
+    if indices is None:
+        indices = 'all'
+    if os.path.isdir(path): # legacy format.
+        dir_listing = os.listdir(path)
+        dir_listing.sort()
+        if indices != 'all':
+            dir_listing = [d for (i,d) in enumerate(dir_listing) if i in indices]
+        h5_files = [os.path.join(path, f) for f in dir_listing if f.split('.')[-1] == "h5"]
+        for h5_file in h5_files:
+            try:
+                with h5py.File(h5_file, 'r') as h5:
+                    root_path = '/data/'
+                    if poissonized:
+                        path_to_data = root_path + 'data'
+                    else:
+                        path_to_data = root_path + 'diffr'
 
-    # Open file for reading
-    with h5py.File(path, 'r') as h5:
-        if indices is None:
-            indices = [key for key in h5['data'].iterkeys()]
-        else:
-            indices = ["%0.7d" % ix for ix in indices]
-        for ix in indices:
-            root_path = '/data/%s/'% (ix)
-            if poissonized:
-                path_to_data = root_path + 'data'
+                    diffr = h5[path_to_data].value
+
+                    yield diffr
+            except:
+                continue
+
+    else: # v0.2
+        # Open file for reading
+        with h5py.File(path, 'r') as h5:
+            if indices is None or indices == 'all':
+                indices = [key for key in h5['data'].iterkeys()]
             else:
-                path_to_data = root_path + 'diffr'
+                indices = ["%0.7d" % ix for ix in indices]
+            for ix in indices:
+                root_path = '/data/%s/'% (ix)
+                if poissonized:
+                    path_to_data = root_path + 'data'
+                else:
+                    path_to_data = root_path + 'diffr'
 
-            diffr = h5[path_to_data].value
+                diffr = h5[path_to_data].value
 
-            yield diffr
+                yield diffr
 
 
 def get_pattern_from_v0_1(path, pattern, poissonized=False):
