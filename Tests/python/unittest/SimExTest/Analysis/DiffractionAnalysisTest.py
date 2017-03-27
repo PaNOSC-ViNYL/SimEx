@@ -38,7 +38,7 @@ from TestUtilities import TestUtilities
 # Import the class to test.
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis
-from SimEx.Analysis.DiffractionAnalysis import get_pattern_from_file, generate_patterns_from_file, diffraction_parameters, plot_image
+from SimEx.Analysis.DiffractionAnalysis import diffractionParameters, plotImage
 
 class DiffractionAnalysisTest(unittest.TestCase):
     """
@@ -81,7 +81,9 @@ class DiffractionAnalysisTest(unittest.TestCase):
         """ Testing the construction of the class with non-default parameters. """
 
         # Construct the object.
-        analyzer = DiffractionAnalysis(input_path=self.__test_data)
+        analyzer = DiffractionAnalysis(input_path=self.__test_data,
+                pattern_indices=[1,3,6],
+                poissonize=False)
 
         self.assertIsInstance(analyzer, DiffractionAnalysis)
         self.assertIsInstance(analyzer, AbstractAnalysis)
@@ -89,41 +91,61 @@ class DiffractionAnalysisTest(unittest.TestCase):
 
         self.assertIsInstance( analyzer.input_path, str )
         self.assertEqual( analyzer.input_path, self.__test_data)
+        self.assertFalse( analyzer.poissonize)
+        self.assertEqual( analyzer.pattern_indices, [1,3,6])
+
+    def testShapedConstructionDefaults(self):
+        """ Testing the construction of the class with non-default parameters. """
+
+        # Construct the object.
+        analyzer = DiffractionAnalysis(input_path=self.__test_data,
+                )
+
+        self.assertIsInstance(analyzer, DiffractionAnalysis)
+        self.assertIsInstance(analyzer, AbstractAnalysis)
+        self.assertIsInstance(analyzer, object)
+
+        self.assertIsInstance( analyzer.input_path, str )
+        self.assertEqual( analyzer.input_path, self.__test_data)
+        self.assertTrue( analyzer.poissonize)
+        self.assertEqual( analyzer.pattern_indices, "all")
+
 
     def testPlotOnePatternPoissonized(self):
         """ Check we can plot one diffraction pattern as a color map. """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(poissonized=True)
+        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=1)
+        analyzer.plotPattern()
         plt.show()
 
     def testPlotOnePattern(self):
         """ Check we can plot one diffraction pattern as a color map. """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(4, operation=None)
+        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=4)
+        analyzer.plotPattern()
         plt.show()
 
     def testPlotSumPatternLogscale(self):
         """ Check we can plot one diffraction pattern as a color map. """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern("all", operation=numpy.sum, logscale=True, poissonized=False)
+        analyzer = DiffractionAnalysis(input_path=self.__test_data,
+                poissonize=False)
+        analyzer.plotPattern(operation=numpy.sum, logscale=True)
         plt.show()
 
     def testPlotOnePatternLegacy(self):
         """ Check we can plot one diffraction pattern from a v0.1 dir as a color map. """
-        analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'))
-        analyzer.plotPattern(4, operation=None)
+        analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'), pattern_indices=4)
+        analyzer.plotPattern(operation=None)
         plt.show()
 
     def testPlotAvgPattern(self):
         """ Check we can plot the average diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern_indices="all", operation=numpy.mean)
+        analyzer.plotPattern(operation=numpy.mean)
         plt.show()
 
     def testPlotAvgPatternLegacy(self):
         """ Check we can plot the average diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'))
-        analyzer.plotPattern(pattern_indices="all", operation=numpy.mean)
+        analyzer.plotPattern(operation=numpy.mean)
         plt.show()
 
 
@@ -137,19 +159,19 @@ class DiffractionAnalysisTest(unittest.TestCase):
     def testPlotRMSPattern(self):
         """ Check we can plot the rms diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern_indices="all", operation=numpy.std)
+        analyzer.plotPattern(operation=numpy.std)
         plt.show()
 
     def testPlotAvgSequenceInt(self):
         """ Check we can plot the avg over a subset of patterns given as list of ints."""
-        analyzer = DiffractionAnalysis(input_path=self.__test_data)
-        analyzer.plotPattern(pattern_indices=[1,3,6], operation=numpy.mean)
+        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=[1,3,6])
+        analyzer.plotPattern(operation=numpy.mean)
         plt.show()
 
     def testPlotImage(self):
         """ Check we can plot an ndarray."""
         image = numpy.random.random((100, 100))
-        plot_image(image)
+        plotImage(image)
         plt.show()
 
     def testDiffractionParameters(self):
@@ -159,7 +181,7 @@ class DiffractionAnalysisTest(unittest.TestCase):
         path = self.__test_data
 
         # Extract.
-        parameters = diffraction_parameters(path)
+        parameters = diffractionParameters(path)
 
         # Check for some keys.
         self.assertIn('beam', parameters.keys())
@@ -167,7 +189,13 @@ class DiffractionAnalysisTest(unittest.TestCase):
         self.assertIn('photonEnergy', parameters['beam'].keys())
         self.assertIn('pixelWidth', parameters['geom'].keys())
 
+    def testPlotAndStatistics(self):
+        """ Check that we can get two plots (resetting the iterator works.)"""
+        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
 
+        analyzer.logscale = True
+        analyzer.plotPattern(logscale=True)
+        analyzer.statistics()
 
 if __name__ == '__main__':
     unittest.main()
