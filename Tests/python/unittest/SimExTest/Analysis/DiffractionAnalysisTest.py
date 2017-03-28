@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-RENDER_PLOT=False # Set to True to show plots.
-
+RENDER_PLOT=False # Set to True or use environment variable to show plots.
 
 """ Test module for the DiffractionAnalysis.
 
@@ -41,6 +40,11 @@ from TestUtilities import TestUtilities
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis
 from SimEx.Analysis.DiffractionAnalysis import diffractionParameters, plotImage
+
+
+if 'RENDER_PLOT' in os.environ:
+    RENDER_PLOT=bool(os.environ['RENDER_PLOT'])
+
 
 class DiffractionAnalysisTest(unittest.TestCase):
     """
