@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.7
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,21 +20,21 @@
 #                                                                        #
 ##########################################################################
 """
-    :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class."""
+    :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class.
+"""
+
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
 from matplotlib.colors import Normalize, LogNorm
 
-from copy import deepcopy
 import h5py
 import math
 import numpy
 import os
 import tempfile
-import wpg
 
 class DiffractionAnalysis(AbstractAnalysis):
     """
-    :class DiffractionAnalysis: Class that implements common data analysis tasks for wavefront (radiation field) data.
+    :class DiffractionAnalysis: Class that implements common data analysis tasks for diffraction data.
     """
 
     def __init__(self,
@@ -49,8 +50,8 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param pattern_indices: Identify which patterns to include in the analysis (defaul "all").
         :type pattern_indices: int || sequence of int || "all"
 
-        :param poissonized: Whether to add Poisson noise to the integer photon numbers (default True)
-        :type poissonized: bool
+        :param poissonize: Whether to add Poisson noise to the integer photon numbers (default True)
+        :type poissonize: bool
 
         """
 
@@ -156,7 +157,7 @@ class DiffractionAnalysis(AbstractAnalysis):
     def plotPattern(self, operation=None, logscale=False):
         """ Plot a pattern.
 
-        :param operation: Operation to apply to the given pattern(s).
+        :param operation: Operation to apply to the given pattern(s) (default numpy.sum).
         :type operation: function
         :note operation: Function must accept the "axis" keyword-argument. Axis will always be chosen as axis=0.
         :rtype operation: 2D numpy.array
@@ -365,6 +366,5 @@ def photonStatistics(stack):
     plt.xlabel("Photons")
     plt.ylabel("Histogram")
     plt.title("Photon number histogram")
-
 
 
