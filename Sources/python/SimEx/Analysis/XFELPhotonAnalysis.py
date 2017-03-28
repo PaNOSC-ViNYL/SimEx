@@ -192,6 +192,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
     def plotOnAxisPowerDensity(self, spectrum=False):
         """ Method to plot the on-axis power density.
+
         :param spectrum: Whether to plot the power density in energy domain (True) or time domain (False, default).
         :type spectrum: bool
 
@@ -246,5 +247,3 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
             # Switch back to time domain.
             wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 't')
-
-

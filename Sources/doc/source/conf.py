@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'simex_platform'
-copyright = u'2016, Carsten Fortmann-Grote'
+copyright = u'2015-2017, Carsten Fortmann-Grote'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -106,7 +106,7 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 # -- Options for breathe -- #
-breathe_projects = {"simex": "/home/grotec/Work/XFEL/Codes/SIMEX/develop/simex_platform/doc/doxy_build/xml/"}
+breathe_projects = {"simex": "/home/grotec/Codes/SIMEX/develop/simex_platform/doc/doxy_build/xml/"}
 breathe_default_project = "simex"
 
 # -- Options for HTML output ----------------------------------------------
@@ -258,8 +258,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'simex_platform', u'simex_platform Documentation',
-   u'Carsten Fortmann-Grote, Sergey Yakubov', 'simex_platform', 'One line description of project.',
-   'Miscellaneous'),
+   u'Carsten Fortmann-Grote, Sergey Yakubov', 'simex_platform', 'Simulation platform for photon science experiments.',
+   'Science'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -281,7 +281,7 @@ texinfo_documents = [
 epub_title = u'simex_platform'
 epub_author = u'Carsten Fortmann-Grote, Sergey Yakubov'
 epub_publisher = u'Carsten Fortmann-Grote, Sergey Yakubov'
-epub_copyright = u'2016, Carsten Fortmann-Grote, Sergey Yakubov'
+epub_copyright = u'2015-2017, Carsten Fortmann-Grote, Sergey Yakubov'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'simex_platform'
@@ -350,4 +350,4 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 autoclass_content = "both"
-autodoc_default_flags = ["members", "inherited-members", "show-inheritance"]
+autodoc_default_flags = ["members", "show-inheritance"]

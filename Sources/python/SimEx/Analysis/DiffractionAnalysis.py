@@ -47,10 +47,14 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param input_path: Name of file or directory that contains data to analyse.
         :type input_path: str
 
-        :param pattern_indices: Identify which patterns to include in the analysis (defaul "all").
+        :param pattern_indices: Identify which patterns to include in the analysis (default "all").
         :type pattern_indices: int || sequence of int || "all"
+        :example pattern_indices: pattern_indices=1\n
+                                  pattern_indices=[1,2,3]\n
+                                  pattern_indices=range(1,10)\n
+                                  pattern_indices="all"
 
-        :param poissonize: Whether to add Poisson noise to the integer photon numbers (default True)
+        :param poissonize: Whether to add Poisson noise to the integer photon numbers (default True).
         :type poissonize: bool
 
         """
@@ -157,10 +161,10 @@ class DiffractionAnalysis(AbstractAnalysis):
     def plotPattern(self, operation=None, logscale=False):
         """ Plot a pattern.
 
-        :param operation: Operation to apply to the given pattern(s) (default numpy.sum).
-        :type operation: function
-        :note operation: Function must accept the "axis" keyword-argument. Axis will always be chosen as axis=0.
-        :rtype operation: 2D numpy.array
+        :param operation: Operation to apply to selected patterns (default numpy.sum).
+        :type operation: python function
+        :note operation: Operation must accept a 3D numpy.array as first input argument and the "axis" keyword-argument. Operation must return a 2D numpy.array. Axis will always be chosen as axis=0.
+        :example operation: numpy.mean, numpy.std, numpy.sum
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
@@ -189,7 +193,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         plotResolutionRings(self.__parameters)
 
     def statistics(self):
-        """ Get basic statistics from queried patterns. """
+        """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
 
         pi = self.patterns_iterator
         stack = numpy.array([p for p in pi])
@@ -197,7 +201,14 @@ class DiffractionAnalysis(AbstractAnalysis):
         photonStatistics(stack)
 
     def animatePatterns(self, output_path=None):
-        """ Make an animated gif out of the given patterns. """
+        """
+        Make an animated gif out of the given patterns.
+
+        :param output_path: Where to save the animated git.
+        :type output_path: str
+        :raises IOError: File exists or parent directory not found.
+
+        """
 
         # Handle default path for saving the animated gif.
         if output_path is None:
