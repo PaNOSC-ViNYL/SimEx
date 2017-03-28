@@ -28,6 +28,7 @@ import h5py
 import math
 import numpy
 import os
+import tempfile
 import wpg
 
 class DiffractionAnalysis(AbstractAnalysis):
@@ -194,6 +195,44 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         photonStatistics(stack)
 
+    def animatePatterns(self, output_path=None):
+        """ Make an animated gif out of the given patterns. """
+
+        # Handle default path for saving the animated gif.
+        if output_path is None:
+            output_path=os.path.join(os.getcwd(), "animated_patterns.gif")
+
+        if not isinstance(output_path, str):
+            raise TypeError('The parameter "output_path" must be a str, not %s.' % (type(output_path)) )
+
+        parent_dir = os.path.dirname(os.path.abspath(output_path))
+        if not os.path.isdir( parent_dir ):
+            raise IOError('%s does not exist.' % (parent_dir))
+        if os.path.isfile(output_path):
+            raise IOError('%s already exists, cowardly refusing to overwrite.' % (output_path))
+
+        self.__animation_output_path=os.path.abspath(output_path)
+
+        # Make tempdir.
+        tmp_out_dir = tempfile.mkdtemp()
+        stack = numpy.array([p for p in self.patternGenerator()])
+
+        mn, mx = stack.min(), stack.max()
+        x_range, y_range = stack.shape[1:]
+        for i,img in enumerate(stack):
+            plt.pcolor(img, norm=Normalize(vmin=mn, vmax=mx), cmap='viridis')
+            plotResolutionRings(self.__parameters)
+            plt.colorbar()
+            plt.xlim([0,x_range-1])
+            plt.ylim([0,y_range-1])
+            png_filename = "%07d.png" % (self.pattern_indices[i])
+            plt.savefig(os.path.join(tmp_out_dir, png_filename) )
+            plt.clf()
+
+        # Make the animated gif.
+        os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
+
+
 def diffractionParameters(path):
     """ Extract beam parameters and geometry from given file or directory.
 
@@ -327,58 +366,5 @@ def photonStatistics(stack):
     plt.ylabel("Histogram")
     plt.title("Photon number histogram")
 
-    #pylab.figure(2)
-    ## Average
-    #sum_over_images = 1.0*sum_over_images / number_of_samples
-    ## Offset for log scale.
-    ##sum_over_images += 0.01 * numpy.min(sum_over_images[numpy.where(sum_over_images > 0)])
-    #sum_over_images += 1e-4
-    #vmax=10.
-    #vmin=1.0e-4
-    #raw_input([vmin, vmax])
-    #pylab.pcolor(sum_over_images,norm=LogNorm(vmax=vmax, vmin=vmin), cmap='YlGnBu_r')
-    ##pylab.pcolor(sum_over_images, cmap='YlGnBu_r')
-    #pylab.colorbar()
 
-    #pylab.figure(3)
-    #pylab.semilogy( numpy.sum( sum_over_images, axis=0 ), label='x axis projection')
-    #pylab.semilogy( numpy.sum( sum_over_images, axis=1 ), label='y axis projection')
-
-    #pylab.legend()
-    #pylab.show()
-
-
-def animate(h5):
-    root_path = '/data/'
-
-    img = h5[root_path+'0000001/diffr'].value
-
-    keys = h5[root_path].keys()
-
-    rands = numpy.random.choice(range(len(keys)), 20)
-    keys = [keys[i] for i in rands]
-    stack = numpy.empty((len(keys), img.shape[0], img.shape[1]))
-
-    for i,key in enumerate(keys):
-        print "Reading %s" % (key)
-        stack[i] = h5[root_path][key]['diffr'].value
-
-    mn, mx = stack.min(), stack.max()
-    print "Range = [", mn,",", mx,"]"
-    for i,img in enumerate(stack):
-        plt.pcolor(img, norm=LogNorm(vmin=mn, vmax=mx), cmap='viridis')
-        plotResolutionRings()
-        plt.title(keys[i])
-        plt.colorbar()
-        plt.savefig("%s.png" % (keys[i]))
-        plt.clf()
-
-#if __name__ == "__main__":
-
-    #filename = sys.argv[1]
-    #pattern_number = 1
-    #if len(sys.argv) > 2:
-        #pattern_number = sys.argv[2]
-
-    #main(filename, pattern_number)
 

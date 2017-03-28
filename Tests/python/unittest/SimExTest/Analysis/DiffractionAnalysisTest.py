@@ -18,7 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-RENDER_PLOT=True # Set to True to show plots.
+RENDER_PLOT=False # Set to True to show plots.
+
+
 """ Test module for the DiffractionAnalysis.
 
     @author : CFG
@@ -196,6 +198,45 @@ class DiffractionAnalysisTest(unittest.TestCase):
         analyzer.logscale = True
         analyzer.plotPattern(logscale=True)
         analyzer.statistics()
+
+    def testAnimatePatterns(self):
+        """ Test the animation feature. """
+
+        # Setup the analyser with a sequence of patterns.
+        analyzer = DiffractionAnalysis(input_path=self.__test_data,
+                                       pattern_indices=range(1,11),
+                                      )
+
+        # Check exceptions on faulty path.
+        self.assertRaises(TypeError, analyzer.animatePatterns, output_path=["not", "a", "path"] )
+        self.assertRaises(IOError, analyzer.animatePatterns, output_path="/users/home/myself/animation.gif")
+
+        # Check default behaviour.
+        analyzer.animatePatterns(output_path=None)
+
+        # Check output is present.
+        animation_out_path = 'animated_patterns.gif'
+        self.__files_to_remove.append(animation_out_path)
+        self.assertIn(animation_out_path, os.listdir(os.getcwd()) )
+
+        # Check path is stored on object.
+        self.assertEqual(analyzer._DiffractionAnalysis__animation_output_path, os.path.join(os.getcwd(), animation_out_path) )
+
+        # Check exception on overwrite.
+        self.assertRaises(IOError, analyzer.animatePatterns, output_path=animation_out_path)
+
+        # Execute with parameter.
+        animation_out_path = 'animation2.gif'
+        self.__files_to_remove.append(animation_out_path)
+
+        analyzer.animatePatterns(output_path=animation_out_path)
+
+        # Check path is stored on object.
+        self.assertEqual(analyzer._DiffractionAnalysis__animation_output_path, os.path.join(os.getcwd(), animation_out_path) )
+
+        # Check file is present.
+        self.assertIn(animation_out_path, os.listdir(os.getcwd()) )
+
 
 if __name__ == '__main__':
     unittest.main()
