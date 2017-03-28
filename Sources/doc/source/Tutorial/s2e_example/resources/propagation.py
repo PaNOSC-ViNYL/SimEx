@@ -1,7 +1,8 @@
-from SimEx.Calculators.WavePropagator import WavePropagator
+from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
-from SimEx.Utilities.WPGBeamlines import setup_S2E_SPI_beamline
 
+#
+from prop import exfel_spb_kb_beamline as beamline
 import sys
 
 # Define a beamline.
@@ -14,7 +15,7 @@ parameters=WavePropagatorParameters(beamline=beamline)
 input_files_path = "source/3fs_5keV_nz35_0000001.h5"
 
 # Construct the propagator
-propagator = WavePropagator( parameters=parameters,
+propagator = XFELPhotonPropagator( parameters=parameters,
                              input_path=input_files_path,
                              output_path='prop_out/prop_s2e_example.h5')
 

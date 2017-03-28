@@ -362,8 +362,13 @@ Reference Manual
 
 .. autoclass:: SimEx.Calculators.XFELPhotonSource.XFELPhotonSource
 
+.. autoclass:: SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator
+
 .. autoclass:: SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor
 
+.. autoclass:: SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis
+
+.. autoclass:: SimEx.Analysis.XFELPhotonAnalysis.XFELPhotonAnalysis
 .. .. autoclass:: SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters
 
 
