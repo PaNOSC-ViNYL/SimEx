@@ -60,6 +60,9 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         :type logscale: bool
 
         """
+        # Setup new figure.
+        plt.figure()
+
         # Get the wavefront and integrate over time.
         wf = self.wavefront
 
@@ -137,6 +140,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         """
 
         """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
+        # Setup new figure.
+        plt.figure()
 
         # Get wavefront.
         wf = self.wavefront
@@ -192,6 +197,9 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         """
         """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
+
+        # Setup new figure.
+        plt.figure()
 
         # Get wavefront.
         wf = self.wavefront

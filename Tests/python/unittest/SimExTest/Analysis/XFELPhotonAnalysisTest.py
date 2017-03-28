@@ -18,7 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-RENDER_PLOT=True # Set to True to show plots.
+RENDER_PLOT=False # Set to True to show plots.
+
 """ Test module for the XFELPhotonAnalysis.
 
     @author : CFG
@@ -34,6 +35,10 @@ import unittest
 import wpg
 
 from TestUtilities import TestUtilities
+
+
+if 'RENDER_PLOT' in os.environ:
+    RENDER_PLOT=bool(os.environ['RENDER_PLOT'])
 
 # Import the class to test.
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt
