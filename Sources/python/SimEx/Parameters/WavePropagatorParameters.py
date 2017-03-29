@@ -31,11 +31,11 @@ from scipy.constants import physical_constants
 import copy
 import math
 import numpy
-import os
+import os,sys
 import tempfile
 import wpg
 from wpg.beamline import Beamline
-from prop import exfel_spb_kb_beamline as s2e_beamline
+import prop.exfel_spb_kb_beamline as default_beamline
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -93,7 +93,9 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         @param value : The value to set 'beamline' to.
         """
         if value is None:
-            self.__beamline = s2e_beamline
-            return
+            value = default_beamline
         if not hasattr(value, "get_beamline"):
             raise AttributeError('The beamline module must define a function "get_beamline()".')
+
+        # Ok, store on object.
+        self.__beamline = value
