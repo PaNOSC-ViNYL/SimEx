@@ -2,7 +2,7 @@ INCLUDE(ExternalProject)
 
 ExternalProject_Add(
 prop
-URL https://github.com/samoylv/WPG/archive/develop.zip
+URL  https://github.com/samoylv/WPG/archive/feature/openmp.zip
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
 PATCH_COMMAND patch s2e/prop/diagnostics.py ${CMAKE_CURRENT_SOURCE_DIR}/diagnostics.py.patch

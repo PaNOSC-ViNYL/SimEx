@@ -9,7 +9,7 @@ endif()
 
 ExternalProject_Add(
 wpg
-URL https://github.com/samoylv/WPG/archive/develop.zip
+URL  https://github.com/samoylv/WPG/archive/feature/openmp.zip
 PATCH_COMMAND ${WPG_PATCHCMD}
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
