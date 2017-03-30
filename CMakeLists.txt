@@ -86,6 +86,7 @@ install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysi
 install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysis/pmi/pmi_diagnostics.py DESTINATION ${BINDIR})
 install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysis/scattering/diffr_diagnostics.py DESTINATION ${BINDIR})
 install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/ScriptCollection/DataAnalysis/emc/emc_diagnostics.py DESTINATION ${BINDIR})
+install(PROGRAMS ${SIMEX_SOURCE_DIR}/Sources/python/SimEx/Utilities/wpg_to_opmd.py DESTINATION ${BINDIR})
 
 if (PACKAGE_MAKE)
   add_subdirectory (Packages)
