@@ -10,7 +10,8 @@ endif()
 ExternalProject_Add(
 wpg
 URL  https://github.com/samoylv/WPG/archive/feature/openmp.zip
-PATCH_COMMAND ${WPG_PATCHCMD}
+#PATCH_COMMAND ${WPG_PATCHCMD}
+PATCH_COMMAND ""
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
 BUILD_IN_SOURCE 1
