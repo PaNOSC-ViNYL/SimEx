@@ -22,6 +22,7 @@
     :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
 
+import copy
 import numpy
 import wpg
 
@@ -37,18 +38,52 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         :type input_path: str
 
         """
-
+        print "\n Start initialization."
         # Initialize base class. This takes care of parameter checking.
         super(XFELPhotonAnalysis, self).__init__(input_path)
 
         # Get wavefront file name.
-        self.__wavefront = wpg.Wavefront()
-        self.__wavefront.load_hdf5(self.input_path)
+        wavefront = wpg.Wavefront()
+
+        print "\n Loading wavefront from %s." % (self.input_path)
+        wavefront.load_hdf5(self.input_path)
+        print " ... done."
+
+        # Init intensity.
+        self.__intensity = None
+
+        # Init wavefront, triggers assignment of intensity.
+        self.wavefront = wavefront
+
+
+    @property
+    def intensity(self):
+        """ Query for the intensity. """
+        return self.__intensity
+    @intensity.setter
+    def intensity(self, val):
+        """ Set the intensity. """
+        self.__intensity = val
+
 
     @property
     def wavefront(self):
         """ Query for the wavefront. """
         return self.__wavefront
+    @wavefront.setter
+    def wavefront(self, val):
+        """ Query for the wavefront. """
+        self.__wavefront = val
+
+        # Get intensities and mask nans
+        print "\n Getting intensities."
+        self.intensity = self.__wavefront.get_intensity()
+        print " ... done."
+        print "\n Masking nans."
+        self.__nans = mask_nans(self.intensity)
+        print " ... done."
+
+
 
     def plotIntensityMap(self, qspace=False, logscale=False):
         """ Plot the integrated intensity as function of x,y or qx, qy on a colormap.
@@ -60,20 +95,28 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         :type logscale: bool
 
         """
+
+        print "\n Plotting intensity map."
         # Setup new figure.
         plt.figure()
 
-        # Get the wavefront and integrate over time.
         wf = self.wavefront
+        wf_intensity = self.intensity
+
 
         # Switch to q-space if requested.
         if qspace:
-            wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 'a')
-
-        # Get intensity.
-        wf_intensity = wf.get_intensity().sum(axis=-1)
+            print "\n Switching to reciprocal space."
+            srwl_wf_a = copy.deepcopy(self.wavefront._srwl_wf)
+            wpg.srwlib.srwl.SetRepresElecField(srwl_wf_a, 'a')
+            wf = wpg.Wavefront(srwl_wf_a)
+            print " ... done."
+            wf_intensity = wf.get_intensity()
+            nans = mask_nans(wf_intensity)
 
         # Get average and time slicing.
+        wf_intensity = wf_intensity.sum(axis=-1)
+
         nslices = wf.params.Mesh.nSlices
         if (nslices>1):
             dt = (wf.params.Mesh.sliceMax-wf.params.Mesh.sliceMin)/(nslices-1)
@@ -113,7 +156,6 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # x-projection plots above main plot.
         x_projection = plt.subplot2grid((3, 3), (0, 0), sharex=profile, colspan=2)
-        print(x.shape, wf_intensity.sum(axis=0).shape)
 
         x_projection.plot(x, wf_intensity.sum(axis=0), label='x projection')
 
@@ -130,6 +172,10 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         # Set range according to input.
         profile.set_ylim([ymin*1.e6, ymax*1.e6])
 
+        # Cleanup.
+        if qspace:
+            del wf
+
 
     def plotTotalPower(self, spectrum=False):
         """ Method to plot the total power.
@@ -140,6 +186,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         """
 
         """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
+        print "\n Plotting total power."
         # Setup new figure.
         plt.figure()
 
@@ -148,6 +195,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Switch to frequency (energy) domain if requested.
         if spectrum:
+            print "\n Switching to frequency domain."
             wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 'f')
 
         # Get dimensions.
@@ -156,7 +204,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
 
         # Get intensity by integrating over transverse dimensions.
-        int0 = wf.get_intensity().sum(axis=0).sum(axis=0)
+        int0 = self.intensity
+        int0 = int0.sum(axis=0).sum(axis=0)
         # Scale to get unit W/mm^2
         int0 = int0*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
         int0max = int0.max()
@@ -199,6 +248,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         """
         """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
 
+        print "\n Plotting on-axis power density."
         # Setup new figure.
         plt.figure()
 
@@ -218,14 +268,19 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         center_nx = int(mesh.nx/2)
         center_ny = int(mesh.ny/2)
 
+        # Get time slices of intensity.
+        intensity = self.intensity
+
         # Get on-axis intensity.
-        intensity = wf.get_intensity()
         int0_00 = intensity[center_ny, center_nx, :]
         int0 = intensity.sum(axis=(0,1))*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
         int0max = int0.max()
 
         # Get meaningful slices.
         aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
+        if aw == []:
+            raise RuntimeError("No significant intensities found.")
+
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
 
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
@@ -247,3 +302,22 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
             # Switch back to time domain.
             wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 't')
+
+def mask_nans(a, replacement=0.0):
+    """ Find nans in an array and replace.
+    :param  a: Array to mask.
+    :type a: numpy.array
+
+    :param replacement: The value to replace nans.
+    :type replacement: numeric
+
+    :return: The array of booleans indicating which values of a are nan, numpy.isnan(a)
+    :rtype: numpy.array(dtype=bool)
+    """
+    isnan_array = numpy.isnan(a) # This can take a while ...
+    if isnan_array.any():
+        nans = numpy.where(isnan_array)
+        print "WARNING: Found intensity=nan at", repr(nans)
+        a[nans] = 0.0 # Yes this works because a is a reference!
+    return isnan_array
+
