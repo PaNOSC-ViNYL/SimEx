@@ -38,6 +38,8 @@ from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities import ParallelUtilities
+from SimEx.Utilities import IOUtilities
+
 
 class EMCOrientation(AbstractPhotonAnalyzer):
 
@@ -215,7 +217,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         # Set paths.
         self._setupPaths()
 
-        fname = __name__+"_tmpobj"
+        fname = IOUtilities.getTmpFileName()
         self.dumpToFile(fname)
 
         # collect MPI arguments

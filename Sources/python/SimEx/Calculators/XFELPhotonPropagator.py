@@ -34,6 +34,10 @@ from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Utilities import wpg_to_opmd
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities import EntityChecks
+from SimEx.Utilities import IOUtilities
+
+
+
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 
 import subprocess,shlex
@@ -87,7 +91,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
     def backengine(self):
         """ Starts WPG simulations in parallel in a subprocess """
 
-        fname = __name__+"_tmpobj"
+        fname = IOUtilities.getTmpFileName()
         self.dumpToFile(fname)
 
         forcedMPIcommand=self.parameters.forced_mpi_command

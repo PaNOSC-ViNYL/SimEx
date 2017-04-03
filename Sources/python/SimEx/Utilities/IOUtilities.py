@@ -37,6 +37,17 @@ import sys, os
 from Bio import PDB
 from scipy.constants import m_e, c, e
 
+
+import uuid
+
+def getTmpFileName():
+    """ Create a unique filename
+    :return: unique filename for temporary storage
+    :rtype: str
+
+"""
+    return os.getcwd()+"/"+str(uuid.uuid4())
+
 def checkAndGetPDB( path ):
     """ Query a given pdb code from the PDB.
 
