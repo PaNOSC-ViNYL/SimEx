@@ -569,6 +569,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
 ###########################
 # Check and set functions #
 ###########################
+
 def checkAndSetScatteringAngle(angle):
     """
     Utility to check if the scattering angle is in the correct range.
