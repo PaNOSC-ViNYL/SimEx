@@ -1,5 +1,0 @@
-18,19c18
-<     sys.path.insert(0,'/home/packages/WPG/')
-<     mirror_data_dir = '/home/packages/WPG/s2e/prop/data_common' #'/home/modules/prop/data_common'
----
->     mirror_data_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data_common/')
