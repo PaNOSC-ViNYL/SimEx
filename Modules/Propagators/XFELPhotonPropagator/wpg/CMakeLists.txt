@@ -15,14 +15,5 @@ INSTALL_COMMAND ""
 )
 
 ExternalProject_Get_Property(wpg SOURCE_DIR)
-set (pyfile ${SOURCE_DIR}/s2e/prop/__init__.py)
-add_custom_command (
-  OUTPUT ${pyfile}
-  COMMAND touch ${pyfile}
-  )
-add_custom_target(GeneratePyInit ALL DEPENDS ${pyfile})
-add_dependencies(GeneratePyInit prop)
-
-
 install( DIRECTORY ${SOURCE_DIR}/wpg DESTINATION ${PYPATH})
 install( DIRECTORY ${SOURCE_DIR}/s2e/prop DESTINATION ${PYPATH})
