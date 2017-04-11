@@ -13,3 +13,4 @@ RUN ["bash", "/opt/arma_install.sh"]
 ADD boot_install.sh /opt/boot_install.sh
 RUN ["bash", "/opt/boot_install.sh"]
 
+

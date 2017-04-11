@@ -19,7 +19,7 @@ cd $PREFIX
 export PATH=$PREFIX/bin:$PATH
 conda config --set always_yes True
 
-conda install --no-deps nomkl numpy Cython matplotlib six scipy dateutil pyparsing cycler openblas libpng
+conda install --no-deps nomkl numpy Cython matplotlib functools32 six scipy dateutil pyparsing cycler openblas libpng
 conda install --no-deps libgfortran=1 
 conda install --no-deps -c anaconda biopython=1.67
 conda  install --no-update-deps pyqt
