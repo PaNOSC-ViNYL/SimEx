@@ -40,8 +40,11 @@ def main(args):
         analyzer.plotOnAxisPowerDensity()
     if args._do_spectrum:
         analyzer.plotTotalPower(spectrum=True)
+    if args._do_animate:
+        analyzer.animate(logscale=args.logscale,qspace=False)
 
-    plt.show()
+    if not args._do_animate:
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -101,6 +104,14 @@ if __name__ == "__main__":
                         dest="_do_on_axis_power",
                         default=False,
                         help="Plot total power as function of time.")
+
+    parser.add_argument("-A",
+                        "--animate",
+                        action="store_true",
+                        dest="_do_animate",
+                        default=False,
+                        help="Produce an animated gif of intensity vs. time.")
+
 
 
 

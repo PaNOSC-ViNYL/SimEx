@@ -22,6 +22,7 @@
     :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
 
+import os,shutil
 import copy
 import numpy
 import wpg
@@ -79,11 +80,43 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         print "\n Getting intensities."
         self.intensity = self.__wavefront.get_intensity()
         print " ... done."
-        print "\n Masking nans."
+        print " Data dimensions = ", self.intensity.shape
+        print "\n Masking NANs."
         self.__nans = mask_nans(self.intensity)
         print " ... done."
 
+    def animate(self, qspace=False, logscale=False):
+        """ Generate an animated gif from the wavefront data. """
+        intensity = self.intensity
 
+        # Get limits.
+        xmin, xmax, ymax, ymin = self.wavefront.get_limits()
+        mx = intensity.max()
+        mn = intensity.min()
+        if logscale and mn <= 0.0:
+            mn = intensity[numpy.where(intensity > 0.0)].min(),
+
+        inp_filename = os.path.split(self.input_path)[-1]
+        os.mkdir("tmp")
+        number_of_slices = intensity.shape[-1]
+        # Setup a figure.
+
+        for i in xrange(0,number_of_slices):
+
+            print "Processing slice #%d." % (i)
+
+            # Plot profile as 2D colorcoded map.
+            if logscale:
+                plt.imshow(intensity[:,:,i], norm=mpl.colors.LogNorm(vmin=mn, vmax=mx), extent=[xmin*1.e6, xmax*1.e6, ymax*1.e6, ymin*1.e6], cmap="viridis")
+            else:
+                plt.imshow(intensity[:,:,i], norm=mpl.colors.Normalize(vmin=mn, vmax=mx), extent=[xmin*1.e6, xmax*1.e6, ymax*1.e6, ymin*1.e6], cmap="viridis")
+
+            plt.gca().set_aspect('equal', 'datalim')
+            plt.savefig("tmp/%s_%07d.png" % (inp_filename, i) )
+            plt.clf()
+
+        os.system("convert -delay 10 tmp/*.png %s.gif" % (inp_filename) )
+        shutil.rmtree("tmp")
 
     def plotIntensityMap(self, qspace=False, logscale=False):
         """ Plot the integrated intensity as function of x,y or qx, qy on a colormap.
@@ -317,7 +350,7 @@ def mask_nans(a, replacement=0.0):
     isnan_array = numpy.isnan(a) # This can take a while ...
     if isnan_array.any():
         nans = numpy.where(isnan_array)
-        print "WARNING: Found intensity=nan at", repr(nans)
+        print "WARNING: Found intensity=NAN at", repr(nans)
         a[nans] = 0.0 # Yes this works because a is a reference!
     return isnan_array
 
