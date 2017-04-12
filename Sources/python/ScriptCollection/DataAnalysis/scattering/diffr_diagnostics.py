@@ -49,7 +49,7 @@ def main(args=None):
 
         print "Animated gif saved to %s." % (analyzer._DiffractionAnalysis__animation_output_path)
 
-    if args.statistic:
+    if args.statistics:
         analyzer.statistics()
 
 
@@ -100,13 +100,13 @@ if __name__ == '__main__':
     parser.add_argument("-z",
                         "--poissonize",
                         dest="poissonize",
-                        default=True,
+                        default="True",
                         help="Whether to read the poissonized diffraction photon numbers (True) or diffraction intensities (False).")
 
     parser.add_argument("-S",
                         "--statistics",
                         dest="statistics",
-                        default=True,
+                        default=False,
                         help="Whether to plot a histogram over number of photons per pattern and print some basic statistic information.")
 
 

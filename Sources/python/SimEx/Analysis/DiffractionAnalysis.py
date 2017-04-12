@@ -192,6 +192,9 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Plot resolution rings.
         plotResolutionRings(self.__parameters)
 
+        # Plot radial projection.
+        plotRadialProjection(pattern_to_plot, self.__parameters)
+
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
 
@@ -243,6 +246,50 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Make the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
+
+def plotRadialProjection(pattern, parameters):
+    """ Perform integration over azimuthal angle and plot as function of radius. """
+
+    # Extract parameters.
+    beam = parameters['beam']
+    geom = parameters['geom']
+
+    # Photon energy and wavelength
+    E0 = beam['photonEnergy']
+    lmd = 1239.8 / E0
+
+    # Pixel dimension
+    apix = geom['pixelWidth']
+    # Sample-detector distance
+    Ddet = geom['detectorDist']
+    # Number of pixels in each dimension
+    Npix = geom['mask'].shape[0]
+
+    # Find center.
+    center = 0.5*(Npix-1)
+    # Max. scattering angle.
+    theta_max = math.atan( center * apix / Ddet )
+
+    x = ( 1.0*numpy.arange(Npix) - center ) * apix
+    y = ( 1.0*numpy.arange(Npix) - center ) * apix
+
+    X, Y = numpy.meshgrid(x,y)
+
+    r_squared =X**2+Y**2
+    r = numpy.sqrt(r_squared)
+    q = 2./lmd*numpy.sin(0.5*numpy.arctan(r/Ddet))
+
+    histogram_values = q.flatten()
+    histogram_weights = pattern.flatten()
+
+    # Get the histogram of q values. This scales as r since the resolution shell areas is 2pi*r*dr
+    unweighted_histogram, bin_edges = numpy.histogram(histogram_values, bins = (Npix-1)/2)
+
+    # Setup a histogram.
+    frequencies, bin_edges = numpy.histogram(histogram_values, bins=(Npix-1)/2, weights=histogram_weights)
+
+    plt.figure()
+    plt.plot(bin_edges[:-1], frequencies/unweighted_histogram, "+")
 
 
 def diffractionParameters(path):
@@ -324,8 +371,11 @@ def plotResolutionRings(parameters):
     # Number of pixels in each dimension
     Npix = geom['mask'].shape[0]
 
+    # Find center.
+    center = 0.5*(Npix-1)
+
     # Max. scattering angle.
-    theta_max = math.atan( 0.5*Npix * apix / Ddet )
+    theta_max = math.atan( center * apix / Ddet )
     # Min resolution.
     d_min = 0.5*lmd/math.sin(theta_max)
 
@@ -340,16 +390,16 @@ def plotResolutionRings(parameters):
 
     # Plot each ring and attach a label.
     for i,N in enumerate(Ns):
-        x0 = 0.5*Npix
+        x0 = center
         X = numpy.linspace(x0-N,x0+N, 512)
         Y_up = x0 + numpy.sqrt(N**2 - (X-x0)**2)
         Y_dn = x0 - numpy.sqrt(N**2 - (X-x0)**2)
         plt.plot(X,Y_up,color='k')
         plt.plot(X,Y_dn,color='k')
-        plt.text(0.5*Npix+0.75*N,0.5*Npix+0.75*N, "%2.1f" % (ds[i]*10.))
+        plt.text(x0+0.75*N,x0+0.75*N, "%2.1f" % (ds[i]*10.))
 
-    plt.xlim(0,Npix)
-    plt.ylim(0,Npix)
+    plt.xlim(0,Npix-1)
+    plt.ylim(0,Npix-1)
 
 def photonStatistics(stack):
     """ """
