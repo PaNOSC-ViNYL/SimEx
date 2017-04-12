@@ -1,6 +1,7 @@
+""" Module for entity checks.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,16 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for entity checks.
-    @author CFG
-    @institution XFEL
-    @creation 20160623
-"""
 
 import exceptions
 import h5py
 import numpy
-import numpy
+import urllib
 import os, shutil
 import periodictable
 import sys, os
@@ -44,32 +40,28 @@ def getTmpFileName():
     """ Create a unique filename
     :return: unique filename for temporary storage
     :rtype: str
-
-"""
+    """
     return os.getcwd()+"/"+str(uuid.uuid4())
 
 def checkAndGetPDB( path ):
     """ Query a given pdb code from the PDB.
 
-    :param pdb_code: The PDB code of the molecule to query.
-    :type pdb_code: str
+    :param path: The PDB code of the molecule to query.
+    :type path: str
 
-    :return: The queried molecule pdb dataset.
-    :rtype: ???
+    :return: Path to the checked pdb file.
 
     """
 
     if path is None:
-        raise IOError( "The parameter 'path' must be a path to a valid pdb file.")
+        raise IOError( "The parameter 'path' must be a str.")
 
     if not isinstance (path, str):
-        raise IOError( "The parameter 'path' must be a path to a valid pdb file.")
+        raise IOError( "The parameter 'path' must be a str.")
 
     # Setup paths and filenames.
     pdb_target_name = os.path.basename(path).split('.pdb')[0]
     pdb_target_dir = os.path.dirname(path)
-    source = os.path.join(pdb_target_dir, 'pdb'+pdb_target_name.lower()+'.ent')
-    target = os.path.join(pdb_target_dir, pdb_target_name.lower()+'.pdb')
 
     if not os.path.isfile( path ):
         # Query from pdb.org
@@ -79,12 +71,15 @@ def checkAndGetPDB( path ):
 
         try:
             print "PDB file %s could not be found. Attempting to query from protein database server." % (path)
-            pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir )
+            urllib.urlcleanup()
+            download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir )
         except:
             raise IOError( "Database query failed.")
+        finally:
+            urllib.urlcleanup()
 
         # Move and rename the downloaded file.
-        shutil.move( source, path  )
+        shutil.move( download_target, path  )
 
     return path
 
