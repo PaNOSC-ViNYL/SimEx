@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -38,7 +38,7 @@ def suite():
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
-             #unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
+             unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
              )
 
     return unittest.TestSuite(suites)

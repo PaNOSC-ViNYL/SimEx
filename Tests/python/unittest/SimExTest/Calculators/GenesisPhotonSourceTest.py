@@ -1,3 +1,4 @@
+""" Test module for the GenesisPhotonSource.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the GenesisPhotonSource.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20170215
-
-"""
 import paths
 import unittest
 
