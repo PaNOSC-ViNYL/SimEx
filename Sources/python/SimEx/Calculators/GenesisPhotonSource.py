@@ -1,3 +1,4 @@
+""" Module that holds the GenesisPhotonSource class."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2017 Carsten Fortmann-Grote                              #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the GenesisPhotonSource class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20170215
-
-"""
 import h5py
 import numpy
 import os
