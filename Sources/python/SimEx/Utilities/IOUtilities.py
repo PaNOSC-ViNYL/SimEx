@@ -20,21 +20,20 @@
 #                                                                        #
 ##########################################################################
 
-
+from Bio import PDB
+from ocelot.adaptors.genesis import read_dfl_file_out, read_out_file
+from ocelot.gui.genesis_plot import plot_dfl, plt
+from scipy.constants import m_e, c, e
+from wpg import Wavefront
 import exceptions
 import h5py
 import numpy
-import urllib
-import os, shutil
+import os
 import periodictable
-import sys, os
-
-
-from Bio import PDB
-from ocelot.adaptors.genesis import read_dfl_file_out
-from scipy.constants import m_e, c, e
-
-
+import scipy.constants as const
+import shutil
+import sys
+import urllib
 import uuid
 
 def getTmpFileName():
@@ -254,24 +253,12 @@ def pic2dist( pic_file_name, target='genesis'):
     elif target == 'simplex':
 	    return numpy.vstack([ y/c, x, xprime, z, zprime,  gamma]).transpose(),  total_charge
 
-def genesis_dfl_to_wpg_h5( genesis_out, genesis_dfl=None, output_path=None):
-    """ Convert a genesis radiation field (.dfl) to hdf5 readable by wpg.
+def genesis_dfl_to_wavefront(genesis_out, genesis_dfl):
+    '''
+    Based on WPG/wpg/converters/genesis_v2.py
+    '''
 
-    :param genesis_out: Location of genesis output data.
-
-    :param genesis_dfl: Location of genesis dfl file (default taken from genesis_out parameter).
-
-    :param output_path: Where output is to be stored (default constructed from input filename).
-
-    """
-
-    # Get the genesis radiation object.
-    genesis_radiation_field = read_dfl_file_out(out=genesis_out, filePath=genesis_dfl, debug=0)
-
-
-    return genesis_radiation_field
-
-
+    return read_genesis_file(genesis_out, genesis_dfl)
 
 
 if __name__ == "__main__":

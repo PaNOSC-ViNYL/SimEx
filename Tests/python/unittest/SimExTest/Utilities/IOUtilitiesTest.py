@@ -166,6 +166,18 @@ class IOUtilitiesTest(unittest.TestCase):
 
         radiation_field = IOUtilities.genesis_dfl_to_wpg_h5(genesis_out_file, genesis_dfl_file)
 
+    def testGenesisDFLToWPGWavefront(self):
+        """ Check the conversion from genesis dfl to wpg readable hdf5. """
+        genesis_out_file = generateTestFilePath("genesis/lcls/lcls.out")
+        genesis_dfl_file = generateTestFilePath("genesis/lcls/lcls.out.dfl")
+
+        wf = genesis_dfl_to_wavefront(genesis_out_file, genesis_dfl_file)
+
+        from wpg import wpg_uti_wf
+        wpg_uti_wf.plot_intensity_map(wf)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
