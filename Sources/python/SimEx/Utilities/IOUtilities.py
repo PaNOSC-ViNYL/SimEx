@@ -31,6 +31,7 @@ import sys, os
 
 
 from Bio import PDB
+from ocelot.adaptors.genesis import read_dfl_file_out
 from scipy.constants import m_e, c, e
 
 
@@ -252,6 +253,24 @@ def pic2dist( pic_file_name, target='genesis'):
 	    return numpy.vstack([ x, xprime, z, zprime, y/c, P]).transpose(),  total_charge
     elif target == 'simplex':
 	    return numpy.vstack([ y/c, x, xprime, z, zprime,  gamma]).transpose(),  total_charge
+
+def genesis_dfl_to_wpg_h5( genesis_out, genesis_dfl=None, output_path=None):
+    """ Convert a genesis radiation field (.dfl) to hdf5 readable by wpg.
+
+    :param genesis_out: Location of genesis output data.
+
+    :param genesis_dfl: Location of genesis dfl file (default taken from genesis_out parameter).
+
+    :param output_path: Where output is to be stored (default constructed from input filename).
+
+    """
+
+    # Get the genesis radiation object.
+    genesis_radiation_field = read_dfl_file_out(out=genesis_out, filePath=genesis_dfl, debug=0)
+
+
+    return genesis_radiation_field
+
 
 
 

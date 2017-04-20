@@ -159,6 +159,13 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, "xyz.pdb" )
         self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, 1234 )
 
+    def testGenesisDFLToWPGH5(self):
+        """ Check the conversion from genesis dfl to wpg readable hdf5. """
+        genesis_out_file = generateTestFilePath("genesis/lcls/lcls.out")
+        genesis_dfl_file = generateTestFilePath("genesis/lcls/lcls.out.dfl")
+
+        radiation_field = IOUtilities.genesis_dfl_to_wpg_h5(genesis_out_file, genesis_dfl_file)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -137,7 +137,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         """ Testing the read function and conversion of openpmd input to native beam file."""
 
         # Ensure proper cleanup.
-        self.__dirs_to_remove.append('source')
+        #self.__dirs_to_remove.append('source')
 
         # Get SASE1 template undulator object.
         undulator = sase1.und
@@ -174,6 +174,6 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
         self.assertFalse( throws )
 
-if __name__ == '__main__':
+ if __name__ == '__main__':
     unittest.main()
 
