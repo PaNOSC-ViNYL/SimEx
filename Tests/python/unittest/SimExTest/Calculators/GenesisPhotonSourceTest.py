@@ -35,6 +35,7 @@ from ocelot.rad.undulator_params import UndulatorParameters
 from TestUtilities import TestUtilities
 
 from SimEx.Utilities import sase1
+from SimEx.Utilities.IOUtilities import wgetData
 
 from ocelot.rad.undulator_params import Ephoton2K
 
@@ -47,12 +48,20 @@ class GenesisPhotonSourceTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         # Get pic test data.
-        pass
+        if "simData_8000.h5" in os.listdir("."):
+            cls.__simdata = testfile_path
+        else:
+            try:
+                cls.__simdata = wgetData(url = "https://docs.xfel.eu/alfresco/d/a/workspace/SpacesStore/4d00d480-34a5-462e-8459-5483a75445c5/simData_8000.h5")
+            except:
+                raise RuntimeError("Unable to download simulation input data. Please try again later. If problem persists, contact support.")
+                sys.exit()
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        pass
+        if os.isfile(cls.__simdata):
+            os.remove(cls.__simdata)
 
 
     def setUp(self):
@@ -176,4 +185,5 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
  if __name__ == '__main__':
     unittest.main()
+
 

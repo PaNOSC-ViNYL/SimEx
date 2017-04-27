@@ -260,6 +260,33 @@ def genesis_dfl_to_wavefront(genesis_out, genesis_dfl):
 
     return read_genesis_file(genesis_out, genesis_dfl)
 
+def wgetData(url=None, path=None):
+    """ Download a given url. """
+
+    # Local filename where data will be saved.
+    local_filename = url.split('/')[-1]
+
+
+    # Make https request.
+    print "Attempting to download %s." % (url)
+    r = requests.get(url, stream=True)
+
+    # Write to local file in chunks of 1 MB.
+    with open(local_filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+
+    # After successful write, close the https connection.
+    f.close()
+
+    # Return.
+    print "Download completed and saved to %s." % (local_filename)
+    return local_filename
+
+
+
+
 
 if __name__ == "__main__":
     data, charge = pic2dist(sys.argv[1], sys.argv[2])
@@ -272,6 +299,5 @@ if __name__ == "__main__":
         numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
     if sys.argv[2] == 'simplex':
         numpy.savetxt( fname='beam.dist', X=data)
-
 
 
