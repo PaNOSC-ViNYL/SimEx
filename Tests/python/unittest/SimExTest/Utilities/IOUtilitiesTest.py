@@ -171,7 +171,7 @@ class IOUtilitiesTest(unittest.TestCase):
         genesis_out_file = generateTestFilePath("genesis/lcls/lcls.out")
         genesis_dfl_file = generateTestFilePath("genesis/lcls/lcls.out.dfl")
 
-        wf = genesis_dfl_to_wavefront(genesis_out_file, genesis_dfl_file)
+        wf = IOUtilities.genesis_dfl_to_wavefront(genesis_out_file, genesis_dfl_file)
 
         from wpg import wpg_uti_wf
         wpg_uti_wf.plot_intensity_map(wf)

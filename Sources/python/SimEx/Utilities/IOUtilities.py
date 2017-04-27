@@ -21,10 +21,10 @@
 ##########################################################################
 
 from Bio import PDB
-from ocelot.adaptors.genesis import read_dfl_file_out, read_out_file
 from ocelot.gui.genesis_plot import plot_dfl, plt
 from scipy.constants import m_e, c, e
 from wpg import Wavefront
+from wpg.converters.genesis_v2 import read_genesis_file
 import exceptions
 import h5py
 import numpy
