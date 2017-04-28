@@ -237,7 +237,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 , elements )
 
         # Two inputs should be enough.
-        ed_ref, Zf_ref, rho_ref = 2.8433e23, 2.3, 1.85
+        ed_ref, Zf_ref, rho_ref = 3.8512e23, 1.3, 2.3
         ed, Zf, rho = checkAndSetDensitiesAndCharge( None, Zf_ref, rho_ref, elements )
         self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
         self.assertAlmostEqual( Zf, Zf_ref, 4)

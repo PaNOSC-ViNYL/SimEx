@@ -654,10 +654,13 @@ def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, el
         raise RuntimeError( "At least two of Electron_density, ion_charge, and mass_density must be given.")
 
     # Get molar weight needed to convert electron density to mass density.
-    element_symbol=elements[0][0]
-    element_instance = getattr(periodictable, element_symbol)
-    molar_weight = element_instance.mass
+    element_symbols=[e[0] for e in elements]
+    element_abundances = numpy.array([e[1] for e in elements])
+    element_charges = numpy.array([e[2] for e in elements])
+    element_instances = [getattr(periodictable, es) for es in element_symbols]
+    molar_weights = [ei.mass for ei in element_instances]
 
+    molar_weight = sum(element_abundances * molar_weights) / sum( element_abundances )
     if electron_density is None:
         electron_density = mass_density * ion_charge * Avogadro / molar_weight
         print "Setting electron density to %5.4e/cm**3." % (electron_density)
@@ -667,6 +670,14 @@ def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, el
     if mass_density is None:
         mass_density = electron_density / (ion_charge * Avogadro / molar_weight)
         print "Setting mass density to %5.4f g/cm**3." % (mass_density)
+
+    # Adjust
+    #negative_charge_element_index = numpy.where(element_charges == -1)
+    #positive_charges = element_charges[numpy.where(element_charges >= 0.0)]
+
+    #sum_s_Zini= sum(element_abundances[numpy.where(element_charges >= 0.0)] * positive_charges)
+    #sum_s_ni = sum(element_abundances[numpy.where(element_charges >= 0.0)])
+    #element_charges[negative_charge_element_index] = sum_s_Zini / ion_charge - sum_s_ni
 
     if abs( electron_density / (mass_density * ion_charge * Avogadro / molar_weight) - 1. ) > 1e-4:
         raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/cm**3, rho*Zf*NA/u= %5.4e/cm**3." % (electron_density, mass_density * ion_charge * Avogadro/molar_weight) )
