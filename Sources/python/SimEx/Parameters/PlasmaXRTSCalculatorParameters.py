@@ -22,6 +22,7 @@
 
 from scipy.constants import Avogadro
 from scipy.constants import physical_constants
+import periodictable
 import copy
 import math
 import numpy
@@ -138,7 +139,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__scattering_angle     = checkAndSetScatteringAngle(scattering_angle)
         self.__electron_temperature = checkAndSetElectronTemperature(electron_temperature)
         # Set electron density, charge, and mass density depending on which input was given.
-        self.__electron_density, self.__ion_charge, self.__mass_density = checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density)
+        self.__electron_density, self.__ion_charge, self.__mass_density = checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, elements)
         self.__ion_temperature   = checkAndSetIonTemperature(ion_temperature, self.electron_temperature)
         self.__debye_temperature = checkAndSetDebyeTemperature(debye_temperature)
         self.__band_gap          = checkAndSetBandGap(band_gap)
@@ -643,24 +644,32 @@ def checkAndSetElectronTemperature(electron_temperature):
 
     return electron_temperature
 
-def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density):
+def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, elements):
     """ Utility to check input and return a set of consistent electron density, average ion charge, and mass density, if two are given as input.
     """
+    if len(elements) > 1:
+        return
+
     # Find number of Nones in input.
     number_of_nones = (sum(x is None for x in [electron_density, ion_charge, mass_density]))
     # raise if not enough input.
-    if number_of_nones > 0:
-        raise RuntimeError( "Electron_density, ion_charge, and mass_density must be given.")
+    if number_of_nones > 1:
+        raise RuntimeError( "At least two of Electron_density, ion_charge, and mass_density must be given.")
 
-    #if electron_density is None:
-        #electron_density = mass_density * ion_charge * Avogadro
-    #if ion_charge is None:
-        #ion_charge = electron_density / (mass_density * Avogadro)
-    #if mass_density is None:
-        #mass_density = electron_density / (ion_charge * Avogadro)
+    # Get molar weight needed to convert electron density to mass density.
+    element_symbol=elements[0][0]
+    element_instance = getattr(periodictable, element_symbol)
+    molar_weight = element_instance.mass
 
-    #if abs( electron_density / (mass_density * ion_charge * Avogadro) - 1 ) > 1e-4:
-        #raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA = %5.4e/m**3." % (electron_density, mass_density * ion_charge * Avogadro) )
+    if electron_density is None:
+        electron_density = mass_density * ion_charge * Avogadro / molar_weight * 1e6
+    if ion_charge is None:
+        ion_charge = electron_density*1e-6 / (mass_density * Avogadro / molar_weight)
+    if mass_density is None:
+        mass_density = electron_density*1e-6 / (ion_charge * Avogadro / molar_weight)
+
+    if abs( electron_density*1e-6 / (mass_density * ion_charge * Avogadro / molar_weight) - 1. ) > 1e-4:
+        raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA/u= %5.4e/m**3." % (electron_density, mass_density * ion_charge * Avogadro/molar_weight*1e6) )
 
     return electron_density, ion_charge, mass_density
 
