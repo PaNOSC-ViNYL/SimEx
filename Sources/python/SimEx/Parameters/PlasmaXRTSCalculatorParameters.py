@@ -81,7 +81,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         :param electron_temperature: The temperature of the electron subsystems (units of eV).
         :type electron_temperature: float
 
-        :param electron_density: The electron number density (units of 1/m^3)
+        :param electron_density: The electron number density (units of 1/cm^3)
         :type electron_density: float
 
         :param ion_temperature: The temperature of the ion subsystem (units of eV).
@@ -270,7 +270,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('PHOTON_ENERGY     %4.3f\n' % (self.photon_energy))
             input_deck.write('SCATTERING_ANGLE  %4.3f\n' % (self.scattering_angle) )
             input_deck.write('ELECTRON_TEMP     %4.3f 0\n' % (self.electron_temperature) )
-            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density) )
+            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e6) )
             input_deck.write('AMPLITUDE         1.0   0\n')
             input_deck.write('BASELINE          0.0   0\n')
             input_deck.write('Z_FREE            %4.3f 0\n' % (self.ion_charge) )
@@ -647,9 +647,6 @@ def checkAndSetElectronTemperature(electron_temperature):
 def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, elements):
     """ Utility to check input and return a set of consistent electron density, average ion charge, and mass density, if two are given as input.
     """
-    if len(elements) > 1:
-        return
-
     # Find number of Nones in input.
     number_of_nones = (sum(x is None for x in [electron_density, ion_charge, mass_density]))
     # raise if not enough input.
@@ -662,14 +659,17 @@ def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, el
     molar_weight = element_instance.mass
 
     if electron_density is None:
-        electron_density = mass_density * ion_charge * Avogadro / molar_weight * 1e6
+        electron_density = mass_density * ion_charge * Avogadro / molar_weight
+        print "Setting electron density to %5.4e/cm**3." % (electron_density)
     if ion_charge is None:
-        ion_charge = electron_density*1e-6 / (mass_density * Avogadro / molar_weight)
+        ion_charge = electron_density / (mass_density * Avogadro / molar_weight)
+        print "Setting average ion charge to %5.4f." % (ion_charge)
     if mass_density is None:
-        mass_density = electron_density*1e-6 / (ion_charge * Avogadro / molar_weight)
+        mass_density = electron_density / (ion_charge * Avogadro / molar_weight)
+        print "Setting mass density to %5.4f g/cm**3." % (mass_density)
 
-    if abs( electron_density*1e-6 / (mass_density * ion_charge * Avogadro / molar_weight) - 1. ) > 1e-4:
-        raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA/u= %5.4e/m**3." % (electron_density, mass_density * ion_charge * Avogadro/molar_weight*1e6) )
+    if abs( electron_density / (mass_density * ion_charge * Avogadro / molar_weight) - 1. ) > 1e-4:
+        raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/cm**3, rho*Zf*NA/u= %5.4e/cm**3." % (electron_density, mass_density * ion_charge * Avogadro/molar_weight) )
 
     return electron_density, ion_charge, mass_density
 

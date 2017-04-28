@@ -77,7 +77,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
                                                          photon_energy=4.96e3,
                                                          scattering_angle=90.0,
                                                          electron_temperature=10.0,
-                                                         electron_density=2.8433e29,
+                                                         electron_density=2.8433e23,
                                                          ion_charge=2.3,
                                                          mass_density=1.85
                                                          )
@@ -99,7 +99,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
                                                          photon_energy=4.96e3,
                                                          scattering_angle=90.0,
                                                          electron_temperature=10.0,
-                                                         electron_density=1.0e23,
+                                                         electron_density=None,
                                                          ion_charge=2.3,
                                                          mass_density=1.85,
                                                          )
@@ -202,24 +202,59 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
         self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 , elements )
 
         # Two inputs should be enough.
-        ed_ref, Zf_ref, rho_ref = 2.8433e29, 2.3, 1.85
+        ed_ref, Zf_ref, rho_ref = 2.8433e23, 2.3, 1.85
         ed, Zf, rho = checkAndSetDensitiesAndCharge( None, Zf_ref, rho_ref, elements )
-        self.assertAlmostEqual( ed/1e29, ed_ref/1e29, 4)
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
         self.assertAlmostEqual( Zf, Zf_ref, 4)
         self.assertAlmostEqual( rho, rho_ref, 4)
 
         ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, None, rho_ref, elements )
-        self.assertAlmostEqual( ed/1e29, ed_ref/1e29, 4)
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
         self.assertAlmostEqual( Zf, Zf_ref, 4)
         self.assertAlmostEqual( rho, rho_ref, 4)
 
         ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, None, elements )
-        self.assertAlmostEqual( ed/1e29, ed_ref/1e29, 4)
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
         self.assertAlmostEqual( Zf, Zf_ref, 4)
         self.assertAlmostEqual( rho, rho_ref, 4)
 
         ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, rho_ref, elements )
-        self.assertAlmostEqual( ed/1e29, ed_ref/1e29, 4)
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+    def notestCheckAndSetDensitiesAndChargeMultipleElements(self):
+        """ Check the utility for setting the charge, number and mass densities works correctly for more than one element in target specification. """
+
+        elements = [ ["C",6,-1], ["H",12,1] ]
+
+        # Case 1: No input -> raise
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, None, elements )
+
+        # Case 2: Not enough input.
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, 1e19, None, None, elements )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, 2.3, None , elements )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 , elements )
+
+        # Two inputs should be enough.
+        ed_ref, Zf_ref, rho_ref = 2.8433e23, 2.3, 1.85
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( None, Zf_ref, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, None, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, None, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
         self.assertAlmostEqual( Zf, Zf_ref, 4)
         self.assertAlmostEqual( rho, rho_ref, 4)
 
