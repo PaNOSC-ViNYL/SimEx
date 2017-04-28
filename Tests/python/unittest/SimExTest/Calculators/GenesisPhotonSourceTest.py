@@ -20,24 +20,23 @@
 #                                                                        #
 ##########################################################################
 
+# 3rd party imports
+from ocelot.adaptors import genesis
+from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
+import h5py
+import numpy
+import os, shutil
 import paths
 import unittest
 
-import numpy
-import h5py
-import os, shutil
-
-# Import the class to test.
+# SimEx imports
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
-from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
-from ocelot.adaptors import genesis
-from ocelot.rad.undulator_params import UndulatorParameters
-from TestUtilities import TestUtilities
-
 from SimEx.Utilities import sase1
 from SimEx.Utilities.IOUtilities import wgetData
+from TestUtilities import TestUtilities
 
-from ocelot.rad.undulator_params import Ephoton2K
+# Import the class to test.
+from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
 
 class GenesisPhotonSourceTest(unittest.TestCase):
     """
