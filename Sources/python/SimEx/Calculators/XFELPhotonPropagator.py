@@ -1,6 +1,7 @@
+""" Module that holds the XFELPhotonPropagator class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,30 +20,17 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the XFELPhotonPropagator class.
-
-    :author: CFG
-    :institution: XFEL
-    :creation: 20151104
-
-"""
-import os
-
 from prop import propagate_s2e
 
+import os
+import subprocess
+
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
-from SimEx.Utilities import wpg_to_opmd
-from SimEx.Utilities import ParallelUtilities
+from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 from SimEx.Utilities import EntityChecks
 from SimEx.Utilities import IOUtilities
-
-
-
-from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
-
-import subprocess,shlex
-
-
+from SimEx.Utilities import ParallelUtilities
+from SimEx.Utilities import wpg_to_opmd
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
@@ -183,8 +171,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :type output_path: string
         """
         pass # No action required since output is written in backengine.
-
-
 
 if __name__ == '__main__':
     XFELPhotonPropagator.runFromCLI()

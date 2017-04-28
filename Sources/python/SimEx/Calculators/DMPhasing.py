@@ -1,6 +1,7 @@
+""" Module that holds the DMPhasing class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the DMPhasing class.
-
-    :author: CFG
-    :institution: XFEL
-    :creation: 20151104
-
-"""
 import glob
 import h5py
 import numpy
@@ -228,7 +222,6 @@ class DMPhasing(AbstractPhotonAnalyzer):
         except:
             os.chdir(cwd)
             return 1
-
 
 def _load_intensities(ref_file):
     """ """

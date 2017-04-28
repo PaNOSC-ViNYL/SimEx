@@ -1,3 +1,4 @@
+""" :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -18,8 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-"""
-    :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
+
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
 
 import os,shutil

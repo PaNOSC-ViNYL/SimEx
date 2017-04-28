@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+""" :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,10 +20,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-"""
-    :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class.
-"""
-
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
 from matplotlib.colors import Normalize, LogNorm
 
@@ -291,7 +288,6 @@ def plotRadialProjection(pattern, parameters):
     plt.figure()
     plt.plot(bin_edges[:-1], frequencies/unweighted_histogram, "+")
 
-
 def diffractionParameters(path):
     """ Extract beam parameters and geometry from given file or directory.
 
@@ -322,7 +318,6 @@ def diffractionParameters(path):
 
     # Return.
     return parameters_dict
-
 
 def plotImage(pattern, logscale=False):
     """ Workhorse function to plot an image
@@ -427,5 +422,4 @@ def photonStatistics(stack):
     plt.xlabel("Photons")
     plt.ylabel("Histogram")
     plt.title("Photon number histogram")
-
 

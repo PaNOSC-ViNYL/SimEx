@@ -1,6 +1,7 @@
+""" Module that holds the XFELPhotonSource class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,18 +20,10 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the XFELPhotonSource class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151104
-
-"""
 import os
 import shutil
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
-
 
 class XFELPhotonSource(AbstractPhotonSource):
     """

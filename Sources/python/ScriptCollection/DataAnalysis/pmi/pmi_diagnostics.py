@@ -1,6 +1,5 @@
 #!/usr/bin/env python2.7
 
-
 from argparse import ArgumentParser
 import cPickle
 import commands
@@ -26,8 +25,6 @@ global g_s2e_setup
 pdb = '2nip.pdb'
 
 ##############################################################################
-
-
 def f_hdf5_simple_read( a_file , a_dataset ) :
     xfp  = h5py.File( a_file , "r" )
     xxx = xfp.get( a_dataset ).value

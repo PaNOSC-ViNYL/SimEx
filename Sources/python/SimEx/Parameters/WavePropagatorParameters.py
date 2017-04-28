@@ -1,6 +1,7 @@
+""" Module that holds the WavePropagatorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,23 +20,16 @@
 #                                                                        #
 ##########################################################################
 
-"""
-    @file Module that holds the WavePropagatorParameters class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20161003
-"""
 from scipy.constants import Avogadro
 from scipy.constants import physical_constants
+from wpg.beamline import Beamline
 import copy
 import math
 import numpy
 import os,sys
+import prop.exfel_spb_kb_beamline as default_beamline
 import tempfile
 import wpg
-from wpg.beamline import Beamline
-import prop.exfel_spb_kb_beamline as default_beamline
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance

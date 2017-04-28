@@ -1,6 +1,7 @@
+""" Module that hosts the PhotonExperimentSimulation class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,12 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that hosts the PhotonExperimentSimulation class, i.e. the top level object for running photon based experiment simulations
-    @author : CFG
-    @institution : XFEL GmbH Hamburg, Germany
-    @creation : 20151005
-"""
-
 import os
 
 from SimEx.Calculators.AbstractPhotonAnalyzer   import checkAndSetPhotonAnalyzer
@@ -33,7 +28,6 @@ from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffract
 from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
 from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
 from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
-
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class PhotonExperimentSimulation(object):

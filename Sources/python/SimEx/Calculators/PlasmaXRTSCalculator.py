@@ -1,3 +1,4 @@
+""" Module that holds the PlasmaXRTSCalculator class."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016 Carsten Fortmann-Grote                              #
@@ -19,22 +20,15 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the PlasmaXRTSCalculator class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160225
-
-"""
 import h5py
 import os
 import re
 import numpy
 import subprocess
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
+from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
@@ -302,7 +296,6 @@ def _parseStaticData(data_string):
 
         return static_dict
 
-
 def extractDate(pattern_string, text):
     """ Workhorse function to get a pattern from text using a regular expression.
     :param pattern_string: The regex pattern to find.
@@ -326,6 +319,7 @@ def extractDate(pattern_string, text):
 #
 # Check and set functions
 #
+
 def checkAndSetParameters( parameters ):
     """
     Utility to check if the parameters dictionary is ok .

@@ -9,11 +9,10 @@ def get_settings(key):
         if key in settings.keys():
             return settings[key]
         else:
-           return None 
+           return None
     except:
         print ("Cannot open open or corrupted file: %s"%fname)
         sys.exit(1)
-
 
 def get_project_name():
     return get_settings('Project Name')
@@ -34,7 +33,6 @@ def get_disabled_modules():
         return []
     else:
         return list
-    
 
 def set_settings(key,value):
     try:

@@ -83,7 +83,6 @@ def checkAndGetPDB( path ):
 
     return path
 
-
 def loadPDB( path = None ):
     """ Wrapper to convert a given pdb file to a sample dictionary used by e.g. the XMDYNCalculator.
 
@@ -283,21 +282,3 @@ def wgetData(url=None, path=None):
     # Return.
     print "Download completed and saved to %s." % (local_filename)
     return local_filename
-
-
-
-
-
-if __name__ == "__main__":
-    data, charge = pic2dist(sys.argv[1], sys.argv[2])
-    # Setup header for distribution file.
-    comments = "? "
-    size = data.shape[0]
-    header = "VERSION = 1.0\nSIZE = %d\nCHARGE = %7.6E\nCOLUMNS X XPRIME Y YPRIME T P" % (size, charge)
-
-    if sys.argv[2] == 'genesis':
-        numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
-    if sys.argv[2] == 'simplex':
-        numpy.savetxt( fname='beam.dist', X=data)
-
-

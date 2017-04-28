@@ -1,3 +1,4 @@
+""" Module for AbstractPhotonSource """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -19,20 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for AbstractPhotonSource
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
-
 from abc import ABCMeta
 from abc import abstractmethod
 
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 class AbstractPhotonSource(AbstractBaseCalculator):
     """
@@ -120,7 +112,6 @@ class AbstractPhotonSource(AbstractBaseCalculator):
         :return: List of strings, e.g. [/data/data1, /params/params1']
         """
         return self.__provided_data
-
 
 def checkAndSetPhotonSource(var=None, default=None):
     """
