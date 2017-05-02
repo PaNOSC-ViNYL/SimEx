@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -26,7 +27,6 @@ from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis, plt
 from argparse import ArgumentParser
 import numpy
 
-
 def main(args=None):
 
     # Setup the object.
@@ -51,8 +51,6 @@ def main(args=None):
 
     if args.statistics:
         analyzer.statistics()
-
-
 
 if __name__ == '__main__':
 

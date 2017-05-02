@@ -8,7 +8,7 @@ def getFromDict(dataDict, mapList):
 	try:
 		vals = reduce(lambda d, k: d[k], mapList, dataDict)
 	except:
-		raise Exception		
+		raise Exception
 	return vals
 
 
@@ -24,7 +24,7 @@ def set_param(param,module):
 			return True
 		elif (key == 'output_path'):
 			module.output_path=value
-			return True				
+			return True
 		keys=key.split(':')
 		setInDict(module.parameters,keys,value)
 		return True
@@ -40,9 +40,9 @@ def set_parameters(name,params):
 		return
 
 	paramfile = name+'_params'
-	
+
 	module = __import__(paramfile)
-	
+
 	picfile = name+'_params.pyc'
 	os.remove(picfile)
 
@@ -52,12 +52,12 @@ def set_parameters(name,params):
 		ok = set_param(param,module)
 		if ok == True:
 			to_write=True
-		
+
 	if (to_write):
 		module_files.write_module_parameters(name,module)
-	
-	
+
+
 if __name__ == "__main__":
 	import sys
 	set_param(sys.argv[1:])
-	
+

@@ -1,3 +1,4 @@
+""" Module for AbstractAnalysis """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for AbstractAnalysis
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20170322
-
-"""
 from abc import ABCMeta, abstractmethod
 import exceptions
 import os

@@ -1,6 +1,7 @@
+""" Module for entity checks.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,11 +21,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for entity checks.
-    @author CFG
-    @institution XFEL
-    @creation 20151006
-"""
 
 import exceptions
 
@@ -70,7 +66,6 @@ def checkAndSetInteger(var=None, default=None):
     if not isinstance(var, int):
             raise exceptions.TypeError("The parameter must be of type integer.")
     return var
-
 
 def checkAndSetPositiveInteger(var=None, default=None):
     """

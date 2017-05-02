@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,25 +19,16 @@
 #                                                                        #
 ##########################################################################
 
-"""
-    @file Module that holds the EMCOrientationParameters class.
+""" Module that holds the EMCOrientationParameters class.  """
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20160721
-
-"""
-import os
 import copy
-import numpy
 import math
+import numpy
+import os
 import tempfile
-from scipy.constants import physical_constants
-from scipy.constants import Avogadro
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 class EMCOrientationParameters(AbstractCalculatorParameters):
     """

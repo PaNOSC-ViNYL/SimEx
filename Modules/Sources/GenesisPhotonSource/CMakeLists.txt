@@ -2,7 +2,7 @@ INCLUDE(ExternalProject)
 
 ExternalProject_Add(
 ocelot
-URL https://github.com/eucall-software/ocelot/archive/disable_pyfftw.zip
+URL https://github.com/eucall-software/ocelot/archive/dev_gen.zip
 PATCH_COMMAND ""
 INSTALL_COMMAND ""
 CONFIGURE_COMMAND ""

@@ -20,20 +20,20 @@
 #                                                                        #
 ##########################################################################
 
-
+from Bio import PDB
+from ocelot.gui.genesis_plot import plot_dfl, plt
+from scipy.constants import m_e, c, e
+from wpg import Wavefront
+from wpg.converters.genesis_v2 import read_genesis_file
 import exceptions
 import h5py
 import numpy
-import urllib
-import os, shutil
+import os
 import periodictable
-import sys, os
-
-
-from Bio import PDB
-from scipy.constants import m_e, c, e
-
-
+import scipy.constants as const
+import shutil
+import sys
+import urllib
 import uuid
 
 def getTmpFileName():
@@ -82,7 +82,6 @@ def checkAndGetPDB( path ):
         shutil.move( download_target, path  )
 
     return path
-
 
 def loadPDB( path = None ):
     """ Wrapper to convert a given pdb file to a sample dictionary used by e.g. the XMDYNCalculator.
@@ -253,19 +252,33 @@ def pic2dist( pic_file_name, target='genesis'):
     elif target == 'simplex':
 	    return numpy.vstack([ y/c, x, xprime, z, zprime,  gamma]).transpose(),  total_charge
 
+def genesis_dfl_to_wavefront(genesis_out, genesis_dfl):
+    '''
+    Based on WPG/wpg/converters/genesis_v2.py
+    '''
+
+    return read_genesis_file(genesis_out, genesis_dfl)
+
+def wgetData(url=None, path=None):
+    """ Download a given url. """
+
+    # Local filename where data will be saved.
+    local_filename = url.split('/')[-1]
 
 
-if __name__ == "__main__":
-    data, charge = pic2dist(sys.argv[1], sys.argv[2])
-    # Setup header for distribution file.
-    comments = "? "
-    size = data.shape[0]
-    header = "VERSION = 1.0\nSIZE = %d\nCHARGE = %7.6E\nCOLUMNS X XPRIME Y YPRIME T P" % (size, charge)
+    # Make https request.
+    print "Attempting to download %s." % (url)
+    r = requests.get(url, stream=True)
 
-    if sys.argv[2] == 'genesis':
-        numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
-    if sys.argv[2] == 'simplex':
-        numpy.savetxt( fname='beam.dist', X=data)
+    # Write to local file in chunks of 1 MB.
+    with open(local_filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
 
+    # After successful write, close the https connection.
+    f.close()
 
-
+    # Return.
+    print "Download completed and saved to %s." % (local_filename)
+    return local_filename

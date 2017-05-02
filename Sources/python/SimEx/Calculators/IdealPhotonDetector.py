@@ -1,3 +1,4 @@
+""" Module that holds the IdealPhotonDetector class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -20,18 +21,9 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the IdealPhotonDetector class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151112
-
-"""
-
 import os
 
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
-
 
 class IdealPhotonDetector(AbstractPhotonDetector):
     """

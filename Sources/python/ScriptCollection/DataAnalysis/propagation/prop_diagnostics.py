@@ -1,4 +1,6 @@
 #!/usr/bin/env python2.7
+
+""" :module: Holding functions for quick diagnostics of wavefront propagation results. """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -20,7 +22,6 @@
 #                                                                        #
 ##########################################################################
 
-""" :module: Holding functions for quick diagnostics of wavefront propagation results. """
 
 from argparse import ArgumentParser
 from SimEx.Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis, plt

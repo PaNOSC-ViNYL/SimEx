@@ -13,17 +13,17 @@ def add_module(names):
 				print "module %s is already added"%name
 			else:
 				currentModules.append(name)
-				added  = True				
+				added  = True
 				print "adding module ",name
 		else:
 			print "Module %s not found"%name
 
-	if (added): 
+	if (added):
 		currentModules = sorted(currentModules, key=lambda k: parse_modules.get_module_priority(k))
 		parse_settings.set_settings('Modules',currentModules)
-		project_files.update_main_file()	
+		project_files.update_main_file()
 
 if __name__ == "__main__":
 	import sys
 	add_module(sys.argv[1:])
-	
+

@@ -11,8 +11,8 @@ def show_available_modules():
 	for item in moduleList:
 		print "%40s %20s %20s"% (item.get("Name"),item.get("Class"),
 								parse_classes.get_class_priority(item.get("Class")))
-		print "-"*88	
-	
+		print "-"*88
+
 
 if __name__ == "__main__":
 	show_available_modules(None)

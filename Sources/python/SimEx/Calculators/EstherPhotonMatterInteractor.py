@@ -1,3 +1,4 @@
+""" Module that holds the EstherPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the EstherPhotonMatterInteractor class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20170222
-
-"""
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 
@@ -36,6 +30,7 @@ class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
+
         :param parameters: Parameters for the EstherPhotonMatterInteractor.
         :type parameters: EstherPhotonMatterInteractorParameters
 

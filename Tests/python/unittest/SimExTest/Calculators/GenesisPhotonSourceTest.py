@@ -20,23 +20,23 @@
 #                                                                        #
 ##########################################################################
 
+# 3rd party imports
+from ocelot.adaptors import genesis
+from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
+import h5py
+import numpy
+import os, shutil
 import paths
 import unittest
 
-import numpy
-import h5py
-import os, shutil
-
-# Import the class to test.
+# SimEx imports
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
-from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
-from ocelot.adaptors import genesis
-from ocelot.rad.undulator_params import UndulatorParameters
+from SimEx.Utilities import sase1
+from SimEx.Utilities.IOUtilities import wgetData
 from TestUtilities import TestUtilities
 
-from SimEx.Utilities import sase1
-
-from ocelot.rad.undulator_params import Ephoton2K
+# Import the class to test.
+from SimEx.Calculators.GenesisPhotonSource import GenesisPhotonSource
 
 class GenesisPhotonSourceTest(unittest.TestCase):
     """
@@ -47,12 +47,20 @@ class GenesisPhotonSourceTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         # Get pic test data.
-        pass
+        if "simData_8000.h5" in os.listdir("."):
+            cls.__simdata = testfile_path
+        else:
+            try:
+                cls.__simdata = wgetData(url = "https://docs.xfel.eu/alfresco/d/a/workspace/SpacesStore/4d00d480-34a5-462e-8459-5483a75445c5/simData_8000.h5")
+            except:
+                raise RuntimeError("Unable to download simulation input data. Please try again later. If problem persists, contact support.")
+                sys.exit()
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        pass
+        if os.isfile(cls.__simdata):
+            os.remove(cls.__simdata)
 
 
     def setUp(self):
@@ -137,7 +145,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         """ Testing the read function and conversion of openpmd input to native beam file."""
 
         # Ensure proper cleanup.
-        self.__dirs_to_remove.append('source')
+        #self.__dirs_to_remove.append('source')
 
         # Get SASE1 template undulator object.
         undulator = sase1.und
@@ -174,6 +182,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
         self.assertFalse( throws )
 
-if __name__ == '__main__':
+ if __name__ == '__main__':
     unittest.main()
+
 

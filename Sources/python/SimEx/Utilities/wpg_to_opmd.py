@@ -232,7 +232,6 @@ def convertToOPMD(input_file):
             opmd_h5.close()
             h5.close()
 
-
 def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy=1.0e-3, pulse_duration=23.0e-15):
     """ Converter for non-time dependent wavefronts in frequency representation.
     Requires knowledge of pulse energy and pulse duration to allow photon number calculation.
@@ -422,8 +421,6 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     opmd_h5.close()
     h5.close()
 
-
-
 if __name__ == "__main__":
 
     # Parse arguments.
@@ -434,4 +431,3 @@ if __name__ == "__main__":
 
     # Call the converter routine.
     convertToOPMD(args.input_file)
-

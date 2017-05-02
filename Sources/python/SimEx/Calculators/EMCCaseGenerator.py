@@ -1,7 +1,7 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
-# Based on simS2E script provided by D. Loh.
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Based on simS2E script provided by N.-D. Loh.                          #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -94,7 +94,6 @@ def load_intensities(ref_file):
             fp.close()
             return (qmax, t_intens, intens_len, qPos, qPos_full)
 
-
 def zero_neg(x):
     return 0. if x<=0. else x
 v_zero_neg  = numpy.vectorize(zero_neg)
@@ -159,7 +158,6 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
 # Create detector.dat, creation of beamstop
 # Test data is in: /data/S2E/data/simulation_test/diffr
 ###############################################################
-
 
 class EMCCaseGenerator(object):
     """ Class that represents an EMC case. """
@@ -383,7 +381,7 @@ class EMCCaseGenerator(object):
                     v = f["data/data"].value
                     avg += v
                     temp = {"o":[], "m":[]}
-                
+
                     for p,vv in zip(pos, v.flat):
                         # Todo: remove this
                         vv = int(vv)
@@ -788,6 +786,3 @@ class EMCCaseGenerator(object):
         self.writeDensityToFile(densityFileName)
         self.writeDetectorToFile(detectorFileName)
         self.writeIntensitiesToFile(intensitiesFileName)
-
-
-

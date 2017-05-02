@@ -17,10 +17,10 @@ def show_project_modules():
 		elif (item.get("Name") in enabledModules):
 			status = "enabled"
 		else:
-			continue						
+			continue
 		print "%40s %20s %20s"% (item.get("Name"),item.get("Class"),status)
-		print "-"*88	
-	
+		print "-"*88
+
 
 if __name__ == "__main__":
 	show_project_modules(None)

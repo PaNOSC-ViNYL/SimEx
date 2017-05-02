@@ -1,6 +1,7 @@
+""" Module that holds the PlasmaXRTSCalculatorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,21 +20,14 @@
 #                                                                        #
 ##########################################################################
 
-"""
-    @file Module that holds the PlasmaXRTSCalculatorParameters class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160219
-
-"""
-import os
-import copy
-import numpy
-import math
-import tempfile
-from scipy.constants import physical_constants
 from scipy.constants import Avogadro
+from scipy.constants import physical_constants
+import periodictable
+import copy
+import math
+import numpy
+import os
+import tempfile
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.Utilities import ALL_ELEMENTS
@@ -87,7 +81,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         :param electron_temperature: The temperature of the electron subsystems (units of eV).
         :type electron_temperature: float
 
-        :param electron_density: The electron number density (units of 1/m^3)
+        :param electron_density: The electron number density (units of 1/cm^3)
         :type electron_density: float
 
         :param ion_temperature: The temperature of the ion subsystem (units of eV).
@@ -145,7 +139,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__scattering_angle     = checkAndSetScatteringAngle(scattering_angle)
         self.__electron_temperature = checkAndSetElectronTemperature(electron_temperature)
         # Set electron density, charge, and mass density depending on which input was given.
-        self.__electron_density, self.__ion_charge, self.__mass_density = checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density)
+        self.__electron_density, self.__ion_charge, self.__mass_density = checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, elements)
         self.__ion_temperature   = checkAndSetIonTemperature(ion_temperature, self.electron_temperature)
         self.__debye_temperature = checkAndSetDebyeTemperature(debye_temperature)
         self.__band_gap          = checkAndSetBandGap(band_gap)
@@ -276,7 +270,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('PHOTON_ENERGY     %4.3f\n' % (self.photon_energy))
             input_deck.write('SCATTERING_ANGLE  %4.3f\n' % (self.scattering_angle) )
             input_deck.write('ELECTRON_TEMP     %4.3f 0\n' % (self.electron_temperature) )
-            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density) )
+            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e6) )
             input_deck.write('AMPLITUDE         1.0   0\n')
             input_deck.write('BASELINE          0.0   0\n')
             input_deck.write('Z_FREE            %4.3f 0\n' % (self.ion_charge) )
@@ -650,24 +644,43 @@ def checkAndSetElectronTemperature(electron_temperature):
 
     return electron_temperature
 
-def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density):
+def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, elements):
     """ Utility to check input and return a set of consistent electron density, average ion charge, and mass density, if two are given as input.
     """
     # Find number of Nones in input.
     number_of_nones = (sum(x is None for x in [electron_density, ion_charge, mass_density]))
     # raise if not enough input.
-    if number_of_nones > 0:
-        raise RuntimeError( "Electron_density, ion_charge, and mass_density must be given.")
+    if number_of_nones > 1:
+        raise RuntimeError( "At least two of Electron_density, ion_charge, and mass_density must be given.")
 
-    #if electron_density is None:
-        #electron_density = mass_density * ion_charge * Avogadro
-    #if ion_charge is None:
-        #ion_charge = electron_density / (mass_density * Avogadro)
-    #if mass_density is None:
-        #mass_density = electron_density / (ion_charge * Avogadro)
+    # Get molar weight needed to convert electron density to mass density.
+    element_symbols=[e[0] for e in elements]
+    element_abundances = numpy.array([e[1] for e in elements])
+    element_charges = numpy.array([e[2] for e in elements])
+    element_instances = [getattr(periodictable, es) for es in element_symbols]
+    molar_weights = [ei.mass for ei in element_instances]
 
-    #if abs( electron_density / (mass_density * ion_charge * Avogadro) - 1 ) > 1e-4:
-        #raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA = %5.4e/m**3." % (electron_density, mass_density * ion_charge * Avogadro) )
+    molar_weight = sum(element_abundances * molar_weights) / sum( element_abundances )
+    if electron_density is None:
+        electron_density = mass_density * ion_charge * Avogadro / molar_weight
+        print "Setting electron density to %5.4e/cm**3." % (electron_density)
+    if ion_charge is None:
+        ion_charge = electron_density / (mass_density * Avogadro / molar_weight)
+        print "Setting average ion charge to %5.4f." % (ion_charge)
+    if mass_density is None:
+        mass_density = electron_density / (ion_charge * Avogadro / molar_weight)
+        print "Setting mass density to %5.4f g/cm**3." % (mass_density)
+
+    # Adjust
+    #negative_charge_element_index = numpy.where(element_charges == -1)
+    #positive_charges = element_charges[numpy.where(element_charges >= 0.0)]
+
+    #sum_s_Zini= sum(element_abundances[numpy.where(element_charges >= 0.0)] * positive_charges)
+    #sum_s_ni = sum(element_abundances[numpy.where(element_charges >= 0.0)])
+    #element_charges[negative_charge_element_index] = sum_s_Zini / ion_charge - sum_s_ni
+
+    if abs( electron_density / (mass_density * ion_charge * Avogadro / molar_weight) - 1. ) > 1e-4:
+        raise ValueError( "Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/cm**3, rho*Zf*NA/u= %5.4e/cm**3." % (electron_density, mass_density * ion_charge * Avogadro/molar_weight) )
 
     return electron_density, ion_charge, mass_density
 

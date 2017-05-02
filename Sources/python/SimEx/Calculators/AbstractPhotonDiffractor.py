@@ -1,3 +1,4 @@
+""" Module for AbstractPhotonDiffractor """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -18,14 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
-""" Module for AbstractPhotonDiffractor
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
 
 from abc import ABCMeta
 from abc import abstractmethod

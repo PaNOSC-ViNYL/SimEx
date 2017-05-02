@@ -1,6 +1,8 @@
+""" Module for AbstractBaseCalculator """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+#               2016-2017 Sergey Yakubov                                 #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +21,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for AbstractBaseCalculator
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
 from abc import ABCMeta, abstractmethod
 import exceptions
 import os
@@ -35,8 +30,6 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 import dill
 import sys
-
-
 
 class AbstractBaseCalculator(object):
     """
@@ -210,7 +203,6 @@ class AbstractBaseCalculator(object):
         """ Delete the output_path path(s). """
         del self.__output_path
 
-
 def checkAndSetIO(io):
     """ Check the passed io path/filenames and set appropriately. """
 
@@ -232,7 +224,6 @@ def checkAndSetIO(io):
     o = os.path.abspath(o)
 
     return (i, o)
-
 
 def checkAndSetBaseCalculator(var=None, default=None):
     """

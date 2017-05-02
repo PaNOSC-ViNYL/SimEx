@@ -1,6 +1,7 @@
+""" :module pic2dist: Script to convert openpmd output from picongpu to a genesis beam.dat file. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote, Ashutosh Sharma             #
+# Copyright (C) 2017 Carsten Fortmann-Grote, Ashutosh Sharma             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +20,10 @@
 #                                                                        #
 ##########################################################################
 
-""" :module pic2dist: Script to convert openpmd output from picongpu to a genesis beam.dat file. """
-
-import numpy
-import h5py
-import sys, os
-
 from scipy.constants import m_e, c, e
+import h5py
+import numpy
+import sys, os
 
 def pic2dist( pic_file_name, target='genesis'):
     """ Utility to extract particle data from openPMD and write into genesis distribution file.

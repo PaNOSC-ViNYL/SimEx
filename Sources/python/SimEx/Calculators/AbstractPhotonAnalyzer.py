@@ -1,6 +1,7 @@
+""" Module for AbstractPhotonAnalyzer """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -18,14 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
-""" Module for AbstractPhotonAnalyzer
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
 
 from abc import ABCMeta
 from abc import abstractmethod

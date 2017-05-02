@@ -1,6 +1,7 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+#               2016-2017 Sergey Yakubov                                 #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,16 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module with utilities for parallel job.
-    @author SY
-    @institution DESY
-    @creation 20161111
-"""
+""" Module with utilities for parallel job.  """
 
 import os
 import subprocess
 from distutils.version import StrictVersion
-
 
 def _getParallelResourceInfoFromEnv():
     resource = {}
@@ -95,7 +91,6 @@ def _getParallelResourceInfoFromMpirun():
     except:
         return None
 
-
 def getParallelResourceInfo():
     """
     Utility extract information about available parallel resources.
@@ -120,8 +115,6 @@ def getParallelResourceInfo():
         print("Was unable to determine parallel resources, will run in serial mode")
         return dict([("NCores", 0),("NNodes",1)])
 
-
-
 def _getMPIVersionInfo():
     try:
         mpi_cmd = _MPICommandName()
@@ -141,7 +134,6 @@ def _getMPIVersionInfo():
 
     except:
         return None
-
 
 def _getVendorSpecificMPIArguments(version, threads_per_task):
 
@@ -166,7 +158,6 @@ def _getVendorSpecificMPIArguments(version, threads_per_task):
             mpi_cmd+=" -env OMP_NUM_THREADS "+str(threads_per_task)
 
     return mpi_cmd
-
 
 def prepareMPICommandArguments(ntasks, threads_per_task=0):
     """
@@ -196,4 +187,3 @@ def prepareMPICommandArguments(ntasks, threads_per_task=0):
 
 
     return mpi_cmd
-
