@@ -851,6 +851,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         #source_file = TestUtilities.generateTestFilePath("FELsource_out.h5")
 
         # Propagate
+        propagation_parameters =
         propagator = XFELPhotonPropagator(parameters=None, input_path=source_file, output_path="prop_out.h5")
         propagator.backengine()
         propagator.saveH5()
