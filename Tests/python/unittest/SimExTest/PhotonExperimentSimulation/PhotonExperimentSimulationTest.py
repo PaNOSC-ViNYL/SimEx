@@ -847,33 +847,32 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
     def reference2NIP(self):
         """ Testing that diffraction intensities with 9fs 5keV pulses through SPB-SFX KB beamline are of the order of Yoon 2016. """
 
-        source_file = TestUtilities.generateTestFilePath("5keV_9fs_2015_slice12_fromYoon2016.h5")
+        source_file = "/data/netapp/grotec/datadump/5keV_9fs_2015_slice12_fromYoon2016.h5"
         #source_file = TestUtilities.generateTestFilePath("FELsource_out.h5")
 
         # Propagate
-        propagation_parameters =
         propagator = XFELPhotonPropagator(parameters=None, input_path=source_file, output_path="prop_out.h5")
-        propagator.backengine()
-        propagator.saveH5()
+        #propagator.backengine()
+        #propagator.saveH5()
 
-        #pmi = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=propagator.output_path, output_path="pmi", sample_path="2nip.pdb")
-        #pmi.backengine()
+        pmi = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=propagator.output_path, output_path="pmi", sample_path=TestUtilities.generateTestFilePath("sample.h5"))
+        pmi.backengine()
 
-        ##  Diffraction with parameters.
-        #diffraction_parameters={ 'uniform_rotation': True,
-                     #'calculate_Compton' : False,
-                     #'slice_interval' : 100,
-                     #'number_of_slices' : 100,
-                     #'pmi_start_ID' : 1,
-                     #'pmi_stop_ID'  : 1,
-                     #'number_of_diffraction_patterns' : 1,
-                     #'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     #'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     #'number_of_MPI_processes' : 8,
-                     #}
+        #  Diffraction with parameters.
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 100,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 1,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 8,
+                     }
 
-        #diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=pmi.output_path, output_path="diffr_out.h5")
-        #diffractor.backengine()
+        diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=pmi.output_path, output_path="diffr_out.h5")
+        diffractor.backengine()
 
 
 if __name__ == '__main__':
