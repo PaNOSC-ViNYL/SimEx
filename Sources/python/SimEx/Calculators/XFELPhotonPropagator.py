@@ -24,6 +24,7 @@ from prop import propagate_s2e
 
 import os
 import subprocess
+import shlex
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
