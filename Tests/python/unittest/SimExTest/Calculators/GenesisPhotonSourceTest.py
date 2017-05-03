@@ -182,7 +182,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
         self.assertFalse( throws )
 
- if __name__ == '__main__':
+if __name__ == '__main__':
     unittest.main()
 
 

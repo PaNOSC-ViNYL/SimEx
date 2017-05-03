@@ -852,8 +852,8 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Propagate
         propagator = XFELPhotonPropagator(parameters=None, input_path=source_file, output_path="prop_out.h5")
-        #propagator.backengine()
-        #propagator.saveH5()
+        propagator.backengine()
+        propagator.saveH5()
 
         pmi = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=propagator.output_path, output_path="pmi", sample_path=TestUtilities.generateTestFilePath("sample.h5"))
         pmi.backengine()
