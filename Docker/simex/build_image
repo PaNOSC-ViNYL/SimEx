@@ -1,2 +1,2 @@
-docker build -t yakser/simex .
+docker build --no-cache -t yakser/simex .
 

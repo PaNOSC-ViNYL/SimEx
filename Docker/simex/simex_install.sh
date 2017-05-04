@@ -32,7 +32,7 @@ cmake -DINSTALL_TESTS=OFF -DSRW_OPTIMIZED=ON -DDEVELOPER_INSTALL=OFF -DCMAKE_INS
 chmod og+rwX -R $ROOT_DIR
 
 # Build the project.
-make -j
+make
 
 
 # Install the project.
