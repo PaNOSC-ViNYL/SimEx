@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+
+set -e
+
+
 BRANCH=develop
 URL=https://github.com/eucall-software/simex_platform.git
 cd /opt

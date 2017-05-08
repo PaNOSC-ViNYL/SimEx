@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 URL=http://sourceforge.net/projects/arma/files/armadillo-7.800.2.tar.xz
 
 wget -q $URL

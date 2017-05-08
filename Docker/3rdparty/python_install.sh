@@ -1,5 +1,7 @@
+#!/usr/bin/env bash
+
 URL=http://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
-#URL=http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh
+
 
 # Install dir
 PREFIX=/opt/miniconda2
@@ -19,32 +21,26 @@ cd $PREFIX
 export PATH=$PREFIX/bin:$PATH
 conda config --set always_yes True
 
-conda install --no-deps nomkl numpy Cython matplotlib functools32 six scipy dateutil pyparsing cycler openblas libpng
-conda install --no-deps libgfortran=1 
-conda install --no-deps -c anaconda biopython=1.67
-conda  install --no-update-deps pyqt
-$PREFIX/bin/pip install periodictable mpi4py dill
-#yum install -y hdf5-devel
-## clean to reduce image size
+#conda install --no-deps nomkl functools32 six dateutil pyparsing cycler openblas libpng
 
 # delete tests
 find . -type d -name tests -depth -exec rm -rf {} \;
 find . -type d -name test -depth -exec rm -rf {} \;
 
-conda install --no-deps hdf5 h5py # after cleaning tests
-#conda install --no-deps  h5py=2.3.1
-#conda install --no-deps  hdf5
-
 conda clean --tarballs
 
+# install requirements from file (in given order)
+#$PREFIX/bin/pip install -r /opt/requirements.txt
+xargs -L 1 pip install < /opt/requirements.txt
 
 # remove .pyc
 find . -name \__pycache__ -depth -exec rm -rf {} \;
 find . -name "*.pyc" -exec rm -rf {} \;
 
 
-
-# remove pkgs cache
+# remove cache
 rm -r pkgs/*
+rm -rf /root/.cache/pip
+
 
 echo "export PATH=/opt/miniconda2/bin:${PATH}" >> /etc/profile.d/scripts-path.sh
