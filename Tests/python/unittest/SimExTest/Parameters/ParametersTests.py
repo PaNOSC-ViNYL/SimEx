@@ -28,6 +28,7 @@ from SingFELPhotonDiffractorParametersTest import SingFELPhotonDiffractorParamet
 from EMCOrientationParametersTest import EMCOrientationParametersTest
 from DMPhasingParametersTest import DMPhasingParametersTest
 from WavePropagatorParametersTest import WavePropagatorParametersTest
+from PhotonBeamParametersTest import PhotonBeamParametersTest
 
 # Setup the suite.
 def suite():
@@ -37,6 +38,7 @@ def suite():
              unittest.makeSuite(EMCOrientationParametersTest,    'test'),
              unittest.makeSuite(DMPhasingParametersTest,    'test'),
              unittest.makeSuite(WavePropagatorParametersTest,    'test'),
+             unittest.makeSuite(PhotonBeamParametersTest,    'test'),
              )
 
     return unittest.TestSuite(suites)
