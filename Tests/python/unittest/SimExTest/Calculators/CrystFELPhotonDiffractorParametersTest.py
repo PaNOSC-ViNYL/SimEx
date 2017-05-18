@@ -39,6 +39,7 @@ import unittest
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 
 class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
@@ -83,8 +84,8 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         # Check all parameters are set to default values.
         self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
         self.assertTrue( parameters.uniform_rotation )
-        self.assertEqual( parameters.beam_parameter_file, None )
-        self.assertEqual( parameters.beam_geometry_file, None )
+        self.assertEqual( parameters.beam_parameters, None )
+        self.assertEqual( parameters.geometry, None )
         self.assertTrue( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
         self.assertFalse( parameters.powder )
@@ -93,11 +94,18 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertFalse( parameters.poissonize, False )
         self.assertEqual( parameters.number_of_background_photons, 0 )
         self.assertFalse( parameters.suppress_fringes )
-        self.assertEqual( parameters.beam_parameter_file, None )
-        self.assertEqual( parameters.beam_geometry_file, None )
+        self.assertEqual( parameters.beam_parameters, None )
+        self.assertEqual( parameters.geometry, None )
 
     def testShapedConstruction(self):
         """ Testing the construction with parameters of the class. """
+
+        beam_parameters = PhotonBeamParameters(
+                photon_energy=4.96e3,
+                photon_energy_relative_bandwidth=0.01,
+                beam_diameter_fwhm=2e-6,
+                divergence=2e-6,
+                pulse_energy=1e3)
 
         # Attempt to construct an instance of the class.
         parameters = CrystFELPhotonDiffractorParameters(
@@ -108,7 +116,10 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
                 poissonize=True,
                 suppress_fringes=True,
                 crystal_size_range=[10,100],
-                uniform_rotation=False,)
+                uniform_rotation=False,
+                beam_parameters=beam_parameters,
+                geometry=TestUtilities.generateTestFilePath('simple.geom'))
+
 
         # Check all parameters are set as intended.
         self.assertFalse( parameters.uniform_rotation )
@@ -118,6 +129,9 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertTrue( parameters.poissonize )
         self.assertEqual( parameters.number_of_background_photons, 100 )
         self.assertTrue( parameters.suppress_fringes )
+        self.assertIsInstance( parameters.beam_parameters, PhotonBeamParameters )
+        self.assertEqual( parameters.beam_parameters.photon_energy, 4.96e3 )
+        self.assertEqual( parameters.geometry, TestUtilities.generateTestFilePath('simple.geom') )
 
     def testSettersAndQueries(self):
         """ Testing the default construction of the class using a dictionary. """

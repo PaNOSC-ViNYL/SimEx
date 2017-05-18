@@ -25,6 +25,7 @@ import os
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities import IOUtilities
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
@@ -40,8 +41,8 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 poissonize=None,
                 number_of_background_photons=None,
                 suppress_fringes=None,
-                beam_parameter_file=None,
-                beam_geometry_file=None,
+                beam_parameters=None,
+                geometry=None,
                 **kwargs
                 ):
         """
@@ -74,11 +75,11 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param suppress_fringes: Whether to suppress subsidiary maxima beyond first minimum of the shape transform (default False).
         :type suppress_fringes: bool
 
-        :param beam_parameter_file: Path of the beam parameter file.
-        :type beam_parameter_file: str
+        :param beam_parameters: Path of the beam parameter file.
+        :type beam_parameters: str
 
-        :param beam_geometry_file: Path of the beam geometry file.
-        :type beam_geometry_file: str
+        :param geometry: Path of the beam geometry file.
+        :type geometry: str
 
         :param kwargs: Key-value pairs to pass to the parent class.
         """
@@ -94,8 +95,8 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.poissonize = poissonize
         self.number_of_background_photons = number_of_background_photons
         self.suppress_fringes = suppress_fringes
-        self.beam_parameter_file = beam_parameter_file
-        self.beam_geometry_file = beam_geometry_file
+        self.beam_parameters = beam_parameters
+        self.geometry = geometry
         self.number_of_diffraction_patterns = number_of_diffraction_patterns
 
         super(CrystFELPhotonDiffractorParameters, self).__init__(**kwargs)
@@ -197,37 +198,37 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.__uniform_rotation = checkAndSetInstance( bool, value, True )
 
     @property
-    def beam_parameter_file(self):
-        """ Query for the 'beam_parameter_file' parameter. """
-        return self.__beam_parameter_file
-    @beam_parameter_file.setter
-    def beam_parameter_file(self, value):
-        """ Set the 'beam_parameter_file' parameter to a given value.
-        :param value: The value to set 'beam_parameter_file' to.
+    def beam_parameters(self):
+        """ Query for the 'beam_parameters' parameter. """
+        return self.__beam_parameters
+    @beam_parameters.setter
+    def beam_parameters(self, value):
+        """ Set the 'beam_parameters' parameter to a given value.
+        :param value: The value to set 'beam_parameters' to.
         """
-        self.__beam_parameter_file = checkAndSetInstance( str, value, None )
+        if value is None:
+            print ("WARNING: Beam parameters not set, will use crystFEL/pattern_sim defaults.")
 
-        if self.__beam_parameter_file is not None:
-            if not os.path.isfile( self.__beam_parameter_file):
-                raise IOError("The beam_parameter_file %s is not a valid file or filename." % (self.__beam_parameter_file) )
-        else:
-            print ("WARNING: Beam parameter file not set, calculation will most probably fail.")
+        self.__beam_parameters = checkAndSetInstance( (str, PhotonBeamParameters), value, None )
 
+        if isinstance(self.__beam_parameters, str):
+            if not os.path.isfile( self.__beam_parameters):
+                raise IOError("The beam_parameters %s is not a valid file or filename." % (self.__beam_parameters) )
 
     @property
-    def beam_geometry_file(self):
-        """ Query for the 'beam_geometry_file' parameter. """
-        return self.__beam_geometry_file
-    @beam_geometry_file.setter
-    def beam_geometry_file(self, value):
-        """ Set the 'beam_geometry_file' parameter to a given value.
-        :param value: The value to set 'beam_geometry_file' to.
+    def geometry(self):
+        """ Query for the 'geometry' parameter. """
+        return self.__geometry
+    @geometry.setter
+    def geometry(self, value):
+        """ Set the 'geometry' parameter to a given value.
+        :param value: The value to set 'geometry' to.
         """
-        self.__beam_geometry_file = checkAndSetInstance( str, value, None )
+        self.__geometry = checkAndSetInstance( str, value, None )
 
-        if self.__beam_geometry_file is not None:
-            if not os.path.isfile( self.__beam_geometry_file):
-                raise IOError("The beam_parameter_file %s is not a valid file or filename." % (self.__beam_geometry_file) )
+        if self.__geometry is not None:
+            if not os.path.isfile( self.__geometry):
+                raise IOError("The geometry %s is not a valid file or filename." % (self.__geometry) )
         else:
             print ("WARNING: Geometry file not set, calculation will most probably fail.")
 

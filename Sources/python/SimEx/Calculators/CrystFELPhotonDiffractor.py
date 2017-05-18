@@ -26,9 +26,10 @@ import os
 import subprocess,shlex
 
 import prepHDF5
+from scipy import constants
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+from SimEx.Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
@@ -41,7 +42,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
 
         :param parameters: Parameters of the calculation (not data).
-        :type parameters: dict || CrystFELPhotonDiffractorParameters
+        :type parameters:  CrystFELPhotonDiffractorParameters
 
         :param input_path: Path to hdf5 file holding the input data.
         :type input_path: str
@@ -50,37 +51,24 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         :type output_path: str
         """
 
-        if isinstance( parameters, dict ):
-            parameters = CrystFELPhotonDiffractorParameters( parameters_dictionary = parameters )
-
         # Set default parameters if no parameters given.
         if parameters is None:
-            self.__parameters = checkAndSetInstance( CrystFELPhotonDiffractorParameters, parameters, CrystFELPhotonDiffractorParameters() )
+            raise ValueError( "Parameters must at least specify the sample structure, e.g. in pdb format.")
         else:
             self.__parameters = checkAndSetInstance( CrystFELPhotonDiffractorParameters, parameters, None )
 
 
         # Init base class.
+
+        # Dummy input path since none required (we don't read from a beam propgation yet.)
+        input_path = os.path.dirname(__file__)
+
+        if output_path is None:
+            output_path = os.path.join(os.path.dirname(__file__), "diffr")
+
         super(CrystFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
 
-        self.__expected_data = ['/data/snp_<7 digit index>/ff',
-                                '/data/snp_<7 digit index>/halfQ',
-                                '/data/snp_<7 digit index>/Nph',
-                                '/data/snp_<7 digit index>/r',
-                                '/data/snp_<7 digit index>/T',
-                                '/data/snp_<7 digit index>/Z',
-                                '/data/snp_<7 digit index>/xyz',
-                                '/data/snp_<7 digit index>/Sq_halfQ',
-                                '/data/snp_<7 digit index>/Sq_bound',
-                                '/data/snp_<7 digit index>/Sq_free',
-                                '/history/parent/detail',
-                                '/history/parent/parent',
-                                '/info/package_version',
-                                '/info/contact',
-                                '/info/data_description',
-                                '/info/method_description',
-                                '/version']
-
+        ### FIXME
         self.__provided_data = [
                                 '/data/data',
                                 '/data/diffr',
@@ -103,11 +91,11 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
-        return self.__expected_data
+        return None
 
     def providedData(self):
         """ Query for the data provided by the Diffractor. """
-        return self.__provided_data
+        return None
 
 
     def computeNTasks(self):
@@ -125,69 +113,54 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
     def backengine(self):
         """ This method drives the backengine singFEL."""
 
-        # Setup directory to pmi output.
-        # Backengine expects a directory name, so have to check if
-        # input_path is dir or file and handle accordingly.
-        if os.path.isdir( self.input_path ):
-            input_dir = self.input_path
-
-        elif os.path.isfile( self.input_path ):
-            input_dir = os.path.dirname( self.input_path )
-
-        # Link the  python utility so the backengine can find it.
-        ### Yes, this is messy.
-        preph5_location = inspect.getsourcefile(prepHDF5)
-        if preph5_location is None:
-            raise RuntimeError("prepHDF5.py not found. Aborting the calculation.")
-
-        uniform_rotation = int( self.parameters.uniform_rotation)
-        calculate_Compton = int( self.parameters.calculate_Compton )
-        slice_interval = self.parameters.slice_interval
-        number_of_slices = self.parameters.number_of_slices
-        pmi_start_ID = self.parameters.pmi_start_ID
-        pmi_stop_ID = self.parameters.pmi_stop_ID
-        number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
-        beam_parameter_file = self.parameters.beam_parameter_file
-        beam_geometry_file = self.parameters.beam_geometry_file
-
+        # Setup directory structure as needed.
         if not os.path.isdir( self.output_path ):
-            os.mkdir( self.output_path )
-        output_dir = self.output_path
+            os.makedirs( self.output_path )
+        output_file_base = os.path.join( self.output_path, "diffr_out")
 
-        config_file = '/dev/null'
+        if self.parameters.number_of_diffraction_patterns == 1:
+            output_file_base += "_0000001.h5"
 
-# collect MPI arguments
+        # collect MPI arguments
         if self.parameters.forced_mpi_command=="":
             np=self.computeNTasks()
             mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
         else:
             mpicommand=self.parameters.forced_mpi_command
-# collect program arguments
-        command_sequence = ['radiationDamageMPI',
-                            '--inputDir',         str(input_dir),
-                            '--outputDir',        str(output_dir),
-                            '--beamFile',         str(beam_parameter_file),
-                            '--geomFile',         str(beam_geometry_file),
-                            '--configFile',       str(config_file),
-                            '--uniformRotation',  str(uniform_rotation),
-                            '--calculateCompton', str(calculate_Compton),
-                            '--sliceInterval',    str(slice_interval),
-                            '--numSlices',        str(number_of_slices),
-                            '--pmiStartID',       str(pmi_start_ID),
-                            '--pmiEndID',         str(pmi_stop_ID),
-                            '--numDP',            str(number_of_diffraction_patterns),
-                            '--prepHDF5File',     preph5_location,
+
+        # Setup command, minimum set first.
+        command_sequence = ['pattern_sim',
+                            '-p %s'                 % self.parameters.sample,
+                            '--geometry=%s'         % self.parameters.geometry,
+                            '--output=%s'           % output_file_base,
+                            '--number=%d'           % self.parameters.number_of_diffraction_patterns,
                             ]
+        # Handle random rotation is requested.
+        if self.parameters.uniform_rotation is True:
+            command_sequence.append('--random-orientation')
+            command_sequence.append('--really-random')
+
+        if self.parameters.beam_parameters is not None:
+            command_sequence.append('--photon-energy=%f' % (self.parameters.beam_parameters.photon_energy))
+            command_sequence.append('--beam-bandwidth=%f' % (self.parameters.beam_parameters.photon_energy_relative_bandwidth))
+            nphotons = self.parameters.beam_parameters.pulse_energy / constants.e / self.parameters.beam_parameters.photon_energy
+            command_sequence.append('--nphotons=%e' % (nphotons))
+            command_sequence.append('--beam-radius=%e' % (self.parameters.beam_parameters.beam_diameter_fwhm/2.))
+            command_sequence.append('--spectrum=%s' % (self.parameters.beam_parameters.photon_energy_spectrum_type.lower()))
+
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
+        #args =  command_sequence
+        command = " ".join(args)
 
+        print command
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print("CrystFELPhotonDiffractor backengine mpicommand: "+mpicommand)
 
         # Run the backengine command.
-        proc = subprocess.Popen(args)
+        proc = subprocess.Popen(command, shell=True)
         proc.wait()
 
         # Return the return code from the backengine.
@@ -204,16 +177,16 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         pass
 
     def saveH5(self):
-        """ """
         """
-        Private method to save the object to a file. Creates links to h5 files that all contain only one pattern.
-
-        :param output_path: The file where to save the object's data.
-        :type output_path: string, default b
+        Method to save the object to a file. Creates links to h5 files that all contain only one pattern.
         """
 
         # Path where individual h5 files are located.
         path_to_files = self.output_path
+
+        _rename_files(path_to_files)
+
+        return
 
         # Setup new file.
         h5_outfile = h5py.File( self.output_path + ".h5" , "w")
@@ -222,6 +195,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         individual_files = [os.path.join( path_to_files, f ) for f in os.listdir( path_to_files ) ]
         individual_files.sort()
 
+        # First rename.
         # Keep track of global parameters being linked.
         global_parameters = False
         # Loop over all individual files and link in the top level groups.
@@ -262,4 +236,21 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
 
+def _rename_files(path):
+    """ Renames all files generated by pattern_sim to simex conform filenames."""
 
+    old_wd = os.getcwd()
+    os.chdir( path )
+    original_files = os.listdir(".")
+
+    original_files.sort()
+
+    for i,f in enumerate(original_files):
+        if not f.split(".")[-1] == "h5":
+            continue
+
+        new_filename = "%s_%07d.h5" % ("".join(f.split("-")[:-1]),i+1)
+        print "Renaming %s to %s." % (f, new_filename)
+        os.rename(f, new_filename)
+
+    os.chdir( old_wd )

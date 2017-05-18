@@ -75,6 +75,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
         parameters = PhotonBeamParameters(
                 photon_energy=4.96e3,
                 photon_energy_relative_bandwidth=2e-2,
+                photon_energy_spectrum_type="SASE",
                 pulse_energy = 2e-3,
                 beam_diameter_fwhm = 2e-6,
                 divergence = 1e-6,
@@ -83,6 +84,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
         # Check all parameters are set as intended.
         self.assertEqual( parameters.photon_energy, 4.96e3 )
         self.assertEqual( parameters.photon_energy_relative_bandwidth, 2e-2 )
+        self.assertEqual( parameters.photon_energy_spectrum_type, "SASE" )
         self.assertEqual( parameters.pulse_energy, 2e-3 )
         self.assertEqual( parameters.beam_diameter_fwhm, 2e-6 )
         self.assertEqual( parameters.divergence, 1e-6 )
@@ -102,6 +104,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
         parameters.beam_diameter_fwhm = 100e-9
         parameters.photon_energy_relative_bandwidth = 1e-3
         parameters.divergence = 5e-6
+        parameters.photon_energy_spectrum_type="tophat"
 
         # Check all parameters are set as intended.
         self.assertEqual( parameters.photon_energy, 8.0e3 )
@@ -109,6 +112,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
         self.assertEqual( parameters.pulse_energy, 2.5e-3 )
         self.assertEqual( parameters.beam_diameter_fwhm, 1e-7 )
         self.assertEqual( parameters.divergence, 5e-6 )
+        self.assertEqual( parameters.photon_energy_spectrum_type, "tophat" )
 
 if __name__ == '__main__':
     unittest.main()

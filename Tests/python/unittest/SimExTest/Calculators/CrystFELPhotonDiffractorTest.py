@@ -37,8 +37,10 @@ import unittest
 
 
 # Import the class to test.
-from SimEx.Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
-from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+from SimEx.Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor, CrystFELPhotonDiffractorParameters
+from SimEx.Calculators.CrystFELPhotonDiffractor import _rename_files
+from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from TestUtilities import TestUtilities
 
 class CrystFELPhotonDiffractorTest(unittest.TestCase):
@@ -49,12 +51,12 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
+        pass
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        del cls.input_h5
+        pass
 
     def setUp(self):
         """ Setting up a test. """
@@ -73,402 +75,143 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
     def testShapedConstruction(self):
         """ Testing the construction of the class with parameters. """
 
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                   }
+        # Setup parameters.
+        parameters=CrystFELPhotonDiffractorParameters(sample="5udc.pdb")
 
         # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
+        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None)
 
+        # Check type.
         self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
+        self.assertIsInstance(diffractor, AbstractPhotonDiffractor)
 
-    def testConstructionParameters(self):
-        """ Check we can construct with a parameter object. """
-        parameters = CrystFELPhotonDiffractorParameters(uniform_rotation = True,
-                                                       calculate_Compton = False,
-                                                       slice_interval = 100,
-                                                       number_of_slices = 2,
-                                                       pmi_start_ID = 1,
-                                                       pmi_stop_ID  = 1,
-                                                       number_of_diffraction_patterns = 2,
-                                                       beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
-                                                       beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
-                                                       )
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
+    def testBackengineSinglePattern(self):
+        """ Check we can run pattern_sim with a minimal set of parameter. """
 
-        # Check instance.
-        self.assertIsInstance( diffractor, CrystFELPhotonDiffractor )
+        # Ensure cleanup.
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
 
-    def testShapedConstruction(self):
-        """ Testing the construction of the class with parameters. """
+        # Get parameters.
+        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+                geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                number_of_diffraction_patterns=1)
 
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                   }
+        # Get calculator.
+        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
-
-        self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
-
-
-    def testDefaultConstruction(self):
-        """ Testing the default construction of the class. """
-
-        # Prepare input.
-        shutil.copytree( TestUtilities.generateTestFilePath( 'pmi_out' ), os.path.abspath( 'pmi' ) )
-
-        # Ensure proper cleanup.
-        self.__dirs_to_remove.append( os.path.abspath( 'pmi') )
-        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
-
-        # Set up parameters.
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                   }
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters)
-
-        self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
-
-        self.assertEqual( diffractor.input_path,  os.path.abspath( 'pmi') )
-        self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
-
-    def testDefaultConstructionLegacy(self):
-        """ Testing the default construction of the class with MPI parameter. """
-
-        # Prepare input.
-        shutil.copytree( TestUtilities.generateTestFilePath( 'pmi_out' ), os.path.abspath( 'pmi' ) )
-
-        # Ensure proper cleanup.
-        self.__dirs_to_remove.append( os.path.abspath( 'pmi') )
-        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
-
-        # Set up parameters.
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 2,
-                   }
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters)
-
-        self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
-
-        self.assertEqual( diffractor.input_path,  os.path.abspath( 'pmi') )
-        self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
-
-    def testConstructionExceptions(self):
-        """ Check that proper exceptions are thrown if object is constructed incorrectly. """
-        # Parameter not a dict.
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, 1, self.input_h5, 'diffr.h5')
-
-        # Setup parameters that are ok
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     }
-
-        # Check construction with sane parameters.
-        singfel = CrystFELPhotonDiffractor( parameters, self.input_h5, 'diffr.h5')
-        self.assertIsInstance( singfel, CrystFELPhotonDiffractor )
-
-        # uniform_rotation not a bool.
-        parameters['uniform_rotation'] = 1
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['uniform_rotation'] = True
-
-        # calculate_Compton not a bool.
-        parameters['calculate_Compton'] = 1
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['calculate_Compton'] = False
-
-        # slice_interval not positive integer.
-        parameters['slice_interval'] = -1
-        self.assertRaises( ValueError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # slice_interval not a number
-        parameters['slice_interval'] = 'one'
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['slice_interval'] = 1
-
-        # number_of_slices not positive integer.
-        parameters['number_of_slices'] = -1
-        self.assertRaises( ValueError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # number_of_slices not a number
-        parameters['number_of_slices'] = 'one'
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['number_of_slices'] = 2
-
-        # number_of_diffraction_patterns not positive integer.
-        parameters['number_of_diffraction_patterns'] = -1
-        self.assertRaises( ValueError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # number_of_diffraction_patterns not a number
-        parameters['number_of_diffraction_patterns'] = 'one'
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['number_of_diffraction_patterns'] = 2
-
-        # pmi_start_ID not positive integer.
-        parameters['pmi_start_ID'] = -1
-        self.assertRaises( ValueError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # pmi_start_ID not a number
-        parameters['pmi_start_ID'] = 'one'
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['pmi_start_ID'] = 1
-
-        # pmi_stop_ID not positive integer.
-        parameters['pmi_stop_ID'] = -1
-        self.assertRaises( ValueError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # pmi_stop_ID not a number
-        parameters['pmi_stop_ID'] = 'one'
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['pmi_stop_ID'] = 1
-
-        # beam_parameter_file not a string.
-        parameters['beam_parameter_file'] = 1
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # beam_parameter_file not a file.
-        parameters['beam_parameter_file'] = 's2e.beam'
-        self.assertRaises( IOError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        parameters['beam_parameter_file'] =  TestUtilities.generateTestFilePath('s2e.beam')
-
-        # beam_geometry_file not a string.
-        parameters['beam_geometry_file'] = 1
-        self.assertRaises( TypeError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # beam_geometry_file not a file.
-        parameters['beam_geometry_file'] = 's2e.geom'
-        self.assertRaises( IOError, CrystFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        parameters['beam_geometry_file'] =  TestUtilities.generateTestFilePath('s2e.geom'),
-
-
-    def testBackengine(self):
-        """ Test that we can start a test calculation. """
-
-        # Cleanup.
-        self.__dirs_to_remove.append('diffr')
-
-        parameters = CrystFELPhotonDiffractorParameters(
-                     uniform_rotation= True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID  = 1,
-                     number_of_diffraction_patterns = 2,
-                     beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
-                     forced_mpi_command='mpirun',
-                     )
-
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr')
-
-        # Call backengine.
+        # Run backengine
         status = diffractor.backengine()
 
-        # Check successful completion.
+        # Check return code.
         self.assertEqual(status, 0)
 
-    def testBackengineDefaultPaths(self):
-        """ Test that we can start a calculation with default paths given. """
+        # Check output dir was created.
+        self.assertTrue( os.path.isdir( diffractor.output_path ) )
 
-        # Prepare input.
-        shutil.copytree( TestUtilities.generateTestFilePath( 'pmi_out' ), os.path.abspath( 'pmi' ) )
+        # Check pattern was written.
+        self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
 
-        # Ensure proper cleanup.
-        self.__dirs_to_remove.append( os.path.abspath( 'pmi') )
-        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
 
-        parameters = CrystFELPhotonDiffractorParameters(
-                     uniform_rotation = True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
-                     number_of_diffraction_patterns= 2,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
-                     forced_mpi_command='mpirun')
 
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters)
+    def testBackengineMultiplePatterns(self):
+        """ Check we can run pattern_sim with a minimal set of parameter. """
 
-        # Call backengine.
+        # Ensure cleanup.
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
+
+        # Get parameters.
+        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+                geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                number_of_diffraction_patterns=2)
+
+        # Get calculator.
+        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
+
+        # Run backengine
         status = diffractor.backengine()
 
-        # Check successful completion.
+        # Check return code.
         self.assertEqual(status, 0)
 
-        # Check expected files exist.
-        self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
-        self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
+        # Check output dir was created.
+        self.assertTrue( os.path.isdir( diffractor.output_path ) )
 
+        # Check pattern was written.
+        self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
+        self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
-    def testBackengineInputFile(self):
-        """ Test that we can start a test calculation if the input path is a single file. """
+    def testSaveH5(self):
+        """ Check that saveh5() creates correct filenames. """
 
-        # Cleanup.
-        self.__dirs_to_remove.append('diffr')
+        # Ensure cleanup.
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
 
-        parameters = CrystFELPhotonDiffractorParameters(
-                     uniform_rotation = True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
-                     number_of_diffraction_patterns= 2,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
-                     forced_mpi_command='mpirun')
+        # Get parameters.
+        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+                geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                number_of_diffraction_patterns=2)
 
+        # Get calculator.
+        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr')
-
-        # Call backengine.
+        # Run backengine
         status = diffractor.backengine()
 
-        # Check successful completion.
+        # Save correctly.
+        diffractor.saveH5()
+
+        # Check return code.
         self.assertEqual(status, 0)
 
-    def testBackengineInputDir(self):
-        """ Test that we can start a test calculation if the input path is a directory. """
+        # Check output dir was created.
+        self.assertTrue( os.path.isdir( diffractor.output_path ) )
 
-        # Cleanup.
-        self.__dirs_to_remove.append('diffr')
+        # Check pattern was written.
+        self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
+        self.assertIn( "diffr_out_0000002.h5" , os.listdir( diffractor.output_path ))
 
-        parameters = CrystFELPhotonDiffractorParameters(
-                     uniform_rotation = True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
-                     number_of_diffraction_patterns= 2,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
-                     forced_mpi_command='mpirun')
+        # FIXME: Link all output into one hdf5.
+        self.assertIn( diffractor.output_path+".h5", os.listdir( os.path.dirname( diffractor.output_path) ) )
 
-        # Construct the object.
-        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=TestUtilities.generateTestFilePath('pmi_out'), output_path='diffr')
+    def notestRenameFiles(self):
 
-        # Call backengine.
+        _rename_files( "diffr" )
+
+    def testBackengineWithBeamParametersObject(self):
+        """ Check beam parameter logic if they are set as parameters. """
+
+        # Ensure cleanup.
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
+
+        # Setup beam parameters.
+        beam_parameters = PhotonBeamParameters(
+                photon_energy=16.0e3,
+                photon_energy_relative_bandwidth=0.001,
+                pulse_energy=2.0e-3,
+                beam_diameter_fwhm=100e-9,
+                divergence=None,
+                )
+
+        # Get parameters.
+        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+                geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                beam_parameters=beam_parameters,
+                number_of_diffraction_patterns=2,
+                )
+
+        # Get calculator.
+        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
+
+        # Run backengine
         status = diffractor.backengine()
 
-        # Check successful completion.
+        # Check return code.
         self.assertEqual(status, 0)
 
-    def testBug53(self):
-        """ Tests a script that was found to raise if run in parallel mode. """
-
-        self.__dirs_to_remove.append('diffr')
-
-        diffraction_parameters = CrystFELPhotonDiffractorParameters(
-                     uniform_rotation= True,
-                     calculate_Compton= True,
-                     slice_interval= 100,
-                     number_of_slices= 2,
-                     pmi_start_ID= 1,
-                     pmi_stop_ID = 9,
-                     number_of_diffraction_patterns= 1,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
-                   )
-
-        photon_diffractor = CrystFELPhotonDiffractor(
-                parameters=diffraction_parameters,
-                input_path=TestUtilities.generateTestFilePath('pmi_out'),
-                output_path='diffr')
-
-        photon_diffractor.backengine()
-
-    def testCrystleFile(self):
-        """ Test that saveH5() generates only one linked hdf. """
-
-
-        diffraction_parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : True,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 4,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                     'number_of_MPI_processes' : 8,
-                   }
-
-        photon_diffractor = CrystFELPhotonDiffractor(
-                parameters=diffraction_parameters,
-                input_path=TestUtilities.generateTestFilePath('pmi_out'),
-                output_path='diffr_newstyle')
-
-        # Cleanup.
-        self.__dirs_to_remove.append(photon_diffractor.output_path)
-
-        # Run backengine and convert files.
-        photon_diffractor.backengine()
-        photon_diffractor.saveH5()
-
-        # Cleanup new style files.
-        self.__files_to_remove.append(photon_diffractor.output_path)
-
-        # Check that only one file was generated.
-        self.assertTrue( os.path.isfile( photon_diffractor.output_path ))
-
-        # Open the file for reading.
-        h5_filehandle = h5py.File( photon_diffractor.output_path, 'r')
-
-        # Count groups under /data.
-        number_of_patterns = len(h5_filehandle['data'].keys())
-
-        self.assertEqual( number_of_patterns, 8 )
-
-        # Assert global metadata is present.
-        self.assertIn("params", h5_filehandle.keys() )
-        self.assertIn("version", h5_filehandle.keys() )
-        self.assertIn("info", h5_filehandle.keys() )
 
 if __name__ == '__main__':
     unittest.main()

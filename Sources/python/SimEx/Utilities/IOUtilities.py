@@ -76,7 +76,7 @@ def checkAndGetPDB( path ):
         try:
             print "PDB file %s could not be found. Attempting to query from protein database server." % (path)
             urllib.urlcleanup()
-            download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir )
+            download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
         except:
             raise IOError( "Database query failed.")
         finally:
@@ -292,6 +292,7 @@ def wgetData(url=None, path=None):
     print "Download completed and saved to %s." % (local_filename)
     return local_filename
 #if __name__ == "__main__":
+    #main()
     #data, charge = pic2dist(sys.argv[1], sys.argv[2])
     ## Setup header for distribution file.
     #comments = "? "

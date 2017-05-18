@@ -32,6 +32,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
             pulse_energy,
             photon_energy_relative_bandwidth=None,
             divergence=None,
+            photon_energy_spectrum_type=None,
             **kwargs
             ):
         """
@@ -52,6 +53,9 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         :param divergence: Beam divergence angle in units of radian (rad).
         :type divergence: float (0 < divergence < 2*pi)
 
+        :param photon_energy_spectrum_type: Type of energy spectrum ("SASE" | "tophat" | "twocolour", default "SASE").
+        :type photon_energy_spectrum_type: float (0 < photon_energy_spectrum_type < 2*pi)
+
         :param kwargs: Key-value pairs to be passed to the parent class constructor.
         :type kwargs: dict
 
@@ -64,6 +68,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         self.beam_diameter_fwhm = beam_diameter_fwhm
         self.pulse_energy = pulse_energy
         self.divergence = divergence
+        self.photon_energy_spectrum_type = photon_energy_spectrum_type
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
@@ -78,6 +83,15 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
     def photon_energy(self, val):
         """ Set the 'photon_energy' parameter to val."""
         self.__photon_energy = checkAndSetInstance( float, val, None)
+
+    @property
+    def photon_energy_spectrum_type(self):
+        """ Query the 'photon_energy_spectrum_type' parameter. """
+        return self.__photon_energy_spectrum_type
+    @photon_energy_spectrum_type.setter
+    def photon_energy_spectrum_type(self, val):
+        """ Set the 'photon_energy_spectrum_type' parameter to val."""
+        self.__photon_energy_spectrum_type = checkAndSetInstance( str, val, "SASE")
 
     @property
     def photon_energy_relative_bandwidth(self):
