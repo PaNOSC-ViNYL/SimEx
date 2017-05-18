@@ -24,12 +24,14 @@ import os
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import IOUtilities
 
 class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
     Class representing parameters for the CrystFELPhotonDiffractor calculator.
     """
     def __init__(self,
+                sample=None,
                 uniform_rotation=None,
                 number_of_diffraction_patterns=None,
                 powder=None,
@@ -40,11 +42,13 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 suppress_fringes=None,
                 beam_parameter_file=None,
                 beam_geometry_file=None,
-                number_of_MPI_processes=None,
-                **kwargs,
+                **kwargs
                 ):
         """
         Constructor for the CrystFELPhotonDiffractorParameters.
+
+        :param sample: Location of file that contains the sample definition (pdb or crystfel format)
+        :type sample: str
 
         :param uniform_rotation: Whether to perform uniform sampling of rotation space.
         :type uniform_rotation: bool, default True
@@ -76,15 +80,13 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param beam_geometry_file: Path of the beam geometry file.
         :type beam_geometry_file: str
 
-        :param number_of_MPI_processes: Number of MPI processes
-        :type number_of_MPI_processes: int, default 1
-
         :param kwargs: Key-value pairs to pass to the parent class.
         """
 
 
 
         # Check all parameters.
+        self.sample = sample
         self.uniform_rotation = uniform_rotation
         self.powder = powder
         self.intensities_file = intensities_file
@@ -92,7 +94,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.poissonize = poissonize
         self.number_of_background_photons = number_of_background_photons
         self.suppress_fringes = suppress_fringes
-        self.number_of_MPI_processes=number_of_MPI_processes
         self.beam_parameter_file = beam_parameter_file
         self.beam_geometry_file = beam_geometry_file
         self.number_of_diffraction_patterns = number_of_diffraction_patterns
@@ -104,6 +105,18 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     ### Setters and queries.
+    @property
+    def sample(self):
+        """ Query the 'sample' parameter. """
+        return self.__sample
+    @sample.setter
+    def sample(self, val):
+        """ Set the 'sample' parameter to val."""
+        if val is None:
+            raise ValueError( "A sample must be defined.")
+        if val.split(".")[-1] == "pdb":
+            self.__sample = IOUtilities.checkAndGetPDB(val)
+
     @property
     def powder(self):
         """ Query the 'powder' parameter. """
@@ -120,7 +133,7 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     @intensities_file.setter
     def intensities_file(self, val):
         """ Set the 'intensities_file' parameter to val."""
-        self.__intensities_file = checkAndSetInstance( str, val, "")
+        self.__intensities_file = checkAndSetInstance( str, val, None)
 
     @property
     def crystal_size_range(self):
@@ -129,8 +142,13 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     @crystal_size_range.setter
     def crystal_size_range(self, val):
         """ Set the 'crystal_size_range' parameter to val."""
-        self.__crystal_size_range = checkAndSetInstance( tuple, val, (,))
-
+        # Check if iterable.
+        if val is None:
+            self.__crystal_size_range = None
+        if hasattr(val, '__iter__'):
+            if len(val) != 2:
+                raise ValueError( 'The parameter "crystal_size_range" must be an iterable (list or tuple) of length 2.')
+            self.__crystal_size_range = tuple(val)
     @property
     def poissonize(self):
         """ Query the 'poissonize' parameter. """

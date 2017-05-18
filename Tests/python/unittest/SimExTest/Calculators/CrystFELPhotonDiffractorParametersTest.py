@@ -38,7 +38,7 @@ import unittest
 
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+from SimEx.Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 
 
 class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
@@ -70,52 +70,82 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
                 shutil.rmtree(d)
 
     def testDefaultConstruction(self):
-        """ Testing the default construction of the class using a dictionary. """
+        """ Testing the default construction. """
 
         # Attempt to construct an instance of the class.
-        parameters = CrystFELPhotonDiffractorParameters()
+        parameters = CrystFELPhotonDiffractorParameters( sample=TestUtilities.generateTestFilePath("2nip.pdb")
+                )
 
         # Check instance and inheritance.
         self.assertIsInstance( parameters, CrystFELPhotonDiffractorParameters )
         self.assertIsInstance( parameters, AbstractCalculatorParameters )
 
         # Check all parameters are set to default values.
+        self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
         self.assertTrue( parameters.uniform_rotation )
-        self.assertFalse( parameters.calculate_Compton )
-        self.assertEqual( parameters.slice_interval, 100 )
-        self.assertEqual( parameters.number_of_slices, 1 )
-        self.assertEqual( parameters.pmi_start_ID, 1 )
-        self.assertEqual( parameters.pmi_stop_ID, 1 )
+        self.assertEqual( parameters.beam_parameter_file, None )
+        self.assertEqual( parameters.beam_geometry_file, None )
+        self.assertTrue( parameters.uniform_rotation )
+        self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
+        self.assertFalse( parameters.powder )
+        self.assertEqual( parameters.intensities_file, None )
+        self.assertEqual( parameters.crystal_size_range, None )
+        self.assertFalse( parameters.poissonize, False )
+        self.assertEqual( parameters.number_of_background_photons, 0 )
+        self.assertFalse( parameters.suppress_fringes )
         self.assertEqual( parameters.beam_parameter_file, None )
         self.assertEqual( parameters.beam_geometry_file, None )
 
-    def testLegacyDictionary(self):
-        """ Check parameter object can be initialized via a old-style dictionary. """
-        parameters_dict = { 'uniform_rotation': False,
-                           'calculate_Compton' : True,
-                           'slice_interval' : 12,
-                           'number_of_slices' : 2,
-                           'pmi_start_ID' : 4,
-                           'pmi_stop_ID'  : 5,
-                           'number_of_diffraction_patterns' : 2,
-                           'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                           'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                           'number_of_MPI_processes' : 4, # Legacy, has no effect.
-                   }
+    def testShapedConstruction(self):
+        """ Testing the construction with parameters of the class. """
 
+        # Attempt to construct an instance of the class.
+        parameters = CrystFELPhotonDiffractorParameters(
+                sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+                powder=True,
+                number_of_diffraction_patterns=10,
+                number_of_background_photons=100,
+                poissonize=True,
+                suppress_fringes=True,
+                crystal_size_range=[10,100],
+                uniform_rotation=False,)
 
-        parameters = CrystFELPhotonDiffractorParameters(parameters_dictionary=parameters_dict)
-
-        # Check all parameters are set correctly.
+        # Check all parameters are set as intended.
         self.assertFalse( parameters.uniform_rotation )
-        self.assertTrue( parameters.calculate_Compton )
-        self.assertEqual( parameters.slice_interval, 12 )
-        self.assertEqual( parameters.number_of_slices, 2 )
-        self.assertEqual( parameters.pmi_start_ID, 4 )
-        self.assertEqual( parameters.pmi_stop_ID, 5 )
-        self.assertEqual( parameters.beam_parameter_file, TestUtilities.generateTestFilePath('s2e.beam') )
-        self.assertEqual( parameters.beam_geometry_file, TestUtilities.generateTestFilePath('s2e.geom') )
+        self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
+        self.assertTrue( parameters.powder )
+        self.assertEqual( parameters.crystal_size_range, (10.,100.) )
+        self.assertTrue( parameters.poissonize )
+        self.assertEqual( parameters.number_of_background_photons, 100 )
+        self.assertTrue( parameters.suppress_fringes )
 
+    def testSettersAndQueries(self):
+        """ Testing the default construction of the class using a dictionary. """
+
+        self.__files_to_remove.append("5udc.pdb")
+
+        # Construct with defaults.
+        parameters = CrystFELPhotonDiffractorParameters(TestUtilities.generateTestFilePath("2nip.pdb"))
+
+        # Set some members to non-defaults.
+        parameters.sample="5udc.pdb"
+        parameters.powder=True
+        parameters.number_of_diffraction_patterns=10
+        parameters.number_of_background_photons=100
+        parameters.poissonize=True
+        parameters.suppress_fringes=True
+        parameters.crystal_size_range=[10,100]
+        parameters.uniform_rotation=False
+
+        # Check all parameters are set as intended.
+        self.assertEqual( parameters.sample, "5udc.pdb")
+        self.assertFalse( parameters.uniform_rotation )
+        self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
+        self.assertTrue( parameters.powder )
+        self.assertEqual( parameters.crystal_size_range, (10.,100.) )
+        self.assertTrue( parameters.poissonize )
+        self.assertEqual( parameters.number_of_background_photons, 100 )
+        self.assertTrue( parameters.suppress_fringes )
 
 if __name__ == '__main__':
     unittest.main()
