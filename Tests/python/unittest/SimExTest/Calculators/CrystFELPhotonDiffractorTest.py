@@ -1,6 +1,7 @@
+""" Test module for the CrystFELPhotonDiffractor."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015,2016 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the CrystFELPhotonDiffractor.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151109
-
-"""
 import os
 import h5py
 import shutil
@@ -84,6 +78,48 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check type.
         self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
         self.assertIsInstance(diffractor, AbstractPhotonDiffractor)
+
+    def testConstructionWithPropInput(self):
+        """ Check that beam parameters can be taken from a given propagation output file."""
+
+
+        parameters = CrystFELPhotonDiffractorParameters(
+                sample="5udc.pdb",
+                geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                beam_parameters=None,
+                number_of_diffraction_patterns=1,
+                )
+
+        diffractor = CrystFELPhotonDiffractor(
+                parameters=parameters,
+                input_path=TestUtilities.generateTestFilePath("prop_out_0000001.h5"),
+                output_path="diffr",
+                )
+
+        # Check that beam parameters have been updated from prop output.
+        self.assertAlmostEqual( diffractor.parameters.beam_parameters.photon_energy , 4947.34315, 5 )
+
+    def testBackengineWithPropInput(self):
+        """ Check that beam parameters can be taken from a given propagation output file."""
+
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
+
+        parameters = CrystFELPhotonDiffractorParameters(
+                sample="5udc.pdb",
+                geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                beam_parameters=None,
+                number_of_diffraction_patterns=1,
+                )
+
+        diffractor = CrystFELPhotonDiffractor(
+                parameters=parameters,
+                input_path=TestUtilities.generateTestFilePath("prop_out_0000001.h5"),
+                output_path="diffr",
+                )
+
+        # Check that beam parameters have been updated from prop output.
+        diffractor.backengine()
 
     def testBackengineSinglePattern(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """

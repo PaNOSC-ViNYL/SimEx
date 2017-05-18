@@ -30,6 +30,7 @@ from scipy import constants
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters, propToBeamParameters
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
@@ -58,14 +59,18 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             self.__parameters = checkAndSetInstance( CrystFELPhotonDiffractorParameters, parameters, None )
 
 
-        # Init base class.
-
         # Dummy input path since none required (we don't read from a beam propgation yet.)
-        input_path = os.path.dirname(__file__)
+        if input_path is None:
+            input_path = os.path.dirname(__file__)
+        else:
+            if parameters.beam_parameters is not None:
+                raise RuntimeError("Beam parameters can only be passed through the parameters object or via the input_path argument.")
+            parameters.beam_parameters = propToBeamParameters( input_path )
 
         if output_path is None:
             output_path = os.path.join(os.path.dirname(__file__), "diffr")
 
+        # Init base class.
         super(CrystFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
 
         ### FIXME
@@ -147,6 +152,9 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             command_sequence.append('--nphotons=%e' % (nphotons))
             command_sequence.append('--beam-radius=%e' % (self.parameters.beam_parameters.beam_diameter_fwhm/2.))
             command_sequence.append('--spectrum=%s' % (self.parameters.beam_parameters.photon_energy_spectrum_type.lower()))
+            if self.parameters.beam_parameters.photon_energy_spectrum_type.lower() == "sase":
+                command_sequence.append('--sample-spectrum=512')
+
 
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence

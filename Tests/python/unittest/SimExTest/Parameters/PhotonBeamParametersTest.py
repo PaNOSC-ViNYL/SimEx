@@ -1,7 +1,7 @@
 """ :module PhotonBeamParametersTest: Test module for the PhotonBeamParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -33,6 +33,7 @@ import unittest
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
 
 class PhotonBeamParametersTest(unittest.TestCase):
     """
@@ -114,6 +115,13 @@ class PhotonBeamParametersTest(unittest.TestCase):
         self.assertEqual( parameters.divergence, 5e-6 )
         self.assertEqual( parameters.photon_energy_spectrum_type, "tophat" )
 
+    def testPropToBeamParameters(self):
+        """ Test the utility function to construct a PhotonBeamParameters instance from prop output (wavefron file). """
+
+        beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out_0000001.h5"))
+
+        self.assertIsInstance( beam_parameters, PhotonBeamParameters )
+        self.assertAlmostEqual( beam_parameters.photon_energy, 4947.34315, 5 )
 if __name__ == '__main__':
     unittest.main()
 
