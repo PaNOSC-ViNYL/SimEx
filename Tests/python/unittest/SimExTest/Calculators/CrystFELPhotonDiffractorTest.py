@@ -182,9 +182,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Check that saveh5() creates correct filenames. """
 
         # Ensure cleanup.
-        #self.__dirs_to_remove.append("diffr")
-        #self.__files_to_remove.append("5udc.pdb")
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
+        self.__files_to_remove.append("diffr.h5")
 
+        # Setup beam parameters.
         beam_parameters = PhotonBeamParameters(photon_energy=5e3,
                 pulse_energy=2e-3,
                 photon_energy_relative_bandwidth=1e-3,
@@ -213,19 +215,14 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor.saveH5()
 
         # Check output file was created.
-        self.assertTrue( os.path.isfile( diffractor.output_path+".h5" ) )
+        self.assertTrue( os.path.isfile( diffractor.output_path ) )
 
         # Check pattern was written.
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( "diffr" ))
         self.assertIn( "diffr_out_0000002.h5" , os.listdir( "diffr" ))
 
         # Check metafile was created.
-        self.assertIn( os.path.split(diffractor.output_path+".h5")[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
-
-        # Check calculator json string is stored.
-        with h5py.File( diffractor.output_path+".h5" ) as h5:
-            self.assertIn("params", h5.keys())
-            self.assertIn("calculator", h5["params"].keys())
+        self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
 
     def notestRenameFiles(self):
 

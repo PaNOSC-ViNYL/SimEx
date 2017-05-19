@@ -195,60 +195,38 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         _rename_files(path_to_files)
 
         # Setup new file.
-        h5_outfile = h5py.File( self.output_path + ".h5" , "w")
+        with h5py.File( self.output_path + ".h5" , "w") as h5_outfile:
 
-        # Files to read from.
-        individual_files = [os.path.join( path_to_files, f ) for f in os.listdir( path_to_files ) ]
-        individual_files.sort()
+            # Files to read from.
+            individual_files = [os.path.join( path_to_files, f ) for f in os.listdir( path_to_files ) ]
+            individual_files.sort()
 
-        # Loop over all individual files and link in the top level groups.
-        for ind_file in individual_files:
-            # Open file.
-            h5_infile = h5py.File( ind_file, 'r')
+            # Loop over all individual files and link in the top level groups.
+            for ind_file in individual_files:
+                # Open file.
+                with h5py.File( ind_file, 'r') as h5_infile:
 
-            # Get file ID.
-            file_ID = os.path.split(ind_file)[-1].split(".h5")[0].split("_")[-1]
+                    # Get file ID.
+                    file_ID = os.path.split(ind_file)[-1].split(".h5")[0].split("_")[-1]
 
-            # Links must be relative.
-            relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+                    # Links must be relative.
+                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
 
-            for l1 in h5_infile.keys():
+                    for l1 in h5_infile.keys():
 
-                # Link in the data.
-                path_in_origin = "%s/%s" % (file_ID,l1)
-                path_in_target = "%s" % (l1)
-                h5_outfile[path_in_origin] = h5py.ExternalLink(relative_link_target, path_in_target)
+                        # Link in the data.
+                        path_in_origin = "%s/%s" % (file_ID,l1)
+                        path_in_target = "%s" % (l1)
+                        h5_outfile[path_in_origin] = h5py.ExternalLink(relative_link_target, path_in_target)
 
-            # Close input file.
-            h5_infile.close()
+                    # Close input file.
+                    h5_infile.close()
 
-        # Save yourself.
-        self.serialize()
+            # Close file.
+            h5_outfile.close()
 
-        h5_outfile.create_group("params")
-        with  open(self.__json_path) as json_path:
-            h5_outfile["params/calculator"] = json_path.readlines()
-            json.close()
-
-        # Close file.
-        h5_outfile.close()
-
-    def serialize(self):
-        # Write json file of this parameter class instance.
-        json_path = os.path.join( self.output_path, 'crystfel_photon_diffractor.json')
-        with open( json_path, 'w') as j:
-            json.dump( self.__dict__, j)
-            j.close()
-        self.__json_path = json_path
-
-    def _initFromJson(self,path):
-        # Read from parameters file
-        json_path = path
-        with open(json_path, 'r') as j:
-            dictionary = json.load(j)
-            j.close()
-
-        self.__dict__ = dictionary
+            # Reset output_path
+            self.output_path = self.output_path+".h5"
 
 def _rename_files(path):
     """ """
