@@ -182,12 +182,19 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Check that saveh5() creates correct filenames. """
 
         # Ensure cleanup.
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
+        #self.__dirs_to_remove.append("diffr")
+        #self.__files_to_remove.append("5udc.pdb")
 
+        beam_parameters = PhotonBeamParameters(photon_energy=5e3,
+                pulse_energy=2e-3,
+                photon_energy_relative_bandwidth=1e-3,
+                photon_energy_spectrum_type="tophat",
+                beam_diameter_fwhm=3e-6,
+                )
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
                 geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2)
 
         # Get calculator.
@@ -196,21 +203,29 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Run backengine
         status = diffractor.backengine()
 
-        # Save correctly.
-        diffractor.saveH5()
-
         # Check return code.
         self.assertEqual(status, 0)
 
         # Check output dir was created.
         self.assertTrue( os.path.isdir( diffractor.output_path ) )
 
-        # Check pattern was written.
-        self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
-        self.assertIn( "diffr_out_0000002.h5" , os.listdir( diffractor.output_path ))
+        # Save correctly.
+        diffractor.saveH5()
 
-        # FIXME: Link all output into one hdf5.
-        self.assertIn( diffractor.output_path+".h5", os.listdir( os.path.dirname( diffractor.output_path) ) )
+        # Check output file was created.
+        self.assertTrue( os.path.isfile( diffractor.output_path+".h5" ) )
+
+        # Check pattern was written.
+        self.assertIn( "diffr_out_0000001.h5" , os.listdir( "diffr" ))
+        self.assertIn( "diffr_out_0000002.h5" , os.listdir( "diffr" ))
+
+        # Check metafile was created.
+        self.assertIn( os.path.split(diffractor.output_path+".h5")[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
+
+        # Check calculator json string is stored.
+        with h5py.File( diffractor.output_path+".h5" ) as h5:
+            self.assertIn("params", h5.keys())
+            self.assertIn("calculator", h5["params"].keys())
 
     def notestRenameFiles(self):
 
