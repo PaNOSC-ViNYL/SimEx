@@ -50,13 +50,14 @@ class EstherExperimentConstructionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Make a directory for simulation storage.
-        cls._simdir = os.path.join(os.getcwd(), "Simulations")
-        os.mkdir(cls._simdir)
+        cls._simdir = os.path.join("/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/", "Simulations")
+        #os.mkdir(cls._simdir)
+        #Comment out the mkdir if the sim dir has already been created. Is there an overwrite or if is not path then create...
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        shutil.rmtree(cls._simdir)
+        #shutil.rmtree(cls._simdir)
 
     def setUp(self):
         """ Setting up a test. """
@@ -79,45 +80,18 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         # Attempt to construct an instance of the class.
         self.assertRaises( RuntimeError, EstherExperimentConstruction )
 
-    def testConstruction1(self):
-
-        esther_sims_path=self._simdir
-        sim_name = "NickelShock"
-        esther_experiment = EstherExperimentConstruction(esther_sims_path=esther_sims_path, sim_name=sim_name)
-
-        # Check presence of expected directories.
-        self.assertIn( sim_name, os.listdir( esther_sims_path ) )
-        self.assertIn( "1",  os.listdir(os.path.join(esther_sims_path, sim_name) ) )
-
-        # Check instance and inheritance.
-        self.assertIsInstance( esther_experiment, EstherExperimentConstruction )
-
-    def testConstruction2(self):
-
-        esther_sims_path=self._simdir
-        sim_name = "NickelShock"
-        esther_experiment = EstherExperimentConstruction(esther_sims_path=esther_sims_path, sim_name=sim_name)
-
-        # Check presence of expected directories.
-        self.assertIn( sim_name, os.listdir( esther_sims_path ) )
-        self.assertIn( "1", os.listdir( os.path.join(esther_sims_path, sim_name) ) )
-        self.assertIn( "2", os.listdir( os.path.join(esther_sims_path, sim_name) ) )
-
-        # Check instance and inheritance.
-        self.assertIsInstance( esther_experiment, EstherExperimentConstruction )
-
     def testComplexWorkflow(self):
 
         # Create parameters.
         parameters = EstherPhotonMatterInteractorParameters(
                                         number_of_layers=2,
                                          ablator="CH",
-                                         ablator_thickness=10.0,
+                                         ablator_thickness=25.0,
                                          sample="Iron",
-                                         sample_thickness=20.0,
+                                         sample_thickness=5.0,
                                          window=None,
                                          window_thickness=0.0,
-                                         laser_wavelength=800.0,
+                                         laser_wavelength=1064.0,
                                          laser_pulse='flat',
                                          laser_pulse_duration=1.0,
                                          laser_intensity=0.1,
@@ -125,29 +99,30 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                          delta_time=0.05
                                          )
         # Create experiment.
+        simName = "HPLF-Fe"
         experiment = EstherExperimentConstruction(parameters=parameters,
                                                   esther_sims_path=self._simdir,
-                                                  sim_name=parameters.sample)
+                                                  sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "Simulations/Iron/1"
+        expected_dir = "Simulations/HPLF-Fe/1"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "Iron1.dat", os.listdir(expected_dir) )
-        self.assertIn( "Iron1_intensite_impulsion.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe1.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe1_intensite_impulsion.dat", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         # Create new experiment from previous.
         experiment = EstherExperimentConstruction(parameters=parameters,
                                                   esther_sims_path=self._simdir,
-                                                  sim_name=parameters.sample)
+                                                  sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "Simulations/Iron/2"
+        expected_dir = "Simulations/HPLF-Fe/2"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "Iron2.dat", os.listdir(expected_dir) )
-        self.assertIn( "Iron2_intensite_impulsion.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe2.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe2_intensite_impulsion.dat", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         with open(os.path.join(expected_dir,"parameters.json")) as j:
@@ -155,23 +130,22 @@ class EstherExperimentConstructionTest(unittest.TestCase):
             j.close()
 
         # Check parameter.
-        self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 20.0 )
-
-
+        self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 5.0 )
+        
         # Create new experiment from previous with update.
-        new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=15.0,
-                read_from_file="Simulations/Iron/2")
+        new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=4.0,
+                read_from_file="Simulations/HPLF-Fe/2")
 
         experiment = EstherExperimentConstruction(parameters=new_parameters,
                                                   esther_sims_path=self._simdir,
-                                                  sim_name=parameters.sample)
+                                                  sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "Simulations/Iron/3"
+        expected_dir = "Simulations/HPLF-Fe/3"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "Iron3.dat", os.listdir(expected_dir) )
-        self.assertIn( "Iron3_intensite_impulsion.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe3.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe3_intensite_impulsion.dat", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         with open(os.path.join(expected_dir,"parameters.json")) as j:
@@ -179,24 +153,41 @@ class EstherExperimentConstructionTest(unittest.TestCase):
             j.close()
 
         # Check update performed.
-        self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 15.0 )
+        self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 4.0 )
+
+    def testComplexWorkflow2(self):
 
 
+        # Create parameters.
+        parameters = EstherPhotonMatterInteractorParameters(
+                                        number_of_layers=2,
+                                         ablator="CH",
+                                         ablator_thickness=25.0,
+                                         sample="Iron",
+                                         sample_thickness=5.0,
+                                         window=None,
+                                         window_thickness=0.0,
+                                         laser_wavelength=1064.0,
+                                         laser_pulse='flat',
+                                         laser_pulse_duration=6.0,
+                                         laser_intensity=0.1,
+                                         run_time=10.0,
+                                         delta_time=0.05
+                                         )
+        # Create experiment.
+        simName = "HPLF-Fe"
+        estherSimsPath = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/"
+        experiment = EstherExperimentConstruction(parameters=parameters,
+                                                  esther_sims_path=estherSimsPath,
+                                                  sim_name=simName)
 
-        ## Serialize.
-        ## New experiment based on first experiment.
-        #esther_sims_path=self._simdir
-        #sim_name = "NickelShock"
-        #esther_experiment = EstherExperimentConstruction(esther_sims_path=esther_sims_path, sim_name=sim_name)
+        # Check presence of expected directories.
+        expected_dir = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/HPLF-Fe/1"
+        self.assertTrue( os.path.isdir(expected_dir) )
 
-        ## Check presence of expected directories.
-        #self.assertIn( sim_name, os.listdir( esther_sims_path ) )
-        #self.assertIn( "1", os.listdir( os.path.join(esther_sims_path, sim_name) ) )
-        #self.assertIn( "2", os.listdir( os.path.join(esther_sims_path, sim_name) ) )
-
-        ## Check instance and inheritance.
-        #self.assertIsInstance( esther_experiment, EstherExperimentConstruction )
-
+        self.assertIn( "HPLF-Fe1.txt", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe1_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
 
 

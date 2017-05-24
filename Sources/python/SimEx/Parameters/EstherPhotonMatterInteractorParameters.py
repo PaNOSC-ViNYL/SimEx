@@ -425,8 +425,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # Make a loop of layer constructions with number_of_zones[i] for i < number of layers
             # The empty layer (epaisseur_vide) should be in the first layer construction
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
-            input_deck.write('NOM_MILIEU=%s\n' % (self.sample))
-            input_deck.write('EQUATION_ETAT=EOS_LIST\n')
+            input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.sample]["shortname"]))
+            input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.sample]["eos_name"]))
             if self.window is None:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
@@ -436,19 +436,19 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
-            input_deck.write('NOM_MILIEU=abl1\n') # 1ST PART OF ABLATOR
-            input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
+            input_deck.write('NOM_MILIEU=%s_abl1\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 1st PART OF ABLATOR
+            input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"]))# ABLATOR EOS
             # if only simulating ablator layer, then must include empty (VIDE) layer
             if self.number_of_layers == 1:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._non_feather_zone_width)) # Non-feather thickness
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self._non_feather_zones)) # Number of zones
             input_deck.write('\n')
-            input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
-            input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
+            input_deck.write('NOM_MILIEU==%s_abl2\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 2nd PART OF ABLATOR
+            input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"])) # ABLATOR EOS
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
-            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (self._minimum_zone_width)) #Min zone width
+            input_deck.write('EPAISSEUR_EXTERNE=%1.1fe-10\n' % (self._minimum_zone_width)) #Min zone width
             input_deck.write('\n')
 
             # TO DO: GIT ISSUE #96: Expert mode
