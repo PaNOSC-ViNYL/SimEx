@@ -387,7 +387,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self._esther_filename='tmp_input'
 
         # Write the input file
-        input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.dat')
+        input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.txt')
         print "Writing input deck to ", input_deck_path, "."
 
         # Write json file of this parameter class instance.
@@ -481,7 +481,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('FIN_DES_INSTRUCTIONS')
 
         # Write the laser input file
-        laser_input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'_intensite_impulsion.dat')
+        laser_input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'_intensite_impulsion.txt')
 
         print "Writing laser input deck to ", laser_input_deck_path, "."
 
