@@ -419,6 +419,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.window_thickness))
                 # Calculate number of zones in window
                 input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_window_zones))
+                input_deck.write('MECANIQUE_RAM\n')
                 input_deck.write('\n')
 
             # TO DO: GIT ISSUE #95: Complex targets
@@ -432,6 +433,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             # Calculate number of zones
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_sample_zones))
+            input_deck.write('MECANIQUE_RAM\n')
             input_deck.write('\n')
 
             # Write ablator
@@ -449,6 +451,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
             input_deck.write('EPAISSEUR_EXTERNE=%1.1fe-10\n' % (self._minimum_zone_width)) #Min zone width
+            input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
 
             # TO DO: GIT ISSUE #96: Expert mode
@@ -463,7 +466,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
             input_deck.write('DUREE_IMPULSION=%.2fe-9\n' % (self.laser_pulse_duration))
             input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_intensity))
-            input_deck.write('IMPULSION_FICHIER\n')
+            input_deck.write('TEMPS_IMPUL_TABULE=0.0e-9,INTENSITE_TABULEE=0.\n') # These need to change for approrpriate laser designs.
+            input_deck.write('TEMPS_IMPUL_TABULE=0.2e-9,INTENSITE_TABULEE=1\n')
+            input_deck.write('TEMPS_IMPUL_TABULE=5.8e-9,INTENSITE_TABULEE=1\n')
+            input_deck.write('TEMPS_IMPUL_TABULE=6.0e-9,INTENSITE_TABULEE=0.\n')
+            #input_deck.write('IMPULSION_FICHIER\n')
             input_deck.write('\n')
 
             # Output parameters
@@ -476,7 +483,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
             # End of input file
             input_deck.write('ARRET\n')
-            input_deck.write('TEMP_ARRET=%.2fe-9\n' % (self.run_time))
+            input_deck.write('TEMPS_ARRET=%.2fe-9\n' % (self.run_time))
             input_deck.write('\n')
             input_deck.write('FIN_DES_INSTRUCTIONS')
 
