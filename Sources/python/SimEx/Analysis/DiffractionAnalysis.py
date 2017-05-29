@@ -28,6 +28,7 @@ import math
 import numpy
 import os
 import tempfile
+import pyFAI
 
 class DiffractionAnalysis(AbstractAnalysis):
     """
@@ -155,7 +156,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
 
 
-    def plotPattern(self, operation=None, logscale=False):
+    def plotPattern(self, operation=None, logscale=False, print_ai=False):
         """ Plot a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -165,6 +166,9 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
+
+        :param print_ai: Whether to print out the azimuthally integrated pattern. (default False).
+        :type print_ai: bool
 
         """
 
@@ -190,7 +194,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         plotResolutionRings(self.__parameters)
 
         # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters)
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale, print_ai)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -244,7 +248,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Make the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters):
+def plotRadialProjection(pattern, parameters, logscale=True, print_to_stdout=False):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
     # Extract parameters.
@@ -264,29 +268,42 @@ def plotRadialProjection(pattern, parameters):
 
     # Find center.
     center = 0.5*(Npix-1)
-    # Max. scattering angle.
-    theta_max = math.atan( center * apix / Ddet )
 
-    x = ( 1.0*numpy.arange(Npix) - center ) * apix
-    y = ( 1.0*numpy.arange(Npix) - center ) * apix
+    azimuthal_integrator = pyFAI.AzimuthalIntegrator(
+            dist=Ddet,
+            pixel1=apix,
+            pixel2=apix,
+            wavelength=lmd*1e-9)
 
-    X, Y = numpy.meshgrid(x,y)
 
-    r_squared =X**2+Y**2
-    r = numpy.sqrt(r_squared)
-    q = 2./lmd*numpy.sin(0.5*numpy.arctan(r/Ddet))
+    azimuthal_integrator.setFit2D(
+            directDist=Ddet*1e3,
+            centerX=center,
+            centerY=center,
+            tilt=0.0,
+            tiltPlanRotation=0.0,
+            pixelX=apix*1e6,
+            pixelY=apix*1e6,
+            )
 
-    histogram_values = q.flatten()
-    histogram_weights = pattern.flatten()
-
-    # Get the histogram of q values. This scales as r since the resolution shell areas is 2pi*r*dr
-    unweighted_histogram, bin_edges = numpy.histogram(histogram_values, bins = (Npix-1)/2)
-
-    # Setup a histogram.
-    frequencies, bin_edges = numpy.histogram(histogram_values, bins=(Npix-1)/2, weights=histogram_weights)
+    qs, intensities = azimuthal_integrator.integrate1d(
+            pattern,
+            512,
+            unit="q_nm^-1",
+            )
 
     plt.figure()
-    plt.plot(bin_edges[:-1], frequencies/unweighted_histogram, "+")
+    if logscale:
+        plt.semilogy(qs, intensities)
+    else:
+        plt.plot(qs, intensities)
+    plt.xlabel("q (1/nm)")
+    plt.ylabel("Intensity (arb. units)")
+
+    if print_to_stdout:
+        for q,i in zip(qs, intensities):
+            print "8.7e\t%8.7e" % (q,i)
+
 
 def diffractionParameters(path):
     """ Extract beam parameters and geometry from given file or directory.
