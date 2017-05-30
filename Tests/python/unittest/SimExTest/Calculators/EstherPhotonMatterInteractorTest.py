@@ -1,3 +1,5 @@
+""" Test module for the EstherPhotonMatterInteractor.
+"""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016, 2017 Carsten Fortmann-Grote                        #
@@ -19,13 +21,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the EstherPhotonMatterInteractor.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20170227
-
-"""
 import os
 import numpy
 import shutil
@@ -74,9 +69,15 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
                  window=None,
                  window_thickness=0.0,
                  laser_wavelength=800.0,
-                 laser_pulse='rect',
+                 laser_pulse='flat',
                  laser_pulse_duration=1.0,
                  laser_intensity=0.1,
+                 run_time=10.,
+                 delta_time=.25,
+                 read_from_file=None,
+                 force_passage=True,
+                 without_therm_conduc=True,
+                 rad_transfer=False,
             )
 
     def tearDown(self):

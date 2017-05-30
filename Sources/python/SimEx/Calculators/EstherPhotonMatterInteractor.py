@@ -20,8 +20,11 @@
 #                                                                        #
 ##########################################################################
 
+import os
+
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
+from esther_execute import Esther_execute as EstherRun
 
 class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """
@@ -58,10 +61,33 @@ class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
 
     def backengine(self):
         """ This method drives the backengine xrts."""
-        ### TODO, system call to esther code.
-        pass
         # Serialize the parameters (generate the input deck).
         self.parameters._serialize()
+
+        # Setup path to esther input file.
+        esther_files_path = self.parameters._esther_files_path
+
+                # Prepare for copying over the input files to where esther_py expects them.
+        esther_entrees_dir = os.path.join(os.environ['ESTHER_ESTHER'], 'ESTHER_entrees', 'SIMEX', os.path.split(esther_files_path)[-1])
+        os.rename(esther_files_path,  esther_entrees_dir)
+
+        esther_case_filename = os.path.join( esther_entrees_dir, self.parameters._esther_filename+".txt")
+        if not os.path.isfile(esther_case_filename):
+            raise IOError("Esther input file %s not found." % (esther_case_filename))
+
+
+        # Create the run.
+        esther_run = EstherRun(
+                filename_cas=esther_case_filename,
+                chemin_esther=os.path.join(os.environ['ESTHER_ESTHER'],""),
+                multiple=False,
+                nprocs=1, ### FIXME, read SIMEX_NCORES
+                forcer_passage=True, # Forces continuation if esther requests input.
+                widComment=None,
+                interval=1000,
+                recup_sorties_esth = False)
+
+        print esther_run.message
 
     @property
     def data(self):
