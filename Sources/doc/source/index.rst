@@ -358,12 +358,23 @@ Reference Manual
 .. autoclass:: SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor
 .. autoclass:: SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters
 
+.. autoclass:: SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor
+.. autoclass:: SimEx.Calculators.CrystFELPhotonDiffractorParameters.CrystFELPhotonDiffractorParameters
+.. autoclass:: SimEx.Parameters.PhotonBeamParameters.PhotonBeamParameters
+
+.. autofunction:: SimEx.Parameters.PhotonBeamParameters.propToBeamParameters
+
 .. autoclass:: SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters
 
 .. autoclass:: SimEx.Calculators.XFELPhotonSource.XFELPhotonSource
 
+.. autoclass:: SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator
+
 .. autoclass:: SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor
 
+.. autoclass:: SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis
+
+.. autoclass:: SimEx.Analysis.XFELPhotonAnalysis.XFELPhotonAnalysis
 .. .. autoclass:: SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters
 
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,19 +19,11 @@
 #                                                                        #
 ##########################################################################
 
-"""
-    @file Module that holds the SingFELPhotonDiffractorParameters class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160721
-
-"""
+""" Module that holds the SingFELPhotonDiffractorParameters class.  """
 import os
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
@@ -252,5 +244,3 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             self.__number_of_diffraction_patterns = number_of_diffraction_patterns
         else:
             raise ValueError("The parameters 'number_of_diffraction_patterns' must be a positive integer.")
-
-

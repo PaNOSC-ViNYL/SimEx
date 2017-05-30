@@ -1,3 +1,4 @@
+""" Module that holds the SingFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -19,15 +20,8 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the SingFELPhotonDiffractor class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151104
-
-"""
-import inspect
 import h5py
+import inspect
 import os
 import subprocess,shlex
 
@@ -35,9 +29,8 @@ import prepHDF5
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 from SimEx.Utilities import ParallelUtilities
-
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """

@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -27,8 +27,10 @@ from XFELPhotonSourceTest import XFELPhotonSourceTest
 from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
+from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
+from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
 from S2EReconstructionTest import S2EReconstructionTest
-from GenesisPhotonSourceTest import GenesisPhotonSourceTest
+#from GenesisPhotonSourceTest import GenesisPhotonSourceTest
 
 # Setup the suite.
 def suite():
@@ -38,6 +40,9 @@ def suite():
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
+             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,                  'test'),
+             ### Disabled since CrystFEL not added to external libraries.
+             #unittest.makeSuite(CrystFELPhotonDiffractorTest,                  'test'),
              #unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
              )
 

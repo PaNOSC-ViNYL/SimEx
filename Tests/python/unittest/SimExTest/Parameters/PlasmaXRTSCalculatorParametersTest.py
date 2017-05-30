@@ -1,6 +1,7 @@
+""" Test module for the PlasmaXRTSCalculatorParameter class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,22 +20,15 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the PlasmaXRTSCalculatorParameter class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160219
-
-"""
-import paths
-import os
 import numpy
+import os
+import paths
 import shutil
 import subprocess
+import unittest
 
 # Include needed directories in sys.path.
 import paths
-import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
@@ -83,7 +77,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
                                                          photon_energy=4.96e3,
                                                          scattering_angle=90.0,
                                                          electron_temperature=10.0,
-                                                         electron_density=3.0e29,
+                                                         electron_density=2.8433e23,
                                                          ion_charge=2.3,
                                                          mass_density=1.85
                                                          )
@@ -105,7 +99,7 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
                                                          photon_energy=4.96e3,
                                                          scattering_angle=90.0,
                                                          electron_temperature=10.0,
-                                                         electron_density=1.0e23,
+                                                         electron_density=None,
                                                          ion_charge=2.3,
                                                          mass_density=1.85,
                                                          )
@@ -197,17 +191,72 @@ class PlasmaXRTSCalculatorParametersTest(unittest.TestCase):
     def testCheckAndSetDensitiesAndCharge(self):
         """ Check the utility for setting the charge, number and mass densities works correctly. """
 
+        elements = [["Be", 1, -1]]
+
         # Case 1: No input -> raise
-        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, None )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, None, elements )
 
         # Case 2: Not enough input.
-        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, 1e19, None, None )
-        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, 2.3, None )
-        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, 1e19, None, None, elements )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, 2.3, None , elements )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 , elements )
 
-        ed, Zf, rho = 3e29, 2.3, 1.85
+        # Two inputs should be enough.
+        ed_ref, Zf_ref, rho_ref = 2.8433e23, 2.3, 1.85
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( None, Zf_ref, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
 
-        self.assertAlmostEqual( (ed, Zf, rho) , checkAndSetDensitiesAndCharge( ed, Zf, rho ) )
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, None, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, None, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+    def notestCheckAndSetDensitiesAndChargeMultipleElements(self):
+        """ Check the utility for setting the charge, number and mass densities works correctly for more than one element in target specification. """
+
+        elements = [ ["C",6,-1], ["H",12,1] ]
+
+        # Case 1: No input -> raise
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, None, elements )
+
+        # Case 2: Not enough input.
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, 1e19, None, None, elements )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, 2.3, None , elements )
+        self.assertRaises( RuntimeError, checkAndSetDensitiesAndCharge, None, None, 1.5 , elements )
+
+        # Two inputs should be enough.
+        ed_ref, Zf_ref, rho_ref = 3.8512e23, 1.3, 2.3
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( None, Zf_ref, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, None, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, None, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
+
+        ed, Zf, rho = checkAndSetDensitiesAndCharge( ed_ref, Zf_ref, rho_ref, elements )
+        self.assertAlmostEqual( ed/1e23, ed_ref/1e23, 4)
+        self.assertAlmostEqual( Zf, Zf_ref, 4)
+        self.assertAlmostEqual( rho, rho_ref, 4)
 
     def testCheckAndSetIonTemperature(self):
         """ Test the ion temperature check'n'set function. """

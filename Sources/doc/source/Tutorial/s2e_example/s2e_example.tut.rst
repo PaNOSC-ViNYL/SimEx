@@ -43,13 +43,14 @@ Using the Calculator
 ''''''''''''''''''''
 
 Propagation of x-ray pulses through the SPB-SFX beamline will be performed by means of the
-:code:`WavePropagator` class (:py:class:`SimEx.Calculators.WavePropagator.WavePropagator`), that comes with simex_platform. It interfaces the wavefront propagation code
+:code:`XFELPhotonPropagator` class (:py:class:`SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator`), that comes with simex_platform. It interfaces the wavefront propagation code
 WPG. Below is a commented python script
 that demonstrates setup and execution of the propagation.
 
 
 .. literalinclude:: Tutorial/s2e_example/resources/propagation.py
    :linenos:
+
 :download:`Download script<Tutorial/s2e_example/resources/propagation.py>`
 
 The definition of the beamline (line 7) loads a WPG beamline from the beamline collection. Besides
@@ -57,13 +58,13 @@ the beamline, the user has to specify the location of the source files (see `Pre
 input`_). The variable :code:`input_path` can be either a file or a directory. In the latter case, all valid source
 files in the directory will be processed.
 
-The :code:`WavePropagator` class
+The :code:`XFELPhotonPropagator` class
 requires two input parameters, a parameters object (of type
 :code:`WavePropagationParameters`, defined in line 10),
 and the :code:`input_path`. After construction, the input files are read in using the method :code:`_readH5`,
 and the calculation is executed by calling the :code:`backengine` method.
 
-A third input parameter for the :code:`WavePropagator`  class, :code:`output_path` can be used to specify where the results of the wavefront
+A third input parameter for the :code:`XFELPhotonPropagator`  class, :code:`output_path` can be used to specify where the results of the wavefront
 propagation shall be saved. By default, they are stored in a directory called "prop/" below the
 current working directory.
 
@@ -74,13 +75,25 @@ Confirm that the results of the wavefront propagation are saved to "prop/".
 The script :code:`ScriptCollection/DataAnalysis/propagation/prop_diagnostics.py` provides utilities
 to quickly diagnose single propagated x-ray pulses. The syntax is::
 
-    $> prop_diagnostics -I -R -P prop_out.h5
+    $> prop_diagnostics.py <options> prop_out.h5
 
-The optional parameters :code:`-I, -R, -P` trigger the generation of real space intensity map plus time dependence plot, reciprocal space intensity map, and real space phase map, respectively.
+Running :code:`diagnostics.py` without arguments will return a small instruction how to use it.
+
+E.g.::
+    $> prop_diagnostics.py -I prop_out.h5
+
+generates an intensity map of the radiation field in the focus. Likewise,::
+
+    $> prop_diagnostics.py -R prop_out.h5
+
+plots the intensity distribution in reciprocal (qx-qy) space.
+
+The options :code:`-T, -X, -S` produce viewgraphs of the total power as function of time, the on-axis power as function of time,
+and the power spectrum as a function of photon energy, respectively.
 
 Running the script on the source file::
 
-    $> prop_diagnostics -I -R -P source/s2e_felsource.h5
+    $> prop_diagnostics.py <options> source/s2e_felsource.h5
 
 will produce the same figures for the source. Comparison of source and propagated pulses can give
 some information about the reliability of the propagation. E.g. a drastic loss in power would indicate that the area over which the wavefront was calculated, is too small or that the wavefront is insufficiently sampled.
@@ -101,15 +114,9 @@ Intensity distribution, source (left) vs. focus (right)
 .. figure:: Tutorial/s2e_example/resources/intensity_x-y.png
 
 
-Phase distribution in reciprocal space, source (left) vs. focus (right)
-
-.. figure:: Tutorial/s2e_example/resources/phase_x-y.png
-
-
 Intensity distribution in reciprocal space, source (left) vs. focus (right)
 
 .. figure:: Tutorial/s2e_example/resources/intensity_qx-qy.png
-
 
 
 Confirm that the pulse duration is approximately 9 fs (full width at half maximum, FWHM),
@@ -132,6 +139,7 @@ photon-matter trajectories which will then be used to calculate the diffraction.
 
 .. literalinclude:: Tutorial/s2e_example/resources/pmi.py
    :linenos:
+
 :download:`Download script<Tutorial/s2e_example/resources/pmi.py>`
 
 
@@ -168,20 +176,40 @@ demonstrates its usage:
 
 .. literalinclude:: Tutorial/s2e_example/resources/diffraction.py
     :linenos:
+
 :download:`Download script<Tutorial/s2e_example/resources/diffraction.py>`
 
 
 Analyzing the results
 '''''''''''''''''''''
 
-Run the script :code:`ScriptCollection/DataAnalysis/scatteing/pattern_statistics.py` to generate
-statistical information about the number of scattered photons and a histogram. Since the script is not
-interactive, the path to the diffraction data and some other details have to be coded in the script.
-Examples and documenting comments are provided. Below is a histogram resulting from a 9 fs simulation analyzing 20000
-patterns.
+Run the script :code:`ScriptCollection/DataAnalysis/scatteing/diffr_diagnostics.py` to generate
+statistical information about the number of scattered photons and a histogram. Envoke the script without any
+arguments to get obtain usage instructions.
+
+For example::
+
+    $> diffr_diagnostics.py -p -P 1 diffr.h5
+
+will show the detected photons in the detector pixel array for the first pattern.
+
+A more complicated example is::
+
+    $> diffr_diagnostics.py -p -P "range(1,11)" --logscale --operation "numpy.mean" diffr.h5
+
+this will plot the average detector image on a logarithmic color scale for patterns 1 to 10.
+
+To see a histogram over the number of photons per pattern::
+
+    $> diffr_diagnostics.py -S -P "range(1,11)"  diffr.h5
 
 .. figure:: Tutorial/s2e_example/resources/diffr_histogram_9fs.png
    :width: 50%
    :alt: Histogram over number of registered photons per diffraction pattern.
    :align: center
+
+To create an animation of all selected patterns::
+
+    $> diffr_diagnostics.py -A animation.gif -P "range(1,11)"  diffr.h5
+
 

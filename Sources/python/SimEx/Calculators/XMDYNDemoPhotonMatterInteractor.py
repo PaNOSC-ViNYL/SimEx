@@ -1,3 +1,4 @@
+""" Module that holds the XMDYNDemoPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the XMDYNDemoPhotonMatterInteractor class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151215
-
-"""
 import h5py
 import numpy
 import os
@@ -33,10 +27,8 @@ import random
 import subprocess
 import sys
 
-
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities import IOUtilities
-
 
 class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
     """
@@ -234,8 +226,6 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
         :type output_path: str
         """
         pass # No action required since output is written in backengine.
-
-
 
 class PMIDemo(object):
 
@@ -573,7 +563,6 @@ class PMIDemo(object):
 
     ##############################################################################
 
-
 def f_eval_disp( a_snp , a_r0 , a_sample ) :
 
     num_Z = len( a_sample['selZ'].keys() )
@@ -584,11 +573,6 @@ def f_eval_disp( a_snp , a_r0 , a_sample ) :
         all_disp[cc] = numpy.mean( numpy.sqrt( numpy.sum( dr * dr , axis = 1 ) ) ) / 1e-10
         cc = cc + 1
     return all_disp
-
-
-
-
-
 
 def s2e_gen_randrot_quat( quat , rotmat ) :
 
@@ -649,8 +633,6 @@ def s2e_gen_randrot_quat( quat , rotmat ) :
 
     ##############################################################################
 
-
-
 def s2e_rand_orient( r ,mat ) :
     N = r.shape[1]
 ###    print N
@@ -665,8 +647,6 @@ def s2e_rand_orient( r ,mat ) :
 
 
 ##############################################################################
-
-
 def f_eval_numE( a_snp , a_sample ) :
 
     num_Z = len( a_sample['selZ'].keys() )
@@ -679,7 +659,6 @@ def f_eval_numE( a_snp , a_sample ) :
 
 
 ##############################################################################
-
 
 def f_md_step( r , v , m , dt ) :
     r = r.copy()
@@ -694,7 +673,6 @@ def f_md_step( r , v , m , dt ) :
 
 
 ##############################################################################
-
 
 def   f_pmi_diagnostics_help() :
     print """
@@ -826,7 +804,6 @@ def load_ff_database():
 
 ##############################################################################
 
-
 def f_hdf5_simple_read(self, a_file , a_dataset ) :
     xfp  = h5py.File( a_file , "r" )
     xxx = xfp.get( a_dataset ).value
@@ -835,8 +812,6 @@ def f_hdf5_simple_read(self, a_file , a_dataset ) :
 
 
 ##############################################################################
-
-
 
 def f_h5_out2in( src , dest , *args ) :
 

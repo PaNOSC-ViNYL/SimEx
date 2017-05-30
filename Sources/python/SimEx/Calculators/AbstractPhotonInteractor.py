@@ -1,6 +1,7 @@
+""" Module holding the AbstractPhotonInteractor."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,20 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for AbstractPhotonInteractor
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
-
 from abc import ABCMeta
 from abc import abstractmethod
 
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 class AbstractPhotonInteractor(AbstractBaseCalculator):
     """
@@ -72,4 +64,3 @@ def checkAndSetPhotonInteractor(var=None, default=None):
     """
 
     return checkAndSetInstance(AbstractPhotonInteractor, var, default)
-

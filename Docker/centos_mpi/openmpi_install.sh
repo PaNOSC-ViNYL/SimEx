@@ -1,14 +1,15 @@
-URL=http://www.open-mpi.de/software/ompi/v2.0/downloads/openmpi-2.0.1.tar.gz
+VER=2.1.0
+URL=http://www.open-mpi.de/software/ompi/v2.1/downloads/openmpi-$VER.tar.gz
 
 wget -q $URL
 
-tar -xf openmpi-2.0.1.tar.gz
-cd openmpi-2.0.1
+tar -xf openmpi-$VER.tar.gz
+cd openmpi-$VER
 ./configure --prefix=/usr/lib64/openmpi --disable-getpwuid --enable-orterun-prefix-by-default
 make
 make install
 cd ..
 
-rm -rf openmpi-2.0.1.tar.gz openmpi-2.0.1
+rm -rf openmpi-$VER.tar.gz openmpi-$VER
 
 

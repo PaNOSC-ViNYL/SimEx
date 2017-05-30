@@ -3,7 +3,7 @@ import os,sys,fileinput
 
 import SimEx,parse_settings,parse_modules
 import pprint
-   
+
 def write_module_parameters(moduleName,module):
     dest= moduleName+'_params.py'
     try:
@@ -14,7 +14,7 @@ def write_module_parameters(moduleName,module):
     except IOError as e:
         print('Error: %s' % e)
     except :
-        print('Error: cannot create file %s'%dest )        
+        print('Error: cannot create file %s'%dest )
         return
     modfile = open(dest, 'w')
 
@@ -22,7 +22,5 @@ def write_module_parameters(moduleName,module):
     print>>modfile, 'output_path  = ',repr(module.output_path),'\n'
     s=pprint.pformat(module.parameters)
     print>>modfile,'parameters = ',s
-    
+
     modfile.close()
-    
-    

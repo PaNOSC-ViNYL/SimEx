@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016, 2017 Richard Briggs, Carsten Fortmann-Grote        #
+# Copyright (C) 2016-2017 Richard Briggs, Carsten Fortmann-Grote         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -23,12 +23,6 @@ import numpy
 import os
 import sys
 import tempfile
-
-#from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-#from SimEx.Utilities.EntityChecks import checkAndSetInstance
-#from SimEx.Utilities.EntityChecks import checkAndSetInteger
-#from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
-#from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 BOOL_TO_INT = {True : 1, False : 0}
 
@@ -93,22 +87,8 @@ class HydroParameters(AbstractCalculatorParameters):
         self.__window = checkAndSetWindow(window)
         self.__window_thickness = checkAndSetWindowThickness(window_thickness)
         self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
-        #self.__laser_pulse = checkAndSetLaserPulse(laser_pulse)
-        #self.__laser_pulse_duration = checkAndSetLaserPulseDuration(laser_pulse_duration)
-        #self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
 
         # Set internal parameters
-        """ TO DO PLACEHOLDER -------------------------------------------------------------->
-        List of DEMARRAGE (translates as "Start up") parameters
-        TRANSFERT_RADIATIF
-        USI
-
-        "Expert user mode to choose the correct demarrage parameters"
-
-        Can also update this so that you can choose which EOS model to run???
-        self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
-        self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
-        """
         self._setDemmargeFlags()
         self._setWindowFlags()
 
@@ -262,7 +242,7 @@ class HydroParameters(AbstractCalculatorParameters):
             number_of_sample_zones=int(self.samplethickness/width_of_sample_zone)
             input_deck.write('NOMBRE_MAILLES=%d\n' % (number_of_sample_zones))
             input_deck.write('\n')
-            
+
             #width_of_zone[i] = mass_of_zone/material_type[material_in_zone[i]][3]
             #number_of_zones[i] = int(thickness[i]/width_of_zone[i])
 
@@ -290,7 +270,6 @@ class HydroParameters(AbstractCalculatorParameters):
             input_deck.write('DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ\n')
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
 
-
     @property
     def number_of_layers(self):
        	""" Query for the number of layers. """
@@ -299,6 +278,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def number_of_layers(self, value):
        	""" Set the number of layers to the value. """
        	self.__number_of_layers = checkAndSetnumber_of_layers(value)
+
     @property
     def ablator(self):
        	""" Query for the ablator type. """
@@ -307,6 +287,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def ablator(self, value):
        	""" Set the ablator to the value. """
        	self.__ablator = checkAndSetAblator(value)
+
     @property
     def ablator_thickness(self):
        	""" Query for the ablator thickness. """
@@ -315,6 +296,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def ablator_thickness(self, value):
        	""" Set the ablator thickness to the value. """
        	self.__ablator_thickness = checkAndSetAblatorThickness(value)
+
     @property
     def sample(self):
        	""" Query for the sample type. """
@@ -323,6 +305,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def sample(self, value):
        	""" Set the sample type to the value. """
        	self.__sample = checkAndSetSample(value)
+
     @property
     def sample_thickness(self):
        	""" Query for the sample thickness type. """
@@ -331,6 +314,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def sample_thickness(self, value):
        	""" Set the sample thickness to the value. """
        	self.__sample_thickness = checkAndSetSampleThickness(value)
+
     @property
     def window(self):
        	""" Query for the window type. """
@@ -339,6 +323,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def window(self, value):
        	""" Set the window to the value. """
        	self.__window = checkAndSetWindow(value)
+
     @property
     def window_thickness(self):
        	""" Query for the window thickness type. """
@@ -347,6 +332,7 @@ class HydroParameters(AbstractCalculatorParameters):
     def window_thickness(self, value):
        	""" Set the window thickness to the value. """
        	self.__window_thickness = checkAndSetWindowThickness(value)
+
     @property
     def LaserWavelength(self):
        	""" Query for the laser wavelength type. """
@@ -403,7 +389,6 @@ def checkAndSetAblator(ablator):
 
 	return ablator
 
-
 def checkAndSetAblatorThickness(ablator_thickness):
 	"""
 	Utility to check that the ablator thickness is > 5 um and < 100 um
@@ -420,7 +405,6 @@ def checkAndSetAblatorThickness(ablator_thickness):
 	print ( "Ablator thickness is %4.1f " % ablator_thickness)
 
 	return ablator_thickness
-
 
 def checkAndSetSample(sample):
 	"""
@@ -445,14 +429,14 @@ def checkAndSetSample(sample):
 
 def checkAndSetSampleThickness(sample_thickness):
 	"""
-	Utility to check that the sample thickness is > 1 um and < 200 um
+	Utility to check that the sample thickness is in permissible range (Esther constraint).
 	"""
 
 	# Set default
 	if sample_thickness is None:
 		raise RuntimeError( "sample thickness not specified.")
 
-	# Check if ablator is between 1 and 100 um
+	# Check if sample thickness is in permissible range.
 	if sample_thickness < 1.0 or sample_thickness > 200.0:
 		raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
 
@@ -496,21 +480,6 @@ def checkAndSetWindowThickness(window_thickness):
         raise ValueError( "Window must be between 1.0 and 500.0 microns")
 
     return window_thickness
-
-def checkAndSetSampleThickness(sample_thickness):
-    """
-    Utility to check that the sample thickness is > 1 um and < 200 um
-    """
-
-    # Set default
-    if sample_thickness is None:
-        raise RuntimeError( "Sample thickness not specified.")
-
-    # Check if ablator is between 1 and 100 um
-    if sample_thickness < 1.0 or sample_thickness > 200.0:
-        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
-
-    return sample_thickness
 
 def checkAndSetLaserWavelength(laser_wavelength):
     """

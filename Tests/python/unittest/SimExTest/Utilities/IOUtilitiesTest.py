@@ -1,6 +1,7 @@
+""" Test module for the entity checks.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,17 +20,13 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the entity checks.
-    @author CFG
-    @institution XFEL
-    @creation 20160623 (Day of the UK EU referendum)
-"""
 import exceptions
 import os
 import shutil
 import numpy
 import paths
 import unittest
+from wpg import Wavefront
 
 from TestUtilities.TestUtilities import generateTestFilePath
 from SimEx.Utilities import IOUtilities
@@ -90,6 +87,12 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check exception on wrong file type.
         self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("sample.h5") )
 
+    def testQueryNonexisitngPDB(self):
+        """ Check exception if querying a non-existing pdb """
+        # Check exception on wrong input type.
+        self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
+
+
     def testQueryPDB(self):
         """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
         # Setup path to pdb file.
@@ -104,7 +107,30 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertTrue( os.path.isfile( pdb_path ) )
 
         # Check exception on wrong input type.
-        self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
+        #self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
+
+    def testQueryPDBTwice(self):
+        """ Check that we can do two subsequent queries (fails if urllib.urlcleanup is not called.) """
+        # Setup path to pdb file.
+        pdb_path = '2nip.pdb'
+        self.__files_to_remove.append(pdb_path)
+        self.__paths_to_remove.append('obsolete')
+
+        # Attempt to load it.
+        pdb_path = IOUtilities.checkAndGetPDB(pdb_path)
+
+        # Check it's there.
+        self.assertTrue( os.path.isfile( pdb_path ) )
+
+        # Remove it.
+        os.remove(pdb_path)
+
+        # Query again.
+        pdb_path = IOUtilities.checkAndGetPDB(pdb_path)
+
+        # Check it's there.
+        self.assertTrue( os.path.isfile( pdb_path ) )
+
 
     def testPdbToS2ESampleDict(self):
         """ Check the utility that converts a pdb file to an s2e sample dict.
@@ -133,6 +159,17 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, None )
         self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, "xyz.pdb" )
         self.assertRaises( IOError, IOUtilities._pdbToS2ESampleDict, 1234 )
+
+    def testGenesisDFLToWPGWavefront(self):
+        """ Check the conversion from genesis dfl to wpg readable hdf5. """
+        genesis_out_file = generateTestFilePath("genesis/lcls/lcls.out")
+        genesis_dfl_file = generateTestFilePath("genesis/lcls/lcls.out.dfl")
+
+        wf = IOUtilities.genesis_dfl_to_wavefront(genesis_out_file, genesis_dfl_file)
+
+        self.assertIsInstance(wf, Wavefront)
+
+
 
 
 if __name__ == '__main__':

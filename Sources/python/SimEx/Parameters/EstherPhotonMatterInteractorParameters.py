@@ -27,7 +27,6 @@ import json
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
-BOOL_TO_INT = {True : 1, False : 0}
 
 ESTHER_MATERIAL_DICT = { "Aluminum" : {"name" : "Aluminum",
                        "shortname" : "Al#",
@@ -317,14 +316,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
         self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
 
-        # What other options to include from Esther start up options
-
-    # TO DO: #96 expert mode: Set EOS options here
-    #def _setEOS(self):
-        # Which EOS model to run???
-        #self.__use_eos = BOOL_TO_INT[self.eos == "SESAME"]
-        #self.__use_eos = BOOL_TO_INT[self.eos == "BLF"]
-
     def _setupFeathering(self, number_of_zones=250, feather_zone_width=5.0, minimum_zone_width=1e-4):
         """ Method to fix feathering
 
@@ -529,6 +520,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def number_of_layers(self, value):
            """ Set the number of layers to the value. """
            self.__number_of_layers = checkAndSetNumberOfLayers(value)
+
     @property
     def ablator(self):
            """ Query for the ablator type. """
@@ -537,6 +529,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def ablator(self, value):
            """ Set the ablator to the value. """
            self.__ablator = checkAndSetAblator(value)
+
     @property
     def ablator_thickness(self):
            """ Query for the ablator thickness. """
@@ -545,6 +538,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def ablator_thickness(self, value):
            """ Set the ablator thickness to the value. """
            self.__ablator_thickness = checkAndSetAblatorThickness(value)
+
     @property
     def sample(self):
            """ Query for the sample type. """
@@ -553,6 +547,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def sample(self, value):
            """ Set the sample type to the value. """
            self.__sample = checkAndSetSample(value)
+
     @property
     def sample_thickness(self):
            """ Query for the sample thickness type. """
@@ -561,6 +556,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def sample_thickness(self, value):
            """ Set the sample thickness to the value. """
            self.__sample_thickness = checkAndSetSampleThickness(value)
+
     @property
     def window(self):
            """ Query for the window type. """
@@ -569,6 +565,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def window(self, value):
            """ Set the window to the value. """
            self.__window = checkAndSetWindow(value)
+
     @property
     def window_thickness(self):
            """ Query for the window thickness type. """
@@ -577,6 +574,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def window_thickness(self, value):
            """ Set the window thickness to the value. """
            self.__window_thickness = checkAndSetWindowThickness(value)
+
     @property
     def laser_wavelength(self):
            """ Query for the laser wavelength type. """
@@ -585,6 +583,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def laser_wavelength(self, value):
            """ Set the laser wavelength to the value. """
            self.__laser_wavelength = checkAndSetLaserWavelength(value)
+
     @property
     def laser_pulse(self):
         """Query for laser pulse type"""
@@ -593,6 +592,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def laser_pulse(self,value):
         """ Set the laser pulse to type value """
         self.__laser_pulse = checkAndSetLaserPulse(value)
+
     @property
     def laser_pulse_duration(self):
         """ Query for laser pulse duration """
@@ -601,6 +601,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def laser_pulse_duration(self,value):
         """ Set laser pulse duration """
         self.__laser_pulse_duration = checkAndSetLaserPulseDuration(value)
+
     @property
     def laser_intensity(self):
         """ Query for laser intensity """
@@ -609,6 +610,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def laser_intensity(self,value):
         """ Set laser intensity """
         self.__laser_intensity = checkAndSetLaserIntensity(value)
+
     @property
     def run_time(self):
         """ Query for simulation run time """
@@ -617,6 +619,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def run_time(self,value):
         """ Set simulation run time """
         self.__run_time = checkAndSetRunTime(value)
+
     @property
     def delta_time(self):
         """ Query for simulation time resolution (delta t ns) """
@@ -740,16 +743,16 @@ def checkAndSetSample(sample):
 
 def checkAndSetSampleThickness(sample_thickness):
     """
-    Utility to check that the sample thickness is > 1 um and < 200 um
+    Utility to check that the sample thickness is in permitted range set by Esther.
     """
 
     # Set default
     if sample_thickness is None:
-        raise RuntimeError( "sample thickness not specified.")
+        raise RuntimeError( "Sample thickness not specified.")
 
     # Check if ablator is between 1 and 100 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
-        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
+        raise ValueError( "Sample must be between 1.0 and 200.0 microns")
 
     return sample_thickness
 
@@ -797,25 +800,6 @@ def checkAndSetWindowThickness(window_thickness):
         raise ValueError( "Window must be between 1.0 and 500.0 microns")
 
     return window_thickness
-
-def checkAndSetSampleThickness(sample_thickness):
-    """
-    Utility to check that the sample thickness is > 1 um and < 200 um
-    """
-
-    # Set default
-    if sample_thickness is None:
-        raise RuntimeError( "Sample thickness not specified.")
-
-    # Check if number.
-    if not isinstance( sample_thickness, (float, int)):
-        raise TypeError( "The parameter 'sample_thickness' must be a numerical type (float or int.)")
-
-    # Check if ablator is between 1 and 100 um
-    if sample_thickness < 1.0 or sample_thickness > 200.0:
-        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
-
-    return sample_thickness
 
 def checkAndSetLaserWavelength(laser_wavelength):
     """

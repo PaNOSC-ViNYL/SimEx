@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 URL=http://downloads.sourceforge.net/project/boost/boost/1.60.0/boost_1_60_0.tar.gz
 
 export PATH=/opt/miniconda2/bin:$PATH

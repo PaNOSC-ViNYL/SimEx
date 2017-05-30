@@ -1,12 +1,11 @@
 #!/usr/bin/env python2.7
-import sys
 
-import os
-import pylab as plt
-
-import numpy as np
 from wpg import Wavefront
 from wpg.wpg_uti_wf import plot_t_wf,look_at_q_space
+import numpy as np
+import os
+import pylab as plt
+import sys
 
 def show_diagnostics(FELsource_out_number):
 

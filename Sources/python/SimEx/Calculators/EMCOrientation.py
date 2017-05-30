@@ -1,6 +1,7 @@
+""" Module that holds the EMCOrientation class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the EMCOrientation class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151104
-
-"""
 import h5py
 import numpy
 import os
@@ -36,8 +30,9 @@ import time
 from EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import IOUtilities
 from SimEx.Utilities import ParallelUtilities
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class EMCOrientation(AbstractPhotonAnalyzer):
 
@@ -215,7 +210,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         # Set paths.
         self._setupPaths()
 
-        fname = __name__+"_tmpobj"
+        fname = IOUtilities.getTmpFileName()
         self.dumpToFile(fname)
 
         # collect MPI arguments
@@ -537,4 +532,3 @@ def _checkPaths(run_files_path, tmp_files_path):
 
 if __name__ == '__main__':
     EMCOrientation.runFromCLI()
-

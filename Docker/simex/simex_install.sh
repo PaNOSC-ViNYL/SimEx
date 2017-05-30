@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
 BRANCH=develop
 URL=https://github.com/eucall-software/simex_platform/archive/${BRANCH}.zip
 
@@ -32,7 +36,7 @@ cmake -DINSTALL_TESTS=OFF -DSRW_OPTIMIZED=ON -DDEVELOPER_INSTALL=OFF -DCMAKE_INS
 chmod og+rwX -R $ROOT_DIR
 
 # Build the project.
-make -j
+make
 
 
 # Install the project.
