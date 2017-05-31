@@ -156,7 +156,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
 
 
-    def plotPattern(self, operation=None, logscale=False, print_ai=False):
+    def plotPattern(self, operation=None, logscale=False):
         """ Plot a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -171,7 +171,6 @@ class DiffractionAnalysis(AbstractAnalysis):
         :type print_ai: bool
 
         """
-
         # Handle default operation
         if operation is None:
             operation = numpy.sum
@@ -192,9 +191,6 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Plot resolution rings.
         plotResolutionRings(self.__parameters)
-
-        # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters, logscale, print_ai)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
