@@ -133,9 +133,10 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
                                               )
 
         # Call the backengine.
-        esther_calculator.backengine()
+        esther_message = esther_calculator.backengine()
 
-        self.assertTrue( False )
+        self.assertEqual(esther_message, "")
+
 
     def testSaveH5(self):
         """ Test hdf5 output generation. """
