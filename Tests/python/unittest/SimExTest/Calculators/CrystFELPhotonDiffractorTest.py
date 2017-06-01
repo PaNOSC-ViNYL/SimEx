@@ -221,6 +221,19 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( "diffr" ))
         self.assertIn( "diffr_out_0000002.h5" , os.listdir( "diffr" ))
 
+        # Open linked h5 file.
+        with h5py.File(diffractor.output_path, 'r') as h5:
+            self.assertIn("data" , h5.keys())
+            self.assertIn("0000001" , h5["data"].keys())
+            self.assertIn("0000002" , h5["data"].keys())
+            self.assertIn("data" , h5["data/0000001"].keys())
+            self.assertIn("data" , h5["data/0000002"].keys())
+
+            self.assertIn("params" , h5.keys())
+            self.assertIn("beam" , h5["params"].keys())
+            self.assertIn("photonEnergy" , h5["params/beam"].keys())
+            self.assertIn("focusArea" , h5["params/beam"].keys())
+
         # Check metafile was created.
         self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
 
