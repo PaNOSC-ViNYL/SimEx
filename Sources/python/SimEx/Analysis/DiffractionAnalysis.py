@@ -66,8 +66,15 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Init attributes.
         self.poissonize = poissonize
-        self.__parameters = diffractionParameters(self.input_path)
+        self.parameters = diffractionParameters(self.input_path)
 
+    @property
+    def parameters(self):
+        return self.__parameters
+
+    @parameters.setter
+    def parameters(self, val):
+        self.__parameters = val
     @property
     def pattern_indices(self):
         """ Query pattern indices attribute. """
@@ -156,6 +163,32 @@ class DiffractionAnalysis(AbstractAnalysis):
 
 
 
+    def plotRadialProjection(self, operation=None, logscale=False):
+        """ Plot the radial projection of a pattern.
+
+        :param operation: Operation to apply to selected patterns (default numpy.sum).
+        :type operation: python function
+        :note operation: Operation must accept a 3D numpy.array as first input argument and the "axis" keyword-argument. Operation must return a 2D numpy.array. Axis will always be chosen as axis=0.
+        :example operation: numpy.mean, numpy.std, numpy.sum
+
+        :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
+        :type logscale: bool
+
+        """
+        # Handle default operation
+        if operation is None:
+            operation = numpy.sum
+
+        # Get pattern to plot.
+        pi = self.patterns_iterator
+        if len(self.pattern_indices) == 1:
+            pattern_to_plot = pi.next()
+        else:
+            pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
+
+        # Plot radial projection.
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale)
+
     def plotPattern(self, operation=None, logscale=False):
         """ Plot a pattern.
 
@@ -167,18 +200,15 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
 
-        :param print_ai: Whether to print out the azimuthally integrated pattern. (default False).
-        :type print_ai: bool
-
         """
+
         # Handle default operation
-        if operation is None:
+        if operation is None and len(self.pattern_indices) > 1:
             operation = numpy.sum
 
         # Complain if operating on single pattern.
         else:
-            if len(self.pattern_indices) == 1:
-                print "WARNING: Giving an operation with a single pattern has no effect."
+            print "WARNING: Giving an operation with a single pattern has no effect."
         # Get pattern to plot.
         pi = self.patterns_iterator
         if len(self.pattern_indices) == 1:
@@ -188,9 +218,6 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Plot image and colorbar.
         plotImage(pattern_to_plot, logscale)
-
-        # Plot resolution rings.
-        plotResolutionRings(self.__parameters)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -244,8 +271,19 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Make the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True, print_to_stdout=False):
+def plotRadialProjection(pattern, parameters, logscale=True):
     """ Perform integration over azimuthal angle and plot as function of radius. """
+
+    qs, intensities = azimuthalIntegation(pattern, parameters)
+
+    if logscale:
+        plt.semilogy(qs, intensities)
+    else:
+        plt.plot(qs, intensities)
+    plt.xlabel("q (1/nm)")
+    plt.ylabel("Intensity (arb. units)")
+
+def azimuthalIntegation(pattern, parameters):
 
     # Extract parameters.
     beam = parameters['beam']
@@ -281,25 +319,13 @@ def plotRadialProjection(pattern, parameters, logscale=True, print_to_stdout=Fal
             pixelX=apix*1e6,
             pixelY=apix*1e6,
             )
-
     qs, intensities = azimuthal_integrator.integrate1d(
             pattern,
             512,
             unit="q_nm^-1",
             )
 
-    plt.figure()
-    if logscale:
-        plt.semilogy(qs, intensities)
-    else:
-        plt.plot(qs, intensities)
-    plt.xlabel("q (1/nm)")
-    plt.ylabel("Intensity (arb. units)")
-
-    if print_to_stdout:
-        for q,i in zip(qs, intensities):
-            print "8.7e\t%8.7e" % (q,i)
-
+    return qs, intensities
 
 def diffractionParameters(path):
     """ Extract beam parameters and geometry from given file or directory.

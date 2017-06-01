@@ -41,7 +41,13 @@ def main(args=None):
         analyzer.plotPattern(logscale=args.logscale,
                              operation=eval(args.operation),
                              )
-        plt.show()
+    # Plot if requested.
+    if args.radial:
+        analyzer.plotRadialProjection(logscale=args.logscale,
+                             operation=eval(args.operation),
+                             )
+    plt.show()
+
 
     # Animate if requested.
     if args.animation_filename:
@@ -75,6 +81,14 @@ if __name__ == '__main__':
                         dest="plot",
                         default=False,
                         help="Flag indicating whether to render a plot or not.")
+
+    parser.add_argument("-R",
+                        "--radial",
+                        action="store_true",
+                        dest="radial",
+                        default=False,
+                        help="Flag indicating whether to render a radial projection plot or not.")
+
 
     parser.add_argument("-l",
                         "--logscale",
