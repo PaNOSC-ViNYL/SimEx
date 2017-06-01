@@ -1,2 +1,6 @@
+cp ../../requirements.txt .
+
 docker build -t yakser/simex_3rdparty .
 docker push yakser/simex_3rdparty
+
+rm -f requirements.txt

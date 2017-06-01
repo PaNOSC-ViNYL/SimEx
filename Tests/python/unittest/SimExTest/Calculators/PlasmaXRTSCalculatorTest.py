@@ -1,6 +1,7 @@
+""" Test module for the PlasmaXRTSCalculator.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,21 +20,14 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the PlasmaXRTSCalculator.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160225
-
-"""
-import os
-import numpy
-import shutil
 import h5py
+import numpy
+import os
+import shutil
+import unittest
 
 # Include needed directories in sys.path.
 import paths
-import unittest
 
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -69,9 +63,8 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         self.xrts_parameters = PlasmaXRTSCalculatorParameters(
                             elements=[['Be', 1, -1]],
                             photon_energy=4.96e3,
-                            electron_density=3e29,
+                            electron_density=3e23,
                             electron_temperature=10.0,
-                            mass_density=1.85,
                             ion_charge=2.3,
                             scattering_angle=90.,
                             )

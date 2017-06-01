@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+
+set -e
+
+
 BRANCH=develop
 URL=https://github.com/eucall-software/simex_platform.git
 cd /opt
@@ -35,7 +40,7 @@ cmake -DSRW_OPTIMIZED=ON -DDEVELOPER_INSTALL=ON -DCMAKE_INSTALL_PREFIX=$ROOT_DIR
 chmod og+rwX -R $ROOT_DIR
 
 # Build the project.
-make -j
+make
 
 
 # Install the project.

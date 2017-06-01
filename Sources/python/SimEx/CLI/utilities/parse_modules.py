@@ -5,7 +5,6 @@ import os
 import SimEx.Calculators
 import parse_classes
 
-
 def get_module_from_file(fname):
     f=open(fname,'r')
     moduleDescription = json.load(f)
@@ -22,7 +21,7 @@ def get_available_modules():
     for fname in os.listdir(path):
             if not '_ParamTemplate.py' in fname:
                 moduleList.append(get_module_from_file(path+fname))
-    moduleList = sorted(moduleList, key=lambda k: parse_classes.get_class_priority(k['Class']))                 
+    moduleList = sorted(moduleList, key=lambda k: parse_classes.get_class_priority(k['Class']))
     return moduleList
 
 def get_module_priority(moduleName):
@@ -42,4 +41,3 @@ def get_module(moduleName):
 
 if __name__ == "__main__":
         print get_available_modules()
-        

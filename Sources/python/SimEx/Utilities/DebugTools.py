@@ -1,6 +1,7 @@
+""" Module for debug utilities.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,17 +21,10 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for some debug utilities.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
 import ipdb
 
 def break_here():
-    ipdb.
+    ipdb.set_trace()
 
 
 

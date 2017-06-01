@@ -1,4 +1,6 @@
 #!/usr/bin/env python2.7
+""" Collection of utilities to analyse output from (esther) rad-hydro simulations. """
+
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2017 Carsten Fortmann-Grote, Richard Briggs              #
@@ -20,7 +22,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Collection of utilities to analyse output from (esther) rad-hydro simulations. """
 
 import os
 import numpy

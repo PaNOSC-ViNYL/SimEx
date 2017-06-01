@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016,2017 Richard Briggs, Carsten Fortmann-Grote         #
+# Copyright (C) 2016-2017 Richard Briggs, Carsten Fortmann-Grote         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -23,7 +23,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #---------------------------------------------------------------------------
-# Materials: [name, EOS shortname, EOS longname, density]
+# Materials: [name, EOS shortname, EOS longname, mass density at ambient conditions]
 material_type = [0]*13
 material_type[1] = ["Aluminium","Al#","Al#_e_ses",2.7]
 material_type[2] = ["Diamond","Dia","Dia_e_ses",3.51]

@@ -1,6 +1,5 @@
 from project_commands import create_project,create_test_project
 
-
 def set_arguments(parser):
     subparsers = parser.add_subparsers(title='project commands',help='')
     parser = subparsers.add_parser('create', help='create project')

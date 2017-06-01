@@ -1,10 +1,2 @@
-""" Module for <++>
-
-    @author : CFG
-    @institution : XFEL
-    @creation <+yyyymmdd+>
-
-"""
-
-
+""" Module holding the <++> class."""
 

@@ -1,6 +1,7 @@
+""" Module holding the AbstractPhotonPropagator abstract class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,20 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for AbstractPhotonPropagator
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
-
 from abc import ABCMeta
 from abc import abstractmethod
 
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 class AbstractPhotonPropagator(AbstractBaseCalculator):
     """
@@ -156,7 +148,6 @@ class AbstractPhotonPropagator(AbstractBaseCalculator):
         :return: List of strings, e.g. [/data/data1, /params/params1']
         """
         return self.__provided_data
-
 
 def checkAndSetPhotonPropagator(var=None, default=None):
     """

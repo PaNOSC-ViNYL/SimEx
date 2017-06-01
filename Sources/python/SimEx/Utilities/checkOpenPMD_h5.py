@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2015-2016, Axel Huebl, Remi Lehe, Carsten Fortmann-Grote
+# Copyright (c) 2015-2017, Axel Huebl, Remi Lehe, Carsten Fortmann-Grote
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@ import h5py as h5
 import numpy as np
 import re
 import string
-import collections # for isinstance
+import collections
 import sys, getopt, os.path
 
 openPMD = "1.0.1"

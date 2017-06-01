@@ -1,6 +1,7 @@
+""" Test module for module PhotonExperimentSimulation from SimEx """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,24 +20,21 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for module PhotonExperimentSimulation from SimEx
-    @author : CFG
-    @creation : 20151005
-"""
-import os, shutil
 import h5py
-import unittest
+import os, shutil
 import paths
+import unittest
 
-from TestUtilities import TestUtilities
-from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
-from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
-from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
-from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
+
 from SimEx.Calculators.IdealPhotonDetector import IdealPhotonDetector
 from SimEx.Calculators.S2EReconstruction import S2EReconstruction
-
+from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
+from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
+from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
+from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 from SimEx.PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
+
+from TestUtilities import TestUtilities
 
 class PhotonExperimentSimulationTest( unittest.TestCase):
     """ Test class for the PhotonExperimentSimulation class. """
@@ -323,10 +321,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         interfaces_are_consistent = pxs._checkInterfaceConsistency()
 
         self.assertTrue( interfaces_are_consistent )
-
-
-
-
 
     def testSimS2EWorkflowTwoDiffractionPatterns(self):
         """ Testing that a workflow akin to the simS2E example workflow works. """
@@ -659,9 +653,6 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         pxs.run()
 
-
-
-
     def testSimS2EWorkflowSingleFile(self):
         """ Testing that a workflow akin to the simS2E example workflow works. Only one I/O file per calculator. """
 
@@ -853,6 +844,35 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
             print f
             self.assertTrue( os.path.isfile( f ) )
 
+    def reference2NIP(self):
+        """ Testing that diffraction intensities with 9fs 5keV pulses through SPB-SFX KB beamline are of the order of Yoon 2016. """
+
+        source_file = "/data/netapp/grotec/datadump/5keV_9fs_2015_slice12_fromYoon2016.h5"
+        #source_file = TestUtilities.generateTestFilePath("FELsource_out.h5")
+
+        # Propagate
+        propagator = XFELPhotonPropagator(parameters=None, input_path=source_file, output_path="prop_out.h5")
+        propagator.backengine()
+        propagator.saveH5()
+
+        pmi = XMDYNDemoPhotonMatterInteractor(parameters=None, input_path=propagator.output_path, output_path="pmi", sample_path=TestUtilities.generateTestFilePath("sample.h5"))
+        pmi.backengine()
+
+        #  Diffraction with parameters.
+        diffraction_parameters={ 'uniform_rotation': True,
+                     'calculate_Compton' : False,
+                     'slice_interval' : 100,
+                     'number_of_slices' : 100,
+                     'pmi_start_ID' : 1,
+                     'pmi_stop_ID'  : 1,
+                     'number_of_diffraction_patterns' : 1,
+                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
+                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'number_of_MPI_processes' : 8,
+                     }
+
+        diffractor = SingFELPhotonDiffractor(parameters=diffraction_parameters, input_path=pmi.output_path, output_path="diffr_out.h5")
+        diffractor.backengine()
 
 
 if __name__ == '__main__':

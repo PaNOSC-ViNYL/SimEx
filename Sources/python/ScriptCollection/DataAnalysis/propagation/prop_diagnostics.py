@@ -1,4 +1,6 @@
 #!/usr/bin/env python2.7
+
+""" :module: Holding functions for quick diagnostics of wavefront propagation results. """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -20,65 +22,30 @@
 #                                                                        #
 ##########################################################################
 
-""" :module: Holding functions for quick diagnostics of wavefront propagation results. """
 
 from argparse import ArgumentParser
-
-import matplotlib
-matplotlib.use('Qt4Agg')
-from matplotlib import pyplot
-
-import wpg
-from wpg.wpg_uti_wf import plot_intensity_qmap, plot_intensity_map, integral_intensity
-
-
-### TODO
-# Plot phase distribution for maximum intensity slices.
-# Plot average and rms intensity distribution over given patterns.
-
-def plot(wavefront):
-
-    if args._do_intensity_distribution:
-        integral_intensity(wavefront, bPlot=True)
-        plot_intensity_map(wavefront)
-
-    if args._do_spectra:
-        spectrum0 = wavefront.custom_fields['misc']['spectrum0']
-        spectrum1 = wavefront.custom_fields['misc']['spectrum1']
-
-        pyplot.plot(spectrum0[:,0],spectrum0[:,1], label="initial")
-        pyplot.plot(spectrum1[:,0],spectrum1[:,1], label="final")
-        pyplot.xlabel("Energy (eV)")
-        pyplot.ylabel("Power spectrum (normalized)")
-        pyplot.legend()
-
-        pyplot.show()
-
-    if args._do_phase_distribution:
-
-        pyplot.imshow(wavefront.get_phase(slice_number=0,polarization='horizontal'), cmap='hsv')
-        pyplot.colorbar()
-
-    if args._do_qspace_intensity:
-        plot_intensity_qmap(wavefront)
-
-
-
+from SimEx.Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis, plt
 
 def main(args):
 
-    # Get wavefront file name.
-    print "Setting up wavefront."
-    wavefront_file = args.input_file
+    # Setup the object.
+    analyzer = XFELPhotonAnalysis(input_path=args.input_file)
 
-    wavefront = wpg.Wavefront()
-    print "Loading wavefront from %s." % (wavefront_file)
-    wavefront.load_hdf5(wavefront_file)
+    if args._do_intensity_distribution:
+        analyzer.plotIntensityMap(logscale=args.logscale)
+    if args._do_qspace_intensity:
+        analyzer.plotIntensityMap(logscale=args.logscale, qspace=True)
+    if args._do_total_power:
+        analyzer.plotTotalPower()
+    if args._do_on_axis_power:
+        analyzer.plotOnAxisPowerDensity()
+    if args._do_spectrum:
+        analyzer.plotTotalPower(spectrum=True)
+    if args._do_animate:
+        analyzer.animate(logscale=args.logscale,qspace=False)
 
-    print "Plotting wavefront as reqested"
-    plot(wavefront)
-
-    pyplot.show()
+    if not args._do_animate:
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -94,29 +61,58 @@ if __name__ == "__main__":
                         "--intensity",
                         action="store_true",
                         dest="_do_intensity_distribution",
-                        default=True,
+                        default=False,
                         help="Plot the intensity distribution in x-y.")
 
     parser.add_argument("-R",
                         "--reciprocal",
                         action="store_true",
                         dest="_do_qspace_intensity",
-                        default=True,
+                        default=False,
                         help="Plot the intensity distribution in qx-qy.")
 
-    parser.add_argument("-P",
-                        "--phase",
-                        action="store_true",
-                        dest="_do_phase_distribution",
-                        default=False,
-                        help="Plot the phase distribution in x-y.")
+    #parser.add_argument("-P",
+                        #"--phase",
+                        #action="store_true",
+                        #dest="_do_phase_distribution",
+                        #default=False,
+                        #help="Plot the phase distribution in x-y.")
 
     parser.add_argument("-S",
                         "--spectrum",
                         action="store_true",
-                        dest="_do_spectra",
-                        default=True,
-                        help="Plot the power spectra (before and after propagation.")
+                        dest="_do_spectrum",
+                        default=False,
+                        help="Plot the power spectra.")
+
+    parser.add_argument("-l",
+                        "--logscale",
+                        action="store_true",
+                        dest="logscale",
+                        default=False,
+                        help="Plot color profiles on logscale.")
+
+    parser.add_argument("-T",
+                        "--total-power",
+                        action="store_true",
+                        dest="_do_total_power",
+                        default=False,
+                        help="Plot total power as function of time.")
+
+    parser.add_argument("-X",
+                        "--on-axis-power",
+                        action="store_true",
+                        dest="_do_on_axis_power",
+                        default=False,
+                        help="Plot total power as function of time.")
+
+    parser.add_argument("-A",
+                        "--animate",
+                        action="store_true",
+                        dest="_do_animate",
+                        default=False,
+                        help="Produce an animated gif of intensity vs. time.")
+
 
 
 

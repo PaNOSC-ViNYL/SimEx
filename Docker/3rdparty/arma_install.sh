@@ -1,12 +1,13 @@
-URL=http://sourceforge.net/projects/arma/files/armadillo-6.600.4.tar.gz
+#!/usr/bin/env bash
+URL=http://sourceforge.net/projects/arma/files/armadillo-7.800.2.tar.xz
 
 wget -q $URL
 
-tar -xf armadillo-6.600.4.tar.gz
-cd armadillo-6.600.4 
+tar -xf armadillo-7.800.2.tar.xz
+cd armadillo-7.800.2 
 ./configure
 make install
 cd ..
-rm -rf armadillo-6.600.4.tar.gz armadillo-6.600.4
+rm -rf armadillo-7.800.2.tar.gz armadillo-7.800.2
 
 

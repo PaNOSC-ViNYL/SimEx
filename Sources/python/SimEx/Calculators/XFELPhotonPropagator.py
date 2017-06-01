@@ -1,6 +1,7 @@
+""" Module that holds the XFELPhotonPropagator class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,26 +20,18 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the XFELPhotonPropagator class.
+from prop import propagate_s2e
 
-    :author: CFG
-    :institution: XFEL
-    :creation: 20151104
-
-"""
 import os
-
-from prop import propagate_s2e as propagate
+import subprocess
+import shlex
 
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
-from SimEx.Utilities import wpg_to_opmd
-from SimEx.Utilities import ParallelUtilities
-from SimEx.Utilities import EntityChecks
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
-
-import subprocess,shlex
-
-
+from SimEx.Utilities import EntityChecks
+from SimEx.Utilities import IOUtilities
+from SimEx.Utilities import ParallelUtilities
+from SimEx.Utilities import wpg_to_opmd
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
@@ -87,7 +80,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
     def backengine(self):
         """ Starts WPG simulations in parallel in a subprocess """
 
-        fname = __name__+"_tmpobj"
+        fname = IOUtilities.getTmpFileName()
         self.dumpToFile(fname)
 
         forcedMPIcommand=self.parameters.forced_mpi_command
@@ -136,7 +129,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             input_files.sort() # Assuming the filenames have some kind of ordering scheme.
         else:
             if thisProcess == 0: # other MPI processes (if any) have nothing to do
-                propagate.propagate(self.input_path, self.output_path, self.parameters.beamline.get_beamline)
+                propagate_s2e.propagate(self.input_path, self.output_path, self.parameters.beamline.get_beamline)
             return 0
 
         # If we have more than one input file, we should also have more than one output file, i.e.
@@ -154,7 +147,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             # process file on a corresponding process (round-robin)
             if i % numProcesses == thisProcess:
                 output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
-                propagate.propagate(input_file, output_file, self.parameters.beamline.get_beamline)
+                propagate_s2e.propagate(input_file, output_file, self.parameters.beamline.get_beamline)
 
                 # Rewrite in openpmd conformant way.
                 wpg_to_opmd.convertToOPMD( output_file )
@@ -179,8 +172,6 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         :type output_path: string
         """
         pass # No action required since output is written in backengine.
-
-
 
 if __name__ == '__main__':
     XFELPhotonPropagator.runFromCLI()

@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016, 2017 Richard Briggs, Carsten Fortmann-Grote        #
+# Copyright (C) 2016-2017 Richard Briggs, Carsten Fortmann-Grote         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -110,4 +110,3 @@ class EstherExperimentConstruction():
                 self._parameters = parameters
 
             parameters._serialize(output_path,filename)
-

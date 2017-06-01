@@ -1,3 +1,4 @@
+""" Module for AbstractPhotonDetector. """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -19,20 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module for AbstractPhotonDetector
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151007
-
-"""
-
 from abc import ABCMeta
 from abc import abstractmethod
 
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
 
 class AbstractPhotonDetector(AbstractBaseCalculator):
     """
