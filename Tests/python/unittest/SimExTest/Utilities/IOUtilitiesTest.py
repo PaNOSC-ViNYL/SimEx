@@ -57,8 +57,6 @@ class IOUtilitiesTest(unittest.TestCase):
             if os.path.isdir(p):
                 shutil.rmtree(p)
 
-
-
     def testLoadPDB(self):
         """ Check that we can load a pdb and convert it to a dict. """
 
@@ -96,7 +94,7 @@ class IOUtilitiesTest(unittest.TestCase):
     def testQueryPDB(self):
         """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
         # Setup path to pdb file.
-        pdb_path = '2nip.pdb'
+        pdb_path = '5UDC.pdb'
         self.__files_to_remove.append(pdb_path)
         self.__paths_to_remove.append('obsolete')
 
@@ -112,7 +110,7 @@ class IOUtilitiesTest(unittest.TestCase):
     def testQueryPDBTwice(self):
         """ Check that we can do two subsequent queries (fails if urllib.urlcleanup is not called.) """
         # Setup path to pdb file.
-        pdb_path = '2nip.pdb'
+        pdb_path = '5loy.pdb'
         self.__files_to_remove.append(pdb_path)
         self.__paths_to_remove.append('obsolete')
 
@@ -162,6 +160,7 @@ class IOUtilitiesTest(unittest.TestCase):
 
     def testGenesisDFLToWPGWavefront(self):
         """ Check the conversion from genesis dfl to wpg readable hdf5. """
+
         genesis_out_file = generateTestFilePath("genesis/lcls/lcls.out")
         genesis_dfl_file = generateTestFilePath("genesis/lcls/lcls.out.dfl")
 

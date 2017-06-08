@@ -35,7 +35,8 @@ from SimEx.Utilities import xpdb
 from Bio import PDB
 from scipy.constants import m_e, c, e
 
-from wpg.converters.genesis_v2 import read_genesis_file
+from wpg.converters.genesis_v2 import read_genesis_file as genesis2
+from wpg.converters.genesis import read_genesis_file as genesis3
 
 
 import uuid
@@ -267,7 +268,7 @@ def genesis_dfl_to_wavefront(genesis_out, genesis_dfl):
     Based on WPG/wpg/converters/genesis_v2.py
     '''
 
-    return read_genesis_file(genesis_out, genesis_dfl)
+    return genesis2(genesis_out, genesis_dfl)
 
 def wgetData(url=None, path=None):
     """ Download a given url. """
