@@ -50,14 +50,14 @@ class EstherExperimentConstructionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Make a directory for simulation storage.
-        cls._simdir = os.path.join("/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/", "Simulations")
-        #os.mkdir(cls._simdir)
+        cls._simdir = os.path.join("/users/rbriggs/", "Simulations")
+        os.mkdir(cls._simdir)
         #Comment out the mkdir if the sim dir has already been created. Is there an overwrite or if is not path then create...
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        #shutil.rmtree(cls._simdir)
+        shutil.rmtree(cls._simdir)
 
     def setUp(self):
         """ Setting up a test. """
