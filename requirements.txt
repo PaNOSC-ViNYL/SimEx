@@ -13,3 +13,4 @@ breathe
 dill
 sqlalchemy
 pyfftw
+pyFAI

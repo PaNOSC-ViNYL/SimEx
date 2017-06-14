@@ -21,7 +21,8 @@ cd $PREFIX
 export PATH=$PREFIX/bin:$PATH
 conda config --set always_yes True
 
-#conda install --no-deps nomkl functools32 six dateutil pyparsing cycler openblas libpng
+# pip cannot install pyqt
+conda install --no-update-deps pyqt=4
 
 # delete tests
 find . -type d -name tests -depth -exec rm -rf {} \;

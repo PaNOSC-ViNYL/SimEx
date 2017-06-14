@@ -43,6 +43,7 @@ addons:
       - cython
       - sphinx-common
       - python-sphinx
+      - python-qt4
 
 cache:
   apt: true

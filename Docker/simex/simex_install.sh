@@ -51,5 +51,10 @@ rm -rf $ROOT_DIR/Tests
 
 echo "source /opt/simex_platform/bin/simex_vars.sh" > /etc/profile.d/scripts-simex.sh && \
 	chmod 755 /etc/profile.d/scripts-simex.sh
+
+
+echo "export PYFAI_TESTIMAGES=/tmp" >> /etc/profile.d/scripts-simex.sh
+
+
 chmod og+rwX -R /opt/simex_platform
 
