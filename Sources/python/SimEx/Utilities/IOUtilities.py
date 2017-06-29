@@ -79,7 +79,8 @@ def checkAndGetPDB( path ):
             urllib.urlcleanup()
             download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
         except:
-            raise IOError( "Database query failed.")
+            raise
+            #raise IOError( "Database query failed.")
         finally:
             urllib.urlcleanup()
 
@@ -87,6 +88,64 @@ def checkAndGetPDB( path ):
         shutil.move( download_target, path  )
 
     return path
+
+def loadXYZ( path=None):
+    """ Load atomic structure from a xyz file and setup a dictionary readable by xmdyn calculator.
+
+    :param path: The path to the xyz file.
+    """
+    # Setup the return dictionary.
+    atoms_dict = {'Z' : [],     # Atomic number.
+                  'r' : [],     # Cartesian coordinates.
+                  'selZ' : {},  # Abundance of each element.
+                  'N' : 0,      # Number of atoms.
+                  }
+
+    with open(path) as fin:
+        natoms = int(fin.readline())
+        title = fin.readline()[:-1]
+
+        print "Reading %d atoms of %s from %s." % (natoms, title, path)
+        for x in range(natoms):
+            line = fin.readline().split()
+
+            # Get the element symbol from pdb.
+            symbol = line[0]
+
+            # Get the corresponding periodic table element as an instance.
+            atom_obj = getattr(periodictable, symbol)
+
+            # Query the atomic number.
+            charge = atom_obj.number
+
+            xyz = numpy.zeros(3, dtype="float64")
+            xyz[:] = map(float, line[1:4])
+
+            # Write to dict.
+            atoms_dict['Z'].append(charge)
+            atoms_dict['r'].append(xyz*1e-10)
+
+
+    if len(atoms_dict['Z']) == 0:
+        raise IOError( "Error reading structure file %s. " % (path) )
+
+    # Get unique elements.
+    for sel_Z in numpy.unique( atoms_dict['Z'] ) :
+        atoms_dict['selZ'][sel_Z] = numpy.nonzero( atoms_dict['Z'] == sel_Z )[0]
+
+    # Count number of atoms.
+    atoms_dict['N'] = len( atoms_dict['Z'] )
+
+    # Convert to numpy arrays.
+    atoms_dict['Z'] = numpy.array( atoms_dict['Z'] )
+    atoms_dict['r'] = numpy.array( atoms_dict['r'] )
+
+    # Return.
+    return atoms_dict
+
+
+
+
 
 
 def loadPDB( path = None ):

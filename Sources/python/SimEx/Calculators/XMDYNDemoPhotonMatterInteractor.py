@@ -188,15 +188,28 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.f_save_info()
             pmi_demo.f_load_pulse( pmi_demo.g_s2e['prop_out'] )
 
-            # Check if sample is a h5 file. Horrible hack.
-            try:
+            # Get file extension.
+            extension = self.__sample_path.split(".")[-1]
+            if extension.lower() == "h5":
                 h5 = h5py.File(self.__sample_path, 'r')
                 h5.close()
                 pmi_demo.f_load_sample(self.__sample_path)
-            except:
-                # Assume it's a pdb file. Will raise if not.
+            elif extension.lower() == "pdb":
                 atoms_dict = IOUtilities.loadPDB(self.__sample_path)
                 pmi_demo.g_s2e['sample'] = atoms_dict
+
+            elif extension.lower() == "xyz":
+                atoms_dict = IOUtilities.loadXYZself.__sample_path)
+                pmi_demo.g_s2e['sample'] = atoms_dict
+
+            else:
+                raise IOError("Sample file is in an unsupported format (supported are h5, pdb, xyz).")
+
+            ###############################################
+            import ipdb
+            ipdb.set_trace()
+            ###############################################
+
 
             pmi_demo.f_rotate_sample()
             pmi_demo.f_system_setup()
@@ -637,7 +650,6 @@ def s2e_rand_orient( r ,mat ) :
     N = r.shape[1]
 ###    print N
     vv = numpy.zeros((3,0)) ;
-
     for ii in range(N) :
         vv = r[ii,:]
 ###        print vv , vv.shape , mat.shape

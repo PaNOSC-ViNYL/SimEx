@@ -85,6 +85,26 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check exception on wrong file type.
         self.assertRaises( IOError, IOUtilities.loadPDB, generateTestFilePath("sample.h5") )
 
+    def testLoadXYZ(self):
+        """ Check that we can load a xyz file and convert it to a dict. """
+
+        # Setup path to xyz file.
+        xyz_path = generateTestFilePath("Fe2O3_poly_test.xyz")
+
+        # Attempt to load it.
+        return_dict = IOUtilities.loadXYZ(xyz_path)
+
+        # Check that return type is a dict.
+        self.assertIsInstance( return_dict, dict )
+
+        # Check items on dict.
+        self.assertIsInstance( return_dict['Z'], numpy.ndarray )
+        self.assertIsInstance( return_dict['r'], numpy.ndarray )
+        self.assertIsInstance( return_dict['selZ'], dict )
+        self.assertIsInstance( return_dict['N'], int )
+        self.assertEqual( return_dict['Z'].shape, (100,) )
+        self.assertEqual( return_dict['r'].shape, (100,3) )
+
     def testQueryNonexisitngPDB(self):
         """ Check exception if querying a non-existing pdb """
         # Check exception on wrong input type.
