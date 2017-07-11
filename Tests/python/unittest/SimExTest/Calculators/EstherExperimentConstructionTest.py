@@ -175,19 +175,26 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                          delta_time=0.05
                                          )
         # Create experiment.
-        simName = "HPLF-Fe"
+        simName = "Tutorial"
         estherSimsPath = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/"
         experiment = EstherExperimentConstruction(parameters=parameters,
                                                   esther_sims_path=estherSimsPath,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/HPLF-Fe/1"
+        expected_dir = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/Tutorial/1"
         self.assertTrue( os.path.isdir(expected_dir) )
-
-        self.assertIn( "HPLF-Fe1.txt", os.listdir(expected_dir) )
-        self.assertIn( "HPLF-Fe1_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "Tutorial1.txt", os.listdir(expected_dir) )
+        self.assertIn( "Tutorial1_intensite_impulsion.txt", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
+        
+        # Generate new parameters
+        new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=4.0,
+                read_from_file="/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/HPLF-Fe/1")
+
+        experiment = EstherExperimentConstruction(parameters=new_parameters,
+                                                  esther_sims_path=self._simdir,
+                                                  sim_name=simName)
 
 
 
