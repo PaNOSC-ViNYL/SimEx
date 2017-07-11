@@ -50,7 +50,7 @@ class EstherExperimentConstructionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Make a directory for simulation storage.
-        cls._simdir = os.path.join("/users/rbriggs/", "Simulations")
+        cls._simdir = os.path.join("/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode", "Tests")
         os.mkdir(cls._simdir)
         #Comment out the mkdir if the sim dir has already been created. Is there an overwrite or if is not path then create...
 
@@ -86,16 +86,16 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         parameters = EstherPhotonMatterInteractorParameters(
                                         number_of_layers=2,
                                          ablator="CH",
-                                         ablator_thickness=25.0,
+                                         ablator_thickness=50.0,
                                          sample="Iron",
                                          sample_thickness=5.0,
                                          window=None,
                                          window_thickness=0.0,
                                          laser_wavelength=1064.0,
                                          laser_pulse='flat',
-                                         laser_pulse_duration=1.0,
-                                         laser_intensity=0.1,
-                                         run_time=10.0,
+                                         laser_pulse_duration=6.0,
+                                         laser_intensity=0.33,
+                                         run_time=12.0,
                                          delta_time=0.05
                                          )
         # Create experiment.
@@ -155,14 +155,14 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         # Check update performed.
         self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 4.0 )
 
-    def testComplexWorkflow2(self):
+    def testExample(self):
 
 
         # Create parameters.
         parameters = EstherPhotonMatterInteractorParameters(
                                         number_of_layers=2,
                                          ablator="CH",
-                                         ablator_thickness=25.0,
+                                         ablator_thickness=50.0,
                                          sample="Iron",
                                          sample_thickness=5.0,
                                          window=None,
@@ -170,32 +170,31 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                          laser_wavelength=1064.0,
                                          laser_pulse='flat',
                                          laser_pulse_duration=6.0,
-                                         laser_intensity=0.1,
-                                         run_time=10.0,
+                                         laser_intensity=0.33,
+                                         run_time=12.0,
                                          delta_time=0.05
                                          )
         # Create experiment.
-        simName = "Tutorial"
+        simName = "Example"
         estherSimsPath = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/"
         experiment = EstherExperimentConstruction(parameters=parameters,
                                                   esther_sims_path=estherSimsPath,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/Tutorial/1"
+        expected_dir = "/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/Example/1"
         self.assertTrue( os.path.isdir(expected_dir) )
-        self.assertIn( "Tutorial1.txt", os.listdir(expected_dir) )
-        self.assertIn( "Tutorial1_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "Example1.txt", os.listdir(expected_dir) )
+        self.assertIn( "Example1_intensite_impulsion.txt", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
         
         # Generate new parameters
-        new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=4.0,
-                read_from_file="/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/HPLF-Fe/1")
+        #new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=4.0,
+                #read_from_file="/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode/Simulations/HPLF-Fe/1")
 
-        experiment = EstherExperimentConstruction(parameters=new_parameters,
-                                                  esther_sims_path=self._simdir,
-                                                  sim_name=simName)
-
+        #experiment = EstherExperimentConstruction(parameters=new_parameters,
+                                                  #esther_sims_path=self._simdir,
+                                                  #sim_name=simName)
 
 
 if __name__ == '__main__':

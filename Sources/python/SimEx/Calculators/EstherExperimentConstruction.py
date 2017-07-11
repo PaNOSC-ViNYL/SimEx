@@ -81,7 +81,7 @@ class EstherExperimentConstruction():
                 print ("These are the current simulations within %s" % sim_name)
                 for sims in os.listdir(sim_path):
                     if not sims.startswith('.'):
-                        print sims
+                        print (sims)
                 # Create new folder with new iteration numbers
                 # TO DO: Generate updated parameters from SimName
                 output_sim = int(sims)+1
