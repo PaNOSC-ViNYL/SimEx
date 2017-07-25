@@ -199,17 +199,11 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
                 pmi_demo.g_s2e['sample'] = atoms_dict
 
             elif extension.lower() == "xyz":
-                atoms_dict = IOUtilities.loadXYZself.__sample_path)
+                atoms_dict = IOUtilities.loadXYZ(self.__sample_path)
                 pmi_demo.g_s2e['sample'] = atoms_dict
 
             else:
                 raise IOError("Sample file is in an unsupported format (supported are h5, pdb, xyz).")
-
-            ###############################################
-            import ipdb
-            ipdb.set_trace()
-            ###############################################
-
 
             pmi_demo.f_rotate_sample()
             pmi_demo.f_system_setup()
