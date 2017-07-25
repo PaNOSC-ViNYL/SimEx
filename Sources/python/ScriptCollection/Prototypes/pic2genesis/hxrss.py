@@ -108,11 +108,6 @@ und.Kx = Ephoton2K(E_photon, und.lperiod, E_beam)
 up = UndulatorParameters(und,E_beam)
 
 if debug: up.printParameters()
-###############################################
-import ipdb
-ipdb.set_trace()
-###############################################
-
 
 a0 = und.Kx
 taper_func_5 = lambda n : f1(n, n0, a0, a1, a2 )
