@@ -5,9 +5,6 @@ from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 from prop import exfel_spb_kb_beamline as beamline
 import sys
 
-# Define a beamline.
-beamline = setup_S2E_SPI_beamline()
-
 # Setup propagation parameters.
 parameters=WavePropagatorParameters(beamline=beamline)
 
