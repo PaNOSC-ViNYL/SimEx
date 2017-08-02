@@ -9,7 +9,7 @@ find_python_module(h5py REQUIRED)
 
 ExternalProject_Add(
 singfel
-URL https://github.com/wang-zy/pysingfel/archive/master.zip
+URL https://github.com/eucall-software/pysingfel/archive/master.zip
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
 PATCH_COMMAND ""
