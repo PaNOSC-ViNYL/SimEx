@@ -173,16 +173,6 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
 
     def _setSeeFlags(self):
         """ Set the See parameters as used in the input deck generator. """
-<<<<<<< HEAD
-        self.__use_rpa         = int(self.model_See == "RPA")
-        self.__use_bma         = int(self.model_See == "BMA")
-        self.__use_bma_slfc    = int(self.model_See == 'BMA+sLFC')
-        self.__write_bma = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
-        self.__use_lindhard    = int(self.model_See == 'Lindhard')
-        self.__use_static_lfc  = int(self.model_See == 'sLFC')
-        self.__use_dynamic_lfc = int(self.model_See == 'dLFC')
-        self.__use_mff = int(self.model_See == 'MFF')
-=======
         self.__use_rpa         = BOOL_TO_INT[self.model_See == "RPA"]
         self.__use_bma         = BOOL_TO_INT[self.model_See == "BMA"]
         self.__use_bma_slfc    = BOOL_TO_INT[self.model_See == 'BMA+sLFC']
@@ -192,7 +182,6 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__use_static_lfc  = BOOL_TO_INT[self.model_See == 'sLFC']
         self.__use_dynamic_lfc = BOOL_TO_INT[self.model_See == 'dLFC']
         self.__use_mff = BOOL_TO_INT[self.model_See == 'MFF']
->>>>>>> compton_calculator
 
     def _setSiiFlags(self):
         """ Set the internal Sii parameters as used in the input deck generator."""
@@ -282,11 +271,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('PHOTON_ENERGY     %4.3f\n' % (self.photon_energy))
             input_deck.write('SCATTERING_ANGLE  %4.3f\n' % (self.scattering_angle) )
             input_deck.write('ELECTRON_TEMP     %4.3f 0\n' % (self.electron_temperature) )
-<<<<<<< HEAD
             input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e6) )
-=======
-            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e-6) )
->>>>>>> compton_calculator
             input_deck.write('AMPLITUDE         1.0   0\n')
             input_deck.write('BASELINE          0.0   0\n')
             input_deck.write('Z_FREE            %4.3f 0\n' % (self.ion_charge) )
