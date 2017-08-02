@@ -37,6 +37,256 @@ from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
 from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
+    """
+    Class representing parameters for the plasma x-ray Thomson scattering calculator.
+    """
+
+    def __init__(self,
+                 elements=None,
+                 photon_energy=None,
+                 scattering_angle=None,
+                 electron_temperature=None,
+                 electron_density=None,
+                 ion_temperature=None,
+                 ion_charge=None,
+                 mass_density=None,
+                 debye_temperature=None,
+                 band_gap=None,
+                 energy_range=None,
+                 model_Sii=None,
+                 model_See=None,
+                 model_Sbf=None,
+                 model_IPL=None,
+                 model_Mix=None,
+                 lfc=None,
+                 Sbf_norm=None,
+                 source_spectrum=None,
+                 source_spectrum_fwhm=None,
+                 **kwargs
+                 ):
+
+        """
+
+        :param elements: The chemical elements in the scattering target.
+        :type elements: list [[element symbol, stochiometric number, charge], ...], default None
+        :example elements: [['B', 1, 2], ['N', 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).
+        :example elements: [['C', 1, 4], ['H', 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.
+
+        :param photon_energy: The central energy of incoming x-ray photons.
+        :type photon_energy: float
+
+        :param scattering_angle: The scattering angle.
+        :type scattering_angle: float
+
+        :param electron_temperature: The temperature of the electron subsystems (units of eV).
+        :type electron_temperature: float
+
+        :param electron_density: The electron number density (units of 1/cm^3)
+        :type electron_density: float
+
+        :param ion_temperature: The temperature of the ion subsystem (units of eV).
+        :type ion_temperature: float
+
+        :param ion_charge: The average ion charge (units of elementary charge e).
+        :type ion_charge: float
+
+        :param mass_density: The mass density of the target (units of g/cm^3).
+        :type mass_density: float
+
+        :param debye_temperature: The Debye temperature (units of eV).
+        :type debye_temperature: float
+
+        :param band_gap: The band gap of the target (units of eV).
+        :type band_gap: float, default 0
+
+        :param energy_range: The energy range over which to calculate the scattering spectrum.
+        :type energy_range: dict, default 0
+        :example energy_range: energy_range={'min'  -100.0, 'max'  100, 'step'  0.5} to go from -100 eV to 100 eV in steps of 0.5 eV.
+
+        :param model_Sii: The model to use for the ion-ion structure factor.
+        :type model_Sii: str ('DH' || 'OCP' || 'SOCP' || 'SOCPN') || float, default 'DH'
+        :example model_Sii: Sii=1.5 to use a fixed value of Sii=1.5
+
+        :param model_See: The model of the dynamic (high frequency) part of the electron-electron structure factor.
+        :type model_See: str ('RPA' || 'BMA' || 'BMA+sLFC'), default 'RPA'
+
+        :param model_Sbf: The model for the bound-free structure factor.
+        :type model_Sbf: str ('IA' || 'FA'), default 'IA'
+
+        :param model_IPL: Model for ionization potential lowering.
+        :type model_IPL: str ('SP' || 'EK') || float, default 'SP'
+        :example model_IPL: model_IPL=100.0 # Set the ionization potential difference (lowering) to 100 eV.
+
+        :param model_Mix: The model to use for mixing (of species).
+        :type model_Mix: str, default None
+
+        :param lfc:  The local field correction to use.
+        :type lfc:  float, default 0.0
+
+        :param Sbf_norm: How to normalize the bound-free structure factor.
+        :type Sbf_norm: str || float, default None
+
+        :param source_spectrum: Path to a file holding the x-ray probe energy spectrum.
+        :type source_spectrum: str, default None
+
+        :param source_spectrum_fwhm: The x-ray probe energy spectrum fwhm.
+        :type source_spectrum_fwhm: float
+        """
+
+        # Check and set all parameters.
+        self.__elements             = checkAndSetElements(elements)
+        self.__photon_energy        = checkAndSetPhotonEnergy(photon_energy)
+        self.__scattering_angle     = checkAndSetScatteringAngle(scattering_angle)
+        self.__electron_temperature = checkAndSetElectronTemperature(electron_temperature)
+        # Set electron density, charge, and mass density depending on which input was given.
+        self.__electron_density, self.__ion_charge, self.__mass_density = checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, elements)
+        self.__ion_temperature   = checkAndSetIonTemperature(ion_temperature, self.electron_temperature)
+        self.__debye_temperature = checkAndSetDebyeTemperature(debye_temperature)
+        self.__band_gap          = checkAndSetBandGap(band_gap)
+        self.__energy_range      = checkAndSetEnergyRange(energy_range, self.electron_density)
+        self.__model_Sii         = checkAndSetModelSii(model_Sii)
+        self.__model_See         = checkAndSetModelSee(model_See)
+        self.__model_Sbf         = checkAndSetModelSbf(model_Sbf)
+        self.__model_IPL         = checkAndSetModelIPL(model_IPL)
+        self.__model_Mix         = checkAndSetModelMix(model_Mix)
+        self.__lfc               = checkAndSetLFC(lfc)
+        self.__Sbf_norm          = checkAndSetSbfNorm(Sbf_norm)
+        self.__source_spectrum    = checkAndSetSourceSpectrum(source_spectrum)
+        self.__source_spectrum_fwhm=checkAndSetSourceSpectrumFWHM(source_spectrum_fwhm)
+
+        # Set internal parameters.
+        self._setSeeFlags()
+        self._setSiiFlags()
+        self._setSbfNormFlags()
+        self._setDebyeTemperatureFlags()
+        self._setBandGapFlags()
+        self._setIPLFlags()
+        self._setSourceSpectrumFlags()
+
+        # Set state to not-initialized (e.g. input deck is not written).
+        self.__is_initialized = False
+
+    def _setDefaults(self):
+        """ """
+        """ Set the inherited parameters defaults that depend on the special calculator. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = '1'
+
+    def _setSeeFlags(self):
+        """ Set the See parameters as used in the input deck generator. """
+<<<<<<< HEAD
+        self.__use_rpa         = int(self.model_See == "RPA")
+        self.__use_bma         = int(self.model_See == "BMA")
+        self.__use_bma_slfc    = int(self.model_See == 'BMA+sLFC')
+        self.__write_bma = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
+        self.__use_lindhard    = int(self.model_See == 'Lindhard')
+        self.__use_static_lfc  = int(self.model_See == 'sLFC')
+        self.__use_dynamic_lfc = int(self.model_See == 'dLFC')
+        self.__use_mff = int(self.model_See == 'MFF')
+=======
+        self.__use_rpa         = BOOL_TO_INT[self.model_See == "RPA"]
+        self.__use_bma         = BOOL_TO_INT[self.model_See == "BMA"]
+        self.__use_bma_slfc    = BOOL_TO_INT[self.model_See == 'BMA+sLFC']
+        self.__write_bma = BOOL_TO_INT[self.model_See == 'BMA+sLFC' or self.model_See == 'BMA']
+        self.__use_lindhard    = BOOL_TO_INT[self.model_See == 'Lindhard']
+        self.__use_landen      = BOOL_TO_INT[self.model_See == 'Landen']
+        self.__use_static_lfc  = BOOL_TO_INT[self.model_See == 'sLFC']
+        self.__use_dynamic_lfc = BOOL_TO_INT[self.model_See == 'dLFC']
+        self.__use_mff = BOOL_TO_INT[self.model_See == 'MFF']
+>>>>>>> compton_calculator
+
+    def _setSiiFlags(self):
+        """ Set the internal Sii parameters as used in the input deck generator."""
+        # By default, switch off usage of user given Sii value.
+        self.__Sii_value = 0.0
+        self.__use_Sii_value = 0
+
+        # Only if Sii model input parameter is float, use it as Sii(k).
+        if isinstance( self.__model_Sii, float):
+            self.__use_Sii_value = 1
+            # Copy value.
+            self.__Sii_value = copy.deepcopy(self.__model_Sii)
+            # Reset model parameter but short-cutting the setter.
+            self.__model_Sii = 'DH'
+
+    def _setSbfNormFlags(self):
+        """ Set the internal Sbf norm flags used in the input deck generator. """
+
+        # By default, switch off usage of user given SbfNorm value.
+        self.__Sbf_norm_value = 0.0
+
+        # Only if SbfNorm model input parameter is float, use it as SbfNorm(k).
+        if isinstance( self.Sbf_norm, float):
+            # Copy value.
+            self.__Sbf_norm_value = copy.deepcopy(self.Sbf_norm)
+            # Reset model parameter.
+            self.__Sbf_norm = 'USR'
+
+    def _setDebyeTemperatureFlags(self):
+        """ Set the internal Debye temperature flags used in the input deck generator. """
+
+        # By default, switch off usage of user given Debye temperature.
+        self.__use_debye_temperature = 0
+        self.__debye_temperature_value = 0.0
+
+        # Only if Debye Temperature is non-zero use it.
+        if self.debye_temperature is not None:
+            self.__debye_temperature_value = self.__debye_temperature
+            self.__use_debye_temperature = 1
+
+    def _setBandGapFlags(self):
+        """ Set the internal bandgap flags used in the input deck generator. """
+
+        # By default, switch off usage of band gap.
+        self.__use_band_gap = 0
+        self.__band_gap_value = 0.0
+
+        # Only if bandgap is non-zero use it.
+        if self.band_gap is not None:
+            self.__use_band_gap = 1
+            self.__band_gap_value = self.__band_gap
+
+    def _setIPLFlags(self):
+        """ Set the internal ionization potential lowering flags used in the input deck generator. """
+
+        # By default, switch off usage of band gap.
+        self.__ipl_value = 0.0
+
+        # Only if ipl is non-zero use it.
+        if isinstance( self.__model_IPL, float ):
+            self.__ipl_value = copy.deepcopy(self.__model_IPL)
+            self.__model_IPL = 'USR'
+
+    def _setSourceSpectrumFlags(self):
+        """ Set the internal source spectrum flags used in the input deck generation."""
+        # Default.
+        self.__use_source_spectrum_file = 0
+        self.__source_spectrum_identifier = "GAUSSIAN"
+
+        if self.__source_spectrum == "LORENTZ":
+            self.__source_spectrum_identifier = "LORENTZIAN"
+        elif self.__source_spectrum == "PROP":
+            self.__use_source_spectrum_file = 1
+
+    def _serialize(self):
+        """ Write the input deck for the xrts backengine. """
+        # Make a temporary directory.
+        self._tmp_dir = tempfile.mkdtemp(prefix='xrs_')
+
+        # Write the input file.
+        input_deck_path = os.path.join( self._tmp_dir, 'input.dat' )
+        with open(input_deck_path, 'w') as input_deck:
+            input_deck.write('--XRTS---input_file-----------------------------------\n')
+            input_deck.write('--\n')
+            input_deck.write('--fit_parameters------------------------------flag----\n')
+            input_deck.write('DO_FIT                0\n')
+            input_deck.write('PHOTON_ENERGY     %4.3f\n' % (self.photon_energy))
+            input_deck.write('SCATTERING_ANGLE  %4.3f\n' % (self.scattering_angle) )
+            input_deck.write('ELECTRON_TEMP     %4.3f 0\n' % (self.electron_temperature) )
+<<<<<<< HEAD
+            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e6) )
+=======
+            input_deck.write('ELECTRON_DENSITY  %4.3e 0\n' % (self.electron_density*1e-6) )
+>>>>>>> compton_calculator
             input_deck.write('AMPLITUDE         1.0   0\n')
             input_deck.write('BASELINE          0.0   0\n')
             input_deck.write('Z_FREE            %4.3f 0\n' % (self.ion_charge) )
