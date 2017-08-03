@@ -137,7 +137,7 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
 
         self.source_energy = self.parameters.photon_energy
         self.scattering_angle = self.parameters.scattering_angle
-        self.electron_density = self.parameters.electron_density
+        self.electron_density = self.parameters.electron_density*1e6
         print self.electron_density
         self.temperature = self.parameters.electron_temperature
 
