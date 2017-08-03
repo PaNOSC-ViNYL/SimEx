@@ -18,10 +18,6 @@ git clone -b ${BRANCH} $URL
 cd simex_platform
 git lfs pull
 
-export BOOST_ROOT=/opt/boost
-export Boost_NO_SYSTEM_PATHS=ON
-#export ARMA_DIR=/usr
-
 export PATH=/opt/miniconda2/bin:$PATH
 export HDF5_ROOT=/opt/miniconda2
 
