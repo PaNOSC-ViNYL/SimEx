@@ -1,0 +1,279 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Single particle imaging example workflow &#8212; simex_platform 0.2.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="single-particle-imaging-example-workflow">
+<h1>Single particle imaging example workflow<a class="headerlink" href="#single-particle-imaging-example-workflow" title="Permalink to this headline">¶</a></h1>
+<p>This entry level tutorial demonstrates the usage of simex_platform by showing how to simulate a single-particle imaging experiment at the SPB-SFX instrument of the European XFEL.</p>
+<p>In this tutorial, you will learn how to</p>
+<ul class="simple">
+<li>Propagate x-ray pulses from the photon source to the experimental interaction region using the
+wave propagation calculator “WavePropagator”.</li>
+<li>Specify a sample using the corresponding PDB code.</li>
+<li>Calculate the interaction of x-ray photons with the sample using a demo version of the x-ray
+photon - matter interaction codes XMDYN and XATOM.</li>
+<li>Simulate the diffraction of x-ray photons from the sample in a number of random orientations as it
+is exposed to the x-ray pulse.</li>
+<li>Orient the simulated diffraction patterns using the Expand-Maximize-Compress (EMC) orientation
+algorithm into a 3D mesh.</li>
+<li>Calculate the 3D electron density using the Difference-Map (DM) phasing algorithm.</li>
+</ul>
+<div class="section" id="preparing-the-source-input">
+<h2>Preparing the source input<a class="headerlink" href="#preparing-the-source-input" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial, we will propagate one x-ray pulses of approximately 3 fs duration and a photon energy of 4.96 keV.
+We begin the simulation with the x-ray pulse at the exit of the undulator section.
+Pulse data files for a
+wide range of pulse properties (electron bunch charge (which determines the pulse duration),
+accelerator energy and photon energy, as well as the active undulator length, i.e. the saturation
+level of the emitted radiation are provided through the XFEL pulse database <a class="reference external" href="https://in.xfel.eu/xpd">https://in.xfel.eu/xpd</a>.
+To query a pulse file from the database, fill in the form like this:</p>
+<img alt="Tutorial/s2e_example/Tutorial/s2e_example/resources/xpd.png" src="Tutorial/s2e_example/Tutorial/s2e_example/resources/xpd.png" />
+<p>Provide your email address and click “Submit request”. You will then receive a request ID and an
+email will notify you once the calculation has finished and provide you with a link where the
+pulse data can be downloaded. Download and extract the zip file to a place of your liking.
+In the following, we will assume that the file was extracted to directory “source/” in the working directory and is named “3fs_5keV_nz35_0000001.h5”.</p>
+</div>
+<div class="section" id="beamline-propagation">
+<h2>Beamline propagation<a class="headerlink" href="#beamline-propagation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-the-calculator">
+<h3>Using the Calculator<a class="headerlink" href="#using-the-calculator" title="Permalink to this headline">¶</a></h3>
+<p>Propagation of x-ray pulses through the SPB-SFX beamline will be performed by means of the
+<code class="code docutils literal"><span class="pre">XFELPhotonPropagator</span></code> class (<a class="reference internal" href="../../index.html#SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator" title="SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator</span></code></a>), that comes with simex_platform. It interfaces the wavefront propagation code
+WPG. Below is a commented python script
+that demonstrates setup and execution of the propagation.</p>
+<p><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">script</span></code></p>
+<p>The definition of the beamline (line 7) loads a WPG beamline from the beamline collection. Besides
+the beamline, the user has to specify the location of the source files (see <a class="reference internal" href="#preparing-the-source-input">Preparing the source
+input</a>). The variable <code class="code docutils literal"><span class="pre">input_path</span></code> can be either a file or a directory. In the latter case, all valid source
+files in the directory will be processed.</p>
+<p>The <code class="code docutils literal"><span class="pre">XFELPhotonPropagator</span></code> class
+requires two input parameters, a parameters object (of type
+<code class="code docutils literal"><span class="pre">WavePropagationParameters</span></code>, defined in line 10),
+and the <code class="code docutils literal"><span class="pre">input_path</span></code>. After construction, the input files are read in using the method <code class="code docutils literal"><span class="pre">_readH5</span></code>,
+and the calculation is executed by calling the <code class="code docutils literal"><span class="pre">backengine</span></code> method.</p>
+<p>A third input parameter for the <code class="code docutils literal"><span class="pre">XFELPhotonPropagator</span></code>  class, <code class="code docutils literal"><span class="pre">output_path</span></code> can be used to specify where the results of the wavefront
+propagation shall be saved. By default, they are stored in a directory called “prop/” below the
+current working directory.</p>
+</div>
+<div class="section" id="analysis-of-wavefront-propagation-results">
+<h3>Analysis of wavefront propagation results<a class="headerlink" href="#analysis-of-wavefront-propagation-results" title="Permalink to this headline">¶</a></h3>
+<p>Confirm that the results of the wavefront propagation are saved to “prop/”.
+The script <code class="code docutils literal"><span class="pre">ScriptCollection/DataAnalysis/propagation/prop_diagnostics.py</span></code> provides utilities
+to quickly diagnose single propagated x-ray pulses. The syntax is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; prop_diagnostics.py &lt;options&gt; prop_out.h5
+</pre></div>
+</div>
+<p>Running <code class="code docutils literal"><span class="pre">diagnostics.py</span></code> without arguments will return a small instruction how to use it.</p>
+<dl class="docutils">
+<dt>E.g.::</dt>
+<dd>$&gt; prop_diagnostics.py -I prop_out.h5</dd>
+</dl>
+<p>generates an intensity map of the radiation field in the focus. Likewise,:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; prop_diagnostics.py -R prop_out.h5
+</pre></div>
+</div>
+<p>plots the intensity distribution in reciprocal (qx-qy) space.</p>
+<p>The options <code class="code docutils literal"><span class="pre">-T,</span> <span class="pre">-X,</span> <span class="pre">-S</span></code> produce viewgraphs of the total power as function of time, the on-axis power as function of time,
+and the power spectrum as a function of photon energy, respectively.</p>
+<p>Running the script on the source file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; prop_diagnostics.py &lt;options&gt; source/s2e_felsource.h5
+</pre></div>
+</div>
+<p>will produce the same figures for the source. Comparison of source and propagated pulses can give
+some information about the reliability of the propagation. E.g. a drastic loss in power would indicate that the area over which the wavefront was calculated, is too small or that the wavefront is insufficiently sampled.
+The resulting graphs should look similar to these:</p>
+<p>FEL power (averaged over x,y coordinates) as function of time, source (left) vs. focus (right)</p>
+<img alt="Tutorial/s2e_example/Tutorial/s2e_example/resources/power_vs_time.png" src="Tutorial/s2e_example/Tutorial/s2e_example/resources/power_vs_time.png" />
+<p>FEL on-axis power density as function of time, source (left) vs. focus (right)</p>
+<img alt="Tutorial/s2e_example/Tutorial/s2e_example/resources/powerdensity_vs_time.png" src="Tutorial/s2e_example/Tutorial/s2e_example/resources/powerdensity_vs_time.png" />
+<p>Intensity distribution, source (left) vs. focus (right)</p>
+<div class="figure">
+<img alt="Tutorial/s2e_example/Tutorial/s2e_example/resources/intensity_x-y.png" src="Tutorial/s2e_example/Tutorial/s2e_example/resources/intensity_x-y.png" />
+</div>
+<p>Intensity distribution in reciprocal space, source (left) vs. focus (right)</p>
+<div class="figure">
+<img alt="Tutorial/s2e_example/Tutorial/s2e_example/resources/intensity_qx-qy.png" src="Tutorial/s2e_example/Tutorial/s2e_example/resources/intensity_qx-qy.png" />
+</div>
+<p>Confirm that the pulse duration is approximately 9 fs (full width at half maximum, FWHM),
+that the focus has a FWHM of approximately 100 nm and as well as that the reciprocal intensity distribution is smooth
+and shows no artificial high frequency modes.</p>
+</div>
+</div>
+<div class="section" id="photon-matter-interaction">
+<h2>Photon-Matter Interaction<a class="headerlink" href="#photon-matter-interaction" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Using the Calculator<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>simex_platform employs the atomistic simulation codes <code class="code docutils literal"><span class="pre">XMDYN</span></code> and <code class="code docutils literal"><span class="pre">XATOM</span></code> to simulate
+the interaction of the sample with the x-ray pulse. Unfortunately, these codes are not Open Source
+and simex_platform only provides a demo version of the code. The corresponding Calculator is the
+<code class="code docutils literal"><span class="pre">XMDYNDemoPhotonMatterInteractor</span></code> (see API reference here: <a class="reference internal" href="../../index.html#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor" title="SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor</span></code></a>).</p>
+<p>The following script shows how to use the <code class="code docutils literal"><span class="pre">XMDYNDemoPhotonMatterInteractor</span></code> to produce
+photon-matter trajectories which will then be used to calculate the diffraction.</p>
+<p><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">script</span></code></p>
+</div>
+<div class="section" id="analysing-the-results">
+<h3>Analysing the results<a class="headerlink" href="#analysing-the-results" title="Permalink to this headline">¶</a></h3>
+<p>Let’s take a look at the results of the photon matter interaction calculation.
+The script <code class="code docutils literal"><span class="pre">ScriptCollection/DataAnalysis/pmi/pmi_diagnostics.py</span></code> plots the average number of
+bound electrons per atom species in the sample and the average displacement as a function of time.
+The syntax is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; pmi_diagnostics.py &lt;project_directory&gt; test
+</pre></div>
+</div>
+<p>Since this is the demo version of the pmi code, the results are pretty boring, since no radiation damage happens, neither ionization nor atomic displacement.</p>
+</div>
+</div>
+<div class="section" id="diffraction">
+<h2>Diffraction<a class="headerlink" href="#diffraction" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Using the Calculator<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The next step is to calculate the diffraction of photons from the sample as it is exposed to the
+beam, i.e. radiation damage and diffraction or scattering happen simultaneously. In the previous
+section, we have
+precalculated the atomic structure (atom positions as a function of time) and the electronic
+structure as a function of time, and based on this information we can now proceed to calculate
+the amount of scattered radiation into a given detector pixel as a function of time. The detector
+signal will then be calculated by integrating over the exposure time or pulse duration, whichever is
+shorter.</p>
+<p>We use the simex Calculator <code class="code docutils literal"><span class="pre">SingFELPhotonDiffractor</span></code> (see API doc
+<a class="reference internal" href="../../index.html#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor" title="SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor</span></code></a>). The following script
+demonstrates its usage:</p>
+<p><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">script</span></code></p>
+</div>
+<div class="section" id="analyzing-the-results">
+<h3>Analyzing the results<a class="headerlink" href="#analyzing-the-results" title="Permalink to this headline">¶</a></h3>
+<p>Run the script <code class="code docutils literal"><span class="pre">ScriptCollection/DataAnalysis/scatteing/diffr_diagnostics.py</span></code> to generate
+statistical information about the number of scattered photons and a histogram. Envoke the script without any
+arguments to get obtain usage instructions.</p>
+<p>For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; diffr_diagnostics.py -p -P 1 diffr.h5
+</pre></div>
+</div>
+<p>will show the detected photons in the detector pixel array for the first pattern.</p>
+<p>A more complicated example is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; diffr_diagnostics.py -p -P &quot;range(1,11)&quot; --logscale --operation &quot;numpy.mean&quot; diffr.h5
+</pre></div>
+</div>
+<p>this will plot the average detector image on a logarithmic color scale for patterns 1 to 10.</p>
+<p>To see a histogram over the number of photons per pattern:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; diffr_diagnostics.py -S -P &quot;range(1,11)&quot;  diffr.h5
+</pre></div>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="Tutorial/s2e_example/Tutorial/s2e_example/resources/diffr_histogram_9fs.png"><img alt="Histogram over number of registered photons per diffraction pattern." src="Tutorial/s2e_example/Tutorial/s2e_example/resources/diffr_histogram_9fs.png" style="width: 50%;" /></a>
+</div>
+<p>To create an animation of all selected patterns:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$&gt; diffr_diagnostics.py -A animation.gif -P &quot;range(1,11)&quot;  diffr.h5
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Single particle imaging example workflow</a><ul>
+<li><a class="reference internal" href="#preparing-the-source-input">Preparing the source input</a></li>
+<li><a class="reference internal" href="#beamline-propagation">Beamline propagation</a><ul>
+<li><a class="reference internal" href="#using-the-calculator">Using the Calculator</a></li>
+<li><a class="reference internal" href="#analysis-of-wavefront-propagation-results">Analysis of wavefront propagation results</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#photon-matter-interaction">Photon-Matter Interaction</a><ul>
+<li><a class="reference internal" href="#id1">Using the Calculator</a></li>
+<li><a class="reference internal" href="#analysing-the-results">Analysing the results</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#diffraction">Diffraction</a><ul>
+<li><a class="reference internal" href="#id2">Using the Calculator</a></li>
+<li><a class="reference internal" href="#analyzing-the-results">Analyzing the results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/Tutorial/s2e_example/s2e_example.tut.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

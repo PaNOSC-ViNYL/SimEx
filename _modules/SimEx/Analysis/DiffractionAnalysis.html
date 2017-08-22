@@ -1,0 +1,549 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Analysis.DiffractionAnalysis &#8212; simex_platform 0.2.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Analysis.DiffractionAnalysis</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python2.7</span>
+<span class="sd">&quot;&quot;&quot; :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+<span class="kn">from</span> <span class="nn">SimEx.Analysis.AbstractAnalysis</span> <span class="k">import</span> <span class="n">AbstractAnalysis</span><span class="p">,</span> <span class="n">plt</span><span class="p">,</span> <span class="n">mpl</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="k">import</span> <span class="n">Normalize</span><span class="p">,</span> <span class="n">LogNorm</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">pyFAI</span>
+
+<div class="viewcode-block" id="DiffractionAnalysis"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis">[docs]</a><span class="k">class</span> <span class="nc">DiffractionAnalysis</span><span class="p">(</span><span class="n">AbstractAnalysis</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :class DiffractionAnalysis: Class that implements common data analysis tasks for diffraction data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">pattern_indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">poissonize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructor for the DiffractionAnalysis class.</span>
+
+<span class="sd">        :param input_path: Name of file or directory that contains data to analyse.</span>
+<span class="sd">        :type input_path: str</span>
+
+<span class="sd">        :param pattern_indices: Identify which patterns to include in the analysis (default &quot;all&quot;).</span>
+<span class="sd">        :type pattern_indices: int || sequence of int || &quot;all&quot;</span>
+<span class="sd">        :example pattern_indices: pattern_indices=1\n</span>
+<span class="sd">                                  pattern_indices=[1,2,3]\n</span>
+<span class="sd">                                  pattern_indices=range(1,10)\n</span>
+<span class="sd">                                  pattern_indices=&quot;all&quot;</span>
+
+<span class="sd">        :param poissonize: Whether to add Poisson noise to the integer photon numbers (default True).</span>
+<span class="sd">        :type poissonize: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialize base class. This takes care of parameter checking.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DiffractionAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+
+        <span class="c1"># Handle patterns.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__given_indices</span> <span class="o">=</span> <span class="n">pattern_indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pattern_indices</span> <span class="o">=</span> <span class="n">pattern_indices</span>
+
+        <span class="c1"># Init attributes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poissonize</span> <span class="o">=</span> <span class="n">poissonize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">diffractionParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span>
+
+    <span class="nd">@parameters</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">val</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pattern_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query pattern indices attribute. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pattern_indices</span>
+
+    <span class="nd">@pattern_indices</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">pattern_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern_indices</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the pattern indices. &quot;&quot;&quot;</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">pattern_indices</span>
+        <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">indices</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The parameter &quot;pattern_indices&quot; must be an int, iterable over ints, or &quot;all&quot;.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Convert int to list.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern_indices</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">pattern_indices</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pattern_indices</span> <span class="o">=</span> <span class="n">indices</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">patterns_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">patternGenerator</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">poissonize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query whether to read data with (True) or without (False) Poisson noise. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__poissonize</span>
+    <span class="nd">@poissonize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">poissonize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;poissonize&#39; flag.&quot;&quot;&quot;</span>
+        <span class="c1"># Handle default.</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The parameter &quot;poissonize&quot; must be a bool.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__poissonize</span> <span class="o">=</span> <span class="n">val</span>
+
+
+<div class="viewcode-block" id="DiffractionAnalysis.patternGenerator"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis.patternGenerator">[docs]</a>    <span class="k">def</span> <span class="nf">patternGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Yield an iterator over a given pattern sequence from a diffraction file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern_indices</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="c1"># legacy format.</span>
+            <span class="n">dir_listing</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">dir_listing</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">indices</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">dir_listing</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dir_listing</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+            <span class="n">h5_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dir_listing</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h5&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">h5_file</span> <span class="ow">in</span> <span class="n">h5_files</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5</span><span class="p">:</span>
+                        <span class="n">root_path</span> <span class="o">=</span> <span class="s1">&#39;/data/&#39;</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">poissonize</span><span class="p">:</span>
+                            <span class="n">path_to_data</span> <span class="o">=</span> <span class="n">root_path</span> <span class="o">+</span> <span class="s1">&#39;data&#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">path_to_data</span> <span class="o">=</span> <span class="n">root_path</span> <span class="o">+</span> <span class="s1">&#39;diffr&#39;</span>
+
+                        <span class="n">diffr</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="n">path_to_data</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+                        <span class="k">yield</span> <span class="n">diffr</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># v0.2</span>
+            <span class="c1"># Open file for reading</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">indices</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%0.7d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ix</span> <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                    <span class="n">root_path</span> <span class="o">=</span> <span class="s1">&#39;/data/</span><span class="si">%s</span><span class="s1">/&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">ix</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">poissonize</span><span class="p">:</span>
+                        <span class="n">path_to_data</span> <span class="o">=</span> <span class="n">root_path</span> <span class="o">+</span> <span class="s1">&#39;data&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">path_to_data</span> <span class="o">=</span> <span class="n">root_path</span> <span class="o">+</span> <span class="s1">&#39;diffr&#39;</span>
+
+                    <span class="n">diffr</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="n">path_to_data</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+                    <span class="k">yield</span> <span class="n">diffr</span></div>
+
+
+
+<div class="viewcode-block" id="DiffractionAnalysis.plotRadialProjection"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis.plotRadialProjection">[docs]</a>    <span class="k">def</span> <span class="nf">plotRadialProjection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Plot the radial projection of a pattern.</span>
+
+<span class="sd">        :param operation: Operation to apply to selected patterns (default numpy.sum).</span>
+<span class="sd">        :type operation: python function</span>
+<span class="sd">        :note operation: Operation must accept a 3D numpy.array as first input argument and the &quot;axis&quot; keyword-argument. Operation must return a 2D numpy.array. Axis will always be chosen as axis=0.</span>
+<span class="sd">        :example operation: numpy.mean, numpy.std, numpy.sum</span>
+
+<span class="sd">        :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).</span>
+<span class="sd">        :type logscale: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Handle default operation</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">operation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span>
+
+        <span class="c1"># Get pattern to plot.</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns_iterator</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pattern_to_plot</span> <span class="o">=</span> <span class="n">pi</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pattern_to_plot</span> <span class="o">=</span> <span class="n">operation</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pi</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Plot radial projection.</span>
+        <span class="n">plotRadialProjection</span><span class="p">(</span><span class="n">pattern_to_plot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span><span class="p">,</span> <span class="n">logscale</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DiffractionAnalysis.plotPattern"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis.plotPattern">[docs]</a>    <span class="k">def</span> <span class="nf">plotPattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Plot a pattern.</span>
+
+<span class="sd">        :param operation: Operation to apply to selected patterns (default numpy.sum).</span>
+<span class="sd">        :type operation: python function</span>
+<span class="sd">        :note operation: Operation must accept a 3D numpy.array as first input argument and the &quot;axis&quot; keyword-argument. Operation must return a 2D numpy.array. Axis will always be chosen as axis=0.</span>
+<span class="sd">        :example operation: numpy.mean, numpy.std, numpy.sum</span>
+
+<span class="sd">        :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).</span>
+<span class="sd">        :type logscale: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Handle default operation</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">operation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span>
+
+        <span class="c1"># Complain if operating on single pattern.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;WARNING: Giving an operation with a single pattern has no effect.&quot;</span>
+        <span class="c1"># Get pattern to plot.</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns_iterator</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pattern_to_plot</span> <span class="o">=</span> <span class="n">pi</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pattern_to_plot</span> <span class="o">=</span> <span class="n">operation</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pi</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Plot image and colorbar.</span>
+        <span class="n">plotImage</span><span class="p">(</span><span class="n">pattern_to_plot</span><span class="p">,</span> <span class="n">logscale</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DiffractionAnalysis.statistics"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis.statistics">[docs]</a>    <span class="k">def</span> <span class="nf">statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. &quot;&quot;&quot;</span>
+
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns_iterator</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pi</span><span class="p">])</span>
+
+        <span class="n">photonStatistics</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DiffractionAnalysis.animatePatterns"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis.animatePatterns">[docs]</a>    <span class="k">def</span> <span class="nf">animatePatterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make an animated gif out of the given patterns.</span>
+
+<span class="sd">        :param output_path: Where to save the animated git.</span>
+<span class="sd">        :type output_path: str</span>
+<span class="sd">        :raises IOError: File exists or parent directory not found.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Handle default path for saving the animated gif.</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">&quot;animated_patterns.gif&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The parameter &quot;output_path&quot; must be a str, not </span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">output_path</span><span class="p">))</span> <span class="p">)</span>
+
+        <span class="n">parent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="n">parent_dir</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> does not exist.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_dir</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> already exists, cowardly refusing to overwrite.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">output_path</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__animation_output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="c1"># Make tempdir.</span>
+        <span class="n">tmp_out_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">patternGenerator</span><span class="p">()])</span>
+
+        <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">stack</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">x_range</span><span class="p">,</span> <span class="n">y_range</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stack</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+            <span class="n">plotResolutionRings</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">x_range</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">y_range</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">png_filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%07d</span><span class="s2">.png&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_indices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="n">png_filename</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+        <span class="c1"># Make the animated gif.</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;convert -delay 100 </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;*.png&quot;</span><span class="p">),</span> <span class="n">output_path</span><span class="p">)</span> <span class="p">)</span></div></div>
+
+<span class="k">def</span> <span class="nf">plotRadialProjection</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Perform integration over azimuthal angle and plot as function of radius. &quot;&quot;&quot;</span>
+
+    <span class="n">qs</span><span class="p">,</span> <span class="n">intensities</span> <span class="o">=</span> <span class="n">azimuthalIntegation</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">logscale</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">qs</span><span class="p">,</span> <span class="n">intensities</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qs</span><span class="p">,</span> <span class="n">intensities</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;q (1/nm)&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Intensity (arb. units)&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">azimuthalIntegation</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+
+    <span class="c1"># Extract parameters.</span>
+    <span class="n">beam</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;beam&#39;</span><span class="p">]</span>
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;geom&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Photon energy and wavelength</span>
+    <span class="n">E0</span> <span class="o">=</span> <span class="n">beam</span><span class="p">[</span><span class="s1">&#39;photonEnergy&#39;</span><span class="p">]</span>
+    <span class="n">lmd</span> <span class="o">=</span> <span class="mf">1239.8</span> <span class="o">/</span> <span class="n">E0</span>
+
+    <span class="c1"># Pixel dimension</span>
+    <span class="n">apix</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;pixelWidth&#39;</span><span class="p">]</span>
+    <span class="c1"># Sample-detector distance</span>
+    <span class="n">Ddet</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;detectorDist&#39;</span><span class="p">]</span>
+    <span class="c1"># Number of pixels in each dimension</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;mask&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Find center.</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">Npix</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">azimuthal_integrator</span> <span class="o">=</span> <span class="n">pyFAI</span><span class="o">.</span><span class="n">AzimuthalIntegrator</span><span class="p">(</span>
+            <span class="n">dist</span><span class="o">=</span><span class="n">Ddet</span><span class="p">,</span>
+            <span class="n">pixel1</span><span class="o">=</span><span class="n">apix</span><span class="p">,</span>
+            <span class="n">pixel2</span><span class="o">=</span><span class="n">apix</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="o">=</span><span class="n">lmd</span><span class="o">*</span><span class="mf">1e-9</span><span class="p">)</span>
+
+
+    <span class="n">azimuthal_integrator</span><span class="o">.</span><span class="n">setFit2D</span><span class="p">(</span>
+            <span class="n">directDist</span><span class="o">=</span><span class="n">Ddet</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span>
+            <span class="n">centerX</span><span class="o">=</span><span class="n">center</span><span class="p">,</span>
+            <span class="n">centerY</span><span class="o">=</span><span class="n">center</span><span class="p">,</span>
+            <span class="n">tilt</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">tiltPlanRotation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">pixelX</span><span class="o">=</span><span class="n">apix</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span>
+            <span class="n">pixelY</span><span class="o">=</span><span class="n">apix</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="n">qs</span><span class="p">,</span> <span class="n">intensities</span> <span class="o">=</span> <span class="n">azimuthal_integrator</span><span class="o">.</span><span class="n">integrate1d</span><span class="p">(</span>
+            <span class="n">pattern</span><span class="p">,</span>
+            <span class="mi">512</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;q_nm^-1&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">qs</span><span class="p">,</span> <span class="n">intensities</span>
+
+<span class="k">def</span> <span class="nf">diffractionParameters</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Extract beam parameters and geometry from given file or directory.</span>
+
+<span class="sd">    :param path: Path to file that holds the parameters to extract.</span>
+<span class="sd">    :type path: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check if old style.</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">h5_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;diffr_out_0000001.h5&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">h5_file</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: no such file or directory.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+    <span class="c1"># Setup return dictionary.</span>
+    <span class="n">parameters_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;beam&#39;</span><span class="p">:{},</span> <span class="s1">&#39;geom&#39;</span><span class="p">:{}}</span>
+
+    <span class="c1"># Open file.</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5</span><span class="p">:</span>
+        <span class="c1"># Loop over entries in /params.</span>
+        <span class="k">for</span> <span class="n">top_key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;beam&#39;</span><span class="p">,</span> <span class="s1">&#39;geom&#39;</span><span class="p">]:</span>
+            <span class="c1"># Loop over groups.</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">top_key</span><span class="p">)]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="c1"># Insert into return dictionary.</span>
+                <span class="n">parameters_dict</span><span class="p">[</span><span class="n">top_key</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c1"># Return.</span>
+    <span class="k">return</span> <span class="n">parameters_dict</span>
+
+<span class="k">def</span> <span class="nf">plotImage</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Workhorse function to plot an image</span>
+
+<span class="sd">    :param logscale: Whether to show the data on logarithmic scale (z axis) (default False).</span>
+<span class="sd">    :type logscale: bool</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="c1"># Get limits.</span>
+    <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">pattern</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">logscale</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mn</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">mn</span> <span class="o">+=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">+</span><span class="mf">1e-5</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="n">mn</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$x$ (pixel)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$y$ (pixel)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">plotResolutionRings</span><span class="p">(</span><span class="n">parameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show resolution rings on current plot.</span>
+
+<span class="sd">    :param parameters: Parameters needed to construct the resolution rings.</span>
+<span class="sd">    :type parameters: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extract parameters.</span>
+    <span class="n">beam</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;beam&#39;</span><span class="p">]</span>
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;geom&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Photon energy and wavelength</span>
+    <span class="n">E0</span> <span class="o">=</span> <span class="n">beam</span><span class="p">[</span><span class="s1">&#39;photonEnergy&#39;</span><span class="p">]</span>
+    <span class="n">lmd</span> <span class="o">=</span> <span class="mf">1239.8</span> <span class="o">/</span> <span class="n">E0</span>
+
+    <span class="c1"># Pixel dimension</span>
+    <span class="n">apix</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;pixelWidth&#39;</span><span class="p">]</span>
+    <span class="c1"># Sample-detector distance</span>
+    <span class="n">Ddet</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;detectorDist&#39;</span><span class="p">]</span>
+    <span class="c1"># Number of pixels in each dimension</span>
+    <span class="n">Npix</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;mask&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Find center.</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">Npix</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Max. scattering angle.</span>
+    <span class="n">theta_max</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span> <span class="n">center</span> <span class="o">*</span> <span class="n">apix</span> <span class="o">/</span> <span class="n">Ddet</span> <span class="p">)</span>
+    <span class="c1"># Min resolution.</span>
+    <span class="n">d_min</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">lmd</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_max</span><span class="p">)</span>
+
+    <span class="c1"># Next integer resolution.</span>
+    <span class="n">d0</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">d_min</span><span class="o">*</span><span class="mf">10.0</span><span class="p">)</span> <span class="c1"># 10 powers to get Angstrom</span>
+
+    <span class="c1"># Array of resolution rings to plot.</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">])</span>
+
+    <span class="c1"># Pixel numbers corresponding to resolution rings.</span>
+    <span class="n">Ns</span> <span class="o">=</span> <span class="n">Ddet</span><span class="o">/</span><span class="n">apix</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">lmd</span><span class="o">/</span><span class="mf">2.</span><span class="o">/</span><span class="n">ds</span><span class="p">))</span>
+
+    <span class="c1"># Plot each ring and attach a label.</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">N</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Ns</span><span class="p">):</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">center</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x0</span><span class="o">-</span><span class="n">N</span><span class="p">,</span><span class="n">x0</span><span class="o">+</span><span class="n">N</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
+        <span class="n">Y_up</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">Y_dn</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y_up</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y_dn</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x0</span><span class="o">+</span><span class="mf">0.75</span><span class="o">*</span><span class="n">N</span><span class="p">,</span><span class="n">x0</span><span class="o">+</span><span class="mf">0.75</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%2.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mf">10.</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Npix</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Npix</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">photonStatistics</span><span class="p">(</span><span class="n">stack</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+
+    <span class="n">number_of_images</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">photons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">avg_photons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">photons</span><span class="p">)</span>
+    <span class="n">rms_photons</span> <span class="o">=</span>  <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">photons</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;***********************&quot;</span>
+    <span class="nb">print</span> <span class="s2">&quot;avg = </span><span class="si">%s</span><span class="s2">, std = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">avg_photons</span><span class="p">,</span> <span class="n">rms_photons</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;***********************&quot;</span>
+
+
+    <span class="c1"># Plot histogram.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">max_photon_number</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span> <span class="n">photons</span> <span class="p">)</span>
+    <span class="n">min_photon_number</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span> <span class="n">photons</span> <span class="p">)</span>
+    <span class="n">binwidth</span> <span class="o">=</span> <span class="n">max_photon_number</span> <span class="o">-</span> <span class="n">min_photon_number</span>
+    <span class="n">number_of_bins</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">number_of_images</span><span class="p">)</span>
+    <span class="n">binwidth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">binwidth</span> <span class="o">/</span> <span class="n">number_of_bins</span> <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">photons</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">xrange</span><span class="p">(</span><span class="n">min_photon_number</span><span class="p">,</span> <span class="n">max_photon_number</span><span class="p">,</span> <span class="n">binwidth</span><span class="p">),</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="n">min_photon_number</span><span class="p">,</span> <span class="n">max_photon_number</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Photons&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Histogram&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Photon number histogram&quot;</span><span class="p">)</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

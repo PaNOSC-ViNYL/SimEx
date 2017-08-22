@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>SimEx.Parameters.PlasmaXRTSCalculatorParameters &#8212; simex_platform 0.2.0 documentation</title>
-    
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -24,11 +21,11 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -46,9 +43,10 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Parameters.PlasmaXRTSCalculatorParameters</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the PlasmaXRTSCalculatorParameters class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -67,21 +65,14 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    @file Module that holds the PlasmaXRTSCalculatorParameters class.</span>
-
-<span class="sd">    @author : CFG</span>
-<span class="sd">    @institution : XFEL</span>
-<span class="sd">    @creation 20160219</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span>
 <span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">Avogadro</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span>
+<span class="kn">import</span> <span class="nn">periodictable</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities.Utilities</span> <span class="k">import</span> <span class="n">ALL_ELEMENTS</span>
@@ -116,6 +107,7 @@
                  <span class="n">Sbf_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">source_spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">source_spectrum_fwhm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span>
                  <span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
@@ -134,7 +126,7 @@
 <span class="sd">        :param electron_temperature: The temperature of the electron subsystems (units of eV).</span>
 <span class="sd">        :type electron_temperature: float</span>
 
-<span class="sd">        :param electron_density: The electron number density (units of 1/m^3)</span>
+<span class="sd">        :param electron_density: The electron number density (units of 1/cm^3)</span>
 <span class="sd">        :type electron_density: float</span>
 
 <span class="sd">        :param ion_temperature: The temperature of the ion subsystem (units of eV).</span>
@@ -192,7 +184,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__scattering_angle</span>     <span class="o">=</span> <span class="n">checkAndSetScatteringAngle</span><span class="p">(</span><span class="n">scattering_angle</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__electron_temperature</span> <span class="o">=</span> <span class="n">checkAndSetElectronTemperature</span><span class="p">(</span><span class="n">electron_temperature</span><span class="p">)</span>
         <span class="c1"># Set electron density, charge, and mass density depending on which input was given.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__electron_density</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ion_charge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mass_density</span> <span class="o">=</span> <span class="n">checkAndSetDensitiesAndCharge</span><span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__electron_density</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ion_charge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mass_density</span> <span class="o">=</span> <span class="n">checkAndSetDensitiesAndCharge</span><span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__ion_temperature</span>   <span class="o">=</span> <span class="n">checkAndSetIonTemperature</span><span class="p">(</span><span class="n">ion_temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">electron_temperature</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature</span> <span class="o">=</span> <span class="n">checkAndSetDebyeTemperature</span><span class="p">(</span><span class="n">debye_temperature</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap</span>          <span class="o">=</span> <span class="n">checkAndSetBandGap</span><span class="p">(</span><span class="n">band_gap</span><span class="p">)</span>
@@ -218,6 +210,11 @@
 
         <span class="c1"># Set state to not-initialized (e.g. input deck is not written).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Set the inherited parameters defaults that depend on the special calculator. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractCalculatorParameters__cpus_per_task_default</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
 
     <span class="k">def</span> <span class="nf">_setSeeFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the See parameters as used in the input deck generator. &quot;&quot;&quot;</span>
@@ -318,7 +315,7 @@
             <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PHOTON_ENERGY     </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">))</span>
             <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;SCATTERING_ANGLE  </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">)</span> <span class="p">)</span>
             <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ELECTRON_TEMP     </span><span class="si">%4.3f</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_temperature</span><span class="p">)</span> <span class="p">)</span>
-            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ELECTRON_DENSITY  </span><span class="si">%4.3e</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ELECTRON_DENSITY  </span><span class="si">%4.3e</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span> <span class="p">)</span>
             <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;AMPLITUDE         1.0   0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BASELINE          0.0   0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Z_FREE            </span><span class="si">%4.3f</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ion_charge</span><span class="p">)</span> <span class="p">)</span>
@@ -611,6 +608,7 @@
 <span class="c1">###########################</span>
 <span class="c1"># Check and set functions #</span>
 <span class="c1">###########################</span>
+
 <span class="k">def</span> <span class="nf">checkAndSetScatteringAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the scattering angle is in the correct range.</span>
@@ -691,24 +689,43 @@
 
     <span class="k">return</span> <span class="n">electron_temperature</span>
 
-<span class="k">def</span> <span class="nf">checkAndSetDensitiesAndCharge</span><span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">checkAndSetDensitiesAndCharge</span><span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Utility to check input and return a set of consistent electron density, average ion charge, and mass density, if two are given as input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Find number of Nones in input.</span>
     <span class="n">number_of_nones</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">]))</span>
     <span class="c1"># raise if not enough input.</span>
-    <span class="k">if</span> <span class="n">number_of_nones</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Electron_density, ion_charge, and mass_density must be given.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">number_of_nones</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;At least two of Electron_density, ion_charge, and mass_density must be given.&quot;</span><span class="p">)</span>
 
-    <span class="c1">#if electron_density is None:</span>
-        <span class="c1">#electron_density = mass_density * ion_charge * Avogadro</span>
-    <span class="c1">#if ion_charge is None:</span>
-        <span class="c1">#ion_charge = electron_density / (mass_density * Avogadro)</span>
-    <span class="c1">#if mass_density is None:</span>
-        <span class="c1">#mass_density = electron_density / (ion_charge * Avogadro)</span>
+    <span class="c1"># Get molar weight needed to convert electron density to mass density.</span>
+    <span class="n">element_symbols</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">]</span>
+    <span class="n">element_abundances</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span>
+    <span class="n">element_charges</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span>
+    <span class="n">element_instances</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">periodictable</span><span class="p">,</span> <span class="n">es</span><span class="p">)</span> <span class="k">for</span> <span class="n">es</span> <span class="ow">in</span> <span class="n">element_symbols</span><span class="p">]</span>
+    <span class="n">molar_weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">ei</span><span class="o">.</span><span class="n">mass</span> <span class="k">for</span> <span class="n">ei</span> <span class="ow">in</span> <span class="n">element_instances</span><span class="p">]</span>
 
-    <span class="c1">#if abs( electron_density / (mass_density * ion_charge * Avogadro) - 1 ) &gt; 1e-4:</span>
-        <span class="c1">#raise ValueError( &quot;Electron density, mass_density, and ion charge are not internally consistent: ne = %5.4e/m**3, rho*Zf*NA = %5.4e/m**3.&quot; % (electron_density, mass_density * ion_charge * Avogadro) )</span>
+    <span class="n">molar_weight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">element_abundances</span> <span class="o">*</span> <span class="n">molar_weights</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">element_abundances</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">electron_density</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">electron_density</span> <span class="o">=</span> <span class="n">mass_density</span> <span class="o">*</span> <span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span>
+        <span class="nb">print</span> <span class="s2">&quot;Setting electron density to </span><span class="si">%5.4e</span><span class="s2">/cm**3.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">electron_density</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ion_charge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ion_charge</span> <span class="o">=</span> <span class="n">electron_density</span> <span class="o">/</span> <span class="p">(</span><span class="n">mass_density</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Setting average ion charge to </span><span class="si">%5.4f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ion_charge</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mass_density</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mass_density</span> <span class="o">=</span> <span class="n">electron_density</span> <span class="o">/</span> <span class="p">(</span><span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Setting mass density to </span><span class="si">%5.4f</span><span class="s2"> g/cm**3.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mass_density</span><span class="p">)</span>
+
+    <span class="c1"># Adjust</span>
+    <span class="c1">#negative_charge_element_index = numpy.where(element_charges == -1)</span>
+    <span class="c1">#positive_charges = element_charges[numpy.where(element_charges &gt;= 0.0)]</span>
+
+    <span class="c1">#sum_s_Zini= sum(element_abundances[numpy.where(element_charges &gt;= 0.0)] * positive_charges)</span>
+    <span class="c1">#sum_s_ni = sum(element_abundances[numpy.where(element_charges &gt;= 0.0)])</span>
+    <span class="c1">#element_charges[negative_charge_element_index] = sum_s_Zini / ion_charge - sum_s_ni</span>
+
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span> <span class="n">electron_density</span> <span class="o">/</span> <span class="p">(</span><span class="n">mass_density</span> <span class="o">*</span> <span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.</span> <span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Electron density, mass_density, and ion charge are not internally consistent: ne = </span><span class="si">%5.4e</span><span class="s2">/cm**3, rho*Zf*NA/u= </span><span class="si">%5.4e</span><span class="s2">/cm**3.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">mass_density</span> <span class="o">*</span> <span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span><span class="o">/</span><span class="n">molar_weight</span><span class="p">)</span> <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span>
 
@@ -1027,8 +1044,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

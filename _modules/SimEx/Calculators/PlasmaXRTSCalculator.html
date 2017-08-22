@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>SimEx.Calculators.PlasmaXRTSCalculator &#8212; simex_platform 0.2.0 documentation</title>
-    
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -24,11 +21,11 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -46,7 +43,8 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.PlasmaXRTSCalculator</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the PlasmaXRTSCalculator class.&quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
@@ -67,22 +65,15 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
-<span class="sd">&quot;&quot;&quot; Module that holds the PlasmaXRTSCalculator class.</span>
-
-<span class="sd">    @author : CFG</span>
-<span class="sd">    @institution : XFEL</span>
-<span class="sd">    @creation 20160225</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
 
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
 
 <div class="viewcode-block" id="PlasmaXRTSCalculator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator">[docs]</a><span class="k">class</span> <span class="nc">PlasmaXRTSCalculator</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -110,7 +101,7 @@
             <span class="n">output_path</span> <span class="o">=</span> <span class="s1">&#39;xrts_out.h5&#39;</span>
 
         <span class="c1"># Init base class.</span>
-        <span class="nb">super</span><span class="p">(</span> <span class="n">PlasmaXRTSCalculator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">PlasmaXRTSCalculator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
 
         <span class="c1"># Set state to not-initialized (e.g. input deck is not written).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
@@ -350,7 +341,6 @@
 
         <span class="k">return</span> <span class="n">static_dict</span>
 
-
 <span class="k">def</span> <span class="nf">extractDate</span><span class="p">(</span><span class="n">pattern_string</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Workhorse function to get a pattern from text using a regular expression.</span>
 <span class="sd">    :param pattern_string: The regex pattern to find.</span>
@@ -374,6 +364,7 @@
 <span class="c1">#</span>
 <span class="c1"># Check and set functions</span>
 <span class="c1">#</span>
+
 <span class="k">def</span> <span class="nf">checkAndSetParameters</span><span class="p">(</span> <span class="n">parameters</span> <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the parameters dictionary is ok .</span>
@@ -420,8 +411,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

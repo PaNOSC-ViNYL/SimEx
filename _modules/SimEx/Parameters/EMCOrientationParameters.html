@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>SimEx.Parameters.EMCOrientationParameters &#8212; simex_platform 0.2.0 documentation</title>
-    
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -24,11 +21,11 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -48,7 +45,7 @@
   <h1>Source code for SimEx.Parameters.EMCOrientationParameters</h1><div class="highlight"><pre>
 <span></span><span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -67,25 +64,16 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    @file Module that holds the EMCOrientationParameters class.</span>
+<span class="sd">&quot;&quot;&quot; Module that holds the EMCOrientationParameters class.  &quot;&quot;&quot;</span>
 
-<span class="sd">    @author : CFG</span>
-<span class="sd">    @institution : XFEL</span>
-<span class="sd">    @creation 20160721</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span>
-<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">Avogadro</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
-
 
 <div class="viewcode-block" id="EMCOrientationParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters">[docs]</a><span class="k">class</span> <span class="nc">EMCOrientationParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -100,6 +88,7 @@
                 <span class="n">beamstop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">detailed_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">parameters_dictionary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the EMCOrientationParameters.</span>
@@ -139,6 +128,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">max_number_of_iterations</span> <span class="o">=</span> <span class="n">max_number_of_iterations</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">beamstop</span> <span class="o">=</span> <span class="n">beamstop</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">detailed_output</span> <span class="o">=</span> <span class="n">detailed_output</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">EMCOrientationParameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Set the inherited parameters defaults that depend on the special calculator. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractCalculatorParameters__cpus_per_task_default</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1">### Setters and queries.</span>
     <span class="nd">@property</span>
@@ -261,8 +257,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

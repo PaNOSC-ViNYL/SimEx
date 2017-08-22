@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>SimEx.Calculators.EMCOrientation &#8212; simex_platform 0.2.0 documentation</title>
-    
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -24,11 +21,11 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -46,9 +43,10 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.EMCOrientation</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the EMCOrientation class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2015 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -67,33 +65,26 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
-<span class="sd">&quot;&quot;&quot; Module that holds the EMCOrientation class.</span>
-
-<span class="sd">    @author : CFG</span>
-<span class="sd">    @institution : XFEL</span>
-<span class="sd">    @creation 20151104</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span><span class="nn">shlex</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">from</span> <span class="nn">EMCCaseGenerator</span> <span class="k">import</span>  <span class="n">EMCCaseGenerator</span><span class="p">,</span> <span class="n">_print_to_log</span>
 <span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonAnalyzer</span> <span class="k">import</span> <span class="n">AbstractPhotonAnalyzer</span>
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.EMCOrientationParameters</span> <span class="k">import</span> <span class="n">EMCOrientationParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">IOUtilities</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">ParallelUtilities</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
 
-
 <div class="viewcode-block" id="EMCOrientation"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.EMCOrientation.EMCOrientation">[docs]</a><span class="k">class</span> <span class="nc">EMCOrientation</span><span class="p">(</span><span class="n">AbstractPhotonAnalyzer</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tmp_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">run_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="sd">        :param  parameters: Parameters for the EMC orientation calculator.</span>
 <span class="sd">        :type parameters: EMCOrientationParameters instance</span>
 
@@ -126,7 +117,7 @@
 
 
         <span class="c1"># Initialize base class.</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">EMCOrientation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EMCOrientation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
 
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;data/data&#39;</span><span class="p">,</span>
@@ -235,16 +226,152 @@
                 <span class="c1"># If run dir already existed, this would have been caught earlier.</span>
             <span class="n">run_instance_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_files_path</span>
 
-        <span class="c1"># Return.</span>
-        <span class="k">return</span> <span class="n">run_instance_dir</span><span class="p">,</span> <span class="n">tmp_out_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sparsePhotonFile</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;photons.dat&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detectorFile</span>        <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;detector.dat&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span>           <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span> <span class="s2">&quot;EMC_extended.log&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avgPatternFile</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;avg_photon.h5&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lockFile</span>            <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;write.lock&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span> <span class="o">=</span> <span class="n">run_instance_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_out_dir</span> <span class="o">=</span> <span class="n">tmp_out_dir</span>
 
-        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_emc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">run_instance_dir</span><span class="p">,</span><span class="n">tmp_out_dir</span>
 
-        <span class="k">return</span> <span class="n">status</span>
+    <span class="k">def</span> <span class="nf">computeNTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">resources</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">getParallelResourceInfo</span><span class="p">()</span>
+        <span class="n">ncores</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span>
+        <span class="n">nnodes</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_run_emc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="o">==</span><span class="s2">&quot;MAX&quot;</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="n">nnodes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="o">/</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="p">)),</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span>
+
+<div class="viewcode-block" id="EMCOrientation.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.EMCOrientation.EMCOrientation.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts EMC simulations in parallel in a subprocess &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set paths.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setupPaths</span><span class="p">()</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">IOUtilities</span><span class="o">.</span><span class="n">getTmpFileName</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToFile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="c1"># collect MPI arguments</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span><span class="o">==</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">computeNTasks</span><span class="p">()</span>
+            <span class="n">mpicommand</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">prepareMPICommandArguments</span><span class="p">(</span><span class="n">np</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mpicommand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span>
+        <span class="c1"># collect program arguments</span>
+        <span class="n">command_sequence</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;python&#39;</span><span class="p">,</span>
+                            <span class="vm">__file__</span><span class="p">,</span>
+                            <span class="n">fname</span><span class="p">,</span>
+                            <span class="p">]</span>
+        <span class="c1"># put MPI and program arguments together</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span> <span class="o">+</span> <span class="n">command_sequence</span>
+
+
+        <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;MPI&#39;</span> <span class="ow">in</span>  <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_VERBOSE&#39;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EMCOrientation backengine mpicommand: &quot;</span><span class="o">+</span><span class="n">mpicommand</span><span class="p">)</span>
+
+        <span class="c1"># Run the backengine command.</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+
+        <span class="c1"># Return the return code from the backengine.</span>
+        <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span></div>
+
+    <span class="k">def</span> <span class="nf">_need_prepare_photon_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">thisProcess</span><span class="p">):</span>
+        <span class="c1">###############################################################</span>
+        <span class="c1"># A lock file is created if subprocess is converting sparse photons</span>
+        <span class="c1">#   so that another subprocess does not clobber an ongoing conversion.</span>
+        <span class="c1"># Make photons.dat and detector.dat if they don&#39;t exist.</span>
+        <span class="c1"># Create time-tagged output subdirectory for intermediate states.</span>
+        <span class="c1">###############################################################</span>
+
+        <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lockFile</span><span class="p">)):</span>
+            <span class="c1"># Sleep in 30 s intervals, then check if sparse photon lock has been released.</span>
+            <span class="n">sleep_duration</span> <span class="o">=</span> <span class="mi">30</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Lock file in &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_out_dir</span> <span class="o">+</span> <span class="s2">&quot;. &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Photons.dat likely being written to tmpDir by another programm. &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Sleeping this programm for </span><span class="si">%d</span><span class="s2"> s.&quot;</span> <span class="o">%</span> <span class="n">sleep_duration</span>
+            <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_duration</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sparsePhotonFile</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_detectorFile</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_join_photon_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">numProcesses</span><span class="p">):</span>
+
+        <span class="n">outf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sparsePhotonFile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numProcesses</span><span class="p">):</span>
+            <span class="n">fname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sparsePhotonFile</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="n">outf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="n">outf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">outh5</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_avgPatternFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numProcesses</span><span class="p">):</span>
+            <span class="n">fname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_avgPatternFile</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;mask&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">avg</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;average&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">avg</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;average&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+
+        <span class="n">outh5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;average&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">avg</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;gzip&quot;</span><span class="p">,</span> <span class="n">compression_opts</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+        <span class="n">outh5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;gzip&quot;</span><span class="p">,</span> <span class="n">compression_opts</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+        <span class="n">outh5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_prepare_photon_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">comm</span><span class="p">):</span>
+        <span class="n">thisProcess</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span>
+        <span class="n">numProcesses</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># Prepare for reading input.</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">photonFiles</span>         <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="n">pf</span><span class="p">)</span> <span class="k">for</span> <span class="n">pf</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span> <span class="p">]</span>
+            <span class="n">photonFiles</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">photonFiles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot; Input file </span><span class="si">%s</span><span class="s2"> not found.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span>
+
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">EMCCaseGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
+        <span class="n">gen</span><span class="o">.</span><span class="n">readGeomFromPhotonData</span><span class="p">(</span><span class="n">photonFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">thisProcess</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;touch </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lockFile</span><span class="p">)</span>
+            <span class="n">gen</span><span class="o">.</span><span class="n">writeDetectorToFile</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_detectorFile</span><span class="p">)</span>
+
+        <span class="n">gen</span><span class="o">.</span><span class="n">writeSparsePhotonFile</span><span class="p">(</span><span class="n">photonFiles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sparsePhotonFile</span><span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">thisProcess</span><span class="p">),</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">_avgPatternFile</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">thisProcess</span><span class="p">),</span>
+                                               <span class="n">thisProcess</span><span class="p">,</span><span class="n">numProcesses</span><span class="p">)</span>
+        <span class="n">comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_join_photon_files</span><span class="p">(</span><span class="n">numProcesses</span><span class="p">)</span>
+
+        <span class="n">comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Sparse photons file created. Deleting lock file now&quot;</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
+            <span class="c1">#        _print_to_log(msg=&quot;Detector parameters: %d %d %d&quot;%(gen.qmax, len(gen.detector), len(gen.beamstop)), log_file=self._outputLog)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lockFile</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="sd">&quot;&quot;&quot; Private method to run the Expand-Maximize-Compress (EMC) algorithm.</span>
 
@@ -252,6 +379,26 @@
 
 <span class="sd">        :note: Copied and adapted from the main routine in s2e_recon/EMC/runEMC.py</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+
+        <span class="c1"># MPI info</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+        <span class="n">thisProcess</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_prepare_photon_files</span><span class="p">(</span><span class="n">thisProcess</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Photons.dat and detector.dat not found in &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_out_dir</span> <span class="o">+</span> <span class="s2">&quot;. Will create them now...&quot;</span>
+                <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_photon_files</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Photons.dat and detector.dat already exists in &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_out_dir</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+                <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
+
+<span class="c1"># the rest is non-parallel (yet)</span>
+        <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
         <span class="c1">###############################################################</span>
         <span class="c1"># Instantiate a reconstruction object</span>
         <span class="c1">###############################################################</span>
@@ -263,70 +410,23 @@
         <span class="n">beamstop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beamstop</span>
         <span class="n">detailed_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">detailed_output</span>
 
-        <span class="c1"># Get paths.</span>
-        <span class="n">run_instance_dir</span><span class="p">,</span> <span class="n">tmp_out_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setupPaths</span><span class="p">()</span>
+        <span class="n">quaternion_dir</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;CalculatorUtilities&#39;</span><span class="p">,</span> <span class="s1">&#39;quaternions&#39;</span><span class="p">)</span>
 
-        <span class="c1"># Get path to log.</span>
-        <span class="n">outputLog</span>           <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span> <span class="s2">&quot;EMC_extended.log&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Prepare for reading input.</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
-            <span class="n">photonFiles</span>         <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="n">pf</span><span class="p">)</span> <span class="k">for</span> <span class="n">pf</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span> <span class="p">]</span>
-            <span class="n">photonFiles</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
-            <span class="n">photonFiles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot; Input file </span><span class="si">%s</span><span class="s2"> not found.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span>
-
-        <span class="n">sparsePhotonFile</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;photons.dat&quot;</span><span class="p">)</span>
-        <span class="n">avgPatternFile</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;avg_photon.h5&quot;</span><span class="p">)</span>
-        <span class="n">detectorFile</span>        <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;detector.dat&quot;</span><span class="p">)</span>
-        <span class="n">lockFile</span>            <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span> <span class="s2">&quot;write.lock&quot;</span><span class="p">)</span>
-        <span class="n">quaternion_dir</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="s1">&#39;CalculatorUtilities&#39;</span><span class="p">,</span> <span class="s1">&#39;quaternions&#39;</span><span class="p">)</span>
-
-        <span class="n">gen</span> <span class="o">=</span> <span class="n">EMCCaseGenerator</span><span class="p">(</span><span class="n">outputLog</span><span class="p">)</span>
-        <span class="c1">###############################################################</span>
-        <span class="c1"># A lock file is created if subprocess is converting sparse photons</span>
-        <span class="c1">#   so that another subprocess does not clobber an ongoing conversion.</span>
-        <span class="c1"># Make photons.dat and detector.dat if they don&#39;t exist.</span>
-        <span class="c1"># Create time-tagged output subdirectory for intermediate states.</span>
-        <span class="c1">###############################################################</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">lockFile</span><span class="p">)):</span>
-            <span class="c1"># Sleep in 30 s intervals, then check if sparse photon lock has been released.</span>
-            <span class="n">sleep_duration</span> <span class="o">=</span> <span class="mi">30</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Lock file in &quot;</span> <span class="o">+</span> <span class="n">tmp_out_dir</span> <span class="o">+</span> <span class="s2">&quot;. &quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Photons.dat likely being written to tmpDir by another process. &quot;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Sleeping this process for </span><span class="si">%d</span><span class="s2"> s.&quot;</span> <span class="o">%</span> <span class="n">sleep_duration</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
-            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_duration</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">sparsePhotonFile</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">detectorFile</span><span class="p">)):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Photons.dat and detector.dat not found in &quot;</span> <span class="o">+</span> <span class="n">tmp_out_dir</span> <span class="o">+</span> <span class="s2">&quot;. Will create them now...&quot;</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;touch </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">lockFile</span><span class="p">)</span>
-            <span class="n">gen</span><span class="o">.</span><span class="n">readGeomFromPhotonData</span><span class="p">(</span><span class="n">photonFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">gen</span><span class="o">.</span><span class="n">writeDetectorToFile</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">detectorFile</span><span class="p">)</span>
-            <span class="n">gen</span><span class="o">.</span><span class="n">writeSparsePhotonFile</span><span class="p">(</span><span class="n">photonFiles</span><span class="p">,</span> <span class="n">sparsePhotonFile</span><span class="p">,</span> <span class="n">avgPatternFile</span><span class="p">)</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Sparse photons file created. Deleting lock file now&quot;</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Detector parameters: </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">detector</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">beamstop</span><span class="p">)),</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">lockFile</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Photons.dat and detector.dat already exists in &quot;</span> <span class="o">+</span> <span class="n">tmp_out_dir</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
-            <span class="n">gen</span><span class="o">.</span><span class="n">readGeomFromDetectorFile</span><span class="p">(</span><span class="n">detectorFile</span><span class="p">)</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Detector parameters: </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">detector</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">beamstop</span><span class="p">)),</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">EMCCaseGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
+        <span class="n">gen</span><span class="o">.</span><span class="n">readGeomFromDetectorFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_detectorFile</span><span class="p">)</span>
+        <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Detector parameters: </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">detector</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">beamstop</span><span class="p">)),</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
 
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;detector.dat&quot;</span><span class="p">))):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span><span class="s2">&quot;detector.dat&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;detector.dat&quot;</span><span class="p">))</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;photons.dat&quot;</span><span class="p">))):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_out_dir</span><span class="p">,</span><span class="s2">&quot;photons.dat&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;photons.dat&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;detector.dat&quot;</span><span class="p">))):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp_out_dir</span><span class="p">,</span><span class="s2">&quot;detector.dat&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;detector.dat&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;photons.dat&quot;</span><span class="p">))):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp_out_dir</span><span class="p">,</span><span class="s2">&quot;photons.dat&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;photons.dat&quot;</span><span class="p">))</span>
 
         <span class="c1">###############################################################</span>
         <span class="c1"># Create dummy destination h5 for intermediate output from EMC</span>
         <span class="c1">###############################################################</span>
         <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">)</span>
         <span class="c1">#Output file is kept in tmpOutDir.</span>
         <span class="n">outFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span>
         <span class="n">offset_iter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -358,7 +458,7 @@
             <span class="n">offset_iter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;/history/intensities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Output will be appended to the results of </span><span class="si">%d</span><span class="s2"> iterations before this.&quot;</span><span class="o">%</span><span class="n">offset_iter</span>
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+            <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
 
         <span class="c1">###############################################################</span>
         <span class="c1"># Iterate EMC</span>
@@ -369,18 +469,18 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">while</span><span class="p">(</span><span class="n">currQuat</span> <span class="o">&lt;=</span> <span class="n">max_number_of_quaternions</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;quaternion.dat&quot;</span><span class="p">)):</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;quaternion.dat&quot;</span><span class="p">))</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quaternion_dir</span> <span class="p">,</span><span class="s2">&quot;quaternion&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">currQuat</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.dat&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_instance_dir</span><span class="p">,</span><span class="s2">&quot;quaternion.dat&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;quaternion.dat&quot;</span><span class="p">)):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;quaternion.dat&quot;</span><span class="p">))</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quaternion_dir</span> <span class="p">,</span><span class="s2">&quot;quaternion&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">currQuat</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.dat&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_instance_dir</span><span class="p">,</span><span class="s2">&quot;quaternion.dat&quot;</span><span class="p">))</span>
 
                 <span class="n">diff</span> <span class="o">=</span> <span class="mf">1.</span>
                 <span class="k">while</span> <span class="p">(</span><span class="n">iter_num</span> <span class="o">&lt;=</span> <span class="n">max_number_of_iterations</span><span class="p">):</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">iter_num</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="n">min_error</span><span class="p">):</span>
                         <span class="n">_print_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Error </span><span class="si">%0.3e</span><span class="s2"> is smaller than threshold </span><span class="si">%0.3e</span><span class="s2">. Going to next quaternion.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">min_error</span><span class="p">),</span>
-                                <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+                                <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
                         <span class="k">break</span>
                     <span class="n">_print_to_log</span><span class="p">(</span><span class="s2">&quot;Beginning iteration </span><span class="si">%d</span><span class="s2">, with quaternion </span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">iter_num</span><span class="o">+</span><span class="n">offset_iter</span><span class="p">,</span> <span class="n">currQuat</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="o">*</span><span class="mi">20</span><span class="p">),</span>
-                                <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+                                <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
 
                     <span class="c1"># Here is the actual timed EMC iteration, which calls the EMC.c code.</span>
                     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
@@ -391,7 +491,7 @@
                     <span class="n">process_handle</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
                     <span class="n">time_taken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
                     <span class="n">_print_to_log</span><span class="p">(</span><span class="s2">&quot;Took </span><span class="si">%lf</span><span class="s2"> s&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">time_taken</span><span class="p">),</span>
-                                <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+                                <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
 
                     <span class="c1"># Read intermediate output of EMC.c and stuff them into a h5 file</span>
                     <span class="c1"># Delete these EMC.c-generated intermediate files afterwards,</span>
@@ -420,7 +520,7 @@
                     <span class="n">gg</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;history/error&quot;</span><span class="p">]</span>
                     <span class="n">gg</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%04d</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">iter_num</span> <span class="o">+</span> <span class="n">offset_iter</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">diff</span><span class="p">)</span>
                     <span class="n">_print_to_log</span><span class="p">(</span><span class="s2">&quot;rms change in intensities </span><span class="si">%e</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span>
-                                <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+                                <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
 
                     <span class="n">gg</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;history/angle&quot;</span><span class="p">]</span>
                     <span class="n">gg</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%04d</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">iter_num</span> <span class="o">+</span> <span class="n">offset_iter</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">most_likely_orientations</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;gzip&quot;</span><span class="p">,</span> <span class="n">compression_opts</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
@@ -441,19 +541,19 @@
 
                     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputLog</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%e</span><span class="se">\t</span><span class="s2"> </span><span class="si">%lf</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">time_taken</span><span class="p">))</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
                     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;cp finish_intensity.dat start_intensity.dat&quot;</span><span class="p">)</span>
 
                     <span class="n">_print_to_log</span><span class="p">(</span><span class="s2">&quot;Iteration number </span><span class="si">%d</span><span class="s2"> completed&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">iter_num</span><span class="p">),</span>
-                                <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+                                <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
                     <span class="n">iter_num</span> <span class="o">+=</span> <span class="mi">1</span>
 
                 <span class="n">currQuat</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="n">_print_to_log</span><span class="p">(</span><span class="s2">&quot;All EMC iterations completed&quot;</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="n">outputLog</span><span class="p">)</span>
+            <span class="n">_print_to_log</span><span class="p">(</span><span class="s2">&quot;All EMC iterations completed&quot;</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputLog</span><span class="p">)</span>
 
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
             <span class="k">return</span> <span class="mi">0</span>
@@ -474,6 +574,9 @@
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Run files path already exists, cowardly refusing to overwrite.&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">EMCOrientation</span><span class="o">.</span><span class="n">runFromCLI</span><span class="p">()</span>
 </pre></div>
 
           </div>
@@ -509,8 +612,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

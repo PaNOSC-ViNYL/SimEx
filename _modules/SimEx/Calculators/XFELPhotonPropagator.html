@@ -1,0 +1,262 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Calculators.XFELPhotonPropagator &#8212; simex_platform 0.2.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Calculators.XFELPhotonPropagator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the XFELPhotonPropagator class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">from</span> <span class="nn">prop</span> <span class="k">import</span> <span class="n">propagate_s2e</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonPropagator</span> <span class="k">import</span> <span class="n">AbstractPhotonPropagator</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.WavePropagatorParameters</span> <span class="k">import</span> <span class="n">WavePropagatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">EntityChecks</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">IOUtilities</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">ParallelUtilities</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">wpg_to_opmd</span>
+
+<div class="viewcode-block" id="XFELPhotonPropagator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator">[docs]</a><span class="k">class</span> <span class="nc">XFELPhotonPropagator</span><span class="p">(</span><span class="n">AbstractPhotonPropagator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing a x-ray free electron laser photon propagator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the XFEL photon propagator.</span>
+
+<span class="sd">        :param parameters: Parameters for the photon propagation.</span>
+<span class="sd">        :type parameters: WavePropagatorParameters instance.</span>
+
+<span class="sd">        :param  input_path: Location of input data for photon propagation.</span>
+<span class="sd">        :type input_path:   str, default &#39;FELsource/&#39;</span>
+
+<span class="sd">        :param output_path: Location of propagation output data.</span>
+<span class="sd">        :type output_path:  str, default &#39;prop/&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="c1"># Handle default parameters if None.</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">EntityChecks</span><span class="o">.</span><span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">WavePropagatorParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">WavePropagatorParameters</span><span class="p">()</span> <span class="p">)</span>
+
+        <span class="c1"># Initialize base class.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">XFELPhotonPropagator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">computeNTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">resources</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">getParallelResourceInfo</span><span class="p">()</span>
+        <span class="n">nnodes</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span>
+        <span class="n">ncores</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span>
+
+        <span class="n">cpusPerTask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span>
+
+        <span class="k">if</span> <span class="n">cpusPerTask</span><span class="o">==</span><span class="s2">&quot;MAX&quot;</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="n">nnodes</span>
+            <span class="n">ncores</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="o">/</span><span class="nb">int</span><span class="p">(</span><span class="n">cpusPerTask</span><span class="p">)))</span>
+            <span class="n">ncores</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">cpusPerTask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="p">,</span><span class="n">ncores</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="XFELPhotonPropagator.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts WPG simulations in parallel in a subprocess &quot;&quot;&quot;</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">IOUtilities</span><span class="o">.</span><span class="n">getTmpFileName</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToFile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="n">forcedMPIcommand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span>
+
+        <span class="k">if</span> <span class="n">forcedMPIcommand</span><span class="o">==</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">np</span><span class="p">,</span><span class="n">ncores</span><span class="p">)</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">computeNTasks</span><span class="p">()</span>
+            <span class="n">mpicommand</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">prepareMPICommandArguments</span><span class="p">(</span><span class="n">np</span><span class="p">,</span><span class="n">ncores</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mpicommand</span><span class="o">=</span><span class="n">forcedMPIcommand</span>
+
+        <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;MPI&#39;</span> <span class="ow">in</span>  <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_VERBOSE&#39;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;XFELPhotonPropagator backengine mpicommand: &quot;</span><span class="o">+</span><span class="n">mpicommand</span><span class="p">)</span>
+
+        <span class="n">mpicommand</span><span class="o">+=</span><span class="s2">&quot; python &quot;</span><span class="o">+</span><span class="vm">__file__</span><span class="o">+</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">fname</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span>
+
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span></div>
+
+    <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; This method drives the WPG backengine.</span>
+
+<span class="sd">        :return: 0 if WPG returns successfully, 1 if not.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># import should be here, not in header as it calls MPI_Init when imported. We want MPI to be</span>
+        <span class="c1"># initialized on this stage only.</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+
+        <span class="c1"># MPI info</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+        <span class="n">thisProcess</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span>
+        <span class="n">numProcesses</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># Check if input path is a directory.</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">input_files</span> <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="n">input_file</span> <span class="p">)</span> <span class="k">for</span> \
+                            <span class="n">input_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span> <span class="p">]</span>
+            <span class="n">input_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="c1"># Assuming the filenames have some kind of ordering scheme.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">thisProcess</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># other MPI processes (if any) have nothing to do</span>
+                <span class="n">propagate_s2e</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">get_beamline</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="c1"># If we have more than one input file, we should also have more than one output file, i.e.</span>
+        <span class="c1"># output_path should be a directory.</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;The given output path is a file but a directory is needed. Cowardly refusing to overwrite.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if output dir exists, create if not.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="c1"># Loop over all input files and generate one run per source file.</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">input_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_files</span><span class="p">):</span>
+            <span class="c1">### TODO: Transmit number of cpus.</span>
+            <span class="c1"># process file on a corresponding process (round-robin)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">numProcesses</span> <span class="o">==</span> <span class="n">thisProcess</span><span class="p">:</span>
+                <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;prop_out_</span><span class="si">%07d</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">propagate_s2e</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">get_beamline</span><span class="p">)</span>
+
+                <span class="c1"># Rewrite in openpmd conformant way.</span>
+                <span class="n">wpg_to_opmd</span><span class="o">.</span><span class="n">convertToOPMD</span><span class="p">(</span> <span class="n">output_file</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="mi">0</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+
+    <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+        <span class="k">pass</span> <span class="c1"># Nothing to be done since IO happens in backengine.</span>
+
+<div class="viewcode-block" id="XFELPhotonPropagator.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param output_path: Path to propagation output.</span>
+<span class="sd">        :type output_path: string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span> <span class="c1"># No action required since output is written in backengine.</span></div></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">XFELPhotonPropagator</span><span class="o">.</span><span class="n">runFromCLI</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
