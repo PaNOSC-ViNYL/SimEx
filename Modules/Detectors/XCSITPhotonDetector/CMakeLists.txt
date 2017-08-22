@@ -29,4 +29,6 @@ install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION ${LIBDIR}
                                         )
 
 # Copz the file which initalizes the local variables to the build folder
-install(DIRECTORY ${BINARY_DIR} DESTINATION ${SIMEXBUILD} FILES_MATCHING PATTERN "env.sh")
+install(FILES ${BINARY_DIR}/env.sh  DESTINATION ${BINDIR} 
+	RENAME "py_detector_interface_env.sh"
+)
