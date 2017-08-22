@@ -19,6 +19,22 @@ option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF
 
 option (INSTALL_TESTS "Install tests" ON)
 
+
+# options for py_detector_interfacei
+option(XCSIT_FOLDER "-DXCSIT_FOLDER=<path>/xcsit  Path to xcsit installation")
+option(GEANT4_SOURCE "-DXCSIT_SOURCE=<path>/geant4.10.03.p01/source   Path to
+    geant4 source files")
+option(GEANT4_BUILD "-DXCSIT_SOURCE=<path>/geant4.10.03.p01-build   Path to
+    geant4 build directory")
+option(GEANT4_SO "-DXCSIT_SOURCE=<path>/geant4.10.03.p01i-install/lib64
+    Path to geant4 shared objects")
+option(XERCES "-DXERCES=<path>/xerces-c-3.1.4/src    Path to xercesc source
+    files")
+set (SIMEXBUILD .)
+
+
+
+
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
