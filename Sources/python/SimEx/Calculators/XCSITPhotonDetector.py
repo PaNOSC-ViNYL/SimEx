@@ -1,3 +1,24 @@
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015-2017 Jan-Philipp Burchert, Carsten Fortmann-Grote   #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+#                                                                        #
+##########################################################################
+
 # IO class imports
 import PhotonEntry_ext
 import PhotonData_ext
@@ -13,15 +34,23 @@ import ChargeSim_ext
 import os
 import numpy as np
 
+from SimEx.Calculators import AbstractPhotonDetector
+from SimEx.Calculators import XCSITPhotonDetectorParameters
+
 class XCSITPhotonDetector(AbstractPhotonDetector):
 	"""
 	Class representing an free electorn laser photon detector
 	"""
 
 	# Define the allowed attributes
-	__slot__ = "__parameters", "__expected_data", "__provided_data",
-	"__input_path", "__output_path", "__photon_data", "__ia_data",
-	"__charge_data"
+	__slot__ = "__parameters",\
+               "__expected_data",\
+               "__provided_data",\
+               "__input_path",\
+               "__output_path",\
+               "__photon_data",\
+               "__ia_data",\
+               "__charge_data"
 
 
 	# Definition of the init
@@ -38,21 +67,22 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		:type output_path: str
 		"""
 
-		# deal with the parameters: Which kind of input? -> Change to Container
-		# if necessary
-		if isinstance(parameters, dict):
-			raise ValueError("Only XCSITPhotonDetectorParameters instances "+
-				" are allowed as input")
+        ### COMMENT: Consider moving these checks and sets to propery setters. What if a parameter is set via
+        ### COMMENT: setter method? then, no check would happen.
+
+		# Handle parameters
 		if parameters == None:
-			raise ValueError("parameters required for simulation")
+			raise ValueError("A parameters instance must be given.")
+		if not isinstance(parameters, XCSITPhotonDetectorParameters):
+			raise TypeError("Only XCSITPhotonDetectorParameters instances  are allowed as input.")
 
 		# Checking of in and output path are given and assign them for storage
 		# to internals
-		if input_path == None)
-			raise ValueError("input_path including the .h5 file has to be specified")
+		if input_path is None)
+			raise ValueError("The parameter 'input_path' must be specified.")
 
-		if output_path == None)
-			raise ValueError("output_path including the resulting .h5 file has to be specified")
+		if output_path is None)
+			raise ValueError("The parameter 'output_path' has to be specified.")
 
 		# input and output path can either be dirctionaries or files but must be
 		# relative pathes
@@ -65,30 +95,31 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		#		specified, but parent folder has to exist
 
 		# Join the current working directory with the relative path given
+        ### COMMENT: What if an absolute path is given?
 		abs_inpath = os.path.normpath(os.path.join(os.getcwd(), input_path))
 		if abs_inpath.endswith(".h5"):
 			# a specified file
 			if not os.path.exists(abs_inpath):
-				raise ValueError("File " + str(abs_inpath) + " does not exists")
+				raise IOError("File " + str(abs_inpath) + " does not exist.")
 		else:
 			# Check for existing input file
 			if os.path.isdir(abs_inpath):
 				count = 1
 				found = ""
-				for file in os.listdir(abs_inpath)
+				for candidate in os.listdir(abs_inpath)
 					# the candidates file
-					if file.endswith(".h5"):
-						found = file
+					if candidate.endswith(".h5"):
+						found = candidate
 						count -= 1
 
 					# there should be only one candidate file
 					# TODO: loop over all files
 					if count < 0:
-						raise RuntimeError("Multiple files ending with .h5 in "+
+						raise IOError("Multiple files ending with .h5 in "+
 							str(abs_inpath))
 
 				if count == 1:
-					raise RuntimeError("There is no such input file")
+					raise IOError("There is no such input file.")
 				abs_inpath = os.path.join(abs_inpath, found)
 
 			# last argument is file name
@@ -96,8 +127,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 				# Check if parent is not an existing directory
 				path, test = os.path.split(abs_inpath)
 				if not os.path.isdir(path):
-					raise RuntimeError("Please specify the input file and path
-						directly")
+					raise IOError("Please specify the input file and path
+						directly.")
 				else:
 					abs_inpath += ".h5"
 
@@ -106,7 +137,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		if abs_outpath.endswith(".h5"):
 			# a specified file
 			if not os.path.exists(abs_outpath):
-				raise ValueError("File " + str(abs_outpath) + " does not exists")
+				raise IOError("File " + str(abs_outpath) + " does not exists")
 		else:
 			# Check for existing directory
 			if os.path.isdir(abs_outpath):
@@ -117,7 +148,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 				# Check if parent is not an existing directory
 				path, test = os.path.split(abs_outpath)
 				if not os.path.isdir(path):
-					raise RuntimeError("Please specify the input file and path
+					raise IOError("Please specify the input file and path
 						directly")
 				else:
 					abs_outpath += ".h5"
@@ -132,8 +163,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		super(XCSITPhotonDetector,self).__init__(parameters,input_path,output_path)
 
 		# Define the input and output structure of the hdf5 file
-		self.__expected_data = ['/data/data',
-                                '/data/diffr',
+		self.__expected_data = ['/data/data', # <- poissonized (int)
+                                '/data/diffr',# <- intensities (float)
                                 '/data/angle',
                                 '/history/parent/detail',
                                 '/history/parent/parent',
@@ -151,8 +182,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/info',
                                 ]
 
-		self.__provided_data = ['/data/data',
-								'/data/photons'
+		self.__provided_data = ['/data/data', # <- store charge matrix here, in ADU
+								'/data/photons' # <- store photon/pixel map here, no directions
 								'/data/interactions',
                                 '/history/parent/',
                                 '/info/package_version',
@@ -197,14 +228,12 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		"""
 		# Check containers
 		if self.__photon_data == None:
-			raise RuntimeError("photon container has not been initialized yet")
+			raise RuntimeError("Photon container has not been initialized yet.")
 		if self.__ia_data == None:
-			raise RuntimeError("interaction container has not been initialized
-yet")
-
+			raise RuntimeError("Interaction container has not been initialized yet.")
 		# Run the simulation
 		ps = ParticleSim_ext.ParticleSim()
-		ps.initialization(self.__parameters["detectortype"])
+		ps.initialization(self.__parameters["detector_type"])
 		ps.runSimulation(self.__photon_data,self.__ia_data)
 		# Results are directly written to the __ia_data instance
 
@@ -225,32 +254,35 @@ yet")
 		cs = ChargeSim_ext.ChargeSim()
 		cs.setInput(self.__ia_data)
 		cs.setComponents(self.__charge_data,
-						self.__parameters["plasmasearch"],
-						self.__parameters["plasmasim"],
-						self.__parameters["pointsim"],
-						self.__parameters["detectortype"]
+						self.__parameters["plasma_search_flag"],
+						self.__parameters["plasma_simulation_flag"],
+						self.__parameters["point_simulation_method"],
+						self.__parameters["detector_type"]
 						)
 		cs.runSimulation()
 
 
 	def backengine(self):
 		"""
-		Executes the simulation of the particle and charge simulation
+		Executes the simulation of the particle and charge simulation.
 		"""
-		print("Simulating photon-detector interaction")
+		print("\nSimulating photon-detector interaction.")
 		# Create the containers
 		self.__ia_data 		= self.__createXCSITInteractions(self)
 		self.__charge_data	= self.__createXCSITChargeMatrix(self)
 
-		# run the particle simulation
+		# Run the particle simulation.
+        ### Check status of backengine.
 		self.__backengineIA(self)
-		print("Interaction simulation of the detector is finished")
+		print("Interaction simulation of the detector is finished.")
 
-		# run the charge simulation
+		# Run the charge simulation.
+        ### Check status of backengine.
 		self.__backengineCP(self)
-		print("Charge propagation simulation in the detector is finished")
+		print("Charge propagation simulation in the detector is finished.")
 
 	def __normalize(vector):
+        ### What's this? can we use numpy.linalg.norm?
 		su = 0
 		length = len(vector)
 		out = np.zero((length,1))
@@ -277,58 +309,58 @@ yet")
 
 		# Open the input file
 		infile = self.__input_path
-		h5_infile 	= h5py.File(infile,"r")
+        with h5py.File(infile,"r") as h5_infile:
 
-		# Get the array where each pixel contains a number of photons
-		photons = h5_infile["data/data"]
-		x_num = len(photons)		# Assuming an rectangle
-		y_num = len(photons[0])
+            # Get the array where each pixel contains a number of photons
+            photons = h5_infile["data/data"]
+            x_num = len(photons)		# Assuming an rectangle
+            y_num = len(photons[0])
 
-		# Parameters of the matrix
-		detector_dist = h5_infile["params/geom/detectorWidth"]
-		x_pixel = h5_infile["params/geom/pixelWidth"]
-		y_pixel = h5_infile["params/geom/pixelHeight"]
-		center_energy = h5_infile["params/beam/photonEnergy"] # missing profile
+            # Parameters of the matrix
+            detector_dist = h5_infile["params/geom/detectorWidth"]
+            x_pixel = h5_infile["params/geom/pixelWidth"]
+            y_pixel = h5_infile["params/geom/pixelHeight"]
+            center_energy = h5_infile["params/beam/photonEnergy"] # missing profile
 
-		# Define base vectors
-		base_x = np.zeros((3,1))
-		base_x[0] = x_pixel
-		base_y = np.zeros((3,1))
-		base_y[1] = y_pixel
-		base_z = np.zeros((3,1))
-		base_z[2] = detector_dist
+            # Define base vectors
+            base_x = np.zeros((3,1))
+            base_x[0] = x_pixel
+            base_y = np.zeros((3,1))
+            base_y[1] = y_pixel
+            base_z = np.zeros((3,1))
+            base_z[2] = detector_dist
 
-		# Create the photon instance
-		self.__photon_data = PhotonData_ext.PhotonData()
+            # Create the photon instance
+            self.__photon_data = PhotonData_ext.PhotonData()
 
-		# Assumptions
-		# - All the photon originate from the center
-		# - photon energy is everywhere the same in the beam
-		#
-		for i in list(range(x_num)):
-			for j in list(range(y_num)):
-				# Calculate the photon flight vector with respect to the matrix
-				# center
-				direct = base_x *(i-x_num/2) + base_y *(j-y_num/2) + base_z
+            # Assumptions
+            # - All the photon originate from the center
+            # - photon energy is everywhere the same in the beam
+            #
+            for i in list(range(x_num)):
+                for j in list(range(y_num)):
+                    # Calculate the photon flight vector with respect to the matrix
+                    # center
+                    direct = base_x *(i-x_num/2) + base_y *(j-y_num/2) + base_z
 
-				# Normalize since only the direction is necessary
-				direct = normalize(direct)
+                    # Normalize since only the direction is necessary
+                    direct = normalize(direct)
 
-				# For each photon detected at (i,j) create an instance
-				for ph in list(range(photons[i,j])):
-					entry = self.__photon_data.addEntry()
-					entry.setPositionX(x_pixel*(i-x_num/2))
-					entry.setPositionY(y_pixel*(j-y_num/2))
-					entry.setPositionZ(detector_dist)
-					entry.setDirectionX(detect[0])
-					entry.setDirectionY(detect[1])
-					entry.setDirectionZ(detect[2])
-					entry.setEnergy(center_energy)
+                    # For each photon detected at (i,j) create an instance
+                    for ph in list(range(photons[i,j])):
+                        entry = self.__photon_data.addEntry()
+                        entry.setPositionX(x_pixel*(i-x_num/2))
+                        entry.setPositionY(y_pixel*(j-y_num/2))
+                        entry.setPositionZ(detector_dist)
+                        entry.setDirectionX(detect[0])
+                        entry.setDirectionY(detect[1])
+                        entry.setDirectionZ(detect[2])
+                        entry.setEnergy(center_energy)
 
-		# Close the input file
-		h5_infile.close()
-		print("Photons read from photon matrix and transfered in XCSIT input
-			form")
+            # Close the input file
+            h5_infile.close()
+
+		print("Photons read from photon matrix and transfered to XCSIT input form.")
 
 	def saveH5(self):
 		"""
@@ -339,6 +371,8 @@ yet")
 
 		# Convert the photon data to a 2D numpy array   (size x 7)
 		num_photon = np.zeros((self.__photon_data.size(),7),dtype=np.float_)
+        ### Try this:
+        ### num_photon[:,0] = entry.getPositionX()
 		for i in list(range(self.__photon_data.size())):
 			entry = self.__photon_data.getEntry(i)
 			num_photon[i,0] = entry.getPositionX()
@@ -374,34 +408,34 @@ yet")
 		# ------------------------------------------------------------
 
 		# Open required files
-		h5_outfile 	= h5py.File(self.__output_path, "w")
-		h5_infile 	= h5py.File(self.__input_path,"r")
+        with h5py.File(self.__output_path, "w") as h5_outfile:
+            # Create the necessary output groups
+            data_gr = h5_outfile.create_group("data")
+            info_gr = h5_outfile.create_group("info")
+            param_gr= h5_outfile.create_group("params/geom")
 
-		# Create the necessary output groups
-		data_gr = h5_outfile.create_group("data")
-		info_gr = h5_outfile.create_group("info")
-		param_gr= h5_outfile.create_group("params/geom")
+            # Create the direct data values independent of the input file
+            data_gr.create_dataset("data", data=charge_array)
+            data_gr.create_dataset("photons", data=num_photon)
+            data_gr.create_dataset("interactions", data=num_ia)
+            info_gr.create_dataset("package_version",data="1.0",dtype=numpy.string_)
 
-		# Create the direct data values independent of the input file
-		data_gr.create_dataset("data", data=charge_array)
-		data_gr.create_dataset("photons", data=num_photon)
-		data_gr.create_dataset("interactions", data=num_ia)
-		info_gr.create_dataset("package_version",data="1.0",dtype=numpy.string_)
+            ### Does the link targe have to be open to make a link?
+            with h5py.File(self.__input_path,"r" ) as  h5_infile:
 
-		# Link the data from the input file
-		# -------------------------------------------------------------
-		params_group["detectorDist"] = h5_infile["/params/geom/detectorDist"]
-		params_group["pixelWidth"] = h5_infile["/params/geom/pixelWidth"]
-		params_group["pixelHeight"] = h5_infile["/params/geom/pixelHeight"]
-		params_group["photonEnergy"] = h5_infile["/params/geom/photonEnergy"]
+                # Link the data from the input file
+                # -------------------------------------------------------------
+                params_group["detectorDist"] = h5_infile["/params/geom/detectorDist"]
+                params_group["pixelWidth"] = h5_infile["/params/geom/pixelWidth"]
+                params_group["pixelHeight"] = h5_infile["/params/geom/pixelHeight"]
+                params_group["photonEnergy"] = h5_infile["/params/geom/photonEnergy"]
 
-		# Link in the input file root
-		h5_outfile["/history/parent/"] =
-			h5py.ExternalLink(self.__input_file,"/")
+                # Link in the input file root.
+                h5_outfile["/history/parent/"] = h5py.ExternalLink(self.__input_file,"/")
 
-        # Close files
-		h5_infile.close()
-        h5_outfile.close()
+                # Close files
+                h5_infile.close()
+            h5_outfile.close()
 
 
 
