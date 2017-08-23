@@ -118,7 +118,11 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'uniform_rotation' parameter to a given value.
         :param value: The value to set 'uniform_rotation' to.
         """
-        self.__uniform_rotation = checkAndSetInstance( bool, value, True )
+        # Allow None.
+        if value is not None:
+            self.__uniform_rotation = checkAndSetInstance( bool, value, True )
+        else:
+            self.__uniform_rotation = None
 
     @property
     def calculate_Compton(self):
