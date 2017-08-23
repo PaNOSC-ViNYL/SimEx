@@ -68,92 +68,73 @@ class XCSITPhotonDetectorParametersTest(unittest.TestCase):
         """ Testing the default construction. """
 
         # Attempt to construct an instance of the class.
-        parameters = XCSITPhotonDetectorParameters( )
-
-        ## Check instance and inheritance.
-        #self.assertIsInstance( parameters, XCSITPhotonDetectorParameters )
-        #self.assertIsInstance( parameters, AbstractCalculatorParameters )
-
-        ## Check all parameters are set to default values.
-        #self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
-        #self.assertTrue( parameters.uniform_rotation )
-        #self.assertEqual( parameters.beam_parameters, None )
-        #self.assertEqual( parameters.geometry, None )
-        #self.assertTrue( parameters.uniform_rotation )
-        #self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
-        #self.assertFalse( parameters.powder )
-        #self.assertEqual( parameters.intensities_file, None )
-        #self.assertEqual( parameters.crystal_size_range, None )
-        #self.assertFalse( parameters.poissonize, False )
-        #self.assertEqual( parameters.number_of_background_photons, 0 )
-        #self.assertFalse( parameters.suppress_fringes )
-        #self.assertEqual( parameters.beam_parameters, None )
-        #self.assertEqual( parameters.geometry, None )
+        self.assertRaises( AttributeError, XCSITPhotonDetectorParameters )
 
     def testShapedConstruction(self):
         """ Testing the construction with parameters of the class. """
 
-        beam_parameters = PhotonBeamParameters(
-                photon_energy=4.96e3,
-                photon_energy_relative_bandwidth=0.01,
-                beam_diameter_fwhm=2e-6,
-                divergence=2e-6,
-                pulse_energy=1e3)
+        # Check construction with detector type.
+        detector_parameters = XCSITPhotonDetectorParameters(detector_type='AGIPDSPB')
+        self.assertIsInstance( detector_parameters, AbstractCalculatorParameters)
+        self.assertIsInstance( detector_parameters, XCSITPhotonDetectorParameters)
 
-        # Attempt to construct an instance of the class.
-        parameters = XCSITPhotonDetectorParameters(
-                sample=TestUtilities.generateTestFilePath("2nip.pdb"),
-                powder=True,
-                number_of_diffraction_patterns=10,
-                number_of_background_photons=100,
-                poissonize=True,
-                suppress_fringes=True,
-                crystal_size_range=[10,100],
-                uniform_rotation=False,
-                beam_parameters=beam_parameters,
-                geometry=TestUtilities.generateTestFilePath('simple.geom'))
-
+        # Check defaults for other fields.
 
         # Check all parameters are set as intended.
-        self.assertFalse( parameters.uniform_rotation )
-        self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
-        self.assertTrue( parameters.powder )
-        self.assertEqual( parameters.crystal_size_range, (10.,100.) )
-        self.assertTrue( parameters.poissonize )
-        self.assertEqual( parameters.number_of_background_photons, 100 )
-        self.assertTrue( parameters.suppress_fringes )
-        self.assertIsInstance( parameters.beam_parameters, PhotonBeamParameters )
-        self.assertEqual( parameters.beam_parameters.photon_energy, 4.96e3 )
-        self.assertEqual( parameters.geometry, TestUtilities.generateTestFilePath('simple.geom') )
+        self.assertEqual( detector_parameters.plasma_search_flag, "BLANK")
+        self.assertEqual( detector_parameters.plasma_simulation_flag, "BLANKPLASMA")
+        self.assertEqual( detector_parameters.point_simulation_method, "FULL")
 
     def testSettersAndQueries(self):
         """ Testing the default construction of the class using a dictionary. """
 
-        self.__files_to_remove.append("5udc.pdb")
 
         # Construct with defaults.
-        parameters = XCSITPhotonDetectorParameters(TestUtilities.generateTestFilePath("2nip.pdb"))
+        parameters = XCSITPhotonDetectorParameters( detector_type="AGIPDSPB")
 
-        # Set some members to non-defaults.
-        parameters.sample="5udc.pdb"
-        parameters.powder=True
-        parameters.number_of_diffraction_patterns=10
-        parameters.number_of_background_photons=100
-        parameters.poissonize=True
-        parameters.suppress_fringes=True
-        parameters.crystal_size_range=[10,100]
-        parameters.uniform_rotation=False
+        # Reset detector type to non-sense value
+        self.assertRaises( TypeError, parameters.detector_type, None)
+        self.assertRaises( TypeError, parameters.detector_type, 1)
+        self.assertRaises( TypeError, parameters.detector_type, 1.4)
+        self.assertRaises( ValueError, parameters.detector_type, "BigFatDetector")
+        self.assertRaises( TypeError, parameters.detector_type, ["AGIPDSPB", "LPD"])
 
-        # Check all parameters are set as intended.
-        self.assertEqual( parameters.sample, "5udc.pdb")
-        self.assertFalse( parameters.uniform_rotation )
-        self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
-        self.assertTrue( parameters.powder )
-        self.assertEqual( parameters.crystal_size_range, (10.,100.) )
-        self.assertTrue( parameters.poissonize )
-        self.assertEqual( parameters.number_of_background_photons, 100 )
-        self.assertTrue( parameters.suppress_fringes )
+        # Set to different detector.
+        parameters.detector_type = "LPD"
+        self.assertEqual(parameters.detector_type, "LPD")
+
+        # Reset plasma_search_flag to non-sense value
+        self.assertRaises( TypeError,  parameters.plasma_search_flag, None)
+        self.assertRaises( TypeError,  parameters.plasma_search_flag, 1)
+        self.assertRaises( TypeError,  parameters.plasma_search_flag, 1.4)
+        self.assertRaises( ValueError, parameters.plasma_search_flag, "XXX")
+        self.assertRaises( TypeError,  parameters.plasma_search_flag, ["BLANK", "BLANK"])
+
+        # Set to different detector.
+        parameters.plasma_search_flag = "BLANK"
+        self.assertEqual(parameters.plasma_search_flag, "BLANK")
+
+        # Reset plasma_simulation_flag to non-sense value
+        self.assertRaises( TypeError,  parameters.plasma_simulation_flag, None)
+        self.assertRaises( TypeError,  parameters.plasma_simulation_flag, 1)
+        self.assertRaises( TypeError,  parameters.plasma_simulation_flag, 1.4)
+        self.assertRaises( ValueError, parameters.plasma_simulation_flag, "XXX")
+        self.assertRaises( TypeError,  parameters.plasma_simulation_flag, ["BLANKPLASMA", "BLANKPLASMA"])
+
+        # Set to different detector.
+        parameters.plasma_search_flag = "BLANKPLASMA"
+        self.assertEqual(parameters.plasma_search_flag, "BLANKPLASMA")
+
+        # Reset point_simulation_method to non-sense value
+        self.assertRaises( TypeError,  parameters.point_simulation_method, None)
+        self.assertRaises( TypeError,  parameters.point_simulation_method, 1)
+        self.assertRaises( TypeError,  parameters.point_simulation_method, 1.4)
+        self.assertRaises( ValueError, parameters.point_simulation_method, "XXX")
+        self.assertRaises( TypeError,  parameters.point_simulation_method, ["FANO", "FULL"])
+
+        # Set to different detector.
+        parameters.plasma_search_flag = "FANO"
+        self.assertEqual(parameters.plasma_search_flag, "FANO")
 
 if __name__ == '__main__':
     unittest.main()
-
