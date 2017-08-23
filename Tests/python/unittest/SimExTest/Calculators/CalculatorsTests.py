@@ -30,6 +30,8 @@ from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
 from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
 from S2EReconstructionTest import S2EReconstructionTest
+from XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
+from XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
 #from GenesisPhotonSourceTest import GenesisPhotonSourceTest
 
 # Setup the suite.
@@ -40,7 +42,9 @@ def suite():
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
              unittest.makeSuite(S2EReconstructionTest,                  'test'),
-             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,                  'test'),
+             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest, 'test'),
+             unittest.makeSuite(XCSITPhotonDetectorParameters,          'test'),
+             unittest.makeSuite(XCSITPhotonDetectorParametersTest,      'test'),
              ### Disabled since CrystFEL not added to external libraries.
              #unittest.makeSuite(CrystFELPhotonDiffractorTest,                  'test'),
              #unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
