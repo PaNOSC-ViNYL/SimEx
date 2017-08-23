@@ -21,9 +21,7 @@ INSTALL_COMMAND ""
 
 ExternalProject_Get_Property(singfel SOURCE_DIR)
 
-install(DIRECTORY ${SOURCE_DIR}/bin/ DESTINATION ${BINDIR}
-        USE_SOURCE_PERMISSIONS
-        )
+install(PROGRAMS ${SOURCE_DIR}/bin/ DESTINATION ${BINDIR})
 
 install(DIRECTORY ${SOURCE_DIR}/pysingfel DESTINATION  ${PYPATH})
 
