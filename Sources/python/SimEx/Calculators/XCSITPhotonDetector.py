@@ -80,7 +80,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         self.parameters = parameters
         self.input_path = input_path
         self.output_path = output_path
-        
+
         # Define the input and output structure of the hdf5 file
         self.__expected_data = ['/data/data',       # <- poissonized (int)
                                 '/data/diffr',      # <- intensities (float)
@@ -112,7 +112,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/beam/photonEnergy',
                                 ]
 
-    
+
 
     # Override the setter of AbstractBaseCalculator
     @AbstractPhotonDetector.parameters.setter
@@ -136,25 +136,27 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             print("Error type: " + str(err[0]))
             print("Error value: " + str(err[1]))
             print("Error traceback: " + str(err[2]))
-            
+
             # end the execution with a new exception
             raise ValueError("Input parameter XCSITPhotonDetectorParameter " +
                 "is incomplete.")
-    
+
         # set the value to the attribute
         super(XCSITPhotonDetector,self).parameters(value)
 
-    
+
     @AbstractPhotonDetector.input_path.setter
     def input_path(self,value):
         # Check the value type
         if value is None:
             raise ValueError("The parameter 'input_path' must be specified.")
+            ### COMMENT: input_path=None should be accepted, default "diffr.h5" -> but usually contains >1 pattern.
         if not isinstance(value,str):
-            raise TypeError("As input_path attribute only instances of str " + 
+            raise TypeError("As input_path attribute only instances of str " +
                 "are allowed.")
         if not value:
-            raise IOError("You must not enter an empty string as output path.") 
+            raise IOError("You must not enter an empty string as output path.")
+            ### Test this. At least the constructor will not trigger this since input_path is initialized to None.
         # treat the input path:
         # Cases
         # 1) given is an absolute path
@@ -162,6 +164,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         #       b) ends with <parent path>/<filename>   -> add .h5
         #       c) ends with <parent path>/<folder>     -> search for an .h5 file in the
         #           parentfolder
+        ### Should loop over all input files.
         # 2) given is an relative path to the current directory
         #       cases like in 1) a-c just with the cwd added previously
 
@@ -178,11 +181,13 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         if not os.path.isdir(head):
             raise IOError("Parent path is not valid. Please check again: " +
                 str(head) +".")
+            ### Why not os.path.exists?
 
         # Check cases a)-c)
         # Multiple input files are stored in one specifed input folder
         in_pathes = []
         if os.endswith(".h5") and os.path.isfile(value):
+            ### syntax??
             # All is fine
             in_pathes.append(value)
         elif os.path.isfile(value + ".h5"):
@@ -195,7 +200,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             # directory can contain multiple files and multiple .h5 files
             for i in os.listdir(value):
                 if i.endswith(".h5"):
-                    in_pathes.append(os.path.join(value,i))         
+                    in_pathes.append(os.path.join(value,i))
         else:
             raise IOError("Last path element causes error: " + str(tail) +
                 "Please check absolute path again: " + str(value) + ".")
@@ -212,10 +217,11 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
     @AbstractPhotonDetector.output_path.setter
     def output_path(self,value):
         # Check the value type
+        ### Default handling: detector_out.h5 -> in case of many input files, put all detector images into one detector.h5, replicate structure of diffr.h5
         if value is None:
             raise ValueError("The parameter 'output_path' has to be specified.")
         if not isinstance(value,str):
-            raise TypeError("As output_path attribute only instances of str " + 
+            raise TypeError("As output_path attribute only instances of str " +
                 "are allowed.")
         if not value:
             raise IOError("You must not enter an empty string as output path.")
@@ -250,7 +256,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         if os.path.isdir(value):
             # input is existing path to directory where to put in the output
             # file 1ic) and 1iic)
-            
+
             # Create a file and join
             value = os.path.join(value,out_name)
             value = os.path.normpath(value)
@@ -274,10 +280,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             # Create an outpuf file
             value = os.join(value,out_name)
             value = os.path.normpath(value)
-        
+
         # set the value to the attribute
         super(XCSITPhotonDetector,self).output_path(value)
-    
+
 
 
 
@@ -306,7 +312,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
     # Subengine to calulate the particle simulation: The interaction of the
     # photons with the detector of choice
-    def __backenginIA(self):
+    def __backengineIA(self):
         """
         Run the particle simulation
         """
@@ -317,7 +323,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             raise RuntimeError("Photon container has not been initialized yet.")
         if self.__ia_data == None:
             raise RuntimeError("Interaction container has not been initialized yet.")
-        
+
         # Run the simulation, catch everything that might happen and report
         try:
             ps = ParticleSim_ext.ParticleSim()
@@ -381,15 +387,17 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
         # Run the particle simulation.
         if not self.__backengineIA(self):
-            raise RuntimeError("Particle simulation caused errors, " + 
+            raise RuntimeError("Particle simulation caused errors, " +
                 "interrupting execution.")
+            ### Indicate where traceback can be found.
         else:
             print("Interaction simulation of the detector is finished.")
 
         # Run the charge simulation.
         if not self.__backengineCP(self):
-            raise RuntimeError("Charge simulation caused errors, " + 
+            raise RuntimeError("Charge simulation caused errors, " +
                 "interrupting execution.")
+            ### Indicate where traceback can be found.
         else:
             print("Charge propagation simulation in the detector is finished.")
 
@@ -401,7 +409,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         """
         # The __input_path is a non relative path to an existing file
         if not os.path.exists(self.__input_path):
-            raise RuntimeError("Input file " + str(self.__input_path) + 
+            raise RuntimeError("Input file " + str(self.__input_path) +
                 " does not exists")
 
         # Raise exception if there is no input file saved
@@ -452,6 +460,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
                     # Normalize since only the direction is necessary
                     direct = np.linalg.norm(direct)
+                    ### Please omit np, use plain numpy.
 
                     # For each photon detected at (i,j) create an instance
                     for ph in list(range(photons[i,j])):
@@ -515,7 +524,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
                 # Link the data from the input file
                 # -------------------------------------------------------------
-               
+
                 # Copy
                 data_gr["photons"] = np.asarray(h5_infile["/data/data"]) # make
                     # sure it is an numpy array
@@ -534,7 +543,3 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
             # Close file
             h5_outfile.close()
-
-
-
-
