@@ -31,9 +31,9 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
 	"""
 
 	# set the only allowed attributes of instances of this class
-	__slots__ = "__detector_type",
-				"__plasma_search_flag",
-				"__plasma_simulation_flag",
+	__slots__ = "__detector_type",\
+				"__plasma_search_flag",\
+				"__plasma_simulation_flag",\
 				"__point_simulation_method"
 
 
