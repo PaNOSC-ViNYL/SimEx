@@ -36,8 +36,8 @@ import os
 import numpy as np
 import sys
 
-from SimEx.Calculators import AbstractPhotonDetector
-from SimEx.Calculators import XCSITPhotonDetectorParameters
+from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
+from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 
 class XCSITPhotonDetector(AbstractPhotonDetector):
     """
@@ -50,19 +50,20 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
     #       __input_path            <- here redefined as array of strings
     #       (pathes)
     #       __output_path
-    __slot__ = "__expected_data",\
-               "__provided_data",\
-               "__photon_data",\
-               "__ia_data",\
-               "__charge_data"
+    __slot__ =  "__expected_data",\
+                "__provided_data",\
+                "__photon_data",\
+                "__ia_data",\
+                "__charge_data"
 
-
-	# Constructor.
-	def __init__(self,parameters=None,input_path=None,output_path=None):
-		"""
-		:param parameters: Parameters of the calulator such as the type of
-			detector
-		:type parameters: XCSITPhotonDetector
+    # Constructor.
+    def __init__(self,parameters=None,
+                input_path=None,
+                output_path=None):
+        """
+        :param parameters: Parameters of the calulator such as the type of
+        detector
+        :type parameters: XCSITPhotonDetector
 
         :param input_path: Path to the hdf5 file holding the input data.
         :type input_path: str
@@ -74,13 +75,12 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         # Init base class
         super(XCSITPhotonDetector,self).__init__(parameters,input_path,output_path)
 
-
         # Use the setters to check the input and assign it to the attributes
         # the attributes are overwritten in the base class
-        self.parameters(parameters)
-        self.input_path(input_path)
-        self.output_path(output_path)
-
+        self.parameters = parameters
+        self.input_path = input_path
+        self.output_path = output_path
+        
         # Define the input and output structure of the hdf5 file
         self.__expected_data = ['/data/data',       # <- poissonized (int)
                                 '/data/diffr',      # <- intensities (float)
@@ -115,7 +115,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
     
 
     # Override the setter of AbstractBaseCalculator
-    @parameters.setter
+    @AbstractPhotonDetector.parameters.setter
     def parameters(self,value):
         # Check the value type
         if value is None:
@@ -145,7 +145,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         super(XCSITPhotonDetector,self).parameters(value)
 
     
-    @input_path.setter
+    @AbstractPhotonDetector.input_path.setter
     def input_path(self,value):
         # Check the value type
         if value is None:
@@ -209,7 +209,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         self.__input_path = in_pathes
 
 
-    @output_path.setter
+    @AbstractPhotonDetector.output_path.setter
     def output_path(self,value):
         # Check the value type
         if value is None:

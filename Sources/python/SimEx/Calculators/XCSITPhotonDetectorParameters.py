@@ -41,7 +41,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
                  detector_type=None,
                  plasma_search_flag=None,
                  plasma_simulation_flag=None,
-                 point_simulation_method=None,
+                 point_simulation_method=None
                 ):
         """
         Constructor for the XCSITPhotonDetectorParameters class.
@@ -62,10 +62,10 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         # Use the setters: They check the type of the input and set the private
         # attributes or raise an exception if the the type does not match the
         # required type
-        self.detector_type(detector_type)
-        self.plasma_search_flag(plasma_search_flag)
-        self.plasma_simulation_flag(plasma_simulation_flag)
-        self.point_simulation_method(point_simulation_method)
+        self.detector_type = detector_type
+        self.plasma_search_flag = plasma_search_flag
+        self.plasma_simulation_flag = plasma_simulation_flag
+        self.point_simulation_method = point_simulation_method
 
     # Getter and Setter
     # getter raise an AttributeError if the attribute accessed by the called
