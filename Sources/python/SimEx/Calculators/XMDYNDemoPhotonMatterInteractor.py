@@ -126,6 +126,9 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             print "\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n"
             self.parameters['number_of_trajectories'] = 1
 
+        if "random_rotation" not in self.parameters.keys():
+            self.parameters["random_rotation"] = False
+
     def expectedData(self):
         """ Query for the data expected by the Interactor. """
         return self.__expected_data
@@ -177,8 +180,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
                 pmi_demo.g_s2e['steps'] = 100
 
             pmi_demo.g_s2e['maxZ'] = 100
-
-
+            pmi_demo.g_s2e['random_rotation'] = self.parameters['random_rotation']
             pmi_demo.g_s2e['setup']['pmi_out'] = output_file
             # Setup the database.
             pmi_demo.f_dbase_setup()
@@ -384,11 +386,16 @@ class PMIDemo(object):
 
 
     def f_rotate_sample( self ) :
-        #print '   quaternion to be set!!!'
-        self.g_s2e['sample']['rot_quaternion'] = numpy.random.rand( 4 ) #  numpy.array([0,0,0,0])
-        self.g_s2e['sample']['rotmat'] = numpy.zeros((9,))
-        s2e_gen_randrot_quat( self.g_s2e['sample']['rot_quaternion'] ,  self.g_s2e['sample']['rotmat'] ) ;
-        s2e_rand_orient( self.g_s2e['sample']['r'] , self.g_s2e['sample']['rotmat'] ) ;
+
+        # Init quaternion for rotation.
+        self.g_s2e['sample']['rot_quaternion'] = numpy.array([0,0,0,0])
+
+        # Set to random if desired.
+        if self.g_s2e['random_rotation'] is True:
+            self.g_s2e['sample']['rot_quaternion'] = numpy.random.rand( 4 )
+            self.g_s2e['sample']['rotmat'] = numpy.zeros((9,))
+            s2e_gen_randrot_quat( self.g_s2e['sample']['rot_quaternion'] ,  self.g_s2e['sample']['rotmat'] ) ;
+            s2e_rand_orient( self.g_s2e['sample']['r'] , self.g_s2e['sample']['rotmat'] ) ;
 
         self.f_save_data( '/data/angle' , self.g_s2e['sample']['rot_quaternion'] .reshape((1,4)) )
 
@@ -641,15 +648,16 @@ def s2e_gen_randrot_quat( quat , rotmat ) :
     ##############################################################################
 
 def s2e_rand_orient( r ,mat ) :
-    N = r.shape[1]
+
+    N = r.shape[0]
 ###    print N
-    vv = numpy.zeros((3,0)) ;
+    vv = numpy.zeros((3,0))
     for ii in range(N) :
         vv = r[ii,:]
 ###        print vv , vv.shape , mat.shape
-        r[ii,0] = mat[0] * vv[0] + mat[1] * vv[1] + mat[2] * vv[2] ;
-        r[ii,1] = mat[3] * vv[0] + mat[4] * vv[1] + mat[5] * vv[2] ;
-        r[ii,2] = mat[6] * vv[0] + mat[7] * vv[1] + mat[8] * vv[2] ;
+        r[ii,0] = mat[0] * vv[0] + mat[1] * vv[1] + mat[2] * vv[2]
+        r[ii,1] = mat[3] * vv[0] + mat[4] * vv[1] + mat[5] * vv[2]
+        r[ii,2] = mat[6] * vv[0] + mat[7] * vv[1] + mat[8] * vv[2]
 
 
 ##############################################################################

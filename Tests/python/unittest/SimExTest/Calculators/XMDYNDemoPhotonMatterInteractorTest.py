@@ -27,6 +27,7 @@
 
 """
 import h5py
+import numpy
 import os
 import paths
 import shutil
@@ -103,7 +104,7 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
     def testDataInterfaceQueries(self):
         """ Check that the data interface queries work. """
 
-        # Get test instance.
+        # Get test instance.G
         # Setup pmi parameters.
         pmi_parameters = {'number_of_trajectories' : 1,
                           'number_of_steps'        : 100,
@@ -240,6 +241,82 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
         Nph = h5['/data/snp_0000001/Nph']
 
         self.assertEqual(Nph.shape, (1,))
+
+    def testRotationNone(self):
+        """ Check that by default no rotation is applied and that random rotation has an effect."""
+
+        # Clean up.
+        self.__dirs_to_remove.append('pmi')
+
+        # Get test instance.
+        pmi_parameters = {'number_of_trajectories' : 1,
+                          'number_of_steps'        : 100,
+                         }
+
+        test_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters,
+                                                          input_path=self.input_h5,
+                                                          output_path='pmi',
+                                                          sample_path = TestUtilities.generateTestFilePath('sample.h5') )
+
+        # Call backengine
+        status = test_interactor.backengine()
+
+        # Check that the backengine returned zero.
+        self.assertEqual(status, 0)
+
+        # Check we have generated the expected output.
+        # Check rotation angle.
+        with h5py.File( os.path.join(test_interactor.output_path, 'pmi_out_0000001.h5'), 'r') as h5:
+            angle = h5['data/angle'].value
+            self.assertEqual( angle[0,0], 0. )
+            self.assertEqual( angle[0,1], 0. )
+            self.assertEqual( angle[0,2], 0. )
+            self.assertEqual( angle[0,3], 0. )
+
+            # Get atom positions.
+            atom_positions = h5['data/snp_0000001/r'].value
+
+        # Now do same calculation again.
+        test_interactor.backengine()
+
+        # Get atom positions from new calculation.
+        with h5py.File( os.path.join(test_interactor.output_path, 'pmi_out_0000001.h5'), 'r') as h5:
+            new_atom_positions = h5['data/snp_0000001/r'].value
+
+        # They should coincide since no rotation has been applied.
+        self.assertAlmostEqual( 1e10*numpy.linalg.norm(atom_positions - new_atom_positions), 0.0, 7 )
+
+    def testRotationRandom(self):
+        """ Check that by default no rotation is applied and that random rotation has an effect."""
+
+        # Clean up.
+        self.__dirs_to_remove.append('pmi')
+
+        # Get test instance.
+        pmi_parameters = {'number_of_trajectories' : 1,
+                          'number_of_steps'        : 100,
+                          'random_rotation'        : True,
+                         }
+
+        test_interactor = XMDYNDemoPhotonMatterInteractor(parameters=pmi_parameters,
+                                                          input_path=self.input_h5,
+                                                          output_path='pmi',
+                                                          sample_path = TestUtilities.generateTestFilePath('sample.h5') )
+
+        # Call backengine
+        status = test_interactor.backengine()
+
+        # Check that the backengine returned zero.
+        self.assertEqual(status, 0)
+
+        # Check we have generated the expected output.
+        # Check rotation angle.
+        with h5py.File( os.path.join(test_interactor.output_path, 'pmi_out_0000001.h5'), 'r') as h5:
+            angle = h5['data/angle'].value[0]
+
+            # Check we have a non-zero rotation.
+            self.assertNotEqual( numpy.linalg.norm(angle), 0.)
+
 
 if __name__ == '__main__':
     unittest.main()
