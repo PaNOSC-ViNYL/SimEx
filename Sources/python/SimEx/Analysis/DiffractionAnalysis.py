@@ -274,7 +274,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 def plotRadialProjection(pattern, parameters, logscale=True):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
-    qs, intensities = azimuthalIntegation(pattern, parameters)
+    qs, intensities = azimuthalIntegration(pattern, parameters)
 
     if logscale:
         plt.semilogy(qs, intensities)
@@ -283,7 +283,7 @@ def plotRadialProjection(pattern, parameters, logscale=True):
     plt.xlabel("q (1/nm)")
     plt.ylabel("Intensity (arb. units)")
 
-def azimuthalIntegation(pattern, parameters):
+def azimuthalIntegration(pattern, parameters):
 
     # Extract parameters.
     beam = parameters['beam']
@@ -347,14 +347,16 @@ def diffractionParameters(path):
     parameters_dict = {'beam':{}, 'geom':{}}
 
     # Open file.
-    with h5py.File(h5_file, 'r') as h5:
-        # Loop over entries in /params.
-        for top_key in ['beam', 'geom']:
-            # Loop over groups.
-            for key, val in h5['params/%s' % (top_key)].iteritems():
-                # Insert into return dictionary.
-                parameters_dict[top_key][key] = val.value
-
+    try:
+        with h5py.File(h5_file, 'r') as h5:
+            # Loop over entries in /params.
+            for top_key in ['beam', 'geom']:
+                # Loop over groups.
+                for key, val in h5['params/%s' % (top_key)].iteritems():
+                    # Insert into return dictionary.
+                    parameters_dict[top_key][key] = val.value
+    except:
+        pass
     # Return.
     return parameters_dict
 
