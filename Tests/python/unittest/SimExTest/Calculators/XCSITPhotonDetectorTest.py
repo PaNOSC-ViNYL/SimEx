@@ -70,209 +70,50 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         """ Testing the construction of the class with parameters. """
 
         # Setup parameters.
-        parameters=XCSITPhotonDetectorParameters(sample="5udc.pdb")
+        parameters=XCSITPhotonDetectorParameters(detector_type="AGIPDSPB")
+
+        # Check construction fails without parameters.
+        self.assertRaises( AttributeError, XCSITPhotonDetector )
+
+        # Check construction fails without input_path.
+        self.assertRaises( AttributeError, XCSITPhotonDetector, parameters )
 
         # Construct the object.
-        diffractor = XCSITPhotonDetector(parameters=parameters, input_path=None)
+        diffractor = XCSITPhotonDetector(parameters=parameters, input_path=TestUtilities.generateTestFilePath("diffr"))
+
+        # Check correct default handling for output_path:
+        self.assertEqual( diffractor.output_path, "detector")
 
         # Check type.
         self.assertIsInstance(diffractor, XCSITPhotonDetector)
         self.assertIsInstance(diffractor, AbstractPhotonDiffractor)
 
-    def testConstructionWithPropInput(self):
+    def testMinimalExample(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
 
         parameters = XCSITPhotonDetectorParameters(
-                sample="5udc.pdb",
-                geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                beam_parameters=None,
-                number_of_diffraction_patterns=1,
+                detector_type="AGIPDSPB",
                 )
 
         diffractor = XCSITPhotonDetector(
                 parameters=parameters,
-                input_path=TestUtilities.generateTestFilePath("prop_out_0000001.h5"),
-                output_path="diffr",
+                input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
+                output_path="detector",
                 )
 
-        # Check that beam parameters have been updated from prop output.
-        self.assertAlmostEqual( diffractor.parameters.beam_parameters.photon_energy , 4947.34315, 5 )
-
-    def testBackengineWithPropInput(self):
-        """ Check that beam parameters can be taken from a given propagation output file."""
-
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
-
-        parameters = XCSITPhotonDetectorParameters(
-                sample="5udc.pdb",
-                geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                beam_parameters=None,
-                number_of_diffraction_patterns=1,
-                )
-
-        diffractor = XCSITPhotonDetector(
-                parameters=parameters,
-                input_path=TestUtilities.generateTestFilePath("prop_out_0000001.h5"),
-                output_path="diffr",
-                )
-
-        # Check that beam parameters have been updated from prop output.
+        diffractor._readH5()
         diffractor.backengine()
-
-    def testBackengineSinglePattern(self):
-        """ Check we can run pattern_sim with a minimal set of parameter. """
-
-        # Ensure cleanup.
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
-
-        # Get parameters.
-        parameters = XCSITPhotonDetectorParameters(sample="5udc.pdb",
-                geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                number_of_diffraction_patterns=1)
-
-        # Get calculator.
-        diffractor = XCSITPhotonDetector(parameters=parameters, input_path=None, output_path='diffr')
-
-        # Run backengine
-        status = diffractor.backengine()
-
-        # Check return code.
-        self.assertEqual(status, 0)
-
-        # Check output dir was created.
-        self.assertTrue( os.path.isdir( diffractor.output_path ) )
-
-        # Check pattern was written.
-        self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
-
-
-
-    def testBackengineMultiplePatterns(self):
-        """ Check we can run pattern_sim with a minimal set of parameter. """
-
-        # Ensure cleanup.
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
-
-        # Get parameters.
-        parameters = XCSITPhotonDetectorParameters(sample="5udc.pdb",
-                geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                number_of_diffraction_patterns=2)
-
-        # Get calculator.
-        diffractor = XCSITPhotonDetector(parameters=parameters, input_path=None, output_path='diffr')
-
-        # Run backengine
-        status = diffractor.backengine()
-
-        # Check return code.
-        self.assertEqual(status, 0)
-
-        # Check output dir was created.
-        self.assertTrue( os.path.isdir( diffractor.output_path ) )
-
-        # Check pattern was written.
-        self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
-        self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
-
-    def testSaveH5(self):
-        """ Check that saveh5() creates correct filenames. """
-
-        # Ensure cleanup.
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
-        self.__files_to_remove.append("diffr.h5")
-
-        # Setup beam parameters.
-        beam_parameters = PhotonBeamParameters(photon_energy=5e3,
-                pulse_energy=2e-3,
-                photon_energy_relative_bandwidth=1e-3,
-                photon_energy_spectrum_type="tophat",
-                beam_diameter_fwhm=3e-6,
-                )
-        # Get parameters.
-        parameters = XCSITPhotonDetectorParameters(sample="5udc.pdb",
-                geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                beam_parameters=beam_parameters,
-                number_of_diffraction_patterns=2)
-
-        # Get calculator.
-        diffractor = XCSITPhotonDetector(parameters=parameters, input_path=None, output_path='diffr')
-
-        # Run backengine
-        status = diffractor.backengine()
-
-        # Check return code.
-        self.assertEqual(status, 0)
-
-        # Check output dir was created.
-        self.assertTrue( os.path.isdir( diffractor.output_path ) )
-
-        # Save correctly.
         diffractor.saveH5()
 
-        # Check output file was created.
-        self.assertTrue( os.path.isfile( diffractor.output_path ) )
+        # Assert output was created.
+        self.assertIn("detector_out_0000001.h5" in "detector")
 
-        # Check pattern was written.
-        self.assertIn( "diffr_out_0000001.h5" , os.listdir( "diffr" ))
-        self.assertIn( "diffr_out_0000002.h5" , os.listdir( "diffr" ))
-
-        # Open linked h5 file.
-        with h5py.File(diffractor.output_path, 'r') as h5:
-            self.assertIn("data" , h5.keys())
-            self.assertIn("0000001" , h5["data"].keys())
-            self.assertIn("0000002" , h5["data"].keys())
-            self.assertIn("data" , h5["data/0000001"].keys())
-            self.assertIn("data" , h5["data/0000002"].keys())
-
-            self.assertIn("params" , h5.keys())
-            self.assertIn("beam" , h5["params"].keys())
-            self.assertIn("photonEnergy" , h5["params/beam"].keys())
-            self.assertIn("focusArea" , h5["params/beam"].keys())
-
-        # Check metafile was created.
-        self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
-
-    def notestRenameFiles(self):
-
-        _rename_files( "diffr" )
-
-    def testBackengineWithBeamParametersObject(self):
-        """ Check beam parameter logic if they are set as parameters. """
-
-        # Ensure cleanup.
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
-
-        # Setup beam parameters.
-        beam_parameters = PhotonBeamParameters(
-                photon_energy=16.0e3,
-                photon_energy_relative_bandwidth=0.001,
-                pulse_energy=2.0e-3,
-                beam_diameter_fwhm=100e-9,
-                divergence=None,
-                )
-
-        # Get parameters.
-        parameters = XCSITPhotonDetectorParameters(sample="5udc.pdb",
-                geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                beam_parameters=beam_parameters,
-                number_of_diffraction_patterns=2,
-                )
-
-        # Get calculator.
-        diffractor = XCSITPhotonDetector(parameters=parameters, input_path=None, output_path='diffr')
-
-        # Run backengine
-        status = diffractor.backengine()
-
-        # Check return code.
-        self.assertEqual(status, 0)
-
+        # Check if we can read the output.
+        with h5py.File( os.path.join( "detector", "detector_out_0000001.h5") as h5:
+            self.assertIn( "data", h5.keys() )
+            self.assertIn( "data", h5["data"].keys() )
+            self.assertIn( "photons", h5["data"].keys() )
 
 if __name__ == '__main__':
     unittest.main()

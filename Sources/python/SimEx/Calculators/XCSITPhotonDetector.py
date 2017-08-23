@@ -20,6 +20,7 @@
 ##########################################################################
 
 # IO class imports
+### Should read from DSIM import PhotonEntry ...
 import PhotonEntry_ext
 import PhotonData_ext
 import InteractionEntry_ext
@@ -42,12 +43,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 	Class representing an free electorn laser photon detector
 	"""
 
-	# Define the allowed attributes
-	# inherited from AbstractBaseCalculator(object)
-	#     	__parameters
-	#	  	__input_path			<- here redefined as array of strings
-	#	  	(pathes)
-    #		__output_path
 	__slot__ = "__expected_data",\
                "__provided_data",\
                "__photon_data",\
@@ -55,7 +50,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                "__charge_data"
 
 
-	# Definition of the init
+	# Constructor.
 	def __init__(self,parameters=None,input_path=None,output_path=None):
 		"""
 		:param parameters: Parameters of the calulator such as the type of
@@ -110,7 +105,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/beam/photonEnergy',
                                 ]
 
-	
+
 
 	# Override the setter of AbstractBaseCalculator
 	@parameters.setter
@@ -133,11 +128,11 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 			print(exc)
 			raise ValueError("Input parameter XCSITPhotonDetectorParameter is
 				incomplete.")
-	
+
 		# set the value to the attribute
 		super(XCSITPhotonDetector,self).parameters(value)
 
-	
+
 	@input_path.setter
 	def input_path(self,value):
 		# Check the value type
@@ -147,7 +142,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 			raise TypeError("As input_path attribute only instances of str are
 				allowed.")
 		if not value:
-			raise IOError("You must not enter an empty string as output path.")	
+			raise IOError("You must not enter an empty string as output path.")
 		# treat the input path:
 		# Cases
 		# 1) given is an absolute path
@@ -188,7 +183,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 			# directory can contain multiple files and multiple .h5 files
 			for i in os.listdir(value):
 				if i.endswith(".h5"):
-					in_pathes.append(os.path.join(value,i))			
+					in_pathes.append(os.path.join(value,i))
 		else
 			raise IOError("Last path element causes error: " + str(tail) +
 				"Please check absolute path again: " + str(value) + ".")
@@ -243,7 +238,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		if os.path.isdir(value):
 			# input is existing path to directory where to put in the output
 			# file 1ic) and 1iic)
-			
+
 			# Create a file and join
 			value = os.path.join(value,out_name)
 			value = os.path.normpath(value)
@@ -265,10 +260,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 			# Create an outpuf file
 			value = os.join(value,out_name)
 			value = os.path.normpath(value)
-		
+
 		# set the value to the attribute
 		super(XCSITPhotonDetector,self).output_path(value)
-	
+
 
 
 
