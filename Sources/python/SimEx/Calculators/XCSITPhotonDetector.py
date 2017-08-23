@@ -43,18 +43,20 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 	"""
 
 	# Define the allowed attributes
-	__slot__ = "__parameters",\
-               "__expected_data",\
+	# inherited from AbstractBaseCalculator(object)
+	#     	__parameters
+	#	  	__input_path			<- here redefined as array of strings
+	#	  	(pathes)
+    #		__output_path
+	__slot__ = "__expected_data",\
                "__provided_data",\
-               "__input_path",\
-               "__output_path",\
                "__photon_data",\
                "__ia_data",\
                "__charge_data"
 
 
 	# Definition of the init
-	__init__(self,parameters=None,input_path=None,output_path=None):
+	def __init__(self,parameters=None,input_path=None,output_path=None):
 		"""
 		:param parameters: Parameters of the calulator such as the type of
 			detector
@@ -67,104 +69,19 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		:type output_path: str
 		"""
 
-        ### COMMENT: Consider moving these checks and sets to propery setters. What if a parameter is set via
-        ### COMMENT: setter method? then, no check would happen.
-
-		# Handle parameters
-		if parameters == None:
-			raise ValueError("A parameters instance must be given.")
-		if not isinstance(parameters, XCSITPhotonDetectorParameters):
-			raise TypeError("Only XCSITPhotonDetectorParameters instances  are allowed as input.")
-
-		# Checking of in and output path are given and assign them for storage
-		# to internals
-		if input_path is None)
-			raise ValueError("The parameter 'input_path' must be specified.")
-
-		if output_path is None)
-			raise ValueError("The parameter 'output_path' has to be specified.")
-
-		# input and output path can either be dirctionaries or files but must be
-		# relative pathes
-		# Cases:
-		# 1) ends with .h5     -> it is a file: no action
-		# 2) ends without .h5
-		# 		a) Such a dictionary exists  -> invent a new file to put in or
-		# 		look up existing
-		#		b) Such a dictionary does not exist -> filename without .h5
-		#		specified, but parent folder has to exist
-
-		# Join the current working directory with the relative path given
-        ### COMMENT: What if an absolute path is given?
-		abs_inpath = os.path.normpath(os.path.join(os.getcwd(), input_path))
-		if abs_inpath.endswith(".h5"):
-			# a specified file
-			if not os.path.exists(abs_inpath):
-				raise IOError("File " + str(abs_inpath) + " does not exist.")
-		else:
-			# Check for existing input file
-			if os.path.isdir(abs_inpath):
-				count = 1
-				found = ""
-				for candidate in os.listdir(abs_inpath)
-					# the candidates file
-					if candidate.endswith(".h5"):
-						found = candidate
-						count -= 1
-
-					# there should be only one candidate file
-					# TODO: loop over all files
-					if count < 0:
-						raise IOError("Multiple files ending with .h5 in "+
-							str(abs_inpath))
-
-				if count == 1:
-					raise IOError("There is no such input file.")
-				abs_inpath = os.path.join(abs_inpath, found)
-
-			# last argument is file name
-			else:
-				# Check if parent is not an existing directory
-				path, test = os.path.split(abs_inpath)
-				if not os.path.isdir(path):
-					raise IOError("Please specify the input file and path
-						directly.")
-				else:
-					abs_inpath += ".h5"
-
-		# Join the current working directory with the relative path given
-		abs_outpath = os.path.normpath(os.path.join(os.getcwd(), output_path))
-		if abs_outpath.endswith(".h5"):
-			# a specified file
-			if not os.path.exists(abs_outpath):
-				raise IOError("File " + str(abs_outpath) + " does not exists")
-		else:
-			# Check for existing directory
-			if os.path.isdir(abs_outpath):
-				abs_outpath = os.path.join(abs_out_path,"XCSITDetectorOutput.h5")
-
-			# last argument is file name
-			else:
-				# Check if parent is not an existing directory
-				path, test = os.path.split(abs_outpath)
-				if not os.path.isdir(path):
-					raise IOError("Please specify the input file and path
-						directly")
-				else:
-					abs_outpath += ".h5"
-
-
-		# Save the input in attributes
-		self.__parameters = parameters
-		self.__input_path = abs_inpath
-		self.__output_path= abs_outpath
-
 		# Init base class
 		super(XCSITPhotonDetector,self).__init__(parameters,input_path,output_path)
 
+
+		# Use the setters to check the input and assign it to the attributes
+		# the attributes are overwritten in the base class
+		self.parameters(parameters)
+		self.input_path(input_path)
+		self.output_path(output_path)
+
 		# Define the input and output structure of the hdf5 file
-		self.__expected_data = ['/data/data', # <- poissonized (int)
-                                '/data/diffr',# <- intensities (float)
+		self.__expected_data = ['/data/data', 		# <- poissonized (int)
+                                '/data/diffr',		# <- intensities (float)
                                 '/data/angle',
                                 '/history/parent/detail',
                                 '/history/parent/parent',
@@ -182,8 +99,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/info',
                                 ]
 
-		self.__provided_data = ['/data/data', # <- store charge matrix here, in ADU
-								'/data/photons' # <- store photon/pixel map here, no directions
+		self.__provided_data = ['/data/data', 		# <- store charge matrix here, in ADU
+								'/data/photons' 	# <- store photon/pixel map here, no directions
 								'/data/interactions',
                                 '/history/parent/',
                                 '/info/package_version',
@@ -193,7 +110,165 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/beam/photonEnergy',
                                 ]
 
+	
 
+	# Override the setter of AbstractBaseCalculator
+	@parameters.setter
+	def parameters(self,value):
+		# Check the value type
+		if value is None:
+			raise ValueError("A parameters instance must be given.")
+		if not isinstance(value, XCSITPhotonDetectorParameters):
+			raise TypeError("As parameters input only instances of
+				XCSITPhotonDetectorParameters are allowed.")
+
+		# Check content by calling all the necessary parameters
+		# The input
+		try:
+			self.__parameters.detector_type()
+			self.__parameters.plasma_search_flag()
+			self.__parameters.plasma_simulation_flag()
+			self.__parameters.point_simulation_method()
+		except Exception as exc:
+			print(exc)
+			raise ValueError("Input parameter XCSITPhotonDetectorParameter is
+				incomplete.")
+	
+		# set the value to the attribute
+		super(XCSITPhotonDetector,self).parameters(value)
+
+	
+	@input_path.setter
+	def input_path(self,value):
+		# Check the value type
+		if value is None:
+			raise ValueError("The parameter 'input_path' must be specified.")
+		if not isinstance(value,str):
+			raise TypeError("As input_path attribute only instances of str are
+				allowed.")
+		if not value:
+			raise IOError("You must not enter an empty string as output path.")	
+		# treat the input path:
+		# Cases
+		# 1) given is an absolute path
+		#		a) ends with <parent path>/<filename>.h5-> complete file path
+		#		b) ends with <parent path>/<filename>	-> add .h5
+		#		c) ends with <parent path>/<folder> 	-> search for an .h5 file in the
+		#			parentfolder
+		# 2) given is an relative path to the current directory
+		#		cases like in 1) a-c just with the cwd added previously
+
+		# check if absolute path
+		# Linux: starts with /
+		# Windows: starts with \
+		# Modify value accodingly to create an absolute path and normalize it
+		if not os.path.isabs(value):
+			value = os.path.abspath(value)
+
+		# Check if the parentfolder since it has to exists in an correct
+		# absolute path
+		(head,tail) = os.path.split(value)
+		if not os.path.isdir(head):
+			raise IOError("Parent path is not valid. Please check again: " +
+				str(head) +".")
+
+		# Check cases a)-c)
+		# Multiple input files are stored in one specifed input folder
+		in_pathes = []
+		if os.endswith(".h5") and os.path.isfile(value):
+			# All is fine
+			in_pathes.append(value)
+		elif os.path.isfile(os.path.isfile(value + ".h5"):
+			# filename without ending
+			value += ".h5"
+			in_pathes.append(value)
+		elif os.path.isdir(value):
+			# directory containing exactly one input file
+
+			# directory can contain multiple files and multiple .h5 files
+			for i in os.listdir(value):
+				if i.endswith(".h5"):
+					in_pathes.append(os.path.join(value,i))			
+		else
+			raise IOError("Last path element causes error: " + str(tail) +
+				"Please check absolute path again: " + str(value) + ".")
+
+		# Check if the content are all strings
+		if not all(isinstance(i,str) for i in in_pathes):
+			raise ValueError("One of the pathes is not a python str" +
+				str(in_pathes) + ".")
+
+		# Assign to the variable
+		self.__input_path = in_pathes
+
+
+	@output_path.setter
+	def output_path(self,value):
+		# Check the value type
+		if value is None:
+			raise ValueError("The parameter 'output_path' has to be specified.")
+		if not isinstance(value,str):
+			raise TypeError("As output_path attribute only instances of str are
+				allowed.")
+		if not value:
+			raise IOError("You must not enter an empty string as output path.")
+
+		# Situation: output_path
+		# 1) existing path, filename can exist but doesn't need to
+		#		i) absolut path:
+		# 			a) ends with <parent>/<file>.h5
+		#			b) ends with <parent>/<file>
+		#			c) ends with <parent> -> create a file
+		# 		ii) a relative path such as 1) i)
+		# 2) a partly or non existing path
+		#		i) absolute path:
+		#			a) create if ends with <file>.h5
+		#			b) ends with <parent> -> create path and add another
+		#			<file>.h5
+		#		ii) relative path:
+		#			same as 2) i)
+
+		# check if absolute path
+		# Linux: starts with /
+		# Windows: starts with \
+		# It does not matter if the path exists or not, only the first character
+		# is necessary to know
+		# Modify value accodingly to create an absolute path and normalize it
+		if not os.path.isabs(value):
+			value = os.path.abspath(value)
+
+		# Test the cases:
+		(head,tail) = os.path.split(value)
+		out_name = "XCSITPhotonDetectorOutput.h5"
+		if os.path.isdir(value):
+			# input is existing path to directory where to put in the output
+			# file 1ic) and 1iic)
+			
+			# Create a file and join
+			value = os.path.join(value,out_name)
+			value = os.path.normpath(value)
+		elif os.path.isdir(head):
+			# input is absolute path with file name 1ia 1ib 1iia 1iib
+			# isdir checks also for existance
+			if value.endswith(".h5"):
+				# complete path, create the file there
+			else:
+				# last path element is a filename without ending
+				value += ".h5"
+		elif value.endswith(".h5"):
+			# a path including non existant folders but a specified outputfile
+			# name -> nothing to do since the hdf5 will create necessary pathes
+		else:
+			# a path with non existant folders to the parent folder of a not
+			# specified output file
+
+			# Create an outpuf file
+			value = os.join(value,out_name)
+			value = os.path.normpath(value)
+		
+		# set the value to the attribute
+		super(XCSITPhotonDetector,self).output_path(value)
+	
 
 
 
@@ -245,9 +320,9 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 		# Check containers
 		if self.__ia_data == None:
 			raise RuntimeError("interaction container has not been initialized
-yet")
+				yet.")
 		if self.__charge_data == None:
-			raise RuntimeError("charge matrix has not been initialized yet")
+			raise RuntimeError("charge matrix has not been initialized yet.")
 
 
 		# Run the simulation
@@ -272,17 +347,17 @@ yet")
 		self.__charge_data	= self.__createXCSITChargeMatrix(self)
 
 		# Run the particle simulation.
-        ### Check status of backengine.
+        ### TODO Check status of backengine.
 		self.__backengineIA(self)
 		print("Interaction simulation of the detector is finished.")
 
 		# Run the charge simulation.
-        ### Check status of backengine.
+        ### TODO Check status of backengine.
 		self.__backengineCP(self)
 		print("Charge propagation simulation in the detector is finished.")
 
 	def __normalize(vector):
-        ### What's this? can we use numpy.linalg.norm?
+        ### TODO What's this? can we use numpy.linalg.norm?
 		su = 0
 		length = len(vector)
 		out = np.zero((length,1))
@@ -308,7 +383,9 @@ yet")
 				not exists")
 
 		# Open the input file
-		infile = self.__input_path
+		# TODO Accept multiple input pathes as input
+		# TODO Exception raising if ther is no input path specified
+		infile = self.__input_path[0]
         with h5py.File(infile,"r") as h5_infile:
 
             # Get the array where each pixel contains a number of photons
@@ -362,6 +439,7 @@ yet")
 
 		print("Photons read from photon matrix and transfered to XCSIT input form.")
 
+ 	# TODO edit accoring to comments
 	def saveH5(self):
 		"""
 		Save the results in a file
@@ -371,6 +449,7 @@ yet")
 
 		# Convert the photon data to a 2D numpy array   (size x 7)
 		num_photon = np.zeros((self.__photon_data.size(),7),dtype=np.float_)
+		## TODO: Photon map not the directions
         ### Try this:
         ### num_photon[:,0] = entry.getPositionX()
 		for i in list(range(self.__photon_data.size())):
