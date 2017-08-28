@@ -1,4 +1,4 @@
-""" Test module for the entity checks.  """
+""" Test module for the IO Utilities.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
