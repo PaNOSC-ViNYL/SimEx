@@ -28,7 +28,7 @@ install(FILES ${BINARY_DIR}/py_detector_interface_env.sh
 )
 
 # Copy the header files
-install(DIRECOTRY ${SOURCE_DIR}/include/py_detector_interface/
+install(DIRECTORY ${SOURCE_DIR}/include/py_detector_interface/
     DESTINATION ${INCLUDEDIR}/py_detector_interface
     USE_SOURCE_PERMISSIONS
     FILES_MATCHING
