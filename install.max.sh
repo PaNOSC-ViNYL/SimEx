@@ -55,11 +55,10 @@ cmake -DSRW_OPTIMIZED=ON \
       -Dprop=ON\
       -Dgenesis=ON\
       -Docelot=ON\
-      -DXCSIT_FOLDER=$KARABO_DEVICES/xcsit \
-      -DGEANT4_SOURCE=/gpfs/exfel/data/user/burcherj/Development/geant4.10.03.p01/source \ ### Why needed. include/ and lib(64) should be enough, no?
-      -DGEANT4_BUILD=/gpfs/exfel/data/user/burcherj/Development/geant4.10.03.p01-build \ ### In most cases, this will not be present anymore after G4 had been installed.
-      -DGEANT4_SO=/gpfs/exfel/data/user/burcherj/Development/geant4.10.03.p01-install/lib64 \ ### Can we name this GEANT4_LIB
-      -DXERCES=/gpfs/exfel/data/user/burcherj/Development/xerces-c-3.1.4/src \ ### Again: Are sources needed, or just the headers? If latter, rename to XERCES_INCLUDE, otherwise to XERCES_SRC
+      -DXERCESC_ROOT=/home/burcherj/.local\
+      -DGEANT4_ROOT=/home/burcherj/.local\
+      -DXCSIT_ROOT=/home/burcherj/.local\
+      -DBOOST_ROOT=/home/burcherj/.local\
       ..
 
 # Build the project.

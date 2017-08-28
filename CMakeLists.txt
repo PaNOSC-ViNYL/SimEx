@@ -22,16 +22,30 @@ option (INSTALL_TESTS "Install tests" ON)
 
 # options required for building the py_detector_interface module:
 # XCSITPotonDetector
-option(XCSIT_FOLDER "-DXCSIT_FOLDER=<path>/xcsit  Path to xcsit installation")
-option(GEANT4_SOURCE "-DXCSIT_SOURCE=<path>/geant4.10.03.p01/source   Path to
-    geant4 source files")
-option(GEANT4_BUILD "-DXCSIT_SOURCE=<path>/geant4.10.03.p01-build   Path to
-    geant4 build directory")
-option(GEANT4_SO "-DXCSIT_SOURCE=<path>/geant4.10.03.p01i-install/lib64
-    Path to geant4 shared objects")
-option(XERCES "-DXERCES=<path>/xerces-c-3.1.4/src    Path to xercesc source
-    files")
-
+option(GEANT4_ROOT "-DGEANT4_ROOT=<abs path> absolute path to the geant4
+    installation directory that includes \n
+    ./bin/\n
+    ./include/Geant4/\n
+    ./lib64/Geant4-<ver>/\n
+    ./share/Geant4-<ver>/data/"
+)
+option(XERCESC_ROOT "-DXERCESC_ROOT=<abs path> absolute path to the xercesc
+    installation directory that includes\n
+    ./include/xercesc/\n
+    ./lib/"
+)
+option(XCSIT_ROOT "-DXCSIT_ROOT=<abs path> absolute path to the xcist 
+    installation directory that includes\n
+    ./include/xcsit/
+    ./lib/
+    ./lib/xcsit/
+    ./bin/"
+)
+option(BOOST_ROOT "-DBOOST_ROOT=<abs path> absolute path to the boost
+    installation directory that includes\n
+    ./include/boost/
+    ./lib/"
+)
 
 
 set (LIBDIR     lib)

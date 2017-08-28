@@ -4,21 +4,36 @@ INCLUDE(ExternalProject)
 
 # Create a new target to with the external project
 ExternalProject_Add(
-	dsim
+	py_detector_interface
 	GIT_REPOSITORY https://github.com/JPBGoe/py_detector_interface.git
 	TIMEOUT 10
-	CMAKE_ARGS "-DXCSIT_FOLDER=${XCSIT_FOLDER}"
-	"-DGEANT4_SOURCE=${GEANT4_SOURCE}"
-	"-DGEANT4_BUILD=${GEANT4_BUILD}"
-	"-DGEANT4_SO=${GEANT4_SO}"
-	"-DXERCES=${XERCES}"
+	CMAKE_ARGS 
+    "-DXERCESC_ROOT=${XERCESC_ROOT}"
+    "-DGEANT4_ROOT=${GEANT4_ROOT}"
+    "-DXCSIT_ROOT=${XCSIT_ROOT}"
+    "-DBOOST_ROOT=${BOOST_ROOT}"
 	PATCH_COMMAND ""
 	INSTALL_COMMAND ""
 	)
 
 
 # get the project binary files
-ExternalProject_Get_Property(dsim BINARY_DIR)
+ExternalProject_Get_Property(py_detector_interface BINARY_DIR)
+ExternalProject_Get_Property(py_detector_interface SOURCE_DIR)
+
+
+# Copy the file which initalizes the local variables to the build folder
+install(FILES ${BINARY_DIR}/py_detector_interface_env.sh 
+    DESTINATION ${BINDIR} 
+)
+
+# Copy the header files
+install(DIRECOTRY ${SOURCE_DIR}/include/py_detector_interface/
+    DESTINATION ${INCLUDEDIR}/py_detector_interface
+    USE_SOURCE_PERMISSIONS
+    FILES_MATCHING
+    PATTERN "*.hh"
+)
 
 # Copy the created shared object to the correct location
 install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION ${LIBDIR}
@@ -28,7 +43,4 @@ install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION ${LIBDIR}
 										PATTERN "CMakeFiles*" EXCLUDE
                                         )
 
-# Copz the file which initalizes the local variables to the build folder
-install(FILES ${BINARY_DIR}/env.sh  DESTINATION ${BINDIR} 
-	RENAME "py_detector_interface_env.sh"
-)
+
