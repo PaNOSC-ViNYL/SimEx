@@ -22,6 +22,7 @@ python Test.py -v
 cd $VIRTUAL_ENV/Tests/doc
 python Test.py -v
 
+printenv
 # functional tests
 #cd $VIRTUAL_ENV/Tests/python/functest/
 #python Test.py -v
