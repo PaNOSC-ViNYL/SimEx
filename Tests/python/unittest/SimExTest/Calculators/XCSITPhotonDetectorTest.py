@@ -110,7 +110,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         self.assertIn("detector_out_0000001.h5" in "detector")
 
         # Check if we can read the output.
-        with h5py.File( os.path.join( "detector", "detector_out_0000001.h5") as h5:
+        with h5py.File( os.path.join( "detector", "detector_out_0000001.h5")) as h5:
             self.assertIn( "data", h5.keys() )
             self.assertIn( "data", h5["data"].keys() )
             self.assertIn( "photons", h5["data"].keys() )
