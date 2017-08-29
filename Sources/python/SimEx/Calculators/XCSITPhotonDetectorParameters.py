@@ -58,6 +58,22 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         :param point_simulation_method: Method for the charge point simulation ("FULL" | "FANO" | "LUT" | "BINNING").
         :type point_simulation_method: str
         """
+        
+        # Prohibit calling the detector with nothing
+        if all([detector_type is None, 
+            plasma_search_flag is None,
+            plasma_simulation_flag is None,
+            point_simulation_method is None]):
+                raise AttributeError("Please specify at least the detector type")
+
+        # Set defaults
+        if plasma_search_flag is None:
+            plasma_search_flag="BLANK"
+        if plasma_simulation_flag is None:
+            plasma_simulation_flag="BLANKPLASMA"
+        if point_simulation_method is None:
+            point_simulation_method="FULL"
+
 
         # Use the setters: They check the type of the input and set the private
         # attributes or raise an exception if the the type does not match the
@@ -66,6 +82,11 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         self.plasma_search_flag = plasma_search_flag
         self.plasma_simulation_flag = plasma_simulation_flag
         self.point_simulation_method = point_simulation_method
+
+
+    def _setDefaults(self):
+        self._AbstractCalculatorParameters__cups_per_task_default = 1
+
 
     # Getter and Setter
     # getter raise an AttributeError if the attribute accessed by the called
@@ -79,7 +100,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         :return string containing the detector name
         """
         if self.__detector_type is None:
-            raise AttributeError("Attribute detector_type has not been set yet.")
+            raise TypeError("Attribute detector_type has not been set yet.")
         else:
             return self.__detector_type
     @detector_type.setter
@@ -87,7 +108,13 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         """
         :param value, a string with the detector name
         """
+        # Check the type
         self.__detector_type = checkAndSetInstance(str,value,None)
+
+        # Check the value
+        if value not in ["pnCCD", "LPD", "AGIPD", "AGIPDSPB", "CAD"]:
+            raise ValueError("Unknown detector type: " + str(value))
+        
 
 
     @property
@@ -96,7 +123,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         :return string, the plasma search method
         """
         if self.__plasma_search_flag is None:
-            raise AttributeError("Attribute plasma_search_flag has not been set yet.")
+            raise TypeError("Attribute plasma_search_flag has not been set yet.")
         else:
             return self.__plasma_search_flag
     @plasma_search_flag.setter
@@ -104,8 +131,12 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         """
         :param value, a string, the plasma search method
         """
+        # Check the type
         self.__plasma_search_flag = checkAndSetInstance(str,value,None)
-
+        
+        # Check the value
+        if not value in ["BLANK"]:
+            raise ValueError("Unknown plasma_search_flag: " + str(value))
 
     @property
     def plasma_simulation_flag(self):
@@ -113,7 +144,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         :return string, the plasma simulation method
         """
         if self.__plasma_simulation_flag is None:
-            raise AttributeError("Attribute plasma_simulation_flag has not been set yet.")
+            raise TypeError("Attribute plasma_simulation_flag has not been set yet.")
         else:
             return self.__plasma_simulation_flag
     @plasma_simulation_flag.setter
@@ -121,7 +152,15 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         """
         :param value, a string, the plasma simulation method
         """
+        # Check the type
         self.__plasma_simulation_flag = checkAndSetInstance(str,value,None)
+
+        # Check the value
+        if not value in ["BLANKPLASMA"]:
+            raise ValueError("Unknown plasma_simulation_flag: " + str(value))
+
+       
+
 
     @property
     def point_simulation_method(self):
@@ -129,7 +168,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         :return string, the charge simulation method
         """
         if self.__point_simulation_method is None:
-            raise AttributeError("Attribute point_simulation_method has not been set yet.")
+            raise TypeError("Attribute point_simulation_method has not been set yet.")
         else:
             return self.__point_simulation_method
     @point_simulation_method.setter
@@ -137,4 +176,10 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         """
         :param value, a string, the charge simulation method
         """
+        # Check the type
         self.__point_simulation_method = checkAndSetInstance(str,value,None)
+
+        # Check the value
+        if not value in ["FULL", "FANO", "LUT", "BINNING"]:
+            raise ValueError("Unknown point_simulation_method: " + str(value))
+            

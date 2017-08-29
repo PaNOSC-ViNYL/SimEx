@@ -32,8 +32,7 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector, XCSITPhotonDetectorParameters
-from SimEx.Calculators.XCSITPhotonDetector import _rename_files
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from TestUtilities import TestUtilities
 
@@ -71,7 +70,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         # Setup parameters.
         parameters=XCSITPhotonDetectorParameters(detector_type="AGIPDSPB")
-
+        
         # Check construction fails without parameters.
         self.assertRaises( AttributeError, XCSITPhotonDetector )
 
@@ -82,11 +81,11 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         diffractor = XCSITPhotonDetector(parameters=parameters, input_path=TestUtilities.generateTestFilePath("diffr"))
 
         # Check correct default handling for output_path:
-        self.assertEqual( diffractor.output_path, "detector")
+        self.assertEqual( os.path.split(diffractor.output_path)[-1], "detector_out.h5")
 
         # Check type.
         self.assertIsInstance(diffractor, XCSITPhotonDetector)
-        self.assertIsInstance(diffractor, AbstractPhotonDiffractor)
+        self.assertIsInstance(diffractor, AbstractPhotonDetector)
 
     def testMinimalExample(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
@@ -107,10 +106,10 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         diffractor.saveH5()
 
         # Assert output was created.
-        self.assertIn("detector_out_0000001.h5" in "detector")
+        self.assertIn("detector_out_0000001.h5","detector")
 
         # Check if we can read the output.
-        with h5py.File( os.path.join( "detector", "detector_out_0000001.h5") as h5:
+        with h5py.File( os.path.join( "detector", "detector_out_0000001.h5")) as h5:
             self.assertIn( "data", h5.keys() )
             self.assertIn( "data", h5["data"].keys() )
             self.assertIn( "photons", h5["data"].keys() )

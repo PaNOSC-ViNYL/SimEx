@@ -31,7 +31,7 @@ import paths
 import unittest
 
 from TestUtilities import TestUtilities
-#from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
@@ -88,7 +88,6 @@ class XCSITPhotonDetectorParametersTest(unittest.TestCase):
     def testSettersAndQueries(self):
         """ Testing the default construction of the class using a dictionary. """
 
-
         # Construct with defaults.
         parameters = XCSITPhotonDetectorParameters( detector_type="AGIPDSPB")
 
@@ -96,7 +95,14 @@ class XCSITPhotonDetectorParametersTest(unittest.TestCase):
         self.assertRaises( TypeError, parameters.detector_type, None)
         self.assertRaises( TypeError, parameters.detector_type, 1)
         self.assertRaises( TypeError, parameters.detector_type, 1.4)
-        self.assertRaises( ValueError, parameters.detector_type, "BigFatDetector")
+        is_true = False
+        try:
+            parameters.detector_type="BigFatDetector"
+        except ValueError:
+            is_true = True
+        except:
+            is_true = False
+        self.assertTrue(is_true)
         self.assertRaises( TypeError, parameters.detector_type, ["AGIPDSPB", "LPD"])
 
         # Set to different detector.
@@ -107,7 +113,14 @@ class XCSITPhotonDetectorParametersTest(unittest.TestCase):
         self.assertRaises( TypeError,  parameters.plasma_search_flag, None)
         self.assertRaises( TypeError,  parameters.plasma_search_flag, 1)
         self.assertRaises( TypeError,  parameters.plasma_search_flag, 1.4)
-        self.assertRaises( ValueError, parameters.plasma_search_flag, "XXX")
+        is_true = False
+        try:
+            parameters.plasma_search_flag="XXX"
+        except ValueError:
+            is_true = True
+        except:
+            is_true = False
+        self.assertTrue(is_true)
         self.assertRaises( TypeError,  parameters.plasma_search_flag, ["BLANK", "BLANK"])
 
         # Set to different detector.
@@ -118,23 +131,39 @@ class XCSITPhotonDetectorParametersTest(unittest.TestCase):
         self.assertRaises( TypeError,  parameters.plasma_simulation_flag, None)
         self.assertRaises( TypeError,  parameters.plasma_simulation_flag, 1)
         self.assertRaises( TypeError,  parameters.plasma_simulation_flag, 1.4)
-        self.assertRaises( ValueError, parameters.plasma_simulation_flag, "XXX")
+        is_true = False
+        try:
+            parameters.plasma_simulation_flag="XXX"
+        except ValueError:
+            is_true = True
+        except:
+            is_true = False
+        self.assertTrue(is_true)
         self.assertRaises( TypeError,  parameters.plasma_simulation_flag, ["BLANKPLASMA", "BLANKPLASMA"])
 
         # Set to different detector.
-        parameters.plasma_search_flag = "BLANKPLASMA"
-        self.assertEqual(parameters.plasma_search_flag, "BLANKPLASMA")
-
+        parameters.plasma_simulation_flag = "BLANKPLASMA"
+        self.assertEqual(parameters.plasma_simulation_flag, "BLANKPLASMA")
+        parameters.plasma_search_flag = "BLANK"
+        self.assertEqual(parameters.plasma_search_flag, "BLANK")
+        
         # Reset point_simulation_method to non-sense value
         self.assertRaises( TypeError,  parameters.point_simulation_method, None)
         self.assertRaises( TypeError,  parameters.point_simulation_method, 1)
         self.assertRaises( TypeError,  parameters.point_simulation_method, 1.4)
-        self.assertRaises( ValueError, parameters.point_simulation_method, "XXX")
+        is_true = False
+        try:
+            parameters.point_simulation_method="XXX"
+        except ValueError:
+            is_true = True
+        except:
+            is_true = False
+        self.assertTrue(is_true)
         self.assertRaises( TypeError,  parameters.point_simulation_method, ["FANO", "FULL"])
 
         # Set to different detector.
-        parameters.plasma_search_flag = "FANO"
-        self.assertEqual(parameters.plasma_search_flag, "FANO")
+        parameters.point_simulation_method = "FANO"
+        self.assertEqual(parameters.point_simulation_method, "FANO")
 
 if __name__ == '__main__':
     unittest.main()

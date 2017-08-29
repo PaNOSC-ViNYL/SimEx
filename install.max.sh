@@ -38,10 +38,11 @@ export FC=ifort
 export BOOST_ROOT=${THIRD_PARTY_ROOT}
 export Boost_NO_SYSTEM_PATHS=ON
 export ARMA_DIR=${THIRD_PARTY_ROOT}
-export XERCESC_ROOT=/usr
-export GEANT4_ROOT=/usr/local
-export XCSIT_ROOT=/usr/local
+export XERCESC_ROOT=/home/burcherj/.local
+export GEANT4_ROOT=/home/burcherj/.local
+export XCSIT_ROOT=/home/burcherj/.local
 
+echo "$XERCESC_ROOT"
 
 #TODO:
 # Please edit the pathes below according to your file system
