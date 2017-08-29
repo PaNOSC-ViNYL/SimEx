@@ -6,8 +6,7 @@
 
 #INSTALL_PREFIX=/data/netapp/s2e/simex
 INSTALL_PREFIX=$PWD
-#THIRD_PARTY_ROOT=/data/netapp/s2e/simex
-THIRD_PARTY_ROOT=/usr
+THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 if [ -z $KARABO]
 then
     KARABO=$HOME/karaboFramework
@@ -30,12 +29,18 @@ echo "Changed dir to $PWD."
 # Uncomment the next line if you want to use Intel Fotran compiler
 # (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by sourcing
 # where $INTEL_HOME is the root of the intel compiler suite (typically /opt/intel), and <arch> is either intel64 or ia32, following need to be load externally
+module load intel/2015
+module load mpi/mpich-x86_64
+. `which compilervars.sh` intel64
 export FC=ifort
 
 # Some needed environment variables.
-export BOOST_ROOT=${THIRD_PARTY_ROOT}/local
+export BOOST_ROOT=${THIRD_PARTY_ROOT}
 export Boost_NO_SYSTEM_PATHS=ON
 export ARMA_DIR=${THIRD_PARTY_ROOT}
+export XERCESC_ROOT=/usr
+export GEANT4_ROOT=/usr/local
+export XCSIT_ROOT=/usr/local
 
 
 #TODO:
@@ -53,14 +58,14 @@ cmake -DSRW_OPTIMIZED=ON \
       -Dprop=ON\
       -Dgenesis=ON\
       -Docelot=ON\
-      -DXERCESC_ROOT=/usr\
-      -DGEANT4_ROOT=/usr/local \
-      -DXCSIT_ROOT=/usr/local \
-      -DBOOST_ROOT=/usr/local \
+      -DXERCESC_ROOT=$XERCESC_ROOT \
+      -DGEANT4_ROOT=$GEANT4_ROOT \
+      -DXCSIT_ROOT=$XCSIT_ROOT \
+      -DBOOST_ROOT=$BOOST_ROOT \
       ..
 
 # Build the project.
-make -j8
+make -j32
 
 # Install the project.
 make install
