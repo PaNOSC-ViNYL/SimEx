@@ -7,7 +7,7 @@ ExternalProject_Add(
 	py_detector_interface
 	GIT_REPOSITORY https://github.com/JPBGoe/py_detector_interface.git
 	TIMEOUT 10
-	CMAKE_ARGS 
+	CMAKE_ARGS
     "-DXERCESC_ROOT=${XERCESC_ROOT}"
     "-DGEANT4_ROOT=${GEANT4_ROOT}"
     "-DXCSIT_ROOT=${XCSIT_ROOT}"
@@ -23,8 +23,8 @@ ExternalProject_Get_Property(py_detector_interface SOURCE_DIR)
 
 
 # Copy the file which initalizes the local variables to the build folder
-install(FILES ${BINARY_DIR}/py_detector_interface_env.sh 
-    DESTINATION ${BINDIR} 
+install(FILES ${BINARY_DIR}/py_detector_interface_env.sh
+    DESTINATION ${BINDIR}
 )
 
 # Copy the header files
