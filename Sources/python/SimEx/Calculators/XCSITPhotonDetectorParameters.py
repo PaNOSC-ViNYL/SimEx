@@ -20,6 +20,9 @@
 ##########################################################################
 
 import os
+import sys
+
+import libpy_detector_interface as lpdi
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -112,7 +115,19 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         self.__detector_type = checkAndSetInstance(str,value,None)
 
         # Check the value
-        if value not in ["pnCCD", "LPD", "AGIPD", "AGIPDSPB", "CAD"]:
+        con = lpdi.Constants()
+        not_valid_option = True
+        try:
+            for i in list(range(con.size("DetectorType"))):
+                if value == con.varValue("DetectorType",i):
+                    not_valid_option = not_valid_option and False
+        except:
+            err = sys.exc_info()
+            print("Error type: " + str(err[0]))
+            print("Error value: " + str(err[1]))
+            print("Error traceback: " + str(err[2]))
+            not_valid_option = True
+        if not_valid_option:
             raise ValueError("Unknown detector type: " + str(value))
         
 
@@ -133,10 +148,22 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         """
         # Check the type
         self.__plasma_search_flag = checkAndSetInstance(str,value,None)
-        
+
         # Check the value
-        if not value in ["BLANK"]:
-            raise ValueError("Unknown plasma_search_flag: " + str(value))
+        con = lpdi.Constants()
+        not_valid_option = True
+        try:
+            for i in list(range(con.size("PlasmaSearch"))):
+                if value == con.varValue("PlasmaSearch",i):
+                    not_valid_option = not_valid_option and False
+        except:
+            err = sys.exc_info()
+            print("Error type: " + str(err[0]))
+            print("Error value: " + str(err[1]))
+            print("Error traceback: " + str(err[2]))
+            not_valid_option = True
+        if not_valid_option:
+           raise ValueError("Unknown plasma_search_flag: " + str(value))
 
     @property
     def plasma_simulation_flag(self):
@@ -156,7 +183,19 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         self.__plasma_simulation_flag = checkAndSetInstance(str,value,None)
 
         # Check the value
-        if not value in ["BLANKPLASMA"]:
+        con = lpdi.Constants()
+        not_valid_option = True
+        try:
+            for i in list(range(con.size("PlasmaSim"))):
+                if value == con.varValue("PlasmaSim",i):
+                    not_valid_option = not_valid_option and False
+        except:
+            err = sys.exc_info()
+            print("Error type: " + str(err[0]))
+            print("Error value: " + str(err[1]))
+            print("Error traceback: " + str(err[2]))
+            not_valid_option = True
+        if not_valid_option:
             raise ValueError("Unknown plasma_simulation_flag: " + str(value))
 
        
@@ -180,6 +219,18 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         self.__point_simulation_method = checkAndSetInstance(str,value,None)
 
         # Check the value
-        if not value in ["FULL", "FANO", "LUT", "BINNING"]:
+        con = lpdi.Constants()
+        not_valid_option = True
+        try:
+            for i in list(range(con.size("ChargeProp"))):
+                if value == con.varValue("ChargeProp",i):
+                    not_valid_option = not_valid_option and False
+        except:
+            err = sys.exc_info()
+            print("Error type: " + str(err[0]))
+            print("Error value: " + str(err[1]))
+            print("Error traceback: " + str(err[2]))
+            not_valid_option = True
+        if not_valid_option:
             raise ValueError("Unknown point_simulation_method: " + str(value))
             

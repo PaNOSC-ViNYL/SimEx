@@ -306,6 +306,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             print("Error traceback: " + str(err[2]))
             is_successful = False
 
+            
+        print("Detected " + str(self.__ia_data.size()) + " interactions from " +
+            str(self.__photon_data.size()) + " photons")
+
         # Results are directly written to the __ia_data instance
         return is_successful
 
@@ -323,7 +327,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         if self.__charge_data is None:
             raise RuntimeError("charge matrix has not been initialized yet.")
 
-
+        print("Input: " + str(self.__ia_data.size()))
+        print("Output: " + str(self.__charge_data.width()))
         # Run the simulation
         try:
             para = self.parameters
@@ -353,9 +358,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         Executes the simulation of the particle and charge simulation.
         """
         print("\nSimulating photon-detector interaction.")
-        # Create the containers
+        # Create interaction container
         self.__createXCSITInteractions()
-        self.__createXCSITChargeMatrix()
 
         # Run the particle simulation.
         if not self.__backengineIA():
@@ -365,6 +369,18 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         else:
             print("Interaction simulation of the detector is finished.")
 
+        # Output the __ia_data
+        print("Found interactions")
+        print("------------------")
+        for i in list(range(self.__ia_data.size())):
+            print("Print the found interactions:")
+            print(self.__ia_data.getEntry(i).toString())
+        print(" ")
+        print(" ")
+
+        # Create output container
+        self.__createXCSITChargeMatrix()
+
         # Run the charge simulation.
         if not self.__backengineCP():
             raise RuntimeError("Charge simulation caused errors, " +
@@ -372,6 +388,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             ### Indicate where traceback can be found.
         else:
             print("Charge propagation simulation in the detector is finished.")
+        return 0
 
 
     def _readH5(self):
@@ -398,30 +415,39 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         # Open the file to read from
         with h5py.File(infile,"r") as h5_infile:
 
-            photons = []
+            keys = h5_infile["/data"].keys()
+            matrix = h5_infile["/data/"+ keys[0] + "/diffr"].value
+            photons = np.zeros((len(matrix),len(matrix[0])),dtype=np.float_)
+ 
             # Get the array where each pixel contains a number of photons
-            # TODO use data/data or data/diffr -- also change in writeH5
+            # Explaination:
+            #       /data/.../data are poissonized patterns
+            #       /data/.../diffr are the intensities
             for i in h5_infile["/data"].keys():
-                print(h5_infile["/data/"+i+"/data"].name)
-                photons += h5_infile["/data/"+i+"/data"]
+            #    print(h5_infile["/data/"+i+"/diffr"].name)
+                photons += h5_infile["/data/"+i+"/diffr"].value
 
+
+
+            # TODO: need to be removed
+            # Factor 100 to increase the signal
+            import math
+            photons = np.ceil(photons)
+            photons = photons.astype(int)
 
             x_num = len(photons)        # Assuming an rectangle
             y_num = len(photons[0])
+            print("Size of input matrix: " + str(x_num) + "x" + str(y_num))
 
             # Parameters of the matrix
-            x_pixel = h5_infile["/params/geom/pixelWidth"]
-            x_pixel = x_pixel[()]
-            print(x_pixel)
-            y_pixel = h5_infile["/params/geom/pixelHeight"]
-            y_pixel = y_pixel[()]
-            print(y_pixel)
-            center_energy = h5_infile["/params/beam/photonEnergy"] # missing profile
-            center_energy = center_energy[()]
-            print(center_energy) 
-            detector_dist = h5_infile["/params/geom/detectorDist"]
-            detector_dist = detector_dist[()]
-            print(detector_dist)
+            x_pixel = h5_infile["/params/geom/pixelWidth"].value
+            print("pixel width: " + str(x_pixel))
+            y_pixel = h5_infile["/params/geom/pixelHeight"].value
+            print("pixel height: " + str(y_pixel))
+            center_energy = h5_infile["/params/beam/photonEnergy"].value # missing profile
+            print("central beam energy: " + str(center_energy))
+            detector_dist = h5_infile["/params/geom/detectorDist"].value
+            print("Detector dist: " + str(detector_dist))
 
             # Define base vectors
             base_x = np.zeros((3,1))
@@ -437,7 +463,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             # Assumptions
             # - All the photon originate from the center
             # - photon energy is everywhere the same in the beam
-            #
+            
+            print("Creating the photons")
             for i in list(range(x_num)):
                 for j in list(range(y_num)):
                     # Calculate the photon flight vector with respect to the matrix
@@ -453,21 +480,25 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                         entry = self.__photon_data.addEntry()
                         entry.setPositionX(x_pixel*(i-x_num/2))
                         entry.setPositionY(y_pixel*(j-y_num/2))
-                        entry.setPositionZ(detector_dist)
-                        entry.setDirectionX(np.asscalar(direct[0]))
-                        entry.setDirectionY(np.asscalar(direct[1]))
-                        entry.setDirectionZ(np.asscalar(direct[2]))
+                        entry.setPositionZ(0)
+                        #entry.setPositionZ(detector_dist)
+                        entry.setDirectionX(np.asscalar(norm_direct[0]))
+                        entry.setDirectionY(np.asscalar(norm_direct[1]))
+                        entry.setDirectionZ(np.asscalar(norm_direct[2]))
                         entry.setEnergy(center_energy)
+                        print(entry.toString())
 
             # Close the input file
             h5_infile.close()
 
-        print("Photons read from photon matrix and transfered to XCSIT input form.")
+        print("XCSITPhotonDetector read " + str(self.__photon_data.size())  + " photons from the input.")
 
     def saveH5(self):
         """
         Save the results in a file
         """
+        print("Save the data")
+
         # Write the new data into python arrays
         # -------------------------------------
 
@@ -475,11 +506,11 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         num_ia = np.zeros((self.__ia_data.size(),5),dtype=np.float_)
         for i in list(range(self.__ia_data.size())):
             entry = self.__ia_data.getEntry(i)
-            num_ia[i,0] = entry.getPositionX()
-            num_ia[i,1] = entry.getPositionY()
-            num_ia[i,2] = entry.getPositionZ()
-            num_ia[i,3] = entry.getEnergy()
-            num_ia[i,4] = entry.getTime()
+            num_ia[i][0] = entry.getPositionX()
+            num_ia[i][1] = entry.getPositionY()
+            num_ia[i][2] = entry.getPositionZ()
+            num_ia[i][3] = entry.getEnergy()
+            num_ia[i][4] = entry.getTime()
 
 
         # Convert the ChargeMatrix to a numpy array to be able to store its

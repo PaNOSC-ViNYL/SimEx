@@ -97,8 +97,9 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         diffractor = XCSITPhotonDetector(
                 parameters=parameters,
-                input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
-                output_path="detector",
+                #input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
+                input_path="diffr/diffr_out_0000001.h5",
+                output_path="detector_out.h5",
                 )
 
         diffractor._readH5()
@@ -106,10 +107,10 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         diffractor.saveH5()
 
         # Assert output was created.
-        self.assertIn("detector_out_0000001.h5","detector")
+        self.assertTrue(os.path.isfile("detector_out.h5"))
 
         # Check if we can read the output.
-        with h5py.File( os.path.join( "detector", "detector_out_0000001.h5")) as h5:
+        with h5py.File( "detector_out.h5") as h5:
             self.assertIn( "data", h5.keys() )
             self.assertIn( "data", h5["data"].keys() )
             self.assertIn( "photons", h5["data"].keys() )
