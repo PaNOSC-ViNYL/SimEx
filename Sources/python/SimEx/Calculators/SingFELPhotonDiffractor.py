@@ -140,7 +140,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if preph5_location is None:
             raise RuntimeError("prepHDF5.py not found. Aborting the calculation.")
 
-        uniform_rotation = int( self.parameters.uniform_rotation)
+        uniform_rotation = self.parameters.uniform_rotation
         calculate_Compton = int( self.parameters.calculate_Compton )
         slice_interval = self.parameters.slice_interval
         number_of_slices = self.parameters.number_of_slices
@@ -178,6 +178,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--numDP',            str(number_of_diffraction_patterns),
                             '--prepHDF5File',     preph5_location,
                             ]
+
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
 

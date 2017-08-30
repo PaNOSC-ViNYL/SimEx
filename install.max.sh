@@ -2,8 +2,8 @@
 
 # Sample installation script. Adjustments might be neccessary.
 
-#INSTALL_PREFIX=/data/netapp/s2e/simex
-INSTALL_PREFIX=$PWD
+INSTALL_PREFIX=/data/netapp/s2e/simex
+#INSTALL_PREFIX=$PWD
 
 # Check for existing build directory, remove if foun.d
 if [ -d build ]
@@ -25,7 +25,7 @@ export FC=ifort
 # Some needed environment variables.
 
 cmake -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=ON \
+      -DDEVELOPER_INSTALL=OFF \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
       -DSingFElPhotonDiffractor=ON \
       -Ds2e=ON \
