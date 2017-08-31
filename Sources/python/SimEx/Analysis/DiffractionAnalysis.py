@@ -39,6 +39,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                  input_path=None,
                  pattern_indices=None,
                  poissonize=True,
+                 mask=None
             ):
         """ Constructor for the DiffractionAnalysis class.
 
@@ -55,6 +56,9 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param poissonize: Whether to add Poisson noise to the integer photon numbers (default True).
         :type poissonize: bool
 
+        :param mask: Mask to multiply on each pattern.
+        :type mask: numpy.array
+
         """
 
         # Initialize base class. This takes care of parameter checking.
@@ -67,6 +71,8 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Init attributes.
         self.poissonize = poissonize
         self.parameters = diffractionParameters(self.input_path)
+
+        self.mask = mask
 
     @property
     def parameters(self):
@@ -116,6 +122,22 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         self.__poissonize = val
 
+    @property
+    def mask(self):
+        """ Query the mask. """
+        return self.__mask
+    @mask.setter
+    def mask(self, val):
+        """ Set the 'mask' flag."""
+        # Handle default.
+        if val is None:
+            self.__mask = 1.
+            return
+        if not isinstance(val, numpy.ndarray):
+            raise TypeError('The parameter "mask" must be a numpy.array.')
+
+        self.__mask = val
+
 
     def patternGenerator(self):
         """ Yield an iterator over a given pattern sequence from a diffraction file.
@@ -159,7 +181,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
                     diffr = h5[path_to_data].value
 
-                    yield diffr
+                    yield diffr*self.mask
 
 
 
@@ -373,7 +395,7 @@ def plotImage(pattern, logscale=False):
 
     if logscale:
         if mn <= 0.0:
-            mn += pattern.min()+1e-5
+            mn += pattern.min()+1e-1
             pattern = pattern.astype(float) + mn
         plt.imshow(pattern, norm=mpl.colors.LogNorm(vmin=mn, vmax=mx), cmap="viridis")
     else:
