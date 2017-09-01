@@ -49,15 +49,15 @@ class EstherExperimentConstructionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Make a directory for simulation storage.
-        cls._simdir = os.path.join("/Users/richardbriggs/Google Drive/Science Experiments/Hydrocode", "Tests")
-        os.mkdir(cls._simdir)
+        # Make a tmp directory for simulation storage.
+        cls._simdir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/"
+        #os.mkdir(cls._simdir) # MUST BE A BETTER WAY OF DOING THIS!
         #Comment out the mkdir if the sim dir has already been created. Is there an overwrite or if is not path then create...
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        shutil.rmtree(cls._simdir)
+        #shutil.rmtree(cls._simdir)
 
     def setUp(self):
         """ Setting up a test. """
@@ -105,11 +105,11 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "Simulations/HPLF-Fe/1"
+        expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/HPLF-Fe/1/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "HPLF-Fe1.dat", os.listdir(expected_dir) )
-        self.assertIn( "HPLF-Fe1_intensite_impulsion.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe1.txt", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe1_intensite_impulsion.txt", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         # Create new experiment from previous.
@@ -118,11 +118,11 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "Simulations/HPLF-Fe/2"
+        expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/HPLF-Fe/2/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "HPLF-Fe2.dat", os.listdir(expected_dir) )
-        self.assertIn( "HPLF-Fe2_intensite_impulsion.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe2.txt", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe2_intensite_impulsion.txt", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         with open(os.path.join(expected_dir,"parameters.json")) as j:
@@ -134,18 +134,18 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         
         # Create new experiment from previous with update.
         new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=4.0,
-                read_from_file="Simulations/HPLF-Fe/2")
+                read_from_file="/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/HPLF-Fe/2/")
 
         experiment = EstherExperimentConstruction(parameters=new_parameters,
                                                   esther_sims_path=self._simdir,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "Simulations/HPLF-Fe/3"
+        expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/HPLF-Fe/3/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "HPLF-Fe3.dat", os.listdir(expected_dir) )
-        self.assertIn( "HPLF-Fe3_intensite_impulsion.dat", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe3.txt", os.listdir(expected_dir) )
+        self.assertIn( "HPLF-Fe3_intensite_impulsion.txt", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         with open(os.path.join(expected_dir,"parameters.json")) as j:
