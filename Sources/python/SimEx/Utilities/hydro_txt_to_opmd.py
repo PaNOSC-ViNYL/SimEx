@@ -68,7 +68,7 @@ def convertTxtToOPMD(esther_dirname=None):
     time_step = time_array[1] - time_array[0]
 
     # Create opmd.h5 output file
-    h5_path = str(esther_dirname)+".opmd.h5"
+    h5_path = str(esther_dirname)+"/output.opmd.h5"
     with h5py.File(h5_path, 'w') as opmd_h5:
 
         # Setup the root attributes.

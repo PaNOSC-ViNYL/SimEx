@@ -28,7 +28,7 @@ from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhoton
 
 class EstherExperimentConstruction():
     """
-    Class to represent iterative Rad-Hydro simulations.
+    Class to represent creating new and iterative Rad-Hydro simulations.
     """
     def __init__(self,
                  parameters=None,
