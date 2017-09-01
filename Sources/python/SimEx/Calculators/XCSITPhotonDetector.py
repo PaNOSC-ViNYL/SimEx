@@ -118,13 +118,12 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         # Check the value type
         if value is None:
             raise ValueError("The parameter 'input_path' must be specified.")
-            ### COMMENT: input_path=None should be accepted, default "diffr.h5" -> but usually contains >1 pattern.
         if not isinstance(value,str):
             raise TypeError("As input_path attribute only instances of str " +
                 "are allowed.")
         if not value:
             raise IOError("You must not enter an empty string as output path.")
-            ### Test this. At least the constructor will not trigger this since input_path is initialized to None.
+        
         # treat the input path:
         # Cases
         # 1) given is an absolute path
@@ -132,9 +131,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         #       b) ends with <parent path>/<filename>   -> add .h5
         #       c) ends with <parent path>/<folder>     -> search for an .h5 file in the
         #           parentfolder
-        ### Should loop over all input files.
         # 2) given is an relative path to the current directory
         #       cases like in 1) a-c just with the cwd added previously
+
+        # TODO: loop over multiple files
 
         # check if absolute path
         # Linux: starts with /
@@ -144,12 +144,11 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             value = os.path.abspath(value)
 
         # Check if the parent folder exists since it has to exists in an correct
-        # absolute path
+        # absolute path and check if it is a directory and not a file
         (head,tail) = os.path.split(value)
         if not os.path.isdir(head):
             raise IOError("Parent path is not valid. Please check again: " +
                 str(head) +".")
-            ### Why not os.path.exists?
 
         # Check cases a)-c)
         # Multiple input files are stored in one specifed input folder
@@ -240,14 +239,17 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         elif value.endswith(".h5"):
             # a path including non existant folders but a specified outputfile
             # name -> nothing to do since the hdf5 will create necessary pathes
-            pass
+            if not os.path.isdir(value):
+                os.makedirs(os.path.dirname(value))
         else:
             # a path with non existant folders to the parent folder of a not
             # specified output file
 
             # Create an outpuf file
-            value = os.join(value,out_name)
+            value = os.path.join(value,out_name)
             value = os.path.normpath(value)
+            if not os.path.isdir(value):
+                os.makedirs(os.path.dirname(value))
 
         # set the value to the attribute
         self._AbstractBaseCalculator__output_path=value
@@ -274,9 +276,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         self.__ia_data = lpdi.InteractionData()
 
     def __createXCSITChargeMatrix(self):
-        self.__charge_data = lpdi.ChargeMatrix()
-        # Size will be addapted by ParticleSim.cc implementation
-
+        self.__charge_data = None
 
     # Subengine to calulate the particle simulation: The interaction of the
     # photons with the detector of choice
@@ -324,23 +324,21 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         if self.__ia_data is None:
             raise RuntimeError("interaction container has not been initialized"+
                 " yet.")
-        if self.__charge_data is None:
-            raise RuntimeError("charge matrix has not been initialized yet.")
 
-        print("Input: " + str(self.__ia_data.size()))
-        print("Output: " + str(self.__charge_data.width()))
         # Run the simulation
         try:
             para = self.parameters
             cs = lpdi.ChargeSim()
             cs.setInput(self.__ia_data)
-            cs.setComponents(self.__charge_data,
-                            para.plasma_search_flag,
+            cs.setComponents(para.plasma_search_flag,
                             para.point_simulation_method,
                             para.plasma_simulation_flag,
                             para.detector_type
                             )
             cs.runSimulation()
+        
+            # Necessary due to the definition of XChargeData.hh
+            self.__charge_data = cs.getOutput()
         except:
             err = sys.exc_info()
             print("Charge propagation error:")
@@ -348,6 +346,19 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             print("Error value: " + str(err[1]))
             print("Error traceback: " + str(err[2]))
             is_successful = False
+            return is_successful
+
+        # Count how many pixels have charge
+        counter=0
+        for x in list(range(self.__charge_data.width())):
+            for y in list(range(self.__charge_data.height())):
+                entry=self.__charge_data.getEntry(x,y)
+                if(entry.getCharge() != 0):
+                    counter+=1
+        print("Found " + str(counter) + " signals in the detector of size " +
+            str(self.__charge_data.height()) + "x" + str(self.__charge_data.width()) +
+            " for " + str(self.__ia_data.size()) + " interactions and " +
+            str(self.__photon_data.size()) + " photons")
 
         # Return if everything went well
         return is_successful
@@ -365,27 +376,16 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         if not self.__backengineIA():
             raise RuntimeError("Particle simulation caused errors, " +
                 "interrupting execution.")
-            ### Indicate where traceback can be found.
         else:
             print("Interaction simulation of the detector is finished.")
 
-        # Output the __ia_data
-        print("Found interactions")
-        print("------------------")
-        for i in list(range(self.__ia_data.size())):
-            print("Print the found interactions:")
-            print(self.__ia_data.getEntry(i).toString())
-        print(" ")
-        print(" ")
-
-        # Create output container
+        # Create interaction container
         self.__createXCSITChargeMatrix()
 
         # Run the charge simulation.
         if not self.__backengineCP():
             raise RuntimeError("Charge simulation caused errors, " +
                 "interrupting execution.")
-            ### Indicate where traceback can be found.
         else:
             print("Charge propagation simulation in the detector is finished.")
         return 0
@@ -424,15 +424,14 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             #       /data/.../data are poissonized patterns
             #       /data/.../diffr are the intensities
             for i in h5_infile["/data"].keys():
-            #    print(h5_infile["/data/"+i+"/diffr"].name)
                 photons += h5_infile["/data/"+i+"/diffr"].value
 
 
 
-            # TODO: need to be removed
-            # Factor 100 to increase the signal
-            import math
-            photons = np.ceil(photons)
+            # TODO: need to be removed and replaced by a proper transition
+            # Rescaling with factor 10000
+            photons = photons*10000
+            photons = np.floor(photons)
             photons = photons.astype(int)
 
             x_num = len(photons)        # Assuming an rectangle
@@ -463,7 +462,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             # Assumptions
             # - All the photon originate from the center
             # - photon energy is everywhere the same in the beam
-            
             print("Creating the photons")
             for i in list(range(x_num)):
                 for j in list(range(y_num)):
@@ -472,21 +470,20 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                     direct = base_x *(i-x_num/2) + base_y *(j-y_num/2) + base_z
 
                     # Normalize since only the direction is necessary
-                    norm_direct = direct/np.linalg.norm(direct)
-                    ### Please omit np, use plain numpy.
+                    norm_direct = direct/np.sqrt(np.sum(direct**2))
 
                     # For each photon detected at (i,j) create an instance
+                    # Look from sample to detector
                     for ph in list(range(photons[i][j])):
                         entry = self.__photon_data.addEntry()
-                        entry.setPositionX(x_pixel*(i-x_num/2))
-                        entry.setPositionY(y_pixel*(j-y_num/2))
+                        entry.setPositionX(x_pixel*(i + 0.5 - 0.5 *x_num))
+                        entry.setPositionY(y_pixel*(j + 0.5 - 0.5 *y_num))
                         entry.setPositionZ(0)
                         #entry.setPositionZ(detector_dist)
                         entry.setDirectionX(np.asscalar(norm_direct[0]))
                         entry.setDirectionY(np.asscalar(norm_direct[1]))
                         entry.setDirectionZ(np.asscalar(norm_direct[2]))
                         entry.setEnergy(center_energy)
-                        print(entry.toString())
 
             # Close the input file
             h5_infile.close()
@@ -521,7 +518,35 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         for x in list(range(x_size)):
             for y in list(range(y_size)):
                 entry = self.__charge_data.getEntry(x,y)
-                charge_array[x,y] = entry.getCharge()
+                charge_array[x][y] = entry.getCharge()
+ 
+
+        # TODO: The following line would cause a difference between
+        # interactions and charge matrix. This difference is a
+        # refraction at an axis parallel to the y axis fliplr
+        # Maybe the charge simulation does not look in propergation on the right
+        # handed martix but oppoiste to that               
+        charge_array = np.fliplr(charge_array)
+
+        # Identify Nan and Inf in ChargeSim output
+        
+        parent =os.path.dirname(self.output_path) 
+        if not os.path.isdir(parent):
+            parent=os.makedirs(parent)
+        ofn = os.path.join(parent,"NaNInf.txt")
+        with open(ofn,'w') as outfile:
+            outfile.write("# All the coordinates are in typical python convention")
+            # Search for Nan and Inf
+            for x in list(range(x_size)):
+                for y in list(range(y_size)):
+                    if(np.isnan(charge_array[x][y])):
+                        print("Warning: Detected NaN in ChargeMatrix at (" + str(x) +
+                            "," + str(y) + ") (python conention: l-r, t-b)")
+                        outfile.write(str(x) + "\t" + str(y) + "\tNaN")
+                    if(np.isinf(charge_array[x][y])):
+                        print("Warning: Detected Inf in ChargeMatrix at (" + str(x) +
+                            "," + str(y) + ") (python conention: l-r, t-b)")               
+                        outfile.write(str(x) + "\t" + str(y) + "\tInf")
 
         # Create the new datasets
         # ------------------------------------------------------------

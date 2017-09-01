@@ -46,6 +46,9 @@ option(BOOST_ROOT "-DBOOST_ROOT=<abs path> absolute path to the boost
     ./include/boost/
     ./lib/"
 )
+option(PY_DETECTOR_INTERFACE_DEBUG "
+    -DPY_DETECTOR_INTERFACE_DEBUG=default: OFF | ON"
+)
 
 
 set (LIBDIR     lib)

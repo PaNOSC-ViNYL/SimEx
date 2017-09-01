@@ -59,6 +59,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -Dprop=ON\
       -Dgenesis=ON\
       -Docelot=ON\
+      -DPY_DETECTOR_INTERFACE_DEBUG=OFF \
       -DXERCESC_ROOT=$XERCESC_ROOT \
       -DGEANT4_ROOT=$GEANT4_ROOT \
       -DXCSIT_ROOT=$XCSIT_ROOT \
