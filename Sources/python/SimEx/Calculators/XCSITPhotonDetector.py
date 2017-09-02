@@ -276,7 +276,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         self.__ia_data = lpdi.InteractionData()
 
     def __createXCSITChargeMatrix(self):
-        self.__charge_data = None
+        self.__charge_data = lpdi.ChargeMatrix()
 
     # Subengine to calulate the particle simulation: The interaction of the
     # photons with the detector of choice
@@ -296,8 +296,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         try: 
             param = self.parameters
             ps = lpdi.ParticleSim()
+            ps.setInput(self.__photon_data)
+            ps.setOutput(self.__ia_data)
             ps.initialization(param.detector_type)
-            ps.runSimulation(self.__photon_data,self.__ia_data)
+            ps.runSimulation()
         except:
             err = sys.exc_info()
             print("Photon-Detector interaction error:")
@@ -330,6 +332,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             para = self.parameters
             cs = lpdi.ChargeSim()
             cs.setInput(self.__ia_data)
+            cs.setOutput(self.__charge_data)
             cs.setComponents(para.plasma_search_flag,
                             para.point_simulation_method,
                             para.plasma_simulation_flag,
@@ -338,7 +341,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             cs.runSimulation()
         
             # Necessary due to the definition of XChargeData.hh
-            self.__charge_data = cs.getOutput()
+            # self.__charge_data = cs.getOutput()
         except:
             err = sys.exc_info()
             print("Charge propagation error:")
