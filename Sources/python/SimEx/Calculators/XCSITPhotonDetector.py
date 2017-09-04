@@ -421,7 +421,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             keys = h5_infile["/data"].keys()
             matrix = h5_infile["/data/"+ keys[0] + "/diffr"].value
             photons = np.zeros((len(matrix),len(matrix[0])),dtype=np.float_)
- 
+
+            # TODO: Single pattern treatment is not implemented yet 
             # Get the array where each pixel contains a number of photons
             # Explaination:
             #       /data/.../data are poissonized patterns
@@ -432,8 +433,8 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
 
             # TODO: need to be removed and replaced by a proper transition
-            # Rescaling with factor 10000
-            photons = photons*10000
+            # Rescaling with factor 100000
+            photons = photons*100000
             photons = np.floor(photons)
             photons = photons.astype(int)
 
@@ -451,14 +452,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             detector_dist = h5_infile["/params/geom/detectorDist"].value
             print("Detector dist: " + str(detector_dist))
 
-            # Define base vectors
-            base_x = np.zeros((3,1))
-            base_x[0] = x_pixel
-            base_y = np.zeros((3,1))
-            base_y[1] = y_pixel
-            base_z = np.zeros((3,1))
-            base_z[2] = detector_dist
-
             # Create the photon instance
             self.__photon_data = lpdi.PhotonData()
 
@@ -468,24 +461,48 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             print("Creating the photons")
             for i in list(range(x_num)):
                 for j in list(range(y_num)):
-                    # Calculate the photon flight vector with respect to the matrix
-                    # center
-                    direct = base_x *(i-x_num/2) + base_y *(j-y_num/2) + base_z
+                    # Transfer from python to cartesian
+                    direct = np.zeros((3,),dtype=np.float_)
+                    direct[0] = i
+                    direct[1] = y_num - 1 - j
+                    direct[2] = 0
 
-                    # Normalize since only the direction is necessary
-                    norm_direct = direct/np.sqrt(np.sum(direct**2))
+                    # Center center and correct for center of element
+                    direct[0] = direct[0] - 0.5* x_num + 0.5
+                    direct[1] = direct[1] - 0.5* y_num + 0.5    
+                    direct[2] = direct[2]
+
+                    # calculate the length
+                    direct[0] = direct[0]*x_pixel
+                    direct[1] = direct[1]*y_pixel   
+                    direct[2] = detector_dist
+
+
+                    # Calculate the photon flight vector with respect to the matrix
+                    # center and the origin of diffraction
+                    #direct[0] = x_pixel*(i + 0.5 - 0.5 *x_num) # x-coordinate
+                    #direct[1] = y_num*y_pixel - y_pixel*(j + 0.5 -0.5 *y_num)
+                    # python goes from left 2 right top 2 to bottom
+                    # in conrast to our coordinate space
+                    #direct[2] = detector_dist
+
+                    # calculate the normalized direction vector
+                    le=np.sqrt(np.sum((direct**2)))
+                    normal_direction = np.zeros((3,),dtype=np.float_)
+                    if le != 0:
+                        normal_direction = direct/le
 
                     # For each photon detected at (i,j) create an instance
-                    # Look from sample to detector
+                    # shift into the koordinate system where the detector is in
+                    # the origin  direct - (0,0,detector_dist)
                     for ph in list(range(photons[i][j])):
                         entry = self.__photon_data.addEntry()
-                        entry.setPositionX(x_pixel*(i + 0.5 - 0.5 *x_num))
-                        entry.setPositionY(y_pixel*(j + 0.5 - 0.5 *y_num))
+                        entry.setPositionX(direct[0])
+                        entry.setPositionY(direct[1]) 
                         entry.setPositionZ(0)
-                        #entry.setPositionZ(detector_dist)
-                        entry.setDirectionX(np.asscalar(norm_direct[0]))
-                        entry.setDirectionY(np.asscalar(norm_direct[1]))
-                        entry.setDirectionZ(np.asscalar(norm_direct[2]))
+                        entry.setDirectionX(np.asscalar(normal_direction[0]))
+                        entry.setDirectionY(np.asscalar(normal_direction[1]))
+                        entry.setDirectionZ(np.asscalar(normal_direction[2]))
                         entry.setEnergy(center_energy)
 
             # Close the input file
@@ -522,17 +539,14 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             for y in list(range(y_size)):
                 entry = self.__charge_data.getEntry(x,y)
                 charge_array[x][y] = entry.getCharge()
- 
 
-        # TODO: The following line would cause a difference between
-        # interactions and charge matrix. This difference is a
-        # refraction at an axis parallel to the y axis fliplr
-        # Maybe the charge simulation does not look in propergation on the right
-        # handed martix but oppoiste to that               
+        # TODO settle this issue:
+        # For unknown reasons the interaction entries and the chargematrix is
+        # rotated of 180 degree to each other
         charge_array = np.fliplr(charge_array)
-
+        charge_array = np.flipud(charge_array)
+ 
         # Identify Nan and Inf in ChargeSim output
-        
         parent =os.path.dirname(self.output_path) 
         if not os.path.isdir(parent):
             parent=os.makedirs(parent)
