@@ -679,7 +679,6 @@ def checkAndSetAblator(ablator):
         raise TypeError("The parameters 'ablator' must be a str.")
 
     ### Could check if isinstance(ablator, str)
-    # Check if ablator is CH, Al or diamond
     if ablator == 'CH':
         print ( "Setting CH as ablator.")
     elif ablator.lower() in ['al', 'aluminium']:
@@ -712,6 +711,9 @@ def checkAndSetAblatorThickness(ablator_thickness):
     # Check if ablator is between 5 and 100 um
     if ablator_thickness < 4.0 or ablator_thickness > 100.0:
         raise ValueError( "Ablator must be between 4.0 and 100.0 microns")
+    
+    # TO DO PLACEHOLDER
+    # IF LASER INTENSITY IS TOO HIGH, ABLATOR MUST BE THICK TO ALLOW FOR ENOUGH MATERIAL TO VAPORISE (CH)
 
     print ( "Ablator thickness is %4.1f " % ablator_thickness)
 
