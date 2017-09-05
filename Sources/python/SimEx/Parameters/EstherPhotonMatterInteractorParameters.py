@@ -28,7 +28,7 @@ import json
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 
-ESTHER_MATERIAL_DICT = { "Aluminum" : {"name" : "Aluminum",
+ESTHER_MATERIAL_DICT = { "Aluminium" : {"name" : "Aluminium",
                        "shortname" : "Al#",
                        "eos_name" : "Al#_e_ses",
                        "mass_density" : 2.7,
@@ -682,12 +682,16 @@ def checkAndSetAblator(ablator):
     # Check if ablator is CH, Al or diamond
     if ablator == 'CH':
         print ( "Setting CH as ablator.")
-    elif ablator == 'Al':
+    elif ablator.lower() in ['al', 'aluminium']:
         print ( "Setting Al as ablator.")
     elif ablator.lower() in ['dia', 'diamond']:
         print ( "Setting diamond as ablator.")
+    elif ablator.lower() in ['mylar', 'myl']:
+        print ( "Setting mylar as ablator.")
+    elif ablator.lower() in ['kap', 'kapton']:
+        print ( "Setting Kapton as ablator.")
     else:
-        raise ValueError( "Ablator is not valid. Use 'CH', 'Al' or 'dia'.")
+        raise ValueError( "Ablator is not valid. Use 'CH', 'Al', 'dia', 'Myl', or 'Kap' as ablator.")
 
     return ablator
 
