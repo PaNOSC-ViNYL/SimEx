@@ -436,7 +436,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"])) # ABLATOR EOS
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
-            input_deck.write('EPAISSEUR_EXTERNE=%1.1fe-10\n' % (self._minimum_zone_width)) #Min zone width
+            input_deck.write('EPAISSEUR_EXTERNE=1.0e-10\n') #Min zone width
             input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
 
@@ -667,7 +667,7 @@ def checkAndSetAblator(ablator):
 
     :param ablator: The ablator material to check.
     :return: The ablator choice after being checked.
-    :raise ValueError: ablator not in ["CH", "Al", "Diamond"].
+    :raise ValueError: ablator not in ["CH", "Al", "Diamond", "Mylar", "Kapton"].
 
     """
 
@@ -710,8 +710,8 @@ def checkAndSetAblatorThickness(ablator_thickness):
         raise TypeError("The parameters 'ablator_thickness' must be of numeric type (int or float).")
 
     # Check if ablator is between 5 and 100 um
-    if ablator_thickness <= 5.0 or ablator_thickness > 100.0:
-        raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
+    if ablator_thickness < 4.0 or ablator_thickness > 100.0:
+        raise ValueError( "Ablator must be between 4.0 and 100.0 microns")
 
     print ( "Ablator thickness is %4.1f " % ablator_thickness)
 
@@ -723,7 +723,10 @@ def checkAndSetSample(sample):
     Utility to check if the sample is in the list of known EOS materials
     """
 
-    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond", "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum", ]
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum",
+                "Berylium", "Chromium", "Iron2", "Kapton", "LiF", "Magnesium", "Mylar",
+                "Quartz", "SiliconOxide", "Silver", "Titanium", "Vanadium", "Water" ]
 
     # Set default
     if sample is None:
