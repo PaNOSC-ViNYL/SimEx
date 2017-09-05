@@ -175,6 +175,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                  ablator_thickness=None,
                  sample=None,
                  sample_thickness=None,
+                 layer1=None,
+                 layer1_thickness=None,
+                 layer2=None,
+                 layer2_thickness=None,
                  window=None,
                  window_thickness=None,
                  laser_wavelength=None,
@@ -192,17 +196,23 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """
         Constructor for the HydroParameters
 
-        :param ablator: The ablating material ( "Al" | "CH" | "Diamond" )
+        :param ablator: The ablating material ( "Al" | "CH" | "Diamond" | "Kapton" | "Mylar" )
         :type ablator: str
 
         :param ablator_thickness: The ablator thickness (micrometers)
         :type ablator_thickness:
 
-        :param sample: The sample material (from limited list of materials)
+        :param sample: The sample material (from list of materials)
         :type sample: str
 
         :param sample_thickness: The sample thickness (micrometers)
         :type sample_thickness: float
+        
+        :param layer1: The layer1 material (from list of materials)
+        :type layer1: str
+        
+        :param layer2: The layer2 material (from list of materials)
+        :type layer2: str
 
         :param window: The window material (LiF | SiO2 | Diamond)
         :type window: str
@@ -249,8 +259,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                     'number_of_layers':number_of_layers,
                     'ablator':ablator,
                     'ablator_thickness':ablator_thickness,
-                    'sample' :sample ,
+                    'sample':sample,
                     'sample_thickness':sample_thickness,
+                    'layer1':layer1,
+                    'layer1_thickness':layer1_thickness,
+                    'layer2':layer2,
+                    'layer2_thickness':layer2_thickness,
                     'window':window,
                     'window_thickness':window_thickness,
                     'laser_wavelength':laser_wavelength,
@@ -268,6 +282,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self.__ablator_thickness = checkAndSetAblatorThickness(ablator_thickness)
             self.__sample = checkAndSetSample(sample)
             self.__sample_thickness = checkAndSetSampleThickness(sample_thickness)
+            self.__layer1 = checkAndSetLayer1(layer1)
+            self.__layer1_thickness = checkAndSetLayer1Thickness(layer1_thickness)
+            self.__layer2 = checkAndSetLayer2(layer2)
+            self.__layer2_thickness = checkAndSetLayer2Thickness(layer2_thickness)
             self.__window = checkAndSetWindow(window)
             self.__window_thickness = checkAndSetWindowThickness(window_thickness)
             self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
@@ -276,6 +294,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
             self.__run_time = checkAndSetRunTime(run_time)
             self.__delta_time = checkAndSetDeltaTime(delta_time)
+            
             # TO DO #96 expert mode: CheckAndSet expert mode parameters to ensure they do not conflict
             self.force_passage = force_passage
             self.without_therm_conduc = without_therm_conduc
@@ -388,9 +407,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             # TO DO: 96 expert mode: Need better way of including these expert options (after checks of conflict)
             if self.force_passage is True:
                 input_deck.write('%s\n' % (self.__use_force_passage)) # Use force passage
+            # BUG: Need to use without_therm_conduc if LiF window...
             if self.without_therm_conduc is True:
                 input_deck.write('%s\n' % (self.__use_without_therm_conduc)) # Use without thermal conductivity option
-            if self.without_therm_conduc is True:
+            if self.rad_transfer is True:
                 input_deck.write('%s\n' % (self.__use_radiative_transfer)) # Use without thermal conductivity option
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
@@ -431,6 +451,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._non_feather_zone_width)) # Non-feather thickness
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self._non_feather_zones)) # Number of zones
+            input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
             input_deck.write('NOM_MILIEU=%s_abl2\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 2nd PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"])) # ABLATOR EOS
@@ -550,6 +571,42 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def sample_thickness(self, value):
            """ Set the sample thickness to the value. """
            self.__sample_thickness = checkAndSetSampleThickness(value)
+    
+    @property
+    def layer1(self):
+           """ Query for the layer1 type. """
+           return self.__layer1
+    @layer1.setter
+    def layer1(self, value):
+           """ Set the layer1 type to the value. """
+           self.__layer1 = checkAndSetLayer1(value)
+
+    @property
+    def layer1_thickness(self):
+           """ Query for the layer1 thickness type. """
+           return self.__layer1_thickness
+    @layer1_thickness.setter
+    def layer1_thickness(self, value):
+           """ Set the layer1 thickness to the value. """
+           self.__layer1_thickness = checkAndSetLayer1Thickness(value)
+
+    @property
+    def layer2(self):
+           """ Query for the layer2 type. """
+           return self.__layer2
+    @layer2.setter
+    def layer2(self, value):
+           """ Set the layer2 type to the value. """
+           self.__layer2 = checkAndSetLayer2(value)
+
+    @property
+    def layer2_thickness(self):
+           """ Query for the layer2 thickness type. """
+           return self.__layer2_thickness
+    @layer2_thickness.setter
+    def layer2_thickness(self, value):
+           """ Set the layer2 thickness to the value. """
+           self.__layer2_thickness = checkAndSetLayer2Thickness(value)
 
     @property
     def window(self):
@@ -656,7 +713,7 @@ def checkAndSetNumberOfLayers(number_of_layers):
     if not isinstance( number_of_layers, int ):
         raise TypeError("The parameter 'number_of_layers' must be an int.")
 
-    if number_of_layers <=1 or number_of_layers > 5:
+    if number_of_layers <1 or number_of_layers > 5:
         raise ValueError( "Number of layers must be between 1 and 5 only.")
 
     return number_of_layers
@@ -693,7 +750,6 @@ def checkAndSetAblator(ablator):
         raise ValueError( "Ablator is not valid. Use 'CH', 'Al', 'dia', 'Myl', or 'Kap' as ablator.")
 
     return ablator
-
 
 def checkAndSetAblatorThickness(ablator_thickness):
     """
@@ -744,6 +800,7 @@ def checkAndSetSample(sample):
 
     return sample
 
+
 def checkAndSetSampleThickness(sample_thickness):
     """
     Utility to check that the sample thickness is in permitted range set by Esther.
@@ -753,22 +810,110 @@ def checkAndSetSampleThickness(sample_thickness):
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
 
-    # Check if ablator is between 1 and 100 um
+    # Check if Sample is between 1 and 100 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
         raise ValueError( "Sample must be between 1.0 and 200.0 microns")
 
     return sample_thickness
 
+
+def checkAndSetLayer1(layer1):
+    """
+    Utility to check if the layer1 is in the list of known EOS materials
+    """
+
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum",
+                "Berylium", "Chromium", "Iron2", "Kapton", "LiF", "Magnesium", "Mylar",
+                "Quartz", "SiliconOxide", "Silver", "Titanium", "Vanadium", "Water" ]
+
+    # Set default
+    if layer1 is None:
+        print ( "Running simulation without layer1 material")
+        return None
+
+    if not isinstance(layer1, str): raise TypeError("The parameter 'layer1' must be a str.")
+
+    # Check each element
+    if layer1 in elements:
+        pass
+    else:
+        raise ValueError( "layer1 is not in list of known EOS materials")
+
+    return layer1
+
+
+def checkAndSetLayer1Thickness(layer1_thickness):
+    """
+    Utility to check that the layer1 thickness is in permitted range set by Esther.
+    """
+
+    # Set default
+    if layer1_thickness is None:
+        return 0.0
+
+    # Check if number.
+    if not isinstance( layer1_thickness, (float, int)):
+        raise TypeError( "The parameter 'layer1_thickness' must be a numerical type (float or int.)")
+
+    # Check if layer1 is between 1 and 100 um
+    if layer1_thickness < 1.0 or layer1_thickness > 200.0:
+        raise ValueError( "layer1 must be between 1.0 and 200.0 microns")
+
+    return layer1_thickness
+
+
+def checkAndSetLayer2(layer2):
+    """
+    Utility to check if the layer2 is in the list of known EOS materials
+    """
+
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum",
+                "Berylium", "Chromium", "Iron2", "Kapton", "LiF", "Magnesium", "Mylar",
+                "Quartz", "SiliconOxide", "Silver", "Titanium", "Vanadium", "Water" ]
+
+    # Set default
+    if layer2 is None:
+        print ( "Running simulation without layer2 material")
+        return None
+
+    if not isinstance(layer2, str): raise TypeError("The parameter 'layer2' must be a str.")
+
+    # Check each element
+    if layer2 in elements:
+        pass
+    else:
+        raise ValueError( "layer2 is not in list of known EOS materials")
+
+    return layer2
+
+
+def checkAndSetLayer2Thickness(layer2_thickness):
+    """
+    Utility to check that the layer2 thickness is in permitted range set by Esther.
+    """
+
+    # Set default
+    if layer2_thickness is None:
+        return 0.0
+    
+    # Check if number.
+    if not isinstance( layer2_thickness, (float, int)):
+        raise TypeError( "The parameter 'layer2_thickness' must be a numerical type (float or int.)")
+
+    # Check if layer2 is between 1 and 100 um
+    if layer2_thickness < 1.0 or layer2_thickness > 200.0:
+        raise ValueError( "layer2 must be between 1.0 and 200.0 microns")
+
+    return layer2_thickness
+
 def checkAndSetWindow(window):
     """
     Utility to check that the window thickness is > 1 um and < 200 um
     """
-    # Change this to be just window materials (LiF, Quartz etc.)
-    ### TODO PLACEHOLDER ------------------------------------------------------------------------------>
-    elements = ["LiF",
-                "SiO2",
-                "Diamond",
-                ]
+    
+    elements = ["LiF", "SiO2", "Diamond", "Quartz" ]
 
     if window is None:
         print ( "Running simulation without window material")
