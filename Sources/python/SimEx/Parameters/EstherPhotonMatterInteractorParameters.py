@@ -376,6 +376,14 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
         self.__number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
 
+        if self.layer1 is not None:
+            width_of_layer1_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer1]["mass_density"]
+            self.__number_of_layer1_zones=int(self.layer1_thickness/width_of_layer1_zone)
+        
+        if self.layer2 is not None:
+            width_of_layer2_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer2]["mass_density"]
+            self.__number_of_layer2_zones=int(self.layer2_thickness/width_of_layer2_zone)
+            
         if self.window is not None:
             width_of_window_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.window]["mass_density"]
             self.__number_of_window_zones=int(self.window_thickness/width_of_window_zone)
@@ -428,9 +436,17 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('MECANIQUE_RAM\n')
                 input_deck.write('\n')
 
-            # TO DO: GIT ISSUE #95: Complex targets
-            # Make a loop of layer constructions with number_of_zones[i] for i < number of layers
-            # The empty layer (epaisseur_vide) should be in the first layer construction
+            # If using 4 layers (ablator, layer1, sample, layer2)
+            if self.number_of_layers == 4:
+                input_deck.write('- %.1f um %s layer\n' % (self.layer2_thickness, self.layer2))
+                input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.layer2]["shortname"]))
+                input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.layer2]["eos_name"]))
+                input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.layer2_thickness))
+                # Calculate number of zones
+                input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_layer2_zones))
+                input_deck.write('MECANIQUE_RAM\n')
+                input_deck.write('\n')
+        
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
             input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.sample]["shortname"]))
             input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.sample]["eos_name"]))
@@ -441,6 +457,17 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_sample_zones))
             input_deck.write('MECANIQUE_RAM\n')
             input_deck.write('\n')
+            
+            # If using 3 layers (ablator, layer1, sample)
+            if self.number_of_layers == 3:
+                input_deck.write('- %.1f um %s layer\n' % (self.layer1_thickness, self.layer1))
+                input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.layer1]["shortname"]))
+                input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.layer1]["eos_name"]))
+                input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.layer1_thickness))
+                # Calculate number of zones
+                input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_layer1_zones))
+                input_deck.write('MECANIQUE_RAM\n')
+                input_deck.write('\n')
 
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
