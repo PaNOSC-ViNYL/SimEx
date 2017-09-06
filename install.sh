@@ -8,12 +8,6 @@
 INSTALL_PREFIX=$PWD
 #THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 THIRD_PARTY_ROOT=/usr
-if [ -z $KARABO]
-then
-    KARABO=$HOME/karaboFramework
-fi
-KARABO_DEVICES=$KARABO/karabo/devices
-KARABO_EXT_SHARE=$KARABO/extern/share
 
 # Check for existing build directory, remove if foun.d
 if [ -d build ]
@@ -50,9 +44,9 @@ cmake -DSRW_OPTIMIZED=ON \
       -DS2EReconstruction_EMC=ON\
       -DS2EReconstruction_DM=ON\
       -Dwpg=ON\
-      -Dprop=ON\
       -Dgenesis=ON\
       -Docelot=ON\
+      -DXCSITPhotonDetector=ON \
       -DXERCESC_ROOT=/usr\
       -DGEANT4_ROOT=/usr/local \
       -DXCSIT_ROOT=/usr/local \
