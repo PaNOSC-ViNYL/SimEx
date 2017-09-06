@@ -12,6 +12,8 @@ ExternalProject_Add(
     "-DGEANT4_ROOT=${GEANT4_ROOT}"
     "-DXCSIT_ROOT=${XCSIT_ROOT}"
     "-DBOOST_ROOT=${BOOST_ROOT}"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+    "-DDEBUG=${PY_DETECTOR_INTERFACE_DEBUG}"
 	PATCH_COMMAND ""
 	INSTALL_COMMAND ""
 	)
@@ -36,7 +38,8 @@ install(DIRECTORY ${SOURCE_DIR}/include/py_detector_interface/
 )
 
 # Copy the created shared object to the correct location
-install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION ${LIBDIR}
+install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION
+${LIBDIR}/python2.7
                                         USE_SOURCE_PERMISSIONS
                                         FILES_MATCHING
                                         PATTERN "*.so"

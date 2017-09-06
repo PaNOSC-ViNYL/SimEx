@@ -23,6 +23,13 @@ echo "Changed dir to $PWD."
 export FC=ifort
 
 # Some needed environment variables.
+export BOOST_ROOT=${THIRD_PARTY_ROOT}
+export Boost_NO_SYSTEM_PATHS=ON
+export ARMA_DIR=${THIRD_PARTY_ROOT}
+export XERCESC_ROOT=/home/burcherj/.local
+export GEANT4_ROOT=/home/burcherj/.local
+export XCSIT_ROOT=/home/burcherj/.local
+
 
 cmake -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=OFF \
@@ -35,7 +42,11 @@ cmake -DSRW_OPTIMIZED=ON \
       -Dprop=ON\
       -Dgenesis=ON\
       -Docelot=ON\
-      -DXCSITPhotonDetector=OFF\
+      -DXCSITPhotonDetector=ON\
+      -DXERCESC_ROOT=$XERCESC_ROOT \
+      -DGEANT4_ROOT=$GEANT4_ROOT \
+      -DXCSIT_ROOT=$XCSIT_ROOT \
+      -DBOOST_ROOT=$BOOST_ROOT \
       ..
 
 # Build the project.
