@@ -48,7 +48,7 @@ def suite():
                  unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
                  unittest.makeSuite(S2EReconstructionTest,                  'test'),
                  unittest.makeSuite(CrystFELPhotonDiffractorParametersTest, 'test'),
-                 unittest.makeSuite(XCSITPhotonDetectorParameters,          'test'),
+                 unittest.makeSuite(XCSITPhotonDetectorTest,                'test'),
                  unittest.makeSuite(XCSITPhotonDetectorParametersTest,      'test'),
                  ### Disabled since CrystFEL not added to external libraries.
                  #unittest.makeSuite(CrystFELPhotonDiffractorTest,                  'test'),
