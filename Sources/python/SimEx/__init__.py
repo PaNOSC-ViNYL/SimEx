@@ -38,8 +38,6 @@ from Calculators.S2EReconstruction import S2EReconstruction
 from Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from Calculators.XFELPhotonPropagator import XFELPhotonPropagator
 from Calculators.XFELPhotonSource import XFELPhotonSource
-from Calculators.XCSITPhotonDetector import XCSITPhotonDetector
-from Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 from Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 
 from Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
