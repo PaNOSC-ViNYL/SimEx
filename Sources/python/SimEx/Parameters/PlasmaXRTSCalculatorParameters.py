@@ -178,6 +178,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__use_bma_slfc    = int(self.model_See == 'BMA+sLFC')
         self.__write_bma = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
         self.__use_lindhard    = int(self.model_See == 'Lindhard')
+        self.__use_landen      = int(self.model_See == 'Landen')
         self.__use_static_lfc  = int(self.model_See == 'sLFC')
         self.__use_dynamic_lfc = int(self.model_See == 'dLFC')
         self.__use_mff = int(self.model_See == 'MFF')
@@ -319,7 +320,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('RPA                                %d    0\n' % (self.__use_rpa) )
             input_deck.write('LINDHARD                           %d    0\n' % (self.__use_lindhard) )
             input_deck.write('SALPETER                            0    0\n')
-            input_deck.write('LANDEN                              0    0\n')
+            input_deck.write('LANDEN                             %d    0\n' % (self.__use_landen) )
             input_deck.write('RPA_TSYTOVICH                       0    0\n')
             input_deck.write('STATIC_LFC                         %d    0\n' % (self.__use_static_lfc) )
             input_deck.write('DYNAMIC_LFC                        %d    0\n' % (self.__use_dynamic_lfc) )
@@ -860,6 +861,7 @@ def checkAndSetModelSee( model ):
     # Valid models.
     valid_models = ['RPA',
                     'Lindhard',
+                    'Landen',
                     'static LFC',
                     'dynamic LFC',
                     'BMA',

@@ -19,6 +19,38 @@ option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF
 
 option (INSTALL_TESTS "Install tests" ON)
 
+
+# options required for building the py_detector_interface module:
+# XCSITPotonDetector
+option(GEANT4_ROOT "-DGEANT4_ROOT=<abs path> absolute path to the geant4
+    installation directory that includes \n
+    ./bin/\n
+    ./include/Geant4/\n
+    ./lib64/Geant4-<ver>/\n
+    ./share/Geant4-<ver>/data/"
+)
+option(XERCESC_ROOT "-DXERCESC_ROOT=<abs path> absolute path to the xercesc
+    installation directory that includes\n
+    ./include/xercesc/\n
+    ./lib/"
+)
+option(XCSIT_ROOT "-DXCSIT_ROOT=<abs path> absolute path to the xcist 
+    installation directory that includes\n
+    ./include/xcsit/
+    ./lib/
+    ./lib/xcsit/
+    ./bin/"
+)
+option(BOOST_ROOT "-DBOOST_ROOT=<abs path> absolute path to the boost
+    installation directory that includes\n
+    ./include/boost/
+    ./lib/"
+)
+option(PY_DETECTOR_INTERFACE_DEBUG "
+    -DPY_DETECTOR_INTERFACE_DEBUG=default: OFF | ON"
+)
+
+
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)

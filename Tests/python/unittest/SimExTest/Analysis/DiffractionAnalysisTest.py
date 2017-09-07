@@ -203,6 +203,16 @@ class DiffractionAnalysisTest(unittest.TestCase):
         analyzer.plotPattern(logscale=True)
         analyzer.statistics()
 
+    def testRadialProjection(self):
+        """ Check that we can get two plots (resetting the iterator works.)"""
+        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
+
+        analyzer.logscale = False
+        analyzer.plotRadialProjection()
+        analyzer.plotRadialProjection(logscale=True)
+        analyzer.plotRadialProjection(operation=numpy.std)
+
+
     def testAnimatePatterns(self):
         """ Test the animation feature. """
 

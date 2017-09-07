@@ -164,14 +164,19 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.powder is True:
             command_sequence.append('--powder=%s' % (os.path.join(self.output_path, "powder.h5")))
 
+        # Handle size range if present.
+        if self.parameters.crystal_size_range is not None:
+            command_sequence.append('--min-size=%f' % (self.parameters.crystal_size_range[0]*1e9 ))
+            command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_range[1]*1e9 ))
+
+
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
         #args =  command_sequence
         command = " ".join(args)
 
         if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
-                print("CrystFELPhotonDiffractor backengine mpicommand: "+mpicommand)
+            print("CrystFELPhotonDiffractor backengine command: "+command)
 
         # Run the backengine command.
         proc = subprocess.Popen(command, shell=True)

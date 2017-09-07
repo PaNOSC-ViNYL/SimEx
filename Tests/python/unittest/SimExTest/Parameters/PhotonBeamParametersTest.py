@@ -121,7 +121,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
         beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out_0000001.h5"))
 
         self.assertIsInstance( beam_parameters, PhotonBeamParameters )
-        self.assertAlmostEqual( beam_parameters.photon_energy, 4947.34315, 5 )
+        self.assertAlmostEqual( beam_parameters.photon_energy, 4972.840247, 5 )
 if __name__ == '__main__':
     unittest.main()
 

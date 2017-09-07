@@ -66,9 +66,7 @@ def convertToOPMD(input_file):
 
             time_max = h5['params/Mesh/sliceMax'].value #s
             time_min = h5['params/Mesh/sliceMin'].value #s
-
             time_step = abs(time_max - time_min) / number_of_time_steps #s
-
 
             photon_energy = h5['params/photonEnergy'].value # eV
             photon_energy = photon_energy * e # Convert to J

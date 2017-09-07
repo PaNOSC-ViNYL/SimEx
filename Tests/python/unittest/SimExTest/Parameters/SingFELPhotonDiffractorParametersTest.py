@@ -80,7 +80,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance( parameters, AbstractCalculatorParameters )
 
         # Check all parameters are set to default values.
-        self.assertTrue( parameters.uniform_rotation )
+        self.assertEqual( parameters.uniform_rotation, None )
         self.assertFalse( parameters.calculate_Compton )
         self.assertEqual( parameters.slice_interval, 100 )
         self.assertEqual( parameters.number_of_slices, 1 )

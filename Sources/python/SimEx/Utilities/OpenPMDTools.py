@@ -24,7 +24,8 @@ import re
 import string
 import sys, getopt, os.path
 
-from SimEx.Utilities.checkOpenPMD_h5 import EXTENSIONS as ext_list
+ext_list = {"ED-PIC": numpy.uint32(1),
+            "HYDRO1D": numpy.uint32(2)}
 
 
 def get_basePath(f, iteration):

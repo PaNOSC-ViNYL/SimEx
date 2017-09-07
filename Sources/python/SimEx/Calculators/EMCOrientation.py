@@ -334,8 +334,10 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         :note: Copied and adapted from the main routine in s2e_recon/EMC/runEMC.py
         """
-        from mpi4py import MPI
+        import mpi4py.rc
+        mpi4py.rc.finalize = False
 
+        from mpi4py import MPI
         # MPI info
         comm = MPI.COMM_WORLD
         thisProcess = comm.rank
@@ -352,6 +354,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
 # the rest is non-parallel (yet)
         if thisProcess != 0:
+            MPI.Finalize()
             return 0
 
         ###############################################################
@@ -511,10 +514,12 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             _print_to_log("All EMC iterations completed", log_file=self._outputLog)
 
             os.chdir(cwd)
+            MPI.Finalize()
             return 0
 
         except:
             os.chdir(cwd)
+            MPI.Finalize()
             return 1
 
 def _checkPaths(run_files_path, tmp_files_path):

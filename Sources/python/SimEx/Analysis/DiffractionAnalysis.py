@@ -28,6 +28,7 @@ import math
 import numpy
 import os
 import tempfile
+
 import pyFAI
 
 class DiffractionAnalysis(AbstractAnalysis):
@@ -39,6 +40,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                  input_path=None,
                  pattern_indices=None,
                  poissonize=True,
+                 mask=None
             ):
         """ Constructor for the DiffractionAnalysis class.
 
@@ -55,6 +57,9 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param poissonize: Whether to add Poisson noise to the integer photon numbers (default True).
         :type poissonize: bool
 
+        :param mask: Mask to multiply on each pattern.
+        :type mask: numpy.array
+
         """
 
         # Initialize base class. This takes care of parameter checking.
@@ -67,6 +72,8 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Init attributes.
         self.poissonize = poissonize
         self.parameters = diffractionParameters(self.input_path)
+
+        self.mask = mask
 
     @property
     def parameters(self):
@@ -116,6 +123,22 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         self.__poissonize = val
 
+    @property
+    def mask(self):
+        """ Query the mask. """
+        return self.__mask
+    @mask.setter
+    def mask(self, val):
+        """ Set the 'mask' flag."""
+        # Handle default.
+        if val is None:
+            self.__mask = 1.
+            return
+        if not isinstance(val, numpy.ndarray):
+            raise TypeError('The parameter "mask" must be a numpy.array.')
+
+        self.__mask = val
+
 
     def patternGenerator(self):
         """ Yield an iterator over a given pattern sequence from a diffraction file.
@@ -159,7 +182,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
                     diffr = h5[path_to_data].value
 
-                    yield diffr
+                    yield diffr*self.mask
 
 
 
@@ -203,12 +226,12 @@ class DiffractionAnalysis(AbstractAnalysis):
         """
 
         # Handle default operation
+        if operation is not None and len(self.pattern_indices) == 1:
+            print "WARNING: Giving an operation with a single pattern has no effect."
+            operation = None
         if operation is None and len(self.pattern_indices) > 1:
             operation = numpy.sum
 
-        # Complain if operating on single pattern.
-        else:
-            print "WARNING: Giving an operation with a single pattern has no effect."
         # Get pattern to plot.
         pi = self.patterns_iterator
         if len(self.pattern_indices) == 1:
@@ -274,7 +297,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 def plotRadialProjection(pattern, parameters, logscale=True):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
-    qs, intensities = azimuthalIntegation(pattern, parameters)
+    qs, intensities = azimuthalIntegration(pattern, parameters)
 
     if logscale:
         plt.semilogy(qs, intensities)
@@ -283,7 +306,7 @@ def plotRadialProjection(pattern, parameters, logscale=True):
     plt.xlabel("q (1/nm)")
     plt.ylabel("Intensity (arb. units)")
 
-def azimuthalIntegation(pattern, parameters):
+def azimuthalIntegration(pattern, parameters):
 
     # Extract parameters.
     beam = parameters['beam']
@@ -347,14 +370,16 @@ def diffractionParameters(path):
     parameters_dict = {'beam':{}, 'geom':{}}
 
     # Open file.
-    with h5py.File(h5_file, 'r') as h5:
-        # Loop over entries in /params.
-        for top_key in ['beam', 'geom']:
-            # Loop over groups.
-            for key, val in h5['params/%s' % (top_key)].iteritems():
-                # Insert into return dictionary.
-                parameters_dict[top_key][key] = val.value
-
+    try:
+        with h5py.File(h5_file, 'r') as h5:
+            # Loop over entries in /params.
+            for top_key in ['beam', 'geom']:
+                # Loop over groups.
+                for key, val in h5['params/%s' % (top_key)].iteritems():
+                    # Insert into return dictionary.
+                    parameters_dict[top_key][key] = val.value
+    except:
+        pass
     # Return.
     return parameters_dict
 
@@ -371,7 +396,7 @@ def plotImage(pattern, logscale=False):
 
     if logscale:
         if mn <= 0.0:
-            mn += pattern.min()+1e-5
+            mn += pattern.min()+1e-1
             pattern = pattern.astype(float) + mn
         plt.imshow(pattern, norm=mpl.colors.LogNorm(vmin=mn, vmax=mx), cmap="viridis")
     else:
@@ -443,15 +468,19 @@ def photonStatistics(stack):
     avg_photons = numpy.mean(photons)
     rms_photons =  numpy.std(photons)
 
-    print "***********************"
-    print "avg = %s, std = %s" % (avg_photons, rms_photons)
-    print "***********************"
+    print "*************************"
+    print "avg = %6.5e" % (avg_photons)
+    print "std = %6.5e" % (rms_photons)
+    print "*************************"
 
 
     # Plot histogram.
     plt.figure()
-    max_photon_number = numpy.max( photons )
-    min_photon_number = numpy.min( photons )
+    max_photon_number = int(numpy.max( photons ))
+    min_photon_number = int(numpy.min( photons ))
+    if max_photon_number == min_photon_number:
+        max_photon_number += 1
+
     binwidth = max_photon_number - min_photon_number
     number_of_bins = min(20, number_of_images)
     binwidth = int( binwidth / number_of_bins )
@@ -461,4 +490,5 @@ def photonStatistics(stack):
     plt.xlabel("Photons")
     plt.ylabel("Histogram")
     plt.title("Photon number histogram")
+
 

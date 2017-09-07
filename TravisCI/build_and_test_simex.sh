@@ -1,13 +1,15 @@
 #!/bin/bash
 set -e # Exit with nonzero exit code if anything fails
 
+printenv
+
 # load git lfs files
 git lfs pull
 
 # build & install
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON ..
+cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DXCSITPhotonDetector=OFF ..
 make
 make install
 

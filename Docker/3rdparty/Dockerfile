@@ -10,10 +10,3 @@ ADD python_install.sh /opt/python_install.sh
 RUN ["bash", "/opt/python_install.sh"]
 ENV PATH /opt/miniconda2/bin:$PATH
 
-ADD arma_install.sh /opt/arma_install.sh
-RUN ["bash", "/opt/arma_install.sh"]
-
-ADD boot_install.sh /opt/boot_install.sh
-RUN ["bash", "/opt/boot_install.sh"]
-
-

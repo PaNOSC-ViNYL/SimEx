@@ -28,6 +28,7 @@
 """
 import os
 import h5py
+import numpy
 import shutil
 import subprocess
 
@@ -469,6 +470,54 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("params", h5_filehandle.keys() )
         self.assertIn("version", h5_filehandle.keys() )
         self.assertIn("info", h5_filehandle.keys() )
+
+    def testNoRotation(self):
+        """ Test that we can run singfel with no-rotation option."""
+
+
+        diffraction_parameters=SingFELPhotonDiffractorParameters(uniform_rotation = None,
+                                                       calculate_Compton = False,
+                                                       slice_interval = 100,
+                                                       number_of_slices = 3,
+                                                       pmi_start_ID = 1,
+                                                       pmi_stop_ID  = 1,
+                                                       number_of_diffraction_patterns = 1,
+                                                       beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
+                                                       beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
+                                                       )
+
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
+                output_path='diffr_newstyle')
+
+        # Cleanup.
+        self.__dirs_to_remove.append(photon_diffractor.output_path)
+
+        # Run backengine and convert files.
+        photon_diffractor.backengine()
+        photon_diffractor.saveH5()
+
+        # Cleanup new style files.
+        self.__files_to_remove.append(photon_diffractor.output_path)
+
+        pattern = h5py.File(photon_diffractor.output_path)['data/0000001/diffr'].value
+
+        # 2nd run.
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                input_path=TestUtilities.generateTestFilePath('pmi_out'),
+                output_path='diffr_newstyle')
+
+
+        # Run backengine and convert files.
+        photon_diffractor.backengine()
+        photon_diffractor.saveH5()
+
+        new_pattern = h5py.File(photon_diffractor.output_path)['data/0000001/diffr'].value
+
+        self.assertAlmostEqual(numpy.linalg.norm(pattern-new_pattern), 0.0, 10)
+
 
 if __name__ == '__main__':
     unittest.main()

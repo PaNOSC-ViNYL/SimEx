@@ -1,48 +1,27 @@
 INCLUDE(ExternalProject)
 
-FIND_PACKAGE (HDF5 REQUIRED HL CXX)
-MESSAGE("HDF5_INCLUDE_DIRS=${HDF5_INCLUDE_DIRS}")
-MESSAGE("HDF5_LIBRARY_DIRS=${HDF5_LIBRARY_DIRS}")
-FIND_PACKAGE (MPI REQUIRED)
-FIND_PACKAGE (Armadillo REQUIRED)
-FIND_PACKAGE(Boost 1.55.0 REQUIRED COMPONENTS python thread date_time system mpi serialization
-                                              filesystem unit_test_framework program_options)
-FIND_PACKAGE(GSL REQUIRED)
-MESSAGE("GSL_INCLUDE_DIRS=${GSL_INCLUDE_DIRS}")
-MESSAGE("GSL_LIBRARIES=${GSL_LIBRARIES}")
+find_python_module(numba REQUIRED)
+find_python_module(numpy REQUIRED)
+find_python_module(scipy REQUIRED)
+find_python_module(mpi4py REQUIRED)
+find_python_module(h5py REQUIRED)
 
 
 ExternalProject_Add(
 singfel
-URL https://github.com/eucall-software/singfel/archive/master.zip
+URL https://github.com/eucall-software/pysingfel/archive/master.zip
+CONFIGURE_COMMAND ""
+CMAKE_COMMAND ""
 PATCH_COMMAND ""
+BUILD_COMMAND ""
 INSTALL_COMMAND ""
 )
 
-# cannot find iomp5 unless using intel compiler!
 
-ExternalProject_Get_Property(singfel BINARY_DIR)
+
 ExternalProject_Get_Property(singfel SOURCE_DIR)
 
-install(DIRECTORY ${BINARY_DIR}/bin/ DESTINATION ${BINDIR}
-        USE_SOURCE_PERMISSIONS
-        )
+install(PROGRAMS ${SOURCE_DIR}/bin/ DESTINATION ${BINDIR})
 
-install(DIRECTORY ${SOURCE_DIR}/libsingfel/ DESTINATION ${INCLUDEDIR}/singfel
-                                        USE_SOURCE_PERMISSIONS
-                                        FILES_MATCHING
-                                        PATTERN "*.h"
-#                                        PATTERN "build" EXCLUDE
-#                                        PATTERN ".*" EXCLUDE
-                                        )
-
-install(DIRECTORY ${SOURCE_DIR}/lib/ DESTINATION ${LIBDIR}
-                                        USE_SOURCE_PERMISSIONS
-                                        FILES_MATCHING
-                                        PATTERN "*.so"
-#                                        PATTERN "build" EXCLUDE
-#                                        PATTERN ".*" EXCLUDE
-                                        )
-
-
+install(DIRECTORY ${SOURCE_DIR}/pysingfel DESTINATION  ${PYPATH})
 

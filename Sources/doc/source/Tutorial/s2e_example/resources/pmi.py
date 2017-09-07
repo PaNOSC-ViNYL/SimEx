@@ -1,3 +1,4 @@
+import sys
 from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 
 # Define the input path (location of propagated pulse data).

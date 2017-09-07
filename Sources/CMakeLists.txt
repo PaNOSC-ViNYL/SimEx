@@ -18,10 +18,11 @@ find_python_module(breathe REQUIRED)
 find_python_module(sqlalchemy REQUIRED)
 find_python_module(pyfftw REQUIRED)
 find_python_module(pyFAI REQUIRED)
+find_python_module(numba REQUIRED)
 find_python_module(PyQt4 REQUIRED)
 
-FIND_PACKAGE (LAPACK REQUIRED)
-#message (STATUS "***** LAPACK_LIBRARIES ${LAPACK_LIBRARIES} ****")
+#FIND_PACKAGE (LAPACK REQUIRED)
+##message (STATUS "***** LAPACK_LIBRARIES ${LAPACK_LIBRARIES} ****")
 
 if (NOT DEVELOPER_INSTALL)
 	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/  DESTINATION ${PYPATH}
