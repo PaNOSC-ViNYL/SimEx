@@ -1,0 +1,71 @@
+CHANGELOG
+=========
+
+Changes from 0.2 to 0.3
+-----------------------
+
+New in 0.3.0
+''''''''''''
+
+New features
+""""""""""""
+* CrystFELPhotonDiffractor for serial crystallography simulation (backengine: CrystFEL.pattern_sim http://www.desy.de/~twhite/crystfel/). Beam parameters can be extracted from wavefront data.
+
+* PhotonBeamParameters to parametrize photon beams.
+
+* XCSITPhotonDetector and XCSITPhotonDetectorParameters for 2D pixel detector simulation. Requires Geant4 and XCSIT being installed, these are not part of the external libraries shipped with simex_platform (partly due to licensing issues). Disabled in the build system by default.
+Va
+* PlasmaXRTSCalculator reads propagated wavefront data to synthesize scattering spectrum with instrumental broadening.
+
+* XFELPhotonAnalysis for diagnostics of wavefront data stored in native FAST/WPG wavefront format. OpenPMD currently not supported. bin/prop_diagnostics.py added as CLI.
+
+* DiffractionAnalysis for diagnostics of diffraction data. CLI: bin/diffr_diagnostics.py
+
+* Added option for no rotation in SingFELPhotonDiffractor.
+
+* ComptonScatteringCalculator for Compton scattering from plasmas.
+
+* Support for sample structures in xyz format.
+
+* GenesisPhotonSource to describe FELs using Genesis and conversion utilities to convert genesis output to wpg readable format, as well as PIC openPMD data to genesis readable format.
+
+* Conversion from PIC openPMD to simplex FEL code input.
+
+* Adding ocelot electron beam simulation framework and FEL code to external libraries.
+* Various tools to steer Esther radiation-hydrodynamics simulations and experiment design.
+* Converter for Shadow3 raytracing beams into OpenPMD particle-mesh data. To be used as python script in Oasys.
+
+Bug fixes and enhancements
+""""""""""""""""""""""""""
+* Removed random rotation in XMDYNDemoPhotonMatterInteractor since done in SingFELPhotonDiffractor
+* Improve MPI parallelization in EMCOrientation
+* Make use of units more consistent in PlasmaXRTSCalculator
+* Replaced singfel by pysingfel (reimplementation in python, less dependencies on fat libraries like boost, armadillo).
+* Exposing most Calculators, Parameters, Utilities, and Analysis objects in SimEx top level module. (>>> from SimEx import SingFELPhotonDiffractor).
+* Azimuthal integration of diffraction patterns uses pyFAI.
+* Fixing pdb parser to parse large (>100000 atoms) pdbs.
+* WPG uses threaded version (openmp) of SRW.
+* Ability to process time-independent wavefront data (one slice in frequency space).
+* PhotonDiffractors write one single hdf5 file which links to individual patterns.
+* Using xraydb (github/scikit-beam/xraydb) for x-ray material properties and atomic levels.
+* Automated collection of system variables to setup MPI parameters for parallel backengine execution.
+* Various bugs in XMDYNDemoPhotonMatterInteractor
+* EMCOrientation: Parallel improvements to create backengine input data photons.dat
+* Fixing EMC for new diffr data format.
+* Adding parameters cpus_per_task and forced_mpi_command and default handling.
+* Adding parallel backengines for high performance backengine execution.
+
+
+Documentation
+"""""""""""""
+* SimEx single-particle imaging tutorial moved to wiki (github.com/eucall-software/simex_platform/wiki
+* New tutorial for usage of Esther rad-hydro simulations
+* Demonstration of new diagnostics tools for wavefront and diffraction data.
+
+
+Build system and deployment
+"""""""""""""""""""""""""""
+* Various improvements in docker image generation and usage.
+* Added pyqt to dockerfiles
+* Added --bind-to none to mpi command
+* Updated Docker files
