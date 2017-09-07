@@ -19,6 +19,7 @@
 # Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
+from .version import __version__
 
 from Analysis.DiffractionAnalysis import DiffractionAnalysis
 from Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis
@@ -52,6 +53,3 @@ from Parameters.WavePropagatorParameters import WavePropagatorParameters
 from PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
 
 import Utilities
-
-
-
