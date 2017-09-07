@@ -19,11 +19,9 @@
 #                                                                        #
 ##########################################################################
 
-import h5py
 import numpy
 import os
 import sys
-from SimEx.Utilities import OpenPMDTools as opmd
 
 def calculateLaserIntensity(laser_energy=None):
     """
@@ -31,7 +29,6 @@ def calculateLaserIntensity(laser_energy=None):
     @param laser_energy: Energy (J)
     @type : float, int
     """
-    
     
     Energy = float(raw_input("Energy (J) : "))
     SpotSize = float(raw_input("Spot size (diameter in um) : "))
@@ -46,3 +43,5 @@ def calculateLaserIntensity(laser_energy=None):
 
     print Power
     print "Intensity = ", Intensity, "TW/cm**2"
+    
+    return Intensity

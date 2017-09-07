@@ -330,16 +330,16 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
         self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
 
-    def _setupFeathering(self, number_of_zones=250, feather_zone_width=5.0, minimum_zone_width=1e-4):
+    def _setupFeathering(self, number_of_zones=200, feather_zone_width=5.0, minimum_zone_width=2e-4):
         """ Method to fix feathering
 
-        :param number_of_zones: The number of zones in the first ablator section (default 250).
+        :param number_of_zones: The number of zones in the first ablator section (default 200).
         :type number_of_zones: int
 
         :param feather_zone_width: Width of feather zone (default 5.0 [microns]).
         :type feather_zone_width: float
 
-        :param minimum_zone_width: Minimal zone width (default 1e-4 [microns]).
+        :param minimum_zone_width: Minimal zone width (default 2e-4 [microns]).
         :type minimum_zone_width: float
 
         """
