@@ -46,6 +46,10 @@ def main(args=None):
         analyzer.plotRadialProjection(logscale=args.logscale,
                              operation=eval(args.operation),
                              )
+
+    if args.statistics:
+        analyzer.statistics()
+
     plt.show()
 
 
@@ -54,9 +58,6 @@ def main(args=None):
         analyzer.animatePatterns(output_path=args.animation_filename)
 
         print "Animated gif saved to %s." % (analyzer._DiffractionAnalysis__animation_output_path)
-
-    if args.statistics:
-        analyzer.statistics()
 
 if __name__ == '__main__':
 

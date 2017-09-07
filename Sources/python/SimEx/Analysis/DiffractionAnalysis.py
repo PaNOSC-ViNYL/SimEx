@@ -28,6 +28,7 @@ import math
 import numpy
 import os
 import tempfile
+
 import pyFAI
 
 class DiffractionAnalysis(AbstractAnalysis):
@@ -225,12 +226,12 @@ class DiffractionAnalysis(AbstractAnalysis):
         """
 
         # Handle default operation
+        if operation is not None and len(self.pattern_indices) == 1:
+            print "WARNING: Giving an operation with a single pattern has no effect."
+            operation = None
         if operation is None and len(self.pattern_indices) > 1:
             operation = numpy.sum
 
-        # Complain if operating on single pattern.
-        else:
-            print "WARNING: Giving an operation with a single pattern has no effect."
         # Get pattern to plot.
         pi = self.patterns_iterator
         if len(self.pattern_indices) == 1:
@@ -467,15 +468,19 @@ def photonStatistics(stack):
     avg_photons = numpy.mean(photons)
     rms_photons =  numpy.std(photons)
 
-    print "***********************"
-    print "avg = %s, std = %s" % (avg_photons, rms_photons)
-    print "***********************"
+    print "*************************"
+    print "avg = %6.5e" % (avg_photons)
+    print "std = %6.5e" % (rms_photons)
+    print "*************************"
 
 
     # Plot histogram.
     plt.figure()
-    max_photon_number = numpy.max( photons )
-    min_photon_number = numpy.min( photons )
+    max_photon_number = int(numpy.max( photons ))
+    min_photon_number = int(numpy.min( photons ))
+    if max_photon_number == min_photon_number:
+        max_photon_number += 1
+
     binwidth = max_photon_number - min_photon_number
     number_of_bins = min(20, number_of_images)
     binwidth = int( binwidth / number_of_bins )
@@ -485,4 +490,5 @@ def photonStatistics(stack):
     plt.xlabel("Photons")
     plt.ylabel("Histogram")
     plt.title("Photon number histogram")
+
 
