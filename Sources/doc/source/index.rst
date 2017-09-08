@@ -32,4 +32,3 @@ SIMEX Users Manual
 .. include:: include/license.rst
 .. include:: include/refman.rst
 .. include:: include/data_formats.rst
-
