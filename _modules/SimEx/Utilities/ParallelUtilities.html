@@ -1,0 +1,280 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Utilities.ParallelUtilities &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Utilities.ParallelUtilities</h1><div class="highlight"><pre>
+<span></span><span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1">#               2016-2017 Sergey Yakubov                                 #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; Module with utilities for parallel job.  &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">distutils.version</span> <span class="k">import</span> <span class="n">StrictVersion</span>
+
+<span class="k">def</span> <span class="nf">_getParallelResourceInfoFromEnv</span><span class="p">():</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_NCORES&#39;</span><span class="p">])</span>
+        <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_NNODES&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;SIMEX_NNODES and SIMEX_NCORES are set incorrectly&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">resource</span>
+
+<span class="k">def</span> <span class="nf">_getParallelResourceInfoFromSlurm</span><span class="p">():</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SLURM_JOB_NUM_NODES&#39;</span><span class="p">])</span>
+        <span class="n">uniq_nodes</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SLURM_JOB_CPUS_PER_NODE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="c1"># SLURM sets this variable to something like 40x(2),20x(1),10x(10). We extract ncores from this</span>
+        <span class="n">ncores</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">uniq_nodes</span><span class="p">:</span>
+            <span class="n">ind</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ind</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">cores</span><span class="o">=</span><span class="n">node</span>
+                <span class="n">mul</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cores</span><span class="o">=</span><span class="n">node</span><span class="p">[:</span><span class="n">ind</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">mul</span><span class="o">=</span><span class="n">node</span><span class="p">[</span><span class="n">ind</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">node</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)]</span>
+            <span class="n">ncores</span><span class="o">+=</span><span class="nb">int</span><span class="p">(</span><span class="n">cores</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">mul</span><span class="p">)</span>
+
+        <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncores</span>
+        <span class="k">if</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">resource</span>
+
+<span class="k">def</span> <span class="nf">_MPICommandName</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;SIMEX_MPICOMMAND&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">mpicmd</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_MPICOMMAND&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mpicmd</span><span class="o">=</span><span class="s1">&#39;mpirun&#39;</span>
+
+    <span class="k">return</span> <span class="n">mpicmd</span>
+
+<span class="k">def</span> <span class="nf">_getParallelResourceInfoFromMpirun</span><span class="p">():</span>
+<span class="c1"># we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be</span>
+<span class="c1"># listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mpicmd</span> <span class="o">=</span> <span class="n">_MPICommandName</span><span class="p">()</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">mpicmd</span><span class="p">,</span> <span class="s2">&quot;hostname&quot;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                   <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">nodes</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">))</span>
+        <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resource</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="getParallelResourceInfo"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.ParallelUtilities.getParallelResourceInfo">[docs]</a><span class="k">def</span> <span class="nf">getParallelResourceInfo</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility extract information about available parallel resources.</span>
+
+<span class="sd">    @return : The dictionary expected by downstream simex modules.</span>
+<span class="sd">    @rtype  : resource</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s1">&#39;SIMEX_NNODES&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s1">&#39;SIMEX_NCORES&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_getParallelResourceInfoFromEnv</span><span class="p">()</span>
+
+
+    <span class="k">if</span> <span class="s1">&#39;SLURM_JOB_NUM_NODES&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s1">&#39;SLURM_JOB_CPUS_PER_NODE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_getParallelResourceInfoFromSlurm</span><span class="p">()</span>
+
+    <span class="n">resource</span><span class="o">=</span><span class="n">_getParallelResourceInfoFromMpirun</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">resource</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">resource</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Was unable to determine parallel resources, will run in serial mode&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="s2">&quot;NCores&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),(</span><span class="s2">&quot;NNodes&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span></div>
+
+<span class="k">def</span> <span class="nf">_getMPIVersionInfo</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mpi_cmd</span> <span class="o">=</span> <span class="n">_MPICommandName</span><span class="p">()</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">mpi_cmd</span><span class="p">,</span> <span class="s2">&quot;--version&quot;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                    <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+        <span class="n">version</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">&quot;(Open MPI)&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="n">version</span><span class="p">[</span><span class="s1">&#39;Vendor&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;OpenMPI&quot;</span>
+            <span class="n">version</span><span class="p">[</span><span class="s1">&#39;Version&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(Open MPI)&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">version</span>
+        <span class="k">if</span> <span class="s2">&quot;HYDRA&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="n">version</span><span class="p">[</span><span class="s1">&#39;Vendor&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;MPICH&quot;</span>
+            <span class="n">version</span><span class="p">[</span><span class="s1">&#39;Version&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Version:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">version</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span> <span class="nf">_getVendorSpecificMPIArguments</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">threads_per_task</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or &quot;</span>
+                       <span class="s2">&quot;provide backengine_mpicommand calculator parameter&quot;</span><span class="p">)</span>
+
+    <span class="n">mpi_cmd</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+    <span class="c1"># mapping by node is required to distribute tasks in round-robin mode.</span>
+    <span class="k">if</span> <span class="n">version</span><span class="p">[</span><span class="s1">&#39;Vendor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;OpenMPI&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">StrictVersion</span><span class="p">(</span><span class="n">version</span><span class="p">[</span><span class="s1">&#39;Version&#39;</span><span class="p">])</span><span class="o">&gt;</span><span class="n">StrictVersion</span><span class="p">(</span><span class="s2">&quot;1.8.0&quot;</span><span class="p">):</span>
+            <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; --map-by node --bind-to none&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; --bynode&quot;</span>
+        <span class="c1"># by default, all cores will be available, no need to set OMP_NUM_THREADS</span>
+        <span class="k">if</span> <span class="n">threads_per_task</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; -x OMP_NUM_THREADS=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">threads_per_task</span><span class="p">)</span>
+        <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0&quot;</span>
+    <span class="k">elif</span> <span class="n">version</span><span class="p">[</span><span class="s1">&#39;Vendor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;MPICH&quot;</span><span class="p">:</span>
+        <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; -map-by node&quot;</span>
+        <span class="k">if</span> <span class="n">threads_per_task</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; -env OMP_NUM_THREADS &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">threads_per_task</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mpi_cmd</span>
+
+<div class="viewcode-block" id="prepareMPICommandArguments"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.ParallelUtilities.prepareMPICommandArguments">[docs]</a><span class="k">def</span> <span class="nf">prepareMPICommandArguments</span><span class="p">(</span><span class="n">ntasks</span><span class="p">,</span> <span class="n">threads_per_task</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility prepares mpi arguments based on mpi version found in the system.</span>
+
+<span class="sd">    :param ntasks: Number of MPI tasks</span>
+<span class="sd">    :type ntasks: int</span>
+
+<span class="sd">    :param threads_per_task: Number of threads per task</span>
+<span class="sd">    :type threads_per_task: int</span>
+
+<span class="sd">    @return : String with mpi command and arguments</span>
+<span class="sd">    @rtype  : string</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ntasks</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;number of tasks should be positive&quot;</span><span class="p">)</span>
+
+    <span class="n">mpi_cmd</span> <span class="o">=</span> <span class="n">_MPICommandName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; -np &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ntasks</span><span class="p">)</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="n">_getMPIVersionInfo</span><span class="p">()</span>
+    <span class="n">mpi_cmd</span><span class="o">+=</span><span class="n">_getVendorSpecificMPIArguments</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">threads_per_task</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;SIMEX_EXTRA_MPI_PARAMETERS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">mpi_cmd</span><span class="o">+=</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_EXTRA_MPI_PARAMETERS&#39;</span><span class="p">]</span>
+
+
+    <span class="k">return</span> <span class="n">mpi_cmd</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

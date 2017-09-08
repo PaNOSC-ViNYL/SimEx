@@ -1,0 +1,409 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Calculators.ComptonScatteringCalculator &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Calculators.ComptonScatteringCalculator</h1><div class="highlight"><pre>
+<span></span><span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; Module that holds the ComptonScatteringCalculator class.</span>
+
+<span class="sd">    @author : CFG</span>
+<span class="sd">    @institution : XFEL</span>
+<span class="sd">    @creation 20160404</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="c1">#from scipy.optimize import newton as root</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">brentq</span> <span class="k">as</span> <span class="n">root</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span> <span class="k">as</span> <span class="n">PC</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">C</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+
+<span class="c1"># Some constants</span>
+<span class="n">BOHR</span> <span class="o">=</span> <span class="n">PC</span><span class="p">[</span><span class="s1">&#39;Bohr radius&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">RY</span> <span class="o">=</span> <span class="n">PC</span><span class="p">[</span><span class="s1">&#39;Rydberg constant times hc in eV&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ALPHA</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">alpha</span>
+
+<div class="viewcode-block" id="ComptonScatteringCalculator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.ComptonScatteringCalculator.ComptonScatteringCalculator">[docs]</a><span class="k">class</span> <span class="nc">ComptonScatteringCalculator</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing a Compton scattering calculator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the ComptonScatteringCalculator.</span>
+
+<span class="sd">        @param parameters : Parameters for the ComptonScatteringCalculator.</span>
+<span class="sd">        @type : dict</span>
+<span class="sd">        @default : None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check parameters.</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">checkAndSetParameters</span><span class="p">(</span> <span class="n">parameters</span> <span class="p">)</span>
+
+        <span class="c1"># Hack to work around input path checking.</span>
+        <span class="k">if</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tmppath</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+            <span class="n">input_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmppath</span><span class="p">,</span> <span class="s1">&#39;xrts_in.h5&#39;</span><span class="p">)</span>
+            <span class="n">dummy</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+
+        <span class="c1"># Init base class.</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">ComptonScatteringCalculator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+
+        <span class="c1"># Set state to not-initialized (e.g. input deck is not written).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Overwrite provided_data.</span>
+        <span class="c1">#self.__expected_data = [&#39;/data/snp_&lt;7 digit index&gt;/ff&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/halfQ&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/Nph&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/r&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/T&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/Z&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/xyz&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/Sq_halfQ&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/Sq_bound&#39;,</span>
+                                <span class="c1">#&#39;/data/snp_&lt;7 digit index&gt;/Sq_free&#39;,</span>
+                                <span class="c1">#&#39;/history/parent/detail&#39;,</span>
+                                <span class="c1">#&#39;/history/parent/parent&#39;,</span>
+                                <span class="c1">#&#39;/info/package_version&#39;,</span>
+                                <span class="c1">#&#39;/info/contact&#39;,</span>
+                                <span class="c1">#&#39;/info/data_description&#39;,</span>
+                                <span class="c1">#&#39;/info/method_description&#39;,</span>
+                                <span class="c1">#&#39;/version&#39;]</span>
+
+        <span class="c1">#self.__provided_data = [</span>
+                                <span class="c1">#&#39;/data/&#39;,</span>
+                                <span class="c1">#&#39;/data/dynamic&#39;</span>
+                                <span class="c1">#&#39;/data/dynamic/energy_shifts&#39;,</span>
+                                <span class="c1">#&#39;/data/dynamic/Skw_free&#39;,</span>
+                                <span class="c1">#&#39;/data/dynamic/Skw_bound&#39;,</span>
+                                <span class="c1">#&#39;/data/dynamic/collision_frequency&#39;,</span>
+                                <span class="c1">#&#39;/data/static&#39;</span>
+                                <span class="c1">#&#39;/data/static/Sk_bound&#39;,</span>
+                                <span class="c1">#&#39;/data/static/Sk_ion&#39;,</span>
+                                <span class="c1">#&#39;/data/static/Sk_elastic&#39;,</span>
+                                <span class="c1">#&#39;/data/static/Sk_core_inelastic&#39;,</span>
+                                <span class="c1">#&#39;/data/static/Sk_free_inelastic&#39;,</span>
+                                <span class="c1">#&#39;/data/static/Sk_total&#39;,</span>
+                                <span class="c1">#&#39;/data/static/fk&#39;,</span>
+                                <span class="c1">#&#39;/data/static/qk&#39;,</span>
+                                <span class="c1">#&#39;/data/static/ionization_potential_delta&#39;</span>
+                                <span class="c1">#&#39;/data/static/LFC&#39;,</span>
+                                <span class="c1">#&#39;/history/parent/detail&#39;,</span>
+                                <span class="c1">#&#39;/history/parent/parent&#39;,</span>
+                                <span class="c1">#&#39;/info/package_version&#39;,</span>
+                                <span class="c1">#&#39;/info/contact&#39;,</span>
+                                <span class="c1">#&#39;/info/data_description&#39;,</span>
+                                <span class="c1">#&#39;/info/method_description&#39;,</span>
+                                <span class="c1">#&#39;/info/units/energy&#39;</span>
+                                <span class="c1">#&#39;/info/units/structure_factor&#39;</span>
+                                <span class="c1">#&#39;/params/beam/photonEnergy&#39;,</span>
+                                <span class="c1">#&#39;/params/beam/spectrum&#39;,</span>
+                                <span class="c1">#&#39;/params/info&#39;,</span>
+                                <span class="c1">#]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_shifts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">],</span>
+                                          <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span>
+                                          <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">scattering_angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">electron_density</span><span class="o">*</span><span class="mf">1e6</span>
+        <span class="nb">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">electron_temperature</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pzs</span> <span class="o">=</span> <span class="n">_pz</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_energy</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_shifts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span> <span class="o">=</span> <span class="n">_fermiEnergy</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fermi_wavenumber</span> <span class="o">=</span> <span class="n">_fermiWavenumber</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemical_potential</span> <span class="o">=</span> <span class="n">_chemicalPotential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compton_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comptonProfile</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ComptonScatteringCalculator.expectedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.ComptonScatteringCalculator.ComptonScatteringCalculator.expectedData">[docs]</a>    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data expected by the Diffractor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span></div>
+
+<div class="viewcode-block" id="ComptonScatteringCalculator.providedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.ComptonScatteringCalculator.ComptonScatteringCalculator.providedData">[docs]</a>    <span class="k">def</span> <span class="nf">providedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data provided by the Diffractor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span></div>
+
+<div class="viewcode-block" id="ComptonScatteringCalculator.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.ComptonScatteringCalculator.ComptonScatteringCalculator.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This method drives the backengine xrts.&quot;&quot;&quot;</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_comptonProfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Workhorse function that calculates the Compton profile. &quot;&quot;&quot;</span>
+
+        <span class="c1"># Fix variables and parameters.</span>
+        <span class="n">pF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_wavenumber</span>
+        <span class="n">EF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemical_potential</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
+
+        <span class="n">rho_z</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pzs</span><span class="o">*</span><span class="n">BOHR</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="o">*</span><span class="n">RY</span> <span class="o">-</span> <span class="n">y</span>
+
+        <span class="c1"># Calculate profile.</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">rho_z</span> <span class="p">)</span> <span class="p">)</span>
+
+        <span class="c1"># Return.</span>
+        <span class="k">return</span> <span class="n">J</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+
+    <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ComptonScatteringCalculator.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.ComptonScatteringCalculator.ComptonScatteringCalculator.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to save the data to a file.</span>
+
+<span class="sd">        @param output_path : The file where to save the object&#39;s data.</span>
+<span class="sd">        @type : string</span>
+<span class="sd">        @default : None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_printProfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Method to write the Compton profile to stdout. &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compton_profile</span><span class="p">)):</span>
+            <span class="nb">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">pzs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">compton_profile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+<span class="c1">##########################</span>
+<span class="c1"># Check and set functions #</span>
+<span class="c1">###########################</span>
+<span class="k">def</span> <span class="nf">checkAndSetParameters</span><span class="p">(</span> <span class="n">parameters</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if the parameters dictionary is ok .&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">AbstractCalculatorParameters</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;The &#39;parameters&#39; argument must be of the type PlasmaXRTSCalculatorParameters.&quot;</span><span class="p">)</span>
+    <span class="c1">### TODO: make an abstract parameters class.</span>
+    <span class="k">return</span> <span class="n">parameters</span>
+
+
+<span class="k">def</span> <span class="nf">_fermiEnergy</span><span class="p">(</span><span class="n">ne</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the Fermi energy from a given electron density. &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get Fermi momentum in inverse Bohr.</span>
+    <span class="n">kF</span> <span class="o">=</span> <span class="n">_fermiWavenumber</span><span class="p">(</span> <span class="n">ne</span> <span class="p">)</span> <span class="o">*</span> <span class="n">BOHR</span>
+
+    <span class="c1"># Get Fermi energy in Rydberg</span>
+    <span class="n">EF</span> <span class="o">=</span> <span class="n">kF</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># Return Fermi energy in eV</span>
+    <span class="k">return</span> <span class="n">EF</span> <span class="o">*</span> <span class="n">RY</span>
+
+
+<span class="k">def</span> <span class="nf">_fermiWavenumber</span><span class="p">(</span> <span class="n">ne</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the Fermi wavenumber kF. &quot;&quot;&quot;</span>
+    <span class="c1"># Convert density to inverse qubic Bohr.</span>
+    <span class="n">neaB</span> <span class="o">=</span> <span class="n">ne</span> <span class="o">*</span> <span class="n">BOHR</span> <span class="o">**</span> <span class="mi">3</span>
+
+    <span class="c1"># Get Fermi momentum in inverse Bohr.</span>
+    <span class="n">kF</span> <span class="o">=</span> <span class="p">(</span> <span class="mf">3.</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">neaB</span> <span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span>
+
+    <span class="c1"># Return Fermi wavenumber in 1/m.</span>
+    <span class="k">return</span> <span class="n">kF</span> <span class="o">/</span> <span class="n">BOHR</span>
+
+
+<span class="k">def</span> <span class="nf">_chemicalPotential</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the chemical potential at given electron density and temperature through inversion</span>
+<span class="sd">    of the Fermi integral F_1/2. &quot;&quot;&quot;</span>
+
+    <span class="n">EF</span> <span class="o">=</span> <span class="n">_fermiEnergy</span><span class="p">(</span> <span class="n">ne</span> <span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">T</span><span class="o">/</span><span class="n">EF</span>
+    <span class="c1"># Thermal wavelength in Bohr.</span>
+    <span class="n">lambda_e_aB</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">T</span><span class="o">*</span><span class="n">RY</span><span class="p">)</span>
+
+    <span class="c1"># Density in Bohr**-3</span>
+    <span class="n">neaB</span> <span class="o">=</span> <span class="n">ne</span> <span class="o">*</span> <span class="n">BOHR</span><span class="o">**</span><span class="mi">3</span>
+
+    <span class="c1"># Locate the root in the interval [3/2 ln(ne lambda_T**3 / 2) , EF/T ]</span>
+    <span class="n">search_interval_minimum</span> <span class="o">=</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">neaB</span> <span class="o">*</span> <span class="n">lambda_e_aB</span><span class="o">**</span><span class="mi">3</span> <span class="p">)</span>
+    <span class="n">search_interval_maximum</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">theta</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">root</span><span class="p">(</span><span class="n">_chemicalPotentialRoot</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">search_interval_minimum</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">search_interval_maximum</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">T</span>
+
+
+<span class="k">def</span> <span class="nf">fermihalf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sgn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Series approximation to the F_{1/2}(x) or F_{-1/2}(x)</span>
+<span class="sd">        Fermi-Dirac integral.</span>
+<span class="sd">        Credits: Greg von Winckel</span>
+<span class="sd">        http://www.scientificpython.net/pyblog/approximate-fermi-dirac-integrals&quot;&quot;&quot;</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="n">sgn</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># F_{1/2}(x)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">770751818298</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">3574503105</span><span class="p">,</span><span class="o">-</span><span class="mf">13.0</span><span class="o">/</span><span class="mi">184757992</span><span class="p">,</span>
+              <span class="mf">85.0</span><span class="o">/</span><span class="mi">3603084</span><span class="p">,</span><span class="mf">3923.0</span><span class="o">/</span><span class="mi">220484</span><span class="p">,</span><span class="mf">74141.0</span><span class="o">/</span><span class="mi">8289</span><span class="p">,</span><span class="o">-</span><span class="mf">5990294.0</span><span class="o">/</span><span class="mi">7995</span><span class="p">))</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># F_{-1/2}(x)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">128458636383</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">714900621</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">3553038</span><span class="p">,</span>
+                      <span class="mf">27.0</span><span class="o">/</span><span class="mi">381503</span><span class="p">,</span><span class="mf">3923.0</span><span class="o">/</span><span class="mi">110242</span><span class="p">,</span><span class="mf">8220.0</span><span class="o">/</span><span class="mi">919</span><span class="p">))</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">f</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="n">F</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">21</span><span class="p">)))</span>
+
+    <span class="k">return</span>  <span class="n">F</span> <span class="c1"># Prefactor to get normalized Fermi integral.</span>
+
+<span class="k">def</span> <span class="nf">_chemicalPotentialRoot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+
+    <span class="c1"># Get theta argument.</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Compute the function to root.</span>
+    <span class="n">ret</span> <span class="o">=</span>  <span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span> <span class="o">/</span> <span class="n">theta</span><span class="o">**</span><span class="mf">1.5</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">fermihalf</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Return.</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">_pz</span><span class="p">(</span> <span class="n">wi</span><span class="p">,</span> <span class="n">wf</span><span class="p">,</span> <span class="n">theta</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the z component of the scattering transfer momentum p. &quot;&quot;&quot;</span>
+
+    <span class="c1"># ALL IN RY UNITS.</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">wi</span> <span class="o">/</span> <span class="n">RY</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">wf</span> <span class="o">/</span> <span class="n">RY</span>
+
+    <span class="n">m0</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="n">ALPHA</span>
+    <span class="n">th</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span>
+
+
+    <span class="n">nom</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="n">f</span> <span class="o">-</span> <span class="n">i</span><span class="o">*</span><span class="n">f</span><span class="o">/</span><span class="n">m0</span><span class="o">/</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">))</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="n">i</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">*</span><span class="n">i</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">nom</span> <span class="o">/</span> <span class="n">denom</span>  <span class="o">/</span> <span class="n">BOHR</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

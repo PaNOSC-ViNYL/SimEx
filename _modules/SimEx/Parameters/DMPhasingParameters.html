@@ -1,0 +1,261 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Parameters.DMPhasingParameters &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Parameters.DMPhasingParameters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the DMPhasingParameters class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">Avogadro</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
+
+<div class="viewcode-block" id="DMPhasingParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.DMPhasingParameters.DMPhasingParameters">[docs]</a><span class="k">class</span> <span class="nc">DMPhasingParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing parameters for the DMPhasing analyzer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">number_of_trials</span>        <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">number_of_iterations</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">averaging_start</span>         <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">leash</span>                   <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">number_of_shrink_cycles</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">parameters_dictionary</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the DMPhasingParameters.</span>
+<span class="sd">        :param number_of_trials: How many trials to run in each iteration.</span>
+<span class="sd">        :type number_of_trials: int&gt;0, default 500</span>
+
+<span class="sd">        :param number_of_iterations: Maximum number of DM iterations.</span>
+<span class="sd">        :type number_of_iterations: int&gt;0, default 50</span>
+
+<span class="sd">        :param averaging_start: Start averaging after this many runs.</span>
+<span class="sd">        :type averaging: int&gt;0, default 15</span>
+
+<span class="sd">        :param leash: DM leash parameter.</span>
+<span class="sd">        :type leash: float&gt;0, default 0.2</span>
+
+<span class="sd">        :param number_of_shrink_cycles: DM shrink cycles.</span>
+<span class="sd">        :type number_of_shrink_cycles: int&gt;0, default 10</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Legacy support for dictionaries.</span>
+        <span class="k">if</span> <span class="n">parameters_dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_trials</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;number_of_trials&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_iterations</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;number_of_iterations&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">averaging_start</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;averaging_start&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">leash</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;leash&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_shrink_cycles</span> <span class="o">=</span> <span class="n">parameters_dictionary</span><span class="p">[</span><span class="s1">&#39;number_of_shrink_cycles&#39;</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check all parameters.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_trials</span> <span class="o">=</span> <span class="n">number_of_trials</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_iterations</span> <span class="o">=</span> <span class="n">number_of_iterations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">averaging_start</span> <span class="o">=</span> <span class="n">averaging_start</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">leash</span> <span class="o">=</span> <span class="n">leash</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_shrink_cycles</span> <span class="o">=</span> <span class="n">number_of_shrink_cycles</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Set the defaults for needed inherited parameters. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractCalculatorParameters__cpus_per_task_default</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+
+    <span class="c1">### Setters and queries.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;number_of_trials&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_trials</span>
+    <span class="nd">@number_of_trials</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">number_of_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;number_of_trials&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;number_of_trials&#39; to.</span>
+<span class="sd">        :type value: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">number_of_trials</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mi">500</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">number_of_trials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_trials</span> <span class="o">=</span> <span class="n">number_of_trials</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;number_of_trials&#39; must be an integer (n &gt; 0)&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;number_of_iterations&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_iterations</span>
+    <span class="nd">@number_of_iterations</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">number_of_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;number_of_iterations&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;number_of_iterations&#39; to.</span>
+<span class="sd">        :type value: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">number_of_iterations</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mi">50</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span> <span class="n">number_of_iterations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_iterations</span> <span class="o">=</span> <span class="n">number_of_iterations</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;number_of_iterations&#39; must be an integer (n &gt; 0)&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">leash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;leash&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__leash</span>
+    <span class="nd">@leash</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">leash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;leash&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;leash&#39; to.</span>
+<span class="sd">        :type value: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">leash</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mf">0.2</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">leash</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__leash</span> <span class="o">=</span> <span class="n">leash</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;leash&#39; must be a positive integer.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">averaging_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;averaging_start&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__averaging_start</span>
+    <span class="nd">@averaging_start</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">averaging_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;averaging_start&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;averaging_start&#39; to.</span>
+<span class="sd">        :type value: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">averaging_start</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mi">15</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">averaging_start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__averaging_start</span> <span class="o">=</span> <span class="n">averaging_start</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;averaging_start&#39; must be a positive integer.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_shrink_cycles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;number_of_shrink_cycles&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_shrink_cycles</span>
+    <span class="nd">@number_of_shrink_cycles</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">number_of_shrink_cycles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;number_of_shrink_cycles&#39; parameter to a given value.</span>
+<span class="sd">        :param value : The value to set &#39;number_of_shrink_cycles&#39; to.</span>
+<span class="sd">        :type value: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">number_of_shrink_cycles</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">number_of_shrink_cycles</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_shrink_cycles</span> <span class="o">=</span> <span class="n">number_of_shrink_cycles</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;number_of_shrink_cycles&#39; must be a positive integer.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

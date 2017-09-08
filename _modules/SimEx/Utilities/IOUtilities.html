@@ -1,0 +1,458 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Utilities.IOUtilities &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Utilities.IOUtilities</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module for entity checks.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+
+<span class="kn">import</span> <span class="nn">exceptions</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">periodictable</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">xpdb</span>
+
+
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">PDB</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">m_e</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">e</span>
+
+<span class="kn">from</span> <span class="nn">wpg.converters.genesis_v2</span> <span class="k">import</span> <span class="n">read_genesis_file</span> <span class="k">as</span> <span class="n">genesis2</span>
+<span class="kn">from</span> <span class="nn">wpg.converters.genesis</span> <span class="k">import</span> <span class="n">read_genesis_file</span> <span class="k">as</span> <span class="n">genesis3</span>
+
+
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<div class="viewcode-block" id="getTmpFileName"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.getTmpFileName">[docs]</a><span class="k">def</span> <span class="nf">getTmpFileName</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Create a unique filename</span>
+<span class="sd">    :return: unique filename for temporary storage</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="checkAndGetPDB"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.checkAndGetPDB">[docs]</a><span class="k">def</span> <span class="nf">checkAndGetPDB</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Query a given pdb code from the PDB.</span>
+
+<span class="sd">    :param path: The PDB code of the molecule to query.</span>
+<span class="sd">    :type path: str</span>
+
+<span class="sd">    :return: Path to the checked pdb file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;path&#39; must be a str.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;path&#39; must be a str.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Setup paths and filenames.</span>
+    <span class="n">pdb_target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.pdb&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">pdb_target_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+        <span class="c1"># Query from pdb.org</span>
+        <span class="n">pdb_list</span> <span class="o">=</span> <span class="n">PDB</span><span class="o">.</span><span class="n">PDBList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pdb_target_dir</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">pdb_target_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;PDB file </span><span class="si">%s</span><span class="s2"> could not be found. Attempting to query from protein database server.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">urlcleanup</span><span class="p">()</span>
+            <span class="n">download_target</span> <span class="o">=</span> <span class="n">pdb_list</span><span class="o">.</span><span class="n">retrieve_pdb_file</span><span class="p">(</span> <span class="n">pdb_target_name</span><span class="p">,</span> <span class="n">pdir</span><span class="o">=</span><span class="n">pdb_target_dir</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="s1">&#39;pdb&#39;</span> <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span>
+            <span class="c1">#raise IOError( &quot;Database query failed.&quot;)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">urlcleanup</span><span class="p">()</span>
+
+        <span class="c1"># Move and rename the downloaded file.</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span> <span class="n">download_target</span><span class="p">,</span> <span class="n">path</span>  <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="loadXYZ"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.loadXYZ">[docs]</a><span class="k">def</span> <span class="nf">loadXYZ</span><span class="p">(</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load atomic structure from a xyz file and setup a dictionary readable by xmdyn calculator.</span>
+
+<span class="sd">    :param path: The path to the xyz file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Setup the return dictionary.</span>
+    <span class="n">atoms_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Z&#39;</span> <span class="p">:</span> <span class="p">[],</span>     <span class="c1"># Atomic number.</span>
+                  <span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="p">[],</span>     <span class="c1"># Cartesian coordinates.</span>
+                  <span class="s1">&#39;selZ&#39;</span> <span class="p">:</span> <span class="p">{},</span>  <span class="c1"># Abundance of each element.</span>
+                  <span class="s1">&#39;N&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>      <span class="c1"># Number of atoms.</span>
+                  <span class="p">}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+        <span class="n">natoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fin</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">readline</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Reading </span><span class="si">%d</span><span class="s2"> atoms of </span><span class="si">%s</span><span class="s2"> from </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">natoms</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natoms</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="c1"># Get the element symbol from pdb.</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Get the corresponding periodic table element as an instance.</span>
+            <span class="n">atom_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">periodictable</span><span class="p">,</span> <span class="n">symbol</span><span class="p">)</span>
+
+            <span class="c1"># Query the atomic number.</span>
+            <span class="n">charge</span> <span class="o">=</span> <span class="n">atom_obj</span><span class="o">.</span><span class="n">number</span>
+
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+            <span class="n">xyz</span><span class="p">[:]</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+
+            <span class="c1"># Write to dict.</span>
+            <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">charge</span><span class="p">)</span>
+            <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xyz</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Error reading structure file </span><span class="si">%s</span><span class="s2">. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="c1"># Get unique elements.</span>
+    <span class="k">for</span> <span class="n">sel_Z</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">][</span><span class="n">sel_Z</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">sel_Z</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Count number of atoms.</span>
+    <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+    <span class="c1"># Convert to numpy arrays.</span>
+    <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+    <span class="c1"># Return.</span>
+    <span class="k">return</span> <span class="n">atoms_dict</span></div>
+
+
+
+
+
+
+<div class="viewcode-block" id="loadPDB"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.loadPDB">[docs]</a><span class="k">def</span> <span class="nf">loadPDB</span><span class="p">(</span> <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper to convert a given pdb file to a sample dictionary used by e.g. the XMDYNCalculator.</span>
+
+<span class="sd">    :param path: The path to the pdb file to be converted.</span>
+<span class="sd">    :type path: str</span>
+
+<span class="sd">    :return: The dictionary describing the sample molecule.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check if the sample is present, retrieve it from the pdb if not.</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">checkAndGetPDB</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># Convert to dict and return.</span>
+    <span class="k">return</span> <span class="n">_pdbToS2ESampleDict</span><span class="p">(</span><span class="n">target</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_pdbToS2ESampleDict</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Workhorse function that converts a pdb file to the sample dictionary.</span>
+
+<span class="sd">    :param path: Path to the pdb file to be loaded.</span>
+<span class="sd">    :type path : string</span>
+
+<span class="sd">    :return: The dictionary expected by downstream simex modules.</span>
+<span class="sd">    :rtype : dict</span>
+
+<span class="sd">    :throws IOError: Path not existing, not a pdb file or corrupt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;path&#39; must be a valid pdb file.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Setup the return dictionary.</span>
+    <span class="n">atoms_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Z&#39;</span> <span class="p">:</span> <span class="p">[],</span>     <span class="c1"># Atomic number.</span>
+                  <span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="p">[],</span>     <span class="c1"># Cartesian coordinates.</span>
+                  <span class="s1">&#39;selZ&#39;</span> <span class="p">:</span> <span class="p">{},</span>  <span class="c1"># Abundance of each element.</span>
+                  <span class="s1">&#39;N&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>      <span class="c1"># Number of atoms.</span>
+                  <span class="p">}</span>
+
+    <span class="c1"># Attempt loading the pdb.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1">#parser = PDB.PDBParser()</span>
+        <span class="c1">#structure = parser.get_structure(&quot;sample&quot;, path)</span>
+
+        <span class="c1"># Cope with &gt; 100000 pdb atoms</span>
+
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">xpdb</span><span class="o">.</span><span class="n">sloppyparser</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+
+        <span class="c1"># Get the atoms.</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+
+        <span class="c1"># Loop over atoms and get charge and coordinates.</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+
+            <span class="c1"># Get the element symbol from pdb.</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+
+            <span class="c1"># Get the coordinates from pdb.</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">coord</span>
+
+            <span class="c1"># Get the corresponding periodic table element as an instance.</span>
+            <span class="n">atom_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">periodictable</span><span class="p">,</span> <span class="n">symbol</span><span class="p">)</span>
+
+            <span class="c1"># Query the atomic number.</span>
+            <span class="n">charge</span> <span class="o">=</span> <span class="n">atom_obj</span><span class="o">.</span><span class="n">number</span>
+
+            <span class="c1"># Write to dict.</span>
+            <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">charge</span><span class="p">)</span>
+            <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinates</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">)</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Input file </span><span class="si">%s</span><span class="s2"> is not a valid pdb file. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Input file </span><span class="si">%s</span><span class="s2"> is not a valid pdb file. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="c1"># Get unique elements.</span>
+    <span class="k">for</span> <span class="n">sel_Z</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">][</span><span class="n">sel_Z</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">sel_Z</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Count number of atoms.</span>
+    <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+    <span class="c1"># Convert to numpy arrays.</span>
+    <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">atoms_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+    <span class="c1"># Return.</span>
+    <span class="k">return</span> <span class="n">atoms_dict</span>
+
+<div class="viewcode-block" id="pic2dist"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.pic2dist">[docs]</a><span class="k">def</span> <span class="nf">pic2dist</span><span class="p">(</span> <span class="n">pic_file_name</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;genesis&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to extract particle data from openPMD and write into genesis distribution file.</span>
+
+<span class="sd">    :param pic_file_name: Filename of openpmd input data file.</span>
+<span class="sd">    :type pic_file_name: str</span>
+
+<span class="sd">    :param target: The targeted file format (genesis || simplex).</span>
+<span class="sd">    :type target: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#  Check path.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pic_file_name</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not a file.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pic_file_name</span><span class="p">))</span>
+
+    <span class="c1"># Check if input is native or openPMD.</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">pic_file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span> <span class="p">)</span> <span class="k">as</span> <span class="n">h5_handle</span><span class="p">:</span>
+
+        <span class="n">timestep</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">positions</span> <span class="o">=</span> <span class="s1">&#39;/data/</span><span class="si">%s</span><span class="s1">/particles/e/position/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timestep</span><span class="p">)</span>
+        <span class="n">momenta</span> <span class="o">=</span> <span class="s1">&#39;/data/</span><span class="si">%s</span><span class="s1">/particles/e/momentum/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timestep</span><span class="p">)</span>
+
+        <span class="n">x_data</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">positions</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">x_data_unit</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">positions</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x_data</span><span class="o">*</span><span class="n">x_data_unit</span>
+
+        <span class="n">y_data</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">positions</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">y_data_unit</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">positions</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">*</span><span class="n">y_data_unit</span>
+
+        <span class="n">z_data</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">positions</span><span class="p">][</span><span class="s1">&#39;z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">z_data_unit</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">positions</span><span class="p">][</span><span class="s1">&#39;z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z_data</span><span class="o">*</span><span class="n">z_data_unit</span>
+
+        <span class="n">px_data</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">momenta</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">px_data_unit</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">momenta</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+        <span class="n">px</span> <span class="o">=</span> <span class="n">px_data</span><span class="o">*</span><span class="n">px_data_unit</span>
+
+        <span class="n">py_data</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">momenta</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">py_data_unit</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">momenta</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+        <span class="n">py</span> <span class="o">=</span> <span class="n">py_data</span><span class="o">*</span><span class="n">py_data_unit</span>
+
+        <span class="n">pz_data</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">momenta</span><span class="p">][</span><span class="s1">&#39;z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">pz_data_unit</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="n">momenta</span><span class="p">][</span><span class="s1">&#39;z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+        <span class="n">pz</span> <span class="o">=</span> <span class="n">pz_data</span><span class="o">*</span><span class="n">pz_data_unit</span>
+
+        <span class="c1"># Convert to xprime, yprime.</span>
+        <span class="n">xprime</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">px</span><span class="o">/</span><span class="n">py</span><span class="p">)</span>
+        <span class="n">zprime</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">pz</span><span class="o">/</span><span class="n">py</span><span class="p">)</span>
+
+        <span class="c1"># Calculate particle charge.</span>
+        <span class="n">charge_group</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;/data/</span><span class="si">%s</span><span class="s1">/particles/e/charge/&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">timestep</span><span class="p">)]</span>
+        <span class="n">macroparticle_charge</span> <span class="o">=</span> <span class="n">charge_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unitSI&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Get number of particles and total charge.</span>
+        <span class="n">particle_patches</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;/data/</span><span class="si">%s</span><span class="s1">/particles/e/particlePatches/numParticles&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">timestep</span><span class="p">)]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">number_of_macroparticles</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">particle_patches</span> <span class="p">)</span>
+
+        <span class="n">number_of_electrons_per_macroparticle</span> <span class="o">=</span> <span class="n">macroparticle_charge</span> <span class="o">/</span> <span class="n">e</span>
+        <span class="n">total_charge</span> <span class="o">=</span> <span class="n">number_of_macroparticles</span> <span class="o">*</span> <span class="n">macroparticle_charge</span>
+
+        <span class="c1"># Calculate momentum</span>
+        <span class="n">psquare</span> <span class="o">=</span> <span class="n">px</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">py</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">pz</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="mf">1.</span> <span class="o">+</span> <span class="n">psquare</span><span class="o">/</span><span class="p">((</span><span class="n">number_of_electrons_per_macroparticle</span> <span class="o">*</span> <span class="n">m_e</span><span class="o">*</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">psquare</span><span class="o">/</span><span class="p">((</span><span class="n">number_of_electrons_per_macroparticle</span> <span class="o">*</span> <span class="n">m_e</span><span class="o">*</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Number of electrons per macroparticle = &quot;</span><span class="p">,</span> <span class="n">number_of_electrons_per_macroparticle</span>
+        <span class="nb">print</span> <span class="s2">&quot;Total charge = &quot;</span><span class="p">,</span> <span class="n">total_charge</span>
+        <span class="nb">print</span> <span class="s2">&quot;Number of macroparticles = &quot;</span><span class="p">,</span> <span class="n">number_of_macroparticles</span>
+
+        <span class="n">h5_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;genesis&#39;</span><span class="p">:</span>
+	    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span> <span class="n">x</span><span class="p">,</span> <span class="n">xprime</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">zprime</span><span class="p">,</span> <span class="n">y</span><span class="o">/</span><span class="n">c</span><span class="p">,</span> <span class="n">P</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>  <span class="n">total_charge</span>
+    <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;simplex&#39;</span><span class="p">:</span>
+	    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span> <span class="n">y</span><span class="o">/</span><span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xprime</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">zprime</span><span class="p">,</span>  <span class="n">gamma</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>  <span class="n">total_charge</span></div>
+
+<div class="viewcode-block" id="genesis_dfl_to_wavefront"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.genesis_dfl_to_wavefront">[docs]</a><span class="k">def</span> <span class="nf">genesis_dfl_to_wavefront</span><span class="p">(</span><span class="n">genesis_out</span><span class="p">,</span> <span class="n">genesis_dfl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Based on WPG/wpg/converters/genesis_v2.py</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">genesis2</span><span class="p">(</span><span class="n">genesis_out</span><span class="p">,</span> <span class="n">genesis_dfl</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="wgetData"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.IOUtilities.wgetData">[docs]</a><span class="k">def</span> <span class="nf">wgetData</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Download a given url. &quot;&quot;&quot;</span>
+
+    <span class="c1"># Local filename where data will be saved.</span>
+    <span class="n">local_filename</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Make https request.</span>
+    <span class="nb">print</span> <span class="s2">&quot;Attempting to download </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Write to local file in chunks of 1 MB.</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span> <span class="c1"># filter out keep-alive new chunks</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+    <span class="c1"># After successful write, close the https connection.</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Return.</span>
+    <span class="nb">print</span> <span class="s2">&quot;Download completed and saved to </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">local_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">local_filename</span></div>
+<span class="c1">#if __name__ == &quot;__main__&quot;:</span>
+    <span class="c1">#main()</span>
+    <span class="c1">#data, charge = pic2dist(sys.argv[1], sys.argv[2])</span>
+    <span class="c1">## Setup header for distribution file.</span>
+    <span class="c1">#comments = &quot;? &quot;</span>
+    <span class="c1">#size = data.shape[0]</span>
+    <span class="c1">#header = &quot;VERSION = 1.0\nSIZE = %d\nCHARGE = %7.6E\nCOLUMNS X XPRIME Y YPRIME T P&quot; % (size, charge)</span>
+
+    <span class="c1">#if sys.argv[2] == &#39;genesis&#39;:</span>
+        <span class="c1">#numpy.savetxt( fname=&#39;beam.dist&#39;, X=data, header=header, comments=comments)</span>
+    <span class="c1">#if sys.argv[2] == &#39;simplex&#39;:</span>
+        <span class="c1">#numpy.savetxt( fname=&#39;beam.dist&#39;, X=data)</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

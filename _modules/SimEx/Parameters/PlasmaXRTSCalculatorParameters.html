@@ -1,0 +1,1059 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Parameters.PlasmaXRTSCalculatorParameters &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Parameters.PlasmaXRTSCalculatorParameters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the PlasmaXRTSCalculatorParameters class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">Avogadro</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">physical_constants</span>
+<span class="kn">import</span> <span class="nn">periodictable</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.Utilities</span> <span class="k">import</span> <span class="n">ALL_ELEMENTS</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInteger</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetPositiveInteger</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetNonNegativeInteger</span>
+
+<div class="viewcode-block" id="PlasmaXRTSCalculatorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters">[docs]</a><span class="k">class</span> <span class="nc">PlasmaXRTSCalculatorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing parameters for the plasma x-ray Thomson scattering calculator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">photon_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">scattering_angle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">electron_temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">electron_density</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ion_temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ion_charge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">mass_density</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">debye_temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">band_gap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">energy_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">model_Sii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">model_See</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">model_Sbf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">model_IPL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">model_Mix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">lfc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">Sbf_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">source_spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">source_spectrum_fwhm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span>
+                 <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param elements: The chemical elements in the scattering target.</span>
+<span class="sd">        :type elements: list [[element symbol, stochiometric number, charge], ...], default None</span>
+<span class="sd">        :example elements: [[&#39;B&#39;, 1, 2], [&#39;N&#39;, 1, 2]] for Boron-Nitride with both B and N two fold ionized (ion average).</span>
+<span class="sd">        :example elements: [[&#39;C&#39;, 1, 4], [&#39;H&#39;, 1, -1]] for Plastic with both four-fold ionized C and ionization of H calculated so that the given average ion charge comes out correct.</span>
+
+<span class="sd">        :param photon_energy: The central energy of incoming x-ray photons.</span>
+<span class="sd">        :type photon_energy: float</span>
+
+<span class="sd">        :param scattering_angle: The scattering angle.</span>
+<span class="sd">        :type scattering_angle: float</span>
+
+<span class="sd">        :param electron_temperature: The temperature of the electron subsystems (units of eV).</span>
+<span class="sd">        :type electron_temperature: float</span>
+
+<span class="sd">        :param electron_density: The electron number density (units of 1/cm^3)</span>
+<span class="sd">        :type electron_density: float</span>
+
+<span class="sd">        :param ion_temperature: The temperature of the ion subsystem (units of eV).</span>
+<span class="sd">        :type ion_temperature: float</span>
+
+<span class="sd">        :param ion_charge: The average ion charge (units of elementary charge e).</span>
+<span class="sd">        :type ion_charge: float</span>
+
+<span class="sd">        :param mass_density: The mass density of the target (units of g/cm^3).</span>
+<span class="sd">        :type mass_density: float</span>
+
+<span class="sd">        :param debye_temperature: The Debye temperature (units of eV).</span>
+<span class="sd">        :type debye_temperature: float</span>
+
+<span class="sd">        :param band_gap: The band gap of the target (units of eV).</span>
+<span class="sd">        :type band_gap: float, default 0</span>
+
+<span class="sd">        :param energy_range: The energy range over which to calculate the scattering spectrum.</span>
+<span class="sd">        :type energy_range: dict, default 0</span>
+<span class="sd">        :example energy_range: energy_range={&#39;min&#39;  -100.0, &#39;max&#39;  100, &#39;step&#39;  0.5} to go from -100 eV to 100 eV in steps of 0.5 eV.</span>
+
+<span class="sd">        :param model_Sii: The model to use for the ion-ion structure factor.</span>
+<span class="sd">        :type model_Sii: str (&#39;DH&#39; || &#39;OCP&#39; || &#39;SOCP&#39; || &#39;SOCPN&#39;) || float, default &#39;DH&#39;</span>
+<span class="sd">        :example model_Sii: Sii=1.5 to use a fixed value of Sii=1.5</span>
+
+<span class="sd">        :param model_See: The model of the dynamic (high frequency) part of the electron-electron structure factor.</span>
+<span class="sd">        :type model_See: str (&#39;RPA&#39; || &#39;BMA&#39; || &#39;BMA+sLFC&#39;), default &#39;RPA&#39;</span>
+
+<span class="sd">        :param model_Sbf: The model for the bound-free structure factor.</span>
+<span class="sd">        :type model_Sbf: str (&#39;IA&#39; || &#39;FA&#39;), default &#39;IA&#39;</span>
+
+<span class="sd">        :param model_IPL: Model for ionization potential lowering.</span>
+<span class="sd">        :type model_IPL: str (&#39;SP&#39; || &#39;EK&#39;) || float, default &#39;SP&#39;</span>
+<span class="sd">        :example model_IPL: model_IPL=100.0 # Set the ionization potential difference (lowering) to 100 eV.</span>
+
+<span class="sd">        :param model_Mix: The model to use for mixing (of species).</span>
+<span class="sd">        :type model_Mix: str, default None</span>
+
+<span class="sd">        :param lfc:  The local field correction to use.</span>
+<span class="sd">        :type lfc:  float, default 0.0</span>
+
+<span class="sd">        :param Sbf_norm: How to normalize the bound-free structure factor.</span>
+<span class="sd">        :type Sbf_norm: str || float, default None</span>
+
+<span class="sd">        :param source_spectrum: Path to a file holding the x-ray probe energy spectrum.</span>
+<span class="sd">        :type source_spectrum: str, default None</span>
+
+<span class="sd">        :param source_spectrum_fwhm: The x-ray probe energy spectrum fwhm.</span>
+<span class="sd">        :type source_spectrum_fwhm: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check and set all parameters.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__elements</span>             <span class="o">=</span> <span class="n">checkAndSetElements</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__photon_energy</span>        <span class="o">=</span> <span class="n">checkAndSetPhotonEnergy</span><span class="p">(</span><span class="n">photon_energy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__scattering_angle</span>     <span class="o">=</span> <span class="n">checkAndSetScatteringAngle</span><span class="p">(</span><span class="n">scattering_angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__electron_temperature</span> <span class="o">=</span> <span class="n">checkAndSetElectronTemperature</span><span class="p">(</span><span class="n">electron_temperature</span><span class="p">)</span>
+        <span class="c1"># Set electron density, charge, and mass density depending on which input was given.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__electron_density</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ion_charge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mass_density</span> <span class="o">=</span> <span class="n">checkAndSetDensitiesAndCharge</span><span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ion_temperature</span>   <span class="o">=</span> <span class="n">checkAndSetIonTemperature</span><span class="p">(</span><span class="n">ion_temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">electron_temperature</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature</span> <span class="o">=</span> <span class="n">checkAndSetDebyeTemperature</span><span class="p">(</span><span class="n">debye_temperature</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap</span>          <span class="o">=</span> <span class="n">checkAndSetBandGap</span><span class="p">(</span><span class="n">band_gap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__energy_range</span>      <span class="o">=</span> <span class="n">checkAndSetEnergyRange</span><span class="p">(</span><span class="n">energy_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sii</span>         <span class="o">=</span> <span class="n">checkAndSetModelSii</span><span class="p">(</span><span class="n">model_Sii</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_See</span>         <span class="o">=</span> <span class="n">checkAndSetModelSee</span><span class="p">(</span><span class="n">model_See</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sbf</span>         <span class="o">=</span> <span class="n">checkAndSetModelSbf</span><span class="p">(</span><span class="n">model_Sbf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_IPL</span>         <span class="o">=</span> <span class="n">checkAndSetModelIPL</span><span class="p">(</span><span class="n">model_IPL</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_Mix</span>         <span class="o">=</span> <span class="n">checkAndSetModelMix</span><span class="p">(</span><span class="n">model_Mix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lfc</span>               <span class="o">=</span> <span class="n">checkAndSetLFC</span><span class="p">(</span><span class="n">lfc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm</span>          <span class="o">=</span> <span class="n">checkAndSetSbfNorm</span><span class="p">(</span><span class="n">Sbf_norm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum</span>    <span class="o">=</span> <span class="n">checkAndSetSourceSpectrum</span><span class="p">(</span><span class="n">source_spectrum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum_fwhm</span><span class="o">=</span><span class="n">checkAndSetSourceSpectrumFWHM</span><span class="p">(</span><span class="n">source_spectrum_fwhm</span><span class="p">)</span>
+
+        <span class="c1"># Set internal parameters.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSeeFlags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSiiFlags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSbfNormFlags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setDebyeTemperatureFlags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setBandGapFlags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setIPLFlags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSourceSpectrumFlags</span><span class="p">()</span>
+
+        <span class="c1"># Set state to not-initialized (e.g. input deck is not written).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Set the inherited parameters defaults that depend on the special calculator. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractCalculatorParameters__cpus_per_task_default</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_setSeeFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the See parameters as used in the input deck generator. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_rpa</span>         <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s2">&quot;RPA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_bma</span>         <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s2">&quot;BMA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_bma_slfc</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;BMA+sLFC&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__write_bma</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;BMA+sLFC&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;BMA&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_lindhard</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;Lindhard&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_landen</span>      <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;Landen&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_static_lfc</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;sLFC&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_dynamic_lfc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;dLFC&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_mff</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_See</span> <span class="o">==</span> <span class="s1">&#39;MFF&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setSiiFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the internal Sii parameters as used in the input deck generator.&quot;&quot;&quot;</span>
+        <span class="c1"># By default, switch off usage of user given Sii value.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Sii_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_Sii_value</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Only if Sii model input parameter is float, use it as Sii(k).</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sii</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__use_Sii_value</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="c1"># Copy value.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Sii_value</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__model_Sii</span><span class="p">)</span>
+            <span class="c1"># Reset model parameter but short-cutting the setter.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sii</span> <span class="o">=</span> <span class="s1">&#39;DH&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_setSbfNormFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the internal Sbf norm flags used in the input deck generator. &quot;&quot;&quot;</span>
+
+        <span class="c1"># By default, switch off usage of user given SbfNorm value.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Only if SbfNorm model input parameter is float, use it as SbfNorm(k).</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sbf_norm</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="c1"># Copy value.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm_value</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sbf_norm</span><span class="p">)</span>
+            <span class="c1"># Reset model parameter.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm</span> <span class="o">=</span> <span class="s1">&#39;USR&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_setDebyeTemperatureFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the internal Debye temperature flags used in the input deck generator. &quot;&quot;&quot;</span>
+
+        <span class="c1"># By default, switch off usage of user given Debye temperature.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_debye_temperature</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Only if Debye Temperature is non-zero use it.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debye_temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__use_debye_temperature</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_setBandGapFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the internal bandgap flags used in the input deck generator. &quot;&quot;&quot;</span>
+
+        <span class="c1"># By default, switch off usage of band gap.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_band_gap</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Only if bandgap is non-zero use it.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_gap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__use_band_gap</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap</span>
+
+    <span class="k">def</span> <span class="nf">_setIPLFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the internal ionization potential lowering flags used in the input deck generator. &quot;&quot;&quot;</span>
+
+        <span class="c1"># By default, switch off usage of band gap.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ipl_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Only if ipl is non-zero use it.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_IPL</span><span class="p">,</span> <span class="nb">float</span> <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ipl_value</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__model_IPL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model_IPL</span> <span class="o">=</span> <span class="s1">&#39;USR&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_setSourceSpectrumFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the internal source spectrum flags used in the input deck generation.&quot;&quot;&quot;</span>
+        <span class="c1"># Default.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_source_spectrum_file</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum_identifier</span> <span class="o">=</span> <span class="s2">&quot;GAUSSIAN&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum</span> <span class="o">==</span> <span class="s2">&quot;LORENTZ&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum_identifier</span> <span class="o">=</span> <span class="s2">&quot;LORENTZIAN&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum</span> <span class="o">==</span> <span class="s2">&quot;PROP&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__use_source_spectrum_file</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write the input deck for the xrts backengine. &quot;&quot;&quot;</span>
+        <span class="c1"># Make a temporary directory.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;xrs_&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Write the input file.</span>
+        <span class="n">input_deck_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span> <span class="s1">&#39;input.dat&#39;</span> <span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_deck_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_deck</span><span class="p">:</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--XRTS---input_file-----------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--fit_parameters------------------------------flag----</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DO_FIT                0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PHOTON_ENERGY     </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;SCATTERING_ANGLE  </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angle</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ELECTRON_TEMP     </span><span class="si">%4.3f</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_temperature</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ELECTRON_DENSITY  </span><span class="si">%4.3e</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_density</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;AMPLITUDE         1.0   0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BASELINE          0.0   0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Z_FREE            </span><span class="si">%4.3f</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ion_charge</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;OUT(1=XSEC,2=PWR)       1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--model_for_total_spec---------use-flag--------------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_RPA </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_rpa</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_LINDHARD    </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_lindhard</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_TSYTOVICH    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_STATIC_LFC  </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_static_lfc</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_DYNAMIC_LFC </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_dynamic_lfc</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_MFF         </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_mff</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_BMA         </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_bma</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_BMA+sLFC    </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_bma_slfc</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_CORE         1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--gradients------------------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GRAD 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;L_GRADIENT            0.0e-0 </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;T_GRADIENT            0.0    </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DSTEP                 0.0    </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--ion_parameters----------------------------use_flag-</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ION_TEMP </span><span class="si">%d</span><span class="s1"> 1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ion_temperature</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;S_ION_FEATURE </span><span class="si">%4.3f</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Sii_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__use_Sii_value</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DEBYE_TEMP    </span><span class="si">%4.3f</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__use_debye_temperature</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BAND_GAP      </span><span class="si">%4.3f</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__band_gap_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__use_band_gap</span><span class="p">)</span> <span class="p">)</span>
+
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--integration----------------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N_DAWSON       32</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N_DISTRIBUTION 32</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N_PVI          32</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N_LANDEN      512</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N_RELAXATION 1024</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;N_FFT        4096</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPS        1.0E-4</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--See(k,w)------------------------------use/norm-----</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;STATIC_MODEL(DH,OCP,SOCP,SOCPN) </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_Sii</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_ADV_Mix </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_Mix</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_IRS_MODEL                            0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;HARD_SPHERE_DIAM                 1E-10   0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;POLARIZABILITY                     0.0 0.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BOUND-FREE_MODEL(IA,IBA,FFA)            </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_Sbf</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BOUND-FREE_NORM(FK,NO,USR)        </span><span class="si">%s</span><span class="s1"> </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sbf_norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm_value</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BOUND-FREE_MEFF                        1.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_BOUND-FREE_DOPPLER                   0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CONT-LOWR_MODEL(SP,EK,USR)         </span><span class="si">%s</span><span class="s1">    </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_IPL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ipl_value</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GK                                 </span><span class="si">%4.3f</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lfc</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;RPA                                </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_rpa</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;LINDHARD                           </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_lindhard</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;SALPETER                            0    0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;LANDEN                             </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_landen</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;RPA_TSYTOVICH                       0    0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;STATIC_LFC                         </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_static_lfc</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DYNAMIC_LFC                        </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_dynamic_lfc</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MFF                                </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_mff</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BMA(+sLFC)                         </span><span class="si">%d</span><span class="s1">    0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__write_bma</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CORE                                1    0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TOTAL                               1    0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;E_MIN                              </span><span class="si">%4.3f</span><span class="s1">  </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;E_MAX                              </span><span class="si">%4.3f</span><span class="s1">  </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;E_STEP                             </span><span class="si">%4.3f</span><span class="s1">  </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--target_spec--------------------------chem----Zfree--</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NUMBER_OF_SPECIES </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">))</span> <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">):</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TARGET_</span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MASS_DENSITY </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NE_ZF_LOCK 1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DATA_FILE data.txt</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NUMBER_POINTS 1024</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;OPACITY_FILE nofile 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--instrument_function---------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;USE_FILE </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_source_spectrum_file</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;FILE_NAME source_spectrum.txt</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INST_MODEL </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum_identifier</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INST_FWHM </span><span class="si">%4.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum_fwhm</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BIN_PER_PIXEL 1.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INST_INDEX 2.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--additional_parameters-------------------------------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MAX_ITERATIONS 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;LEVENBERG_MARQUARDT 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;SIGMA_LM 1.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;SAVE_FILE xrts_out.txt</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__elements</span>
+    <span class="nd">@elements</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the elements to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__elements</span> <span class="o">=</span> <span class="n">checkAndSetElements</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">photon_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the photon energy. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__photon_energy</span>
+    <span class="nd">@photon_energy</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">photon_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the photon energy to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__photon_energy</span> <span class="o">=</span> <span class="n">checkAndSetPhotonEnergy</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scattering_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the scattering angle. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scattering_angle</span>
+    <span class="nd">@scattering_angle</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">scattering_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the scattering angle to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__scattering_angle</span> <span class="o">=</span> <span class="n">checkAndSetScatteringAngle</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">electron_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the electron temperature. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__electron_temperature</span>
+    <span class="nd">@electron_temperature</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">electron_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the electron temperature to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__electron_temperature</span> <span class="o">=</span> <span class="n">checkAndSetElectronTemperature</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">electron_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the electron density. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__electron_density</span>
+    <span class="nd">@electron_density</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">electron_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the electron density to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__electron_density</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="nb">print</span> <span class="s2">&quot;WARNING: Electron density might be inconsistent with mass density and charge.&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ion_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the ion temperature. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ion_temperature</span>
+    <span class="nd">@ion_temperature</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ion_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the ion temperature to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ion_temperature</span> <span class="o">=</span> <span class="n">checkAndSetIonTemperature</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ion_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the ion charge. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ion_charge</span>
+    <span class="nd">@ion_charge</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ion_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the ion charge to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ion_charge</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="nb">print</span> <span class="s2">&quot;WARNING: Ion charge might be inconsistent with electron density and mass density.&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mass_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the mass density. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mass_density</span>
+    <span class="nd">@mass_density</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">mass_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the mass density to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mass_density</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="nb">print</span> <span class="s2">&quot;WARNING: Mass density might be inconsistent with electron density and charge.&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">debye_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the Debye temperature. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature</span>
+    <span class="nd">@debye_temperature</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">debye_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        @brief Set the Debye temperature to value.</span>
+
+<span class="sd">        @param value1 The value to set the Debye temperature to.</span>
+<span class="sd">        &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__debye_temperature</span> <span class="o">=</span> <span class="n">checkAndSetDebyeTemperature</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setDebyeTemperatureFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">band_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the band gap. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap</span>
+    <span class="nd">@band_gap</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">band_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the band gap to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__band_gap</span> <span class="o">=</span> <span class="n">checkAndSetBandGap</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setBandGapFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">energy_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the energy range. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__energy_range</span>
+    <span class="nd">@energy_range</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">energy_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the energy range to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__energy_range</span> <span class="o">=</span> <span class="n">checkAndSetEnergyRange</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_Sii</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the ion-ion structure factor model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sii</span>
+    <span class="nd">@model_Sii</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_Sii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the ion-ion structure factor model to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sii</span> <span class="o">=</span> <span class="n">checkAndSetModelSii</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSiiFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_See</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the electron-electron (high-frequency) structure factor model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_See</span>
+    <span class="nd">@model_See</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_See</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the electron-electron (high-frequency) structure factor model to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_See</span> <span class="o">=</span> <span class="n">checkAndSetModelSee</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSeeFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_Sbf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the bound-free structure factor model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sbf</span>
+    <span class="nd">@model_Sbf</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_Sbf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the bound-free structure factor model to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_Sbf</span> <span class="o">=</span> <span class="n">checkAndSetModelSbf</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_IPL</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the ionization potential lowering model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_IPL</span>
+    <span class="nd">@model_IPL</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_IPL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the ionization potential lowering model to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_IPL</span> <span class="o">=</span> <span class="n">checkAndSetModelIPL</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setIPLFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_Mix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the mixing model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model_Mix</span>
+    <span class="nd">@model_Mix</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_Mix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the mixing model to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_Mix</span> <span class="o">=</span> <span class="n">checkAndSetModelMix</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lfc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the local field factor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lfc</span>
+    <span class="nd">@lfc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">lfc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the local field factor to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lfc</span> <span class="o">=</span> <span class="n">checkAndSetLFC</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Sbf_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the norm of the bound-free structure factor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm</span>
+    <span class="nd">@Sbf_norm</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">Sbf_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the norm of the bound-free structure factor to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Sbf_norm</span> <span class="o">=</span> <span class="n">checkAndSetSbfNorm</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSbfNormFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the source spectrum identifier. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum</span>
+    <span class="nd">@source_spectrum</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">source_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the source_spectrum to value.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum</span> <span class="o">=</span> <span class="n">checkAndSetSourceSpectrum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSourceSpectrumFlags</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_spectrum_fwhm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the source spectrum fwhm identifier. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum</span>
+    <span class="nd">@source_spectrum_fwhm</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">source_spectrum_fwhm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the source_spectrum fwhm to value.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__source_spectrum_fwhm</span> <span class="o">=</span> <span class="n">checkAndSetSourceSpectrumFWHM</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="c1">#@property</span>
+    <span class="c1">#def (self):</span>
+        <span class="c1">#&quot;&quot;&quot; Query for the &lt;++&gt;. &quot;&quot;&quot;</span>
+        <span class="c1">#return self.__&lt;++&gt;</span>
+    <span class="c1">#@&lt;++&gt;.setter</span>
+    <span class="c1">#def &lt;++&gt;(self, value):</span>
+        <span class="c1">#&quot;&quot;&quot; Set the &lt;++&gt; to value.&quot;&quot;&quot;</span>
+        <span class="c1">#self.__&lt;++&gt; = checkAndSet&lt;++&gt;(value)</span>
+        <span class="c1">#&lt;++&gt;</span>
+
+       <span class="c1">#&lt;++&gt;</span>
+
+<span class="c1">###########################</span>
+<span class="c1"># Check and set functions #</span>
+<span class="c1">###########################</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetScatteringAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the scattering angle is in the correct range.</span>
+<span class="sd">    @param angle : The angle to check.</span>
+<span class="sd">    @return The checked angle.</span>
+<span class="sd">    @raise ValueError if not 0 &lt;= angle &lt;= 180</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Set default.</span>
+    <span class="k">if</span> <span class="n">angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Scattering angle not specified.&quot;</span><span class="p">)</span>
+
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># Check if in range.</span>
+    <span class="k">if</span> <span class="n">angle</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">angle</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">:</span>
+        <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s2">&quot;Scattering angle must be between 0 and 180 [degrees].&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Return.</span>
+    <span class="k">return</span> <span class="n">angle</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetPhotonEnergy</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the photon energy is correct.</span>
+<span class="sd">    @param energy : The energy to check.</span>
+<span class="sd">    @return The checked energy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Set default.</span>
+    <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Photon energy not specified.&quot;</span><span class="p">)</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Check if in range.</span>
+    <span class="k">if</span> <span class="n">energy</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span><span class="p">(</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s2">&quot;Photon energy must be positive.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Return.</span>
+    <span class="k">return</span> <span class="n">energy</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetElements</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid list of elements.</span>
+
+<span class="sd">    @param  elements: The elements to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; elements: list</span>
+<span class="sd">    @return: The checked list of elements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;No element(s) specified. Give at least one chemical element.&quot;</span><span class="p">)</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">list</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+
+    <span class="c1"># Check each element.</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+        <span class="n">symbol</span><span class="p">,</span> <span class="n">stoch</span><span class="p">,</span> <span class="n">chrg</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">list</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">symbol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_ELEMENTS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not a valid chemical element symbol.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">stoch</span> <span class="o">=</span> <span class="n">checkAndSetPositiveInteger</span><span class="p">(</span><span class="n">stoch</span><span class="p">)</span>
+        <span class="n">chrg</span> <span class="o">=</span> <span class="n">checkAndSetInteger</span><span class="p">(</span><span class="n">chrg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chrg</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Charge must be &gt;= -1.&quot;</span><span class="p">)</span>
+
+        <span class="n">element</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbol</span><span class="p">,</span> <span class="n">stoch</span><span class="p">,</span> <span class="n">chrg</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">elements</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetElectronTemperature</span><span class="p">(</span><span class="n">electron_temperature</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid electron temperature.</span>
+
+<span class="sd">    @param  electron_temperature : The electron temperature to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : double</span>
+<span class="sd">    @return : The checked electron temperature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">electron_temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Electron temperature not specified.&quot;</span><span class="p">)</span>
+    <span class="n">electron_temperature</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">electron_temperature</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">electron_temperature</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Electron temperature must be positive.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">electron_temperature</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetDensitiesAndCharge</span><span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check input and return a set of consistent electron density, average ion charge, and mass density, if two are given as input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Find number of Nones in input.</span>
+    <span class="n">number_of_nones</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span><span class="p">]))</span>
+    <span class="c1"># raise if not enough input.</span>
+    <span class="k">if</span> <span class="n">number_of_nones</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;At least two of Electron_density, ion_charge, and mass_density must be given.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get molar weight needed to convert electron density to mass density.</span>
+    <span class="n">element_symbols</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">]</span>
+    <span class="n">element_abundances</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span>
+    <span class="n">element_charges</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span>
+    <span class="n">element_instances</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">periodictable</span><span class="p">,</span> <span class="n">es</span><span class="p">)</span> <span class="k">for</span> <span class="n">es</span> <span class="ow">in</span> <span class="n">element_symbols</span><span class="p">]</span>
+    <span class="n">molar_weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">ei</span><span class="o">.</span><span class="n">mass</span> <span class="k">for</span> <span class="n">ei</span> <span class="ow">in</span> <span class="n">element_instances</span><span class="p">]</span>
+
+    <span class="n">molar_weight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">element_abundances</span> <span class="o">*</span> <span class="n">molar_weights</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">element_abundances</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">electron_density</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">electron_density</span> <span class="o">=</span> <span class="n">mass_density</span> <span class="o">*</span> <span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span>
+        <span class="nb">print</span> <span class="s2">&quot;Setting electron density to </span><span class="si">%5.4e</span><span class="s2">/cm**3.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">electron_density</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ion_charge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ion_charge</span> <span class="o">=</span> <span class="n">electron_density</span> <span class="o">/</span> <span class="p">(</span><span class="n">mass_density</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Setting average ion charge to </span><span class="si">%5.4f</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ion_charge</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mass_density</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mass_density</span> <span class="o">=</span> <span class="n">electron_density</span> <span class="o">/</span> <span class="p">(</span><span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Setting mass density to </span><span class="si">%5.4f</span><span class="s2"> g/cm**3.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mass_density</span><span class="p">)</span>
+
+    <span class="c1"># Adjust</span>
+    <span class="c1">#negative_charge_element_index = numpy.where(element_charges == -1)</span>
+    <span class="c1">#positive_charges = element_charges[numpy.where(element_charges &gt;= 0.0)]</span>
+
+    <span class="c1">#sum_s_Zini= sum(element_abundances[numpy.where(element_charges &gt;= 0.0)] * positive_charges)</span>
+    <span class="c1">#sum_s_ni = sum(element_abundances[numpy.where(element_charges &gt;= 0.0)])</span>
+    <span class="c1">#element_charges[negative_charge_element_index] = sum_s_Zini / ion_charge - sum_s_ni</span>
+
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span> <span class="n">electron_density</span> <span class="o">/</span> <span class="p">(</span><span class="n">mass_density</span> <span class="o">*</span> <span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span> <span class="o">/</span> <span class="n">molar_weight</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.</span> <span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Electron density, mass_density, and ion charge are not internally consistent: ne = </span><span class="si">%5.4e</span><span class="s2">/cm**3, rho*Zf*NA/u= </span><span class="si">%5.4e</span><span class="s2">/cm**3.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">electron_density</span><span class="p">,</span> <span class="n">mass_density</span> <span class="o">*</span> <span class="n">ion_charge</span> <span class="o">*</span> <span class="n">Avogadro</span><span class="o">/</span><span class="n">molar_weight</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">electron_density</span><span class="p">,</span> <span class="n">ion_charge</span><span class="p">,</span> <span class="n">mass_density</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetIonTemperature</span><span class="p">(</span><span class="n">ion_temperature</span><span class="p">,</span> <span class="n">electron_temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid ion temperature.</span>
+
+<span class="sd">    @param  ion_temperature : The ion temperature to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : double</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;default&lt;/b&gt; : Electron temperature.</span>
+<span class="sd">    @return : The checked ion temperature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">electron_temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ion_temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot; Could not fix ion temperature because electron temperature not given.&quot;</span><span class="p">)</span>
+    <span class="n">ion_temperature</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ion_temperature</span><span class="p">,</span> <span class="n">electron_temperature</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ion_temperature</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Ion temperature must be positive.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ion_temperature</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetDebyeTemperature</span><span class="p">(</span><span class="n">debye_temperature</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid Debye temperature.</span>
+
+<span class="sd">    @param  debye_temperature : The Debye temperature to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : double</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;default&lt;/b&gt; : 0.0</span>
+<span class="sd">    @return : The checked Debye temperature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">debye_temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">debye_temperature</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">debye_temperature</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">debye_temperature</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Debye temperature must be non-negative.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">debye_temperature</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetBandGap</span><span class="p">(</span><span class="n">band_gap</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid bandgap.</span>
+
+<span class="sd">    @param  band_gap: The bandgap to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : double</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;default&lt;/b&gt; 0.0.</span>
+<span class="sd">    @return : The checked bandgap.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">band_gap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">band_gap</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">band_gap</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">band_gap</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Debye temperature must be positive.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">band_gap</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetModelMix</span><span class="p">(</span><span class="n">model_Mix</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid mixing model.</span>
+
+<span class="sd">    @param  model_Mix : The mixing model to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : string</span>
+<span class="sd">    @return : The checked mixing model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">model_Mix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">model_Mix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The mixing model must be a string or None.&#39;</span><span class="p">)</span>
+    <span class="n">model_Mix</span> <span class="o">=</span> <span class="n">model_Mix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">model_Mix</span> <span class="o">==</span> <span class="s1">&#39;adv&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The mixing model has to be &quot;ADV&quot; (advanced) or None.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;adv&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">:</span> <span class="mi">0</span><span class="p">}[</span><span class="n">model_Mix</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetLFC</span><span class="p">(</span><span class="n">lfc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid local field correction factor.</span>
+
+<span class="sd">    @param  lfc : The lfc to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : double</span>
+<span class="sd">    @return : The checked lfc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lfc</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">lfc</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lfc</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetSbfNorm</span><span class="p">(</span><span class="n">Sbf_norm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Utility to check if input is a valid norm of the bound-free structure factor.</span>
+
+<span class="sd">    @param  Sbf_norm : The norm to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : string or double.</span>
+<span class="sd">    @return : The checked norm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">Sbf_norm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FK&#39;</span><span class="p">,</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">Sbf_norm</span><span class="p">,</span> <span class="nb">float</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The bound-free norm parameter has to be &quot;FK&quot;, &quot;NO&quot;, None, or a numerical value.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Sbf_norm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Sbf_norm</span> <span class="o">=</span> <span class="s1">&#39;FK&#39;</span>
+    <span class="k">return</span> <span class="n">Sbf_norm</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetEnergyRange</span><span class="p">(</span><span class="n">energy_range</span><span class="p">,</span> <span class="n">electron_density</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the photon energy range is ok.</span>
+<span class="sd">    @param energy_range : The range to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; dict</span>
+<span class="sd">    @return The checked photon energy range.</span>
+<span class="sd">    @raise ValueError if not of correct shape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Raise if both arguments None.</span>
+    <span class="k">if</span> <span class="n">energy_range</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">electron_density</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;At least one argument (electron_density or energy_range) must be given.&quot;</span><span class="p">)</span>
+    <span class="c1"># Some constants.</span>
+    <span class="n">bohr_radius_m</span> <span class="o">=</span> <span class="n">physical_constants</span><span class="p">[</span><span class="s1">&#39;Bohr radius&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rydberg_energy_eV</span> <span class="o">=</span> <span class="n">physical_constants</span><span class="p">[</span><span class="s1">&#39;Rydberg constant times hc in eV&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">energy_range_default</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">electron_density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Get plasma frequency.</span>
+        <span class="n">plasma_frequency_eV</span> <span class="o">=</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="n">electron_density</span> <span class="o">*</span> <span class="p">(</span><span class="n">bohr_radius_m</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">rydberg_energy_eV</span>
+
+        <span class="c1"># Set to +/- 10*wpl if no range given.</span>
+        <span class="n">energy_range_default</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;min&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mf">10.0</span><span class="o">*</span><span class="n">plasma_frequency_eV</span><span class="p">,</span>
+                                <span class="s1">&#39;max&#39;</span> <span class="p">:</span>  <span class="mf">10.0</span><span class="o">*</span><span class="n">plasma_frequency_eV</span><span class="p">,</span>
+                                <span class="s1">&#39;step&#39;</span><span class="p">:</span>   <span class="mf">0.1</span><span class="o">*</span><span class="n">plasma_frequency_eV</span><span class="p">}</span>
+    <span class="n">energy_range</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">energy_range</span><span class="p">,</span> <span class="n">energy_range_default</span><span class="p">)</span>
+
+    <span class="c1"># Check keys.</span>
+    <span class="k">if</span> <span class="s1">&#39;min&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">energy_range</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;&#39;min&#39; missing in energy range (keys).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;max&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">energy_range</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;&#39;max&#39; missing in energy range (keys).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;step&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">energy_range</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;&#39;step&#39; missing in energy range (keys).&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check values.</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">energy_range</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">energy_range</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;All values in energy_range must be floats.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;energy_range[&#39;min&#39;] must be smaller than energy_range[&#39;max&#39;].&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">energy_range</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;energy_range[&#39;max&#39;] - energy_range[&#39;min&#39;] must be larger than the stepsize energy_range[&#39;step&#39;].&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Return</span>
+    <span class="k">return</span> <span class="n">energy_range</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetModelSii</span><span class="p">(</span> <span class="n">model</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the model is a valid model for the Rayleigh (quasistatic) scattering feature.</span>
+
+<span class="sd">    @param model : The model to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : str</span>
+<span class="sd">    @return : The checked model</span>
+<span class="sd">    @raise ValueError if not a string or not a valid Sii model (&#39;RPA&#39;, &#39;DH&#39;,</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;SOCP&#39;</span>
+
+    <span class="n">valid_models</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;DH&#39;</span><span class="p">,</span> <span class="s1">&#39;OCP&#39;</span><span class="p">,</span> <span class="s1">&#39;SOCP&#39;</span><span class="p">,</span> <span class="s1">&#39;SOCPN&#39;</span> <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span> <span class="nb">float</span> <span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The Sii model must be a valid model specifier (string) or a float giving the value of Sii(k).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span> <span class="ow">in</span> <span class="n">valid_models</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span> <span class="nb">float</span> <span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The Sii model must be a valid Sii model or a numerical value. Valid Sii models are </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_models</span><span class="p">))</span> <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model</span>
+
+
+<span class="k">def</span> <span class="nf">checkAndSetModelSee</span><span class="p">(</span> <span class="n">model</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the model is a valid model for the high frequency (dynamic) feature.</span>
+
+<span class="sd">    @param model : The model to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : str</span>
+<span class="sd">    @return : The checked model</span>
+<span class="sd">    @raise ValueError if not a string or not a valid See0 model (&#39;RPA&#39;, &#39;BMA&#39;, &#39;BMA+sLFC&#39;, &#39;BMA+dLFC&#39;, &#39;LFC&#39;, &#39;Landen&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Default handling.</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;RPA&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Valid models.</span>
+    <span class="n">valid_models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RPA&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Lindhard&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Landen&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;static LFC&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;dynamic LFC&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;BMA&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;BMA+sLFC&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;BMA+dLFC&#39;</span><span class="p">,</span>
+                    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_models</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The See model must be a valid See0 model. Valid See0 models are </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_models</span><span class="p">))</span> <span class="p">)</span>
+
+    <span class="c1"># Return</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetModelSbf</span><span class="p">(</span> <span class="n">model</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the model is a valid model for the bound-free (Compton) scattering feature.</span>
+
+<span class="sd">    @param model : The model to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : str</span>
+<span class="sd">    @return : The checked model</span>
+<span class="sd">    @raise ValueError if not a string or not a valid Sbf model (&#39;IA&#39;, &#39;HWF&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle default.</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;IA&#39;</span><span class="p">)</span>
+
+    <span class="n">valid_models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IA&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;IBA&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;FFA&#39;</span>
+                    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_models</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The Sbf model must be a valid Sbf model. Valid Sbf models are </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_models</span><span class="p">))</span> <span class="p">)</span>
+
+    <span class="c1"># Return</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetModelIPL</span><span class="p">(</span> <span class="n">model</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the model is a valid model for ionization potential lowering.</span>
+
+<span class="sd">    @param model : The model to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : str or float</span>
+<span class="sd">    @return : The checked model</span>
+<span class="sd">    @raise ValueError if not a valid IPL model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle default.</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;SP&#39;</span>
+
+    <span class="n">valid_models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SP&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;EK&#39;</span><span class="p">,</span>
+                    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span> <span class="nb">str</span> <span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span> <span class="nb">float</span> <span class="p">)</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The IPL model must be a string or a float.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span> <span class="ow">in</span> <span class="n">valid_models</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span> <span class="nb">float</span> <span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The Sbf model must be a valid Sbf model or a numerical value. Valid Sbf models are </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_models</span><span class="p">))</span> <span class="p">)</span>
+
+    <span class="c1"># Return</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetSourceSpectrum</span><span class="p">(</span> <span class="n">source_spectrum</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check sanity of given input for the source spectrum identifier.</span>
+
+<span class="sd">    @param source_spectrum : The source spectrum identifier to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : str</span>
+<span class="sd">    @return : The checked identifier.</span>
+<span class="sd">    @raise : TypeError or ValueError if input is not valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check type.</span>
+    <span class="n">source_spectrum</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_spectrum</span><span class="p">,</span> <span class="s2">&quot;GAUSS&quot;</span> <span class="p">)</span>
+
+    <span class="c1"># Convert to all upper case.</span>
+    <span class="n">source_spectrum</span> <span class="o">=</span> <span class="n">source_spectrum</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="c1"># Check input is valid.</span>
+    <span class="k">if</span> <span class="n">source_spectrum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;GAUSS&quot;</span><span class="p">,</span> <span class="s2">&quot;LORENTZ&quot;</span><span class="p">,</span> <span class="s2">&quot;PROP&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;source_spectrum&#39; must be one of &#39;GAUSS&#39;, &#39;LORENTZ&#39;, or &#39;PROP&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># All checked, return.</span>
+    <span class="k">return</span> <span class="n">source_spectrum</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetSourceSpectrumFWHM</span><span class="p">(</span> <span class="n">fwhm</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check sanity of given input for the source spectrum full width at half maximum (fwhm).</span>
+
+<span class="sd">    @param source_spectrum : The value to check.</span>
+<span class="sd">    &lt;br/&gt;&lt;b&gt;type&lt;/b&gt; : float</span>
+<span class="sd">    @return : The checked value.</span>
+<span class="sd">    @raise : TypeError or ValueError if input is not valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check type.</span>
+    <span class="n">fwhm</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fwhm</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
+
+    <span class="c1"># Check positivity.</span>
+    <span class="k">if</span> <span class="n">fwhm</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;source_spectrum_fwhm&#39; must be positive.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># All checked, return.</span>
+    <span class="k">return</span> <span class="n">fwhm</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

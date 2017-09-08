@@ -1,0 +1,366 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Calculators.CrystFELPhotonDiffractor &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Calculators.CrystFELPhotonDiffractor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module that holds the CrystFELPhotonDiffractor class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2017 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span><span class="nn">shlex</span>
+
+<span class="kn">import</span> <span class="nn">prepHDF5</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.CrystFELPhotonDiffractorParameters</span> <span class="k">import</span> <span class="n">CrystFELPhotonDiffractorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.PhotonBeamParameters</span> <span class="k">import</span> <span class="n">PhotonBeamParameters</span><span class="p">,</span> <span class="n">propToBeamParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">ParallelUtilities</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
+
+<div class="viewcode-block" id="CrystFELPhotonDiffractor"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor">[docs]</a><span class="k">class</span> <span class="nc">CrystFELPhotonDiffractor</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing a x-ray free electron laser photon propagator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param parameters: Parameters of the calculation (not data).</span>
+<span class="sd">        :type parameters:  CrystFELPhotonDiffractorParameters</span>
+
+<span class="sd">        :param input_path: Path to hdf5 file holding the input data.</span>
+<span class="sd">        :type input_path: str</span>
+
+<span class="sd">        :param output_path: Path to hdf5 file for output.</span>
+<span class="sd">        :type output_path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set default parameters if no parameters given.</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameters must at least specify the sample structure, e.g. in pdb format.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">CrystFELPhotonDiffractorParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+
+
+        <span class="c1"># Dummy input path since none required (we don&#39;t read from a beam propgation yet.)</span>
+        <span class="k">if</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Beam parameters can only be passed through the parameters object or via the input_path argument.&quot;</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span> <span class="o">=</span> <span class="n">propToBeamParameters</span><span class="p">(</span> <span class="n">input_path</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;diffr&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Init base class.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CrystFELPhotonDiffractor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="c1">### FIXME</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span> <span class="o">=</span> <span class="p">[</span>
+                                <span class="s1">&#39;/data/data&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/diffr&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/angle&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/history/parent/detail&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/history/parent/parent&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/package_version&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/contact&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/data_description&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/method_description&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/geom/detectorDist&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/geom/pixelWidth&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/geom/pixelHeight&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/geom/mask&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/beam/photonEnergy&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/beam/photons&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/beam/focusArea&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/info&#39;</span><span class="p">,</span>
+                                <span class="p">]</span>
+
+<div class="viewcode-block" id="CrystFELPhotonDiffractor.expectedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor.expectedData">[docs]</a>    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data expected by the Diffractor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CrystFELPhotonDiffractor.providedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor.providedData">[docs]</a>    <span class="k">def</span> <span class="nf">providedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data provided by the Diffractor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span> <span class="nf">computeNTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">resources</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">getParallelResourceInfo</span><span class="p">()</span>
+        <span class="n">ncores</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span>
+        <span class="n">nnodes</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="o">==</span><span class="s2">&quot;MAX&quot;</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="n">nnodes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="o">/</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="p">)),</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span>
+
+<div class="viewcode-block" id="CrystFELPhotonDiffractor.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This method drives the backengine singFEL.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Setup directory structure as needed.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">)</span>
+        <span class="n">output_file_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;diffr_out&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output_file_base</span> <span class="o">+=</span> <span class="s2">&quot;_0000001.h5&quot;</span>
+
+        <span class="c1"># collect MPI arguments</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span><span class="o">==</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">computeNTasks</span><span class="p">()</span>
+            <span class="n">mpicommand</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">prepareMPICommandArguments</span><span class="p">(</span><span class="n">np</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mpicommand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span>
+
+        <span class="c1"># Setup command, minimum set first.</span>
+        <span class="n">command_sequence</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pattern_sim&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;-p </span><span class="si">%s</span><span class="s1">&#39;</span>                 <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">sample</span><span class="p">,</span>
+                            <span class="s1">&#39;--geometry=</span><span class="si">%s</span><span class="s1">&#39;</span>         <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+                            <span class="s1">&#39;--output=</span><span class="si">%s</span><span class="s1">&#39;</span>           <span class="o">%</span> <span class="n">output_file_base</span><span class="p">,</span>
+                            <span class="s1">&#39;--number=</span><span class="si">%d</span><span class="s1">&#39;</span>           <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span><span class="p">,</span>
+                            <span class="p">]</span>
+        <span class="c1"># Handle random rotation is requested.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">uniform_rotation</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--random-orientation&#39;</span><span class="p">)</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--really-random&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--photon-energy=</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">))</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--beam-bandwidth=</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy_relative_bandwidth</span><span class="p">))</span>
+            <span class="n">nphotons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">pulse_energy</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">e</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--nphotons=</span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nphotons</span><span class="p">))</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--beam-radius=</span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">beam_diameter_fwhm</span><span class="o">/</span><span class="mf">2.</span><span class="p">))</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--spectrum=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy_spectrum_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy_spectrum_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;sase&quot;</span><span class="p">:</span>
+                <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--sample-spectrum=512&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Handle intensities list if present.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">intensities_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--intensities=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">intensities_file</span><span class="p">))</span>
+
+        <span class="c1"># Handle powder if present.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">powder</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--powder=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;powder.h5&quot;</span><span class="p">)))</span>
+
+        <span class="c1"># Handle size range if present.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">crystal_size_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--min-size=</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">crystal_size_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1e9</span> <span class="p">))</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--max-size=</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">crystal_size_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">1e9</span> <span class="p">))</span>
+
+
+        <span class="c1"># put MPI and program arguments together</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span> <span class="o">+</span> <span class="n">command_sequence</span>
+        <span class="c1">#args =  command_sequence</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CrystFELPhotonDiffractor backengine command: &quot;</span><span class="o">+</span><span class="n">command</span><span class="p">)</span>
+
+        <span class="c1"># Run the backengine command.</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="c1"># Return the return code from the backengine.</span>
+        <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+
+    <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="CrystFELPhotonDiffractor.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to save the output to a file. Creates links to h5 files that all contain only one pattern.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Path where individual h5 files are located.</span>
+        <span class="n">path_to_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span>
+
+        <span class="c1"># Rename files.</span>
+        <span class="n">_rename_files</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">)</span>
+
+        <span class="c1"># Setup new file.</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span> <span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5_outfile</span><span class="p">:</span>
+
+            <span class="n">data_group</span> <span class="o">=</span> <span class="n">h5_outfile</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+            <span class="n">params_group</span> <span class="o">=</span> <span class="n">h5_outfile</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;params&quot;</span><span class="p">)</span>
+            <span class="n">beam_params_group</span> <span class="o">=</span> <span class="n">params_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;beam&quot;</span><span class="p">)</span>
+            <span class="c1">#geom_params_group = params_group.create_group(&quot;geom&quot;)</span>
+
+            <span class="n">beam_params_group</span><span class="p">[</span><span class="s2">&quot;photonEnergy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy</span>
+            <span class="n">beam_params_group</span><span class="p">[</span><span class="s2">&quot;photonEnergy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unit_symbol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;eV&quot;</span>
+            <span class="n">beam_params_group</span><span class="p">[</span><span class="s2">&quot;photonEnergy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unit_longname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;electronvolt&quot;</span>
+            <span class="n">beam_params_group</span><span class="p">[</span><span class="s2">&quot;focusArea&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">beam_diameter_fwhm</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">beam_params_group</span><span class="p">[</span><span class="s2">&quot;focusArea&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unit_symbol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;m^2&quot;</span>
+            <span class="n">beam_params_group</span><span class="p">[</span><span class="s2">&quot;focusArea&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unit_longname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;square_metre&quot;</span>
+
+            <span class="c1"># Files to read from.</span>
+            <span class="n">individual_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">path_to_files</span><span class="p">,</span> <span class="n">f</span> <span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="n">path_to_files</span> <span class="p">)</span> <span class="p">]</span>
+            <span class="n">individual_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="c1"># Loop over all individual files and link in the top level groups.</span>
+            <span class="k">for</span> <span class="n">ind_file</span> <span class="ow">in</span> <span class="n">individual_files</span><span class="p">:</span>
+                <span class="c1"># Open file.</span>
+                <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">ind_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5_infile</span><span class="p">:</span>
+
+                    <span class="c1"># Get file ID.</span>
+                    <span class="n">file_ID</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">ind_file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.h5&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="c1"># Create group</span>
+                    <span class="n">id_group</span> <span class="o">=</span> <span class="n">data_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">file_ID</span><span class="p">)</span>
+
+                    <span class="c1"># Links must be relative.</span>
+                    <span class="n">relative_link_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ind_file</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">ind_file</span><span class="p">)))</span>
+
+                    <span class="c1"># Link in the data.</span>
+                    <span class="n">path_in_target</span> <span class="o">=</span> <span class="s2">&quot;/data/data&quot;</span>
+                    <span class="n">path_in_origin</span> <span class="o">=</span> <span class="s2">&quot;data/</span><span class="si">%s</span><span class="s2">/data&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file_ID</span><span class="p">)</span>
+                    <span class="n">h5_outfile</span><span class="p">[</span><span class="n">path_in_origin</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="n">path_in_target</span><span class="p">)</span>
+
+                    <span class="c1"># Close input file.</span>
+                    <span class="n">h5_infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c1"># Close file.</span>
+            <span class="n">h5_outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c1"># Reset output_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="s2">&quot;.h5&quot;</span></div></div>
+
+<span class="k">def</span> <span class="nf">_rename_files</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renames all files generated by pattern_sim to simex conform filenames.&quot;&quot;&quot;</span>
+
+    <span class="n">old_wd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span> <span class="n">path</span> <span class="p">)</span>
+    <span class="n">original_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+    <span class="n">original_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">original_files</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h5&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">new_filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_</span><span class="si">%07d</span><span class="s2">.h5&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Renaming </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_filename</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_filename</span><span class="p">)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span> <span class="n">old_wd</span> <span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

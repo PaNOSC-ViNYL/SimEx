@@ -1,0 +1,715 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Calculators.FEFFPhotonMatterInteractor &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Calculators.FEFFPhotonMatterInteractor</h1><div class="highlight"><pre>
+<span></span><span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; Module that holds the FEFFPhotonMatterInteractor class.</span>
+
+<span class="sd">    @author : CFG</span>
+<span class="sd">    @institution : XFEL</span>
+<span class="sd">    @creation 20161011</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">distutils.spawn</span> <span class="k">import</span> <span class="n">find_executable</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonInteractor</span> <span class="k">import</span> <span class="n">AbstractPhotonInteractor</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.Utilities</span> <span class="k">import</span> <span class="n">ALL_ELEMENTS</span>
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractor"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor">[docs]</a><span class="k">class</span> <span class="nc">FEFFPhotonMatterInteractor</span><span class="p">(</span><span class="n">AbstractPhotonInteractor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface class for photon-matter interaction calculations using the FEFF code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the FEFF photon interactor.</span>
+
+<span class="sd">        :param parameters: Parameters that govern the PMI calculation.</span>
+<span class="sd">        :type parameters: FEFFPhotonMatterInteractorParameters</span>
+
+<span class="sd">        :param input_path: Location of data needed by the PMI calculation.</span>
+<span class="sd">        :type input_path: str</span>
+
+<span class="sd">        :param output_path: Where to store the data generated by the PMI calculation.</span>
+<span class="sd">        :type output_path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Handle default output_path</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;pmi&#39;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;pmi&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="s1">&#39;pmi&#39;</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;A file named &#39;pmi&#39; already exists, cowardly refusing to overwrite.&quot;</span><span class="p">)</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="s1">&#39;pmi/pmi_out_0000001.h5&#39;</span>
+
+        <span class="c1"># Initialize base class.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FEFFPhotonMatterInteractor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/data/arrEhor&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/arrEver&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/nSlices&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/nx&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/ny&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qxMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qxMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qyMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qyMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/sliceMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/sliceMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/xMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/xMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/yMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/yMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/zCoord&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/beamline/printout&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Rx&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Ry&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/dRx&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/dRy&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/nval&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/photonEnergy&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wDomain&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wEFieldUnit&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wFloatType&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wSpace&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/xCentre&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/yCentre&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/package_version&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/contact&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/data_description&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/method_description&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/misc/xFWHM&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/misc/yFWHM&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/version&#39;</span><span class="p">,</span>
+                                <span class="p">]</span>
+
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractor.expectedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor.expectedData">[docs]</a>    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data expected by the Interactor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span></div>
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractor.providedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor.providedData">[docs]</a>    <span class="k">def</span> <span class="nf">providedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data provided by the Interactor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span></div>
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractor.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This method drives the backengine code.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Setup the working directory.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setupWorkingDirectory</span><span class="p">()</span>
+
+        <span class="c1"># Setup path to executable.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_to_executable</span> <span class="o">=</span> <span class="n">find_executable</span><span class="p">(</span><span class="s1">&#39;feff85L&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Copy executable.</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_executable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">)</span>
+
+        <span class="c1"># Write parameter deck.</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span> <span class="s1">&#39;feff.inp&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span> <span class="p">)</span> <span class="k">as</span> <span class="n">deck</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_serialize</span><span class="p">(</span> <span class="n">deck</span> <span class="p">)</span>
+            <span class="n">deck</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Execute the code.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">old_wd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">)</span>
+            <span class="n">command_line</span> <span class="o">=</span> <span class="s1">&#39;feff85L&#39;</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="n">command_line</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+            <span class="c1"># Return.</span>
+
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span> <span class="n">old_wd</span> <span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span> <span class="n">old_wd</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="c1"># Setup data object. This will be a h5py File object residing purely in memory until closed,</span>
+        <span class="c1"># at which moment it will be written to disk.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;core&#39;</span><span class="p">,</span> <span class="n">backing_store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span> <span class="p">)</span>
+
+        <span class="c1"># Read raw data files.</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span> <span class="s1">&#39;atoms.dat&#39;</span><span class="p">),</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">xmu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span> <span class="s1">&#39;xmu.dat&#39;</span><span class="p">),</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span> <span class="s1">&#39;chi.dat&#39;</span><span class="p">),</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+        <span class="c1"># Setup tree and write data on the fly.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/r&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">atoms</span><span class="p">[:,:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="c1">#self.__data.create_dataset(&#39;data/snp_0000001/xyz&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;data/snp_0000001/Z&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;data/snp_0000001/T&#39;, data=None)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/E&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xmu</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/DeltaE&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xmu</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/k&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xmu</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/mu&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xmu</span><span class="p">[:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/mu0&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xmu</span><span class="p">[:,</span><span class="mi">4</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/chi&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xmu</span><span class="p">[:,</span><span class="mi">5</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/ampl&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">chi</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/phase&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">chi</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/snp_0000001/potential_index&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">atoms</span><span class="p">[:,</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Angstrom&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/DeltaE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/E&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/k&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/mu&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1/Angstrom&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/mu0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1/Angstrom&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/chi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/ampl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/phase&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;rad&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="s1">&#39;data/snp_0000001/potential_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/polarization_tensor&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/evec&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/xivec&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/spvec&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/nabs&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/iphabs&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/cf_average_data&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/ipol&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/ispin&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/le2&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/elpty&#39;, data=None)</span>
+        <span class="c1">#self.__data.create_dataset(&#39;misc/angks&#39;, data=None)</span>
+
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">working_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the working directory &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__working_directory</span>
+    <span class="nd">@working_directory</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">working_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the working directory to a value. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;working_directory must be a string (path).&quot;</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="n">value</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;working_directory must be an existing directory (or link).&quot;</span><span class="p">)</span>
+
+        <span class="c1"># All sane, set attribute.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__working_directory</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path_to_executable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the path to the feff executable. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__path_to_executable</span>
+    <span class="nd">@path_to_executable</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">path_to_executable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the path_to_executable to a value. &quot;&quot;&quot;</span>
+        <span class="c1"># Check type.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;path_to_executable must be a string (path).&quot;</span> <span class="p">)</span>
+        <span class="c1"># Check is file.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="n">value</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;path_to_executable must be an existing file (or link).&quot;</span><span class="p">)</span>
+        <span class="c1"># Check is executable.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXUSR</span> <span class="o">&amp;</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="n">stat</span><span class="o">.</span><span class="n">ST_MODE</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;path_to_executable must be executable by the user.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># All sane, set attribute.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__path_to_executable</span> <span class="o">=</span> <span class="n">value</span>
+
+
+    <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+        <span class="k">pass</span> <span class="c1"># Nothing to be done since IO happens in backengine.</span>
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractor.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private method to save the object to a file.</span>
+
+<span class="sd">        :param output_path: The file where to save the object&#39;s data. Default: self.output_path</span>
+<span class="sd">        :type output_path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the handle to the data.</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;info/contact&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s1">&#39;Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;&#39;</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;info/data_description&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s1">&#39;Absorption spectrum and associated data.&#39;</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;info/interface_version&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s1">&#39;1.0&#39;</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;info/credits&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s1">&#39;J. J. Rehr et al, &quot;Ab initio theory and calculations of X-ray spectra&quot;, Comptes Rendus Physique _10_, 548 (2009). DOI: dx.doi.org/10.1016/j.crhy.2008.08.004&#39;</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;info/package_version&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s1">&#39;FEFF8.5L&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;params/edge&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">edge</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;params/amplitude_reduction_factor&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">amplitude_reduction_factor</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;params/effective_path_distance&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">effective_path_distance</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;params/amplitude_reduction_factor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;params/edge&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;params/effective_path_distance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Angstrom&#39;</span>
+
+        <span class="c1"># Close the dataset, this writes the data to disk.</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_setupWorkingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create a temporary directory where to execute the calculation. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;tmp_feff&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractorParameters">[docs]</a><span class="k">class</span> <span class="nc">FEFFPhotonMatterInteractorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface class for photon-matter interaction calculations using the FEFF code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">potentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">amplitude_reduction_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">effective_path_distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the FEFF photon interactor.</span>
+
+<span class="sd">        :param atoms: The atomic structure (Atom coordinates ([x,y,z] in Angstrom), element symbol, and potential index). If no potential index is given, all atoms of the same species will be assigned the default potential. The scattering atom must have the potential index 0.</span>
+<span class="sd">        :type atoms: list || tuple</span>
+<span class="sd">        :example atoms: ([[0.0, 0.0, 0.0], &#39;Cu&#39;, 0], [[0.0, 1.0, 1.2], &#39;O&#39;, 1], ...)</span>
+
+<span class="sd">        :param potentials: The potentials to use.</span>
+<span class="sd">        :type potentials: list</span>
+
+<span class="sd">        :param edge: The edge to calculate (K, L1, L2, M1, M2, M3, ...). Default &#39;K&#39;.</span>
+<span class="sd">        :type edge: str</span>
+
+<span class="sd">        :param amplitude_reduction_factor: The amplitude reduction factor. Default 1.0</span>
+<span class="sd">        :type amplitude_reduction_factor: float</span>
+
+<span class="sd">        :param effective_path_distance: The maximum effective (half-path) distance in Angstrom.  Translates to rpath parameter in feff.inp. Default 2.2 times nearest neighbor distance.</span>
+<span class="sd">        :type effective_path_distance: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialize base class.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FEFFPhotonMatterInteractorParameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Set the parameters. Type checking performed here.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potentials</span> <span class="o">=</span> <span class="n">potentials</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge</span> <span class="o">=</span> <span class="n">edge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amplitude_reduction_factor</span> <span class="o">=</span> <span class="n">amplitude_reduction_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">effective_path_distance</span> <span class="o">=</span> <span class="n">effective_path_distance</span>
+
+        <span class="c1"># Finalize. This will check parameter consistency.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+    <span class="c1"># Queries and setters.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query method for atoms &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__atoms</span>
+    <span class="nd">@atoms</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set self.__atoms to value. &quot;&quot;&quot;</span>
+        <span class="c1"># If all passed, set the member attribute.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__atoms</span> <span class="o">=</span> <span class="n">_checkAndSetAtoms</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query method for potentials &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__potentials</span>
+    <span class="nd">@potentials</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set self.__potentials to value. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__potentials</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query method for edge &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__edge</span>
+    <span class="nd">@edge</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set self.__edge to value. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;edge&#39; must be a string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;L1&#39;</span><span class="p">,</span> <span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;M1&#39;</span><span class="p">,</span> <span class="s1">&#39;M2&#39;</span><span class="p">,</span> <span class="s1">&#39;M3&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__edge</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;edge&#39; must be one of &#39;K&#39;, &#39;L1&#39;, &#39;L2&#39;, &#39;M1&#39;, &#39;M2&#39;, or &#39;M3&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">amplitude_reduction_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query method for amplitude_reduction_factor &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__amplitude_reduction_factor</span>
+    <span class="nd">@amplitude_reduction_factor</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">amplitude_reduction_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set self.__amplitude_reduction_factor to value. &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># Cast int to float.</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;amplitude_reduction_factor&#39; must be a float.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span> <span class="n">value</span> <span class="o">&gt;=</span><span class="mf">0.0</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">1.0</span> <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__amplitude_reduction_factor</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;amplitude_reduction_factor&#39; must obey 0.0 &lt;= x &lt;= 1.0.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">effective_path_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query method for effective_path_distance &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__effective_path_distance</span>
+    <span class="nd">@effective_path_distance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">effective_path_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set self.__effective_path_distance to value. &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># Cast int to float.</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;effective_path_distance&#39; must be a float.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span> <span class="n">value</span> <span class="o">&gt;=</span><span class="mf">0.0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__effective_path_distance</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;effective_path_distance&#39; must obey 0.0 &lt;= x.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">finalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the finalization status. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span>
+
+<div class="viewcode-block" id="FEFFPhotonMatterInteractorParameters.finalize"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractorParameters.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Finalize the parameters. Check if all parameters are internally consistent.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Only if not finalized.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Finalize potentials.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__potential_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Get atoms.</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
+            <span class="c1"># Get potential indices.</span>
+            <span class="n">potential_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+
+            <span class="c1"># Sort and set.</span>
+            <span class="n">unique_indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">potential_indices</span><span class="p">)</span>
+
+            <span class="c1"># Loop over all unique potential indices and aggregate the potential information.</span>
+            <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="n">unique_indices</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">potential_indices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Returns first found.</span>
+                <span class="n">atomic_number</span> <span class="o">=</span> <span class="n">ALL_ELEMENTS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__potential_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ui</span><span class="p">,</span> <span class="n">atomic_number</span><span class="p">,</span> <span class="n">symbol</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Private method to serialize the parameters, i.e. write the feff.inp file. &quot;&quot;&quot;</span>
+
+        <span class="c1"># Only possible if finalized.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__finalized</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Only finalized parameters can be serialized. Call the finalize() method before serialize().&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;EDGE    </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edge</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;S02     </span><span class="si">%f</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amplitude_reduction_factor</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;CONTROL 1 1 1 1 1 1</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;PRINT   0 0 0 0 0 0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;RPATH   </span><span class="si">%f</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">effective_path_distance</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;EXAFS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POTENTIALS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">potential</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__potential_list</span><span class="p">:</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">      </span><span class="si">%d</span><span class="s2">      </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">potential</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">potential</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ATOMS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%6.5f</span><span class="s2">      </span><span class="si">%6.5f</span><span class="s2">      </span><span class="si">%6.5f</span><span class="s2">      </span><span class="si">%d</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">atom</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="p">)</span>
+
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;END&quot;</span><span class="p">)</span></div>
+<span class="c1">#</span>
+<span class="c1">##########################################</span>
+<span class="c1"># Utility functions</span>
+<span class="k">def</span> <span class="nf">_checkAndSetAtoms</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Private function to check if input is a valid atoms list.</span>
+
+<span class="sd">    :parameter value: The value to check.</span>
+<span class="sd">    :return: The atom list if checks pass.</span>
+<span class="sd">    :raises: Exception if input not a correct atom list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check if None</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;atoms&#39; must be an iterable (list or tuple) of length &gt; 0&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if iterable.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;atoms&#39; must be an iterable (list or tuple) of length &gt; 0&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check all elements.</span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="c1"># Check that each atom is a list of tuple.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;Each element in &#39;atoms&#39; must be a list or tuple.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check that first element is the coordinate vector.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;__iter__&#39;</span> <span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The first element in each element in &#39;atoms&#39; must be an iterable of length 3 (atomic coordinates in Angstrom).&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check that second element is the element symbol.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">atom</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The second element in each element in &#39;atoms&#39; must be a string (element symbol).&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">atom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ALL_ELEMENTS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The second element in each element in &#39;atoms&#39; must be a valid element symbol.&quot;</span><span class="p">)</span>
+        <span class="c1"># Check that third element is the potential index.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">atom</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The third element in each element in &#39;atoms&#39; must be an integer (potential index).&quot;</span><span class="p">)</span>
+
+    <span class="c1">### Check potential indices.</span>
+    <span class="c1"># Extract potential indices.</span>
+    <span class="n">potential_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="c1"># Sort.</span>
+    <span class="n">potential_indices</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="c1"># Check that there&#39;s only one index 0.</span>
+    <span class="k">if</span> <span class="n">potential_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">potential_indices</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;There must be one and only one potential index 0.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get unique indices.</span>
+    <span class="n">unique_indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">potential_indices</span><span class="p">)</span>
+
+    <span class="c1"># Check no indices missing.</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">ui</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique_indices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">ui</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Potential index </span><span class="si">%d</span><span class="s2"> is missing.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="c1"># All sane, return.</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">_checkAndSetPotentials</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Check if value is a valid potential. Currently, only None is accepted, i.e. default FEFF potentials are used.</span>
+
+<span class="sd">    :param value: The input to check.</span>
+<span class="sd">    :raises TypeError: if input is not None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;potentials&#39; must be None.&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_checkAndSetEdge</span><span class="p">(</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Check input value if a valid edge.</span>
+
+<span class="sd">    :param value: The value to check.</span>
+<span class="sd">    :raises TypeError: if not a str.</span>
+<span class="sd">    :raises ValueError: if not a valid edge designator (&#39;K&#39;, &#39;L1&#39;, &#39;L2&#39;, &#39;M1&#39;, &#39;M2&#39;, &#39;M3&#39;, ...).</span>
+<span class="sd">    :return: The checked edge designator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check default.</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;K&#39;</span>
+
+    <span class="c1"># Check if str.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;edge&#39; must be a string.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Lower case is ok, convert to upper.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="c1"># Accepted edges.</span>
+    <span class="n">valid_edges</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;L1&#39;</span><span class="p">,</span> <span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;M1&#39;</span><span class="p">,</span> <span class="s1">&#39;M2&#39;</span><span class="p">,</span> <span class="s1">&#39;M3&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Check if valid edge.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">valid_edges</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;edge&#39; must be one of </span><span class="si">%s</span><span class="s2">. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_edges</span><span class="p">))</span> <span class="p">)</span>
+
+    <span class="c1"># All sane, return.</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">_checkAndSetAmplitudeReductionFactor</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Check input value for amplitude_reduction_factor.</span>
+
+<span class="sd">    :param value: The value to check.</span>
+<span class="sd">    :raises TypeError: if not a float (0, 1 ok.)</span>
+<span class="sd">    :raises ValueError: if not in range [0, 1].</span>
+<span class="sd">    :return: The checked amplitude reduction factor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle default.</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+
+    <span class="c1"># Convert to float.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+
+    <span class="c1"># Check type.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">float</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;amplitude_reduction_factor&#39; must be a float. &quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check range.</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;amplitude_reduction_factor&#39; must obey 0 &lt;= x &lt;= 1.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># All sane, return</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">_checkAndSetEffectivePathDistance</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Check input value for effective_path_distance.</span>
+
+<span class="sd">    :param value: The value to check.</span>
+<span class="sd">    :raises TypeError: if not a number.</span>
+<span class="sd">    :raises ValueError: if not &gt;= 0.</span>
+<span class="sd">    :return: The checked effective path distance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle default.</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Convert to float.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+
+    <span class="c1"># Check type.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="nb">float</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;effective_path_distance&#39; must be a float. &quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check range.</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;effective_path_distance&#39; must obey x &gt;= 0.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># All sane, return</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

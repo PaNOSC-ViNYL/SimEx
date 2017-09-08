@@ -1,0 +1,522 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Utilities.wpg_to_opmd &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Utilities.wpg_to_opmd</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python2.7</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span>
+
+<span class="c1"># Get some constants.</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">speed_of_light</span>
+<span class="n">eps0</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">epsilon_0</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">e</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">OpenPMDTools</span> <span class="k">as</span> <span class="n">opmd</span>
+
+<div class="viewcode-block" id="convertToOPMD"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.wpg_to_opmd.convertToOPMD">[docs]</a><span class="k">def</span> <span class="nf">convertToOPMD</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Take native wpg output and rewrite in openPMD conformant way.</span>
+<span class="sd">    @param input_file: The hdf5 file to be converted.</span>
+<span class="sd">    @type: string</span>
+<span class="sd">    @example: input_file = &quot;prop_out.h5&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check input file.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">h5py</span><span class="o">.</span><span class="n">is_hdf5</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Not a valid hdf5 file: </span><span class="si">%s</span><span class="s2">. &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">input_file</span><span class="p">))</span>
+
+    <span class="c1"># Open in and out files.</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">input_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;.opmd.h5&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">opmd_h5</span><span class="p">:</span>
+
+            <span class="c1"># Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.</span>
+            <span class="n">data_shape</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEhor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="c1"># Branch off if this is a non-time dependent calculation in frequency domain.</span>
+            <span class="k">if</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/wDomain&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;frequency&quot;</span><span class="p">:</span>
+                <span class="c1"># Time independent calculation in frequency domain.</span>
+                <span class="n">_convert_from_frequency_representation</span><span class="p">(</span><span class="n">h5</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">,</span> <span class="n">data_shape</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">number_of_x_meshpoints</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">number_of_y_meshpoints</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">number_of_time_steps</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+
+            <span class="n">time_max</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/sliceMax&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1">#s</span>
+            <span class="n">time_min</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/sliceMin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1">#s</span>
+            <span class="n">time_step</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">time_max</span> <span class="o">-</span> <span class="n">time_min</span><span class="p">)</span> <span class="o">/</span> <span class="n">number_of_time_steps</span> <span class="c1">#s</span>
+
+            <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/photonEnergy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1"># eV</span>
+            <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">photon_energy</span> <span class="o">*</span> <span class="n">e</span> <span class="c1"># Convert to J</span>
+
+            <span class="c1"># Copy misc and params from original wpg output.</span>
+            <span class="n">opmd_h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;history/parent&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">h5</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;/params&#39;</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="s1">&#39;history/parent&#39;</span><span class="p">])</span>
+                <span class="n">h5</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;/misc&#39;</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="s1">&#39;history/parent&#39;</span><span class="p">])</span>
+                <span class="n">h5</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;/history&#39;</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="s1">&#39;history/parent&#39;</span><span class="p">])</span>
+            <span class="c1"># Some keys may not exist, e.g. if the input file comes from a non-simex wpg run.</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+            <span class="n">sum_x</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">sum_y</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_time_steps</span><span class="p">):</span>
+                <span class="c1"># Write opmd</span>
+                <span class="c1"># Setup the root attributes for iteration 0</span>
+                <span class="n">opmd</span><span class="o">.</span><span class="n">setup_root_attr</span><span class="p">(</span> <span class="n">opmd_h5</span> <span class="p">)</span>
+
+                <span class="n">full_meshes_path</span> <span class="o">=</span> <span class="n">opmd</span><span class="o">.</span><span class="n">get_basePath</span><span class="p">(</span><span class="n">opmd_h5</span><span class="p">,</span> <span class="n">it</span><span class="p">)</span> <span class="o">+</span> <span class="n">opmd_h5</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;meshesPath&quot;</span><span class="p">]</span>
+                <span class="c1"># Setup basepath.</span>
+                <span class="n">time</span><span class="o">=</span><span class="n">time_min</span><span class="o">+</span><span class="n">it</span><span class="o">*</span><span class="n">time_step</span>
+                <span class="n">opmd</span><span class="o">.</span><span class="n">setup_base_path</span><span class="p">(</span> <span class="n">opmd_h5</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">it</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">)</span>
+                <span class="n">opmd_h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_meshes_path</span><span class="p">)</span>
+                <span class="n">meshes</span> <span class="o">=</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="n">full_meshes_path</span><span class="p">]</span>
+
+                <span class="c1"># Path to the E field, within the h5 file.</span>
+                <span class="n">full_e_path_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;E&quot;</span>
+                <span class="n">meshes</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_e_path_name</span><span class="p">)</span>
+                <span class="n">E</span> <span class="o">=</span> <span class="n">meshes</span><span class="p">[</span><span class="n">full_e_path_name</span><span class="p">]</span>
+
+                <span class="c1"># Create the dataset (2d cartesian grid)</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Write the common metadata for the group</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;cartesian&quot;</span><span class="p">)</span>
+                <span class="c1"># Get grid geometry.</span>
+                <span class="n">nx</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/nx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">xMax</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/xMax&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">xMin</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/xMin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">xMax</span> <span class="o">-</span> <span class="n">xMin</span><span class="p">)</span> <span class="o">/</span> <span class="n">nx</span>
+                <span class="n">ny</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/ny&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">yMax</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/yMax&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">yMin</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/yMin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">yMax</span> <span class="o">-</span> <span class="n">yMin</span><span class="p">)</span> <span class="o">/</span> <span class="n">ny</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridSpacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridGlobalOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/xCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/yCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridUnitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axisLabels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                   <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span> <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                   <span class="c1">#            L    M     T     I  theta  N    J</span>
+                   <span class="c1"># E is in volts per meters: V / m = kg * m / (A * s^3)</span>
+                   <span class="c1"># -&gt; L * M * T^-3 * I^-1</span>
+
+                <span class="c1"># Add time information</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;timeOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># Time offset with respect to basePath&#39;s time</span>
+
+                <span class="c1"># Write attribute that is specific to each dataset:</span>
+                <span class="c1"># - Staggered position within a cell</span>
+                <span class="n">E</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">E</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+                <span class="c1"># - Conversion factor to SI units</span>
+                <span class="c1"># WPG writes E fields in units of sqrt(W/mm^2), i.e. it writes E*sqrt(c * eps0 / 2).</span>
+                <span class="c1"># Unit analysis:</span>
+                <span class="c1"># [E] = V/m</span>
+                <span class="c1"># [eps0] = As/Vm</span>
+                <span class="c1"># [c] = m/s</span>
+                <span class="c1"># ==&gt; [E^2 * eps0 * c] = V**2/m**2 * As/Vm * m/s = V*A/m**2 = W/m**2 = [Intensity]</span>
+                <span class="c1"># Converting to SI units by dividing by sqrt(c*eps0/2)*1e3, 1e3 for conversion from mm to m.</span>
+                <span class="n">c</span>    <span class="o">=</span> <span class="mf">2.998e8</span>   <span class="c1"># m/s</span>
+                <span class="n">eps0</span> <span class="o">=</span> <span class="mf">8.854e-12</span> <span class="c1"># As/Vm</span>
+                <span class="n">E</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span>  <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">eps0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1.0e3</span> <span class="p">)</span>
+                <span class="n">E</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span>  <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">eps0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1.0e3</span> <span class="p">)</span>
+
+                <span class="c1"># Copy the fields.</span>
+                <span class="n">Ex</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEhor&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEhor&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">Ey</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEver&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEver&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">E</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">Ex</span>
+                <span class="n">E</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">Ey</span>
+
+                <span class="c1"># Get area element.</span>
+                <span class="n">dA</span> <span class="o">=</span> <span class="n">dx</span><span class="o">*</span><span class="n">dy</span>
+
+                <span class="c1">### Number of photon fields.</span>
+                <span class="c1"># Path to the number of photons.</span>
+                <span class="n">full_nph_path_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;Nph&quot;</span>
+                <span class="n">meshes</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_nph_path_name</span><span class="p">)</span>
+                <span class="n">Nph</span> <span class="o">=</span> <span class="n">meshes</span><span class="p">[</span><span class="n">full_nph_path_name</span><span class="p">]</span>
+
+                <span class="c1"># Create the dataset (2d cartesian grid)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Write the common metadata for the group</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;cartesian&quot;</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridSpacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridGlobalOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/xCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/yCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridUnitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axisLabels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                   <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+                <span class="c1"># Add time information</span>
+                <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;timeOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># Time offset with respect to basePath&#39;s time</span>
+                <span class="c1"># Nph - Staggered position within a cell</span>
+                <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+                <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+
+                <span class="c1"># Calculate number of photons via intensity and photon energy.</span>
+                <span class="c1"># Since fields are stored as sqrt(W/mm^2), have to convert to W/m^2 (factor 1e6 below).</span>
+                <span class="n">number_of_photons_x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Ex</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dA</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">*</span><span class="mf">1.0e6</span> <span class="o">/</span> <span class="n">photon_energy</span><span class="p">)</span>
+                <span class="n">number_of_photons_y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Ey</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dA</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">*</span><span class="mf">1.0e6</span> <span class="o">/</span> <span class="n">photon_energy</span><span class="p">)</span>
+                <span class="n">sum_x</span> <span class="o">+=</span> <span class="n">number_of_photons_x</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">sum_y</span> <span class="o">+=</span> <span class="n">number_of_photons_y</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">number_of_photons_x</span>
+                <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">number_of_photons_y</span>
+
+                <span class="c1">### Phases.</span>
+                <span class="c1"># Path to phases</span>
+                <span class="n">full_phases_path_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;phases&quot;</span>
+                <span class="n">meshes</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_phases_path_name</span><span class="p">)</span>
+                <span class="n">phases</span> <span class="o">=</span> <span class="n">meshes</span><span class="p">[</span><span class="n">full_phases_path_name</span><span class="p">]</span>
+
+                <span class="c1"># Create the dataset (2d cartesian grid)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Write the common metadata for the group</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;cartesian&quot;</span><span class="p">)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridSpacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridGlobalOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/xCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/yCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridUnitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axisLabels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+                <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+
+                <span class="c1"># Add time information</span>
+                <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;timeOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># Time offset with respect to basePath&#39;s time</span>
+                <span class="c1"># phases positions. - Staggered position within a cell</span>
+                <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+                <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Ex</span><span class="p">)</span>
+                <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Ey</span><span class="p">)</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Found </span><span class="si">%e</span><span class="s2"> and </span><span class="si">%e</span><span class="s2"> photons for horizontal and vertical polarization, respectively.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sum_x</span><span class="p">,</span> <span class="n">sum_y</span><span class="p">)</span>
+
+            <span class="n">opmd_h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="k">def</span> <span class="nf">_convert_from_frequency_representation</span><span class="p">(</span><span class="n">h5</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">,</span> <span class="n">data_shape</span><span class="p">,</span> <span class="n">pulse_energy</span><span class="o">=</span><span class="mf">1.0e-3</span><span class="p">,</span> <span class="n">pulse_duration</span><span class="o">=</span><span class="mf">23.0e-15</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Converter for non-time dependent wavefronts in frequency representation.</span>
+<span class="sd">    Requires knowledge of pulse energy and pulse duration to allow photon number calculation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">number_of_x_meshpoints</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">number_of_y_meshpoints</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">number_of_time_steps</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+
+    <span class="n">E_max</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/sliceMax&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1">#eV</span>
+    <span class="n">E_min</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/sliceMin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1">#eV</span>
+
+    <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/photonEnergy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1"># eV</span>
+    <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">photon_energy</span> <span class="o">*</span> <span class="n">e</span> <span class="c1"># Convert to J</span>
+
+    <span class="c1"># Copy misc and params from original wpg output.</span>
+    <span class="n">opmd_h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;history/parent&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">h5</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;/params&#39;</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="s1">&#39;history/parent&#39;</span><span class="p">])</span>
+        <span class="n">h5</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;/misc&#39;</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="s1">&#39;history/parent&#39;</span><span class="p">])</span>
+        <span class="n">h5</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;/history&#39;</span><span class="p">,</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="s1">&#39;history/parent&#39;</span><span class="p">])</span>
+    <span class="c1"># Some keys may not exist, e.g. if the input file comes from a non-simex wpg run.</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+    <span class="n">sum_x</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">sum_y</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Write opmd</span>
+    <span class="c1"># Setup the root attributes.</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">opmd</span><span class="o">.</span><span class="n">setup_root_attr</span><span class="p">(</span> <span class="n">opmd_h5</span> <span class="p">)</span>
+
+    <span class="n">full_meshes_path</span> <span class="o">=</span> <span class="n">opmd</span><span class="o">.</span><span class="n">get_basePath</span><span class="p">(</span><span class="n">opmd_h5</span><span class="p">,</span> <span class="n">it</span><span class="p">)</span> <span class="o">+</span> <span class="n">opmd_h5</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;meshesPath&quot;</span><span class="p">]</span>
+    <span class="c1"># Setup basepath.</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">time_step</span> <span class="o">=</span> <span class="n">pulse_duration</span>
+    <span class="n">opmd</span><span class="o">.</span><span class="n">setup_base_path</span><span class="p">(</span> <span class="n">opmd_h5</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">it</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">)</span>
+    <span class="n">opmd_h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_meshes_path</span><span class="p">)</span>
+    <span class="n">meshes</span> <span class="o">=</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="n">full_meshes_path</span><span class="p">]</span>
+
+    <span class="c1">## Path to the E field, within the h5 file.</span>
+    <span class="c1">#full_e_path_name = b&quot;E&quot;</span>
+    <span class="c1">#meshes.create_group(full_e_path_name)</span>
+    <span class="c1">#E = meshes[full_e_path_name]</span>
+
+    <span class="c1">## Create the dataset (2d cartesian grid)</span>
+    <span class="c1">#E.create_dataset(b&quot;x&quot;, (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64, compression=&#39;gzip&#39;)</span>
+    <span class="c1">#E.create_dataset(b&quot;y&quot;, (number_of_x_meshpoints, number_of_y_meshpoints), dtype=numpy.complex64, compression=&#39;gzip&#39;)</span>
+
+    <span class="c1">## Write the common metadata for the group</span>
+    <span class="c1">#E.attrs[&quot;geometry&quot;] = numpy.string_(&quot;cartesian&quot;)</span>
+    <span class="c1">## Get grid geometry.</span>
+    <span class="n">nx</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/nx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">xMax</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/xMax&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">xMin</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/xMin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">xMax</span> <span class="o">-</span> <span class="n">xMin</span><span class="p">)</span> <span class="o">/</span> <span class="n">nx</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/ny&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">yMax</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/yMax&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">yMin</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/Mesh/yMin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">yMax</span> <span class="o">-</span> <span class="n">yMin</span><span class="p">)</span> <span class="o">/</span> <span class="n">ny</span>
+    <span class="c1">#E.attrs[&quot;gridSpacing&quot;] = numpy.array( [dx,dy], dtype=numpy.float64)</span>
+    <span class="c1">#E.attrs[&quot;gridGlobalOffset&quot;] = numpy.array([h5[&#39;params/xCentre&#39;].value, h5[&#39;params/yCentre&#39;].value], dtype=numpy.float64)</span>
+    <span class="c1">#E.attrs[&quot;gridUnitSI&quot;] = numpy.float64(1.0)</span>
+    <span class="c1">#E.attrs[&quot;dataOrder&quot;] = numpy.string_(&quot;C&quot;)</span>
+    <span class="c1">#E.attrs[&quot;axisLabels&quot;] = numpy.array([b&quot;x&quot;,b&quot;y&quot;])</span>
+    <span class="c1">#E.attrs[&quot;unitDimension&quot;] = \</span>
+       <span class="c1">#numpy.array([1.0, 1.0, -3.0, -1.0, 0.0, 0.0, 0.0 ], dtype=numpy.float64)</span>
+       <span class="c1">##            L    M     T     I  theta  N    J</span>
+       <span class="c1">## E is in volts per meters: V / m = kg * m / (A * s^3)</span>
+       <span class="c1">## -&gt; L * M * T^-3 * I^-1</span>
+
+    <span class="c1">## Add time information</span>
+    <span class="c1">#E.attrs[&quot;timeOffset&quot;] = 0.  # Time offset with respect to basePath&#39;s time</span>
+
+    <span class="c1">## Write attribute that is specific to each dataset:</span>
+    <span class="c1">## - Staggered position within a cell</span>
+    <span class="c1">#E[&quot;x&quot;].attrs[&quot;position&quot;] = numpy.array([0.0, 0.5], dtype=numpy.float32)</span>
+    <span class="c1">#E[&quot;y&quot;].attrs[&quot;position&quot;] = numpy.array([0.5, 0.0], dtype=numpy.float32)</span>
+
+    <span class="c1">## - Conversion factor to SI units</span>
+    <span class="c1">## WPG writes E fields in units of sqrt(W/mm^2), i.e. it writes E*sqrt(c * eps0 / 2).</span>
+    <span class="c1">## Unit analysis:</span>
+    <span class="c1">## [E] = V/m</span>
+    <span class="c1">## [eps0] = As/Vm</span>
+    <span class="c1">## [c] = m/s</span>
+    <span class="c1">## ==&gt; [E^2 * eps0 * c] = V**2/m**2 * As/Vm * m/s = V*A/m**2 = W/m**2 = [Intensity]</span>
+    <span class="c1">## Converting to SI units by dividing by sqrt(c*eps0/2)*1e3, 1e3 for conversion from mm to m.</span>
+    <span class="c1">#c    = 2.998e8   # m/s</span>
+    <span class="c1">#eps0 = 8.854e-12 # As/Vm</span>
+    <span class="c1">#E[&quot;x&quot;].attrs[&quot;unitSI&quot;] = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )</span>
+    <span class="c1">#E[&quot;y&quot;].attrs[&quot;unitSI&quot;] = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )</span>
+
+    <span class="c1"># Get E fields.</span>
+    <span class="n">Ex</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEhor&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEhor&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">Ey</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEver&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;data/arrEver&#39;</span><span class="p">][:,:,</span><span class="n">it</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#E[&quot;x&quot;][:,:] = Ex</span>
+    <span class="c1">#E[&quot;y&quot;][:,:] = Ey</span>
+
+    <span class="c1">### Number of photon fields.</span>
+    <span class="c1"># Path to the number of photons.</span>
+    <span class="n">full_nph_path_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;Nph&quot;</span>
+    <span class="n">meshes</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_nph_path_name</span><span class="p">)</span>
+    <span class="n">Nph</span> <span class="o">=</span> <span class="n">meshes</span><span class="p">[</span><span class="n">full_nph_path_name</span><span class="p">]</span>
+
+    <span class="c1"># Create the dataset (2d cartesian grid)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Write the common metadata for the group</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;cartesian&quot;</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridSpacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridGlobalOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/xCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/yCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridUnitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axisLabels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+       <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Add time information</span>
+    <span class="n">Nph</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;timeOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># Time offset with respect to basePath&#39;s time</span>
+    <span class="c1"># Nph - Staggered position within a cell</span>
+    <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+    <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+
+    <span class="c1"># Calculate number of photons via intensity and photon energy.</span>
+    <span class="c1"># Since fields are stored as sqrt(W/mm^2), have to convert to W/m^2 (factor 1e6 below).</span>
+    <span class="n">number_of_photons_x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Ex</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">number_of_photons_y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">Ey</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum_x</span> <span class="o">=</span> <span class="n">number_of_photons_x</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sum_y</span> <span class="o">=</span> <span class="n">number_of_photons_y</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Conversion from Nph/s/0.1%bandwidth/mm to Nph. Sum * photon_energy must be equal to pulse energy.</span>
+    <span class="c1"># Normalization factor.</span>
+    <span class="n">c_factor</span> <span class="o">=</span> <span class="n">pulse_energy</span> <span class="o">/</span> <span class="n">photon_energy</span>
+    <span class="c1"># Normalize</span>
+    <span class="n">number_of_photons_x</span> <span class="o">*=</span> <span class="n">c_factor</span>
+    <span class="n">number_of_photons_y</span> <span class="o">*=</span> <span class="n">c_factor</span>
+    <span class="c1"># Normalize to sum over all pixels (if != 0 ).</span>
+    <span class="k">if</span> <span class="n">sum_x</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">number_of_photons_x</span> <span class="o">/=</span> <span class="n">sum_x</span>
+    <span class="k">if</span> <span class="n">sum_y</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">number_of_photons_y</span> <span class="o">/=</span> <span class="n">sum_y</span>
+
+    <span class="c1"># Write to h5 dataset.</span>
+    <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">number_of_photons_x</span>
+    <span class="n">Nph</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">number_of_photons_y</span>
+
+
+    <span class="c1">### Phases.</span>
+    <span class="c1"># Path to phases</span>
+    <span class="n">full_phases_path_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;phases&quot;</span>
+    <span class="n">meshes</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_phases_path_name</span><span class="p">)</span>
+    <span class="n">phases</span> <span class="o">=</span> <span class="n">meshes</span><span class="p">[</span><span class="n">full_phases_path_name</span><span class="p">]</span>
+
+    <span class="c1"># Create the dataset (2d cartesian grid)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">number_of_x_meshpoints</span><span class="p">,</span> <span class="n">number_of_y_meshpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Write the common metadata for the group</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;cartesian&quot;</span><span class="p">)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridSpacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridGlobalOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/xCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/yCentre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridUnitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axisLabels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="sa">b</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+    <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">)</span>
+
+    <span class="c1"># Add time information</span>
+    <span class="n">phases</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;timeOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># Time offset with respect to basePath&#39;s time</span>
+    <span class="c1"># phases positions. - Staggered position within a cell</span>
+    <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Ex</span><span class="p">)</span>
+    <span class="n">phases</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][:,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Ey</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Found </span><span class="si">%e</span><span class="s2"> and </span><span class="si">%e</span><span class="s2"> photons for horizontal and vertical polarization, respectively.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sum_x</span><span class="p">,</span> <span class="n">sum_y</span><span class="p">)</span>
+
+    <span class="n">opmd_h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># Parse arguments.</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Convert wpg output to openPMD conform hdf5.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;input_file&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;input_file&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;name of the file to convert.&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="c1"># Call the converter routine.</span>
+    <span class="n">convertToOPMD</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input_file</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

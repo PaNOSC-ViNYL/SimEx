@@ -1,0 +1,230 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Utilities.hydro_txt_to_opmd &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Utilities.hydro_txt_to_opmd</h1><div class="highlight"><pre>
+<span></span><span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016 Richard Briggs, Carsten Fortmann-Grote              #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">OpenPMDTools</span> <span class="k">as</span> <span class="n">opmd</span>
+
+<div class="viewcode-block" id="convertTxtToOPMD"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.hydro_txt_to_opmd.convertTxtToOPMD">[docs]</a><span class="k">def</span> <span class="nf">convertTxtToOPMD</span><span class="p">(</span><span class="n">esther_dirname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the esther .txt output files to opmd conform hdf5.</span>
+<span class="sd">    @param esther_dirname: Path (absolute or relative) of the directory containing esther output.</span>
+<span class="sd">    @type : str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="n">esther_dirname</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not a directory or link to a directory.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get files in directory.</span>
+    <span class="n">dir_listing</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="n">esther_dirname</span><span class="p">)</span>
+
+    <span class="c1"># We need these files.</span>
+    <span class="n">expected_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;densite_massique.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature_du_milieu.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;pression_hydrostatique.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;vitesse_moyenne.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;position_externe_relative.txt&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">f</span> <span class="ow">in</span> <span class="n">dir_listing</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">expected_files</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> does not contain all relevant information (density, temperature, pressure, velocity and position. Will abort now.&quot;</span> <span class="p">)</span>
+
+    <span class="c1"># Ok let&#39;s start reading header information.</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">esther_dirname</span><span class="o">+</span><span class="s2">&quot;/densite_massique.txt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="c1"># Save header line as temp.</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="c1"># Split header line to obtain timesteps and zones.</span>
+        <span class="n">number_of_timesteps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">number_of_zones</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Close.</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+	<span class="c1"># Load data via numpy.</span>
+	<span class="n">rho_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">esther_dirname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/densite_massique.txt&quot;</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="n">pres_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">esther_dirname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/pression_hydrostatique.txt&quot;</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="n">temp_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">esther_dirname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/temperature_du_milieu.txt&quot;</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="n">vel_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">esther_dirname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/vitesse_moyenne.txt&quot;</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="n">pos_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">esther_dirname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/position_externe_relative.txt&quot;</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Slice out the timestamps.</span>
+	<span class="n">time_array</span> <span class="o">=</span> <span class="n">rho_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">time_array</span> <span class="o">=</span> <span class="n">time_array</span>
+    <span class="n">time_step</span> <span class="o">=</span> <span class="n">time_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Create opmd.h5 output file</span>
+    <span class="n">h5_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">esther_dirname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.opmd.h5&quot;</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">opmd_h5</span><span class="p">:</span>
+
+        <span class="c1"># Setup the root attributes.</span>
+        <span class="n">opmd</span><span class="o">.</span><span class="n">setup_root_attr</span><span class="p">(</span> <span class="n">opmd_h5</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;HYDRO1D&quot;</span> <span class="p">)</span>
+
+        <span class="c1"># Loop over all timestamps.</span>
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_timesteps</span><span class="p">):</span>
+            <span class="c1"># Write opmd</span>
+            <span class="n">full_meshes_path</span> <span class="o">=</span> <span class="n">opmd</span><span class="o">.</span><span class="n">get_basePath</span><span class="p">(</span><span class="n">opmd_h5</span><span class="p">,</span> <span class="n">it</span><span class="p">)</span> <span class="o">+</span> <span class="n">opmd_h5</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;meshesPath&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Setup basepath</span>
+            <span class="n">opmd</span><span class="o">.</span><span class="n">setup_base_path</span><span class="p">(</span> <span class="n">opmd_h5</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">it</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">rho_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">it</span><span class="p">],</span> <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">)</span>
+            <span class="n">opmd_h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">full_meshes_path</span><span class="p">)</span>
+            <span class="n">meshes</span> <span class="o">=</span> <span class="n">opmd_h5</span><span class="p">[</span><span class="n">full_meshes_path</span><span class="p">]</span>
+
+
+            <span class="c1"># Create and save datasets</span>
+            <span class="n">meshes</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;rho&#39;</span><span class="p">,</span>  <span class="n">data</span><span class="o">=</span><span class="n">rho_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="n">it</span><span class="p">])</span>
+            <span class="n">meshes</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pres&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pres_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="n">it</span><span class="p">])</span>
+            <span class="n">meshes</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">temp_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="n">it</span><span class="p">])</span>
+            <span class="n">meshes</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;vel&#39;</span><span class="p">,</span>  <span class="n">data</span><span class="o">=</span><span class="n">vel_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="n">it</span><span class="p">])</span>
+            <span class="n">meshes</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pos&#39;</span><span class="p">,</span>  <span class="n">data</span><span class="o">=</span><span class="n">pos_array</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="n">it</span><span class="p">])</span>
+
+            <span class="c1"># Assign documentation.</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Mass density (mass per unit volume) stored on a 1D Lagrangian grid (zones).&quot;</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;pres&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hydrostatic pressure stored on a 1D Lagrangian grid (zones).&quot;</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Temperature stored on a 1D Lagrangian grid (zones).&quot;</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;vel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Average velocity stored on a 1D Lagrangian grid (zones).&quot;</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;External position stored on a 1D Lagrangian grid (zones).&quot;</span>
+
+            <span class="c1"># Assign SI units</span>
+            <span class="c1">#                L      M     t     I     T     N     Lum</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span>  <span class="mf">1.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># kg m^-3</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;pres&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># N m^-2 = kg m s^-2 m^-2 = kg m^-1 s^-2</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">1.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># K</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;vel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># m s^-1</span>
+            <span class="n">meshes</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitDimension&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># m</span>
+
+            <span class="c1"># Write common attributes.</span>
+            <span class="n">axis_label</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Zones&quot;</span><span class="p">]</span>
+            <span class="n">geometry</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;other&quot;</span><span class="p">)</span>
+            <span class="n">grid_spacing</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)]</span>
+            <span class="n">grid_global_offset</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)]</span>
+            <span class="n">grid_unit_si</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">time_offset</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">data_order</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">string_</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Write the common metadata to pass test</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">meshes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axisLabels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">axis_label</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geometry</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridSpacing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_spacing</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridGlobalOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_global_offset</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;gridUnitSI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_unit_si</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;timeOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_offset</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_order</span>
+                <span class="n">meshes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">opmd_h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">h5_path</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

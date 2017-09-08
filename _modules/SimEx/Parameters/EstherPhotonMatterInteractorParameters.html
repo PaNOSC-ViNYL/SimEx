@@ -1,0 +1,912 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Parameters.EstherPhotonMatterInteractorParameters &#8212; simex_platform 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.3.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Parameters.EstherPhotonMatterInteractorParameters</h1><div class="highlight"><pre>
+<span></span><span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016, 2017 Richard Briggs, Carsten Fortmann-Grote        #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+
+
+<span class="n">ESTHER_MATERIAL_DICT</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;Aluminum&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Aluminum&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Al#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Al#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">2.7</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;CH&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;CH&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;CH2&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;CH2_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">1.044</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Diamond&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Diamond&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Dia&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Dia_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">3.51</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Kapton&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Kapton&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Kap&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Kap_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">1.42</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Molybdenum&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Mo&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Mo#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Mo#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">10.2</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Gold&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Gold&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Au#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Au#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">19.3</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Iron&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Iron&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Fe#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Fe#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">7.85</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Copper&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Copper&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Cu#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Cu#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">8.93</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Tin&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Tin&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Sn#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Sn#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">7.31</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;LiF&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Lithium Fluoride&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;LiF&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;LiF_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">2.64</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Tantalum&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Tantalum&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Ta#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Ta#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">16.65</span><span class="p">,</span>
+                       <span class="p">},</span>
+                       <span class="s2">&quot;Titanium&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Titanium&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;shortname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Ti#&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;eos_name&quot;</span> <span class="p">:</span> <span class="s2">&quot;Ti#_e_ses&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;mass_density&quot;</span> <span class="p">:</span> <span class="mf">4.43</span><span class="p">,</span>
+                       <span class="p">},</span>
+           <span class="p">}</span>
+
+<div class="viewcode-block" id="EstherPhotonMatterInteractorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters">[docs]</a><span class="k">class</span> <span class="nc">EstherPhotonMatterInteractorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class representing parameters for the Hydrocode Input Calculator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">number_of_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ablator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ablator_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">sample</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">sample_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">window_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">laser_wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">laser_pulse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">laser_pulse_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">laser_intensity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">run_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">delta_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">read_from_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">force_passage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">without_therm_conduc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rad_transfer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the HydroParameters</span>
+
+<span class="sd">        :param ablator: The ablating material ( &quot;Al&quot; | &quot;CH&quot; | &quot;Diamond&quot; )</span>
+<span class="sd">        :type ablator: str</span>
+
+<span class="sd">        :param ablator_thickness: The ablator thickness (micrometers)</span>
+<span class="sd">        :type ablator_thickness:</span>
+
+<span class="sd">        :param sample: The sample material (from limited list of materials)</span>
+<span class="sd">        :type sample: str</span>
+
+<span class="sd">        :param sample_thickness: The sample thickness (micrometers)</span>
+<span class="sd">        :type sample_thickness: float</span>
+
+<span class="sd">        :param window: The window material (LiF | SiO2 | Diamond)</span>
+<span class="sd">        :type window: str</span>
+
+<span class="sd">        :param window_thickness: The window thickness, if using window (micrometers)</span>
+<span class="sd">        :type window_thickness: float</span>
+
+<span class="sd">        :param laser_pulse: Pulse type (&quot;flat&quot; | &quot;ramp&quot; | &quot;other&quot;)</span>
+<span class="sd">        :type laser_pulse: str</span>
+
+<span class="sd">        :param laser_pulse_duration: Pulse duration of the pump laser (ns)</span>
+<span class="sd">        :type laser_pulse_duration: float</span>
+
+<span class="sd">        :param laser_wavelength: Laser wavelength (nm)</span>
+<span class="sd">        :type laser_wavelength: float</span>
+
+<span class="sd">        :param laser_intensity: Laser intensity (TW/cm2)</span>
+<span class="sd">        :type laser_intensity: float</span>
+
+<span class="sd">        :param run_time: Simulation run time (ns)</span>
+<span class="sd">        :type run_time: float</span>
+
+<span class="sd">        :param delta_time: Time steps resolution (ns)</span>
+<span class="sd">        :type delta_time: float</span>
+
+<span class="sd">        :param force_passage: Expert option to force passage of simulation through minor errors</span>
+<span class="sd">        :type force_passage: boolean</span>
+
+<span class="sd">        :param without_therm_conduc: Expert option to use without thermal conductivity options</span>
+<span class="sd">        :type without_therm_conduc: boolean</span>
+
+<span class="sd">        :param rad_transfer: Expert option to use radiative transfer</span>
+<span class="sd">        :type rad_transfer: boolean</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">read_from_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Parameters file is located here: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">read_from_file</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_readParametersFromFile</span><span class="p">(</span><span class="n">read_from_file</span><span class="p">)</span>
+
+            <span class="c1"># TO DO #96 expert mode : Add expert parameters (if they are set by user)</span>
+            <span class="c1"># Update parameters from arguments.</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="p">{</span>
+                    <span class="s1">&#39;number_of_layers&#39;</span><span class="p">:</span><span class="n">number_of_layers</span><span class="p">,</span>
+                    <span class="s1">&#39;ablator&#39;</span><span class="p">:</span><span class="n">ablator</span><span class="p">,</span>
+                    <span class="s1">&#39;ablator_thickness&#39;</span><span class="p">:</span><span class="n">ablator_thickness</span><span class="p">,</span>
+                    <span class="s1">&#39;sample&#39;</span> <span class="p">:</span><span class="n">sample</span> <span class="p">,</span>
+                    <span class="s1">&#39;sample_thickness&#39;</span><span class="p">:</span><span class="n">sample_thickness</span><span class="p">,</span>
+                    <span class="s1">&#39;window&#39;</span><span class="p">:</span><span class="n">window</span><span class="p">,</span>
+                    <span class="s1">&#39;window_thickness&#39;</span><span class="p">:</span><span class="n">window_thickness</span><span class="p">,</span>
+                    <span class="s1">&#39;laser_wavelength&#39;</span><span class="p">:</span><span class="n">laser_wavelength</span><span class="p">,</span>
+                    <span class="s1">&#39;laser_pulse&#39;</span><span class="p">:</span><span class="n">laser_pulse</span><span class="p">,</span>
+                    <span class="s1">&#39;laser_pulse_duration&#39;</span><span class="p">:</span><span class="n">laser_pulse_duration</span><span class="p">,</span>
+                    <span class="s1">&#39;laser_intensity&#39;</span><span class="p">:</span><span class="n">laser_intensity</span><span class="p">,</span>
+                    <span class="s1">&#39;run_time&#39;</span><span class="p">:</span><span class="n">run_time</span><span class="p">,</span>
+                    <span class="s1">&#39;delta_time&#39;</span><span class="p">:</span><span class="n">delta_time</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check and set all parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_layers</span> <span class="o">=</span> <span class="n">checkAndSetNumberOfLayers</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ablator</span> <span class="o">=</span> <span class="n">checkAndSetAblator</span><span class="p">(</span><span class="n">ablator</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ablator_thickness</span> <span class="o">=</span> <span class="n">checkAndSetAblatorThickness</span><span class="p">(</span><span class="n">ablator_thickness</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sample</span> <span class="o">=</span> <span class="n">checkAndSetSample</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sample_thickness</span> <span class="o">=</span> <span class="n">checkAndSetSampleThickness</span><span class="p">(</span><span class="n">sample_thickness</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__window</span> <span class="o">=</span> <span class="n">checkAndSetWindow</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__window_thickness</span> <span class="o">=</span> <span class="n">checkAndSetWindowThickness</span><span class="p">(</span><span class="n">window_thickness</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__laser_wavelength</span> <span class="o">=</span> <span class="n">checkAndSetLaserWavelength</span><span class="p">(</span><span class="n">laser_wavelength</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__laser_pulse</span> <span class="o">=</span> <span class="n">checkAndSetLaserPulse</span><span class="p">(</span><span class="n">laser_pulse</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__laser_pulse_duration</span> <span class="o">=</span> <span class="n">checkAndSetLaserPulseDuration</span><span class="p">(</span><span class="n">laser_pulse_duration</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__laser_intensity</span> <span class="o">=</span> <span class="n">checkAndSetLaserIntensity</span><span class="p">(</span><span class="n">laser_intensity</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__run_time</span> <span class="o">=</span> <span class="n">checkAndSetRunTime</span><span class="p">(</span><span class="n">run_time</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__delta_time</span> <span class="o">=</span> <span class="n">checkAndSetDeltaTime</span><span class="p">(</span><span class="n">delta_time</span><span class="p">)</span>
+            <span class="c1"># TO DO #96 expert mode: CheckAndSet expert mode parameters to ensure they do not conflict</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">force_passage</span> <span class="o">=</span> <span class="n">force_passage</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">without_therm_conduc</span> <span class="o">=</span> <span class="n">without_therm_conduc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rad_transfer</span> <span class="o">=</span> <span class="n">rad_transfer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+
+        <span class="c1"># Define start up options (called Demmarage in esther)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setDemmargeFlags</span><span class="p">()</span>
+
+        <span class="c1"># TO DO #96 expert mode: Define EOS options here, SESAME or BLF, SESAME default</span>
+        <span class="c1">#self._set EOS options(), SESAME or BLF</span>
+
+        <span class="c1"># TO DO #96 expert mode: Expert parameters to improve spatial resolution can be set here.</span>
+        <span class="c1"># Setup the feathering.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setupFeathering</span><span class="p">()</span>
+
+        <span class="c1"># Set state to not-initialized (e.g. input deck is not written)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_readParametersFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">):</span>
+        <span class="c1"># Read from parameters file</span>
+        <span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;parameters.json&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
+            <span class="n">dictionary</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">j</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">=</span> <span class="n">dictionary</span>
+
+    <span class="k">def</span> <span class="nf">_setDemmargeFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Expert users options to include in the start up options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_usi</span> <span class="o">=</span> <span class="s2">&quot;USI&quot;</span> <span class="c1"># TO DO: Check this option in esther</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_force_passage</span> <span class="o">=</span> <span class="s2">&quot;FORCER_LE_PASSAGE&quot;</span> <span class="c1"># Forces simulation through ignoring minor issues</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_without_therm_conduc</span> <span class="o">=</span> <span class="s2">&quot;SANS_COND_THERMIQUE&quot;</span> <span class="c1"># Run without thermal conducivity???</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__use_radiative_transfer</span> <span class="o">=</span> <span class="s2">&quot;TRANSFERT_RADIATIF&quot;</span> <span class="c1"># Run with radiative transfer</span>
+
+    <span class="k">def</span> <span class="nf">_setupFeathering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_zones</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">feather_zone_width</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">minimum_zone_width</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Method to fix feathering</span>
+
+<span class="sd">        :param number_of_zones: The number of zones in the first ablator section (default 250).</span>
+<span class="sd">        :type number_of_zones: int</span>
+
+<span class="sd">        :param feather_zone_width: Width of feather zone (default 5.0 [microns]).</span>
+<span class="sd">        :type feather_zone_width: float</span>
+
+<span class="sd">        :param minimum_zone_width: Minimal zone width (default 1e-4 [microns]).</span>
+<span class="sd">        :type minimum_zone_width: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Determine the correct zone feathering for ablator</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">number_of_zones</span>
+        <span class="n">feather_list</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Create list of n zones</span>
+        <span class="n">feather_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">1.</span> <span class="c1"># First zone is 1</span>
+        <span class="n">feather_list</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">=-</span><span class="n">feather_zone_width</span><span class="o">/</span><span class="n">minimum_zone_width</span>
+        <span class="n">feather_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=-</span><span class="n">feather_list</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.</span>
+
+        <span class="c1"># Find roots in polynomial over the feather list</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">feather_list</span><span class="p">)</span>
+        <span class="n">roots</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">roots</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">root_found</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Get all purely real roots above 1.</span>
+        <span class="c1">### TODO: Improve algorithm.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">roots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">roots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="o">&gt;</span> <span class="mf">1.000001</span><span class="p">:</span> <span class="c1"># Why not &gt; 1.? This would exclude 1.0f</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">roots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">root_found</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">root_found</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;No ratio bigger than 1.000001 was found.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Store feather information on object.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feather_zone_width</span> <span class="o">=</span> <span class="n">feather_zone_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_zone_width</span> <span class="o">=</span> <span class="n">minimum_zone_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_feather_zone_width</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">minimum_zone_width</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="n">n</span><span class="p">),</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zone_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ablator_thickness</span><span class="o">-</span><span class="n">feather_zone_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zones</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zone_width</span><span class="o">/</span><span class="p">(</span><span class="n">minimum_zone_width</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="n">n</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_feather_zone_width</span><span class="o">*</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ablator</span><span class="p">][</span><span class="s2">&quot;mass_density&quot;</span><span class="p">]</span>
+        <span class="n">width_of_sample_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span><span class="o">/</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">][</span><span class="s2">&quot;mass_density&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_sample_zones</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_thickness</span><span class="o">/</span><span class="n">width_of_sample_zone</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">width_of_window_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span><span class="o">/</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">][</span><span class="s2">&quot;mass_density&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_window_zones</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window_thickness</span><span class="o">/</span><span class="n">width_of_window_zone</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write the input deck for the Esther hydrocode. &quot;&quot;&quot;</span>
+
+        <span class="c1"># Make a temporary directory or use existing path and filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_esther_filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;esther_&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_esther_filename</span><span class="o">=</span><span class="s1">&#39;tmp_input&#39;</span>
+
+        <span class="c1"># Write the input file</span>
+        <span class="n">input_deck_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_filename</span><span class="o">+</span><span class="s1">&#39;.dat&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Writing input deck to &quot;</span><span class="p">,</span> <span class="n">input_deck_path</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span>
+
+        <span class="c1"># Write json file of this parameter class instance.</span>
+        <span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span><span class="p">,</span> <span class="s1">&#39;parameters.json&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="n">json_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+            <span class="n">j</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Write the file.</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_deck_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_deck</span><span class="p">:</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DEMARRAGE,</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_usi</span><span class="p">))</span>
+            <span class="c1"># TO DO: 96 expert mode: Need better way of including these expert options (after checks of conflict)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_passage</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_force_passage</span><span class="p">))</span> <span class="c1"># Use force passage</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">without_therm_conduc</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_without_therm_conduc</span><span class="p">))</span> <span class="c1"># Use without thermal conductivity option</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">without_therm_conduc</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__use_radiative_transfer</span><span class="p">))</span> <span class="c1"># Use without thermal conductivity option</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MILIEUX_INT_VERS_EXT</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># If using a window, write the window layer here</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;- </span><span class="si">%.1f</span><span class="s1"> um </span><span class="si">%s</span><span class="s1"> layer</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window_thickness</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">))</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOM_MILIEU=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">][</span><span class="s2">&quot;shortname&quot;</span><span class="p">]))</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EQUATION_ETAT=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">][</span><span class="s2">&quot;eos_name&quot;</span><span class="p">]))</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_VIDE=100e-6</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_MILIEU=</span><span class="si">%.1f</span><span class="s1">e-6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window_thickness</span><span class="p">))</span>
+                <span class="c1"># Calculate number of zones in window</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOMBRE_MAILLES=</span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__number_of_window_zones</span><span class="p">))</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># TO DO: GIT ISSUE #95: Complex targets</span>
+            <span class="c1"># Make a loop of layer constructions with number_of_zones[i] for i &lt; number of layers</span>
+            <span class="c1"># The empty layer (epaisseur_vide) should be in the first layer construction</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;- </span><span class="si">%.1f</span><span class="s1"> um </span><span class="si">%s</span><span class="s1"> layer</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_thickness</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOM_MILIEU=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EQUATION_ETAT=EOS_LIST</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_VIDE=100e-6</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_MILIEU=</span><span class="si">%.1f</span><span class="s1">e-6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_thickness</span><span class="p">))</span>
+            <span class="c1"># Calculate number of zones</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOMBRE_MAILLES=</span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__number_of_sample_zones</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Write ablator</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;- </span><span class="si">%.1f</span><span class="s1"> um </span><span class="si">%s</span><span class="s1"> layer</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ablator_thickness</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ablator</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOM_MILIEU=abl1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># 1ST PART OF ABLATOR</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EQUATION_ETAT=EOS_FROM_LIST</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># ABLATOR EOS</span>
+            <span class="c1"># if only simulating ablator layer, then must include empty (VIDE) layer</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_VIDE=100e-6</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_MILIEU=</span><span class="si">%.1f</span><span class="s1">e-6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zone_width</span><span class="p">))</span> <span class="c1"># Non-feather thickness</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOMBRE_MAILLES=</span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zones</span><span class="p">))</span> <span class="c1"># Number of zones</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NOM_MILIEU=abl2</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># 1ST PART OF ABLATOR</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EQUATION_ETAT=EOS_FROM_LIST</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># ABLATOR EOS</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_MILIEU=</span><span class="si">%.1f</span><span class="s1">e-6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_feather_zone_width</span><span class="p">))</span> <span class="c1"># Feather thickness</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_INTERNE=</span><span class="si">%.3f</span><span class="s1">e-6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_final_feather_zone_width</span><span class="p">))</span> <span class="c1"># Feather final zone width</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EPAISSEUR_EXTERNE=</span><span class="si">%.1f</span><span class="s1">e-10</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_minimum_zone_width</span><span class="p">))</span> <span class="c1">#Min zone width</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># TO DO: GIT ISSUE #96: Expert mode</span>
+            <span class="c1"># Internal parameters to add to input flags</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INDICE_REEL_LASER=1.46</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INDICE_IMAG_LASER=1.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Laser parameters</span>
+            <span class="c1"># TO DO: GIT ISSUE #96: Expert mode</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DEPOT_ENERGIE,LASER,DEPOT_HELMHOLTZ</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># Expert mode option</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;LONGUEUR_ONDE_LASER=</span><span class="si">%.3f</span><span class="s1">e-6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_wavelength</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DUREE_IMPULSION=</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse_duration</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INTENSITE_IMPUL_MAX=</span><span class="si">%.3f</span><span class="s1">e16</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_intensity</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;IMPULSION_FICHIER</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Output parameters</span>
+            <span class="c1"># TO DO: GIT ISSUE #96: Expert mode</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;SORTIES_GRAPHIQUES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DECOUPAGE_TEMPS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BORNE_TEMPS=</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_time</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;INCREMENT_TEMPS=</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_time</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># End of input file</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ARRET</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TEMP_ARRET=</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_time</span><span class="p">))</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;FIN_DES_INSTRUCTIONS&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Write the laser input file</span>
+        <span class="n">laser_input_deck_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_filename</span><span class="o">+</span><span class="s1">&#39;_intensite_impulsion.dat&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Writing laser input deck to &quot;</span><span class="p">,</span> <span class="n">laser_input_deck_path</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span>
+
+        <span class="c1"># Write the parameters file (_intensitie_impulsion)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">laser_input_deck_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">laser_input_deck</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse</span> <span class="o">==</span> <span class="s2">&quot;flat&quot;</span><span class="p">:</span>
+                <span class="c1"># Write flat top pulse shape to file</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;4</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;temps (s ou u.a.) intensite (W/m2 ou u.a.)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0. </span><span class="se">\t</span><span class="s1"> 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0.1e-9</span><span class="se">\t</span><span class="si">%.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_intensity</span><span class="p">))</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\t</span><span class="si">%.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse_duration</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">laser_intensity</span><span class="p">))</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\t</span><span class="s1">0.0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse_duration</span><span class="p">))</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;fin_de_fichier&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse</span> <span class="o">==</span> <span class="s2">&quot;ramp&quot;</span><span class="p">:</span>
+                <span class="c1"># Write ramp pulse shape to file</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse_duration</span><span class="o">+</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">/</span><span class="n">numpy</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">Number_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">Number_lines</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse_duration</span><span class="o">-</span><span class="mf">0.1</span> <span class="c1"># Set the max intensity at 100 ps before final pulse time</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Number_lines</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># Number of lines to add in pulse shape</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;temps (s ou u.a.) intensite (W/m2 ou u.a.)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">Number_lines</span><span class="p">):</span>
+                    <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\t</span><span class="si">%0.3f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_intensity</span><span class="p">))</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">e-9</span><span class="se">\t</span><span class="s1">0.0</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laser_pulse_duration</span><span class="p">))</span>
+                <span class="n">laser_input_deck</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;fin_de_fichier&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use a default Gaussian? or quit?</span>
+                <span class="c1"># TO DO: GIT ISSUE #96: Expert mode: User defined pulse shape?</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;No default laser chosen?&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the number of layers. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_layers</span>
+    <span class="nd">@number_of_layers</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">number_of_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the number of layers to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_layers</span> <span class="o">=</span> <span class="n">checkAndSetNumberOfLayers</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ablator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the ablator type. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ablator</span>
+    <span class="nd">@ablator</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ablator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the ablator to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__ablator</span> <span class="o">=</span> <span class="n">checkAndSetAblator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ablator_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the ablator thickness. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ablator_thickness</span>
+    <span class="nd">@ablator_thickness</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ablator_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the ablator thickness to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__ablator_thickness</span> <span class="o">=</span> <span class="n">checkAndSetAblatorThickness</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the sample type. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sample</span>
+    <span class="nd">@sample</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the sample type to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__sample</span> <span class="o">=</span> <span class="n">checkAndSetSample</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sample_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the sample thickness type. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sample_thickness</span>
+    <span class="nd">@sample_thickness</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sample_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the sample thickness to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__sample_thickness</span> <span class="o">=</span> <span class="n">checkAndSetSampleThickness</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the window type. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window</span>
+    <span class="nd">@window</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the window to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__window</span> <span class="o">=</span> <span class="n">checkAndSetWindow</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">window_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the window thickness type. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window_thickness</span>
+    <span class="nd">@window_thickness</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">window_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the window thickness to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__window_thickness</span> <span class="o">=</span> <span class="n">checkAndSetWindowThickness</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">laser_wavelength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Query for the laser wavelength type. &quot;&quot;&quot;</span>
+           <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__laser_wavelength</span>
+    <span class="nd">@laser_wavelength</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">laser_wavelength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+           <span class="sd">&quot;&quot;&quot; Set the laser wavelength to the value. &quot;&quot;&quot;</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__laser_wavelength</span> <span class="o">=</span> <span class="n">checkAndSetLaserWavelength</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">laser_pulse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Query for laser pulse type&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__laser_pulse</span>
+    <span class="nd">@laser_pulse</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">laser_pulse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the laser pulse to type value &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__laser_pulse</span> <span class="o">=</span> <span class="n">checkAndSetLaserPulse</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">laser_pulse_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for laser pulse duration &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__laser_pulse_duration</span>
+    <span class="nd">@laser_pulse_duration</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">laser_pulse_duration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set laser pulse duration &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__laser_pulse_duration</span> <span class="o">=</span> <span class="n">checkAndSetLaserPulseDuration</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">laser_intensity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for laser intensity &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__laser_intensity</span>
+    <span class="nd">@laser_intensity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">laser_intensity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set laser intensity &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__laser_intensity</span> <span class="o">=</span> <span class="n">checkAndSetLaserIntensity</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">run_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for simulation run time &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_time</span>
+    <span class="nd">@run_time</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">run_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set simulation run time &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__run_time</span> <span class="o">=</span> <span class="n">checkAndSetRunTime</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">delta_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for simulation time resolution (delta t ns) &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_time</span>
+    <span class="nd">@delta_time</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">delta_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set simulation time resolution delta t, ns&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__delta_time</span> <span class="o">=</span> <span class="n">checkAndSetDeltaTime</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Method to pick sensible defaults for all parameters. &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">checkConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_thickness</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Window thickness cannot be 0.0&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">###########################</span>
+<span class="c1"># Check and set functions #</span>
+<span class="c1">###########################</span>
+
+
+
+<span class="k">def</span> <span class="nf">checkAndSetNumberOfLayers</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the number of layers is reasonable.</span>
+
+<span class="sd">    :param number_of_layers: The number of layers to check</span>
+<span class="sd">    :return: Checked number of layers</span>
+<span class="sd">    :raise ValueError: not (1 &lt; number_of_layers &lt;=5 )</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">number_of_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Number of layers is not defined.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">number_of_layers</span><span class="p">,</span> <span class="nb">int</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The parameter &#39;number_of_layers&#39; must be an int.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">number_of_layers</span> <span class="o">&lt;=</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">number_of_layers</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Number of layers must be between 1 and 5 only.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">number_of_layers</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetAblator</span><span class="p">(</span><span class="n">ablator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the ablator exists in the EOS database.</span>
+
+<span class="sd">    :param ablator: The ablator material to check.</span>
+<span class="sd">    :return: The ablator choice after being checked.</span>
+<span class="sd">    :raise ValueError: ablator not in [&quot;CH&quot;, &quot;Al&quot;, &quot;Diamond&quot;].</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ablator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;ablator&#39; is not defined.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check type.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">ablator</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The parameters &#39;ablator&#39; must be a str.&quot;</span><span class="p">)</span>
+
+    <span class="c1">### Could check if isinstance(ablator, str)</span>
+    <span class="c1"># Check if ablator is CH, Al or diamond</span>
+    <span class="k">if</span> <span class="n">ablator</span> <span class="o">==</span> <span class="s1">&#39;CH&#39;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Setting CH as ablator.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ablator</span> <span class="o">==</span> <span class="s1">&#39;Al&#39;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Setting Al as ablator.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ablator</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dia&#39;</span><span class="p">,</span> <span class="s1">&#39;diamond&#39;</span><span class="p">]:</span>
+        <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Setting diamond as ablator.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Ablator is not valid. Use &#39;CH&#39;, &#39;Al&#39; or &#39;dia&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ablator</span>
+
+
+<span class="k">def</span> <span class="nf">checkAndSetAblatorThickness</span><span class="p">(</span><span class="n">ablator_thickness</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the ablator thickness is &gt; 5 um and &lt; 100 um</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Raise if not set.</span>
+    <span class="k">if</span> <span class="n">ablator_thickness</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Ablator thickness not specified.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check type.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">ablator_thickness</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The parameters &#39;ablator_thickness&#39; must be of numeric type (int or float).&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if ablator is between 5 and 100 um</span>
+    <span class="k">if</span> <span class="n">ablator_thickness</span> <span class="o">&lt;=</span> <span class="mf">5.0</span> <span class="ow">or</span> <span class="n">ablator_thickness</span> <span class="o">&gt;</span> <span class="mf">100.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Ablator must be between 5.0 and 100.0 microns&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Ablator thickness is </span><span class="si">%4.1f</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">ablator_thickness</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ablator_thickness</span>
+
+
+<span class="k">def</span> <span class="nf">checkAndSetSample</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check if the sample is in the list of known EOS materials</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Aluminium&quot;</span><span class="p">,</span> <span class="s2">&quot;Gold&quot;</span><span class="p">,</span> <span class="s2">&quot;Carbon&quot;</span><span class="p">,</span> <span class="s2">&quot;CH&quot;</span><span class="p">,</span> <span class="s2">&quot;Cobalt&quot;</span><span class="p">,</span> <span class="s2">&quot;Copper&quot;</span><span class="p">,</span> <span class="s2">&quot;Diamond&quot;</span><span class="p">,</span> <span class="s2">&quot;Iron&quot;</span><span class="p">,</span> <span class="s2">&quot;Molybdenum&quot;</span><span class="p">,</span> <span class="s2">&quot;Nickel&quot;</span><span class="p">,</span> <span class="s2">&quot;Lead&quot;</span><span class="p">,</span> <span class="s2">&quot;Silicon&quot;</span><span class="p">,</span> <span class="s2">&quot;Tin&quot;</span><span class="p">,</span> <span class="s2">&quot;Tantalum&quot;</span><span class="p">,</span> <span class="p">]</span>
+
+    <span class="c1"># Set default</span>
+    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;sample not specified.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The parameter &#39;sample&#39; must be a str.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check each element</span>
+    <span class="k">if</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;sample is not in list of known EOS materials&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sample</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetSampleThickness</span><span class="p">(</span><span class="n">sample_thickness</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the sample thickness is in permitted range set by Esther.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Set default</span>
+    <span class="k">if</span> <span class="n">sample_thickness</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Sample thickness not specified.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if ablator is between 1 and 100 um</span>
+    <span class="k">if</span> <span class="n">sample_thickness</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">sample_thickness</span> <span class="o">&gt;</span> <span class="mf">200.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Sample must be between 1.0 and 200.0 microns&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sample_thickness</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetWindow</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the window thickness is &gt; 1 um and &lt; 200 um</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Change this to be just window materials (LiF, Quartz etc.)</span>
+    <span class="c1">### TODO PLACEHOLDER ------------------------------------------------------------------------------&gt;</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;LiF&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;SiO2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Diamond&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Running simulation without window material&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">window</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The parameter &#39;window&#39; must be a str.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check each element</span>
+    <span class="k">if</span> <span class="n">window</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;window is not in list of known EOS materials&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">window</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetWindowThickness</span><span class="p">(</span><span class="n">window_thickness</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the window thickness is &gt; 1 um and &lt; 500 um</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Set default</span>
+    <span class="k">if</span> <span class="n">window_thickness</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Check if number.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">window_thickness</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;window_thickness&#39; must be a numerical type (float or int.)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if ablator is between 1 and 100 um</span>
+    <span class="k">if</span> <span class="n">window_thickness</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">window_thickness</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">window_thickness</span> <span class="o">&gt;</span> <span class="mf">500.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Window must be between 1.0 and 500.0 microns&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">window_thickness</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetLaserWavelength</span><span class="p">(</span><span class="n">laser_wavelength</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the laser wavelength is correct.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">laser_wavelength</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Laser wavelength is not defined&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if number.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">laser_wavelength</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;laser_wavelength&#39; must be a numerical type (float or int.)&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">laser_wavelength</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;laser_wavelength&#39; must be a positive number.&quot;</span><span class="p">)</span>
+
+
+ <span class="c1"># Convert to microns.</span>
+    <span class="n">laser_wavelength</span> <span class="o">=</span> <span class="n">laser_wavelength</span><span class="o">*</span><span class="mf">1e-3</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Laser wavelength = </span><span class="si">%.3f</span><span class="s2">e-6&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">laser_wavelength</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">laser_wavelength</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetLaserPulse</span><span class="p">(</span><span class="n">laser_pulse</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the laser pulse type is correct.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">laser_pulse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse type has not been chosen&quot;</span><span class="p">)</span>
+
+    <span class="n">pulse_shapes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;flat&quot;</span><span class="p">,</span><span class="s2">&quot;quasiflat&quot;</span><span class="p">,</span><span class="s2">&quot;ramp&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Check if str.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">laser_pulse</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The parameter &#39;laser_pulse&#39; must be a str.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if pulseshape exists</span>
+    <span class="k">if</span> <span class="n">laser_pulse</span> <span class="ow">in</span> <span class="n">pulse_shapes</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse shape is not in specified list.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">laser_pulse</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetLaserPulseDuration</span><span class="p">(</span><span class="n">laser_pulse_duration</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the laser pulse duration is valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">laser_pulse_duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse duration has not been set&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if number.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">laser_pulse_duration</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;laser_pulse_duration&#39; must be a numerical type (float or int.)&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">laser_pulse_duration</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">laser_pulse_duration</span> <span class="o">&gt;</span> <span class="mf">50.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse must be between 1.0 and 50.0 ns&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">laser_pulse_duration</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetLaserIntensity</span><span class="p">(</span><span class="n">laser_intensity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility to check that the laser intensity is valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">laser_intensity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Laser intensity has not been set&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if number.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">laser_intensity</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s2">&quot;The parameter &#39;laser_intensity&#39; must be a numerical type (float or int.)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: Check these for more realistic limits of TW/cm**2</span>
+    <span class="k">if</span> <span class="n">laser_intensity</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">or</span> <span class="n">laser_intensity</span> <span class="o">&gt;</span> <span class="mf">100.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse must be between 1.0 and 50.0 ns&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">laser_intensity</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetRunTime</span><span class="p">(</span><span class="n">run_time</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility for checking the simulation run time is valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">run_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Simulation run time is not set&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: Check run times</span>
+    <span class="k">if</span> <span class="n">run_time</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">run_time</span> <span class="o">&gt;</span> <span class="mf">50.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Simulation run time should be &gt; 5.0 ns and &lt; 50.0 ns&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">run_time</span>
+
+<span class="k">def</span> <span class="nf">checkAndSetDeltaTime</span><span class="p">(</span><span class="n">delta_time</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility for checking the simulation delta time (resolution) is valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">delta_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Simulation delta time (time resolution) is not set&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">delta_time</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">or</span> <span class="n">delta_time</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Simulation delta time should be &gt; 10 ps and &lt; 500 ps&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">delta_time</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
