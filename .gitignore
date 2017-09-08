@@ -2,9 +2,10 @@
 *.pyo
 **.swp
 bin
-include
+include/
+!Sources/doc/source/include
 lib
-build/
+/build
 /docs
 doc/build/
 doc/doxy_build/

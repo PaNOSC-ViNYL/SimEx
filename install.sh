@@ -29,6 +29,7 @@ export FC=ifort
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}/local
 export Boost_NO_SYSTEM_PATHS=ON
+<<<<<<< HEAD
 export ARMA_DIR=${THIRD_PARTY_ROOT}
 
 
@@ -43,6 +44,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -Ds2e=ON \
       -DS2EReconstruction_EMC=ON\
       -DS2EReconstruction_DM=ON\
+      -DFEFFPhotonInteractor=ON\
       -Dwpg=ON\
       -Dgenesis=ON\
       -Docelot=ON\
@@ -51,7 +53,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -DGEANT4_ROOT=/usr/local \
       -DXCSIT_ROOT=/usr/local \
       -DBOOST_ROOT=/usr/local \
-      ..
+      $ROOT_DIR
 
 # Build the project.
 make -j8
