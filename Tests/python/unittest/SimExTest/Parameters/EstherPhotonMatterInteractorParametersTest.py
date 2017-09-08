@@ -72,16 +72,18 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.__dirs_to_remove = []
 
         self.esther_parameters = EstherPhotonMatterInteractorParameters(
-                                         number_of_layers=2,
+                                         number_of_layers=3,
                                          ablator="CH",
-                                         ablator_thickness=10.0,
+                                         ablator_thickness=25.0,
                                          sample="Iron",
-                                         sample_thickness=20.0,
-                                         window=None,
-                                         window_thickness=0.0,
-                                         laser_wavelength=800.0,
+                                         sample_thickness=5.0,
+                                         window="LiF",
+                                         window_thickness=50.0,
+                                         layer1="Copper",
+                                         layer1_thickness=1.0,
+                                         laser_wavelength=1064.0,
                                          laser_pulse='flat',
-                                         laser_pulse_duration=1.0,
+                                         laser_pulse_duration=6.0,
                                          laser_intensity=0.1,
                                          run_time=10.0,
                                          delta_time=0.05

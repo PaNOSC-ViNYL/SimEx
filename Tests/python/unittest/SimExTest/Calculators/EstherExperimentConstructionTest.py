@@ -50,14 +50,14 @@ class EstherExperimentConstructionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Make a tmp directory for simulation storage.
-        cls._simdir = "/Users/richardbriggs/Desktop/tmp/"
-        os.mkdir(cls._simdir)
+        cls._simdir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/"
+        #os.mkdir(cls._simdir)
         # The os.mkdir is to create the files for temporary use only, obviously this isn't used for main code.
 
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        shutil.rmtree(cls._simdir) # Comment out if you want to keep the files, but then also comment setUpClass mkdir.
+        #shutil.rmtree(cls._simdir) # Comment out if you want to keep the files, but then also comment setUpClass mkdir.
 
     def setUp(self):
         """ Setting up a test. """
@@ -89,71 +89,73 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                          ablator_thickness=50.0,
                                          sample="Iron",
                                          sample_thickness=5.0,
+                                         layer1=None,
+                                         layer1_thickness=None,
                                          window=None,
-                                         window_thickness=0.0,
+                                         window_thickness=None,
                                          laser_wavelength=1064.0,
                                          laser_pulse='flat',
-                                         laser_pulse_duration=6.0,
+                                         laser_pulse_duration=10.0,
                                          laser_intensity=0.33,
-                                         run_time=12.0,
-                                         delta_time=0.05
+                                         run_time=15.0,
+                                         delta_time=0.03
                                          )
         # Create experiment.
-        simName = "test"
+        simName = "CH-test"
         experiment = EstherExperimentConstruction(parameters=parameters,
                                                   esther_sims_path=self._simdir,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Desktop/tmp/test/1/"
+        expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/CH-test/1/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "test1.txt", os.listdir(expected_dir) )
-        self.assertIn( "test1_intensite_impulsion.txt", os.listdir(expected_dir) )
+        self.assertIn( "CH-test1.txt", os.listdir(expected_dir) )
+        self.assertIn( "CH-test1_intensite_impulsion.txt", os.listdir(expected_dir) )
         self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
         # Create new experiment from previous.
-        experiment = EstherExperimentConstruction(parameters=parameters,
-                                                  esther_sims_path=self._simdir,
-                                                  sim_name=simName)
+        #experiment = EstherExperimentConstruction(parameters=parameters,
+        #                                          esther_sims_path=self._simdir,
+        #                                          sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Desktop/tmp/test/2/"
-        self.assertTrue( os.path.isdir(expected_dir) )
+        #expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/CH-LiF/2/"
+        #self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "test2.txt", os.listdir(expected_dir) )
-        self.assertIn( "test2_intensite_impulsion.txt", os.listdir(expected_dir) )
-        self.assertIn( "parameters.json", os.listdir(expected_dir) )
+        #self.assertIn( "CH-LiF2.txt", os.listdir(expected_dir) )
+        #self.assertIn( "CH-LiF2_intensite_impulsion.txt", os.listdir(expected_dir) )
+        #self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
-        with open(os.path.join(expected_dir,"parameters.json")) as j:
-            dictionary = json.load(j)
-            j.close()
+        #with open(os.path.join(expected_dir,"parameters.json")) as j:
+        #    dictionary = json.load(j)
+        #    j.close()
 
         # Check parameter.
-        self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 5.0 )
+        #self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 50.0 )
         
         # Create new experiment from previous with update.
-        new_parameters = EstherPhotonMatterInteractorParameters(sample_thickness=4.0,
-                read_from_file="/Users/richardbriggs/Desktop/tmp/test/2/")
+        #new_parameters = EstherPhotonMatterInteractorParameters(laser_intensity=0.2,
+        #        read_from_file="/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/CH-LiF/2/")
 
-        experiment = EstherExperimentConstruction(parameters=new_parameters,
-                                                  esther_sims_path=self._simdir,
-                                                  sim_name=simName)
+        #experiment = EstherExperimentConstruction(parameters=new_parameters,
+        #                                          esther_sims_path=self._simdir,
+        #                                          sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Desktop/tmp/test/3/"
-        self.assertTrue( os.path.isdir(expected_dir) )
+        #expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/CH-LiF/3/"
+        #self.assertTrue( os.path.isdir(expected_dir) )
 
-        self.assertIn( "test3.txt", os.listdir(expected_dir) )
-        self.assertIn( "test3_intensite_impulsion.txt", os.listdir(expected_dir) )
-        self.assertIn( "parameters.json", os.listdir(expected_dir) )
+        #self.assertIn( "CH-LiF3.txt", os.listdir(expected_dir) )
+        #self.assertIn( "CH-LiF3_intensite_impulsion.txt", os.listdir(expected_dir) )
+        #self.assertIn( "parameters.json", os.listdir(expected_dir) )
 
-        with open(os.path.join(expected_dir,"parameters.json")) as j:
-            dictionary = json.load(j)
-            j.close()
+        #with open(os.path.join(expected_dir,"parameters.json")) as j:
+        #    dictionary = json.load(j)
+        #    j.close()
 
         # Check update performed.
-        self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 4.0 )
+        #self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__laser_intensity"], 0.2 )
 
     def testConversion(self):
         # Existing files and output data need to be saved

@@ -717,13 +717,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             if self.window_thickness == 0.0:
                 raise ValueError( "Window thickness cannot be 0.0")
 
-
-
 ###########################
 # Check and set functions #
 ###########################
 
-
+#################################
+# Material check and set functions
+##################################
 
 def checkAndSetNumberOfLayers(number_of_layers):
     """
@@ -731,7 +731,7 @@ def checkAndSetNumberOfLayers(number_of_layers):
 
     :param number_of_layers: The number of layers to check
     :return: Checked number of layers
-    :raise ValueError: not (1 < number_of_layers <=5 )
+    :raise ValueError: not (1 < number_of_layers <= 4 )
 
     """
     if number_of_layers is None:
@@ -740,8 +740,8 @@ def checkAndSetNumberOfLayers(number_of_layers):
     if not isinstance( number_of_layers, int ):
         raise TypeError("The parameter 'number_of_layers' must be an int.")
 
-    if number_of_layers <1 or number_of_layers > 5:
-        raise ValueError( "Number of layers must be between 1 and 5 only.")
+    if number_of_layers <1 or number_of_layers > 4:
+        raise ValueError( "Number of layers must be between 1 and 4 only.")
 
     return number_of_layers
 
@@ -837,7 +837,7 @@ def checkAndSetSampleThickness(sample_thickness):
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
 
-    # Check if Sample is between 1 and 100 um
+    # Check if Sample is between 1 and 200 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
         raise ValueError( "Sample must be between 1.0 and 200.0 microns")
 
@@ -937,7 +937,7 @@ def checkAndSetLayer2Thickness(layer2_thickness):
 
 def checkAndSetWindow(window):
     """
-    Utility to check that the window thickness is > 1 um and < 200 um
+    Utility to check that the window exists in the EOS database.
     """
     
     elements = ["LiF", "SiO2", "Diamond", "Quartz" ]
@@ -976,6 +976,10 @@ def checkAndSetWindowThickness(window_thickness):
 
     return window_thickness
 
+#################################
+# LASER CHECK AND SET FUNCTIONS #
+#################################
+
 def checkAndSetLaserWavelength(laser_wavelength):
     """
     Utility to check that the laser wavelength is correct.
@@ -987,10 +991,9 @@ def checkAndSetLaserWavelength(laser_wavelength):
     # Check if number.
     if not isinstance( laser_wavelength, (float, int)):
         raise TypeError( "The parameter 'laser_wavelength' must be a numerical type (float or int.)")
-
-    if laser_wavelength <= 0.0:
-        raise ValueError( "The parameter 'laser_wavelength' must be a positive number.")
-
+    
+    if laser_wavelength <= 300 or laser_wavelength > 1200:
+        raise ValueError( "laser wavelength must be between 300 and 1200 nm")
 
  # Convert to microns.
     laser_wavelength = laser_wavelength*1e-3
