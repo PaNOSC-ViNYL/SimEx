@@ -38,7 +38,7 @@ export ARMA_DIR=${THIRD_PARTY_ROOT}
 # If your have another version of xerces_c than 3.1 please edit also the single
 # entry in ./src/CMakeLists.txt which starts with ${XERCES} and ends with .so
 cmake -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=ON \
+      -DDEVELOPER_INSTALL=OFF \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
       -DSingFElPhotonDiffractor=ON \
       -Ds2e=ON \

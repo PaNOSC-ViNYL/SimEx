@@ -34,7 +34,7 @@ option(XERCESC_ROOT "-DXERCESC_ROOT=<abs path> absolute path to the xercesc
     ./include/xercesc/\n
     ./lib/"
 )
-option(XCSIT_ROOT "-DXCSIT_ROOT=<abs path> absolute path to the xcist 
+option(XCSIT_ROOT "-DXCSIT_ROOT=<abs path> absolute path to the xcist
     installation directory that includes\n
     ./include/xcsit/
     ./lib/
