@@ -3,6 +3,23 @@ CHANGELOG
 
 Changes from 0.2 to 0.3
 -----------------------
+New in 0.3.1
+''''''''''''
+
+New features
+""""""""""""
+* FEFFPhotonMatterInteractor: Calculator for the opensource part of FEFF8.5 allowing calculation
+ of EXAFS spectra for a given sample specification.
+
+Documentation
+"""""""""""""
+* Including more utility functions and new calculators (added since version 0.2) to the reference manual.
+
+Bug fixes and enhancements
+""""""""""""""""""""""""""
+* Fixed missing documentation in 0.3.0
+
+
 
 New in 0.3.0
 ''''''''''''
