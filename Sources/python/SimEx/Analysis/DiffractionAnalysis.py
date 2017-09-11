@@ -143,6 +143,7 @@ class DiffractionAnalysis(AbstractAnalysis):
     def patternGenerator(self):
         """ Yield an iterator over a given pattern sequence from a diffraction file.
         """
+
         indices = self.pattern_indices
         path = self.input_path
         if os.path.isdir(path): # legacy format.

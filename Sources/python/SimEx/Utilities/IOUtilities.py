@@ -80,12 +80,16 @@ def checkAndGetPDB( path ):
             download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
         except:
             raise
-            #raise IOError( "Database query failed.")
+
         finally:
             urllib.urlcleanup()
 
+
         # Move and rename the downloaded file.
         shutil.move( download_target, path  )
+
+        # Cleanup.
+        shutil.rmtree('obsolete')
 
     return path
 
