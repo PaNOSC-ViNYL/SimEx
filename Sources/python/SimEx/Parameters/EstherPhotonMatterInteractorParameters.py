@@ -317,6 +317,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def _readParametersFromFile(self,path):
         # Read from parameters file
         json_path = os.path.join(path, 'parameters.json')
+        print ( "Parameters file is: %s" % (json_path))
         with open(json_path, 'r') as j:
             dictionary = json.load(j)
             j.close()
@@ -330,7 +331,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
         self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
 
-    def _setupFeathering(self, number_of_zones=200, feather_zone_width=5.0, minimum_zone_width=2e-4):
+    def _setupFeathering(self, number_of_zones=250, feather_zone_width=4.0, minimum_zone_width=4e-4):
         """ Method to fix feathering
 
         :param number_of_zones: The number of zones in the first ablator section (default 200).
@@ -480,11 +481,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self._non_feather_zones)) # Number of zones
             input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
+            
+            # TO DO IF ABLATOR IS ONLY 4 um THICK, DON'T PRINT ABOVE.
             input_deck.write('NOM_MILIEU=%s_abl2\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 2nd PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"])) # ABLATOR EOS
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
-            input_deck.write('EPAISSEUR_EXTERNE=1.0e-10\n') #Min zone width
+            input_deck.write('EPAISSEUR_EXTERNE=4.0e-10\n') #Min zone width
             input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
 
