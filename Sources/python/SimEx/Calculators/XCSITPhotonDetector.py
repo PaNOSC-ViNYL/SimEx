@@ -20,10 +20,15 @@
 ##########################################################################
 
 
-import libpy_detector_interface as lpdi
+try:
+    import libpy_detector_interface as lpdi
+except ImportError:
+    print "\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed properly on this system. The XCSITPhotonDetector class can still be instantiated, but the backengine() method will throw an exception.\n")
+except:
+    raise
+
 
 import h5py
-
 import os
 import numpy as np
 import sys
@@ -63,7 +68,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         :param output_path: Path pointing to the path for output
         :type output_path: str
         """
-        
+
         # Failure if no argument is given
         if any([parameters is None,
                 input_path is None]):
@@ -123,7 +128,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                 "are allowed.")
         if not value:
             raise IOError("You must not enter an empty string as output path.")
-        
+
         # treat the input path:
         # Cases
         # 1) given is an absolute path
@@ -293,7 +298,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             raise RuntimeError("Interaction container has not been initialized yet.")
 
         # Run the simulation, catch everything that might happen and report
-        try: 
+        try:
             param = self.parameters
             ps = lpdi.ParticleSim()
             ps.setInput(self.__photon_data)
@@ -308,7 +313,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             print("Error traceback: " + str(err[2]))
             is_successful = False
 
-            
+
         print("Detected " + str(self.__ia_data.size()) + " interactions from " +
             str(self.__photon_data.size()) + " photons")
 
@@ -339,7 +344,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                             para.detector_type
                             )
             cs.runSimulation()
-        
+
             # Necessary due to the definition of XChargeData.hh
             # self.__charge_data = cs.getOutput()
         except:
@@ -422,7 +427,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             matrix = h5_infile["/data/"+ keys[0] + "/diffr"].value
             photons = np.zeros((len(matrix),len(matrix[0])),dtype=np.float_)
 
-            # TODO: Single pattern treatment is not implemented yet 
+            # TODO: Single pattern treatment is not implemented yet
             # Get the array where each pixel contains a number of photons
             # Explaination:
             #       /data/.../data are poissonized patterns
@@ -469,12 +474,12 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
                     # Center center and correct for center of element
                     direct[0] = direct[0] - 0.5* x_num + 0.5
-                    direct[1] = direct[1] - 0.5* y_num + 0.5    
+                    direct[1] = direct[1] - 0.5* y_num + 0.5
                     direct[2] = direct[2]
 
                     # calculate the length
                     direct[0] = direct[0]*x_pixel
-                    direct[1] = direct[1]*y_pixel   
+                    direct[1] = direct[1]*y_pixel
                     direct[2] = detector_dist
 
 
@@ -498,7 +503,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                     for ph in list(range(photons[i][j])):
                         entry = self.__photon_data.addEntry()
                         entry.setPositionX(direct[0])
-                        entry.setPositionY(direct[1]) 
+                        entry.setPositionY(direct[1])
                         entry.setPositionZ(0)
                         entry.setDirectionX(np.asscalar(normal_direction[0]))
                         entry.setDirectionY(np.asscalar(normal_direction[1]))
@@ -545,9 +550,9 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         # rotated of 180 degree to each other
         charge_array = np.fliplr(charge_array)
         charge_array = np.flipud(charge_array)
- 
+
         # Identify Nan and Inf in ChargeSim output
-        parent =os.path.dirname(self.output_path) 
+        parent =os.path.dirname(self.output_path)
         if not os.path.isdir(parent):
             parent=os.makedirs(parent)
         ofn = os.path.join(parent,"NaNInf.txt")
@@ -562,7 +567,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                         outfile.write(str(x) + "\t" + str(y) + "\tNaN")
                     if(np.isinf(charge_array[x][y])):
                         print("Warning: Detected Inf in ChargeMatrix at (" + str(x) +
-                            "," + str(y) + ") (python conention: l-r, t-b)")               
+                            "," + str(y) + ") (python conention: l-r, t-b)")
                         outfile.write(str(x) + "\t" + str(y) + "\tInf")
 
         # Create the new datasets
@@ -586,7 +591,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                 # -------------------------------------------------------------
 
                 # Copy
-                dist = h5_infile["/params/geom/detectorDist"] 
+                dist = h5_infile["/params/geom/detectorDist"]
                 param_geom_gr.create_dataset("detectorDist",data=dist[()])
                 pw = h5_infile["/params/geom/pixelWidth"]
                 param_geom_gr.create_dataset("pixelWidth",data=pw[()])
