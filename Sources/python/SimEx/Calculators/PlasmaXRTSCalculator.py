@@ -195,17 +195,22 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         energies = numpy.arange(mesh.nSlices) * dSlice + mesh.sliceMin
         radiated_energy_per_photon_energy = int0
 
+        # Get mean of spectrum
+        spectrum_mean = numpy.sum(energies*radiated_energy_per_photon_energy)/numpy.sum(radiated_energy_per_photon_energy)
+
         self._input_data = {}
         photon_energy = wavefront.params.photonEnergy
-        print photon_energy
         if self.parameters.photon_energy != photon_energy:
-            raise RuntimeError( "Parameter 'photon_energy' (%4.3f) not equal to source photon energy (%4.3f)." % (self.parameters.photon_energy, photon_energy))
+            print  "WARNING: Parameter 'photon_energy' (%4.3e eV) not equal to source photon energy (%4.3e eV). Will proceed with source photon energy." % (self.parameters.photon_energy, photon_energy)
+        if abs(spectrum_mean - photon_energy) > 1.0 :
+            print "WARNING: Given photon energy (%4.3e eV) deviates from spectral mean (%4.3e) by > 1 eV. Will proceed with spectral mean." % (photon_energy, spectrum_mean)
+            photon_energy = spectrum_mean
 
+        # Finally store the photon energy on the class.
         self.parameters.photon_energy = photon_energy
 
-        source_data = zip(energies-photon_energy, radiated_energy_per_photon_energy)
+        source_data = numpy.vstack((energies-photon_energy, radiated_energy_per_photon_energy)).transpose()
         self._input_data['source_spectrum'] = source_data
-        print source_data
 
     def saveH5(self):
         """
@@ -213,67 +218,68 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         """
 
         # Setup h5 data groups and sets.
-        h5 = h5py.File( self.output_path, 'w' )
-        # Data
-        h5.create_group("/data/dynamic")
-        h5.create_group("/data/static")
+        with h5py.File( self.output_path, 'w' ) as h5:
+            # Data
+            h5.create_group("/data/dynamic")
+            h5.create_group("/data/static")
 
-        # History
-        h5.create_group("/history/parent")
+            # History
+            h5.create_group("/history/parent")
 
-        # Info
-        h5.create_group("/info/units/")
+            # Info
+            h5.create_group("/info/units/")
 
-        # Parameters
-        h5.create_group("/params/beam")
-
-
-        # Create data datasets.
-        # Dynamic data.
-        energies  = self.__run_data[:,0]
-        Skw_free  = self.__run_data[:,1]
-        Skw_bound = self.__run_data[:,2]
-        Skw_total = self.__run_data[:,3]
-        ### TODO
-        #collfreq  = self.__run_data[:,4]
-
-        energy_shifts = h5.create_dataset("data/dynamic/energy_shifts", data=energies)
-        energy_shifts.attrs.create('unit', 'eV')
-
-        Skw_free = h5.create_dataset("data/dynamic/Skw_free", data=Skw_free)
-        Skw_free.attrs.create('unit', 'eV**-1')
-
-        Skw_bound = h5.create_dataset("data/dynamic/Skw_bound", data=Skw_bound)
-        Skw_bound.attrs.create('unit', 'eV**-1')
-
-        Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
-        Skw_total.attrs.create('unit', 'eV**-1')
-
-        # Static data.
-        self.__static_data = _parseStaticData( self.__run_log )
-
-        # Save to h5 file.
-        for key, value in self.__static_data.items():
-            h5.create_dataset("/data/static/%s" % (key), data=value)
-
-        # Attach a unit to the ionization potential lowering.
-        h5['/data/static/']['ipl'].attrs.create('unit', 'eV')
+            # Parameters
+            h5.create_group("/params/beam")
 
 
-                                #'/history/parent/detail',
-                                #'/history/parent/parent',
-                                #'/info/package_version',
-                                #'/info/contact',
-                                #'/info/data_description',
-                                #'/info/method_description',
-                                #'/params/beam/photonEnergy',
-                                #'/params/beam/spectrum',
-                                #'/params/info',
-        ####
-        # Close the file.
-        ####
-        h5.close()
-        # Never write after this line in this function.
+            # Create data datasets.
+            # Dynamic data.
+            energies  = self.__run_data[:,0]
+            Skw_free  = self.__run_data[:,1]
+            Skw_bound = self.__run_data[:,2]
+            Skw_total = self.__run_data[:,3]
+
+            ### TODO
+            #collfreq  = self.__run_data[:,4]
+
+            energy_shifts = h5.create_dataset("data/dynamic/energy_shifts", data=energies)
+            energy_shifts.attrs.create('unit', 'eV')
+
+            Skw_free = h5.create_dataset("data/dynamic/Skw_free", data=Skw_free)
+            Skw_free.attrs.create('unit', 'eV**-1')
+
+            Skw_bound = h5.create_dataset("data/dynamic/Skw_bound", data=Skw_bound)
+            Skw_bound.attrs.create('unit', 'eV**-1')
+
+            Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
+            Skw_total.attrs.create('unit', 'eV**-1')
+
+            # Static data.
+            self.__static_data = _parseStaticData( self.__run_log )
+
+            # Save to h5 file.
+            for key, value in self.__static_data.items():
+                h5.create_dataset("/data/static/%s" % (key), data=value)
+
+            # Attach a unit to the ionization potential lowering.
+            h5['/data/static/']['ipl'].attrs.create('unit', 'eV')
+
+
+                                    #'/history/parent/detail',
+                                    #'/history/parent/parent',
+                                    #'/info/package_version',
+                                    #'/info/contact',
+                                    #'/info/data_description',
+                                    #'/info/method_description',
+                                    #'/params/beam/photonEnergy',
+                                    #'/params/beam/spectrum',
+                                    #'/params/info',
+            ####
+            # Close the file.
+            ####
+            h5.close()
+            # Never write after this line in this function.
 
     def _serializeSourceSpectrum(self):
         """ Write the source spectrum to a file on disk. """
