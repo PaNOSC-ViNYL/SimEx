@@ -36,7 +36,7 @@ from TestUtilities import TestUtilities
 
 # Import the class to test.
 from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
-from SimEx.Calculators.PlasmaXRTSCalculator import parseStaticData
+from SimEx.Calculators.PlasmaXRTSCalculator import _parseStaticData
 
 
 class PlasmaXRTSCalculatorTest(unittest.TestCase):
@@ -449,11 +449,39 @@ Real time: 12.0 seconds
         xrts_parameters.energy_range = {'min' :-300.0,
                                         'max' :300.0,
                                         'step':3.,
-                                          }
+                                       }
 
 
         # Run the backengine.
         xrts_calculator.backengine()
+
+
+    def notestBackengineWithWPGOut(self):
+        """ Test that extracting the spectrum from a wpg output works. """
+        """ notested because requires file not in TestFiles. """
+        # Construct parameters.
+        xrts_parameters = self.xrts_parameters
+
+        xrts_calculator = PlasmaXRTSCalculator( parameters=xrts_parameters,
+                                                input_path='prop_out.h5',
+                                                output_path='xrts_out.h5')
+
+        # Read in the data.
+        xrts_calculator._readH5()
+
+        # Specify that we want to use the measured source spectrum.
+        xrts_parameters.source_spectrum = 'prop'
+        xrts_parameters.energy_range = {'min' :-300.0,
+                                        'max' :300.0,
+                                        'step':3.,
+                                       }
+
+
+        # Run the backengine.
+        xrts_calculator.backengine()
+
+        self.assertTrue( 'source_spectrum.txt' in os.listdir( xrts_parameters._tmp_dir ) )
+
 
     def testPhotonEnergyConsistency(self):
         """ Test that an exception is thrown if the given photon energy is not equal to the source photon energy. """
@@ -492,9 +520,6 @@ Real time: 12.0 seconds
 
         # Run the backengine.
         xrts_calculator.backengine()
-
-
-
 
 
 if __name__ == '__main__':

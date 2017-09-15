@@ -169,23 +169,43 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def _readH5(self):
         """
         Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
+        # Import wpg only here if needed.
+        import wpg
+        from wpg.srwlib import srwl
+        # Construct the wave.
+        wavefront = wpg.Wavefront()
+        wavefront.load_hdf5(self.input_path)
 
-        # Open the h5 file.
-        h5 = h5py.File(self.input_path, 'r')
+        ### Switch to frequency domain and get spectrum
+        srwl.SetRepresElecField(wavefront._srwl_wf, 'f')
+
+        # Get mesh
+        mesh = wavefront.params.Mesh
+        dx = (mesh.xMax - mesh.xMin) / (mesh.nx - 1)
+        dy = (mesh.yMax - mesh.yMin) / (mesh.ny - 1)
+
+        # Get intensity and sum over x,y coordinates.
+        int0 = wavefront.get_intensity().sum(axis=(0,1))
+        int0 = int0 * (dx * dy * 1.e6)  # scale to proper unit sqrt(W/mm^2)
+
+        dSlice = 0
+        if mesh.nSlices > 1:
+            dSlice = (mesh.sliceMax - mesh.sliceMin) / (mesh.nSlices - 1)
+
+        energies = numpy.arange(mesh.nSlices) * dSlice + mesh.sliceMin
+        radiated_energy_per_photon_energy = int0
 
         self._input_data = {}
-        photon_energy = h5['params/photonEnergy'].value
+        photon_energy = wavefront.params.photonEnergy
+        print photon_energy
         if self.parameters.photon_energy != photon_energy:
             raise RuntimeError( "Parameter 'photon_energy' (%4.3f) not equal to source photon energy (%4.3f)." % (self.parameters.photon_energy, photon_energy))
 
         self.parameters.photon_energy = photon_energy
 
-        source_data = numpy.array(h5['misc/spectrum0'].value)
-        source_data[:,0] = source_data[:,0] - self.parameters.photon_energy
+        source_data = zip(energies-photon_energy, radiated_energy_per_photon_energy)
         self._input_data['source_spectrum'] = source_data
-
-
-        h5.close()
+        print source_data
 
     def saveH5(self):
         """

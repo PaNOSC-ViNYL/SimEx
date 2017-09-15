@@ -237,8 +237,11 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
 
         # Get intensity by integrating over transverse dimensions.
-        int0 = self.intensity
-        int0 = int0.sum(axis=0).sum(axis=0)
+        if not spectrum:
+            int0 = self.intensity.sum(axis=(0,1))
+        else:
+            int0 = wf.get_intensity().sum(axis=(0,1))
+
         # Scale to get unit W/mm^2
         int0 = int0*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
         int0max = int0.max()
