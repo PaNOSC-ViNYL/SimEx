@@ -31,7 +31,6 @@ Reference Manual
 .. autoclass:: SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor
 .. autoclass:: SimEx.Parameters.DMPhasingParameters.DMPhasingParameters
 .. autoclass:: SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters
-.. autoclass:: SimEx.Parameters.EstherPhotonMatterInteractionParameters
 .. autoclass:: SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters
 .. autoclass:: SimEx.Parameters.PhotonBeamParameters.PhotonBeamParameters
 .. autoclass:: SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters
