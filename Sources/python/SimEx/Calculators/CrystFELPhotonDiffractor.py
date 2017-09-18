@@ -117,7 +117,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         return np
 
     def backengine(self):
-        """ This method drives the backengine singFEL."""
+        """ This method drives the backengine CrystFEL.pattern_sim."""
 
         # Setup directory structure as needed.
         if not os.path.isdir( self.output_path ):

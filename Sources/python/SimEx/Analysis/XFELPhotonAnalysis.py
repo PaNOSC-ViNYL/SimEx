@@ -223,22 +223,20 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         # Setup new figure.
         plt.figure()
 
-        # Get wavefront.
-        wf = self.wavefront
-
         # Switch to frequency (energy) domain if requested.
         if spectrum:
             print "\n Switching to frequency domain."
-            wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 'f')
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
+            self.intensity = self.wavefront.get_intensity()
 
         # Get dimensions.
-        mesh = wf.params.Mesh
+        mesh = self.wavefront.params.Mesh
         dx = (mesh.xMax - mesh.xMin)/(mesh.nx - 1)
         dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
 
         # Get intensity by integrating over transverse dimensions.
-        int0 = self.intensity
-        int0 = int0.sum(axis=0).sum(axis=0)
+        int0 = self.intensity.sum(axis=(0,1))
+
         # Scale to get unit W/mm^2
         int0 = int0*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
         int0max = int0.max()
@@ -253,7 +251,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
         xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
-        if(wf.params.wDomain=='time'):
+        if(self.wavefront.params.wDomain=='time'):
             plt.plot(xs*1e15, int0) # time axis converted to fs.
             plt.plot(xs_mf*1e15, int0_mean, 'ro')
             plt.title('Power')
@@ -270,7 +268,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
             plt.ylabel('J/eV')
 
             # Switch back to time domain.
-            wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 't')
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
+            self.intensity = self.wavefront.get_intensity()
 
     def plotOnAxisPowerDensity(self, spectrum=False):
         """ Method to plot the on-axis power density.
@@ -285,15 +284,13 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         # Setup new figure.
         plt.figure()
 
-        # Get wavefront.
-        wf = self.wavefront
-
         # Switch to frequency (energy) domain if requested.
         if spectrum:
             wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 'f')
+            self.intensity = self.wavefront.get_intensity()
 
         # Get dimensions.
-        mesh = wf.params.Mesh
+        mesh = self.wavefront.params.Mesh
         dx = (mesh.xMax - mesh.xMin)/(mesh.nx - 1)
         dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
 
@@ -320,7 +317,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
 
         # Plot.
-        if(wf.params.wDomain=='time'):
+        if(self.wavefront.params.wDomain=='time'):
             plt.plot(xs*1e15,int0_00)
             plt.plot(xs_mf*1e15, int0_00[min(aw):max(aw)], 'ro')
             plt.title('On-Axis Power Density')
@@ -334,7 +331,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
             plt.ylabel(r'fluence (J/eV/mm${}^{2}$)')
 
             # Switch back to time domain.
-            wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 't')
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
+            self.intensity = self.wavefront.get_intensity()
 
 def mask_nans(a, replacement=0.0):
     """ Find nans in an array and replace.

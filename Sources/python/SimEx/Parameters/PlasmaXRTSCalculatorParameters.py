@@ -328,9 +328,9 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('BMA(+sLFC)                         %d    0\n' % (self.__write_bma))
             input_deck.write('CORE                                1    0\n')
             input_deck.write('TOTAL                               1    0\n')
-            input_deck.write('E_MIN                              %4.3f  \n' % (self.energy_range['min']))
-            input_deck.write('E_MAX                              %4.3f  \n' % (self.energy_range['max']))
-            input_deck.write('E_STEP                             %4.3f  \n' % (self.energy_range['step']))
+            input_deck.write('E_MIN                              %8.7f  \n' % (self.energy_range['min']))
+            input_deck.write('E_MAX                              %8.7f  \n' % (self.energy_range['max']))
+            input_deck.write('E_STEP                             %8.7f  \n' % (self.energy_range['step']))
             input_deck.write('--target_spec--------------------------chem----Zfree--\n')
             input_deck.write('NUMBER_OF_SPECIES %d\n' % (len(self.elements)) )
             for i,element in enumerate(self.elements):
