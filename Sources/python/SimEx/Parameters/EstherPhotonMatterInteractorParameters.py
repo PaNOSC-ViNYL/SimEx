@@ -248,12 +248,12 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         :type rad_transfer: boolean
 
         """
-
+        
+        # If parameters already exist, read from parameters file
         if read_from_file is not None:
             print ( "Parameters file is located here: %s" % (read_from_file))
             self._readParametersFromFile(read_from_file)
 
-            # TO DO #96 expert mode : Add expert parameters (if they are set by user)
             # Update parameters from arguments.
             for key,val in {
                     'number_of_layers':number_of_layers,
@@ -295,7 +295,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self.__run_time = checkAndSetRunTime(run_time)
             self.__delta_time = checkAndSetDeltaTime(delta_time)
             
-            # TO DO #96 expert mode: CheckAndSet expert mode parameters to ensure they do not conflict
             self.force_passage = force_passage
             self.without_therm_conduc = without_therm_conduc
             self.rad_transfer = rad_transfer
@@ -304,11 +303,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Define start up options (called Demmarage in esther)
         self._setDemmargeFlags()
 
-        # TO DO #96 expert mode: Define EOS options here, SESAME or BLF, SESAME default
-        #self._set EOS options(), SESAME or BLF
+        # Expert mode: Choose EOS type, SESAME or BLF
 
-        # TO DO #96 expert mode: Expert parameters to improve spatial resolution can be set here.
-        # Setup the feathering.
+        # Expert mode: Setup zone feathering (spatial resolution)
         self._setupFeathering()
 
         # Set state to not-initialized (e.g. input deck is not written)
@@ -326,9 +323,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
     def _setDemmargeFlags(self):
         # Expert users options to include in the start up options
-        self.__use_usi = "USI" # TO DO: Check this option in esther
+        self.__use_usi = "USI" # Use SI units.
         self.__use_force_passage = "FORCER_LE_PASSAGE" # Forces simulation through ignoring minor issues
-        self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
+        self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity
         self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
 
     def _setupFeathering(self, number_of_zones=250, feather_zone_width=4.0, minimum_zone_width=4e-4):
@@ -357,7 +354,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         root_found = False
 
         # Get all purely real roots above 1.
-        ### TODO: Improve algorithm.
         for i in range(n):
             if roots[i].imag == 0 and roots[i].real > 1.000001: # Why not > 1.? This would exclude 1.0f
                 r = round(roots[i].real,4)
@@ -413,14 +409,16 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
             input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi))
-            # TO DO: 96 expert mode: Need better way of including these expert options (after checks of conflict)
+
             if self.force_passage is True:
                 input_deck.write('%s\n' % (self.__use_force_passage)) # Use force passage
-            # BUG: Need to use without_therm_conduc if LiF window...
+
             if self.without_therm_conduc is True:
                 input_deck.write('%s\n' % (self.__use_without_therm_conduc)) # Use without thermal conductivity option
+
             if self.rad_transfer is True:
                 input_deck.write('%s\n' % (self.__use_radiative_transfer)) # Use without thermal conductivity option
+
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')
@@ -482,7 +480,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
             
-            # TO DO IF ABLATOR IS ONLY 4 um THICK, DON'T PRINT ABOVE.
             input_deck.write('NOM_MILIEU=%s_abl2\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 2nd PART OF ABLATOR
             input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"])) # ABLATOR EOS
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
@@ -511,7 +508,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('\n')
 
             # Output parameters
-            # TO DO: GIT ISSUE #96: Expert mode
             input_deck.write('SORTIES_GRAPHIQUES\n')
             input_deck.write('DECOUPAGE_TEMPS\n')
             input_deck.write('BORNE_TEMPS=%.2fe-9\n' % (self.run_time))
@@ -795,8 +791,8 @@ def checkAndSetAblatorThickness(ablator_thickness):
         raise TypeError("The parameters 'ablator_thickness' must be of numeric type (int or float).")
 
     # Check if ablator is between 5 and 100 um
-    if ablator_thickness < 4.0 or ablator_thickness > 100.0:
-        raise ValueError( "Ablator must be between 4.0 and 100.0 microns")
+    if ablator_thickness < 5.0 or ablator_thickness > 100.0:
+        raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
     
     # TO DO PLACEHOLDER
     # IF LASER INTENSITY IS TOO HIGH, ABLATOR MUST BE THICK TO ALLOW FOR ENOUGH MATERIAL TO VAPORISE (CH)

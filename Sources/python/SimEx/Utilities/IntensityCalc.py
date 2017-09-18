@@ -30,7 +30,11 @@ def calculateLaserIntensity(laser_energy=None):
     @type : float, int
     """
     
-    Energy = float(raw_input("Energy (J) : "))
+    if laser_energy is None:
+        Energy = float(raw_input("Energy (J) : "))
+    else:
+        Energy = laser_energy
+    
     SpotSize = float(raw_input("Spot size (diameter in um) : "))
     PulseLength = float(raw_input("Pulse length (ns) : "))
 
@@ -41,7 +45,6 @@ def calculateLaserIntensity(laser_energy=None):
     Intensity = Power/SpotArea
     Intensity = Intensity/1e12
 
-    print Power
     print "Intensity = ", Intensity, "TW/cm**2"
     
     return Intensity
