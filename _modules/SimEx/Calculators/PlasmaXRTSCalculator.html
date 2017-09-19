@@ -217,23 +217,48 @@
     <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+        <span class="c1"># Import wpg only here if needed.</span>
+        <span class="kn">import</span> <span class="nn">wpg</span>
+        <span class="kn">from</span> <span class="nn">wpg.srwlib</span> <span class="k">import</span> <span class="n">srwl</span>
+        <span class="c1"># Construct the wave.</span>
+        <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wpg</span><span class="o">.</span><span class="n">Wavefront</span><span class="p">()</span>
+        <span class="n">wavefront</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span>
 
-        <span class="c1"># Open the h5 file.</span>
-        <span class="n">h5</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="c1">### Switch to frequency domain and get spectrum</span>
+        <span class="n">srwl</span><span class="o">.</span><span class="n">SetRepresElecField</span><span class="p">(</span><span class="n">wavefront</span><span class="o">.</span><span class="n">_srwl_wf</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get mesh</span>
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">Mesh</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">xMax</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">xMin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">yMax</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">yMin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Get intensity and sum over x,y coordinates.</span>
+        <span class="n">int0</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">get_intensity</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">int0</span> <span class="o">=</span> <span class="n">int0</span> <span class="o">*</span> <span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">*</span> <span class="mf">1.e6</span><span class="p">)</span>  <span class="c1"># scale to proper unit sqrt(W/mm^2)</span>
+
+        <span class="n">dSlice</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nSlices</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dSlice</span> <span class="o">=</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">sliceMax</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">sliceMin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">nSlices</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">nSlices</span><span class="p">)</span> <span class="o">*</span> <span class="n">dSlice</span> <span class="o">+</span> <span class="n">mesh</span><span class="o">.</span><span class="n">sliceMin</span>
+        <span class="n">radiated_energy_per_photon_energy</span> <span class="o">=</span> <span class="n">int0</span>
+
+        <span class="c1"># Get mean of spectrum</span>
+        <span class="n">spectrum_mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">energies</span><span class="o">*</span><span class="n">radiated_energy_per_photon_energy</span><span class="p">)</span><span class="o">/</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">radiated_energy_per_photon_energy</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_data</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;params/photonEnergy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">photonEnergy</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span> <span class="o">!=</span> <span class="n">photon_energy</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;Parameter &#39;photon_energy&#39; (</span><span class="si">%4.3f</span><span class="s2">) not equal to source photon energy (</span><span class="si">%4.3f</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">))</span>
+            <span class="nb">print</span>  <span class="s2">&quot;WARNING: Parameter &#39;photon_energy&#39; (</span><span class="si">%4.3e</span><span class="s2"> eV) not equal to source photon energy (</span><span class="si">%4.3e</span><span class="s2"> eV). Will proceed with source photon energy.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">spectrum_mean</span> <span class="o">-</span> <span class="n">photon_energy</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;WARNING: Given photon energy (</span><span class="si">%4.3e</span><span class="s2"> eV) deviates from spectral mean (</span><span class="si">%4.3e</span><span class="s2">) by &gt; 1 eV. Will proceed with spectral mean.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">spectrum_mean</span><span class="p">)</span>
+            <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">spectrum_mean</span>
 
+        <span class="c1"># Finally store the photon energy on the class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span> <span class="o">=</span> <span class="n">photon_energy</span>
 
-        <span class="n">source_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">h5</span><span class="p">[</span><span class="s1">&#39;misc/spectrum0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">source_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span>
+        <span class="n">source_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">energies</span><span class="o">-</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">radiated_energy_per_photon_energy</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_data</span><span class="p">[</span><span class="s1">&#39;source_spectrum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_data</span>
-
-
-        <span class="n">h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PlasmaXRTSCalculator.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -241,67 +266,68 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Setup h5 data groups and sets.</span>
-        <span class="n">h5</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span> <span class="p">)</span>
-        <span class="c1"># Data</span>
-        <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/data/dynamic&quot;</span><span class="p">)</span>
-        <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/data/static&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span> <span class="p">)</span> <span class="k">as</span> <span class="n">h5</span><span class="p">:</span>
+            <span class="c1"># Data</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/data/dynamic&quot;</span><span class="p">)</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/data/static&quot;</span><span class="p">)</span>
 
-        <span class="c1"># History</span>
-        <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/history/parent&quot;</span><span class="p">)</span>
+            <span class="c1"># History</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/history/parent&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Info</span>
-        <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/info/units/&quot;</span><span class="p">)</span>
+            <span class="c1"># Info</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/info/units/&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Parameters</span>
-        <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/params/beam&quot;</span><span class="p">)</span>
-
-
-        <span class="c1"># Create data datasets.</span>
-        <span class="c1"># Dynamic data.</span>
-        <span class="n">energies</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">Skw_free</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">Skw_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">Skw_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
-        <span class="c1">### TODO</span>
-        <span class="c1">#collfreq  = self.__run_data[:,4]</span>
-
-        <span class="n">energy_shifts</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/energy_shifts&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">energies</span><span class="p">)</span>
-        <span class="n">energy_shifts</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
-
-        <span class="n">Skw_free</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_free&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_free</span><span class="p">)</span>
-        <span class="n">Skw_free</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
-
-        <span class="n">Skw_bound</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_bound&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_bound</span><span class="p">)</span>
-        <span class="n">Skw_bound</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
-
-        <span class="n">Skw_total</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_total&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_total</span><span class="p">)</span>
-        <span class="n">Skw_total</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Static data.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span> <span class="o">=</span> <span class="n">_parseStaticData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_log</span> <span class="p">)</span>
-
-        <span class="c1"># Save to h5 file.</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;/data/static/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-
-        <span class="c1"># Attach a unit to the ionization potential lowering.</span>
-        <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;/data/static/&#39;</span><span class="p">][</span><span class="s1">&#39;ipl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+            <span class="c1"># Parameters</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;/params/beam&quot;</span><span class="p">)</span>
 
 
-                                <span class="c1">#&#39;/history/parent/detail&#39;,</span>
-                                <span class="c1">#&#39;/history/parent/parent&#39;,</span>
-                                <span class="c1">#&#39;/info/package_version&#39;,</span>
-                                <span class="c1">#&#39;/info/contact&#39;,</span>
-                                <span class="c1">#&#39;/info/data_description&#39;,</span>
-                                <span class="c1">#&#39;/info/method_description&#39;,</span>
-                                <span class="c1">#&#39;/params/beam/photonEnergy&#39;,</span>
-                                <span class="c1">#&#39;/params/beam/spectrum&#39;,</span>
-                                <span class="c1">#&#39;/params/info&#39;,</span>
-        <span class="c1">####</span>
-        <span class="c1"># Close the file.</span>
-        <span class="c1">####</span>
-        <span class="n">h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-        <span class="c1"># Never write after this line in this function.</span>
+            <span class="c1"># Create data datasets.</span>
+            <span class="c1"># Dynamic data.</span>
+            <span class="n">energies</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Skw_free</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Skw_bound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">Skw_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+
+            <span class="c1">### TODO</span>
+            <span class="c1">#collfreq  = self.__run_data[:,4]</span>
+
+            <span class="n">energy_shifts</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/energy_shifts&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">energies</span><span class="p">)</span>
+            <span class="n">energy_shifts</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+            <span class="n">Skw_free</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_free&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_free</span><span class="p">)</span>
+            <span class="n">Skw_free</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
+
+            <span class="n">Skw_bound</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_bound&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_bound</span><span class="p">)</span>
+            <span class="n">Skw_bound</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
+
+            <span class="n">Skw_total</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_total&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_total</span><span class="p">)</span>
+            <span class="n">Skw_total</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Static data.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span> <span class="o">=</span> <span class="n">_parseStaticData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_log</span> <span class="p">)</span>
+
+            <span class="c1"># Save to h5 file.</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;/data/static/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="c1"># Attach a unit to the ionization potential lowering.</span>
+            <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;/data/static/&#39;</span><span class="p">][</span><span class="s1">&#39;ipl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+
+
+                                    <span class="c1">#&#39;/history/parent/detail&#39;,</span>
+                                    <span class="c1">#&#39;/history/parent/parent&#39;,</span>
+                                    <span class="c1">#&#39;/info/package_version&#39;,</span>
+                                    <span class="c1">#&#39;/info/contact&#39;,</span>
+                                    <span class="c1">#&#39;/info/data_description&#39;,</span>
+                                    <span class="c1">#&#39;/info/method_description&#39;,</span>
+                                    <span class="c1">#&#39;/params/beam/photonEnergy&#39;,</span>
+                                    <span class="c1">#&#39;/params/beam/spectrum&#39;,</span>
+                                    <span class="c1">#&#39;/params/info&#39;,</span>
+            <span class="c1">####</span>
+            <span class="c1"># Close the file.</span>
+            <span class="c1">####</span>
+            <span class="n">h5</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+            <span class="c1"># Never write after this line in this function.</span>
 
     <span class="k">def</span> <span class="nf">_serializeSourceSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Write the source spectrum to a file on disk. &quot;&quot;&quot;</span>

@@ -128,12 +128,16 @@
             <span class="n">download_target</span> <span class="o">=</span> <span class="n">pdb_list</span><span class="o">.</span><span class="n">retrieve_pdb_file</span><span class="p">(</span> <span class="n">pdb_target_name</span><span class="p">,</span> <span class="n">pdir</span><span class="o">=</span><span class="n">pdb_target_dir</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="s1">&#39;pdb&#39;</span> <span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span>
-            <span class="c1">#raise IOError( &quot;Database query failed.&quot;)</span>
+
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">urllib</span><span class="o">.</span><span class="n">urlcleanup</span><span class="p">()</span>
 
+
         <span class="c1"># Move and rename the downloaded file.</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span> <span class="n">download_target</span><span class="p">,</span> <span class="n">path</span>  <span class="p">)</span>
+
+        <span class="c1"># Cleanup.</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="s1">&#39;obsolete&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">path</span></div>
 
