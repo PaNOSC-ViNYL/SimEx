@@ -3,6 +3,20 @@ CHANGELOG
 
 Changes from 0.2 to 0.3
 -----------------------
+
+New in 0.3.2
+''''''''''''
+
+Documentation
+"""""""""""""
+* Tutorial for PlasmaXRTSCalculator  (in the wiki).
+* Tutorial for CrystFELPhotonDiffracto (in the wiki).
+
+Bug fix
+"""""""
+* Fixed a bug in WPG leading to segfault if wavefront mesh not quadratic shape (nx != ny).
+* Various bug fixes in PlasmaXRTSCalculator and CrystFELPhotonDiffractor which were discovered while writing the tutorial.
+
 New in 0.3.1
 ''''''''''''
 
