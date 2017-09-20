@@ -2,11 +2,7 @@
 
 # Sample installation script. Adjustments might be neccessary.
 
-
-
-#INSTALL_PREFIX=/data/netapp/s2e/simex
 INSTALL_PREFIX=$PWD
-#THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 THIRD_PARTY_ROOT=/usr
 
 # Check for existing build directory, remove if foun.d
@@ -29,7 +25,6 @@ export FC=ifort
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}/local
 export Boost_NO_SYSTEM_PATHS=ON
-<<<<<<< HEAD
 export ARMA_DIR=${THIRD_PARTY_ROOT}
 
 
@@ -38,9 +33,10 @@ export ARMA_DIR=${THIRD_PARTY_ROOT}
 # If your have another version of xerces_c than 3.1 please edit also the single
 # entry in ./src/CMakeLists.txt which starts with ${XERCES} and ends with .so
 cmake -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=OFF \
+      -DDEVELOPER_INSTALL=ON \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
       -DSingFElPhotonDiffractor=ON \
+      -DCrystFElPhotonDiffractor=ON \
       -Ds2e=ON \
       -DS2EReconstruction_EMC=ON\
       -DS2EReconstruction_DM=ON\
@@ -49,11 +45,11 @@ cmake -DSRW_OPTIMIZED=ON \
       -Dgenesis=ON\
       -Docelot=ON\
       -DXCSITPhotonDetector=ON \
-      -DXERCESC_ROOT=/usr\
-      -DGEANT4_ROOT=/usr/local \
-      -DXCSIT_ROOT=/usr/local \
-      -DBOOST_ROOT=/usr/local \
-      $ROOT_DIR
+      -DXERCESC_ROOT=${THIRD_PARTY_ROOT}\
+      -DGEANT4_ROOT=${THIRD_PARTY_ROOT}/local \
+      -DXCSIT_ROOT=${THIRD_PARTY_ROOT}/local \
+      -DBOOST_ROOT=${BOOST_ROOT} \
+      ..
 
 # Build the project.
 make -j8
