@@ -33,39 +33,28 @@ from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
 from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
 from S2EReconstructionTest import S2EReconstructionTest
-#from GenesisPhotonSourceTest import GenesisPhotonSourceTest
+from XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
+from XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
 
 is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
-if not is_travisCI:
-    from XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
-    from XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
 
 # Setup the suite.
 def suite():
+    suites = [
+             unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
+             unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
+             unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
+             unittest.makeSuite(S2EReconstructionTest,                      'test'),
+             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
+             unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
+             unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
+
     if not is_travisCI:
-        suites = (
-                 unittest.makeSuite(XFELPhotonSourceTest,                   'test'),
-                 unittest.makeSuite(XFELPhotonPropagatorTest,               'test'),
-                 unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
-                 unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
-                 unittest.makeSuite(S2EReconstructionTest,                  'test'),
-                 unittest.makeSuite(CrystFELPhotonDiffractorParametersTest, 'test'),
-                 unittest.makeSuite(XCSITPhotonDetectorTest,                'test'),
-                 unittest.makeSuite(XCSITPhotonDetectorParametersTest,      'test'),
-                 ### Disabled since CrystFEL not added to external libraries.
-                 unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'),
-                 unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
-                 )
-    else:
-        suites = (
-                 unittest.makeSuite(XFELPhotonSourceTest,                   'test'),
-                 unittest.makeSuite(XFELPhotonPropagatorTest,               'test'),
-                 unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,    'test'),
-                 unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
-                 unittest.makeSuite(S2EReconstructionTest,                  'test'),
-                 unittest.makeSuite(CrystFELPhotonDiffractorParametersTest, 'test'),
-                 unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'),
-                 )
+        suites.append(unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'))
+        suites.append(unittest.makeSuite(GenesisPhotonSourceTest,                'test'))
+        suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,                'test'))
+        suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest,      'test'))
 
     return unittest.TestSuite(suites)
 

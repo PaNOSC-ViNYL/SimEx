@@ -29,15 +29,22 @@ from SimExTest.Utilities import UtilitiesTests
 from SimExTest.Parameters import ParametersTests
 from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
-# Define the encapsulating test suite.
+# Are we running on CI server?
+is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
+
+
+# Define the test suite.
 def suite():
     suites = [
                AbstractCalculatorsTests.suite(),
                CalculatorsTests.suite(),
                UtilitiesTests.suite(),
                ParametersTests.suite(),
-               PhotonExperimentSimulationTests.suite(),
              ]
+
+    # Append if NOT on CI server.
+    if not is_travisCI:
+        suites.append(PhotonExperimentSimulationTests.suite())
 
     return unittest.TestSuite(suites)
 
