@@ -40,7 +40,7 @@ addons:
       - sphinx-common
       - python-sphinx
       - python-qt4
-      - libgsl-dev
+      - libgsl0-dev
 
 cache:
   apt: true
