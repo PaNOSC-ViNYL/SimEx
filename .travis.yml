@@ -42,8 +42,8 @@ addons:
       - python-qt4
       - libgsl0-dev
       - gtk-doc-tools
-      - libgtk-1.2
-      - gtk2
+      - libgtk2.0-dev
+      - libgtk2.0-0
 
 cache:
   apt: true
