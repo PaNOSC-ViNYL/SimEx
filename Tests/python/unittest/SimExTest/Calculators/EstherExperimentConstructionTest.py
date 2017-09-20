@@ -73,7 +73,7 @@ class EstherExperimentConstructionTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def notestDefaultConstruction(self):
+    def testDefaultConstruction(self):
         """ Testing the default construction of the class using a dictionary. """
 
         # Attempt to construct an instance of the class.
