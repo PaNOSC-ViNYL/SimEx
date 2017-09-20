@@ -41,6 +41,7 @@ addons:
       - python-sphinx
       - python-qt4
       - libgsl0-dev
+      - gtk-doc-tools
 
 cache:
   apt: true
