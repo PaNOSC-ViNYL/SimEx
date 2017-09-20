@@ -17,3 +17,6 @@ ExternalProject_Get_Property(crystfel SOURCE_DIR)
 
 install(PROGRAMS ${SOURCE_DIR}/src/pattern_sim DESTINATION ${BINDIR})
 install(PROGRAMS ${SOURCE_DIR}/src/partial_sim DESTINATION ${BINDIR})
+install(PROGRAMS ${SOURCE_DIR}/scripts/gen-sfs DESTINATION ${BINDIR})
+install(PROGRAMS ${SOURCE_DIR}/scripts/gen-sfs-ano DESTINATION ${BINDIR})
+install(PROGRAMS ${SOURCE_DIR}/scripts/gen-sfs-expand DESTINATION ${BINDIR})
