@@ -84,7 +84,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
                                          laser_pulse_duration=1.0,
                                          laser_intensity=0.1,
                                          run_time=10.0,
-                                         delta_time=0.05
+                                         delta_time=0.05,
                                                          )
 
     def tearDown(self):

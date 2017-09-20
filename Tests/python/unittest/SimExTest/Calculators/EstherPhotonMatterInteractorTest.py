@@ -36,7 +36,7 @@ import paths
 import unittest
 
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from TestUtilities import TestUtilities
 
@@ -74,9 +74,11 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
                  window=None,
                  window_thickness=0.0,
                  laser_wavelength=800.0,
-                 laser_pulse='rect',
+                 laser_pulse='flat',
                  laser_pulse_duration=1.0,
                  laser_intensity=0.1,
+                 run_time=10.0,
+                 delta_time=0.1,
             )
 
     def tearDown(self):
@@ -118,6 +120,7 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         self.assertIsInstance( query, EstherPhotonMatterInteractorParameters )
 
 
+    @unittest.skip("Backengine not available.")
     def testBackengine(self):
         """ Check that the backengine can be executed and output is generated. """
 
@@ -136,6 +139,7 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
 
         self.assertTrue( False )
 
+    @unittest.skip("Backengine not available.")
     def testSaveH5(self):
         """ Test hdf5 output generation. """
         # Make sure we clean up after ourselves.
