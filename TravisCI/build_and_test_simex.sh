@@ -17,6 +17,8 @@ make install
 make docs install
 
 # unit tests
+ls -l $VIRTUAL_ENV
+
 cd $VIRTUAL_ENV/Tests/python/unittest/
 python Test.py -v
 
