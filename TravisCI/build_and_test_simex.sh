@@ -10,7 +10,7 @@ git lfs pull
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DXCSITPhotonDetector=OFF ..
-make
+make -j8
 make install
 
 # build & install docs

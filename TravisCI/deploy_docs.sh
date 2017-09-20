@@ -14,7 +14,7 @@ SOURCE_BRANCH="master"
 TARGET_BRANCH="gh-pages"
 
 #path to gh-pages content
-CONTENT="$VIRTUAL_ENV/docs"
+CONTENT="$VIRTUAL_ENV/share/doc/simex"
 
 # path to encrypted secret key
 KEY=$TRAVIS_BUILD_DIR/TravisCI/key
