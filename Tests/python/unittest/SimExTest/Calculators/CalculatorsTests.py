@@ -29,6 +29,7 @@ from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
 from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
+from GenesisPhotonSourceTest import GenesisPhotonSourceTest
 from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
 from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
@@ -49,6 +50,7 @@ def suite():
              unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
+             ]
 
     if not is_travisCI:
         suites.append(unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'))
