@@ -53,8 +53,8 @@ def suite():
                  unittest.makeSuite(XCSITPhotonDetectorTest,                'test'),
                  unittest.makeSuite(XCSITPhotonDetectorParametersTest,      'test'),
                  ### Disabled since CrystFEL not added to external libraries.
-                 #unittest.makeSuite(CrystFELPhotonDiffractorTest,                  'test'),
-                 #unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
+                 unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'),
+                 unittest.makeSuite(GenesisPhotonSourceTest,                'test'),
                  )
     else:
         suites = (
@@ -64,6 +64,7 @@ def suite():
                  unittest.makeSuite(SingFELPhotonDiffractorTest,            'test'),
                  unittest.makeSuite(S2EReconstructionTest,                  'test'),
                  unittest.makeSuite(CrystFELPhotonDiffractorParametersTest, 'test'),
+                 unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'),
                  )
 
     return unittest.TestSuite(suites)
