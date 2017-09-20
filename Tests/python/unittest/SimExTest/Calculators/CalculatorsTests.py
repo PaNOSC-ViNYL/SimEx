@@ -37,6 +37,9 @@ from XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
 from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from XFELPhotonSourceTest import XFELPhotonSourceTest
 from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
+from EstherExperimentConstructionTest import EstherExperimentConstructionTest
+from EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
+
 
 is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
 
@@ -54,11 +57,14 @@ def suite():
              ]
 
     if not is_travisCI:
-        suites.append(unittest.makeSuite(CrystFELPhotonDiffractorTest,           'test'))
-        suites.append(unittest.makeSuite(GenesisPhotonSourceTest,                'test'))
-        suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,               'test'))
-        suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest,      'test'))
-        suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,                'test'))
+        suites.append(unittest.makeSuite(CrystFELPhotonDiffractorTest,      'test'))
+        suites.append(unittest.makeSuite(GenesisPhotonSourceTest,           'test'))
+        suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
+        suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
+        suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,           'test'))
+        suites.append(unittest.makeSuite(EstherExperimentConstructionTest,  'test'))
+        suites.append(unittest.makeSuite(EstherPhotonMatterInteractorTest,  'test'))
+
 
     return unittest.TestSuite(suites)
 

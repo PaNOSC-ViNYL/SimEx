@@ -663,7 +663,11 @@ def checkAndSetSampleThickness(sample_thickness):
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
 
-    # Check if ablator is between 1 and 100 um
+    # Check if number.
+    if not isinstance( sample_thickness, (float, int)):
+        raise TypeError( "The parameter 'sample_thickness' must be a numerical type (float or int.)")
+
+    # Check if ablator is between 1 and 200 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
         raise ValueError( "Sample must be between 1.0 and 200.0 microns")
 

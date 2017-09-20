@@ -29,6 +29,7 @@ from EMCOrientationParametersTest import EMCOrientationParametersTest
 from DMPhasingParametersTest import DMPhasingParametersTest
 from WavePropagatorParametersTest import WavePropagatorParametersTest
 from PhotonBeamParametersTest import PhotonBeamParametersTest
+from EstherPhotonMatterInteractorParametersTest import EstherPhotonMatterInteractorParametersTest
 
 # Setup the suite.
 def suite():
