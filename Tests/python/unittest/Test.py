@@ -20,7 +20,7 @@
 ##########################################################################
 
 import unittest
-import sys
+import os, sys
 
 # Import suites to run.
 from SimExTest.Calculators import CalculatorsTests
