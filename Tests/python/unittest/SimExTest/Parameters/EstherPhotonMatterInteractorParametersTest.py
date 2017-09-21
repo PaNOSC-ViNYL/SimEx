@@ -111,16 +111,15 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         """ Test the check and set method for number of layers. """
 
         # Type raises.
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "one")
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "1")
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, [1,2])
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "two")
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "2")
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, [2,3])
         self.assertRaises( TypeError, checkAndSetNumberOfLayers, 10.5)
         self.assertRaises( TypeError, checkAndSetNumberOfLayers, self.esther_parameters)
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, {"1" : "one"})
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, {"2" : "two"})
 
         # Value raises.
         self.assertRaises( ValueError, checkAndSetNumberOfLayers, 0)
-        self.assertRaises( ValueError, checkAndSetNumberOfLayers, 1)
         self.assertRaises( ValueError, checkAndSetNumberOfLayers, 6)
         self.assertRaises( ValueError, checkAndSetNumberOfLayers, -3)
 
@@ -170,7 +169,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetSample("CH"), "CH" )
 
     def testCheckAndSetSampleThickness(self):
-        """ Test the check and set method for the ablator thickness. """
+        """ Test the check and set method for the sample thickness. """
 
         self.assertRaises( TypeError, checkAndSetSampleThickness, "ten microns" )
         self.assertRaises( TypeError, checkAndSetSampleThickness, [10.0, 10.0] )
@@ -274,7 +273,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Check that the input deck has been generated.
         self.assertTrue( os.path.isdir( esther_parameters._esther_files_path ) )
 
-        self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
+        self.assertTrue( 'tmp_input.txt' in os.listdir( esther_parameters._esther_files_path ) )
         self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._esther_files_path ) )
 
     def testExpert(self):
@@ -302,7 +301,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         esther_parameters._serialize()
 
         # Assert equal, self.__use_force_passage, "FORCE_PASSAGE" for input.dat?
-        self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
+        self.assertTrue( 'tmp_input.txt' in os.listdir( esther_parameters._esther_files_path ) )
         self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._esther_files_path ) )
 
     def testReadFromFile(self):
@@ -342,11 +341,11 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Setup parameters object.
         esther_parameters = self.esther_parameters
 
-        esther_parameters._setupFeathering(number_of_zones=300, feather_zone_width=4.0, minimum_zone_width=2e-4)
+        esther_parameters._setupFeathering(number_of_zones=250, feather_zone_width=4.0, minimum_zone_width=4e-4)
 
-        self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0807)
-        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.0842508, 6)
-        self.assertEqual( esther_parameters._non_feather_zones, 74)
+        self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0878)
+        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.091662, 6)
+        self.assertEqual( esther_parameters._non_feather_zones, 239)
 
 
 

@@ -368,10 +368,15 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self._final_feather_zone_width = round(minimum_zone_width*(r**n),4)
         self._non_feather_zone_width = self.ablator_thickness-feather_zone_width
         self._non_feather_zones = int(self._non_feather_zone_width/(minimum_zone_width*(r**n)))
+        
 
         self._mass_of_zone = self._final_feather_zone_width*ESTHER_MATERIAL_DICT[self.ablator]["mass_density"]
         width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
         self.__number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
+        
+        print (self._final_feather_zone_width)
+        print (self._mass_of_zone)
+        print (self._non_feather_zones)
 
         if self.layer1 is not None:
             width_of_layer1_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer1]["mass_density"]
@@ -831,14 +836,18 @@ def checkAndSetSampleThickness(sample_thickness):
     """
     Utility to check that the sample thickness is in permitted range set by Esther.
     """
-
-    # Set default
+    
+    # Raise if not set.
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
 
-    # Check if Sample is between 1 and 200 um
+    # Check type.
+    if not isinstance( sample_thickness, (int, float)):
+        raise TypeError("The parameters 'sample_thickness' must be of numeric type (int or float).")
+
+    # Check if sample is between 1 and 200 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
-        raise ValueError( "Sample must be between 1.0 and 200.0 microns")
+        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
 
     return sample_thickness
 
