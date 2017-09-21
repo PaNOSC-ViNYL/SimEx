@@ -61,22 +61,22 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
 
         # Setup parameters.
         self.esther_parameters = EstherPhotonMatterInteractorParameters(
-                 number_of_layers=5,
+                 number_of_layers=2,
                  ablator="CH",
                  ablator_thickness=10.0,
                  sample="Iron",
                  sample_thickness=20.0,
                  window=None,
                  window_thickness=0.0,
-                 laser_wavelength=800.0,
+                 laser_wavelength=1064.0,
                  laser_pulse='flat',
-                 laser_pulse_duration=1.0,
+                 laser_pulse_duration=6.0,
                  laser_intensity=0.1,
                  run_time=10.,
                  delta_time=.25,
                  read_from_file=None,
-                 force_passage=True,
-                 without_therm_conduc=True,
+                 force_passage=False,
+                 without_therm_conduc=False,
                  rad_transfer=False,
             )
 

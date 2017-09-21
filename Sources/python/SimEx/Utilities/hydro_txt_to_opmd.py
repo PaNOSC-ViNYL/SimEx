@@ -33,7 +33,7 @@ def convertTxtToOPMD(esther_dirname=None):
     """
     # Check input.
     if not os.path.isdir( esther_dirname):
-        raise IOError( "%s is not a directory or link to a directory.")
+        raise IOError( "%s is not a directory or link to a directory." % (esther_dirname))
 
     # Get files in directory.
     dir_listing = os.listdir( esther_dirname)

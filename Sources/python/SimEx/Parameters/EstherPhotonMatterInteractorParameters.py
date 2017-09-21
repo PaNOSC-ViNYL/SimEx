@@ -374,9 +374,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
         self.__number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
         
-        print (self._final_feather_zone_width)
-        print (self._mass_of_zone)
-        print (self._non_feather_zones)
+        print ("Final feather zone width: ", self._final_feather_zone_width)
+        print ("Mass of zone: ", self._mass_of_zone)
+        print ("Number of non-feathered zones: ", self._non_feather_zones)
 
         if self.layer1 is not None:
             width_of_layer1_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer1]["mass_density"]
