@@ -47,6 +47,7 @@ is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_
 def suite():
     suites = [
              unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
+             unittest.makeSuite(CrystFELPhotonDiffractorTest,               'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
              unittest.makeSuite(S2EReconstructionTest,                      'test'),
@@ -57,7 +58,6 @@ def suite():
              ]
 
     if not is_travisCI:
-        suites.append(unittest.makeSuite(CrystFELPhotonDiffractorTest,      'test'))
         suites.append(unittest.makeSuite(GenesisPhotonSourceTest,           'test'))
         suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
