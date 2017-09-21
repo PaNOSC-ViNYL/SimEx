@@ -9,7 +9,7 @@ git lfs pull
 # build & install
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DXCSITPhotonDetector=OFF -DDEVELOPER_INSTALL=ON ..
+cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DXCSITPhotonDetector=OFF -DDEVELOPER_INSTALL=OFF ..
 make -j8
 make install
 
@@ -17,7 +17,8 @@ make install
 make docs install
 
 # unit tests
-ls -l $VIRTUAL_ENV
+echo "VIRTUAL_ENV=${VIRTUAL_ENV}"
+echo "TESTS_DIR=${TESTS_DIR}"
 
 cd $VIRTUAL_ENV/Tests/python/unittest/
 python Test.py -v
