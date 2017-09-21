@@ -169,7 +169,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     def _setDefaults(self):
         """ """
         """ Set the inherited parameters defaults that depend on the special calculator. """
-        self._AbstractCalculatorParameters__cpus_per_task_default = '1'
+        self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     def _setSeeFlags(self):
         """ Set the See parameters as used in the input deck generator. """

@@ -37,7 +37,7 @@ class DocTest(unittest.TestCase):
 
     def testDocPresence(self):
         """ Test if the documentation was generated. """
-        path_to_check =  os.path.abspath( os.path.join( os.path.dirname(__file__), '..','..', 'docs', 'index.html') )
+        path_to_check =  os.path.abspath( os.path.join( os.path.dirname(__file__), '..','..', 'share','doc','simex','index.html') )
         print "Checking %s." % (path_to_check)
         self.assertTrue( os.path.isfile( path_to_check) )
 

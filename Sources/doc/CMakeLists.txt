@@ -31,7 +31,7 @@ ExternalProject_Get_Property(docs SOURCE_DIR)
 set (DOCS_BUILDDIR ${SOURCE_DIR}/build/html/)
 
 install(DIRECTORY ${DOCS_BUILDDIR}
-        DESTINATION ${DOCDIR}
+        DESTINATION ${DOCDIR}/simex
         OPTIONAL
 	    PATTERN "*.pyc" EXCLUDE
 	    PATTERN ".git*" EXCLUDE

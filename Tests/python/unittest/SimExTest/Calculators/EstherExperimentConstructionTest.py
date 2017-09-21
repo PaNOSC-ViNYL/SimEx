@@ -73,7 +73,7 @@ class EstherExperimentConstructionTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def notestDefaultConstruction(self):
+    def testDefaultConstruction(self):
         """ Testing the default construction of the class using a dictionary. """
 
         # Attempt to construct an instance of the class.
@@ -81,9 +81,26 @@ class EstherExperimentConstructionTest(unittest.TestCase):
 
     def testConstruction1(self):
 
+        # Create parameters.
+        parameters = EstherPhotonMatterInteractorParameters(
+                                        number_of_layers=2,
+                                         ablator="CH",
+                                         ablator_thickness=10.0,
+                                         sample="Iron",
+                                         sample_thickness=20.0,
+                                         window=None,
+                                         window_thickness=0.0,
+                                         laser_wavelength=800.0,
+                                         laser_pulse='flat',
+                                         laser_pulse_duration=1.0,
+                                         laser_intensity=0.1,
+                                         run_time=10.0,
+                                         delta_time=0.05
+                                         )
+
         esther_sims_path=self._simdir
         sim_name = "NickelShock"
-        esther_experiment = EstherExperimentConstruction(esther_sims_path=esther_sims_path, sim_name=sim_name)
+        esther_experiment = EstherExperimentConstruction(parameters=parameters, esther_sims_path=esther_sims_path, sim_name=sim_name)
 
         # Check presence of expected directories.
         self.assertIn( sim_name, os.listdir( esther_sims_path ) )
@@ -93,10 +110,29 @@ class EstherExperimentConstructionTest(unittest.TestCase):
         self.assertIsInstance( esther_experiment, EstherExperimentConstruction )
 
     def testConstruction2(self):
+        # Create parameters.
+        parameters = EstherPhotonMatterInteractorParameters(
+                                        number_of_layers=2,
+                                         ablator="CH",
+                                         ablator_thickness=10.0,
+                                         sample="Iron",
+                                         sample_thickness=20.0,
+                                         window=None,
+                                         window_thickness=0.0,
+                                         laser_wavelength=800.0,
+                                         laser_pulse='flat',
+                                         laser_pulse_duration=1.0,
+                                         laser_intensity=0.1,
+                                         run_time=10.0,
+                                         delta_time=0.05
+                                         )
 
         esther_sims_path=self._simdir
         sim_name = "NickelShock"
-        esther_experiment = EstherExperimentConstruction(esther_sims_path=esther_sims_path, sim_name=sim_name)
+
+        esther_experiment = EstherExperimentConstruction(parameters=parameters,
+                esther_sims_path=esther_sims_path,
+                sim_name=sim_name)
 
         # Check presence of expected directories.
         self.assertIn( sim_name, os.listdir( esther_sims_path ) )

@@ -22,7 +22,11 @@
 import os
 import sys
 
-import libpy_detector_interface as lpdi
+try:
+    import libpy_detector_interface as lpdi
+
+except ImportError:
+    print "\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed or not being found. Expect errors.\n"
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -61,9 +65,9 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         :param point_simulation_method: Method for the charge point simulation ("FULL" | "FANO" | "LUT" | "BINNING").
         :type point_simulation_method: str
         """
-        
+
         # Prohibit calling the detector with nothing
-        if all([detector_type is None, 
+        if all([detector_type is None,
             plasma_search_flag is None,
             plasma_simulation_flag is None,
             point_simulation_method is None]):
@@ -129,7 +133,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
             not_valid_option = True
         if not_valid_option:
             raise ValueError("Unknown detector type: " + str(value))
-        
+
 
 
     @property
@@ -198,7 +202,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         if not_valid_option:
             raise ValueError("Unknown plasma_simulation_flag: " + str(value))
 
-       
+
 
 
     @property
@@ -233,4 +237,4 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
             not_valid_option = True
         if not_valid_option:
             raise ValueError("Unknown point_simulation_method: " + str(value))
-            
+
