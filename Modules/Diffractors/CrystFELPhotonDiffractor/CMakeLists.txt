@@ -9,7 +9,7 @@ FIND_PACKAGE (GSL REQUIRED)
 ExternalProject_Add( crystfel
     URL http://www.desy.de/~twhite/crystfel/crystfel-0.6.3.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure --with-hdf5=${HDF5_LIBRARY_DIRS} --disable-gtk --disable-png
+    CONFIGURE_COMMAND ./configure --with-hdf5=${HDF5_LIBRARY_DIRS} --disable-gtk --disable-gtk-doc --disable-png
     INSTALL_COMMAND ""
 )
 
