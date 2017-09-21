@@ -17,9 +17,6 @@ make install
 make docs install
 
 # unit tests
-echo "VIRTUAL_ENV=${VIRTUAL_ENV}"
-echo "TESTS_DIR=${TESTS_DIR}"
-
 cd $VIRTUAL_ENV/Tests/python/unittest/
 python Test.py -v
 
