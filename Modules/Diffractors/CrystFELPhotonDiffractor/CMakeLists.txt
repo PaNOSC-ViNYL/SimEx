@@ -7,10 +7,9 @@ FIND_PACKAGE (GSL REQUIRED)
 
 # Add the project.
 ExternalProject_Add( crystfel
-    GIT_REPOSITORY https://stash.desy.de/scm/crys/crystfel.git
-    PATCH_COMMAND ./autogen.sh
+    URL http://www.desy.de/~twhite/crystfel/crystfel-0.6.3.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure --with-hdf5=${HDF5_LIBRARY_DIRS}
+    CONFIGURE_COMMAND ./configure --with-hdf5=${HDF5_LIBRARY_DIRS} --disable-gtk --disable-png
     INSTALL_COMMAND ""
 )
 
