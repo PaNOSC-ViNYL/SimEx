@@ -1158,29 +1158,6 @@ existing data. A consistency check is performed.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="SimEx.Calculators.EstherExperimentConstruction.EstherExperimentConstruction">
-<em class="property">class </em><code class="descclassname">SimEx.Calculators.EstherExperimentConstruction.</code><code class="descname">EstherExperimentConstruction</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em>, <em>esther_sims_path=None</em>, <em>sim_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EstherExperimentConstruction.html#EstherExperimentConstruction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EstherExperimentConstruction.EstherExperimentConstruction" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to represent iterative Rad-Hydro simulations.</p>
-<p>Constructor for the Esther Experiment.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Esther parameters.</li>
-<li><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Location of input parameters from e.g. light source simulation.</li>
-<li><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Location where to store final results from the rad-hydro simulations.</li>
-<li><strong>tmp_files_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Where to store temporary files produced by Rad-Hydro code or parameters object.</li>
-<li><strong>esther_sims_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Top level directory where all experiments are stored.</li>
-<li><strong>sim_name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Name of this experiment</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="class">
 <dt id="SimEx.Calculators.EstherPhotonMatterInteractor.EstherPhotonMatterInteractor">
 <em class="property">class </em><code class="descclassname">SimEx.Calculators.EstherPhotonMatterInteractor.</code><code class="descname">EstherPhotonMatterInteractor</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EstherPhotonMatterInteractor.html#EstherPhotonMatterInteractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EstherPhotonMatterInteractor.EstherPhotonMatterInteractor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor" title="SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonInteractor.AbstractPhotonInteractor</span></code></a></p>
@@ -1201,7 +1178,7 @@ existing data. A consistency check is performed.</p>
 <dl class="method">
 <dt id="SimEx.Calculators.EstherPhotonMatterInteractor.EstherPhotonMatterInteractor.backengine">
 <code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/EstherPhotonMatterInteractor.html#EstherPhotonMatterInteractor.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.EstherPhotonMatterInteractor.EstherPhotonMatterInteractor.backengine" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method drives the backengine xrts.</p>
+<dd><p>This method drives the esther backengine code.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1602,6 +1579,106 @@ Uses the EMC orientation module and the DM phasing module.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.XCSITPhotonDetector.</code><code class="descname">XCSITPhotonDetector</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XCSITPhotonDetector.html#XCSITPhotonDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector" title="SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector</span></code></a></p>
+<p>Class representing an free electorn laser photon detector</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameters</strong> – Parameters of the calulator such as the type of</td>
+</tr>
+</tbody>
+</table>
+<p>detector
+:type parameters: XCSITPhotonDetector</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Path to the hdf5 file holding the input data.</li>
+<li><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Path pointing to the path for output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.backengine">
+<code class="descname">backengine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XCSITPhotonDetector.html#XCSITPhotonDetector.backengine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.backengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes the simulation of the particle and charge simulation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.input_path">
+<code class="descname">input_path</code><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.input_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the input file path(s).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.output_path">
+<code class="descname">output_path</code><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the output file path(s).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.saveH5">
+<code class="descname">saveH5</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XCSITPhotonDetector.html#XCSITPhotonDetector.saveH5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.saveH5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the results in a file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters">
+<em class="property">class </em><code class="descclassname">SimEx.Calculators.XCSITPhotonDetectorParameters.</code><code class="descname">XCSITPhotonDetectorParameters</code><span class="sig-paren">(</span><em>detector_type=None</em>, <em>plasma_search_flag=None</em>, <em>plasma_simulation_flag=None</em>, <em>point_simulation_method=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XCSITPhotonDetectorParameters.html#XCSITPhotonDetectorParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
+<p>Datastructure to store the necessary parameters for a XCSITPhotonDetector
+simulation</p>
+<p>Constructor for the XCSITPhotonDetectorParameters class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>detector_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The detector type to simulate (“pnCCD” | “LPD” | “AGIPD | “AGIPDSPB”).</li>
+<li><strong>plasma_search_flag</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Flag for the plasma search method (“BLANK”).</li>
+<li><strong>plasma_simulation_flag</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Flag for the plasma simulation method (“BLANKPLASMA”).</li>
+<li><strong>point_simulation_method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Method for the charge point simulation (“FULL” | “FANO” | “LUT” | “BINNING”).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.detector_type">
+<code class="descname">detector_type</code><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.detector_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>:return string containing the detector name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.plasma_search_flag">
+<code class="descname">plasma_search_flag</code><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.plasma_search_flag" title="Permalink to this definition">¶</a></dt>
+<dd><p>:return string, the plasma search method</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.plasma_simulation_flag">
+<code class="descname">plasma_simulation_flag</code><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.plasma_simulation_flag" title="Permalink to this definition">¶</a></dt>
+<dd><p>:return string, the plasma simulation method</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.point_simulation_method">
+<code class="descname">point_simulation_method</code><a class="headerlink" href="#SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters.point_simulation_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>:return string, the charge simulation method</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator">
 <em class="property">class </em><code class="descclassname">SimEx.Calculators.XFELPhotonPropagator.</code><code class="descname">XFELPhotonPropagator</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>input_path=None</em>, <em>output_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Calculators/XFELPhotonPropagator.html#XFELPhotonPropagator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator" title="SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator"><code class="xref py py-class docutils literal"><span class="pre">SimEx.Calculators.AbstractPhotonPropagator.AbstractPhotonPropagator</span></code></a></p>
@@ -1840,7 +1917,7 @@ Uses the EMC orientation module and the DM phasing module.</p>
 
 <dl class="class">
 <dt id="SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters">
-<em class="property">class </em><code class="descclassname">SimEx.Parameters.EstherPhotonMatterInteractorParameters.</code><code class="descname">EstherPhotonMatterInteractorParameters</code><span class="sig-paren">(</span><em>number_of_layers=None</em>, <em>ablator=None</em>, <em>ablator_thickness=None</em>, <em>sample=None</em>, <em>sample_thickness=None</em>, <em>window=None</em>, <em>window_thickness=None</em>, <em>laser_wavelength=None</em>, <em>laser_pulse=None</em>, <em>laser_pulse_duration=None</em>, <em>laser_intensity=None</em>, <em>run_time=None</em>, <em>delta_time=None</em>, <em>read_from_file=None</em>, <em>force_passage=None</em>, <em>without_therm_conduc=None</em>, <em>rad_transfer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/EstherPhotonMatterInteractorParameters.html#EstherPhotonMatterInteractorParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">SimEx.Parameters.EstherPhotonMatterInteractorParameters.</code><code class="descname">EstherPhotonMatterInteractorParameters</code><span class="sig-paren">(</span><em>number_of_layers=None</em>, <em>ablator=None</em>, <em>ablator_thickness=None</em>, <em>sample=None</em>, <em>sample_thickness=None</em>, <em>layer1=None</em>, <em>layer1_thickness=None</em>, <em>layer2=None</em>, <em>layer2_thickness=None</em>, <em>window=None</em>, <em>window_thickness=None</em>, <em>laser_wavelength=None</em>, <em>laser_pulse=None</em>, <em>laser_pulse_duration=None</em>, <em>laser_intensity=None</em>, <em>run_time=None</em>, <em>delta_time=None</em>, <em>read_from_file=None</em>, <em>force_passage=None</em>, <em>without_therm_conduc=None</em>, <em>rad_transfer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Parameters/EstherPhotonMatterInteractorParameters.html#EstherPhotonMatterInteractorParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SimEx.Parameters.AbstractCalculatorParameters.AbstractCalculatorParameters</span></code></p>
 <p>class representing parameters for the Hydrocode Input Calculator</p>
 <p>Constructor for the HydroParameters</p>
@@ -1849,10 +1926,12 @@ Uses the EMC orientation module and the DM phasing module.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ablator</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The ablating material ( “Al” | “CH” | “Diamond” )</li>
+<li><strong>ablator</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The ablating material ( “Al” | “CH” | “Diamond” | “Kapton” | “Mylar” )</li>
 <li><strong>ablator_thickness</strong> – The ablator thickness (micrometers)</li>
-<li><strong>sample</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The sample material (from limited list of materials)</li>
+<li><strong>sample</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The sample material (from list of materials)</li>
 <li><strong>sample_thickness</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) – The sample thickness (micrometers)</li>
+<li><strong>layer1</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The layer1 material (from list of materials)</li>
+<li><strong>layer2</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The layer2 material (from list of materials)</li>
 <li><strong>window</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The window material (LiF | SiO2 | Diamond)</li>
 <li><strong>window_thickness</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) – The window thickness, if using window (micrometers)</li>
 <li><strong>laser_pulse</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – Pulse type (“flat” | “ramp” | “other”)</li>
@@ -1909,6 +1988,30 @@ Uses the EMC orientation module and the DM phasing module.</p>
 <dt id="SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.laser_wavelength">
 <code class="descname">laser_wavelength</code><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.laser_wavelength" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query for the laser wavelength type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer1">
+<code class="descname">layer1</code><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the layer1 type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer1_thickness">
+<code class="descname">layer1_thickness</code><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer1_thickness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the layer1 thickness type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer2">
+<code class="descname">layer2</code><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the layer2 type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer2_thickness">
+<code class="descname">layer2_thickness</code><a class="headerlink" href="#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters.layer2_thickness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query for the layer2 thickness type.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2557,26 +2660,6 @@ Uses the EMC orientation module and the DM phasing module.</p>
 </dd></dl>
 
 <span class="target" id="module-SimEx.Utilities.RadHydroAnalysis"></span><p>Collection of utilities to analyse output from (esther) rad-hydro simulations.</p>
-<dl class="function">
-<dt id="SimEx.Utilities.RadHydroAnalysis.plotTransmission">
-<code class="descclassname">SimEx.Utilities.RadHydroAnalysis.</code><code class="descname">plotTransmission</code><span class="sig-paren">(</span><em>symbol</em>, <em>edge='K'</em>, <em>thickness=0.001</em>, <em>energies=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Utilities/RadHydroAnalysis.html#plotTransmission"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Utilities.RadHydroAnalysis.plotTransmission" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots absorption in a given material as function of wavelength.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>symbol</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The chemical symbol of the material.</li>
-<li><strong>edge</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – The requested absorption edge (K, L1, L2, M1, M2, …)</li>
-<li><strong>thickness</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) – The material thickness in centimeters.”</li>
-<li><strong>energies</strong> (<em>ndarray</em>) – For which energies to plot the transmission.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="function">
 <dt id="SimEx.Utilities.RadHydroAnalysis.radHydroAnalysis">
 <code class="descclassname">SimEx.Utilities.RadHydroAnalysis.</code><code class="descname">radHydroAnalysis</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SimEx/Utilities/RadHydroAnalysis.html#radHydroAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SimEx.Utilities.RadHydroAnalysis.radHydroAnalysis" title="Permalink to this definition">¶</a></dt>

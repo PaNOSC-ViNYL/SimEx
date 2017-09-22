@@ -508,10 +508,16 @@
             <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
                 <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%6.5f</span><span class="s2">      </span><span class="si">%6.5f</span><span class="s2">      </span><span class="si">%6.5f</span><span class="s2">      </span><span class="si">%d</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">atom</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="p">)</span>
 
-            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;END&quot;</span><span class="p">)</span></div>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;END&quot;</span><span class="p">)</span>
 <span class="c1">#</span>
 <span class="c1">##########################################</span>
 <span class="c1"># Utility functions</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Set the inherited parameters defaults that depend on the special calculator. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractCalculatorParameters__cpus_per_task_default</span> <span class="o">=</span> <span class="mi">1</span></div>
+
 <span class="k">def</span> <span class="nf">_checkAndSetAtoms</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="sd">&quot;&quot;&quot; Private function to check if input is a valid atoms list.</span>
