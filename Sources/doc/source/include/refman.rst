@@ -15,7 +15,7 @@ Reference Manual
 .. autoclass:: SimEx.Calculators.CrystFELPhotonDiffractorParameters.CrystFELPhotonDiffractorParameters
 .. autoclass:: SimEx.Calculators.DMPhasing.DMPhasing
 .. autoclass:: SimEx.Calculators.EMCOrientation.EMCOrientation
-.. autoclass:: SimEx.Calculators.EstherExperimentConstruction.EstherExperimentConstruction
+.. autoclass:: SimEx.PhotonExperimentSimulation.EstherExperiment.EstherExperiment
 .. autoclass:: SimEx.Calculators.EstherPhotonMatterInteractor.EstherPhotonMatterInteractor
 .. autoclass:: SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor
 .. autoclass:: SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractorParameters
