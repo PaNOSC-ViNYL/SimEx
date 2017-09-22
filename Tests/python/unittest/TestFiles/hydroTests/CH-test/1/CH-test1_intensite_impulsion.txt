@@ -1,0 +1,7 @@
+4
+temps (s ou u.a.) intensite (W/m2 ou u.a.)
+0. 	 0
+0.1e-9	0.330
+9.90e-9	0.330
+10.00e-9	0.0
+fin_de_fichier
