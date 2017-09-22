@@ -20,28 +20,26 @@
 #                                                                        #
 ##########################################################################
 
-import numpy
 import os
 import paths
 import shutil
-import subprocess
 import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 # Import the class to test.
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetNumberOfLayers
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetAblator
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetAblatorThickness
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserIntensity
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulse
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulseDuration
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserWavelength
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetNumberOfLayers
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetSample
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetSampleThickness
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetWindow
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetWindowThickness
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserWavelength
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulse
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulseDuration
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserIntensity
 
 class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
     """
@@ -144,7 +142,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetAblatorThickness(10.0), 10.0 )
         self.assertEqual( checkAndSetAblatorThickness(6), 6.0 )
 
-
     def testCheckAndSetSample(self):
         """ Test the check and set method for the sample material. """
 
@@ -239,7 +236,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetLaserPulseDuration( 2.0 ) , 2.0 )
         self.assertEqual( checkAndSetLaserPulseDuration( 10 ) , 10 )
 
-
     def testCheckAndSetLaserIntensity(self):
         """ Test the check and set method for the laser intensity. """
         # Type raises.
@@ -251,7 +247,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
 
         self.assertEqual( checkAndSetLaserIntensity( 0.1 ) , 0.1 )
         self.assertEqual( checkAndSetLaserIntensity( 1 ) , 1.0 )
-
 
     def testSerialize(self):
         """ Test the serialization of parameters into input deck."""
@@ -337,7 +332,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0878)
         self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.091662, 5)
         self.assertEqual( esther_parameters._non_feather_zones, 239)
-
 
 
 if __name__ == '__main__':
