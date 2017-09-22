@@ -21,17 +21,15 @@
 #                                                                        #
 ##########################################################################
 
-import os
-import numpy
-import shutil
-import h5py
 
-# Include needed directories in sys.path.
+import h5py
+import os
 import paths
+import shutil
 import unittest
 
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
-from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from TestUtilities import TestUtilities
 
@@ -75,7 +73,7 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
                  run_time=10.,
                  delta_time=.25,
                  read_from_file=None,
-                 force_passage=False,
+                 force_passage=True,
                  without_therm_conduc=False,
                  rad_transfer=False,
             )
@@ -140,6 +138,7 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
 
     def testSaveH5(self):
         """ Test hdf5 output generation. """
+
         # Make sure we clean up after ourselves.
         outfile = 'esther_out.h5'
         self.__files_to_remove.append(outfile)
@@ -147,11 +146,11 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         # Setup parameters.
         esther_parameters = self.esther_parameters
 
-
         # Construct an instance.
-        esther_calculator = EstherPhotonMatterInteractor( parameters=esther_parameters,
+        esther_calculator = EstherPhotonMatterInteractor(
+                                                parameters=esther_parameters,
                                                 input_path=self.input_path,
-                                                output_path=outfile
+                                                output_path=outfile,
                                               )
 
         # Call the backengine.
@@ -163,11 +162,25 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         # Check output was written.
         self.assertTrue( os.path.isfile( esther_calculator.output_path ) )
 
-        # Open the file for reading.
-        h5 = h5py.File( esther_calculator.output_path, 'r' )
+        # Open file.
+        with h5py.File( outfile ) as h5:
+            # Check top level group.
+            self.assertIn( 'data' , h5.keys() )
+            # Check all times are present.
+            self.assertEqual( len(h5['data'].keys()), int(esther_calculator.parameters.run_time / esther_calculator.parameters.delta_time)+1 ) # run_time/delta_time
+            # Check time 0 is present.
+            self.assertIn( '0' , h5['data'].keys() )
+            # Check  meshes group present.
+            self.assertIn( 'meshes' , h5['data/0'].keys() )
+            # Check all meshes are present at time 0.
+            self.assertIn( 'pos'  , h5['data/0/meshes'].keys() )
+            self.assertIn( 'pres' , h5['data/0/meshes'].keys() )
+            self.assertIn( 'rho'  , h5['data/0/meshes'].keys() )
+            self.assertIn( 'temp' , h5['data/0/meshes'].keys() )
+            self.assertIn( 'vel'  , h5['data/0/meshes'].keys() )
 
-        self.assertTrue( False )
-
+            # Check dataset shape
+            self.assertEqual( h5['data/0/meshes/vel'].value.shape[0], 2025)
 
 
 if __name__ == '__main__':
