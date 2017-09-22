@@ -24,7 +24,13 @@ import os, shutil
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
-from esther_execute import Esther_execute as EstherRun
+
+try:
+    from esther_execute import Esther_execute as EstherRun
+except ImportError:
+    print "\nWARNING: esther_execute could not be imported. This is most probably due to Esther not being installed or not found. Expect RunTimeErrors when attempting to run the EstherPhotonMatterInteractor.backengine()."
+except:
+    raise
 
 class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """

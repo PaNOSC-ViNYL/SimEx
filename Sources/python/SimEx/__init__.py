@@ -51,5 +51,6 @@ from Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParame
 from Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from Parameters.WavePropagatorParameters import WavePropagatorParameters
 from PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
+from PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 
 import Utilities

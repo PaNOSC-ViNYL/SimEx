@@ -61,7 +61,6 @@ def suite():
         suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,           'test'))
-        suites.append(unittest.makeSuite(EstherExperimentConstructionTest,  'test'))
         suites.append(unittest.makeSuite(EstherPhotonMatterInteractorTest,  'test'))
 
 
