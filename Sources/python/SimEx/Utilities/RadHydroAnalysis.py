@@ -26,62 +26,9 @@
 import os
 import numpy
 from matplotlib import pyplot
-from xraydb import XrayDB
 import h5py
 
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
-
-def plotTransmission(symbol, edge="K", thickness=0.001, energies=None):
-    """ Plots absorption in a given material as function of wavelength.
-
-    :param symbol: The chemical symbol of the material.
-    :type symbol: str
-
-    :param edge: The requested absorption edge (K, L1, L2, M1, M2, ...)
-    :type edge: str
-
-    :param thickness: The material thickness in centimeters."
-    :type thickness: float
-
-    :param energies: For which energies to plot the transmission.
-    :type energies: ndarray
-
-    """
-    # Instantiate the database.
-    xdb = XrayDB()
-
-    # Get info on requested edge.
-    edge_data = xdb.xray_edge(symbol, edge)
-    edge_position = edge_data[0]
-    edge_fyield = edge_data[1]
-    edge_jump = edge_data[2]
-
-    # Mass density (ambient).
-    rho = xdb.density(symbol)
-
-    # Fix energy range.
-    min_energy = 0.7*edge_position
-    max_energy = 1.3*edge_position
-
-    # Setup arrays
-    if energies is None:
-        energies = numpy.linspace(min_energy, max_energy, 1024)
-    mu = xdb.mu_chantler(symbol, energy=energies)
-
-
-    # Convert to iterable if needed.
-    if not hasattr(thickness, "__iter__"):
-        thickness = [thickness]
-
-    absorption = [numpy.exp(-mu*rho*th) for th in thickness]
-    for i,abso in enumerate(absorption):
-        pyplot.plot(energies, abso, lw=2, label=r"%3.1f $\mu$m" % (thickness[i] * 1e4))
-    pyplot.xlabel('Energy (eV)')
-    pyplot.ylabel('Transmission')
-    pyplot.legend()
-    pyplot.title("%s %s-edge" % (symbol, edge))
-
-    pyplot.show()
 
 def radHydroAnalysis(filename):
     """ Generates four plots to analyse shock compression data.
@@ -90,9 +37,10 @@ def radHydroAnalysis(filename):
     :type filename: str
 
     """
+    
     # Get parameters for the corresponding esther run.
     esther_parameters = EstherPhotonMatterInteractorParameters(read_from_file=os.path.dirname(filename))
-
+    
     # Get zone dimensions.
     number_of_sample_zones = esther_parameters._EstherPhotonMatterInteractorParameters__number_of_sample_zones
     try:
@@ -120,8 +68,10 @@ def radHydroAnalysis(filename):
     number_of_ablator_zones = total_number_of_zones-number_of_sample_zones-number_of_window_zones
 
     sample_indices = range(number_of_window_zones, number_of_window_zones+number_of_sample_zones)
-    sample_start_index = sample_indices[0]
-    sample_end_index = sample_indices[-1]
+    #sample_start_index = sample_indices[0]
+    #sample_end_index = sample_indices[-1]
+    sample_start_index = 1
+    sample_end_index =  255
 
     ### PLOTS ###
     ###################
@@ -136,8 +86,8 @@ def radHydroAnalysis(filename):
     pyplot.xlabel("time (ns)")
     pyplot.ylabel("pressure (GPa)")
 
-    pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
-    pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
 
 
     ###################
@@ -151,8 +101,8 @@ def radHydroAnalysis(filename):
     pyplot.xlabel("time (ns)")
     pyplot.ylabel("velocity (km/s)")
 
-    pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
-    pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
 
     ###################
     # Bottom left panel: Pressure contour as function of x and t.
@@ -172,8 +122,8 @@ def radHydroAnalysis(filename):
 
     pyplot.ylim([positions.min(), 0])
 
-    pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
-    pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
 
     ###################
     # Bottom right panel: Temperature vs. pressure.
@@ -187,7 +137,8 @@ def radHydroAnalysis(filename):
     pyplot.xlabel("pressure (GPa)")
     pyplot.ylabel("temperature (K)")
 
-    pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
-    pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
+    #pyplot.gca().get_xaxis().get_major_formatter().set_powerlimits((0, 0))
 
+    pyplot.tight_layout()
     pyplot.show()

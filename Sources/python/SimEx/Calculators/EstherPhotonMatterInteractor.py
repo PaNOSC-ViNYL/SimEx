@@ -20,8 +20,11 @@
 #                                                                        #
 ##########################################################################
 
+import os, shutil
+
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
+from esther_execute import Esther_execute as EstherRun
 
 class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """
@@ -57,11 +60,55 @@ class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
         return None
 
     def backengine(self):
-        """ This method drives the backengine xrts."""
-        ### TODO, system call to esther code.
-        pass
+        """ This method drives the esther backengine code."""
         # Serialize the parameters (generate the input deck).
         self.parameters._serialize()
+
+        # Setup path to esther input file.
+        esther_files_path = self.parameters._esther_files_path
+
+        # Prepare for copying over the input files to where esther_py expects them.
+        esther_entrees_dir = os.path.join(os.environ['ESTHER_ESTHER'], 'ESTHER_entrees', 'SIMEX', os.path.split(esther_files_path)[-1])
+        shutil.copytree(esther_files_path,  esther_entrees_dir)
+
+        esther_case_filename = os.path.join( esther_entrees_dir, self.parameters._esther_filename+".txt")
+        if not os.path.isfile(esther_case_filename):
+            raise IOError("Esther input file %s not found." % (esther_case_filename))
+
+
+        # Save current working directory (esther cd's to where esth executable is).
+        cwd = os.getcwd()
+
+        # Create the run.
+        esther_run = EstherRun(
+                filename_cas=esther_case_filename,
+                chemin_esther=os.path.join(os.environ['ESTHER_ESTHER'],""),
+                multiple=False,
+                nprocs=1,
+                forcer_passage=self.parameters.force_passage,
+                widComment=None,
+                interval=1000,
+                recup_sorties_esth = False)
+
+        # Wait for esther run to finish.
+        esther_run.liste_cas[1]['process'].wait()
+
+        # Cd back to old working directory.
+        os.chdir( cwd )
+
+        # Prepare for copying results to tmp dir.
+        esther_sorties_dir = os.path.join(
+                os.environ['ESTHER_ESTHER'],
+                'ESTHER_sorties',
+                'tmp_input',
+                'stock_t_m',
+                )
+
+        # Copy all files in esther_sorties_dir to the tmp dir.
+        for p in [os.path.join(esther_sorties_dir, f) for f in os.listdir(esther_sorties_dir)]:
+            shutil.copy2(p,  esther_files_path)
+
+        return esther_run.message
 
     @property
     def data(self):

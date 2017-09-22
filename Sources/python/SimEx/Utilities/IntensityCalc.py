@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016 Richard Briggs, Carsten Fortmann-Grote              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -16,26 +16,35 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
-import paths
-import unittest
+import numpy
+import os
+import sys
 
-# Import classes to test.
-from PhotonExperimentSimulationTest import PhotonExperimentSimulationTest
-from EstherExperimentTest import EstherExperimentTest
+def calculateLaserIntensity(laser_energy=None):
+    """
+    Converts the laser energy (in J), pulse length (flat top, in nanoseconds) and spot size (diameter in microns) to intensity in TW/cm^2.
+    @param laser_energy: Energy (J)
+    @type : float, int
+    """
+    
+    if laser_energy is None:
+        Energy = float(raw_input("Energy (J) : "))
+    else:
+        Energy = laser_energy
+    
+    SpotSize = float(raw_input("Spot size (diameter in um) : "))
+    PulseLength = float(raw_input("Pulse length (ns) : "))
 
-# Setup the suite.
-def suite():
-    suites = (
-             unittest.makeSuite(PhotonExperimentSimulationTest,    'test'),
-             unittest.makeSuite(EstherExperimentTest,              'test'),
-             )
+    PulseLength = PulseLength*1e-9
+    SpotSize = SpotSize/10000
+    SpotArea = 3.14159265359*(0.5*SpotSize)*(0.5*SpotSize)
+    Power = Energy/PulseLength
+    Intensity = Power/SpotArea
+    Intensity = Intensity/1e12
 
-    return unittest.TestSuite(suites)
-
-# If called as script, run the suite.
-if __name__=="__main__":
-    unittest.main(defaultTest="suite")
+    print "Intensity = ", Intensity, "TW/cm**2"
+    
+    return Intensity

@@ -1,3 +1,5 @@
+""" Test module for the EstherPhotonMatterInteractor.
+"""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016, 2017 Carsten Fortmann-Grote                        #
@@ -19,20 +21,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the EstherPhotonMatterInteractor.
 
-    @author : CFG
-    @institution : XFEL
-    @creation 20170227
-
-"""
-import os
-import numpy
-import shutil
 import h5py
-
-# Include needed directories in sys.path.
+import os
 import paths
+import shutil
 import unittest
 
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
@@ -66,19 +59,23 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
 
         # Setup parameters.
         self.esther_parameters = EstherPhotonMatterInteractorParameters(
-                 number_of_layers=5,
+                 number_of_layers=2,
                  ablator="CH",
                  ablator_thickness=10.0,
                  sample="Iron",
                  sample_thickness=20.0,
                  window=None,
                  window_thickness=0.0,
-                 laser_wavelength=800.0,
+                 laser_wavelength=1064.0,
                  laser_pulse='flat',
-                 laser_pulse_duration=1.0,
+                 laser_pulse_duration=6.0,
                  laser_intensity=0.1,
-                 run_time=10.0,
-                 delta_time=0.1,
+                 run_time=10.,
+                 delta_time=.25,
+                 read_from_file=None,
+                 force_passage=True,
+                 without_therm_conduc=False,
+                 rad_transfer=False,
             )
 
     def tearDown(self):
@@ -135,13 +132,15 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
                                               )
 
         # Call the backengine.
-        esther_calculator.backengine()
+        esther_message = esther_calculator.backengine()
 
-        self.assertTrue( False )
+        self.assertEqual(esther_message, "")
+
 
     @unittest.skip("Backengine not available.")
     def testSaveH5(self):
         """ Test hdf5 output generation. """
+
         # Make sure we clean up after ourselves.
         outfile = 'esther_out.h5'
         self.__files_to_remove.append(outfile)
@@ -149,11 +148,11 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         # Setup parameters.
         esther_parameters = self.esther_parameters
 
-
         # Construct an instance.
-        esther_calculator = EstherPhotonMatterInteractor( parameters=esther_parameters,
+        esther_calculator = EstherPhotonMatterInteractor(
+                                                parameters=esther_parameters,
                                                 input_path=self.input_path,
-                                                output_path=outfile
+                                                output_path=outfile,
                                               )
 
         # Call the backengine.
@@ -165,11 +164,25 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         # Check output was written.
         self.assertTrue( os.path.isfile( esther_calculator.output_path ) )
 
-        # Open the file for reading.
-        h5 = h5py.File( esther_calculator.output_path, 'r' )
+        # Open file.
+        with h5py.File( outfile ) as h5:
+            # Check top level group.
+            self.assertIn( 'data' , h5.keys() )
+            # Check all times are present.
+            self.assertEqual( len(h5['data'].keys()), int(esther_calculator.parameters.run_time / esther_calculator.parameters.delta_time)+1 ) # run_time/delta_time
+            # Check time 0 is present.
+            self.assertIn( '0' , h5['data'].keys() )
+            # Check  meshes group present.
+            self.assertIn( 'meshes' , h5['data/0'].keys() )
+            # Check all meshes are present at time 0.
+            self.assertIn( 'pos'  , h5['data/0/meshes'].keys() )
+            self.assertIn( 'pres' , h5['data/0/meshes'].keys() )
+            self.assertIn( 'rho'  , h5['data/0/meshes'].keys() )
+            self.assertIn( 'temp' , h5['data/0/meshes'].keys() )
+            self.assertIn( 'vel'  , h5['data/0/meshes'].keys() )
 
-        self.assertTrue( False )
-
+            # Check dataset shape
+            self.assertEqual( h5['data/0/meshes/vel'].value.shape[0], 2025)
 
 
 if __name__ == '__main__':
