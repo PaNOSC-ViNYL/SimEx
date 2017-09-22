@@ -33,7 +33,7 @@ def convertTxtToOPMD(esther_dirname=None):
     """
     # Check input.
     if not os.path.isdir( esther_dirname):
-        raise IOError( "%s is not a directory or link to a directory.")
+        raise IOError( "%s is not a directory or link to a directory." % (esther_dirname))
 
     # Get files in directory.
     dir_listing = os.listdir( esther_dirname)
@@ -68,7 +68,7 @@ def convertTxtToOPMD(esther_dirname=None):
     time_step = time_array[1] - time_array[0]
 
     # Create opmd.h5 output file
-    h5_path = str(esther_dirname)+".opmd.h5"
+    h5_path = str(esther_dirname)+"/output.opmd.h5"
     with h5py.File(h5_path, 'w') as opmd_h5:
 
         # Setup the root attributes.

@@ -1,6 +1,7 @@
+""" :module: Test module for the EstherPhotonMatterInteractorParameter class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016,2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016,2017 Carsten Fortmann-Grote, Richard Briggs         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,38 +20,26 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the EstherPhotonMatterInteractorParameter class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160219
-
-"""
-import paths
 import os
-import numpy
-import shutil
-import subprocess
-
-# Include needed directories in sys.path.
 import paths
+import shutil
 import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 # Import the class to test.
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetNumberOfLayers
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetAblator
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetAblatorThickness
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserIntensity
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulse
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulseDuration
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserWavelength
+from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetNumberOfLayers
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetSample
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetSampleThickness
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetWindow
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetWindowThickness
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserWavelength
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulse
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserPulseDuration
-from SimEx.Parameters.EstherPhotonMatterInteractorParameters import checkAndSetLaserIntensity
 
 class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
     """
@@ -72,19 +61,21 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.__dirs_to_remove = []
 
         self.esther_parameters = EstherPhotonMatterInteractorParameters(
-                                         number_of_layers=2,
+                                         number_of_layers=3,
                                          ablator="CH",
-                                         ablator_thickness=10.0,
+                                         ablator_thickness=25.0,
                                          sample="Iron",
-                                         sample_thickness=20.0,
-                                         window=None,
-                                         window_thickness=0.0,
-                                         laser_wavelength=800.0,
+                                         sample_thickness=5.0,
+                                         window="LiF",
+                                         window_thickness=50.0,
+                                         layer1="Copper",
+                                         layer1_thickness=1.0,
+                                         laser_wavelength=1064.0,
                                          laser_pulse='flat',
-                                         laser_pulse_duration=1.0,
+                                         laser_pulse_duration=6.0,
                                          laser_intensity=0.1,
                                          run_time=10.0,
-                                         delta_time=0.05
+                                         delta_time=0.05,
                                                          )
 
     def tearDown(self):
@@ -109,16 +100,15 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         """ Test the check and set method for number of layers. """
 
         # Type raises.
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "one")
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "1")
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, [1,2])
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "two")
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, "2")
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, [2,3])
         self.assertRaises( TypeError, checkAndSetNumberOfLayers, 10.5)
         self.assertRaises( TypeError, checkAndSetNumberOfLayers, self.esther_parameters)
-        self.assertRaises( TypeError, checkAndSetNumberOfLayers, {"1" : "one"})
+        self.assertRaises( TypeError, checkAndSetNumberOfLayers, {"2" : "two"})
 
         # Value raises.
         self.assertRaises( ValueError, checkAndSetNumberOfLayers, 0)
-        self.assertRaises( ValueError, checkAndSetNumberOfLayers, 1)
         self.assertRaises( ValueError, checkAndSetNumberOfLayers, 6)
         self.assertRaises( ValueError, checkAndSetNumberOfLayers, -3)
 
@@ -152,7 +142,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetAblatorThickness(10.0), 10.0 )
         self.assertEqual( checkAndSetAblatorThickness(6), 6.0 )
 
-
     def testCheckAndSetSample(self):
         """ Test the check and set method for the sample material. """
 
@@ -168,7 +157,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetSample("CH"), "CH" )
 
     def testCheckAndSetSampleThickness(self):
-        """ Test the check and set method for the ablator thickness. """
+        """ Test the check and set method for the sample thickness. """
 
         self.assertRaises( TypeError, checkAndSetSampleThickness, "ten microns" )
         self.assertRaises( TypeError, checkAndSetSampleThickness, [10.0, 10.0] )
@@ -247,7 +236,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetLaserPulseDuration( 2.0 ) , 2.0 )
         self.assertEqual( checkAndSetLaserPulseDuration( 10 ) , 10 )
 
-
     def testCheckAndSetLaserIntensity(self):
         """ Test the check and set method for the laser intensity. """
         # Type raises.
@@ -260,7 +248,6 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual( checkAndSetLaserIntensity( 0.1 ) , 0.1 )
         self.assertEqual( checkAndSetLaserIntensity( 1 ) , 1.0 )
 
-
     def testSerialize(self):
         """ Test the serialization of parameters into input deck."""
 
@@ -272,7 +259,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Check that the input deck has been generated.
         self.assertTrue( os.path.isdir( esther_parameters._esther_files_path ) )
 
-        self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
+        self.assertTrue( 'tmp_input.txt' in os.listdir( esther_parameters._esther_files_path ) )
         self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._esther_files_path ) )
 
     def testExpert(self):
@@ -300,7 +287,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         esther_parameters._serialize()
 
         # Assert equal, self.__use_force_passage, "FORCE_PASSAGE" for input.dat?
-        self.assertTrue( 'tmp_input.dat' in os.listdir( esther_parameters._esther_files_path ) )
+        self.assertTrue( 'tmp_input.txt' in os.listdir( esther_parameters._esther_files_path ) )
         self.assertTrue( 'parameters.json' in os.listdir( esther_parameters._esther_files_path ) )
 
     def testReadFromFile(self):
@@ -340,12 +327,11 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         # Setup parameters object.
         esther_parameters = self.esther_parameters
 
-        esther_parameters._setupFeathering(number_of_zones=300, feather_zone_width=4.0, minimum_zone_width=2e-4)
+        esther_parameters._setupFeathering(number_of_zones=250, feather_zone_width=4.0, minimum_zone_width=4e-4)
 
-        self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0807)
-        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.0842508, 6)
-        self.assertEqual( esther_parameters._non_feather_zones, 74)
-
+        self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0878)
+        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.091662, 5)
+        self.assertEqual( esther_parameters._non_feather_zones, 239)
 
 
 if __name__ == '__main__':

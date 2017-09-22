@@ -28,7 +28,7 @@ import json
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 
-ESTHER_MATERIAL_DICT = { "Aluminum" : {"name" : "Aluminum",
+ESTHER_MATERIAL_DICT = { "Aluminium" : {"name" : "Aluminium",
                        "shortname" : "Al#",
                        "eos_name" : "Al#_e_ses",
                        "mass_density" : 2.7,
@@ -78,15 +78,90 @@ ESTHER_MATERIAL_DICT = { "Aluminum" : {"name" : "Aluminum",
                        "eos_name" : "LiF_e_ses",
                        "mass_density" : 2.64,
                        },
-                       "Tantalum" : {"name" : "Tantalum",
-                       "shortname" : "Ta#",
-                       "eos_name" : "Ta#_e_ses",
-                       "mass_density" : 16.65,
-                       },
                        "Titanium" : {"name" : "Titanium",
                        "shortname" : "Ti#",
                        "eos_name" : "Ti#_e_ses",
                        "mass_density" : 4.43,
+                       },
+                       "Berylium" : {"name" : "Berylium",
+                       "shortname" : "Be#",
+                       "eos_name" : "Be#_e_ses",
+                       "mass_density" : 1.85,
+                       },
+                       "Cobalt" : {"name" : "Cobalt",
+                       "shortname" : "Co#",
+                       "eos_name" : "Co#_e_ses",
+                       "mass_density" : 8.9,
+                       },
+                       "Chromium" : {"name" : "Chromium",
+                       "shortname" : "Cr#",
+                       "eos_name" : "Cr#_e_ses",
+                       "mass_density" : 7.19,
+                       },
+                       "Iron2" : {"name" : "Iron2",
+                       "shortname" : "Fe2",
+                       "eos_name" : "Fe2_e_ses",
+                       "mass_density" : 7.87,
+                       },
+                       "Water" : {"name" : "Water",
+                       "shortname" : "H2O",
+                       "eos_name" : "H20_e_ses",
+                       "mass_density" : 1.0,
+                       },
+                       "Magnesium" : {"name" : "Magnesium",
+                       "shortname" : "Mg#",
+                       "eos_name" : "Mg#_e_ses",
+                       "mass_density" : 1.74,
+                       },
+                       "Mylar" : {"name" : "Mylar",
+                       "shortname" : "Myl",
+                       "eos_name" : "Myl_e_ses",
+                       "mass_density" : 1.38,
+                       },
+                       "Nickel" : {"name" : "Nickel",
+                       "shortname" : "Ni#",
+                       "eos_name" : "Ni#_e_ses",
+                       "mass_density" : 8.9,
+                       },
+                       "Lead" : {"name" : "Lead",
+                       "shortname" : "Pb#",
+                       "eos_name" : "Pb#_e_ses",
+                       "mass_density" : 11.35,
+                       },
+                       "Quartz" : {"name" : "Quartz",
+                       "shortname" : "Qua",
+                       "eos_name" : "Qua_e_ses",
+                       "mass_density" : 2.65,
+                       },
+                       "Silicon" : {"name" : "Silicon",
+                       "shortname" : "Si#",
+                       "eos_name" : "Si#_e_ses",
+                       "mass_density" : 2.33,
+                       },
+                       "SiliconOxide" : {"name" : "SiliconOxide",
+                       "shortname" : "SiO",
+                       "eos_name" : "SiO_e_ses",
+                       "mass_density" : 2.65,
+                       },
+                       "Titanium" : {"name" : "Titanium",
+                       "shortname" : "Ti#",
+                       "eos_name" : "Ti#_e_ses",
+                       "mass_density" : 4.54,
+                       },
+                       "Vanadium" : {"name" : "Vanadium",
+                       "shortname" : "Va#",
+                       "eos_name" : "Va#_e_ses",
+                       "mass_density" : 6.11,
+                       },
+                       "Tungsten" : {"name" : "Tungsten",
+                       "shortname" : "W##",
+                       "eos_name" : "W##_e_ses",
+                       "mass_density" : 19.35,
+                       },
+                       "Silver" : {"name" : "Silver",
+                       "shortname" : "Ag#",
+                       "eos_name" : "Ag#_e_ses",
+                       "mass_density" : 10.5,
                        },
            }
 
@@ -100,6 +175,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                  ablator_thickness=None,
                  sample=None,
                  sample_thickness=None,
+                 layer1=None,
+                 layer1_thickness=None,
+                 layer2=None,
+                 layer2_thickness=None,
                  window=None,
                  window_thickness=None,
                  laser_wavelength=None,
@@ -117,17 +196,23 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """
         Constructor for the HydroParameters
 
-        :param ablator: The ablating material ( "Al" | "CH" | "Diamond" )
+        :param ablator: The ablating material ( "Al" | "CH" | "Diamond" | "Kapton" | "Mylar" )
         :type ablator: str
 
         :param ablator_thickness: The ablator thickness (micrometers)
         :type ablator_thickness:
 
-        :param sample: The sample material (from limited list of materials)
+        :param sample: The sample material (from list of materials)
         :type sample: str
 
         :param sample_thickness: The sample thickness (micrometers)
         :type sample_thickness: float
+
+        :param layer1: The layer1 material (from list of materials)
+        :type layer1: str
+
+        :param layer2: The layer2 material (from list of materials)
+        :type layer2: str
 
         :param window: The window material (LiF | SiO2 | Diamond)
         :type window: str
@@ -164,18 +249,22 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         """
 
+        # If parameters already exist, read from parameters file
         if read_from_file is not None:
             print ( "Parameters file is located here: %s" % (read_from_file))
             self._readParametersFromFile(read_from_file)
 
-            # TO DO #96 expert mode : Add expert parameters (if they are set by user)
             # Update parameters from arguments.
             for key,val in {
                     'number_of_layers':number_of_layers,
                     'ablator':ablator,
                     'ablator_thickness':ablator_thickness,
-                    'sample' :sample ,
+                    'sample':sample,
                     'sample_thickness':sample_thickness,
+                    'layer1':layer1,
+                    'layer1_thickness':layer1_thickness,
+                    'layer2':layer2,
+                    'layer2_thickness':layer2_thickness,
                     'window':window,
                     'window_thickness':window_thickness,
                     'laser_wavelength':laser_wavelength,
@@ -193,6 +282,10 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self.__ablator_thickness = checkAndSetAblatorThickness(ablator_thickness)
             self.__sample = checkAndSetSample(sample)
             self.__sample_thickness = checkAndSetSampleThickness(sample_thickness)
+            self.__layer1 = checkAndSetLayer1(layer1)
+            self.__layer1_thickness = checkAndSetLayer1Thickness(layer1_thickness)
+            self.__layer2 = checkAndSetLayer2(layer2)
+            self.__layer2_thickness = checkAndSetLayer2Thickness(layer2_thickness)
             self.__window = checkAndSetWindow(window)
             self.__window_thickness = checkAndSetWindowThickness(window_thickness)
             self.__laser_wavelength = checkAndSetLaserWavelength(laser_wavelength)
@@ -201,7 +294,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self.__laser_intensity = checkAndSetLaserIntensity(laser_intensity)
             self.__run_time = checkAndSetRunTime(run_time)
             self.__delta_time = checkAndSetDeltaTime(delta_time)
-            # TO DO #96 expert mode: CheckAndSet expert mode parameters to ensure they do not conflict
+
             self.force_passage = force_passage
             self.without_therm_conduc = without_therm_conduc
             self.rad_transfer = rad_transfer
@@ -210,11 +303,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Define start up options (called Demmarage in esther)
         self._setDemmargeFlags()
 
-        # TO DO #96 expert mode: Define EOS options here, SESAME or BLF, SESAME default
-        #self._set EOS options(), SESAME or BLF
+        # Expert mode: Choose EOS type, SESAME or BLF
 
-        # TO DO #96 expert mode: Expert parameters to improve spatial resolution can be set here.
-        # Setup the feathering.
+        # Expert mode: Setup zone feathering (spatial resolution)
         self._setupFeathering()
 
         # Set state to not-initialized (e.g. input deck is not written)
@@ -223,6 +314,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def _readParametersFromFile(self,path):
         # Read from parameters file
         json_path = os.path.join(path, 'parameters.json')
+        print ( "Parameters file is: %s" % (json_path))
         with open(json_path, 'r') as j:
             dictionary = json.load(j)
             j.close()
@@ -231,21 +323,21 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
     def _setDemmargeFlags(self):
         # Expert users options to include in the start up options
-        self.__use_usi = "USI" # TO DO: Check this option in esther
+        self.__use_usi = "USI" # Use SI units.
         self.__use_force_passage = "FORCER_LE_PASSAGE" # Forces simulation through ignoring minor issues
-        self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity???
+        self.__use_without_therm_conduc = "SANS_COND_THERMIQUE" # Run without thermal conducivity
         self.__use_radiative_transfer = "TRANSFERT_RADIATIF" # Run with radiative transfer
 
-    def _setupFeathering(self, number_of_zones=250, feather_zone_width=5.0, minimum_zone_width=1e-4):
+    def _setupFeathering(self, number_of_zones=250, feather_zone_width=4.0, minimum_zone_width=4e-4):
         """ Method to fix feathering
 
-        :param number_of_zones: The number of zones in the first ablator section (default 250).
+        :param number_of_zones: The number of zones in the first ablator section (default 200).
         :type number_of_zones: int
 
         :param feather_zone_width: Width of feather zone (default 5.0 [microns]).
         :type feather_zone_width: float
 
-        :param minimum_zone_width: Minimal zone width (default 1e-4 [microns]).
+        :param minimum_zone_width: Minimal zone width (default 2e-4 [microns]).
         :type minimum_zone_width: float
 
         """
@@ -262,7 +354,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         root_found = False
 
         # Get all purely real roots above 1.
-        ### TODO: Improve algorithm.
         for i in range(n):
             if roots[i].imag == 0 and roots[i].real > 1.000001: # Why not > 1.? This would exclude 1.0f
                 r = round(roots[i].real,4)
@@ -278,9 +369,22 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         self._non_feather_zone_width = self.ablator_thickness-feather_zone_width
         self._non_feather_zones = int(self._non_feather_zone_width/(minimum_zone_width*(r**n)))
 
+
         self._mass_of_zone = self._final_feather_zone_width*ESTHER_MATERIAL_DICT[self.ablator]["mass_density"]
         width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
         self.__number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
+
+        print ("Final feather zone width: ", self._final_feather_zone_width)
+        print ("Mass of zone: ", self._mass_of_zone)
+        print ("Number of non-feathered zones: ", self._non_feather_zones)
+
+        if self.layer1 is not None:
+            width_of_layer1_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer1]["mass_density"]
+            self.__number_of_layer1_zones=int(self.layer1_thickness/width_of_layer1_zone)
+
+        if self.layer2 is not None:
+            width_of_layer2_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer2]["mass_density"]
+            self.__number_of_layer2_zones=int(self.layer2_thickness/width_of_layer2_zone)
 
         if self.window is not None:
             width_of_window_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.window]["mass_density"]
@@ -298,8 +402,8 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             self._esther_filename='tmp_input'
 
         # Write the input file
-        input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.dat')
-        print "Writing input deck to ", input_deck_path, "."
+        input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.txt')
+        print ("Writing input deck to ", input_deck_path, ".")
 
         # Write json file of this parameter class instance.
         json_path = os.path.join( self._esther_files_path, 'parameters.json')
@@ -310,13 +414,16 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
             input_deck.write('DEMARRAGE,%s\n' % (self.__use_usi))
-            # TO DO: 96 expert mode: Need better way of including these expert options (after checks of conflict)
+
             if self.force_passage is True:
                 input_deck.write('%s\n' % (self.__use_force_passage)) # Use force passage
+
             if self.without_therm_conduc is True:
                 input_deck.write('%s\n' % (self.__use_without_therm_conduc)) # Use without thermal conductivity option
-            if self.without_therm_conduc is True:
+
+            if self.rad_transfer is True:
                 input_deck.write('%s\n' % (self.__use_radiative_transfer)) # Use without thermal conductivity option
+
             input_deck.write('\n')
             input_deck.write('MILIEUX_INT_VERS_EXT\n')
             input_deck.write('\n')
@@ -330,36 +437,60 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.window_thickness))
                 # Calculate number of zones in window
                 input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_window_zones))
+                input_deck.write('MECANIQUE_RAM\n')
                 input_deck.write('\n')
 
-            # TO DO: GIT ISSUE #95: Complex targets
-            # Make a loop of layer constructions with number_of_zones[i] for i < number of layers
-            # The empty layer (epaisseur_vide) should be in the first layer construction
+            # If using 4 layers (ablator, layer1, sample, layer2)
+            if self.number_of_layers == 4:
+                input_deck.write('- %.1f um %s layer\n' % (self.layer2_thickness, self.layer2))
+                input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.layer2]["shortname"]))
+                input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.layer2]["eos_name"]))
+                input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.layer2_thickness))
+                # Calculate number of zones
+                input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_layer2_zones))
+                input_deck.write('MECANIQUE_RAM\n')
+                input_deck.write('\n')
+
             input_deck.write('- %.1f um %s layer\n' % (self.sample_thickness, self.sample))
-            input_deck.write('NOM_MILIEU=%s\n' % (self.sample))
-            input_deck.write('EQUATION_ETAT=EOS_LIST\n')
+            input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.sample]["shortname"]))
+            input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.sample]["eos_name"]))
             if self.window is None:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.sample_thickness))
             # Calculate number of zones
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_sample_zones))
+            input_deck.write('MECANIQUE_RAM\n')
             input_deck.write('\n')
+
+            # If using 3 layers (ablator, layer1, sample)
+            if self.number_of_layers == 3:
+                input_deck.write('- %.1f um %s layer\n' % (self.layer1_thickness, self.layer1))
+                input_deck.write('NOM_MILIEU=%s_2\n' % (ESTHER_MATERIAL_DICT[self.layer1]["shortname"]))
+                input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.layer1]["eos_name"]))
+                input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self.layer1_thickness))
+                # Calculate number of zones
+                input_deck.write('NOMBRE_MAILLES=%d\n' % (self.__number_of_layer1_zones))
+                input_deck.write('MECANIQUE_RAM\n')
+                input_deck.write('\n')
 
             # Write ablator
             input_deck.write('- %.1f um %s layer\n' % (self.ablator_thickness, self.ablator))
-            input_deck.write('NOM_MILIEU=abl1\n') # 1ST PART OF ABLATOR
-            input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
+            input_deck.write('NOM_MILIEU=%s_abl1\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 1st PART OF ABLATOR
+            input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"]))# ABLATOR EOS
             # if only simulating ablator layer, then must include empty (VIDE) layer
             if self.number_of_layers == 1:
                 input_deck.write('EPAISSEUR_VIDE=100e-6\n')
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._non_feather_zone_width)) # Non-feather thickness
             input_deck.write('NOMBRE_MAILLES=%d\n' % (self._non_feather_zones)) # Number of zones
+            input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
-            input_deck.write('NOM_MILIEU=abl2\n') # 1ST PART OF ABLATOR
-            input_deck.write('EQUATION_ETAT=EOS_FROM_LIST\n') # ABLATOR EOS
+
+            input_deck.write('NOM_MILIEU=%s_abl2\n' % (ESTHER_MATERIAL_DICT[self.ablator]["shortname"])) # 2nd PART OF ABLATOR
+            input_deck.write('EQUATION_ETAT=%s\n' % (ESTHER_MATERIAL_DICT[self.ablator]["eos_name"])) # ABLATOR EOS
             input_deck.write('EPAISSEUR_MILIEU=%.1fe-6\n' % (self._feather_zone_width)) # Feather thickness
             input_deck.write('EPAISSEUR_INTERNE=%.3fe-6\n' % (self._final_feather_zone_width)) # Feather final zone width
-            input_deck.write('EPAISSEUR_EXTERNE=%.1fe-10\n' % (self._minimum_zone_width)) #Min zone width
+            input_deck.write('EPAISSEUR_EXTERNE=4.0e-10\n') #Min zone width
+            input_deck.write('MECANIQUE_RAM\n') # Needs to be an option to use this.
             input_deck.write('\n')
 
             # TO DO: GIT ISSUE #96: Expert mode
@@ -374,11 +505,14 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             input_deck.write('LONGUEUR_ONDE_LASER=%.3fe-6\n' % (self.laser_wavelength))
             input_deck.write('DUREE_IMPULSION=%.2fe-9\n' % (self.laser_pulse_duration))
             input_deck.write('INTENSITE_IMPUL_MAX=%.3fe16\n' % (self.laser_intensity))
-            input_deck.write('IMPULSION_FICHIER\n')
+            input_deck.write('TEMPS_IMPUL_TABULE=0.0e-9,INTENSITE_TABULEE=0.\n') # These need to change for approrpriate laser designs.
+            input_deck.write('TEMPS_IMPUL_TABULE=0.2e-9,INTENSITE_TABULEE=1\n')
+            input_deck.write('TEMPS_IMPUL_TABULE=5.8e-9,INTENSITE_TABULEE=1\n')
+            input_deck.write('TEMPS_IMPUL_TABULE=6.0e-9,INTENSITE_TABULEE=0.\n')
+            #input_deck.write('IMPULSION_FICHIER\n')
             input_deck.write('\n')
 
             # Output parameters
-            # TO DO: GIT ISSUE #96: Expert mode
             input_deck.write('SORTIES_GRAPHIQUES\n')
             input_deck.write('DECOUPAGE_TEMPS\n')
             input_deck.write('BORNE_TEMPS=%.2fe-9\n' % (self.run_time))
@@ -387,14 +521,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
             # End of input file
             input_deck.write('ARRET\n')
-            input_deck.write('TEMP_ARRET=%.2fe-9\n' % (self.run_time))
+            input_deck.write('TEMPS_ARRET=%.2fe-9\n' % (self.run_time))
             input_deck.write('\n')
             input_deck.write('FIN_DES_INSTRUCTIONS')
 
         # Write the laser input file
-        laser_input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'_intensite_impulsion.dat')
-
-        print "Writing laser input deck to ", laser_input_deck_path, "."
+        laser_input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'_intensite_impulsion.txt')
+        print ("Writing laser input deck to ", laser_input_deck_path, ".")
 
         # Write the parameters file (_intensitie_impulsion)
         with open(laser_input_deck_path, 'w') as laser_input_deck:
@@ -471,6 +604,42 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
            self.__sample_thickness = checkAndSetSampleThickness(value)
 
     @property
+    def layer1(self):
+           """ Query for the layer1 type. """
+           return self.__layer1
+    @layer1.setter
+    def layer1(self, value):
+           """ Set the layer1 type to the value. """
+           self.__layer1 = checkAndSetLayer1(value)
+
+    @property
+    def layer1_thickness(self):
+           """ Query for the layer1 thickness type. """
+           return self.__layer1_thickness
+    @layer1_thickness.setter
+    def layer1_thickness(self, value):
+           """ Set the layer1 thickness to the value. """
+           self.__layer1_thickness = checkAndSetLayer1Thickness(value)
+
+    @property
+    def layer2(self):
+           """ Query for the layer2 type. """
+           return self.__layer2
+    @layer2.setter
+    def layer2(self, value):
+           """ Set the layer2 type to the value. """
+           self.__layer2 = checkAndSetLayer2(value)
+
+    @property
+    def layer2_thickness(self):
+           """ Query for the layer2 thickness type. """
+           return self.__layer2_thickness
+    @layer2_thickness.setter
+    def layer2_thickness(self, value):
+           """ Set the layer2 thickness to the value. """
+           self.__layer2_thickness = checkAndSetLayer2Thickness(value)
+
+    @property
     def window(self):
            """ Query for the window type. """
            return self.__window
@@ -542,7 +711,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         """ Set simulation time resolution delta t, ns"""
         self.__delta_time = checkAndSetDeltaTime(value)
 
-
     def _setDefaults(self):
         """ Method to pick sensible defaults for all parameters. """
         pass
@@ -552,13 +720,13 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             if self.window_thickness == 0.0:
                 raise ValueError( "Window thickness cannot be 0.0")
 
-
-
 ###########################
 # Check and set functions #
 ###########################
 
-
+#################################
+# Material check and set functions
+##################################
 
 def checkAndSetNumberOfLayers(number_of_layers):
     """
@@ -566,7 +734,7 @@ def checkAndSetNumberOfLayers(number_of_layers):
 
     :param number_of_layers: The number of layers to check
     :return: Checked number of layers
-    :raise ValueError: not (1 < number_of_layers <=5 )
+    :raise ValueError: not (1 < number_of_layers <= 4 )
 
     """
     if number_of_layers is None:
@@ -575,8 +743,8 @@ def checkAndSetNumberOfLayers(number_of_layers):
     if not isinstance( number_of_layers, int ):
         raise TypeError("The parameter 'number_of_layers' must be an int.")
 
-    if number_of_layers <=1 or number_of_layers > 5:
-        raise ValueError( "Number of layers must be between 1 and 5 only.")
+    if number_of_layers <1 or number_of_layers > 4:
+        raise ValueError( "Number of layers must be between 1 and 4 only.")
 
     return number_of_layers
 
@@ -586,7 +754,7 @@ def checkAndSetAblator(ablator):
 
     :param ablator: The ablator material to check.
     :return: The ablator choice after being checked.
-    :raise ValueError: ablator not in ["CH", "Al", "Diamond"].
+    :raise ValueError: ablator not in ["CH", "Al", "Diamond", "Mylar", "Kapton"].
 
     """
 
@@ -598,18 +766,20 @@ def checkAndSetAblator(ablator):
         raise TypeError("The parameters 'ablator' must be a str.")
 
     ### Could check if isinstance(ablator, str)
-    # Check if ablator is CH, Al or diamond
     if ablator == 'CH':
         print ( "Setting CH as ablator.")
-    elif ablator == 'Al':
+    elif ablator.lower() in ['al', 'aluminium']:
         print ( "Setting Al as ablator.")
     elif ablator.lower() in ['dia', 'diamond']:
         print ( "Setting diamond as ablator.")
+    elif ablator.lower() in ['mylar', 'myl']:
+        print ( "Setting mylar as ablator.")
+    elif ablator.lower() in ['kap', 'kapton']:
+        print ( "Setting Kapton as ablator.")
     else:
-        raise ValueError( "Ablator is not valid. Use 'CH', 'Al' or 'dia'.")
+        raise ValueError( "Ablator is not valid. Use 'CH', 'Al', 'dia', 'Myl', or 'Kap' as ablator.")
 
     return ablator
-
 
 def checkAndSetAblatorThickness(ablator_thickness):
     """
@@ -625,20 +795,25 @@ def checkAndSetAblatorThickness(ablator_thickness):
         raise TypeError("The parameters 'ablator_thickness' must be of numeric type (int or float).")
 
     # Check if ablator is between 5 and 100 um
-    if ablator_thickness <= 5.0 or ablator_thickness > 100.0:
+    if ablator_thickness < 5.0 or ablator_thickness > 100.0:
         raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
+
+    # TO DO PLACEHOLDER
+    # IF LASER INTENSITY IS TOO HIGH, ABLATOR MUST BE THICK TO ALLOW FOR ENOUGH MATERIAL TO VAPORISE (CH)
 
     print ( "Ablator thickness is %4.1f " % ablator_thickness)
 
     return ablator_thickness
-
 
 def checkAndSetSample(sample):
     """
     Utility to check if the sample is in the list of known EOS materials
     """
 
-    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond", "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum", ]
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum",
+                "Berylium", "Chromium", "Iron2", "Kapton", "LiF", "Magnesium", "Mylar",
+                "Quartz", "SiliconOxide", "Silver", "Titanium", "Vanadium", "Water" ]
 
     # Set default
     if sample is None:
@@ -659,26 +834,114 @@ def checkAndSetSampleThickness(sample_thickness):
     Utility to check that the sample thickness is in permitted range set by Esther.
     """
 
-    # Set default
+    # Raise if not set.
     if sample_thickness is None:
         raise RuntimeError( "Sample thickness not specified.")
 
-    # Check if ablator is between 1 and 100 um
+    # Check type.
+    if not isinstance( sample_thickness, (int, float)):
+        raise TypeError("The parameters 'sample_thickness' must be of numeric type (int or float).")
+
+    # Check if sample is between 1 and 200 um
     if sample_thickness < 1.0 or sample_thickness > 200.0:
-        raise ValueError( "Sample must be between 1.0 and 200.0 microns")
+        raise ValueError( "Ablator must be between 1.0 and 200.0 microns")
 
     return sample_thickness
 
+def checkAndSetLayer1(layer1):
+    """
+    Utility to check if the layer1 is in the list of known EOS materials
+    """
+
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum",
+                "Berylium", "Chromium", "Iron2", "Kapton", "LiF", "Magnesium", "Mylar",
+                "Quartz", "SiliconOxide", "Silver", "Titanium", "Vanadium", "Water" ]
+
+    # Set default
+    if layer1 is None:
+        print ( "Running simulation without layer1 material")
+        return None
+
+    if not isinstance(layer1, str): raise TypeError("The parameter 'layer1' must be a str.")
+
+    # Check each element
+    if layer1 in elements:
+        pass
+    else:
+        raise ValueError( "layer1 is not in list of known EOS materials")
+
+    return layer1
+
+def checkAndSetLayer1Thickness(layer1_thickness):
+    """
+    Utility to check that the layer1 thickness is in permitted range set by Esther.
+    """
+
+    # Set default
+    if layer1_thickness is None:
+        return 0.0
+
+    # Check if number.
+    if not isinstance( layer1_thickness, (float, int)):
+        raise TypeError( "The parameter 'layer1_thickness' must be a numerical type (float or int.)")
+
+    # Check if layer1 is between 1 and 100 um
+    if layer1_thickness < 1.0 or layer1_thickness > 200.0:
+        raise ValueError( "layer1 must be between 1.0 and 200.0 microns")
+
+    return layer1_thickness
+
+def checkAndSetLayer2(layer2):
+    """
+    Utility to check if the layer2 is in the list of known EOS materials
+    """
+
+    elements = [ "Aluminium", "Gold", "Carbon", "CH", "Cobalt", "Copper", "Diamond",
+                "Iron", "Molybdenum", "Nickel", "Lead", "Silicon", "Tin", "Tantalum",
+                "Berylium", "Chromium", "Iron2", "Kapton", "LiF", "Magnesium", "Mylar",
+                "Quartz", "SiliconOxide", "Silver", "Titanium", "Vanadium", "Water" ]
+
+    # Set default
+    if layer2 is None:
+        print ( "Running simulation without layer2 material")
+        return None
+
+    if not isinstance(layer2, str): raise TypeError("The parameter 'layer2' must be a str.")
+
+    # Check each element
+    if layer2 in elements:
+        pass
+    else:
+        raise ValueError( "layer2 is not in list of known EOS materials")
+
+    return layer2
+
+def checkAndSetLayer2Thickness(layer2_thickness):
+    """
+    Utility to check that the layer2 thickness is in permitted range set by Esther.
+    """
+
+    # Set default
+    if layer2_thickness is None:
+        return 0.0
+
+    # Check if number.
+    if not isinstance( layer2_thickness, (float, int)):
+        raise TypeError( "The parameter 'layer2_thickness' must be a numerical type (float or int.)")
+
+    # Check if layer2 is between 1 and 100 um
+    if layer2_thickness < 1.0 or layer2_thickness > 200.0:
+        raise ValueError( "layer2 must be between 1.0 and 200.0 microns")
+
+    return layer2_thickness
+
 def checkAndSetWindow(window):
     """
-    Utility to check that the window thickness is > 1 um and < 200 um
+    Utility to check that the window exists in the EOS database.
     """
-    # Change this to be just window materials (LiF, Quartz etc.)
-    ### TODO PLACEHOLDER ------------------------------------------------------------------------------>
-    elements = ["LiF",
-                "SiO2",
-                "Diamond",
-                ]
+
+    elements = ["LiF", "SiO2", "Diamond", "Quartz" ]
 
     if window is None:
         print ( "Running simulation without window material")
@@ -714,6 +977,10 @@ def checkAndSetWindowThickness(window_thickness):
 
     return window_thickness
 
+#################################
+# LASER CHECK AND SET FUNCTIONS #
+#################################
+
 def checkAndSetLaserWavelength(laser_wavelength):
     """
     Utility to check that the laser wavelength is correct.
@@ -726,9 +993,8 @@ def checkAndSetLaserWavelength(laser_wavelength):
     if not isinstance( laser_wavelength, (float, int)):
         raise TypeError( "The parameter 'laser_wavelength' must be a numerical type (float or int.)")
 
-    if laser_wavelength <= 0.0:
-        raise ValueError( "The parameter 'laser_wavelength' must be a positive number.")
-
+    if laser_wavelength <= 300 or laser_wavelength > 1200:
+        raise ValueError( "laser wavelength must be between 300 and 1200 nm")
 
  # Convert to microns.
     laser_wavelength = laser_wavelength*1e-3

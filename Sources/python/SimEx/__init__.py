@@ -30,7 +30,6 @@ from Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffrac
 from Calculators.DMPhasing import DMPhasing
 from Calculators.EMCCaseGenerator import EMCCaseGenerator
 from Calculators.EMCOrientation import EMCOrientation
-from Calculators.EstherExperimentConstruction import EstherExperimentConstruction
 from Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
 from Calculators.GenesisPhotonSource import GenesisPhotonSource
 from Calculators.IdealPhotonDetector import IdealPhotonDetector
@@ -51,5 +50,6 @@ from Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParame
 from Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from Parameters.WavePropagatorParameters import WavePropagatorParameters
 from PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
+from PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 
 import Utilities

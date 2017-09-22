@@ -87,6 +87,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, XCSITPhotonDetector)
         self.assertIsInstance(diffractor, AbstractPhotonDetector)
 
+    @unittest.skip("Run this only on large memory machine.")
     def testMinimalExample(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
@@ -98,8 +99,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         diffractor = XCSITPhotonDetector(
                 parameters=parameters,
-                #input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
-                input_path="diffr/diffr_out_0000001.h5",
+                input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
                 output_path="detector_out.h5",
                 )
 

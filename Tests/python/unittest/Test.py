@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,7 +20,7 @@
 ##########################################################################
 
 import unittest
-import sys
+import os, sys
 
 # Import suites to run.
 from SimExTest.Calculators import CalculatorsTests
@@ -29,15 +29,22 @@ from SimExTest.Utilities import UtilitiesTests
 from SimExTest.Parameters import ParametersTests
 from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
-# Define the encapsulating test suite.
+# Are we running on CI server?
+is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
+
+
+# Define the test suite.
 def suite():
     suites = [
                AbstractCalculatorsTests.suite(),
                CalculatorsTests.suite(),
                UtilitiesTests.suite(),
                ParametersTests.suite(),
-               PhotonExperimentSimulationTests.suite(),
              ]
+
+    # Append if NOT on CI server.
+    if not is_travisCI:
+        suites.append(PhotonExperimentSimulationTests.suite())
 
     return unittest.TestSuite(suites)
 

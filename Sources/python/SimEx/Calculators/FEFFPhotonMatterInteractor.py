@@ -464,6 +464,12 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 #
 ##########################################
 # Utility functions
+
+    def _setDefaults(self):
+        """ """
+        """ Set the inherited parameters defaults that depend on the special calculator. """
+        self._AbstractCalculatorParameters__cpus_per_task_default = 1
+
 def _checkAndSetAtoms(value):
     """ """
     """ Private function to check if input is a valid atoms list.

@@ -29,17 +29,19 @@ from EMCOrientationParametersTest import EMCOrientationParametersTest
 from DMPhasingParametersTest import DMPhasingParametersTest
 from WavePropagatorParametersTest import WavePropagatorParametersTest
 from PhotonBeamParametersTest import PhotonBeamParametersTest
+from EstherPhotonMatterInteractorParametersTest import EstherPhotonMatterInteractorParametersTest
 
 # Setup the suite.
 def suite():
-    suites = (
-             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,    'test'),
-             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,    'test'),
-             unittest.makeSuite(EMCOrientationParametersTest,    'test'),
-             unittest.makeSuite(DMPhasingParametersTest,    'test'),
-             unittest.makeSuite(WavePropagatorParametersTest,    'test'),
-             unittest.makeSuite(PhotonBeamParametersTest,    'test'),
-             )
+    suites = [
+             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,             'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,          'test'),
+             unittest.makeSuite(EMCOrientationParametersTest,                   'test'),
+             unittest.makeSuite(DMPhasingParametersTest,                        'test'),
+             unittest.makeSuite(WavePropagatorParametersTest,                   'test'),
+             unittest.makeSuite(PhotonBeamParametersTest,                       'test'),
+             unittest.makeSuite(EstherPhotonMatterInteractorParametersTest,     'test'),
+             ]
 
     return unittest.TestSuite(suites)
 
