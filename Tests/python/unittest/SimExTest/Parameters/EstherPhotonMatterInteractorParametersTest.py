@@ -1,6 +1,7 @@
+""" :module: Test module for the EstherPhotonMatterInteractorParameter class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016,2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016,2017 Carsten Fortmann-Grote, Richard Briggs         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,21 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the EstherPhotonMatterInteractorParameter class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160219
-
-"""
-import paths
-import os
 import numpy
+import os
+import paths
 import shutil
 import subprocess
-
-# Include needed directories in sys.path.
-import paths
 import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
@@ -344,7 +335,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
         esther_parameters._setupFeathering(number_of_zones=250, feather_zone_width=4.0, minimum_zone_width=4e-4)
 
         self.assertAlmostEqual( esther_parameters._final_feather_zone_width, 0.0878)
-        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.091662, 6)
+        self.assertAlmostEqual( esther_parameters._mass_of_zone, 0.091662, 5)
         self.assertEqual( esther_parameters._non_feather_zones, 239)
 
 
