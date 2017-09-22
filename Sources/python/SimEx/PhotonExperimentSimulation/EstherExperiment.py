@@ -19,14 +19,11 @@
 #                                                                        #
 ##########################################################################
 
-import numpy
 import os
-import sys
-import tempfile
 
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
 
-class EstherExperimentConstruction():
+class EstherExperiment():
     """
     Class to represent creating new and iterative Rad-Hydro simulations.
     """

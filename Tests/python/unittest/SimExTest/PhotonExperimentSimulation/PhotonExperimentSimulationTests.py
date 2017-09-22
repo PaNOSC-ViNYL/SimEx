@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,11 +25,13 @@ import unittest
 
 # Import classes to test.
 from PhotonExperimentSimulationTest import PhotonExperimentSimulationTest
+from PhotonExperimentSimulationTest import EstherExperimentTest
 
 # Setup the suite.
 def suite():
     suites = (
              unittest.makeSuite(PhotonExperimentSimulationTest,    'test'),
+             unittest.makeSuite(EstherExperimentTest,              'test'),
              )
 
     return unittest.TestSuite(suites)
@@ -37,4 +39,3 @@ def suite():
 # If called as script, run the suite.
 if __name__=="__main__":
     unittest.main(defaultTest="suite")
-

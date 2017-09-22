@@ -1,6 +1,7 @@
+""" :module: Test module for the EstherExperiment class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2017 Carsten Fortmann-Grot, Richard Briggs               #
+# Copyright (C) 2017 Carsten Fortmann-Grote, Richard Briggs              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,33 +20,21 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the EstherExperimentConstruction class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160219
-
-"""
-import paths
-import os
-import numpy
-import shutil
-import subprocess
 import json
-
-# Include needed directories in sys.path.
+import os
 import paths
+import shutil
 import unittest
 
 # Import the class to test.
-from SimEx.Calculators.EstherExperimentConstruction import EstherExperimentConstruction
+from SimEx.PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
-from TestUtilities.TestUtilities import TestUtilities
+from TestUtilities import TestUtilities
 
-class EstherExperimentConstructionTest(unittest.TestCase):
+class EstherExperimentTest(unittest.TestCase):
     """
-    Test class for the EstherExperimentConstruction class.
+    Test class for the EstherExperiment class.
     """
 
     @classmethod
@@ -74,11 +63,11 @@ class EstherExperimentConstructionTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def notestDefaultConstruction(self):
+    def testDefaultConstruction(self):
         """ Testing the default construction of the class using a dictionary. """
 
         # Attempt to construct an instance of the class.
-        self.assertRaises( RuntimeError, EstherExperimentConstruction )
+        self.assertRaises( RuntimeError, EstherExperiment )
 
     def testComplexWorkflow(self):
 
@@ -98,83 +87,78 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                          laser_pulse_duration=10.0,
                                          laser_intensity=0.33,
                                          run_time=15.0,
-                                         delta_time=0.03
+                                         delta_time=0.03,
+                                         force_passage=True,
                                          )
         # Create experiment.
-        simName = "CH-test"
-        path_to_test = TestUtilities.generateTestFilePath("hydroTests/hydro.txt")
-        experiment = EstherExperimentConstruction(parameters=parameters,
-                                                  esther_sims_path=path_to_test,
-                                                  sim_name=simName)
+        sim_name = "CH-test"
+
+        # Make a temporary directory under which experiments will be stored.
+        esther_sims_path = "hydroTests"
+        os.mkdir(esther_sims_path)
+
+        # Ensure proper cleanup after test.
+        self.__dirs_to_remove.append(esther_sims_path)
+
+        # Make directory to store this experiment.
+        experiment_root =  os.path.join(esther_sims_path, sim_name)
+
+        # Construct the experiment.
+        experiment = EstherExperiment(parameters=parameters,
+                                                  esther_sims_path=esther_sims_path,
+                                                  sim_name=sim_name)
 
         # Check presence of expected directories.
-        expected_dir = path_to_test + "CH-test/1/"
-        self.assertTrue( os.path.isdir(expected_dir) )
+        experiment_dir = os.path.join(experiment_root, '1' )
+        self.assertTrue( os.path.isdir(experiment_dir) )
 
-        self.assertIn( "CH-test1.txt", os.listdir(expected_dir) )
-        self.assertIn( "CH-test1_intensite_impulsion.txt", os.listdir(expected_dir) )
-        self.assertIn( "parameters.json", os.listdir(expected_dir) )
+        self.assertIn( "CH-test1.txt", os.listdir(experiment_dir) )
+        self.assertIn( "CH-test1_intensite_impulsion.txt", os.listdir(experiment_dir) )
+        self.assertIn( "parameters.json", os.listdir(experiment_dir) )
 
         # Create new experiment from previous.
-        experiment = EstherExperimentConstruction(parameters=parameters,
-                                                  esther_sims_path=path_to_test,
-                                                  sim_name=simName)
+        experiment = EstherExperiment(parameters=parameters,
+                                                  esther_sims_path=esther_sims_path,
+                                                  sim_name=sim_name)
 
         # Check presence of expected directories.
-        expected_dir = path_to_test + "CH-test/2/"
-        self.assertTrue( os.path.isdir(expected_dir) )
+        experiment_dir = os.path.join(experiment_root, '2' )
+        self.assertTrue( os.path.isdir(experiment_dir) )
 
-        self.assertIn( "CH-test2.txt", os.listdir(expected_dir) )
-        self.assertIn( "CH-test2_intensite_impulsion.txt", os.listdir(expected_dir) )
-        self.assertIn( "parameters.json", os.listdir(expected_dir) )
+        self.assertIn( "CH-test2.txt", os.listdir(experiment_dir) )
+        self.assertIn( "CH-test2_intensite_impulsion.txt", os.listdir(experiment_dir) )
+        self.assertIn( "parameters.json", os.listdir(experiment_dir) )
 
-        with open(os.path.join(expected_dir,"parameters.json")) as j:
+        with open(os.path.join(experiment_dir,"parameters.json")) as j:
             dictionary = json.load(j)
             j.close()
 
         # Check parameter.
         self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__sample_thickness"], 5.0 )
-        
+
         # Create new experiment from previous with update.
         new_parameters = EstherPhotonMatterInteractorParameters(laser_intensity=0.2,
-                read_from_file="/Users/richardbriggs/Desktop/tmp/CH-test/2/")
+                read_from_file=experiment_dir)
 
-        experiment = EstherExperimentConstruction(parameters=new_parameters,
-                                                  esther_sims_path=path_to_test,
-                                                  sim_name=simName)
+        experiment = EstherExperiment(parameters=new_parameters,
+                                                  esther_sims_path=esther_sims_path,
+                                                  sim_name=sim_name)
 
         # Check presence of expected directories.
-        expected_dir = path_to_test + "CH-test/3/"
-        self.assertTrue( os.path.isdir(expected_dir) )
+        new_experiment_dir = os.path.join(experiment_root, '3' )
+        self.assertTrue( os.path.isdir(new_experiment_dir) )
 
-        self.assertIn( "CH-test3.txt", os.listdir(expected_dir) )
-        self.assertIn( "CH-test3_intensite_impulsion.txt", os.listdir(expected_dir) )
-        self.assertIn( "parameters.json", os.listdir(expected_dir) )
+        self.assertIn( "CH-test3.txt", os.listdir(new_experiment_dir) )
+        self.assertIn( "CH-test3_intensite_impulsion.txt", os.listdir(new_experiment_dir) )
+        self.assertIn( "parameters.json", os.listdir(new_experiment_dir) )
 
-        with open(os.path.join(expected_dir,"parameters.json")) as j:
+        with open(os.path.join(new_experiment_dir,"parameters.json")) as j:
             dictionary = json.load(j)
             j.close()
 
         # Check update performed.
         self.assertEqual( dictionary["_EstherPhotonMatterInteractorParameters__laser_intensity"], 0.2 )
 
-    def testConversion(self):
-        # Existing files and output data need to be saved
-
-        # Create experiment.
-        dirName = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/Fe-Example/1"
-        
-        convertTxtToOPMD(dirName)
-
-        # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/OneDrive/Data/Hydrocode/tmp/Fe-Example/1/"
-        self.assertTrue( os.path.isdir(expected_dir) )
-        
-        # Check the output file is created in opmd.h5 format
-        self.assertIn( "output.opmd.h5", os.listdir(expected_dir) )
-     
-        
 
 if __name__ == '__main__':
     unittest.main()
-
