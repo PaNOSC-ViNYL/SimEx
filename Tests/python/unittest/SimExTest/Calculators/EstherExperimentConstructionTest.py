@@ -41,6 +41,7 @@ import unittest
 from SimEx.Calculators.EstherExperimentConstruction import EstherExperimentConstruction
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
+from TestUtilities.TestUtilities import TestUtilities
 
 class EstherExperimentConstructionTest(unittest.TestCase):
     """
@@ -50,7 +51,7 @@ class EstherExperimentConstructionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Make a tmp directory for simulation storage.
-        cls._simdir = "/Users/richardbriggs/Desktop/tmp"
+        cls._simdir = "tmp/"
         os.mkdir(cls._simdir)
 
     @classmethod
@@ -101,12 +102,13 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                                          )
         # Create experiment.
         simName = "CH-test"
+        path_to_test = TestUtilities.generateTestFilePath("hydroTests/hydro.txt")
         experiment = EstherExperimentConstruction(parameters=parameters,
-                                                  esther_sims_path=self._simdir,
+                                                  esther_sims_path=path_to_test,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Desktop/tmp/CH-test/1/"
+        expected_dir = path_to_test + "CH-test/1/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
         self.assertIn( "CH-test1.txt", os.listdir(expected_dir) )
@@ -115,11 +117,11 @@ class EstherExperimentConstructionTest(unittest.TestCase):
 
         # Create new experiment from previous.
         experiment = EstherExperimentConstruction(parameters=parameters,
-                                                  esther_sims_path=self._simdir,
+                                                  esther_sims_path=path_to_test,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Desktop/tmp/CH-test/2/"
+        expected_dir = path_to_test + "CH-test/2/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
         self.assertIn( "CH-test2.txt", os.listdir(expected_dir) )
@@ -138,11 +140,11 @@ class EstherExperimentConstructionTest(unittest.TestCase):
                 read_from_file="/Users/richardbriggs/Desktop/tmp/CH-test/2/")
 
         experiment = EstherExperimentConstruction(parameters=new_parameters,
-                                                  esther_sims_path=self._simdir,
+                                                  esther_sims_path=path_to_test,
                                                   sim_name=simName)
 
         # Check presence of expected directories.
-        expected_dir = "/Users/richardbriggs/Desktop/tmp/CH-test/3/"
+        expected_dir = path_to_test + "CH-test/3/"
         self.assertTrue( os.path.isdir(expected_dir) )
 
         self.assertIn( "CH-test3.txt", os.listdir(expected_dir) )
