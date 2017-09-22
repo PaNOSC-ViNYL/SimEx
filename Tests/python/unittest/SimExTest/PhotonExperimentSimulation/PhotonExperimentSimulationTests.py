@@ -25,7 +25,7 @@ import unittest
 
 # Import classes to test.
 from PhotonExperimentSimulationTest import PhotonExperimentSimulationTest
-from PhotonExperimentSimulationTest import EstherExperimentTest
+from EstherExperimentTest import EstherExperimentTest
 
 # Setup the suite.
 def suite():
