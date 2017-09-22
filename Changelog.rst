@@ -4,6 +4,23 @@ CHANGELOG
 Changes from 0.2 to 0.3
 -----------------------
 
+New in 0.3.3
+''''''''''''
+
+New features
+""""""""""""
+* EstherExperiment: A workflow for radiation-hydrodynamics simulations
+* Added CrystFEL to external libraries (building simex_platform will download, build, and install CrystFEL as well). Controllable via the DCrystFELPhotonDiffractor flag to cmake.
+
+Bug fixes
+"""""""""
+* Various small bug fixes related to Esther interfaces, enabled minimal working example with the EstherPhotonMatterInteractor.
+
+Tests
+"""""
+* Disabled lengthy tests on the CI server.
+
+
 New in 0.3.2
 ''''''''''''
 
