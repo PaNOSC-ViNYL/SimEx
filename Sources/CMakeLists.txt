@@ -18,7 +18,6 @@ find_python_module(breathe REQUIRED)
 find_python_module(sqlalchemy REQUIRED)
 find_python_module(pyfftw REQUIRED)
 find_python_module(pyFAI REQUIRED)
-find_python_module(numba REQUIRED)
 find_python_module(PyQt4 REQUIRED)
 
 #FIND_PACKAGE (LAPACK REQUIRED)
