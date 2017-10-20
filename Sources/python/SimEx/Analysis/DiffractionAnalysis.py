@@ -213,7 +213,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Plot radial projection.
         plotRadialProjection(pattern_to_plot, self.__parameters, logscale)
 
-    def plotPattern(self, operation=None, logscale=False):
+    def plotPattern(self, operation=None, logscale=False, offset=1e-1):
         """ Plot a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -223,6 +223,9 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
+
+        :param offset: Offset to apply if logarithmic scaling is on.
+        :type offset: float
 
         """
 
@@ -241,7 +244,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot image and colorbar.
-        plotImage(pattern_to_plot, logscale)
+        plotImage(pattern_to_plot, logscale, offset)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -251,7 +254,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         photonStatistics(stack)
 
-    def animatePatterns(self, output_path=None):
+    def animatePatterns(self, output_path=None, logscale=False, offset=1e-1):
         """
         Make an animated gif out of the given patterns.
 
@@ -259,6 +262,11 @@ class DiffractionAnalysis(AbstractAnalysis):
         :type output_path: str
         :raises IOError: File exists or parent directory not found.
 
+        :param logscale: Whether to apply logarithmic scaling to the z axis (color).
+        :type logscale: bool
+
+        :param offset: Offset to apply if logarithmic scaling is on.
+        :type offset: float
         """
 
         # Handle default path for saving the animated gif.
@@ -283,16 +291,20 @@ class DiffractionAnalysis(AbstractAnalysis):
         mn, mx = stack.min(), stack.max()
         x_range, y_range = stack.shape[1:]
         for i,img in enumerate(stack):
-            plt.pcolor(img, norm=Normalize(vmin=mn, vmax=mx), cmap='viridis')
-            plotResolutionRings(self.__parameters)
-            plt.colorbar()
-            plt.xlim([0,x_range-1])
-            plt.ylim([0,y_range-1])
-            png_filename = "%07d.png" % (self.pattern_indices[i])
+            plotImage(img, logscale=logscale, offset=offset)
+
+            # Save image.
+            if self.pattern_indices != "all":
+                png_filename = "%07d.png" % (self.pattern_indices[i])
+            else:
+                png_filename = "%07d.png" % (i)
+
             plt.savefig(os.path.join(tmp_out_dir, png_filename) )
+
+            # Clear figure.
             plt.clf()
 
-        # Make the animated gif.
+        # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
 def plotRadialProjection(pattern, parameters, logscale=True):
@@ -304,8 +316,10 @@ def plotRadialProjection(pattern, parameters, logscale=True):
         plt.semilogy(qs, intensities)
     else:
         plt.plot(qs, intensities)
+
     plt.xlabel("q (1/nm)")
     plt.ylabel("Intensity (arb. units)")
+    plt.tight_layout()
 
 def azimuthalIntegration(pattern, parameters):
 
@@ -345,8 +359,9 @@ def azimuthalIntegration(pattern, parameters):
             )
     qs, intensities = azimuthal_integrator.integrate1d(
             pattern,
-            512,
+            min(Npix,1024),
             unit="q_nm^-1",
+            #unit="2th_deg",
             )
 
     return qs, intensities
@@ -384,20 +399,25 @@ def diffractionParameters(path):
     # Return.
     return parameters_dict
 
-def plotImage(pattern, logscale=False):
+def plotImage(pattern, logscale=False, offset=1e-1):
     """ Workhorse function to plot an image
 
     :param logscale: Whether to show the data on logarithmic scale (z axis) (default False).
     :type logscale: bool
+
+    :param offset: Offset to apply if logarithmic scaling is on.
+    :type offset: float
 
     """
     plt.figure()
     # Get limits.
     mn, mx = pattern.min(), pattern.max()
 
+    x_range, y_range = pattern.shape
+
     if logscale:
         if mn <= 0.0:
-            mn += pattern.min()+1e-1
+            mn += pattern.min()+offset
             pattern = pattern.astype(float) + mn
         plt.imshow(pattern, norm=mpl.colors.LogNorm(vmin=mn, vmax=mx), cmap="viridis")
     else:
@@ -405,6 +425,9 @@ def plotImage(pattern, logscale=False):
 
     plt.xlabel(r'$x$ (pixel)')
     plt.ylabel(r'$y$ (pixel)')
+    plt.xlim([0,x_range-1])
+    plt.ylim([0,y_range-1])
+    plt.tight_layout()
     plt.colorbar()
 
 def plotResolutionRings(parameters):
