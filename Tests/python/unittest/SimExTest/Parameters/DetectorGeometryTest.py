@@ -1,4 +1,4 @@
-""" :module DetectorGeometryParametersTest: Test module for the DetectorGeometryParameters class.  """
+""" :module DetectorGeometryTest: Test module for the DetectorGeometry class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -32,12 +32,11 @@ import unittest
 
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.DetectorGeometryParameters import DetectorGeometryParameters
-from SimEx.Parameters.DetectorGeometryParameters import propToBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 
-class DetectorGeometryParametersTest(unittest.TestCase):
+class DetectorGeometryTest(unittest.TestCase):
     """
-    Test class for the DetectorGeometryParameters class.
+    Test class for the DetectorGeometry class.
     """
 
     @classmethod
@@ -67,61 +66,10 @@ class DetectorGeometryParametersTest(unittest.TestCase):
         """ Testing the default construction. """
 
         # Attempt to construct an instance of the class.
-        self.assertRaises(TypeError, DetectorGeometryParameters)
+        detector_geometry = DetectorGeometry()
+        self.assertIsInstance(detector_geometry, DetectorGeometry)
+        self.assertIsInstance(detector_geometry, AbstractCalculatorParameters)
 
-    def testShapedConstruction(self):
-        """ Testing the construction of the class with parameters. """
-
-        # Attempt to construct an instance of the class.
-        parameters = DetectorGeometryParameters(
-                photon_energy=4.96e3,
-                photon_energy_relative_bandwidth=2e-2,
-                photon_energy_spectrum_type="SASE",
-                pulse_energy = 2e-3,
-                beam_diameter_fwhm = 2e-6,
-                divergence = 1e-6,
-                )
-
-        # Check all parameters are set as intended.
-        self.assertEqual( parameters.photon_energy, 4.96e3 )
-        self.assertEqual( parameters.photon_energy_relative_bandwidth, 2e-2 )
-        self.assertEqual( parameters.photon_energy_spectrum_type, "SASE" )
-        self.assertEqual( parameters.pulse_energy, 2e-3 )
-        self.assertEqual( parameters.beam_diameter_fwhm, 2e-6 )
-        self.assertEqual( parameters.divergence, 1e-6 )
-
-    def testSettersAndQueries(self):
-        """ Testing the default construction of the class using a dictionary. """
-        # Attempt to construct an instance of the class.
-        parameters = DetectorGeometryParameters(
-                photon_energy=4.96e3,
-                pulse_energy = 2e-3,
-                beam_diameter_fwhm = 2e-6,
-                )
-
-        # Set via methods.
-        parameters.photon_energy = 8.0e3
-        parameters.pulse_energy = 2.5e-3
-        parameters.beam_diameter_fwhm = 100e-9
-        parameters.photon_energy_relative_bandwidth = 1e-3
-        parameters.divergence = 5e-6
-        parameters.photon_energy_spectrum_type="tophat"
-
-        # Check all parameters are set as intended.
-        self.assertEqual( parameters.photon_energy, 8.0e3 )
-        self.assertEqual( parameters.photon_energy_relative_bandwidth, 1e-3 )
-        self.assertEqual( parameters.pulse_energy, 2.5e-3 )
-        self.assertEqual( parameters.beam_diameter_fwhm, 1e-7 )
-        self.assertEqual( parameters.divergence, 5e-6 )
-        self.assertEqual( parameters.photon_energy_spectrum_type, "tophat" )
-
-    def testPropToBeamParameters(self):
-        """ Test the utility function to construct a DetectorGeometryParameters instance from prop output (wavefron file). """
-
-        beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out_0000001.h5"))
-
-        self.assertIsInstance( beam_parameters, DetectorGeometryParameters )
-        self.assertAlmostEqual( beam_parameters.photon_energy, 4947.34315, 5 )
 if __name__ == '__main__':
     unittest.main()
 
