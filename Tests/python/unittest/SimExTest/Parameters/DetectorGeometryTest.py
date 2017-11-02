@@ -32,7 +32,7 @@ import unittest
 
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.DetectorGeometry import DetectorGeometry
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 
 class DetectorGeometryTest(unittest.TestCase):
     """
@@ -66,9 +66,57 @@ class DetectorGeometryTest(unittest.TestCase):
         """ Testing the default construction. """
 
         # Attempt to construct an instance of the class.
-        detector_geometry = DetectorGeometry()
+        self.assertRaises( TypeError,  DetectorGeometry )
+
+    def testShapedConstruction(self):
+
+        # Get a panel
+        detector_panel = DetectorPanel()
+
+        # Construct the detector geometry.
+        detector_geometry = DetectorGeometry(panels=detector_panel)
+
+        # Check type and inheritance.
         self.assertIsInstance(detector_geometry, DetectorGeometry)
         self.assertIsInstance(detector_geometry, AbstractCalculatorParameters)
+
+        # Check members.
+        self.assertEqual( detector_panel, detector_geometry.panels[0] )
+
+class DetectorPanelTest(unittest.TestCase):
+    """
+    Test class for the DetectorPanel class.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+        pass
+
+    def setUp(self):
+        """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__dirs_to_remove = []
+
+    def tearDown(self):
+        """ Tearing down a test. """
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for d in self.__dirs_to_remove:
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+
+    def testDefaultConstruction(self):
+        """ Testing the default construction. """
+
+        # Attempt to construct an instance of the class.
+        panel = DetectorPanel()
+        self.assertIsInstance( panel, DetectorPanel )
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,14 +23,33 @@
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class DetectorGeometry(AbstractCalculatorParameters):
-    """ Class representing the detector geometry. """
+class DetectorPanel(object):
+    """ Class representing one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
 
     def __init__(self,
             **kwargs
             ):
         """
+        Constructor of the DetectorPanel.
+
+        :param <++>: <++>
+        :type  <++>: <++>
+
+        """
+        pass
+
+class DetectorGeometry(AbstractCalculatorParameters):
+    """ Class representing the detector geometry. """
+
+    def __init__(self,
+            panels=None,
+            **kwargs
+            ):
+        """
         Constructor of the DetectorGeometry class.
+
+        :param panels: Single or list of detector panels that constitute the detector.
+        :type  panels: list, tuple, or instance of DetectorPanel
 
         :param kwargs: Key-value pairs to be passed to the parent class constructor.
         :type kwargs: dict
@@ -38,6 +57,20 @@ class DetectorGeometry(AbstractCalculatorParameters):
         """
 
         super(DetectorGeometry, self).__init__(**kwargs)
+
+        self.panels = panels
+
+    @property
+    def panels(self):
+        return self.__panels
+    @panels.setter
+    def panels(self, val):
+        # Check if single instance, convert to list if true.
+        if not isinstance(val, (list, tuple)):
+            val = [val]
+        if not all([isinstance(v, DetectorPanel) for v in val]):
+            raise TypeError( "Parameter 'panels' must be a list of instances, tuple of instances, or a single instance of the  DetectorPanel class.")
+        self.__panels = val
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
