@@ -27,6 +27,23 @@ class DetectorPanel(object):
     """ Class representing one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
 
     def __init__(self,
+            dimensions=None,
+            ranges=None,
+            pixel_size=None,
+            adu_per_eV=None,
+            adu_per_photon=None,
+            badrow_direction=None,
+            distance_from_interaction_plane=None,
+            distance_offset=None,
+            fast_scan_xyz=None,
+            slow_scan_xyz=None,
+            corners=None,
+            saturation_adu=None,
+            mask=None,
+            good_bit_mask=None,
+            bad_bit_mask=None,
+            saturation_map=None,
+            badregion_flag=None,
             **kwargs
             ):
         """
@@ -75,7 +92,3 @@ class DetectorGeometry(AbstractCalculatorParameters):
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
-
-
-
-
