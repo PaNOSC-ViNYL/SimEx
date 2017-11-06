@@ -22,17 +22,16 @@
 
 import paths
 import os
-import numpy
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
 import paths
 import unittest
 
-from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
+from SimEx.Utilities.Units import Metre
+from SimEx import PhysicalQuantity
 
 class DetectorGeometryTest(unittest.TestCase):
     """
@@ -117,6 +116,35 @@ class DetectorPanelTest(unittest.TestCase):
         # Attempt to construct an instance of the class.
         panel = DetectorPanel()
         self.assertIsInstance( panel, DetectorPanel )
+
+    def testShapedConstruction(self):
+        """ Testing construction with parameters. """
+
+        # Construct the panel.
+        panel = DetectorPanel(
+                dimensions                      = ["ss", "fs"],
+                ranges                          = [[0,511],[0,511]],
+                pixel_size                      = 2.2e-4*Metre,
+                adu_response                    = 1.0,
+                badrow_direction                = None,
+                distance_from_interaction_plane = 0.13*Metre,
+                distance_offset                 = 0.0*Metre,
+                fast_scan_xyz                   = None,
+                slow_scan_xyz                   = None,
+                corners                         = [512,512],
+                saturation_adu                  = 1e4,
+                mask                            = None,
+                good_bit_mask                   = None,
+                bad_bit_mask                    = None,
+                saturation_map                  = None,
+                badregion_flag                  = False,
+                )
+
+        # Check attributes.
+        self.assertEqual( panel.pixel_size, 1.0e-4*Metre,)
+        self.assertIsInstance(panel.pixel_size, PhysicalQuantity )
+        self.assertRaises( DetectorPanel, pixel_size=1.0e-4)
+
 
 if __name__ == '__main__':
     unittest.main()

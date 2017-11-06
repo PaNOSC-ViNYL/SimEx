@@ -108,3 +108,25 @@ def checkAndSetNonNegativeInteger(var=None, default=None):
     if var < 0:
             raise exceptions.TypeError("The parameter must be a non-negative integer.")
     return var
+
+def checkAndSetNumber(var=None, default=None):
+    """ Check if input is a numerical type. """
+    if var is not None:
+        if not isinstance( var, (int, float) ):
+            raise exceptions.TypeError("The default must be a numerical type.")
+        return default
+
+    if not isinstance(var, (int, float)):
+            raise exceptions.TypeError("The parameter must be of a numerical type.")
+
+    return var
+
+def checkAndSetIterable(var=None, default=None):
+    """ Check if input is iterable (list, tuple, or array type). """
+
+    if not hasattr( var, "__iter__" ):
+        raise AttributeError( "The parameter must be iterable (e.g. a tuple, list, or numpy.array).")
+
+    return var
+
+

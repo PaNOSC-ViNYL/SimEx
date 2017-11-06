@@ -19,6 +19,10 @@
 # Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
+from pint import UnitRegistry
+ureg = UnitRegistry()
+PhysicalQuantity = ureg.Quantity
+
 from .version import __version__
 
 from Analysis.DiffractionAnalysis import DiffractionAnalysis
