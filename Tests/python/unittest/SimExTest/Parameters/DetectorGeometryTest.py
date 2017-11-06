@@ -141,6 +141,50 @@ class DetectorPanelTest(unittest.TestCase):
                 )
 
         # Check attributes.
+        self.assertListsEqual( panel.dimensions,                     , ['ss', 'fs'] )
+        self.assertListsEqual( panel.ranges,                         , [[0,511],[0,511]] )
+        self.assertEqual( panel.pixel_size,                          , 1.0e-4*Metre )
+        self.assertEqual( panel.adu_response,                        ,
+        self.assertEqual( panel.badrow_direction
+        self.assertEqual( panel.distance_from_interaction_plane
+        self.assertEqual( panel.distance_offset
+        self.assertEqual( panel.fast_scan_xyz
+        self.assertEqual( panel.slow_scan_xyz
+        self.assertEqual( panel.corners
+        self.assertEqual( panel.saturation_adu
+        self.assertEqual( panel.mask
+        self.assertEqual( panel.good_bit_mask
+        self.assertEqual( panel.bad_bit_mask
+        self.assertEqual( panel.saturation_map
+        self.assertEqual( panel.badregion_flag
+
+
+
+
+    def testPanelSize(self):
+        """ Testing construction with parameters. """
+
+        # Construct the panel.
+        panel = DetectorPanel(
+                dimensions                      = ["ss", "fs"],
+                ranges                          = [[0,511],[0,511]],
+                pixel_size                      = 2.2e-4*Metre,
+                adu_response                    = 1.0,
+                badrow_direction                = None,
+                distance_from_interaction_plane = 0.13*Metre,
+                distance_offset                 = 0.0*Metre,
+                fast_scan_xyz                   = None,
+                slow_scan_xyz                   = None,
+                corners                         = [512,512],
+                saturation_adu                  = 1e4,
+                mask                            = None,
+                good_bit_mask                   = None,
+                bad_bit_mask                    = None,
+                saturation_map                  = None,
+                badregion_flag                  = False,
+                )
+
+        # Check attributes.
         self.assertEqual( panel.pixel_size, 1.0e-4*Metre,)
         self.assertIsInstance(panel.pixel_size, PhysicalQuantity )
         self.assertRaises( DetectorPanel, pixel_size=1.0e-4)

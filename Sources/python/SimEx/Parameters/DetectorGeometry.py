@@ -106,22 +106,22 @@ class DetectorPanel(object):
         """
 
         # Store on object using setters.
-        self.dimensions=dimensions
-        self.ranges=ranges
-        self.pixel_size=pixel_size
-        self.adu_response=adu_response
-        self.badrow_direction=badrow_direction
-        self.distance_from_interaction_plane=distance_from_interaction_plane
-        self.distance_offset=distance_offset
-        self.fast_scan_xyz=fast_scan_xyz
-        self.slow_scan_xyz=slow_scan_xyz
-        self.corners= corners
-        self.saturation_adu=saturation_adu
-        self.mask=mask
-        self.good_bit_mask=good_bit_mask
-        self.bad_bit_mask=bad_bit_mask
-        self.saturation_map=saturation_map
-        self.badregion_flag=badregion_flag
+        self.dimensions                      = dimensions
+        self.ranges                          = ranges
+        self.pixel_size                      = pixel_size
+        self.adu_response                    = adu_response
+        self.badrow_direction                = badrow_direction
+        self.distance_from_interaction_plane = distance_from_interaction_plane
+        self.distance_offset                 = distance_offset
+        self.fast_scan_xyz                   = fast_scan_xyz
+        self.slow_scan_xyz                   = slow_scan_xyz
+        self.corners                         = corners
+        self.saturation_adu                  = saturation_adu
+        self.mask                            = mask
+        self.good_bit_mask                   = good_bit_mask
+        self.bad_bit_mask                    = bad_bit_mask
+        self.saturation_map                  = saturation_map
+        self.badregion_flag                  = badregion_flag
 
 
     ### Query and set methods.
@@ -314,10 +314,6 @@ class DetectorPanel(object):
     #def property(self, val):
         #""" Set the panel XXX. """
         #self.__XXX = checkAndSetIterable( val, ["ss","fs"] )
-
-
-
-
 
 class DetectorGeometry(AbstractCalculatorParameters):
     """ Class representing the detector geometry. """
