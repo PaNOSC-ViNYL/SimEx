@@ -131,7 +131,7 @@ class DetectorPanel(object):
         """ Query the panel dimensions. """
         return self.__dimensions
     @dimensions.setter
-    def property(self, val):
+    def dimensions(self, val):
         """ Set the panel dimensions. """
         self.__dimensions = checkAndSetIterable( val, ["ss","fs"] )
 
@@ -141,7 +141,7 @@ class DetectorPanel(object):
         """ Query the panel ranges. """
         return self.__ranges
     @ranges.setter
-    def property(self, val):
+    def ranges(self, val):
         """ Set the panel ranges. """
         self.__ranges = checkAndSetIterable( val, None )
 
@@ -151,7 +151,7 @@ class DetectorPanel(object):
         """ Query the panel pixel_size. """
         return self.__pixel_size
     @pixel_size.setter
-    def property(self, val):
+    def pixel_size(self, val):
         """ Set the panel pixel_size. """
         self.__pixel_size = checkAndSetInstance( PhysicalQuantity,  val, 1.0e-4*Metre)
 
@@ -161,15 +161,17 @@ class DetectorPanel(object):
         """ Query the panel adu_response. """
         return self.__adu_response
     @adu_response.setter
-    def property(self, val):
+    def adu_response(self, val):
         """ Set the panel adu_response. """
         if isinstance(val, PhysicalQuantity):
             val = checkAndSetInstance( PhysicalQuantity, val, 1.0/ElectronVolt )
             self.__adu_per_eV = val
+            self.__adu_response = val
             self.__adu_per_photon = None
         else:
             val = checkAndSetNumber( val, 1.0 )
             self.__adu_per_photon = val
+            self.__adu_response = val
             self.__adu_per_eV = None
 
     # badrow_direction
@@ -178,13 +180,13 @@ class DetectorPanel(object):
         """ Query the panel badrow_direction. """
         return self.__badrow_direction
     @badrow_direction.setter
-    def property(self, val):
+    def badrow_direction(self, val):
         """ Set the panel badrow_direction. """
         if val is not None:
             val = checkAndSetInstance( str, val  )
         else:
             val = None
-        return val
+        self.__badrow_direction = val
 
     # distance_from_interaction_plane
     @property
@@ -192,7 +194,7 @@ class DetectorPanel(object):
         """ Query the panel distance_from_interaction_plane. """
         return self.__distance_from_interaction_plane
     @distance_from_interaction_plane.setter
-    def property(self, val):
+    def distance_from_interaction_plane(self, val):
         """ Set the panel distance_from_interaction_plane. """
         self.__distance_from_interaction_plane = checkAndSetInstance( PhysicalQuantity, val, 0.1*Metre )
 
@@ -202,7 +204,7 @@ class DetectorPanel(object):
         """ Query the panel distance_offset. """
         return self.__distance_offset
     @distance_offset.setter
-    def property(self, val):
+    def distance_offset(self, val):
         """ Set the panel distance_offset. """
         self.__distance_offset = checkAndSetInstance( PhysicalQuantity, val, 0.0*Metre )
 
@@ -212,7 +214,7 @@ class DetectorPanel(object):
         """ Query the panel fast_scan_xyz. """
         return self.__fast_scan_xyz
     @fast_scan_xyz.setter
-    def property(self, val):
+    def fast_scan_xyz(self, val):
         """ Set the panel fast_scan_xyz. """
         self.__fast_scan_xyz = checkAndSetInstance( str, val, "1.0*x" )
 
@@ -222,7 +224,7 @@ class DetectorPanel(object):
         """ Query the panel slow_scan_xyz. """
         return self.__slow_scan_xyz
     @slow_scan_xyz.setter
-    def property(self, val):
+    def slow_scan_xyz(self, val):
         """ Set the panel slow_scan_xyz. """
         self.__slow_scan_xyz = checkAndSetInstance( str, val, "1.0*y" )
 
@@ -232,7 +234,7 @@ class DetectorPanel(object):
         """ Query the panel cornes. """
         return self.__cornes
     @cornes.setter
-    def property(self, val):
+    def corners(self, val):
         """ Set the panel cornes. """
         self.__cornes = checkAndSetIterable( val, [0.0,0.0] )
 
@@ -242,9 +244,9 @@ class DetectorPanel(object):
         """ Query the panel saturation_adu. """
         return self.__saturation_adu
     @saturation_adu.setter
-    def property(self, val):
+    def saturation_adu(self, val):
         """ Set the panel saturation_adu. """
-        self.__saturation_adu = checkAndSetNumber( val, None )
+        self.__saturation_adu = checkAndSetNumber( val, 1.0e4 )
 
     # mask
     @property
@@ -252,7 +254,7 @@ class DetectorPanel(object):
         """ Query the panel mask. """
         return self.__mask
     @mask.setter
-    def property(self, val):
+    def mask(self, val):
         """ Set the panel mask. """
         self.__mask = checkAndSetInstance( numpy.array, None )
 
@@ -262,7 +264,7 @@ class DetectorPanel(object):
         """ Query the panel good_bit_mask. """
         return self.__good_bit_mask
     @good_bit_mask.setter
-    def property(self, val):
+    def good_bit_mask(self, val):
         """ Set the panel good_bit_mask. """
         self.__good_bit_mask = checkAndSetInstance( int, None )
 
@@ -272,7 +274,7 @@ class DetectorPanel(object):
         """ Query the panel bad_bit_mask. """
         return self.__bad_bit_mask
     @bad_bit_mask.setter
-    def property(self, val):
+    def bad_bit_mask(self, val):
         """ Set the panel bad_bit_mask. """
         self.__bad_bit_mask = checkAndSetInstance( int, val, None )
 
@@ -282,7 +284,7 @@ class DetectorPanel(object):
         """ Query the panel saturation_map. """
         return self.__saturation_map
     @saturation_map.setter
-    def property(self, val):
+    def saturation_map(self, val):
         """ Set the panel saturation_map. """
         self.__saturation_map = checkAndSetInstance( numpy.array, val, None )
 
@@ -292,7 +294,7 @@ class DetectorPanel(object):
         """ Query the panel badregion_flag. """
         return self.__badregion_flag
     @badregion_flag.setter
-    def property(self, val):
+    def badregion_flag(self, val):
         """ Set the panel badregion_flag. """
         self.__badregion_flag = checkAndSetInstance( bool, val, False )
 
@@ -302,7 +304,7 @@ class DetectorPanel(object):
         #""" Query the panel XXX. """
         #return self.__XXX
     #@XXX.setter
-    #def property(self, val):
+    #def XXX(self, val):
         #""" Set the panel XXX. """
         #self.__XXX = checkAndSetIterable( val, ["ss","fs"] )
     ## XXX
@@ -311,7 +313,7 @@ class DetectorPanel(object):
         #""" Query the panel XXX. """
         #return self.__XXX
     #@XXX.setter
-    #def property(self, val):
+    #def XXX(self, val):
         #""" Set the panel XXX. """
         #self.__XXX = checkAndSetIterable( val, ["ss","fs"] )
 

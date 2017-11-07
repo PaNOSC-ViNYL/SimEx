@@ -141,22 +141,22 @@ class DetectorPanelTest(unittest.TestCase):
                 )
 
         # Check attributes.
-        self.assertListsEqual( panel.dimensions,                     , ['ss', 'fs'] )
-        self.assertListsEqual( panel.ranges,                         , [[0,511],[0,511]] )
-        self.assertEqual( panel.pixel_size,                          , 1.0e-4*Metre )
-        self.assertEqual( panel.adu_response,                        ,
-        self.assertEqual( panel.badrow_direction
-        self.assertEqual( panel.distance_from_interaction_plane
-        self.assertEqual( panel.distance_offset
-        self.assertEqual( panel.fast_scan_xyz
-        self.assertEqual( panel.slow_scan_xyz
-        self.assertEqual( panel.corners
-        self.assertEqual( panel.saturation_adu
-        self.assertEqual( panel.mask
-        self.assertEqual( panel.good_bit_mask
-        self.assertEqual( panel.bad_bit_mask
-        self.assertEqual( panel.saturation_map
-        self.assertEqual( panel.badregion_flag
+        self.assertListEqual( panel.dimensions                  , ['ss', 'fs'] )
+        self.assertListEqual( panel.ranges                      , [[0,511],[0,511]] )
+        self.assertEqual( panel.pixel_size                       , 2.2e-4*Metre )
+        self.assertEqual( panel.adu_response                     , 1.0 )
+        self.assertEqual( panel.badrow_direction                 , None )
+        self.assertEqual( panel.distance_from_interaction_plane  , 0.13*Metre )
+        self.assertEqual( panel.distance_offset                  , 0.0*Metre )
+        self.assertEqual( panel.fast_scan_xyz                    , "1.0*x" )
+        self.assertEqual( panel.slow_scan_xyz                    , "1.0*y" )
+        self.assertEqual( panel.corners                          , [512,512] )
+        self.assertEqual( panel.saturation_adu                   , 1.0e4 )
+        self.assertEqual( panel.mask                             , None )
+        self.assertEqual( panel.good_bit_mask                    , None )
+        self.assertEqual( panel.bad_bit_mask                     , None )
+        self.assertEqual( panel.saturation_map                   , None )
+        self.assertEqual( panel.badregion_flag                   , False )
 
 
 
