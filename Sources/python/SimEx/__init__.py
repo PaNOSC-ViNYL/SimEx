@@ -19,6 +19,10 @@
 # Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
+
+# Set up physical units system.
+# All units are defined in SimEx.Utilities.Units.
+# NOTE: There must be no other import of pint submodules.
 from pint import UnitRegistry
 ureg = UnitRegistry()
 PhysicalQuantity = ureg.Quantity

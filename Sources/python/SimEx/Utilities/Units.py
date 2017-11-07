@@ -1,14 +1,14 @@
 from SimEx import PhysicalQuantity
 from scipy.constants import e,c,hbar
 
-Metre           = PhysicalQuantity(1.0, 'meter')
-Second          = PhysicalQuantity(1.0, 'second')
-Kilogram        = PhysicalQuantity(1.0, 'kilogram')
-Ampere          = PhysicalQuantity(1.0, 'ampere')
-Volt            = PhysicalQuantity(1.0, 'volt')
-Joule           = PhysicalQuantity(1.0, 'joule')
-Newton          = PhysicalQuantity(1.0, 'newton')
-Kelvin          = PhysicalQuantity(1.0, 'kelvin')
+meter           = PhysicalQuantity(1.0, 'meter')
+second          = PhysicalQuantity(1.0, 'second')
+kilogram        = PhysicalQuantity(1.0, 'kilogram')
+ampere          = PhysicalQuantity(1.0, 'ampere')
+volt            = PhysicalQuantity(1.0, 'volt')
+joule           = PhysicalQuantity(1.0, 'joule')
+newton          = PhysicalQuantity(1.0, 'newton')
+kelvin          = PhysicalQuantity(1.0, 'kelvin')
 
-Coulomb         = Ampere * Second
-ElectronVolt    = e * Joule
+coulomb         = ampere * second
+electronvolt    = e * joule
