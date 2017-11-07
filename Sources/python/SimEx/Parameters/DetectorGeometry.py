@@ -19,23 +19,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Utilities.Units import meter, electronvolt
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber
+from SimEx import PhysicalQuantity
 
 import numpy
-
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.Units import Metre, ElectronVolt
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetIterable, checkAndSetNumber
-from SimEx import PhysicalQuantity
+import sys
 
 class DetectorPanel(object):
     """ Class representing one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
 
     def __init__(self,
-            dimensions                      = None,
             ranges                          = None,
             pixel_size                      = None,
             adu_response                    = None,
-            badrow_direction                = None,
             distance_from_interaction_plane = None,
             distance_offset                 = None,
             fast_scan_xyz                   = None,
@@ -52,29 +50,22 @@ class DetectorPanel(object):
         """
         Constructor of the DetectorPanel.
 
-        :param dimensions: The dimensions of the panel: Tuple or list with two or three elements indicating the scan axis of the detector data.
-        :type  dimensions: list or tuple
-        :example dimensions: ['fs','ss'] # first axis is fast scan, second axis is slow scan
-        :example dimensions: ['event', 'ss', 'fs'] # first axis encodes event number scan, second axis encodes slow scan, third axis encodes fast scan.
 
         :param ranges: The minimum and maximum values pixel numbers on the respective transverse axis.
-        :type  ranges: List of tuples or tuple of tuples.
-        :example ranges: [[11,20],[1,20]] # First axis from 11 to 20 and second axis from 1 to 20.
+        :type  ranges: Dictionary
+        ":example ranges: {"fast_scan_min : 11, "fast_scan_max" : 20, "slow_scan_min" : 1, "fast_scan_max" : 20} # First axis from 11 to 20 and second axis from 1 to 20."
 
         :param pixel_size: The physical size of the pixel (assuming quadratic shape) (SI units).
-        :type  pixel_size: PhysicalQuantity with unit Metre.
+        :type  pixel_size: PhysicalQuantity with unit meter.
 
         :param adu_response: Number of detector units (ADU) arising from one eV or one photon (depending on the unit).
         :type  adu_response: PhysicalQuantity with unit 1/eV (adu_per_eV) or float (adu_per_photon).
 
-        :param badrow_direction: Direction in which to apply a bad row (x || y).
-        :type  badrow_direction: str
-
         :param distance_from_interaction_plane: Distance in z of this panel from the plane of interaction (transverse plane that contains the sample).
-        :type  distance_from_interaction_plane: PhysicalQuantity with unit Metre.
+        :type  distance_from_interaction_plane: PhysicalQuantity with unit meter.
 
         :param distance_offset: Offset from distance_from_interaction_plane.
-        :type  distance_offset: PhysicalQuantity with unit Metre.
+        :type  distance_offset: PhysicalQuantity with unit meter.
 
         :param fast_scan_xyz: Formula that lab frame coordinates to panel axes.
         :type  fast_scan_xyz: str
@@ -106,11 +97,9 @@ class DetectorPanel(object):
         """
 
         # Store on object using setters.
-        self.dimensions                      = dimensions
         self.ranges                          = ranges
         self.pixel_size                      = pixel_size
         self.adu_response                    = adu_response
-        self.badrow_direction                = badrow_direction
         self.distance_from_interaction_plane = distance_from_interaction_plane
         self.distance_offset                 = distance_offset
         self.fast_scan_xyz                   = fast_scan_xyz
@@ -124,17 +113,7 @@ class DetectorPanel(object):
         self.badregion_flag                  = badregion_flag
 
 
-    ### Query and set methods.
-    # dimensions
-    @property
-    def dimensions(self):
-        """ Query the panel dimensions. """
-        return self.__dimensions
-    @dimensions.setter
-    def dimensions(self, val):
-        """ Set the panel dimensions. """
-        self.__dimensions = checkAndSetIterable( val, ["ss","fs"] )
-
+    ### Accessors.
     # ranges
     @property
     def ranges(self):
@@ -143,7 +122,7 @@ class DetectorPanel(object):
     @ranges.setter
     def ranges(self, val):
         """ Set the panel ranges. """
-        self.__ranges = checkAndSetIterable( val, None )
+        self.__ranges = checkAndSetInstance( dict, val, None )
 
     # pixel_size
     @property
@@ -153,7 +132,7 @@ class DetectorPanel(object):
     @pixel_size.setter
     def pixel_size(self, val):
         """ Set the panel pixel_size. """
-        self.__pixel_size = checkAndSetInstance( PhysicalQuantity,  val, 1.0e-4*Metre)
+        self.__pixel_size = checkAndSetInstance( PhysicalQuantity,  val, 1.0e-4*meter)
 
     # adu_response
     @property
@@ -164,7 +143,7 @@ class DetectorPanel(object):
     def adu_response(self, val):
         """ Set the panel adu_response. """
         if isinstance(val, PhysicalQuantity):
-            val = checkAndSetInstance( PhysicalQuantity, val, 1.0/ElectronVolt )
+            val = checkAndSetInstance( PhysicalQuantity, val, 1.0/electronvolt )
             self.__adu_per_eV = val
             self.__adu_response = val
             self.__adu_per_photon = None
@@ -174,20 +153,6 @@ class DetectorPanel(object):
             self.__adu_response = val
             self.__adu_per_eV = None
 
-    # badrow_direction
-    @property
-    def badrow_direction(self):
-        """ Query the panel badrow_direction. """
-        return self.__badrow_direction
-    @badrow_direction.setter
-    def badrow_direction(self, val):
-        """ Set the panel badrow_direction. """
-        if val is not None:
-            val = checkAndSetInstance( str, val  )
-        else:
-            val = None
-        self.__badrow_direction = val
-
     # distance_from_interaction_plane
     @property
     def distance_from_interaction_plane(self):
@@ -196,7 +161,7 @@ class DetectorPanel(object):
     @distance_from_interaction_plane.setter
     def distance_from_interaction_plane(self, val):
         """ Set the panel distance_from_interaction_plane. """
-        self.__distance_from_interaction_plane = checkAndSetInstance( PhysicalQuantity, val, 0.1*Metre )
+        self.__distance_from_interaction_plane = checkAndSetInstance( PhysicalQuantity, val, 0.1*meter )
 
     # distance_offset
     @property
@@ -206,7 +171,7 @@ class DetectorPanel(object):
     @distance_offset.setter
     def distance_offset(self, val):
         """ Set the panel distance_offset. """
-        self.__distance_offset = checkAndSetInstance( PhysicalQuantity, val, 0.0*Metre )
+        self.__distance_offset = checkAndSetInstance( PhysicalQuantity, val, 0.0*meter )
 
     # fastscan_xyz
     @property
@@ -216,7 +181,7 @@ class DetectorPanel(object):
     @fast_scan_xyz.setter
     def fast_scan_xyz(self, val):
         """ Set the panel fast_scan_xyz. """
-        self.__fast_scan_xyz = checkAndSetInstance( str, val, "1.0*x" )
+        self.__fast_scan_xyz = checkAndSetInstance( str, val, "1.0x" )
 
     # slow_scan_xyz
     @property
@@ -226,17 +191,17 @@ class DetectorPanel(object):
     @slow_scan_xyz.setter
     def slow_scan_xyz(self, val):
         """ Set the panel slow_scan_xyz. """
-        self.__slow_scan_xyz = checkAndSetInstance( str, val, "1.0*y" )
+        self.__slow_scan_xyz = checkAndSetInstance( str, val, "1.0y" )
 
-    # cornes
+    # corners
     @property
-    def cornes(self):
+    def corners(self):
         """ Query the panel cornes. """
-        return self.__cornes
-    @cornes.setter
+        return self.__corners
+    @corners.setter
     def corners(self, val):
-        """ Set the panel cornes. """
-        self.__cornes = checkAndSetIterable( val, [0.0,0.0] )
+        """ Set the panel corners. """
+        self.__corners = checkAndSetInstance( dict, val, {"x" : 0.0, "y" : 0.0} )
 
     # saturation_adu
     @property
@@ -297,25 +262,46 @@ class DetectorPanel(object):
     def badregion_flag(self, val):
         """ Set the panel badregion_flag. """
         self.__badregion_flag = checkAndSetInstance( bool, val, False )
+    ### End accessors
 
-    ## XXX
-    #@property
-    #def XXX(self):
-        #""" Query the panel XXX. """
-        #return self.__XXX
-    #@XXX.setter
-    #def XXX(self, val):
-        #""" Set the panel XXX. """
-        #self.__XXX = checkAndSetIterable( val, ["ss","fs"] )
-    ## XXX
-    #@property
-    #def XXX(self):
-        #""" Query the panel XXX. """
-        #return self.__XXX
-    #@XXX.setter
-    #def XXX(self, val):
-        #""" Set the panel XXX. """
-        #self.__XXX = checkAndSetIterable( val, ["ss","fs"] )
+    def _serialize(self, stream=None, panel_id=None):
+        """ Serialize the panel.
+
+        :param stream: The stream to write the serialized panel to.
+        :type stream: file like (default sys.stdout)
+
+        """
+        # Check stream parameter.
+        if stream is None:
+            stream = sys.stdio
+
+        if not hasattr(stream, "write"):
+            raise IOError( "The given stream is not writable." )
+
+        # Check panel_id parameter.
+        panel_id = checkAndSetInstance( int, panel_id, 0 )
+
+        # Get panel id as a string.
+        panel_id_str = str(panel_id)
+
+        # Initialize the string to be written to.
+        serialization = ";panel %s\n" % (panel_id_str)
+        serialization += "panel%s/min_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_min"])
+        serialization += "panel%s/max_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_max"])
+        serialization += "panel%s/min_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_min"])
+        serialization += "panel%s/max_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_max"])
+        serialization += "panel%s/corner_x      = %d\n" % (panel_id_str, self.corners["x"])
+        serialization += "panel%s/corner_y      = %d\n" % (panel_id_str, self.corners["y"])
+        serialization += "panel%s/fast_scan_xyz = %s\n" % (panel_id_str, self.fast_scan_xyz)
+        serialization += "panel%s/slow_scan_xyz = %s\n" % (panel_id_str, self.slow_scan_xyz)
+        serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.magnitude)
+        serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.magnitude)
+        serialization += "\n"
+
+        # Finally write the serialized panel.
+        stream.write(serialization)
+
+
 
 class DetectorGeometry(AbstractCalculatorParameters):
     """ Class representing the detector geometry. """
