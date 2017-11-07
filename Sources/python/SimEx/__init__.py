@@ -32,6 +32,7 @@ from .version import __version__
 from Analysis.DiffractionAnalysis import DiffractionAnalysis
 from Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis
 
+from AbstractBaseClass import AbstractBaseClass
 from Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
 from Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
@@ -61,3 +62,6 @@ from PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperime
 from PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 
 import Utilities
+
+
+#from AbstractBaseClass import AbstractBaseClass

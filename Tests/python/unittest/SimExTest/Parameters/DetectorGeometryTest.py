@@ -50,6 +50,39 @@ class DetectorGeometryTest(unittest.TestCase):
 
     def setUp(self):
         """ Setting up a test. """
+        self.__panel0 =DetectorPanel(
+                dimensions                      = ["ss", "fs"],
+                ranges                          = {
+                                                    "fast_scan_min" : 0,
+                                                    "fast_scan_max" : 511,
+                                                    "slow_scan_min" : 512,
+                                                    "slow_scan_max" : 1023,
+                                                    },
+                pixel_size                      = 2.2e-4*meter,
+                adu_response                    = 1.0,
+                badrow_direction                = None,
+                distance_from_interaction_plane = 0.13*meter,
+                distance_offset                 = 0.0*meter,
+                fast_scan_xyz                   = None,
+                slow_scan_xyz                   = None,
+                corners                         = {"x" : -512, "y" : -256},
+                saturation_adu                  = 1e4,
+                mask                            = None,
+                good_bit_mask                   = None,
+                bad_bit_mask                    = None,
+                saturation_map                  = None,
+                badregion_flag                  = False,
+                )
+
+        # Copy-construct a second panel.
+        self.__panel1 = self.__panel0( ranges={'fast_scan_min' : self.__panel0.ranges['fast_scan_min'],
+                                 'fast_scan_max' : self.__panel0.ranges['fast_scan_max'],
+                                 'slow_scan_min' : self.__panel0.ranges['slow_scan_max'] + 1,
+                                 'slow_scan_max' : 2*self.__panel0.ranges['slow_scan_max'] - self.__panel0.ranges['slow_scan_min']+1},
+                         corners={'x' : self.__panel0.corners['x'], 'y' : self.__panel0.corners['y'] + 512},
+                       )
+
+
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
@@ -68,10 +101,10 @@ class DetectorGeometryTest(unittest.TestCase):
         # Attempt to construct an instance of the class.
         self.assertRaises( TypeError,  DetectorGeometry )
 
-    def testShapedConstruction(self):
+    def testShapedConstructionSinglePanel(self):
 
         # Get a panel
-        detector_panel = DetectorPanel()
+        detector_panel = self.__panel0
 
         # Construct the detector geometry.
         detector_geometry = DetectorGeometry(panels=detector_panel)
@@ -82,6 +115,163 @@ class DetectorGeometryTest(unittest.TestCase):
 
         # Check members.
         self.assertEqual( detector_panel, detector_geometry.panels[0] )
+
+    def testShapedConstructionMultiPanels(self):
+
+        # Get a panel
+        panel0 = self.__panel0
+        panel1 = self.__panel1
+
+                # Construct the detector geometry.
+        detector_geometry = DetectorGeometry(panels=[panel0, panel1])
+
+        # Check members.
+        self.assertEqual( panel0, detector_geometry.panels[0] )
+        self.assertEqual( panel1, detector_geometry.panels[1] )
+
+    def testSerialize(self):
+        """ Test the serialization of the DetectorGeometry. """
+
+        # Get panels
+        panel0 = self.__panel0
+        panel1 = self.__panel1
+
+        # Setup the detector geometry.
+        detector_geometry = DetectorGeometry(panels=[panel0, panel1])
+
+        # Serialize to stream
+        stream = StringIO.StringIO()
+
+        detector_geometry.serialize(stream)
+
+        reference_string=""";panel 0
+panel0/min_fs        = 0
+panel0/max_fs        = 511
+panel0/min_ss        = 512
+panel0/max_ss        = 1023
+panel0/corner_x      = -512
+panel0/corner_y      = -256
+panel0/fast_scan_xyz = 1.0x
+panel0/slow_scan_xyz = 1.0y
+panel0/clen          = 1.3000000e-01
+panel0/res           = 4.5454545e+03
+
+;panel 1
+panel1/min_fs        = 0
+panel1/max_fs        = 511
+panel1/min_ss        = 1024
+panel1/max_ss        = 1535
+panel1/corner_x      = -512
+panel1/corner_y      = 256
+panel1/fast_scan_xyz = 1.0x
+panel1/slow_scan_xyz = 1.0y
+panel1/clen          = 1.3000000e-01
+panel1/res           = 4.5454545e+03
+
+"""
+        self.assertEqual(stream.getvalue(), reference_string)
+
+    def testSerializeHandle(self):
+        """ Test the serialization of the DetectorGeometry. """
+
+        # Get panels
+        panel0 = self.__panel0
+        panel1 = self.__panel1
+
+        # Setup the detector geometry.
+        detector_geometry = DetectorGeometry(panels=[panel0, panel1])
+
+        # Serialize to stream
+        geom_file = "simex.geom"
+        self.__files_to_remove.append(geom_file)
+
+        # Open for writing.
+        with open("simex.geom",'w') as stream:
+
+            # Serialize into file handle.
+            detector_geometry.serialize(stream)
+
+        reference_string=""";panel 0
+panel0/min_fs        = 0
+panel0/max_fs        = 511
+panel0/min_ss        = 512
+panel0/max_ss        = 1023
+panel0/corner_x      = -512
+panel0/corner_y      = -256
+panel0/fast_scan_xyz = 1.0x
+panel0/slow_scan_xyz = 1.0y
+panel0/clen          = 1.3000000e-01
+panel0/res           = 4.5454545e+03
+
+;panel 1
+panel1/min_fs        = 0
+panel1/max_fs        = 511
+panel1/min_ss        = 1024
+panel1/max_ss        = 1535
+panel1/corner_x      = -512
+panel1/corner_y      = 256
+panel1/fast_scan_xyz = 1.0x
+panel1/slow_scan_xyz = 1.0y
+panel1/clen          = 1.3000000e-01
+panel1/res           = 4.5454545e+03
+
+"""
+
+        # Open for reading.
+        with open(geom_file, 'r') as stream:
+            lines = "".join( stream.readlines() )
+
+        self.assertEqual(lines, reference_string)
+
+    def testSerializeFilename(self):
+        """ Test the serialization of the DetectorGeometry. """
+
+        # Get panels
+        panel0 = self.__panel0
+        panel1 = self.__panel1
+
+        # Setup the detector geometry.
+        detector_geometry = DetectorGeometry(panels=[panel0, panel1])
+
+        # Serialize to stream
+        geom_file = "simex.geom"
+        #self.__files_to_remove.append(geom_file)
+
+        # Serialize into file handle.
+        detector_geometry.serialize(geom_file)
+
+        reference_string=""";panel 0
+panel0/min_fs        = 0
+panel0/max_fs        = 511
+panel0/min_ss        = 512
+panel0/max_ss        = 1023
+panel0/corner_x      = -512
+panel0/corner_y      = -256
+panel0/fast_scan_xyz = 1.0x
+panel0/slow_scan_xyz = 1.0y
+panel0/clen          = 1.3000000e-01
+panel0/res           = 4.5454545e+03
+
+;panel 1
+panel1/min_fs        = 0
+panel1/max_fs        = 511
+panel1/min_ss        = 1024
+panel1/max_ss        = 1535
+panel1/corner_x      = -512
+panel1/corner_y      = 256
+panel1/fast_scan_xyz = 1.0x
+panel1/slow_scan_xyz = 1.0y
+panel1/clen          = 1.3000000e-01
+panel1/res           = 4.5454545e+03
+
+"""
+
+        # Open for reading.
+        with open(geom_file, 'r') as stream:
+            lines = "".join( stream.readlines() )
+
+        self.assertEqual(lines, reference_string)
+
 
 class DetectorPanelTest(unittest.TestCase):
     """
@@ -159,8 +349,8 @@ class DetectorPanelTest(unittest.TestCase):
         self.assertEqual( panel.badrow_direction                 , None )
         self.assertEqual( panel.distance_from_interaction_plane  , 0.13*meter )
         self.assertEqual( panel.distance_offset                  , 0.0*meter )
-        self.assertEqual( panel.fast_scan_xyz                    , "1.0*x" )
-        self.assertEqual( panel.slow_scan_xyz                    , "1.0*y" )
+        self.assertEqual( panel.fast_scan_xyz                    , "1.0x" )
+        self.assertEqual( panel.slow_scan_xyz                    , "1.0y" )
         self.assertEqual( panel.corners                          , {"x" : -512, "y" : -256})
         self.assertEqual( panel.saturation_adu                   , 1.0e4 )
         self.assertEqual( panel.mask                             , None )
@@ -196,8 +386,8 @@ panel0/min_ss        = 512
 panel0/max_ss        = 1024
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0*x
-panel0/slow_scan_xyz = 1.0*y
+panel0/fast_scan_xyz = 1.0x
+panel0/slow_scan_xyz = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
 
@@ -211,6 +401,8 @@ panel0/res           = 4.5454545e+03
         """ Test the _serialize() method for the panel. """
         # Setup a file for this panel.
         panel_file_name = "panel0.geom"
+
+        self.__files_to_remove.append(panel_file_name)
         with open(panel_file_name, "w") as panel_file:
 
             # Construct a panel.
@@ -228,8 +420,8 @@ panel0/min_ss        = 512
 panel0/max_ss        = 1024
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0*x
-panel0/slow_scan_xyz = 1.0*y
+panel0/fast_scan_xyz = 1.0x
+panel0/slow_scan_xyz = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
 
@@ -241,24 +433,34 @@ panel0/res           = 4.5454545e+03
         # Compare.
         self.assertEqual( panel_string, reference_string )
 
-    def testCopy(self):
+    def testClone(self):
         """ Test the copy constructor. """
         # Get a panel.
         origin_panel = self.__panel
 
         # Make a copy.
-        copy_panel = DetectorPanel(origin_panel)
+        copy_panel = origin_panel()
 
         # Assert they are equal but not identical.
         self.assertEqual( origin_panel, copy_panel )
         self.assertIsNot( origin_panel, copy_panel )
 
+    def testMutate(self):
+        """ Test the copy constructor with mutation. """
+        # Get a panel.
+        origin_panel = self.__panel
 
-    def testConstructFromFile(self):
-        """ <++> """
-        self.assertTrue(False)
+        # Make a copy.
+        copy_panel = origin_panel(distance_from_interaction_plane = 0.1324*meter )
 
-    #def test<++>(self):
+        # Assert they are equal but not identical.
+        self.assertNotEqual( origin_panel, copy_panel )
+        self.assertIsNot( origin_panel, copy_panel )
+
+        # Check mutated attribute.
+        self.assertEqual( copy_panel.distance_from_interaction_plane, 0.1324*meter )
+
+        #def test<++>(self):
         #""" <++> """
         #self.assertTrue(False)
 

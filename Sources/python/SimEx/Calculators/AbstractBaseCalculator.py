@@ -25,13 +25,14 @@ from abc import ABCMeta, abstractmethod
 import exceptions
 import os
 
+from SimEx import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 import dill
 import sys
 
-class AbstractBaseCalculator(object):
+class AbstractBaseCalculator(AbstractBaseClass):
     """
     Abstract class for all simulation calculators.
     """

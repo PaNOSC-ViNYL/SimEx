@@ -23,11 +23,15 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 from SimEx.Utilities.Units import meter, electronvolt
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber
 from SimEx import PhysicalQuantity
+from SimEx import AbstractBaseClass
 
+import copy
 import numpy
 import sys
 
-class DetectorPanel(object):
+
+
+class DetectorPanel(AbstractBaseClass):
     """ Class representing one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
 
     def __init__(self,
@@ -111,7 +115,6 @@ class DetectorPanel(object):
         self.bad_bit_mask                    = bad_bit_mask
         self.saturation_map                  = saturation_map
         self.badregion_flag                  = badregion_flag
-
 
     ### Accessors.
     # ranges
@@ -340,3 +343,35 @@ class DetectorGeometry(AbstractCalculatorParameters):
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
+
+    def serialize(self, stream=None):
+        """ Serialize the geometry.
+
+        :param stream: The stream to write the serialized geometry to (default sys.stdout).
+        :type  stream: File like object.
+
+        """
+
+        # Handle default case.
+        if stream is None:
+            stream = sys.stdout
+
+        # If this is a string, open a corresponding file.
+        if isinstance( stream,  str):
+            with open(stream, 'w') as fstream:
+                self._serialize(fstream)
+                return
+
+        if not hasattr(stream, "write"):
+            raise IOError("The stream % is not writable." % (stream) )
+
+        # Loop over all panels and serialize each one.
+        self._serialize(stream)
+
+    def _serialize(self, stream=sys.stdout):
+        """ Workhorse function for serialization. """
+
+        for i,panel in enumerate(self.panels):
+            panel._serialize( stream, panel_id=i)
+
+
