@@ -24,7 +24,7 @@ import paths
 
 from SimEx import PhysicalQuantity
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel, _detectorPanelFromString
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel, _detectorPanelFromString, _detectorGeometryFromString
 from SimEx.Utilities.Units import meter
 
 import StringIO
@@ -270,6 +270,30 @@ panel1/res           = 4.5454545e+03
 
         self.assertEqual(lines, reference_string)
 
+    def testDeSerialize(self):
+        """ Test deserialization (i.e. construction from a file/string). """
+
+        # Setup geometry.
+        geometry = DetectorGeometry(panels=[self.__panel0, self.__panel1])
+
+        # Serialize
+        stream = StringIO.StringIO()
+        geometry.serialize(stream=stream)
+        serialized_panel = stream.getvalue()
+        stream.close()
+
+        # Deserialize
+        deserialized_geometry = _detectorGeometryFromString( serialized_panel )
+
+        # Compare.
+        for i,panel in enumerate(geometry.panels):
+            self.assertAlmostEqual( panel.ranges,  deserialized_geometry.panels[i].ranges )
+            self.assertAlmostEqual( panel.corners, deserialized_geometry.panels[i].corners )
+            self.assertEqual( panel.fast_scan_xyz, deserialized_geometry.panels[i].fast_scan_xyz )
+            self.assertEqual( panel.slow_scan_xyz, deserialized_geometry.panels[i].slow_scan_xyz )
+            self.assertAlmostEqual( panel.pixel_size.magnitude, deserialized_geometry.panels[i].pixel_size.magnitude )
+            self.assertAlmostEqual( panel.distance_from_interaction_plane.magnitude, deserialized_geometry.panels[i].distance_from_interaction_plane.magnitude )
+
 
 class DetectorPanelTest(unittest.TestCase):
     """
@@ -483,11 +507,6 @@ panel0/res           = 4.5454545e+03
         self.assertEqual( panel.slow_scan_xyz, deserialized_panel.slow_scan_xyz )
         self.assertAlmostEqual( panel.pixel_size.magnitude, deserialized_panel.pixel_size.magnitude )
         self.assertAlmostEqual( panel.distance_from_interaction_plane.magnitude, deserialized_panel.distance_from_interaction_plane.magnitude )
-
-
-    #def test<++>(self):
-        #""" <++> """
-        #self.assertTrue(False)
 
     #def test<++>(self):
         #""" <++> """

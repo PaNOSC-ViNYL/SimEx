@@ -374,11 +374,44 @@ class DetectorGeometry(AbstractCalculatorParameters):
         for i,panel in enumerate(self.panels):
             panel._serialize( stream, panel_id=i)
 
-def _detectorPanelFromString( input_string):
+def _detectorPanelFromString( input_string, common_block=None):
     """ Construct a DetectorPanel instance from a serialized panel.
     :param input_string: The string from which to construct the panel.
+    :param common_block: String representing a block of common parameters for a group of panels.
 
     """
+    # First treat common block
+    common_dict = {}
+    if common_block is not None:
+        common_dict = _panelStringToDict(common_block)
+
+    panel_dict = _panelStringToDict( input_string )
+
+    # Loop over common dict and fill into panel dict if not present there.
+    for key,val in common_dict.iteritems():
+        if not key in panel_dict:
+            panel_dict[key] = val
+
+    # Now put the data into the DetectorPanel instance.
+    panel = DetectorPanel( ranges={"fast_scan_min" : float(panel_dict["min_fs"]),
+                                   "fast_scan_max" : float(panel_dict["max_fs"]),
+                                   "slow_scan_min" : float(panel_dict["min_ss"]),
+                                   "slow_scan_max" : float(panel_dict["max_ss"]),
+                                   },
+                           corners={"x" : float(panel_dict["corner_x"]),
+                                    "y" : float(panel_dict["corner_y"]),
+                                   },
+                           fast_scan_xyz=panel_dict["fs"],
+                           slow_scan_xyz=panel_dict["ss"],
+                           distance_from_interaction_plane=float(panel_dict["clen"])*meter,
+                           pixel_size=1.0/float(panel_dict["res"])*meter
+                           )
+
+    return panel
+
+
+def _panelStringToDict( input_string ):
+    """ Convert a panel block string to a dictionary. """
     # Get rid of panel prefix
     lines=input_string.split("\n")
 
@@ -412,23 +445,70 @@ def _detectorPanelFromString( input_string):
         # Store on dict.
         tmp_dict[key] = val
 
-
-    # Now put the data into the DetectorPanel instance.
-    panel = DetectorPanel( ranges={"fast_scan_min" : float(tmp_dict["min_fs"]),
-                                   "fast_scan_max" : float(tmp_dict["max_fs"]),
-                                   "slow_scan_min" : float(tmp_dict["min_ss"]),
-                                   "slow_scan_max" : float(tmp_dict["max_ss"]),
-                                   },
-                           corners={"x" : float(tmp_dict["corner_x"]),
-                                    "y" : float(tmp_dict["corner_y"]),
-                                   },
-                           fast_scan_xyz=tmp_dict["fs"],
-                           slow_scan_xyz=tmp_dict["ss"],
-                           distance_from_interaction_plane=float(tmp_dict["clen"])*meter,
-                           pixel_size=1.0/float(tmp_dict["res"])*meter
-                           )
-
-    return panel
+    return tmp_dict
 
 
+def _detectorGeometryFromString( input_string):
+    """ Construct a DetectorGeometry instance from a serialized representation.
+    :param input_string: The string from which to construct the panel.
+
+    """
+    # Separate out panel blocks and common block.
+    # Get rid of empty lines.
+    while "\n\n" in input_string:
+        input_string = input_string.replace("\n\n", "\n")
+    # Get rid of white space.
+    input_string = input_string.replace(" ", "")
+
+    # Split into lines.
+    lines = input_string.split("\n")
+
+    common_block = ""
+    panel_blocks = ""
+    for line in lines:
+        if line == "":
+            continue
+        if line[0] == ";":
+            continue
+        if "/" in line:
+            panel_blocks += line+"\n"
+        else:
+            common_block += "COMMON_BLOCK/"+line+"\n"
+
+    # If no separate panels are defined, return.
+    if panel_blocks == "":
+        return DetectorGeometry(panels=common_panel)
+
+    # Now separate the panel block into lines again and loop.
+    lines = panel_blocks.split("\n")
+    # Sort to make sure lines belonging to same block are adjacent.
+    lines.sort()
+
+    # Get panel identifiers.
+    panel_identifiers = []
+    for line in lines:
+        if line == "":
+            continue
+        panel_identifiers.append(line.split("/")[0])
+
+    # Turn into set of unique identifiers
+    panel_identifiers=list(set(panel_identifiers))
+
+    # Gather all panel blocks into a list of strings, separated by newline to make fit for _detectorPanelFromString().
+    panel_blocks = ["",]*len(panel_identifiers)
+    for line in lines:
+        if line == "":
+            continue
+        # Get id.
+        panel_identifier = line.split("/")[0]
+        # Get index in list.
+        block_index = panel_identifiers.index(panel_identifier)
+        # Insert in correct position.
+        panel_blocks[block_index] += line+"\n"
+
+    # Deserialize the blocks.
+    panels = [_detectorPanelFromString(block, common_block) for block in panel_blocks]
+
+    # Return novel geometry instance.
+    return DetectorGeometry(panels=panels)
 
