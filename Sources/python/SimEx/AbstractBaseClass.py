@@ -35,6 +35,7 @@ class AbstractBaseClass(object):
         eq = True
         for key, val in self.__dict__.iteritems():
             if not ( val == comp.__dict__[key] ):
+                #print key, val, comp.__dict__[key]
                 return not eq
 
         return eq

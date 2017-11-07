@@ -21,18 +21,16 @@
 ##########################################################################
 
 import paths
+
+from SimEx import PhysicalQuantity
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel, _detectorPanelFromString
+from SimEx.Utilities.Units import meter
+
+import StringIO
 import os
 import shutil
-import StringIO
-
-# Include needed directories in sys.path.
-import paths
 import unittest
-
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
-from SimEx.Utilities.Units import meter
-from SimEx import PhysicalQuantity
 
 class DetectorGeometryTest(unittest.TestCase):
     """
@@ -151,8 +149,8 @@ panel0/min_ss        = 512
 panel0/max_ss        = 1023
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0x
-panel0/slow_scan_xyz = 1.0y
+panel0/fs = 1.0x
+panel0/ss = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
 
@@ -163,8 +161,8 @@ panel1/min_ss        = 1024
 panel1/max_ss        = 1535
 panel1/corner_x      = -512
 panel1/corner_y      = 256
-panel1/fast_scan_xyz = 1.0x
-panel1/slow_scan_xyz = 1.0y
+panel1/fs = 1.0x
+panel1/ss = 1.0y
 panel1/clen          = 1.3000000e-01
 panel1/res           = 4.5454545e+03
 
@@ -198,8 +196,8 @@ panel0/min_ss        = 512
 panel0/max_ss        = 1023
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0x
-panel0/slow_scan_xyz = 1.0y
+panel0/fs = 1.0x
+panel0/ss = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
 
@@ -210,8 +208,8 @@ panel1/min_ss        = 1024
 panel1/max_ss        = 1535
 panel1/corner_x      = -512
 panel1/corner_y      = 256
-panel1/fast_scan_xyz = 1.0x
-panel1/slow_scan_xyz = 1.0y
+panel1/fs = 1.0x
+panel1/ss = 1.0y
 panel1/clen          = 1.3000000e-01
 panel1/res           = 4.5454545e+03
 
@@ -247,8 +245,8 @@ panel0/min_ss        = 512
 panel0/max_ss        = 1023
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0x
-panel0/slow_scan_xyz = 1.0y
+panel0/fs = 1.0x
+panel0/ss = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
 
@@ -259,8 +257,8 @@ panel1/min_ss        = 1024
 panel1/max_ss        = 1535
 panel1/corner_x      = -512
 panel1/corner_y      = 256
-panel1/fast_scan_xyz = 1.0x
-panel1/slow_scan_xyz = 1.0y
+panel1/fs = 1.0x
+panel1/ss = 1.0y
 panel1/clen          = 1.3000000e-01
 panel1/res           = 4.5454545e+03
 
@@ -386,8 +384,8 @@ panel0/min_ss        = 512
 panel0/max_ss        = 1024
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0x
-panel0/slow_scan_xyz = 1.0y
+panel0/fs = 1.0x
+panel0/ss = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
 
@@ -460,9 +458,28 @@ panel0/res           = 4.5454545e+03
         # Check mutated attribute.
         self.assertEqual( copy_panel.distance_from_interaction_plane, 0.1324*meter )
 
-        #def test<++>(self):
-        #""" <++> """
-        #self.assertTrue(False)
+    def testDeSerialize(self):
+        """ Test the deserialization of a panel from a string. """
+
+        # Get a panel.
+        panel = self.__panel
+        # Serialize it.
+        stream = StringIO.StringIO()
+        panel._serialize(stream)
+        serialized_panel=stream.getvalue()
+        stream.close()
+
+        # Deserialize it.
+        deserialized_panel = _detectorPanelFromString( serialized_panel )
+
+        # Compare (Cannot use equality testing on the instances here because of round-off errors.)
+        self.assertAlmostEqual( panel.ranges, deserialized_panel.ranges )
+        self.assertAlmostEqual( panel.corners, deserialized_panel.corners )
+        self.assertEqual( panel.fast_scan_xyz, deserialized_panel.fast_scan_xyz )
+        self.assertEqual( panel.slow_scan_xyz, deserialized_panel.slow_scan_xyz )
+        self.assertAlmostEqual( panel.pixel_size, deserialized_panel.pixel_size )
+        self.assertAlmostEqual( panel.distance_from_interaction_plane, deserialized_panel.distance_from_interaction_plane )
+
 
     #def test<++>(self):
         #""" <++> """

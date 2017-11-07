@@ -25,9 +25,9 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber
 from SimEx import PhysicalQuantity
 from SimEx import AbstractBaseClass
 
-import copy
 import numpy
 import sys
+import StringIO
 
 
 
@@ -276,7 +276,7 @@ class DetectorPanel(AbstractBaseClass):
         """
         # Check stream parameter.
         if stream is None:
-            stream = sys.stdio
+            stream = sys.stdout
 
         if not hasattr(stream, "write"):
             raise IOError( "The given stream is not writable." )
@@ -295,8 +295,8 @@ class DetectorPanel(AbstractBaseClass):
         serialization += "panel%s/max_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_max"])
         serialization += "panel%s/corner_x      = %d\n" % (panel_id_str, self.corners["x"])
         serialization += "panel%s/corner_y      = %d\n" % (panel_id_str, self.corners["y"])
-        serialization += "panel%s/fast_scan_xyz = %s\n" % (panel_id_str, self.fast_scan_xyz)
-        serialization += "panel%s/slow_scan_xyz = %s\n" % (panel_id_str, self.slow_scan_xyz)
+        serialization += "panel%s/fs            = %s\n" % (panel_id_str, self.fast_scan_xyz)
+        serialization += "panel%s/ss            = %s\n" % (panel_id_str, self.slow_scan_xyz)
         serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.magnitude)
         serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.magnitude)
         serialization += "\n"
@@ -373,5 +373,62 @@ class DetectorGeometry(AbstractCalculatorParameters):
 
         for i,panel in enumerate(self.panels):
             panel._serialize( stream, panel_id=i)
+
+def _detectorPanelFromString( input_string):
+    """ Construct a DetectorPanel instance from a serialized panel.
+    :param input_string: The string from which to construct the panel.
+
+    """
+    # Get rid of panel prefix
+    lines=input_string.split("\n")
+
+    # Setup temporary dictionary.
+    tmp_dict = {}
+
+    # Loop over lines and extract data.
+    for line in lines:
+        # Bail out if not containing an assignment.
+        if not "=" in line:
+            continue
+        # Get rid of white spaces.
+        line = line.replace(" ","")
+        line = line.replace("\t","")
+
+        # Check for commented lines.
+        if  line[0] == ";":
+            continue
+
+        key_val = line.split("=")
+        key = key_val[0]
+        val = key_val[1]
+
+        # Check for comments after assignment.
+        if ";" in val:
+            val=val.split(";")[0]
+
+        # Get rid of panel prefix.
+        key = key.split("/")[-1]
+
+        # Store on dict.
+        tmp_dict[key] = val
+
+
+    # Now put the data into the DetectorPanel instance.
+    panel = DetectorPanel( ranges={"fast_scan_min" : float(tmp_dict["min_fs"]),
+                                   "fast_scan_max" : float(tmp_dict["max_fs"]),
+                                   "slow_scan_min" : float(tmp_dict["min_ss"]),
+                                   "slow_scan_max" : float(tmp_dict["max_ss"]),
+                                   },
+                           corners={"x" : float(tmp_dict["corner_x"]),
+                                    "y" : float(tmp_dict["corner_y"]),
+                                   },
+                           fast_scan_xyz=tmp_dict["fs"],
+                           slow_scan_xyz=tmp_dict["ss"],
+                           distance_from_interaction_plane=float(tmp_dict["clen"])*meter,
+                           pixel_size=1.0/float(tmp_dict["res"])*meter,
+                           )
+
+    return panel
+
 
 

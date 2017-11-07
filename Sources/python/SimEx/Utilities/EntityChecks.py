@@ -114,11 +114,7 @@ def checkAndSetNumber(var=None, default=None):
     if var is not None:
         if not isinstance( var, (int, float) ):
             raise exceptions.TypeError("The default must be a numerical type.")
-        return default
-
-    if not isinstance(var, (int, float)):
-            raise exceptions.TypeError("The parameter must be of a numerical type.")
-
+        var = default
     return var
 
 def checkAndSetIterable(var=None, default=None):
