@@ -425,7 +425,7 @@ def _detectorPanelFromString( input_string):
                            fast_scan_xyz=tmp_dict["fs"],
                            slow_scan_xyz=tmp_dict["ss"],
                            distance_from_interaction_plane=float(tmp_dict["clen"])*meter,
-                           pixel_size=1.0/float(tmp_dict["res"])*meter,
+                           pixel_size=1.0/float(tmp_dict["res"])*meter
                            )
 
     return panel

@@ -469,16 +469,20 @@ panel0/res           = 4.5454545e+03
         serialized_panel=stream.getvalue()
         stream.close()
 
+        panel._serialize()
+
         # Deserialize it.
         deserialized_panel = _detectorPanelFromString( serialized_panel )
+
+        deserialized_panel._serialize()
 
         # Compare (Cannot use equality testing on the instances here because of round-off errors.)
         self.assertAlmostEqual( panel.ranges, deserialized_panel.ranges )
         self.assertAlmostEqual( panel.corners, deserialized_panel.corners )
         self.assertEqual( panel.fast_scan_xyz, deserialized_panel.fast_scan_xyz )
         self.assertEqual( panel.slow_scan_xyz, deserialized_panel.slow_scan_xyz )
-        self.assertAlmostEqual( panel.pixel_size, deserialized_panel.pixel_size )
-        self.assertAlmostEqual( panel.distance_from_interaction_plane, deserialized_panel.distance_from_interaction_plane )
+        self.assertAlmostEqual( panel.pixel_size.magnitude, deserialized_panel.pixel_size.magnitude )
+        self.assertAlmostEqual( panel.distance_from_interaction_plane.magnitude, deserialized_panel.distance_from_interaction_plane.magnitude )
 
 
     #def test<++>(self):
