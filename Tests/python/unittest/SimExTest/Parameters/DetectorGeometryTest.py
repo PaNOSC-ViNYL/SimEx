@@ -25,7 +25,8 @@ import paths
 from SimEx import PhysicalQuantity
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel, _detectorPanelFromString, _detectorGeometryFromString
-from SimEx.Utilities.Units import meter
+from SimEx.Utilities.Units import meter, electronvolt
+from TestUtilities import TestUtilities
 
 import StringIO
 import os
@@ -293,6 +294,55 @@ panel1/res           = 4.5454545e+03
             self.assertEqual( panel.slow_scan_xyz, deserialized_geometry.panels[i].slow_scan_xyz )
             self.assertAlmostEqual( panel.pixel_size.magnitude, deserialized_geometry.panels[i].pixel_size.magnitude )
             self.assertAlmostEqual( panel.distance_from_interaction_plane.magnitude, deserialized_geometry.panels[i].distance_from_interaction_plane.magnitude )
+
+    def testDeSerializeWithCommonBlock(self):
+        """ Test deserialization when a common block is present in the file. """
+
+        # Read in the file.
+        with open( TestUtilities.generateTestFilePath("simple.geom") ) as geom_file_handle:
+            geom_string = "".join( geom_file_handle.readlines() )
+
+        # Setup geometry.
+        geometry = _detectorGeometryFromString( geom_string )
+
+        # Check parameters from common block
+        self.assertEqual( geometry.panels[0].adu_response, 1.0/electronvolt )
+        self.assertEqual( geometry.panels[1].adu_response, 1.0/electronvolt )
+
+        # Check parameters from individual blocks
+        self.assertNotEqual( geometry.panels[0].ranges, geometry.panels[1].ranges )
+
+    def testDeSerializeOnlyCommonBlock(self):
+        """ Test deserialization when only a common block is present in the file. """
+
+        # Read in the file.
+        with open( TestUtilities.generateTestFilePath("one_panel.geom") ) as geom_file_handle:
+            geom_string = "".join( geom_file_handle.readlines() )
+
+        # Setup geometry.
+        geometry = _detectorGeometryFromString( geom_string )
+
+        # Check parameters from common block
+        self.assertEqual( len(geometry.panels), 1)
+        self.assertEqual( geometry.panels[0].adu_response, 1.25e-4/electronvolt)
+
+    def testDeSerializeCommonBlockWithOverwrite(self):
+        """ Test deserialization when a common block is present but one panel overwrites a parameter."""
+
+        # Read in the file.
+        with open( TestUtilities.generateTestFilePath("common_overwrite.geom") ) as geom_file_handle:
+            geom_string = "".join( geom_file_handle.readlines() )
+
+        # Setup geometry.
+        geometry = _detectorGeometryFromString( geom_string )
+
+        # Check parameters from common block
+        self.assertEqual( len(geometry.panels), 2)
+        geometry.panels[0]._serialize()
+        geometry.panels[1]._serialize()
+        self.assertEqual( geometry.panels[0].adu_response, 1.0/electronvolt)
+        self.assertEqual( geometry.panels[1].adu_response, 2.0/electronvolt)
+
 
 
 class DetectorPanelTest(unittest.TestCase):

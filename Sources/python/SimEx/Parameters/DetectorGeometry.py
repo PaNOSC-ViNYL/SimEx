@@ -389,7 +389,7 @@ def _detectorPanelFromString( input_string, common_block=None):
 
     # Loop over common dict and fill into panel dict if not present there.
     for key,val in common_dict.iteritems():
-        if not key in panel_dict:
+        if panel_dict[key] is None:
             panel_dict[key] = val
 
     # Now put the data into the DetectorPanel instance.
@@ -404,8 +404,37 @@ def _detectorPanelFromString( input_string, common_block=None):
                            fast_scan_xyz=panel_dict["fs"],
                            slow_scan_xyz=panel_dict["ss"],
                            distance_from_interaction_plane=float(panel_dict["clen"])*meter,
-                           pixel_size=1.0/float(panel_dict["res"])*meter
+                           pixel_size=1.0/float(panel_dict["res"])*meter,
                            )
+
+    if panel_dict["adu_per_photon"] is not None:
+        panel.adu_response = float(panel_dict["adu_per_photon"])
+    if panel_dict["adu_per_eV"] is not None:
+        panel.adu_response = float(panel_dict["adu_per_eV"])/electronvolt
+    if panel_dict["coffset"] is not None:
+       panel.distance_offset = float(panel_dict["coffset"])*meter
+    else:
+       panel.distance_offset=None
+    if panel_dict["max_adu"] is not None:
+        panel.saturation_adu = float(panel_dict["max_adu"]),
+    else:
+        panel.saturation_adu = None
+    if panel_dict["mask"] is not None:
+        panel.mask = numpy.array( eval(panel_dict["mask"]) ),
+    else:
+        panel.mask = None
+    if panel_dict["good_bit_mask"] is not None:
+        panel.good_bit_mask = panel_dict["good_bit_mask"],
+    else:
+        panel.good_bit_mask = None
+    if panel_dict["bad_bit_mask"] is not None:
+        panel.bad_bit_mask = panel_dict["bad_bit_mask"],
+    else:
+        panel.bad_bit_mask = None
+    if panel_dict["saturation_map"] is not None:
+        panel.saturation_map = panel_dict["saturation_map"],
+    else:
+        panel.saturation_map = None
 
     return panel
 
@@ -416,7 +445,26 @@ def _panelStringToDict( input_string ):
     lines=input_string.split("\n")
 
     # Setup temporary dictionary.
-    tmp_dict = {}
+    tmp_dict = {
+            "min_fs"         : None,
+            "max_fs"         : None,
+            "min_ss"         : None,
+            "max_ss"         : None,
+            "corner_x"       : None,
+            "corner_y"       : None,
+            "fs"             : None,
+            "ss"             : None,
+            "clen"           : None,
+            "res"            : None,
+            "coffset"        : None,
+            "adu_per_eV"     : None,
+            "adu_per_photon" : None,
+            "max_adu"        : None,
+            "mask"           : None,
+            "good_bit_mask"  : None,
+            "bad_bit_mask"   : None,
+            "saturation_map" : None,
+            }
 
     # Loop over lines and extract data.
     for line in lines:
@@ -477,7 +525,7 @@ def _detectorGeometryFromString( input_string):
 
     # If no separate panels are defined, return.
     if panel_blocks == "":
-        return DetectorGeometry(panels=common_panel)
+        return DetectorGeometry(panels=_detectorPanelFromString(common_block))
 
     # Now separate the panel block into lines again and loop.
     lines = panel_blocks.split("\n")
@@ -511,4 +559,3 @@ def _detectorGeometryFromString( input_string):
 
     # Return novel geometry instance.
     return DetectorGeometry(panels=panels)
-
