@@ -37,7 +37,8 @@ class DetectorPanel(AbstractBaseClass):
     def __init__(self,
             ranges                          = None,
             pixel_size                      = None,
-            adu_response                    = None,
+            energy_response                 = None,
+            photon_response                 = None,
             distance_from_interaction_plane = None,
             distance_offset                 = None,
             fast_scan_xyz                   = None,
@@ -62,8 +63,11 @@ class DetectorPanel(AbstractBaseClass):
         :param pixel_size: The physical size of the pixel (assuming quadratic shape) (SI units).
         :type  pixel_size: PhysicalQuantity with unit meter.
 
-        :param adu_response: Number of detector units (ADU) arising from one eV or one photon (depending on the unit).
-        :type  adu_response: PhysicalQuantity with unit 1/eV (adu_per_eV) or float (adu_per_photon).
+        :param energy_response: Number of detector units (ADU) arising from one eV.
+        :type  energy_response: PhysicalQuantity with unit 1/eV (adu_per_eV)
+
+        :param photon_response: Number of detector units (ADU) arising from one photon.
+        :type  photon_response: float
 
         :param distance_from_interaction_plane: Distance in z of this panel from the plane of interaction (transverse plane that contains the sample).
         :type  distance_from_interaction_plane: PhysicalQuantity with unit meter.
@@ -103,7 +107,8 @@ class DetectorPanel(AbstractBaseClass):
         # Store on object using setters.
         self.ranges                          = ranges
         self.pixel_size                      = pixel_size
-        self.adu_response                    = adu_response
+        self.energy_response                 = energy_response
+        self.photon_response                 = photon_response
         self.distance_from_interaction_plane = distance_from_interaction_plane
         self.distance_offset                 = distance_offset
         self.fast_scan_xyz                   = fast_scan_xyz
@@ -137,26 +142,31 @@ class DetectorPanel(AbstractBaseClass):
         """ Set the panel pixel_size. """
         self.__pixel_size = checkAndSetInstance( PhysicalQuantity,  val, 1.0e-4*meter)
 
-    # adu_response
+    # energy_response
     @property
-    def adu_response(self):
-        """ Query the panel adu_response. """
-        return self.__adu_response
-    @adu_response.setter
-    def adu_response(self, val):
-        """ Set the panel adu_response. """
-        if isinstance(val, PhysicalQuantity):
-            val = checkAndSetInstance( PhysicalQuantity, val, 1.0/electronvolt )
-            self.__adu_per_eV = val
-            self.__adu_response = val
-            self.__adu_per_photon = None
-        else:
-            val = checkAndSetNumber( val, 1.0 )
-            self.__adu_per_photon = val
-            self.__adu_response = val
-            self.__adu_per_eV = None
+    def energy_response(self):
+        """ Query the panel energy_response. """
+        return self.__energy_response
+    @energy_response.setter
+    def energy_response(self, val):
+        """ Set the panel energy_response. """
+        if val is not None:
+            val = checkAndSetInstance( PhysicalQuantity, val, None)
+        self.__energy_response = val
 
-    # distance_from_interaction_plane
+    # photon_response
+    @property
+    def photon_response(self):
+        """ Query the panel photon_response. """
+        return self.__photon_response
+    @photon_response.setter
+    def photon_response(self, val):
+        """ Set the panel photon_response. """
+        if val is not None:
+            val = checkAndSetInstance( float, val, None)
+        self.__photon_response = val
+
+     # distance_from_interaction_plane
     @property
     def distance_from_interaction_plane(self):
         """ Query the panel distance_from_interaction_plane. """
@@ -299,6 +309,16 @@ class DetectorPanel(AbstractBaseClass):
         serialization += "panel%s/ss            = %s\n" % (panel_id_str, self.slow_scan_xyz)
         serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.magnitude)
         serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.magnitude)
+        serialization += "panel%s/coffset       = %8.7e\n" % (panel_id_str, self.distance_offset.magnitude)
+        if self.energy_response is not None:
+            serialization += "panel%s/adu_per_eV    = %8.7e\n" % (panel_id_str, self.energy_response.magnitude)
+        if self.photon_response is not None:
+            serialization += "panel%s/adu_per_photon= %8.7e\n" % (panel_id_str, self.photon_response)
+        #serialization += "panel%s/max_adu       = %8.7e\n" % (panel_id_str, self.saturation_adu)
+        #serialization += "panel%s/mask          = %8.7e\n" % (panel_id_str, self.mask.magnitude)
+        #serialization += "panel%s/mask_good     = %8.7e\n" % (panel_id_str, self.good_bit_mask.magnitude)
+        #serialization += "panel%s/mask_bad      = %8.7e\n" % (panel_id_str, self.bad_bit_mask.magnitude)
+        #serialization += "panel%s/saturation_map= %8.7e\n" % (panel_id_str, self.saturation_map.magnitude)
         serialization += "\n"
 
         # Finally write the serialized panel.
@@ -423,12 +443,12 @@ def _detectorPanelFromString( input_string, common_block=None):
         panel.mask = numpy.array( eval(panel_dict["mask"]) ),
     else:
         panel.mask = None
-    if panel_dict["good_bit_mask"] is not None:
-        panel.good_bit_mask = panel_dict["good_bit_mask"],
+    if panel_dict["mask_good"] is not None:
+        panel.good_bit_mask = panel_dict["mask_good"],
     else:
         panel.good_bit_mask = None
-    if panel_dict["bad_bit_mask"] is not None:
-        panel.bad_bit_mask = panel_dict["bad_bit_mask"],
+    if panel_dict["mask_bad"] is not None:
+        panel.bad_bit_mask = panel_dict["mask_bad"],
     else:
         panel.bad_bit_mask = None
     if panel_dict["saturation_map"] is not None:
@@ -461,8 +481,8 @@ def _panelStringToDict( input_string ):
             "adu_per_photon" : None,
             "max_adu"        : None,
             "mask"           : None,
-            "good_bit_mask"  : None,
-            "bad_bit_mask"   : None,
+            "mask_good"      : None,
+            "mask_bad"       : None,
             "saturation_map" : None,
             }
 
