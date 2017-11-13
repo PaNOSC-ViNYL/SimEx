@@ -121,6 +121,10 @@ class DetectorPanel(AbstractBaseClass):
         self.saturation_map                  = saturation_map
         self.badregion_flag                  = badregion_flag
 
+        # Handle case that neither photon nor energy response is set.
+        if self.energy_response is None and self.photon_response is None:
+            self.photon_response = 1.0
+
     ### Accessors.
     # ranges
     @property
@@ -154,6 +158,10 @@ class DetectorPanel(AbstractBaseClass):
             val = checkAndSetInstance( PhysicalQuantity, val, None)
         self.__energy_response = val
 
+        # Invalidate photon response.
+        if val is not None and self.__photon_response is not None:
+            self.__photon_response = None
+
     # photon_response
     @property
     def photon_response(self):
@@ -164,9 +172,14 @@ class DetectorPanel(AbstractBaseClass):
         """ Set the panel photon_response. """
         if val is not None:
             val = checkAndSetInstance( float, val, None)
+
         self.__photon_response = val
 
-     # distance_from_interaction_plane
+        # Invalidate energy response.
+        if val is not None and self.__energy_response is not None:
+            self.__energy_response = None
+
+     # Distance_from_interaction_plane
     @property
     def distance_from_interaction_plane(self):
         """ Query the panel distance_from_interaction_plane. """
@@ -405,6 +418,7 @@ def _detectorPanelFromString( input_string, common_block=None):
     if common_block is not None:
         common_dict = _panelStringToDict(common_block)
 
+
     panel_dict = _panelStringToDict( input_string )
 
     # Loop over common dict and fill into panel dict if not present there.
@@ -428,9 +442,9 @@ def _detectorPanelFromString( input_string, common_block=None):
                            )
 
     if panel_dict["adu_per_photon"] is not None:
-        panel.adu_response = float(panel_dict["adu_per_photon"])
+        panel.photon_response = float(panel_dict["adu_per_photon"])
     if panel_dict["adu_per_eV"] is not None:
-        panel.adu_response = float(panel_dict["adu_per_eV"])/electronvolt
+        panel.energy_response = float(panel_dict["adu_per_eV"])/electronvolt
     if panel_dict["coffset"] is not None:
        panel.distance_offset = float(panel_dict["coffset"])*meter
     else:
@@ -549,6 +563,7 @@ def _detectorGeometryFromString( input_string):
 
     # Now separate the panel block into lines again and loop.
     lines = panel_blocks.split("\n")
+
     # Sort to make sure lines belonging to same block are adjacent.
     lines.sort()
 
@@ -559,8 +574,9 @@ def _detectorGeometryFromString( input_string):
             continue
         panel_identifiers.append(line.split("/")[0])
 
-    # Turn into set of unique identifiers
+    # Turn into set of unique identifiers.
     panel_identifiers=list(set(panel_identifiers))
+    panel_identifiers.sort()
 
     # Gather all panel blocks into a list of strings, separated by newline to make fit for _detectorPanelFromString().
     panel_blocks = ["",]*len(panel_identifiers)

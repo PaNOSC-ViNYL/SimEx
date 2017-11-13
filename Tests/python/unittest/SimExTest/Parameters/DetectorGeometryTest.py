@@ -339,8 +339,8 @@ panel1/res           = 4.5454545e+03
         # Check parameters from common block
         self.assertEqual( len(geometry.panels), 2)
         geometry.serialize()
-        self.assertEqual( geometry.panels[0].adu_response, 1.0/electronvolt)
-        self.assertEqual( geometry.panels[1].adu_response, 2.0/electronvolt)
+        self.assertEqual( geometry.panels[0].energy_response, 1.0/electronvolt)
+        self.assertEqual( geometry.panels[1].energy_response, 2.0/electronvolt)
 
 
 
