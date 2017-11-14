@@ -32,6 +32,9 @@ import unittest
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
 from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
+from SimEx.Utilities.EntityChecks import checkAndSetPhysicalQuantity
+from SimEx import PhysicalQuantity
+from SimEx.Utilities.Units import *
 
 class EntityChecksTest(unittest.TestCase):
     """ Test class for the EntityChecks class. """
@@ -134,7 +137,12 @@ class EntityChecksTest(unittest.TestCase):
         self.assertRaises( TypeError, checkAndSetNonNegativeInteger, -1)
 
 
+    def testCheckAndSetPhysicalQuantity(self):
+        """ """
 
+        self.assertEqual( 1.0*meter, checkAndSetPhysicalQuantity( 1.0*meter,None,meter) )
+        self.assertEqual( 1.0*meter, checkAndSetPhysicalQuantity( None, 1.0, meter) )
+        self.assertEqual( 1.0*meter, checkAndSetPhysicalQuantity( None, 1.0*meter, meter) )
 
 
 

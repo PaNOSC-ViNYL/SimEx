@@ -23,6 +23,7 @@
 
 
 import exceptions
+from SimEx import PhysicalQuantity
 
 def checkAndSetInstance(cls, var=None, default=None):
     """
@@ -125,4 +126,24 @@ def checkAndSetIterable(var=None, default=None):
 
     return var
 
+def checkAndSetPhysicalQuantity(var, default, unit):
+    """ Check if input is a PhysicalQuantity and has the correct unit. """
+
+    if var is not None:
+        if not isinstance(var, PhysicalQuantity):
+            raise TypeError("%s is not a PhysicalQuantity." % (repr(var)) )
+        if not var.units == unit.units:
+            raise TypeError("Incorrect unit (%s), expected %s." % (var.units, unit.units) )
+    else:
+        if default is not None:
+            if isinstance(default, PhysicalQuantity):
+                if default.units == unit.units:
+                    return default
+                else:
+                    return default.to(unit.units)
+            else:
+                return default*unit
+            return default
+
+    return var
 

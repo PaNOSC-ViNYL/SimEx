@@ -1,3 +1,4 @@
+""" Test module for the SingFELPhotonDiffractor."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015,2016 Carsten Fortmann-Grote                         #
@@ -19,18 +20,10 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the SingFELPhotonDiffractor.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151109
-
-"""
 import os
 import h5py
 import numpy
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
 import paths
@@ -40,6 +33,9 @@ import unittest
 # Import the class to test.
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 from TestUtilities import TestUtilities
 
 class SingFELPhotonDiffractorTest(unittest.TestCase):
@@ -51,7 +47,25 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         cls.input_h5 = TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
+        detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
+                                                'fast_scan_max' : 1023,
+                                                'slow_scan_min' : 0,
+                                                'slow_scan_max' : 1023},
+                                        pixel_size=2.2e-4*meter,
+                                        photon_response=1.0,
+                                        distance_from_interaction_plane=0.13*meter,
+                                        corners={'x': -512, 'y' : 512},
+                                        )
 
+        cls.detector_geometry = DetectorGeometry(panels=[detector_panel])
+
+        cls.beam = PhotonBeamParameters(photon_energy=8.6e3*electronvolt,
+                                    beam_diameter_fwhm=1.0e-6*meter,
+                                    pulse_energy=1.0e-3*joule,
+                                    photon_energy_relative_bandwidth=0.001,
+                                    divergence=1e-3*radian,
+                                    photon_energy_spectrum_type="SASE",
+                                    )
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
@@ -81,8 +95,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'beam_parameters' : self.beam,
+                     'detector_geometry' : self.detector_geometry,
                    }
 
         # Construct the object.
@@ -92,22 +106,22 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
     def testConstructionParameters(self):
         """ Check we can construct with a parameter object. """
-        parameters = SingFELPhotonDiffractorParameters(uniform_rotation = True,
-                                                       calculate_Compton = False,
-                                                       slice_interval = 100,
-                                                       number_of_slices = 2,
-                                                       pmi_start_ID = 1,
-                                                       pmi_stop_ID  = 1,
-                                                       number_of_diffraction_patterns = 2,
-                                                       beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
-                                                       beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
+        parameters=SingFELPhotonDiffractorParameters(uniform_rotation=True,
+                                                       calculate_Compton=False,
+                                                       slice_interval=100,
+                                                       number_of_slices=2,
+                                                       pmi_start_ID=1,
+                                                       pmi_stop_ID=1,
+                                                       number_of_diffraction_patterns=2,
+                                                       beam_parameters=self.beam,
+                                                       detector_geometry=self.detector_geometry,
                                                        )
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
 
         # Check instance.
         self.assertIsInstance( diffractor, SingFELPhotonDiffractor )
 
-    def testShapedConstruction(self):
+    def testShapedConstruction2(self):
         """ Testing the construction of the class with parameters. """
 
         parameters={ 'uniform_rotation': True,
@@ -117,8 +131,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'beam_parameters' : self.beam,
+                     'detector_geometry' : self.detector_geometry,
                    }
 
         # Construct the object.
@@ -145,8 +159,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'beam_parameters' : self.beam,
+                     'detector_geometry' : self.detector_geometry,
                    }
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters)
@@ -174,8 +188,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'beam_parameters' : self.beam,
+                     'detector_geometry' : self.detector_geometry,
                      'number_of_MPI_processes' : 2,
                    }
         # Construct the object.
@@ -199,8 +213,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 1,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'beam_parameters' : self.beam,
+                     'detector_geometry' : self.detector_geometry,
                      }
 
         # Check construction with sane parameters.
@@ -264,21 +278,21 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Reset.
         parameters['pmi_stop_ID'] = 1
 
-        # beam_parameter_file not a string.
-        parameters['beam_parameter_file'] = 1
+        # beam_parameters not a string.
+        parameters['beam_parameters'] = 1
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # beam_parameter_file not a file.
-        parameters['beam_parameter_file'] = 's2e.beam'
+        # beam_parameters not a file.
+        parameters['beam_parameters'] = 'xyz.beam'
         self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        parameters['beam_parameter_file'] =  TestUtilities.generateTestFilePath('s2e.beam')
+        parameters['beam_parameters'] =  self.beam
 
-        # beam_geometry_file not a string.
-        parameters['beam_geometry_file'] = 1
+        # detector_geometry not a string.
+        parameters['detector_geometry'] = 1
         self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # beam_geometry_file not a file.
-        parameters['beam_geometry_file'] = 's2e.geom'
+        # detector_geometry not a file.
+        parameters['detector_geometry'] = 'xyz.geom'
         self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        parameters['beam_geometry_file'] =  TestUtilities.generateTestFilePath('s2e.geom'),
+        parameters['detector_geometry'] = self.detector_geometry
 
 
     def testBackengine(self):
@@ -295,8 +309,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID  = 1,
                      number_of_diffraction_patterns = 2,
-                     beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
+                     beam_parameters = self.beam,
+                     detector_geometry = self.detector_geometry,
                      forced_mpi_command='mpirun',
                      )
 
@@ -327,8 +341,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
+                     beam_parameters= self.beam,
+                     detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun')
 
         # Construct the object.
@@ -359,8 +373,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
+                     beam_parameters= self.beam,
+                     detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun')
 
 
@@ -387,8 +401,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
+                     beam_parameters= self.beam,
+                     detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun')
 
         # Construct the object.
@@ -413,8 +427,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID= 1,
                      pmi_stop_ID = 9,
                      number_of_diffraction_patterns= 1,
-                     beam_parameter_file= TestUtilities.generateTestFilePath('s2e.beam'),
-                     beam_geometry_file= TestUtilities.generateTestFilePath('s2e.geom'),
+                     beam_parameters= self.beam,
+                     detector_geometry= self.detector_geometry,
                    )
 
         photon_diffractor = SingFELPhotonDiffractor(
@@ -435,8 +449,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 4,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameter_file': TestUtilities.generateTestFilePath('s2e.beam'),
-                     'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
+                     'beam_parameters': self.beam,
+                     'detector_geometry' : self.detector_geometry,
                      'number_of_MPI_processes' : 8,
                    }
 
@@ -482,8 +496,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        pmi_start_ID = 1,
                                                        pmi_stop_ID  = 1,
                                                        number_of_diffraction_patterns = 1,
-                                                       beam_parameter_file = TestUtilities.generateTestFilePath('s2e.beam'),
-                                                       beam_geometry_file = TestUtilities.generateTestFilePath('s2e.geom'),
+                                                       beam_parameters = self.beam,
+                                                       detector_geometry = self.detector_geometry
                                                        )
 
         photon_diffractor = SingFELPhotonDiffractor(

@@ -147,8 +147,12 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_start_ID = self.parameters.pmi_start_ID
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
-        beam_parameter_file = self.parameters.beam_parameter_file
-        beam_geometry_file = self.parameters.beam_geometry_file
+
+        beam_parameter_file = "tmp.beam"
+        self.parameters.beam_parameters.serialize(beam_parameter_file)
+
+        beam_geometry_file = "tmp.geom"
+        self.parameters.detector_geometry.serialize(beam_geometry_file)
 
         if not os.path.isdir( self.output_path ):
             os.mkdir( self.output_path )

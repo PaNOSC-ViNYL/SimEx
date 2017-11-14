@@ -82,7 +82,8 @@ class DetectorPanel(AbstractBaseClass):
         :type  slow_scan_xyz: str
 
         :param corners: [x,y] coordinates of lower left pixel of this panel in the globale detector geometry.
-        :type  corners: list, tuple
+        :type  corners: dict
+        :example corners: corners={"x" : -10, "y" : 10 }
 
         :param saturation_adu: Saturation level for this panel.
         :type  saturation_adu: float.

@@ -25,6 +25,7 @@ import os
 import numpy
 import shutil
 import subprocess
+import StringIO
 
 # Include needed directories in sys.path.
 import paths
@@ -34,6 +35,7 @@ from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
 class PhotonBeamParametersTest(unittest.TestCase):
     """
@@ -42,8 +44,13 @@ class PhotonBeamParametersTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
-
+        cls.beam = PhotonBeamParameters(photon_energy=8.6e3*electronvolt,
+                                    beam_diameter_fwhm=1.0e-6*meter,
+                                    pulse_energy=1.0e-3*joule,
+                                    photon_energy_relative_bandwidth=0.001,
+                                    divergence=None,
+                                    photon_energy_spectrum_type="SASE",
+                                    )
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
@@ -74,46 +81,100 @@ class PhotonBeamParametersTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         parameters = PhotonBeamParameters(
-                photon_energy=4.96e3,
+                photon_energy=4.96e3*electronvolt,
                 photon_energy_relative_bandwidth=2e-2,
                 photon_energy_spectrum_type="SASE",
-                pulse_energy = 2e-3,
-                beam_diameter_fwhm = 2e-6,
-                divergence = 1e-6,
+                pulse_energy = 2e-3*joule,
+                beam_diameter_fwhm = 2e-6*meter,
+                divergence = 1e-6*radian,
                 )
 
         # Check all parameters are set as intended.
-        self.assertEqual( parameters.photon_energy, 4.96e3 )
+        self.assertEqual( parameters.photon_energy, 4.96e3*electronvolt )
         self.assertEqual( parameters.photon_energy_relative_bandwidth, 2e-2 )
         self.assertEqual( parameters.photon_energy_spectrum_type, "SASE" )
-        self.assertEqual( parameters.pulse_energy, 2e-3 )
-        self.assertEqual( parameters.beam_diameter_fwhm, 2e-6 )
-        self.assertEqual( parameters.divergence, 1e-6 )
+        self.assertEqual( parameters.pulse_energy, 2e-3*joule )
+        self.assertEqual( parameters.beam_diameter_fwhm, 2e-6*meter )
+        self.assertEqual( parameters.divergence, 1e-6*radian )
 
     def testSettersAndQueries(self):
         """ Testing the default construction of the class using a dictionary. """
         # Attempt to construct an instance of the class.
         parameters = PhotonBeamParameters(
-                photon_energy=4.96e3,
-                pulse_energy = 2e-3,
-                beam_diameter_fwhm = 2e-6,
+                photon_energy=4.96e3*electronvolt,
+                pulse_energy = 2e-3*joule,
+                beam_diameter_fwhm = 2e-6*meter,
                 )
 
         # Set via methods.
-        parameters.photon_energy = 8.0e3
-        parameters.pulse_energy = 2.5e-3
-        parameters.beam_diameter_fwhm = 100e-9
+        parameters.photon_energy = 8.0e3*electronvolt
+        parameters.pulse_energy = 2.5e-3*joule
+        parameters.beam_diameter_fwhm = 100e-9*meter
         parameters.photon_energy_relative_bandwidth = 1e-3
-        parameters.divergence = 5e-6
+        parameters.divergence = 5e-6*radian
         parameters.photon_energy_spectrum_type="tophat"
 
         # Check all parameters are set as intended.
-        self.assertEqual( parameters.photon_energy, 8.0e3 )
+        self.assertEqual( parameters.photon_energy, 8.0e3*electronvolt )
         self.assertEqual( parameters.photon_energy_relative_bandwidth, 1e-3 )
-        self.assertEqual( parameters.pulse_energy, 2.5e-3 )
-        self.assertEqual( parameters.beam_diameter_fwhm, 1e-7 )
-        self.assertEqual( parameters.divergence, 5e-6 )
+        self.assertEqual( parameters.pulse_energy.magnitude, 2.5e-3 )
+        self.assertEqual( parameters.beam_diameter_fwhm.magnitude, 1e-7 )
+        self.assertEqual( parameters.divergence.magnitude, 5e-6 )
         self.assertEqual( parameters.photon_energy_spectrum_type, "tophat" )
+
+    def testSerializeToFile(self):
+        """ Test the serialization of a PhotonBeamParameters instance to file. """
+
+        parameters = self.beam
+
+        # Setup IO file and cleanup.
+        ofile = 'tmp.beam'
+        self.__files_to_remove.append(ofile)
+
+        with open(ofile,'w') as  stream:
+            parameters.serialize(stream=stream)
+
+        reference_serial = """; [Photon beam parameters]
+
+; photon energy (eV)
+beam/photon_energy = 8.6000000e+03
+
+; Number of photons per pulse
+beam/fluence = 7.2575692e+11
+
+; Radius of X-ray beam (m)
+beam/radius = 5.0000000e-07
+"""
+
+        with open(ofile, 'r') as stream:
+            serial = "".join(stream.readlines())
+
+        self.assertEqual( serial, reference_serial )
+
+
+    def testSerialize(self):
+        """ Test the serialization of a PhotonBeamParameters instance. """
+        parameters = self.beam
+
+        stream = StringIO.StringIO()
+        parameters.serialize(stream=stream)
+
+
+        reference_serial = """; [Photon beam parameters]
+
+; photon energy (eV)
+beam/photon_energy = 8.6000000e+03
+
+; Number of photons per pulse
+beam/fluence = 7.2575692e+11
+
+; Radius of X-ray beam (m)
+beam/radius = 5.0000000e-07
+"""
+
+        self.assertEqual( stream.getvalue(), reference_serial)
+
+        stream.close()
 
     def testPropToBeamParameters(self):
         """ Test the utility function to construct a PhotonBeamParameters instance from prop output (wavefron file). """
@@ -121,7 +182,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
         beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out_0000001.h5"))
 
         self.assertIsInstance( beam_parameters, PhotonBeamParameters )
-        self.assertAlmostEqual( beam_parameters.photon_energy, 4972.840247, 5 )
+        self.assertAlmostEqual( beam_parameters.photon_energy.magnitude, 4972.840247*electronvolt.magnitude, 5 )
 if __name__ == '__main__':
     unittest.main()
 
