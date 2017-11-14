@@ -122,6 +122,35 @@ class PhotonBeamParametersTest(unittest.TestCase):
         self.assertEqual( parameters.divergence.magnitude, 5e-6 )
         self.assertEqual( parameters.photon_energy_spectrum_type, "tophat" )
 
+    def testSerializeToFileName(self):
+        """ Test the serialization of a PhotonBeamParameters instance to file given the filename. """
+
+        parameters = self.beam
+
+        # Setup IO file and cleanup.
+        ofile = 'tmp.beam'
+        self.__files_to_remove.append(ofile)
+
+        parameters.serialize(stream=ofile)
+
+        reference_serial = """; [Photon beam parameters]
+
+; photon energy (eV)
+beam/photon_energy = 8.6000000e+03
+
+; Number of photons per pulse
+beam/fluence = 7.2575692e+11
+
+; Radius of X-ray beam (m)
+beam/radius = 5.0000000e-07
+"""
+
+        with open(ofile, 'r') as stream:
+            serial = "".join(stream.readlines())
+
+        self.assertEqual( serial, reference_serial )
+
+
     def testSerializeToFile(self):
         """ Test the serialization of a PhotonBeamParameters instance to file. """
 

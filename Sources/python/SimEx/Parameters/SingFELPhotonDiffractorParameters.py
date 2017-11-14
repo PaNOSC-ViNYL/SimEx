@@ -211,9 +211,10 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         value = checkAndSetInstance( (str,PhotonBeamParameters), value, None )
 
         if isinstance(value, str):
-            if not os.path.isfile( self.__beam_parameters):
-                raise IOError("The beam_parameters %s is not a valid file or filename." % (self.__beam_parameters) )
+            if not os.path.isfile( value ):
+                raise IOError("The beam_parameters %s is not a valid file or filename." % (value) )
             raise TypeError("Passing beam parameters as a file is currently unsupported. Please use the PhotonBeamParameters class.")
+
         self.__beam_parameters = value
 
     @property
@@ -232,7 +233,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             value = checkAndSetInstance( (str, DetectorGeometry), value, None )
 
             if isinstance(value, str):
-                if not os.path.isfile( self.__detector_geometry):
+                if not os.path.isfile( value ):
                     raise IOError('The parameter "detector_geometry" %s is not a valid file or filename.' % (value) )
 
                 value = DetectorGeometry(filename=value)

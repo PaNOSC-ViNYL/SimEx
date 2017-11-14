@@ -147,7 +147,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         """
 
         if isinstance(stream, str):
-            with open(stream) as ostream:
+            with open(stream, 'w') as ostream:
                 self._serialize(ostream)
         elif hasattr(stream, 'write'):
                 self._serialize(stream)
