@@ -170,6 +170,36 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertEqual( diffractor.input_path,  os.path.abspath( 'pmi') )
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
+    def testConstructionWithSample(self):
+        """ Testing the construction with sample passed via parameters."""
+
+        # Ensure proper cleanup.
+        sample_file = '5udc.pdb'
+        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+        self.__files_to_remove.append( sample_file )
+
+        # Set up parameters.
+        parameters=SingFELPhotonDiffractorParameters(
+                sample=sample_file,
+                uniform_rotation = False,
+                calculate_Compton = False,
+                slice_interval = 100,
+                number_of_slices = 5,
+                pmi_start_ID = 1,
+                pmi_stop_ID = 1,
+                number_of_diffraction_patterns= 1,
+                beam_parameters=self.beam,
+                detector_geometry= self.detector_geometry,
+                forced_mpi_command='mpirun'
+                )
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+
+        self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
+        self.assertEqual( diffractor.input_path,  os.path.abspath( sample_file ) )
+        self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
+
     def testDefaultConstructionLegacy(self):
         """ Testing the default construction of the class with MPI parameter. """
 

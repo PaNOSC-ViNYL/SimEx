@@ -30,7 +30,8 @@ import prepHDF5
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Utilities import ParallelUtilities
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import IOUtilities
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -56,11 +57,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         self.__parameters = checkAndSetInstance( SingFELPhotonDiffractorParameters, parameters, SingFELPhotonDiffractorParameters() )
 
         # Handle sample geometry provenience.
-        if self.parameters.sample is None and input_path is None:
+        if self.__parameters.sample is None and input_path is None:
             raise AttributeError("One and only one of parameters.sample or input_path must be provided.")
-        self.__sample_source = "pmi"
-        if self.parameters.sample is not None:
-            self.__sample_source = "sample_file"
+        if self.__parameters.sample is not None:
+            input_path=self.__parameters.sample
 
         # Init base class.
         super(SingFELPhotonDiffractor, self).__init__(parameters,input_path,output_path)
@@ -144,13 +144,27 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         beam_geometry_file = "tmp.geom"
         self.parameters.detector_geometry.serialize(beam_geometry_file)
 
+        # Setup directory to pmi output.
+        # Backengine expects a directory name, so have to check if
+        # input_path is dir or file and handle accordingly.
+        if os.path.isdir( self.input_path ):
+            input_dir = self.input_path
+
+        elif os.path.isfile( self.input_path ):
+            input_dir = os.path.dirname( self.input_path )
+
+        else:
+            # Attempt to query from pdb.
+            self.input_path = IOUtilities.checkAndGetPDB(self.input_path)
+            input_dir = os.path.dirname( self.input_path )
+
         if not os.path.isdir( self.output_path ):
             os.mkdir( self.output_path )
         output_dir = self.output_path
 
         config_file = '/dev/null'
 
-# collect MPI arguments
+        # collect MPI arguments
         if self.parameters.forced_mpi_command=="":
             np=self.computeNTasks()
             mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
@@ -158,6 +172,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand=self.parameters.forced_mpi_command
 # collect program arguments
         command_sequence = ['radiationDamageMPI',
+                            '--inputDir',         str(input_dir),
                             '--outputDir',        str(output_dir),
                             '--geomFile',         str(beam_geometry_file),
                             '--configFile',       str(config_file),
@@ -170,19 +185,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--numDP',            str(number_of_diffraction_patterns),
                             '--prepHDF5File',     preph5_location,
                             ]
-
-        if self.__sample_source is 'pmi':
-            # Setup directory to pmi output.
-            # Backengine expects a directory name, so have to check if
-            # input_path is dir or file and handle accordingly.
-            if os.path.isdir( self.input_path ):
-                input_dir = self.input_path
-
-            elif os.path.isfile( self.input_path ):
-                input_dir = os.path.dirname( self.input_path )
-
-            command_sequence.append('--inputDir')
-            command_sequence.append(input_dir)
 
 
         if self.parameters.beam_parameters is not None:
