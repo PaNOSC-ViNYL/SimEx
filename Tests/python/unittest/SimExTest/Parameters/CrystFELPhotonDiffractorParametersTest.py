@@ -1,3 +1,4 @@
+""" Test module for the CrystFELPhotonDiffractorParameter class."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016 Carsten Fortmann-Grote                              #
@@ -19,28 +20,16 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the CrystFELPhotonDiffractorParameter class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160721
-
-"""
-import paths
 import os
-import numpy
-import shutil
-import subprocess
-
-# Include needed directories in sys.path.
 import paths
+import shutil
 import unittest
 
-from TestUtilities import TestUtilities
+from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
-
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian
+from TestUtilities import TestUtilities
 
 class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
     """
@@ -85,27 +74,28 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
         self.assertTrue( parameters.uniform_rotation )
         self.assertEqual( parameters.beam_parameters, None )
-        self.assertEqual( parameters.geometry, None )
+        self.assertEqual( parameters.detector_geometry, None )
         self.assertTrue( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
         self.assertFalse( parameters.powder )
         self.assertEqual( parameters.intensities_file, None )
-        self.assertEqual( parameters.crystal_size_range, None )
+        self.assertEqual( parameters.crystal_size_min, None )
+        self.assertEqual( parameters.crystal_size_max, None )
         self.assertFalse( parameters.poissonize, False )
         self.assertEqual( parameters.number_of_background_photons, 0 )
         self.assertFalse( parameters.suppress_fringes )
         self.assertEqual( parameters.beam_parameters, None )
-        self.assertEqual( parameters.geometry, None )
+        self.assertEqual( parameters.detector_geometry, None )
 
     def testShapedConstruction(self):
         """ Testing the construction with parameters of the class. """
 
         beam_parameters = PhotonBeamParameters(
-                photon_energy=4.96e3,
+                photon_energy=4.96e3*electronvolt,
                 photon_energy_relative_bandwidth=0.01,
-                beam_diameter_fwhm=2e-6,
-                divergence=2e-6,
-                pulse_energy=1e3)
+                beam_diameter_fwhm=2e-6*meter,
+                divergence=2e-6*radian,
+                pulse_energy=1e-3*joule)
 
         # Attempt to construct an instance of the class.
         parameters = CrystFELPhotonDiffractorParameters(
@@ -115,23 +105,25 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
                 number_of_background_photons=100,
                 poissonize=True,
                 suppress_fringes=True,
-                crystal_size_range=[10,100],
+                crystal_size_min=10.0e-9*meter,
+                crystal_size_max=100.0e-9*meter,
                 uniform_rotation=False,
                 beam_parameters=beam_parameters,
-                geometry=TestUtilities.generateTestFilePath('simple.geom'))
+                detector_geometry=TestUtilities.generateTestFilePath('simple.geom'))
 
 
         # Check all parameters are set as intended.
         self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
         self.assertTrue( parameters.powder )
-        self.assertEqual( parameters.crystal_size_range, (10.,100.) )
+        self.assertEqual( parameters.crystal_size_min.m_as(meter), 10.e-9 )
+        self.assertEqual( parameters.crystal_size_max.m_as(meter), 100.e-9 )
         self.assertTrue( parameters.poissonize )
         self.assertEqual( parameters.number_of_background_photons, 100 )
         self.assertTrue( parameters.suppress_fringes )
         self.assertIsInstance( parameters.beam_parameters, PhotonBeamParameters )
-        self.assertEqual( parameters.beam_parameters.photon_energy, 4.96e3 )
-        self.assertEqual( parameters.geometry, TestUtilities.generateTestFilePath('simple.geom') )
+        self.assertEqual( parameters.beam_parameters.photon_energy.m_as(electronvolt), 4.96e3 )
+        self.assertEqual( parameters.detector_geometry, TestUtilities.generateTestFilePath('simple.geom') )
 
     def testSettersAndQueries(self):
         """ Testing the default construction of the class using a dictionary. """
@@ -148,7 +140,8 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         parameters.number_of_background_photons=100
         parameters.poissonize=True
         parameters.suppress_fringes=True
-        parameters.crystal_size_range=[10,100]
+        parameters.crystal_size_min=10.0e-9*meter
+        parameters.crystal_size_max=100.0e-9*meter
         parameters.uniform_rotation=False
 
         # Check all parameters are set as intended.
@@ -156,10 +149,56 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
         self.assertTrue( parameters.powder )
-        self.assertEqual( parameters.crystal_size_range, (10.,100.) )
+        self.assertEqual( parameters.crystal_size_min, 10.0e-9*meter )
+        self.assertEqual( parameters.crystal_size_max, 100.0e-9*meter )
         self.assertTrue( parameters.poissonize )
         self.assertEqual( parameters.number_of_background_photons, 100 )
         self.assertTrue( parameters.suppress_fringes )
+
+    def testCrystalSizes(self):
+        """ Test the various ways to set the crystal size range. """
+        # Construct with only minimum size.
+        parameters = CrystFELPhotonDiffractorParameters(sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+        powder=True,
+        number_of_diffraction_patterns=10,
+        number_of_background_photons=100,
+        poissonize=True,
+        suppress_fringes=True,
+        crystal_size_min=10.0e-9*meter,
+        uniform_rotation=False,
+        )
+
+        self.assertEqual( parameters.crystal_size_min, parameters.crystal_size_max )
+
+        # Construct with only max size.
+        parameters = CrystFELPhotonDiffractorParameters(sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+        powder=True,
+        number_of_diffraction_patterns=10,
+        number_of_background_photons=100,
+        poissonize=True,
+        suppress_fringes=True,
+        crystal_size_max=10.0e-9*meter,
+        uniform_rotation=False,
+        )
+
+        self.assertEqual( parameters.crystal_size_min, parameters.crystal_size_max )
+
+        # Construct with both sizes set.
+        parameters = CrystFELPhotonDiffractorParameters(
+                sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+                powder=True,
+                number_of_diffraction_patterns=10,
+                number_of_background_photons=100,
+                poissonize=True,
+                suppress_fringes=True,
+                crystal_size_min=10.0e-9*meter,
+                crystal_size_max=100.0e-9*meter,
+                uniform_rotation=False,
+                )
+
+        self.assertNotEqual( parameters.crystal_size_min, parameters.crystal_size_max )
+
+
 
 if __name__ == '__main__':
     unittest.main()

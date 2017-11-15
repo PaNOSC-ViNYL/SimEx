@@ -1,3 +1,4 @@
+""" Module that holds the CrystFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -19,12 +20,12 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the CrystFELPhotonDiffractorParameters class.  """
 import os
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysicalQuantity
 from SimEx.Utilities import IOUtilities
+from SimEx.Utilities.Units import meter
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
@@ -37,12 +38,13 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 number_of_diffraction_patterns=None,
                 powder=None,
                 intensities_file=None,
-                crystal_size_range=None,
+                crystal_size_min=None,
+                crystal_size_max=None,
                 poissonize=None,
                 number_of_background_photons=None,
                 suppress_fringes=None,
                 beam_parameters=None,
-                geometry=None,
+                detector_geometry=None,
                 **kwargs
                 ):
         """
@@ -60,8 +62,11 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param intensities_file: Location of file that contains intensities and phases at reciprocal lattice points. See CrystFEL documentation for more info. Default: Constant intensities and phases across entire sample.
         :type intensities_file: str
 
-        :param crystal_size_range: (Min,Max) tuple specifying the minimum and maximum of crystal sizes to sample.
-        :type crystal_size_range: tuple or list of length 2
+        :param crystal_size_min: Minimum crystal size.
+        :type crystal_size_min: PhysicalQuantity with unit of length (meter).
+
+        :param crystal_size_max: Maximum crystal size.
+        :type crystal_size_max: PhysicalQuantity with unit of length (meter).
 
         :param poissonize: Whether to add Poisson noise to pixel values.
         :type poissonize: bool
@@ -78,8 +83,8 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param beam_parameters: Path of the beam parameter file.
         :type beam_parameters: str
 
-        :param geometry: Path of the beam geometry file.
-        :type geometry: str
+        :param detector_geometry: Path of the beam geometry file.
+        :type detector_geometry: str
 
         :param kwargs: Key-value pairs to pass to the parent class.
         """
@@ -91,13 +96,21 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.uniform_rotation = uniform_rotation
         self.powder = powder
         self.intensities_file = intensities_file
-        self.crystal_size_range = crystal_size_range
+        self.crystal_size_min = crystal_size_min
+        self.crystal_size_max = crystal_size_max
         self.poissonize = poissonize
         self.number_of_background_photons = number_of_background_photons
         self.suppress_fringes = suppress_fringes
         self.beam_parameters = beam_parameters
-        self.geometry = geometry
+        self.detector_geometry = detector_geometry
         self.number_of_diffraction_patterns = number_of_diffraction_patterns
+
+        # Handle single size case:
+        if self.crystal_size_min is None or self.crystal_size_max is None:
+            if self.crystal_size_min is None:
+                self.crystal_size_min = self.crystal_size_max
+            else:
+                self.crystal_size_max = self.crystal_size_min
 
         super(CrystFELPhotonDiffractorParameters, self).__init__(**kwargs)
 
@@ -137,19 +150,25 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.__intensities_file = checkAndSetInstance( str, val, None)
 
     @property
-    def crystal_size_range(self):
-        """ Query the 'crystal_size_range' parameter. """
-        return self.__crystal_size_range
-    @crystal_size_range.setter
-    def crystal_size_range(self, val):
-        """ Set the 'crystal_size_range' parameter to val."""
+    def crystal_size_min(self):
+        """ Query the 'crystal_size_min' parameter. """
+        return self.__crystal_size_min
+    @crystal_size_min.setter
+    def crystal_size_min(self, val):
+        """ Set the 'crystal_size_min' parameter to val."""
         # Check if iterable.
-        if val is None:
-            self.__crystal_size_range = None
-        if hasattr(val, '__iter__'):
-            if len(val) != 2:
-                raise ValueError( 'The parameter "crystal_size_range" must be an iterable (list or tuple) of length 2.')
-            self.__crystal_size_range = tuple(val)
+        self.__crystal_size_min = checkAndSetPhysicalQuantity(val, None, meter )
+
+    @property
+    def crystal_size_max(self):
+        """ Query the 'crystal_size_max' parameter. """
+        return self.__crystal_size_max
+    @crystal_size_max.setter
+    def crystal_size_max(self, val):
+        """ Set the 'crystal_size_max' parameter to val."""
+        # Check if iterable.
+        self.__crystal_size_max = checkAndSetPhysicalQuantity(val, None, meter )
+
     @property
     def poissonize(self):
         """ Query the 'poissonize' parameter. """
@@ -216,19 +235,19 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 raise IOError("The beam_parameters %s is not a valid file or filename." % (self.__beam_parameters) )
 
     @property
-    def geometry(self):
-        """ Query for the 'geometry' parameter. """
-        return self.__geometry
-    @geometry.setter
-    def geometry(self, value):
-        """ Set the 'geometry' parameter to a given value.
-        :param value: The value to set 'geometry' to.
+    def detector_geometry(self):
+        """ Query for the 'detector_geometry' parameter. """
+        return self.__detector_geometry
+    @detector_geometry.setter
+    def detector_geometry(self, value):
+        """ Set the 'detector_geometry' parameter to a given value.
+        :param value: The value to set 'detector_geometry' to.
         """
-        self.__geometry = checkAndSetInstance( str, value, None )
+        self.__detector_geometry = checkAndSetInstance( str, value, None )
 
-        if self.__geometry is not None:
-            if not os.path.isfile( self.__geometry):
-                raise IOError("The geometry %s is not a valid file or filename." % (self.__geometry) )
+        if self.__detector_geometry is not None:
+            if not os.path.isfile( self.__detector_geometry):
+                raise IOError("The detector_geometry %s is not a valid file or filename." % (self.__detector_geometry) )
         else:
             print ("WARNING: Geometry file not set, calculation will most probably fail.")
 
