@@ -140,6 +140,31 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual( parameters.beam_parameters, self.beam )
         self.assertEqual( parameters.detector_geometry, self.detector_geometry )
 
+    def testConstructionWithSample(self):
+        """ Testing the construction of the class with a PhotonBeamParameters instance. """
+
+        # Attempt to construct an instance of the class.
+        parameters = SingFELPhotonDiffractorParameters(
+                sample='5udc.pdb',
+                detector_geometry=self.detector_geometry,
+                beam_parameters=self.beam
+                )
+
+        # Check instance and inheritance.
+        self.assertIsInstance( parameters, SingFELPhotonDiffractorParameters )
+        self.assertIsInstance( parameters, AbstractCalculatorParameters )
+
+        # Check all parameters are set to default values.
+        self.assertEqual( parameters.sample, '5udc.pdb' )
+        self.assertEqual( parameters.uniform_rotation, None )
+        self.assertFalse( parameters.calculate_Compton )
+        self.assertEqual( parameters.slice_interval, 100 )
+        self.assertEqual( parameters.number_of_slices, 1 )
+        self.assertEqual( parameters.pmi_start_ID, 1 )
+        self.assertEqual( parameters.pmi_stop_ID, 1 )
+        self.assertEqual( parameters.beam_parameters, self.beam )
+        self.assertEqual( parameters.detector_geometry, self.detector_geometry )
+
     def testLegacyDictionary(self):
         """ Check parameter object can be initialized via a old-style dictionary. """
         parameters_dict = { 'uniform_rotation': False,

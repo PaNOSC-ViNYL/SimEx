@@ -33,6 +33,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
 
     def __init__(self,
+                sample=None,
                 uniform_rotation=None,
                 calculate_Compton=None,
                 slice_interval=None,
@@ -48,6 +49,9 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
+
+        :param sample: Name of file containing atomic sample geometry (default None).
+        :type sample: str
 
         :param uniform_rotation: Whether to perform uniform sampling of rotation space.
         :type uniform_rotation: bool, default True
@@ -82,26 +86,27 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """
         # Legacy support for dictionaries.
         if parameters_dictionary is not None:
-            self.uniform_rotation = parameters_dictionary['uniform_rotation']
-            self.calculate_Compton = parameters_dictionary['calculate_Compton']
-            self.slice_interval = parameters_dictionary['slice_interval']
-            self.number_of_slices = parameters_dictionary['number_of_slices']
-            self.pmi_start_ID = parameters_dictionary['pmi_start_ID']
-            self.pmi_stop_ID = parameters_dictionary['pmi_stop_ID']
-            self.beam_parameters = parameters_dictionary['beam_parameters']
-            self.detector_geometry = parameters_dictionary['detector_geometry']
+            self.uniform_rotation               = parameters_dictionary['uniform_rotation']
+            self.calculate_Compton              = parameters_dictionary['calculate_Compton']
+            self.slice_interval                 = parameters_dictionary['slice_interval']
+            self.number_of_slices               = parameters_dictionary['number_of_slices']
+            self.pmi_start_ID                   = parameters_dictionary['pmi_start_ID']
+            self.pmi_stop_ID                    = parameters_dictionary['pmi_stop_ID']
+            self.beam_parameters                = parameters_dictionary['beam_parameters']
+            self.detector_geometry              = parameters_dictionary['detector_geometry']
             self.number_of_diffraction_patterns = parameters_dictionary['number_of_diffraction_patterns']
 
         else:
             # Check all parameters.
-            self.uniform_rotation = uniform_rotation
-            self.calculate_Compton = calculate_Compton
-            self.slice_interval = slice_interval
-            self.number_of_slices = number_of_slices
-            self.pmi_start_ID = pmi_start_ID
-            self.pmi_stop_ID = pmi_stop_ID
-            self.beam_parameters = beam_parameters
-            self.detector_geometry = detector_geometry
+            self.sample                         = sample
+            self.uniform_rotation               = uniform_rotation
+            self.calculate_Compton              = calculate_Compton
+            self.slice_interval                 = slice_interval
+            self.number_of_slices               = number_of_slices
+            self.pmi_start_ID                   = pmi_start_ID
+            self.pmi_stop_ID                    = pmi_stop_ID
+            self.beam_parameters                = beam_parameters
+            self.detector_geometry              = detector_geometry
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
 
         super(SingFELPhotonDiffractorParameters, self).__init__(**kwargs)
@@ -111,6 +116,20 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     ### Setters and queries.
+    @property
+    def sample(self):
+        """ Query for the 'sample' parameter. """
+        return self.__sample
+    @sample.setter
+    def sample(self, value):
+        """ Set the 'sample' parameter to a given value.
+        :param value: The value to set 'sample' to.
+        """
+        # Allow None.
+        if value is not None:
+            value = checkAndSetInstance( str, value, None )
+        self.__sample = value
+
     @property
     def uniform_rotation(self):
         """ Query for the 'uniform_rotation' parameter. """

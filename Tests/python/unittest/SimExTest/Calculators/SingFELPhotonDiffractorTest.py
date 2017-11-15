@@ -385,6 +385,44 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
 
+    def testBackengineWithSample(self):
+        """ Test that we can start a test calculation if the sample was given via the parameters . """
+
+        # Cleanup.
+        sample_file = '5udc.pdb'
+        self.__dirs_to_remove.append('diffr')
+        self.__files_to_remove.append( sample_file )
+
+        # Make sure sample file does not exist.
+        if sample_file in os.listdir( os.getcwd() ):
+            os.remove( sample_file )
+
+        parameters = SingFELPhotonDiffractorParameters(
+                     sample='5udc.pdb',
+                     uniform_rotation = False,
+                     calculate_Compton = False,
+                     slice_interval = 100,
+                     number_of_slices = 5,
+                     pmi_start_ID = 1,
+                     pmi_stop_ID = 1,
+                     number_of_diffraction_patterns= 1,
+                     beam_parameters=self.beam,
+                     detector_geometry= self.detector_geometry,
+                     forced_mpi_command='mpirun')
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(
+                parameters=parameters,
+                input_path=None,
+                output_path='diffr'
+                )
+
+        # Call backengine.
+        status = diffractor.backengine()
+
+        # Check successful completion.
+        self.assertEqual(status, 0)
+
 
     def testBackengineInputFile(self):
         """ Test that we can start a test calculation if the input path is a single file. """
@@ -428,7 +466,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun')
+                     forced_mpi_command='mpirun',
+                     )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=TestUtilities.generateTestFilePath('pmi_out'), output_path='diffr')
