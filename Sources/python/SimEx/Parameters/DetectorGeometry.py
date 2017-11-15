@@ -317,22 +317,34 @@ class DetectorPanel(AbstractBaseClass):
         serialization += "panel%s/max_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_max"])
         serialization += "panel%s/min_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_min"])
         serialization += "panel%s/max_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_max"])
+        number_of_pixels_fast = self.ranges["fast_scan_max"] - self.ranges["fast_scan_min"] + 1
+        number_of_pixels_slow = self.ranges["slow_scan_max"] - self.ranges["slow_scan_min"] + 1
+
+        serialization += "panel%s/px            = %d\n" % (panel_id_str, number_of_pixels_fast)
+        serialization += "panel%s/py            = %d\n" % (panel_id_str, number_of_pixels_slow)
         serialization += "panel%s/corner_x      = %d\n" % (panel_id_str, self.corners["x"])
         serialization += "panel%s/corner_y      = %d\n" % (panel_id_str, self.corners["y"])
         serialization += "panel%s/fs            = %s\n" % (panel_id_str, self.fast_scan_xyz)
         serialization += "panel%s/ss            = %s\n" % (panel_id_str, self.slow_scan_xyz)
-        serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.magnitude)
-        serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.magnitude)
-        serialization += "panel%s/coffset       = %8.7e\n" % (panel_id_str, self.distance_offset.magnitude)
+        serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.m_as(meter))
+        serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.m_as(meter))
+        serialization += "panel%s/pix_width     = %8.7e\n" % (panel_id_str, self.pixel_size.m_as(meter))
+        serialization += "panel%s/coffset       = %8.7e\n" % (panel_id_str, self.distance_offset.m_as(meter))
         if self.energy_response is not None:
-            serialization += "panel%s/adu_per_eV    = %8.7e\n" % (panel_id_str, self.energy_response.magnitude)
+            serialization += "panel%s/adu_per_eV    = %8.7e\n" % (panel_id_str, self.energy_response.m_as(1/electronvolt))
         if self.photon_response is not None:
             serialization += "panel%s/adu_per_photon= %8.7e\n" % (panel_id_str, self.photon_response)
-        #serialization += "panel%s/max_adu       = %8.7e\n" % (panel_id_str, self.saturation_adu)
-        #serialization += "panel%s/mask          = %8.7e\n" % (panel_id_str, self.mask.magnitude)
-        #serialization += "panel%s/mask_good     = %8.7e\n" % (panel_id_str, self.good_bit_mask.magnitude)
-        #serialization += "panel%s/mask_bad      = %8.7e\n" % (panel_id_str, self.bad_bit_mask.magnitude)
-        #serialization += "panel%s/saturation_map= %8.7e\n" % (panel_id_str, self.saturation_map.magnitude)
+        if self.saturation_adu is not None:
+            serialization += "panel%s/max_adu       = %8.7e\n" % (panel_id_str, self.saturation_adu)
+        if self.mask is not None:
+            serialization += "panel%s/badpixmap     = %s\n" % (panel_id_str, str(self.mask.magnitude))
+            serialization += "panel%s/badpixmap     = %s\n" % (panel_id_str, str(self.mask.magnitude))
+        if self.good_bit_mask is not None:
+            serialization += "panel%s/mask_good     = %d\n" % (panel_id_str, self.good_bit_mask.magnitude)
+        if self.bad_bit_mask is not None:
+            serialization += "panel%s/mask_bad      = %d\n" % (panel_id_str, self.bad_bit_mask.magnitude)
+        if self.saturation_adu is not None:
+            serialization += "panel%s/saturation_map= %s\n" % (panel_id_str, str(self.saturation_map.magnitude) )
         serialization += "\n"
 
         # Finally write the serialized panel.

@@ -48,13 +48,13 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Setting up the test class. """
         cls.input_h5 = TestUtilities.generateTestFilePath('pmi_out_0000001.h5')
         detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
-                                                'fast_scan_max' : 1023,
+                                                'fast_scan_max' : 21,
                                                 'slow_scan_min' : 0,
-                                                'slow_scan_max' : 1023},
+                                                'slow_scan_max' : 21},
                                         pixel_size=2.2e-4*meter,
                                         photon_response=1.0,
                                         distance_from_interaction_plane=0.13*meter,
-                                        corners={'x': -512, 'y' : 512},
+                                        corners={'x': -11, 'y' : -11},
                                         )
 
         cls.detector_geometry = DetectorGeometry(panels=[detector_panel])
@@ -318,11 +318,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr')
 
         # Call backengine.
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
-
         status = diffractor.backengine()
 
         # Check successful completion.
@@ -374,7 +369,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
-                     beam_parameters= self.beam,
                      detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun')
 
@@ -406,7 +400,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
-                     beam_parameters= self.beam,
                      detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun')
 
@@ -434,7 +427,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
-                     beam_parameters= self.beam,
                      detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun')
 
@@ -460,7 +452,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID= 1,
                      pmi_stop_ID = 9,
                      number_of_diffraction_patterns= 1,
-                     beam_parameters= self.beam,
                      detector_geometry= self.detector_geometry,
                    )
 
@@ -482,7 +473,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'pmi_start_ID' : 1,
                      'pmi_stop_ID'  : 4,
                      'number_of_diffraction_patterns' : 2,
-                     'beam_parameters': self.beam,
+                     'beam_parameters' : None,
                      'detector_geometry' : self.detector_geometry,
                      'number_of_MPI_processes' : 8,
                    }
@@ -529,7 +520,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        pmi_start_ID = 1,
                                                        pmi_stop_ID  = 1,
                                                        number_of_diffraction_patterns = 1,
-                                                       beam_parameters = self.beam,
                                                        detector_geometry = self.detector_geometry
                                                        )
 

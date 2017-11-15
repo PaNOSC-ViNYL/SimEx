@@ -148,9 +148,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
 
-        beam_parameter_file = "tmp.beam"
-        self.parameters.beam_parameters.serialize(beam_parameter_file)
-
         beam_geometry_file = "tmp.geom"
         self.parameters.detector_geometry.serialize(beam_geometry_file)
 
@@ -170,7 +167,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(output_dir),
-                            '--beamFile',         str(beam_parameter_file),
                             '--geomFile',         str(beam_geometry_file),
                             '--configFile',       str(config_file),
                             '--uniformRotation',  str(uniform_rotation),
@@ -182,6 +178,13 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--numDP',            str(number_of_diffraction_patterns),
                             '--prepHDF5File',     preph5_location,
                             ]
+
+        if self.parameters.beam_parameters is not None:
+            beam_parameter_file = "tmp.beam"
+            self.parameters.beam_parameters.serialize(beam_parameter_file)
+
+            command_sequence.append('--beamFile')
+            command_sequence.append(str(beam_parameter_file))
 
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
