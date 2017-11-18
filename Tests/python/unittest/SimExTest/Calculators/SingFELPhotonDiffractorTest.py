@@ -369,7 +369,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = None,
                      detector_geometry = self.detector_geometry,
-                     forced_mpi_command='mpirun',
                      )
 
         # Construct the object.
@@ -420,25 +419,23 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # Cleanup.
         sample_file = '5udc.pdb'
-        self.__dirs_to_remove.append('diffr')
-        self.__files_to_remove.append( sample_file )
+        #sample_file = '2nip.pdb'
+        #self.__dirs_to_remove.append('diffr')
+        #self.__files_to_remove.append( sample_file )
 
         # Make sure sample file does not exist.
         if sample_file in os.listdir( os.getcwd() ):
             os.remove( sample_file )
 
         parameters = SingFELPhotonDiffractorParameters(
-                     sample='5udc.pdb',
+                     sample=sample_file,
                      uniform_rotation = False,
                      calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 5,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
-                     number_of_diffraction_patterns= 1,
+                     number_of_diffraction_patterns= 2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun')
+                     forced_mpi_command='mpirun',
+                     )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(
@@ -452,6 +449,11 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # Check successful completion.
         self.assertEqual(status, 0)
+
+        # Check expected files exist.
+        self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
+        self.assertIn( 'diffr_out_0000001.h5', os.listdir( diffractor.output_path ) )
+        self.assertIn( 'diffr_out_0000002.h5', os.listdir( diffractor.output_path ) )
 
 
     def testBackengineInputFile(self):

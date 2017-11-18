@@ -28,6 +28,7 @@ import os
 from SimEx import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities import ParallelUtilities
 
 import dill
 import sys
@@ -117,7 +118,6 @@ class AbstractBaseCalculator(AbstractBaseClass):
         # To be implemented by specialized calculator.
         pass
 
-# TODO : think - should we make it abstract and remove default call of backengine?
 #    @abstractmethod
     def _run(self):
         """
@@ -144,6 +144,22 @@ class AbstractBaseCalculator(AbstractBaseClass):
             dill.dump(self, open(fname, "w"))
         except:
             raise exceptions.IOError("Cannot dump to file "+fname)
+
+    #def computeNTasks(self):
+        #resources=ParallelUtilities.getParallelResourceInfo()
+        #nnodes=resources['NNodes']
+        #ncores=resources['NCores']
+
+        #cpusPerTask=self.parameters.cpus_per_task
+
+        #if cpusPerTask=="MAX":
+            #np=nnodes
+            #ncores=0
+        #else:
+            #np=max(1,int(ncores/int(cpusPerTask)))
+            #ncores=int(cpusPerTask)
+
+        #return (np,ncores)
 
 
 

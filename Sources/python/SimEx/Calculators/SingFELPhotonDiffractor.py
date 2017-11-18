@@ -20,13 +20,21 @@
 #                                                                        #
 ##########################################################################
 
+from pysingfel.FileIO import saveAsDiffrOutFile, prepH5
+from pysingfel.beam import Beam
+from pysingfel.detector import Detector
+from pysingfel.diffraction import calculate_molecularFormFactorSq
+from pysingfel.particle import Particle
+from pysingfel.radiationDamage import generateRotations, rotateParticle
+from pysingfel.toolbox import convert_to_poisson
+import copy
 import h5py
 import inspect
 import os
 import subprocess,shlex
+import time
 
-import prepHDF5
-
+from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Utilities import ParallelUtilities
@@ -122,16 +130,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             np=max(int(ncores/int(self.parameters.cpus_per_task)),1)
 
-        return np
+        return np,ncores
 
     def backengine(self):
         """ This method drives the backengine singFEL."""
-
-                # Link the  python utility so the backengine can find it.
-        ### Yes, this is messy.
-        preph5_location = inspect.getsourcefile(prepHDF5)
-        if preph5_location is None:
-            raise RuntimeError("prepHDF5.py not found. Aborting the calculation.")
 
         uniform_rotation = self.parameters.uniform_rotation
         calculate_Compton = int( self.parameters.calculate_Compton )
@@ -141,6 +143,20 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
 
+        if not os.path.isdir( self.output_path ):
+            os.mkdir( self.output_path )
+        self.__output_dir = self.output_path
+
+        # If the sample is passed as a pdb, branch out to separate backengine implementation.
+        if self.input_path.split(".")[-1].lower() == 'pdb':
+            if not os.path.isfile(self.input_path):
+                # Attempt to query from pdb.
+                self.input_path = IOUtilities.checkAndGetPDB(self.input_path)
+
+            return self._backengineWithPdb()
+
+        # Ok, not a pdb, proceed.
+        # Serialize the geometry file.
         beam_geometry_file = "tmp.geom"
         self.parameters.detector_geometry.serialize(beam_geometry_file)
 
@@ -153,27 +169,18 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         elif os.path.isfile( self.input_path ):
             input_dir = os.path.dirname( self.input_path )
 
-        else:
-            # Attempt to query from pdb.
-            self.input_path = IOUtilities.checkAndGetPDB(self.input_path)
-            input_dir = os.path.dirname( self.input_path )
-
-        if not os.path.isdir( self.output_path ):
-            os.mkdir( self.output_path )
-        output_dir = self.output_path
-
         config_file = '/dev/null'
 
         # collect MPI arguments
         if self.parameters.forced_mpi_command=="":
-            np=self.computeNTasks()
+            np, ncores=self.computeNTasks()
             mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
         else:
             mpicommand=self.parameters.forced_mpi_command
 # collect program arguments
         command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
-                            '--outputDir',        str(output_dir),
+                            '--outputDir',        str(self.__output_dir),
                             '--geomFile',         str(beam_geometry_file),
                             '--configFile',       str(config_file),
                             '--uniformRotation',  str(uniform_rotation),
@@ -183,7 +190,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                             '--pmiStartID',       str(pmi_start_ID),
                             '--pmiEndID',         str(pmi_stop_ID),
                             '--numDP',            str(number_of_diffraction_patterns),
-                            '--prepHDF5File',     preph5_location,
                             ]
 
 
@@ -206,6 +212,155 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Return the return code from the backengine.
         return proc.returncode
+
+    def _backengineWithPdb(self):
+        """ """
+        """ Run the diffraction simulation if the sample is a pdb. Codes is based on pysingfel/tests/test_particle.test_calFromPDB"""
+
+        # Dump self to file.
+        fname = IOUtilities.getTmpFileName()
+        self.dumpToFile(fname)
+
+        # Setup the mpi call.
+        forcedMPIcommand=self.parameters.forced_mpi_command
+
+        if forcedMPIcommand=="" or forcedMPIcommand is None:
+            (np,ncores)=self.computeNTasks()
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np,ncores)
+        else:
+            mpicommand=forcedMPIcommand
+
+        if 'SIMEX_VERBOSE' in os.environ:
+            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
+                print("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand)
+
+        mpicommand+=" python "+__file__+" "+fname
+
+        args = shlex.split(mpicommand)
+
+        # Launch the system command.
+        proc = subprocess.Popen(args,universal_newlines=True)
+        proc.wait()
+        os.remove(fname)
+
+        return proc.returncode
+
+
+    def _run(self):
+
+        # Local import of MPI to avoid premature call to MPI.init().
+        from mpi4py import MPI
+
+        # Initialize MPI
+        mpi_comm = MPI.COMM_WORLD
+        mpi_rank = mpi_comm.Get_rank()
+        mpi_size = mpi_comm.Get_size()
+
+        # Initialize time
+        start = time.time()
+
+        # Perform common work on all cores.
+        initial_particle = Particle()
+        initial_particle.readPDB(self.input_path, ff='WK')
+
+        # Generate rotations.
+        quaternions = generateRotations(
+                self.parameters.uniform_rotation,
+                'xyz',
+                self.parameters.number_of_diffraction_patterns,
+                )
+
+        # Setup the pysingfel detector using the simex object.
+        ### TODO: only the first panel is considered for now, can loop over panels later.
+        detector = Detector(None)  # read geom file
+        panel = self.parameters.detector_geometry.panels[0]
+        detector.set_detector_dist( panel.distance_from_interaction_plane.m_as(meter) )
+        detector.set_pix_width( panel.pixel_size.m_as(meter) )
+        detector.set_pix_height( panel.pixel_size.m_as(meter) )
+        detector.set_numPix(  panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,  # y
+                              panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"] + 1   # x
+                              )
+        detector.set_center_x( (panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] +1 ) / 2.)
+        detector.set_center_y( (panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] +1 ) / 2.)
+
+        # Setup the beam based on the PhotonBeamParameters instance.
+        beam = Beam(None)
+        simex_beam = self.parameters.beam_parameters
+        beam.set_photon_energy(  simex_beam.photon_energy.m_as(electronvolt) )
+        beam.set_focus( simex_beam.beam_diameter_fwhm.m_as(meter) )
+        beam.set_photonsPerPulse( simex_beam.pulse_energy.m_as(joule) / simex_beam.photon_energy.m_as(joule) ) # Will update all other attributes.
+
+        # Initialize diffraction pattern
+        detector.init_dp(beam)
+
+        # Determine which patterns to run on which core.
+        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns / mpi_size
+        # Remainder of the division.
+        remainder = self.parameters.number_of_diffraction_patterns % mpi_size
+        # Pattern indices
+        pattern_indices = range(self.parameters.number_of_diffraction_patterns)
+
+        # Distribute patterns over cores.
+        rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
+
+        # Distribute remainder
+        if mpi_rank < remainder:
+            rank_indices.append( pattern_indices[mpi_size * number_of_patterns_per_core + mpi_rank] )
+
+        # Setup the output file.
+        outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(mpi_comm.Get_rank()+1) + '.h5'
+        if os.path.exists(outputName):
+            os.remove(outputName)
+
+        output_is_ready = False
+        # Loop over assigned tasks
+        for pattern_index in rank_indices:
+
+            # Setup the output hdf5 file if not already done.
+            if not output_is_ready:
+                prepH5(outputName)
+                output_is_ready = True
+
+            # Make local copy of the sample.
+            particle = copy.deepcopy(initial_particle)
+
+            # Rotate particle.
+            quaternion = quaternions[pattern_index,:]
+            rotateParticle(quaternion, particle)
+
+            # Calculate the diffraction intensity.
+            detector_intensity = calculate_molecularFormFactorSq(particle, detector)
+
+            # Correct for solid angle
+            detector_intensity *= detector.solidAngle
+
+            #Correct for polarization
+            detector_intensity *= detector.PolarCorr
+
+            #Multiply by photon fluence.
+            detector_intensity *= beam.get_photonsPerPulsePerArea()
+
+            # Poissonize.
+            detector_counts = convert_to_poisson(detector_intensity)
+
+
+            # Save to h5 file.
+            saveAsDiffrOutFile(
+                    outputName,
+                    None,
+                    pattern_index,
+                    detector_counts,
+                    detector_intensity,
+                    quaternion,
+                    detector,
+                    beam,
+                    )
+
+            del particle
+
+        mpi_comm.Barrier()
+
+        return 0
 
     @property
     def data(self):
@@ -274,6 +429,5 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         self.output_path = self.output_path+".h5"
 
 
-
-
-
+if __name__ == '__main__':
+    SingFELPhotonDiffractor.runFromCLI()
