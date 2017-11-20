@@ -3,7 +3,7 @@
 # Sample installation script. Adjustments might be neccessary.
 
 INSTALL_PREFIX=$PWD
-THIRD_PARTY_ROOT=/usr
+THIRD_PARTY_ROOT=/home/grotec/local
 
 # Check for existing build directory, remove if foun.d
 if [ -d build ]
@@ -25,7 +25,6 @@ export FC=ifort
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}/local
 export Boost_NO_SYSTEM_PATHS=ON
-export ARMA_DIR=${THIRD_PARTY_ROOT}
 
 
 #TODO:

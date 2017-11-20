@@ -418,10 +418,9 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Test that we can start a test calculation if the sample was given via the parameters . """
 
         # Cleanup.
-        sample_file = '5udc.pdb'
-        #sample_file = '2nip.pdb'
-        #self.__dirs_to_remove.append('diffr')
-        #self.__files_to_remove.append( sample_file )
+        sample_file = '2nip.pdb'
+        self.__dirs_to_remove.append('diffr')
+        self.__files_to_remove.append( sample_file )
 
         # Make sure sample file does not exist.
         if sample_file in os.listdir( os.getcwd() ):
@@ -434,7 +433,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns= 2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun',
+                     forced_mpi_command='mpirun -np 2 -map-by node',
                      )
 
         # Construct the object.
