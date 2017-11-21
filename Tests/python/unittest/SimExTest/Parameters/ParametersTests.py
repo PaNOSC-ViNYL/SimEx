@@ -35,13 +35,14 @@ from WavePropagatorParametersTest import WavePropagatorParametersTest
 # Setup the suite.
 def suite():
     suites = [
-             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,             'test'),
-             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,          'test'),
-             unittest.makeSuite(EMCOrientationParametersTest,                   'test'),
-             unittest.makeSuite(DMPhasingParametersTest,                        'test'),
-             unittest.makeSuite(WavePropagatorParametersTest,                   'test'),
-             unittest.makeSuite(PhotonBeamParametersTest,                       'test'),
-             unittest.makeSuite(EstherPhotonMatterInteractorParametersTest,     'test'),
+             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
+             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,         'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,      'test'),
+             unittest.makeSuite(EMCOrientationParametersTest,               'test'),
+             unittest.makeSuite(DMPhasingParametersTest,                    'test'),
+             unittest.makeSuite(WavePropagatorParametersTest,               'test'),
+             unittest.makeSuite(PhotonBeamParametersTest,                   'test'),
+             unittest.makeSuite(EstherPhotonMatterInteractorParametersTest, 'test'),
              ]
 
     return unittest.TestSuite(suites)

@@ -44,7 +44,6 @@ is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_
 # Setup the suite.
 def suite():
     suites = [
-             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
              unittest.makeSuite(CrystFELPhotonDiffractorTest,               'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
