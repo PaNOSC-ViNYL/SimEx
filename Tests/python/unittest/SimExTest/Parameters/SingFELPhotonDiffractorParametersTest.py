@@ -191,7 +191,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual( parameters.pmi_stop_ID, 5 )
         self.assertEqual( parameters.beam_parameters, None )
         self.assertEqual( parameters.detector_geometry, self.detector_geometry)
-
+        self.assertIsNone(parameters.sample)
 
 if __name__ == '__main__':
     unittest.main()

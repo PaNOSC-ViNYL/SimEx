@@ -86,6 +86,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """
         # Legacy support for dictionaries.
         if parameters_dictionary is not None:
+            self.sample                         = None
             self.uniform_rotation               = parameters_dictionary['uniform_rotation']
             self.calculate_Compton              = parameters_dictionary['calculate_Compton']
             self.slice_interval                 = parameters_dictionary['slice_interval']

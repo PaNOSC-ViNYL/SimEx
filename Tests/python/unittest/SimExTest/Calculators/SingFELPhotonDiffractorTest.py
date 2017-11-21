@@ -163,11 +163,9 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'detector_geometry' : self.detector_geometry,
                    }
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
-
-        self.assertEqual( diffractor.input_path,  os.path.abspath( 'pmi') )
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
     def testConstructionWithSample(self):
@@ -223,11 +221,12 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      'number_of_MPI_processes' : 2,
                    }
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
 
+        # Check type.
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
 
-        self.assertEqual( diffractor.input_path,  os.path.abspath( 'pmi') )
+        # Check default output_path.
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
     def testConstructionExceptions(self):
@@ -402,7 +401,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      forced_mpi_command='mpirun')
 
         # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
 
         # Call backengine.
         status = diffractor.backengine()
@@ -419,8 +418,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # Cleanup.
         sample_file = '2nip.pdb'
-        #self.__dirs_to_remove.append('diffr')
-        #self.__files_to_remove.append( sample_file )
+        self.__dirs_to_remove.append('diffr')
+        self.__files_to_remove.append( sample_file )
 
         # Make sure sample file does not exist.
         if sample_file in os.listdir( os.getcwd() ):
