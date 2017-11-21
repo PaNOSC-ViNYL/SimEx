@@ -35,7 +35,6 @@ from Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis
 from AbstractBaseClass import AbstractBaseClass
 from Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
-from Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from Calculators.DMPhasing import DMPhasing
 from Calculators.EMCCaseGenerator import EMCCaseGenerator
 from Calculators.EMCOrientation import EMCOrientation
@@ -50,6 +49,7 @@ from Calculators.XFELPhotonSource import XFELPhotonSource
 from Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 
 from Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from Parameters.DMPhasingParameters import DMPhasingParameters
 #from Parameters.DetectorGeometry import DetectorGeometry
 from Parameters.EMCOrientationParameters import EMCOrientationParameters
