@@ -24,7 +24,6 @@ import paths
 import unittest
 
 # Import classes to test.
-from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
 from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
 from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
 from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
