@@ -24,14 +24,16 @@ export FC=ifort
 
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}/local
+export HDF5_ROOT=/usr
 export Boost_NO_SYSTEM_PATHS=ON
-
+CMAKE=/usr/bin/cmake
 
 #TODO:
 # Please edit the pathes below according to your file system
 # If your have another version of xerces_c than 3.1 please edit also the single
 # entry in ./src/CMakeLists.txt which starts with ${XERCES} and ends with .so
-cmake -DSRW_OPTIMIZED=ON \
+${CMAKE} --version
+${CMAKE} -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=ON \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
       -DSingFElPhotonDiffractor=ON \
@@ -44,7 +46,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -Dgenesis=ON\
       -Docelot=ON\
       -DXCSITPhotonDetector=ON \
-      -DXERCESC_ROOT=${THIRD_PARTY_ROOT}\
+      -DXERCESC_ROOT=/usr\
       -DGEANT4_ROOT=${THIRD_PARTY_ROOT}/local \
       -DXCSIT_ROOT=${THIRD_PARTY_ROOT}/local \
       -DBOOST_ROOT=${BOOST_ROOT} \

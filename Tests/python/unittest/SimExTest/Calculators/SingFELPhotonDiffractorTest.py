@@ -419,8 +419,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # Cleanup.
         sample_file = '2nip.pdb'
-        self.__dirs_to_remove.append('diffr')
-        self.__files_to_remove.append( sample_file )
+        #self.__dirs_to_remove.append('diffr')
+        #self.__files_to_remove.append( sample_file )
 
         # Make sure sample file does not exist.
         if sample_file in os.listdir( os.getcwd() ):
@@ -430,10 +430,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      sample=sample_file,
                      uniform_rotation = False,
                      calculate_Compton = False,
-                     number_of_diffraction_patterns= 2,
+                     number_of_diffraction_patterns=2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 -map-by node',
+                     forced_mpi_command='mpirun \
+-np 2 \
+--map-by node \
+--bind-to none \
+-x OMP_NUM_THREADS=2 \
+-x OMPI_MCA_mpi_warn_on_fork=0 \
+-x OMPI_MCA_btl_base_warn_component_unused=0',
                      )
 
         # Construct the object.
@@ -453,7 +459,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( diffractor.output_path ) )
         self.assertIn( 'diffr_out_0000002.h5', os.listdir( diffractor.output_path ) )
-
 
     def testBackengineInputFile(self):
         """ Test that we can start a test calculation if the input path is a single file. """
