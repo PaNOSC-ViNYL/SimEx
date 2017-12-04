@@ -20,14 +20,13 @@
 #                                                                        #
 ##########################################################################
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.Units import meter, electronvolt
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber
+from SimEx.Utilities.Units import meter, electronvolt, joule
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber, checkAndSetPhysicalQuantity
 from SimEx import PhysicalQuantity
 from SimEx import AbstractBaseClass
 
 import numpy
 import sys
-import StringIO
 
 
 
@@ -145,7 +144,7 @@ class DetectorPanel(AbstractBaseClass):
     @pixel_size.setter
     def pixel_size(self, val):
         """ Set the panel pixel_size. """
-        self.__pixel_size = checkAndSetInstance( PhysicalQuantity,  val, 1.0e-4*meter)
+        self.__pixel_size = checkAndSetPhysicalQuantity( val, 1.0e-4*meter, meter)
 
     # energy_response
     @property
@@ -156,7 +155,7 @@ class DetectorPanel(AbstractBaseClass):
     def energy_response(self, val):
         """ Set the panel energy_response. """
         if val is not None:
-            val = checkAndSetInstance( PhysicalQuantity, val, None)
+            val = checkAndSetPhysicalQuantity( val, None, 1./electronvolt)
         self.__energy_response = val
 
         # Invalidate photon response.
@@ -188,7 +187,7 @@ class DetectorPanel(AbstractBaseClass):
     @distance_from_interaction_plane.setter
     def distance_from_interaction_plane(self, val):
         """ Set the panel distance_from_interaction_plane. """
-        self.__distance_from_interaction_plane = checkAndSetInstance( PhysicalQuantity, val, 0.1*meter )
+        self.__distance_from_interaction_plane = checkAndSetPhysicalQuantity( val, 0.1*meter, meter )
 
     # distance_offset
     @property
@@ -198,7 +197,7 @@ class DetectorPanel(AbstractBaseClass):
     @distance_offset.setter
     def distance_offset(self, val):
         """ Set the panel distance_offset. """
-        self.__distance_offset = checkAndSetInstance( PhysicalQuantity, val, 0.0*meter )
+        self.__distance_offset = checkAndSetPhysicalQuantity( val, 0.0*meter, meter)
 
     # fastscan_xyz
     @property
@@ -343,7 +342,7 @@ class DetectorPanel(AbstractBaseClass):
             serialization += "panel%s/mask_good     = %d\n" % (panel_id_str, self.good_bit_mask.magnitude)
         if self.bad_bit_mask is not None:
             serialization += "panel%s/mask_bad      = %d\n" % (panel_id_str, self.bad_bit_mask.magnitude)
-        if self.saturation_adu is not None:
+        if self.saturation_map is not None:
             serialization += "panel%s/saturation_map= %s\n" % (panel_id_str, str(self.saturation_map.magnitude) )
         serialization += "\n"
 
@@ -463,23 +462,23 @@ def _detectorPanelFromString( input_string, common_block=None):
     else:
        panel.distance_offset=None
     if panel_dict["max_adu"] is not None:
-        panel.saturation_adu = float(panel_dict["max_adu"]),
+        panel.saturation_adu = float(panel_dict["max_adu"])
     else:
         panel.saturation_adu = None
     if panel_dict["mask"] is not None:
-        panel.mask = numpy.array( eval(panel_dict["mask"]) ),
+        panel.mask = numpy.array( eval(panel_dict["mask"]) )
     else:
         panel.mask = None
     if panel_dict["mask_good"] is not None:
-        panel.good_bit_mask = panel_dict["mask_good"],
+        panel.good_bit_mask = panel_dict["mask_good"]
     else:
         panel.good_bit_mask = None
     if panel_dict["mask_bad"] is not None:
-        panel.bad_bit_mask = panel_dict["mask_bad"],
+        panel.bad_bit_mask = panel_dict["mask_bad"]
     else:
         panel.bad_bit_mask = None
     if panel_dict["saturation_map"] is not None:
-        panel.saturation_map = panel_dict["saturation_map"],
+        panel.saturation_map = panel_dict["saturation_map"]
     else:
         panel.saturation_map = None
 

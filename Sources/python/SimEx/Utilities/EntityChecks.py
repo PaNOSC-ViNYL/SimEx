@@ -114,9 +114,12 @@ def checkAndSetNumber(var=None, default=None):
     """ Check if input is a numerical type. """
     if var is not None:
         if not isinstance( var, (int, float) ):
-            raise exceptions.TypeError("The default must be a numerical type.")
-        var = default
-    return var
+            raise exceptions.TypeError("The given value must be a numerical type, got %s" % (type(var)))
+        return var
+
+    if not isinstance( default, (int, float)):
+            raise exceptions.TypeError("The default value must be a numerical type, got %s" % (type(default)))
+    return default
 
 def checkAndSetIterable(var=None, default=None):
     """ Check if input is iterable (list, tuple, or array type). """

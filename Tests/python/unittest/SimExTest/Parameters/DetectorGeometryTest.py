@@ -50,7 +50,6 @@ class DetectorGeometryTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
         self.__panel0 =DetectorPanel(
-                dimensions                      = ["ss", "fs"],
                 ranges                          = {
                                                     "fast_scan_min" : 0,
                                                     "fast_scan_max" : 511,
@@ -58,8 +57,7 @@ class DetectorGeometryTest(unittest.TestCase):
                                                     "slow_scan_max" : 1023,
                                                     },
                 pixel_size                      = 2.2e-4*meter,
-                adu_response                    = 1.0,
-                badrow_direction                = None,
+                photon_response                    = 1.0,
                 distance_from_interaction_plane = 0.13*meter,
                 distance_offset                 = 0.0*meter,
                 fast_scan_xyz                   = None,
@@ -148,24 +146,36 @@ panel0/min_fs        = 0
 panel0/max_fs        = 511
 panel0/min_ss        = 512
 panel0/max_ss        = 1023
+panel0/px            = 512
+panel0/py            = 512
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fs = 1.0x
-panel0/ss = 1.0y
+panel0/fs            = 1.0x
+panel0/ss            = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
+panel0/pix_width     = 2.2000000e-04
+panel0/coffset       = 0.0000000e+00
+panel0/adu_per_photon= 1.0000000e+00
+panel0/max_adu       = 1.0000000e+04
 
 ;panel 1
 panel1/min_fs        = 0
 panel1/max_fs        = 511
 panel1/min_ss        = 1024
 panel1/max_ss        = 1535
+panel1/px            = 512
+panel1/py            = 512
 panel1/corner_x      = -512
 panel1/corner_y      = 256
-panel1/fs = 1.0x
-panel1/ss = 1.0y
+panel1/fs            = 1.0x
+panel1/ss            = 1.0y
 panel1/clen          = 1.3000000e-01
 panel1/res           = 4.5454545e+03
+panel1/pix_width     = 2.2000000e-04
+panel1/coffset       = 0.0000000e+00
+panel1/adu_per_photon= 1.0000000e+00
+panel1/max_adu       = 1.0000000e+04
 
 """
         self.assertEqual(stream.getvalue(), reference_string)
@@ -195,24 +205,36 @@ panel0/min_fs        = 0
 panel0/max_fs        = 511
 panel0/min_ss        = 512
 panel0/max_ss        = 1023
+panel0/px            = 512
+panel0/py            = 512
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fs = 1.0x
-panel0/ss = 1.0y
+panel0/fs            = 1.0x
+panel0/ss            = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
+panel0/pix_width     = 2.2000000e-04
+panel0/coffset       = 0.0000000e+00
+panel0/adu_per_photon= 1.0000000e+00
+panel0/max_adu       = 1.0000000e+04
 
 ;panel 1
 panel1/min_fs        = 0
 panel1/max_fs        = 511
 panel1/min_ss        = 1024
 panel1/max_ss        = 1535
+panel1/px            = 512
+panel1/py            = 512
 panel1/corner_x      = -512
 panel1/corner_y      = 256
-panel1/fs = 1.0x
-panel1/ss = 1.0y
+panel1/fs            = 1.0x
+panel1/ss            = 1.0y
 panel1/clen          = 1.3000000e-01
 panel1/res           = 4.5454545e+03
+panel1/pix_width     = 2.2000000e-04
+panel1/coffset       = 0.0000000e+00
+panel1/adu_per_photon= 1.0000000e+00
+panel1/max_adu       = 1.0000000e+04
 
 """
 
@@ -244,24 +266,36 @@ panel0/min_fs        = 0
 panel0/max_fs        = 511
 panel0/min_ss        = 512
 panel0/max_ss        = 1023
+panel0/px            = 512
+panel0/py            = 512
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fs = 1.0x
-panel0/ss = 1.0y
+panel0/fs            = 1.0x
+panel0/ss            = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
+panel0/pix_width     = 2.2000000e-04
+panel0/coffset       = 0.0000000e+00
+panel0/adu_per_photon= 1.0000000e+00
+panel0/max_adu       = 1.0000000e+04
 
 ;panel 1
 panel1/min_fs        = 0
 panel1/max_fs        = 511
 panel1/min_ss        = 1024
 panel1/max_ss        = 1535
+panel1/px            = 512
+panel1/py            = 512
 panel1/corner_x      = -512
 panel1/corner_y      = 256
-panel1/fs = 1.0x
-panel1/ss = 1.0y
+panel1/fs            = 1.0x
+panel1/ss            = 1.0y
 panel1/clen          = 1.3000000e-01
 panel1/res           = 4.5454545e+03
+panel1/pix_width     = 2.2000000e-04
+panel1/coffset       = 0.0000000e+00
+panel1/adu_per_photon= 1.0000000e+00
+panel1/max_adu       = 1.0000000e+04
 
 """
 
@@ -306,8 +340,8 @@ panel1/res           = 4.5454545e+03
         geometry = _detectorGeometryFromString( geom_string )
 
         # Check parameters from common block
-        self.assertEqual( geometry.panels[0].adu_response, 1.0/electronvolt )
-        self.assertEqual( geometry.panels[1].adu_response, 1.0/electronvolt )
+        self.assertEqual( geometry.panels[0].energy_response, 1.0/electronvolt )
+        self.assertEqual( geometry.panels[1].energy_response, 1.0/electronvolt )
 
         # Check parameters from individual blocks
         self.assertNotEqual( geometry.panels[0].ranges, geometry.panels[1].ranges )
@@ -324,7 +358,7 @@ panel1/res           = 4.5454545e+03
 
         # Check parameters from common block
         self.assertEqual( len(geometry.panels), 1)
-        self.assertEqual( geometry.panels[0].adu_response, 1.25e-4/electronvolt)
+        self.assertEqual( geometry.panels[0].energy_response, 1.25e-4/electronvolt)
 
     def testDeSerializeCommonBlockWithOverwrite(self):
         """ Test deserialization when a common block is present but one panel overwrites a parameter."""
@@ -338,7 +372,6 @@ panel1/res           = 4.5454545e+03
 
         # Check parameters from common block
         self.assertEqual( len(geometry.panels), 2)
-        geometry.serialize()
         self.assertEqual( geometry.panels[0].energy_response, 1.0/electronvolt)
         self.assertEqual( geometry.panels[1].energy_response, 2.0/electronvolt)
 
@@ -373,8 +406,7 @@ class DetectorPanelTest(unittest.TestCase):
                                                     "slow_scan_max" : 1024,
                                                     },
                 pixel_size                      = 2.2e-4*meter,
-                adu_response                    = 1.0,
-                badrow_direction                = None,
+                photon_response                    = 1.0,
                 distance_from_interaction_plane = 0.13*meter,
                 distance_offset                 = 0.0*meter,
                 fast_scan_xyz                   = None,
@@ -413,11 +445,9 @@ class DetectorPanelTest(unittest.TestCase):
         panel = self.__panel
 
         # Check attributes.
-        self.assertListEqual( panel.dimensions                  , ['ss', 'fs'] )
         self.assertDictEqual( panel.ranges                      , { "fast_scan_min" : 0, "fast_scan_max" : 511, "slow_scan_min" : 512, "slow_scan_max" : 1024})
         self.assertEqual( panel.pixel_size                       , 2.2e-4*meter )
-        self.assertEqual( panel.adu_response                     , 1.0 )
-        self.assertEqual( panel.badrow_direction                 , None )
+        self.assertEqual( panel.photon_response                  , 1.0 )
         self.assertEqual( panel.distance_from_interaction_plane  , 0.13*meter )
         self.assertEqual( panel.distance_offset                  , 0.0*meter )
         self.assertEqual( panel.fast_scan_xyz                    , "1.0x" )
@@ -438,7 +468,7 @@ class DetectorPanelTest(unittest.TestCase):
         panel = self.__panel
 
         # Check attributes.
-        self.assertEqual( panel.pixel_size, 1.0e-4*meter,)
+        self.assertEqual( panel.pixel_size, 2.2e-4*meter,)
         self.assertIsInstance(panel.pixel_size, PhysicalQuantity )
         self.assertRaises( DetectorPanel, pixel_size=1.0e-4)
 
@@ -455,12 +485,18 @@ panel0/min_fs        = 0
 panel0/max_fs        = 511
 panel0/min_ss        = 512
 panel0/max_ss        = 1024
+panel0/px            = 512
+panel0/py            = 513
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fs = 1.0x
-panel0/ss = 1.0y
+panel0/fs            = 1.0x
+panel0/ss            = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
+panel0/pix_width     = 2.2000000e-04
+panel0/coffset       = 0.0000000e+00
+panel0/adu_per_photon= 1.0000000e+00
+panel0/max_adu       = 1.0000000e+04
 
 """
 
@@ -489,12 +525,18 @@ panel0/min_fs        = 0
 panel0/max_fs        = 511
 panel0/min_ss        = 512
 panel0/max_ss        = 1024
+panel0/px            = 512
+panel0/py            = 513
 panel0/corner_x      = -512
 panel0/corner_y      = -256
-panel0/fast_scan_xyz = 1.0x
-panel0/slow_scan_xyz = 1.0y
+panel0/fs            = 1.0x
+panel0/ss            = 1.0y
 panel0/clen          = 1.3000000e-01
 panel0/res           = 4.5454545e+03
+panel0/pix_width     = 2.2000000e-04
+panel0/coffset       = 0.0000000e+00
+panel0/adu_per_photon= 1.0000000e+00
+panel0/max_adu       = 1.0000000e+04
 
 """
         # Open for reading.
@@ -542,12 +584,8 @@ panel0/res           = 4.5454545e+03
         serialized_panel=stream.getvalue()
         stream.close()
 
-        panel._serialize()
-
         # Deserialize it.
         deserialized_panel = _detectorPanelFromString( serialized_panel )
-
-        deserialized_panel._serialize()
 
         # Compare (Cannot use equality testing on the instances here because of round-off errors.)
         self.assertAlmostEqual( panel.ranges, deserialized_panel.ranges )
