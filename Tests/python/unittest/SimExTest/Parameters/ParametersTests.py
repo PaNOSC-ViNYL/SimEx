@@ -23,24 +23,29 @@ import paths
 import unittest
 
 # Import classes to test.
+from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
+from DMPhasingParametersTest import DMPhasingParametersTest
+from DetectorGeometryTest import DetectorGeometryTest, DetectorPanelTest
+from EMCOrientationParametersTest import EMCOrientationParametersTest
+from EstherPhotonMatterInteractorParametersTest import EstherPhotonMatterInteractorParametersTest
+from PhotonBeamParametersTest import PhotonBeamParametersTest
 from PlasmaXRTSCalculatorParametersTest import PlasmaXRTSCalculatorParametersTest
 from SingFELPhotonDiffractorParametersTest import SingFELPhotonDiffractorParametersTest
-from EMCOrientationParametersTest import EMCOrientationParametersTest
-from DMPhasingParametersTest import DMPhasingParametersTest
 from WavePropagatorParametersTest import WavePropagatorParametersTest
-from PhotonBeamParametersTest import PhotonBeamParametersTest
-from EstherPhotonMatterInteractorParametersTest import EstherPhotonMatterInteractorParametersTest
 
 # Setup the suite.
 def suite():
     suites = [
-             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,             'test'),
-             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,          'test'),
-             unittest.makeSuite(EMCOrientationParametersTest,                   'test'),
-             unittest.makeSuite(DMPhasingParametersTest,                        'test'),
-             unittest.makeSuite(WavePropagatorParametersTest,                   'test'),
-             unittest.makeSuite(PhotonBeamParametersTest,                       'test'),
-             unittest.makeSuite(EstherPhotonMatterInteractorParametersTest,     'test'),
+             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
+             unittest.makeSuite(DetectorGeometryTest,                       'test'),
+             unittest.makeSuite(DetectorPanelTest,                          'test'),
+             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,         'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,      'test'),
+             unittest.makeSuite(EMCOrientationParametersTest,               'test'),
+             unittest.makeSuite(DMPhasingParametersTest,                    'test'),
+             unittest.makeSuite(WavePropagatorParametersTest,               'test'),
+             unittest.makeSuite(PhotonBeamParametersTest,                   'test'),
+             unittest.makeSuite(EstherPhotonMatterInteractorParametersTest, 'test'),
              ]
 
     return unittest.TestSuite(suites)

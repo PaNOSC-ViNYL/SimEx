@@ -23,6 +23,7 @@
 
 
 import exceptions
+from SimEx import PhysicalQuantity
 
 def checkAndSetInstance(cls, var=None, default=None):
     """
@@ -108,3 +109,44 @@ def checkAndSetNonNegativeInteger(var=None, default=None):
     if var < 0:
             raise exceptions.TypeError("The parameter must be a non-negative integer.")
     return var
+
+def checkAndSetNumber(var=None, default=None):
+    """ Check if input is a numerical type. """
+    if var is not None:
+        if not isinstance( var, (int, float) ):
+            raise exceptions.TypeError("The given value must be a numerical type, got %s" % (type(var)))
+        return var
+
+    if not isinstance( default, (int, float)):
+            raise exceptions.TypeError("The default value must be a numerical type, got %s" % (type(default)))
+    return default
+
+def checkAndSetIterable(var=None, default=None):
+    """ Check if input is iterable (list, tuple, or array type). """
+
+    if not hasattr( var, "__iter__" ):
+        raise AttributeError( "The parameter must be iterable (e.g. a tuple, list, or numpy.array).")
+
+    return var
+
+def checkAndSetPhysicalQuantity(var, default, unit):
+    """ Check if input is a PhysicalQuantity and has the correct unit. """
+
+    if var is not None:
+        if not isinstance(var, PhysicalQuantity):
+            raise TypeError("%s is not a PhysicalQuantity." % (repr(var)) )
+        if not var.units == unit.units:
+            raise TypeError("Incorrect unit (%s), expected %s." % (var.units, unit.units) )
+    else:
+        if default is not None:
+            if isinstance(default, PhysicalQuantity):
+                if default.units == unit.units:
+                    return default
+                else:
+                    return default.to(unit.units)
+            else:
+                return default*unit
+            return default
+
+    return var
+

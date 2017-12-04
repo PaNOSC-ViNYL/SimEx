@@ -21,19 +21,17 @@
 ##########################################################################
 
 import h5py
-import inspect
-import json
 import os
 import subprocess,shlex
 
-import prepHDF5
 from scipy import constants
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Calculators.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters, propToBeamParameters
+from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
 from SimEx.Utilities import ParallelUtilities
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.Units import electronvolt, meter
 
 class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -137,7 +135,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Setup command, minimum set first.
         command_sequence = ['pattern_sim',
                             '-p %s'                 % self.parameters.sample,
-                            '--geometry=%s'         % self.parameters.geometry,
+                            '--geometry=%s'         % self.parameters.detector_geometry,
                             '--output=%s'           % output_file_base,
                             '--number=%d'           % self.parameters.number_of_diffraction_patterns,
                             ]
@@ -147,11 +145,11 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             command_sequence.append('--really-random')
 
         if self.parameters.beam_parameters is not None:
-            command_sequence.append('--photon-energy=%f' % (self.parameters.beam_parameters.photon_energy))
+            command_sequence.append('--photon-energy=%f' % (self.parameters.beam_parameters.photon_energy.m_as(electronvolt)))
             command_sequence.append('--beam-bandwidth=%f' % (self.parameters.beam_parameters.photon_energy_relative_bandwidth))
-            nphotons = self.parameters.beam_parameters.pulse_energy / constants.e / self.parameters.beam_parameters.photon_energy
+            nphotons = self.parameters.beam_parameters.pulse_energy / self.parameters.beam_parameters.photon_energy
             command_sequence.append('--nphotons=%e' % (nphotons))
-            command_sequence.append('--beam-radius=%e' % (self.parameters.beam_parameters.beam_diameter_fwhm/2.))
+            command_sequence.append('--beam-radius=%e' % (self.parameters.beam_parameters.beam_diameter_fwhm.m_as(meter)/2.))
             command_sequence.append('--spectrum=%s' % (self.parameters.beam_parameters.photon_energy_spectrum_type.lower()))
             if self.parameters.beam_parameters.photon_energy_spectrum_type.lower() == "sase":
                 command_sequence.append('--sample-spectrum=512')
@@ -165,9 +163,10 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             command_sequence.append('--powder=%s' % (os.path.join(self.output_path, "powder.h5")))
 
         # Handle size range if present.
-        if self.parameters.crystal_size_range is not None:
-            command_sequence.append('--min-size=%f' % (self.parameters.crystal_size_range[0]*1e9 ))
-            command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_range[1]*1e9 ))
+        if self.parameters.crystal_size_min is not None:
+            command_sequence.append('--min-size=%f' % (self.parameters.crystal_size_min.m_as(1e-9*meter) ))
+        if self.parameters.crystal_size_max is not None:
+            command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_max.m_as(1e-9*meter) ))
 
 
         # put MPI and program arguments together
@@ -214,10 +213,10 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             beam_params_group = params_group.create_group("beam")
             #geom_params_group = params_group.create_group("geom")
 
-            beam_params_group["photonEnergy"] = self.parameters.beam_parameters.photon_energy
+            beam_params_group["photonEnergy"] = self.parameters.beam_parameters.photon_energy.m_as(electronvolt)
             beam_params_group["photonEnergy"].attrs["unit_symbol"] = "eV"
             beam_params_group["photonEnergy"].attrs["unit_longname"] = "electronvolt"
-            beam_params_group["focusArea"] = self.parameters.beam_parameters.beam_diameter_fwhm**2
+            beam_params_group["focusArea"] = self.parameters.beam_parameters.beam_diameter_fwhm.m_as(meter)**2
             beam_params_group["focusArea"].attrs["unit_symbol"] = "m^2"
             beam_params_group["focusArea"].attrs["unit_longname"] = "square_metre"
 
@@ -234,7 +233,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
                     file_ID = os.path.split(ind_file)[-1].split(".h5")[0].split("_")[-1]
 
                     # Create group
-                    id_group = data_group.create_group(file_ID)
+                    data_group.create_group(file_ID)
 
                     # Links must be relative.
                     relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))

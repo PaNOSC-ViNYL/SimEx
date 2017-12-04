@@ -15,4 +15,4 @@ sqlalchemy
 pyfftw
 pyFAI
 numba
-
+pint

@@ -21,16 +21,16 @@
 ##########################################################################
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysicalQuantity
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
-import scipy
 from scipy import constants
-import os
-import numpy
+from wpg import Wavefront, wpg_uti_wf
 from wpg.srwlib import srwl
 import math
-
-from wpg import Wavefront, wpg_uti_wf
+import numpy
+import os
+import sys
 
 class PhotonBeamParameters(AbstractCalculatorParameters):
     """ Class representing photon beam parameters. """
@@ -47,7 +47,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         """
         Constructor of the PhotonBeamParameters class.
 
-        :param photon_energy: The mean photon energy in units of electonvolts (eV).
+        :param photon_energy: The mean photon energy in units of electronvolts (eV).
         :type photon_energy: float
 
         :param photon_energy_relative_bandwidth: The relative energy bandwidth
@@ -91,7 +91,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
     @photon_energy.setter
     def photon_energy(self, val):
         """ Set the 'photon_energy' parameter to val."""
-        self.__photon_energy = checkAndSetInstance( float, val, None)
+        self.__photon_energy = checkAndSetPhysicalQuantity( val, None,  electronvolt)
 
     @property
     def photon_energy_spectrum_type(self):
@@ -118,7 +118,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
     @beam_diameter_fwhm.setter
     def beam_diameter_fwhm(self, val):
         """ Set the 'beam_diameter_fwhm' parameter to val."""
-        self.__beam_diameter_fwhm = checkAndSetInstance( float, val, None)
+        self.__beam_diameter_fwhm = checkAndSetPhysicalQuantity( val , 1.0e-6, meter )
 
     @property
     def divergence(self):
@@ -127,7 +127,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
     @divergence.setter
     def divergence(self, val):
         """ Set the 'divergence' parameter to val."""
-        self.__divergence = checkAndSetInstance( float, val, 0.0)
+        self.__divergence = checkAndSetPhysicalQuantity( val, 0.0, radian)
 
     @property
     def pulse_energy(self):
@@ -136,7 +136,43 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
     @pulse_energy.setter
     def pulse_energy(self, val):
         """ Set the 'pulse_energy' parameter to val."""
-        self.__pulse_energy = checkAndSetInstance( float, val, None)
+        self.__pulse_energy = checkAndSetPhysicalQuantity( val, 1.0e-3, joule)
+
+    def serialize(self, stream=sys.stdout):
+        """ Serialize the object (write to a stream)
+
+        :param stream: The stream to write to (default sys.stdout)
+        :type stream:  str || file
+
+        """
+
+        if isinstance(stream, str):
+            with open(stream, 'w') as ostream:
+                self._serialize(ostream)
+        elif hasattr(stream, 'write'):
+                self._serialize(stream)
+
+    def _serialize(self, stream=sys.stdout):
+        """ """
+        """ Workhorse serialization function """
+
+        stream.write("; [Photon beam parameters]" )
+        stream.write("\n")
+        stream.write("\n")
+        stream.write("; photon energy (eV)" )
+        stream.write("\n")
+        stream.write("beam/photon_energy = %8.7e" % (self.photon_energy.m_as(electronvolt)) )
+        stream.write("\n")
+        stream.write("\n")
+        stream.write("; Number of photons per pulse" )
+        stream.write("\n")
+        stream.write("beam/fluence = %8.7e" % (self.pulse_energy.m_as(joule) / self.photon_energy.m_as(joule) ) )
+        stream.write("\n")
+        stream.write("\n")
+        stream.write("; Radius of X-ray beam (m)" )
+        stream.write("\n")
+        stream.write("beam/radius = %8.7e" % (self.beam_diameter_fwhm.m_as(meter)/2. ) )
+        stream.write("\n")
 
 def propToBeamParameters( prop_output_path ):
     """ Utility to setup a PhotonBeamParameters instance from propagation output. """
@@ -192,7 +228,7 @@ def propToBeamParameters( prop_output_path ):
     rms = math.sqrt(m2 - m1**2)
 
     photon_energy = m1
-    spec_fwhm_eV = rms
+    #spec_fwhm_eV = rms
 
     # Extract beam diameter fwhm
     xy_fwhm = wpg_uti_wf.calculate_fwhm(wavefront)
@@ -205,19 +241,13 @@ def propToBeamParameters( prop_output_path ):
     del wavefront
 
     beam_parameters = PhotonBeamParameters(
-            photon_energy=photon_energy,
+            photon_energy=photon_energy*electronvolt,
             photon_energy_relative_bandwidth=spike_fwhm_eV/photon_energy,
-            pulse_energy=pulse_energy,
-            divergence=max([qxqy_fwhm['fwhm_x'],qxqy_fwhm['fwhm_y']])/2.,
-            beam_diameter_fwhm=max([xy_fwhm['fwhm_x'],xy_fwhm['fwhm_y']]),
+            pulse_energy=pulse_energy*joule,
+            divergence=max([qxqy_fwhm['fwhm_x'],qxqy_fwhm['fwhm_y']])/2.*radian,
+            beam_diameter_fwhm=max([xy_fwhm['fwhm_x'],xy_fwhm['fwhm_y']])*meter,
             photon_energy_spectrum_type="SASE",
             )
-
-    print "photon_energy=%5.4f eV" % beam_parameters.photon_energy
-    print "photon_energy_relative_bandwidth=", beam_parameters.photon_energy_relative_bandwidth
-    print "pulse_energy=%4.3e J" % beam_parameters.pulse_energy
-    print "divergence=%4.3e rad" % beam_parameters.divergence
-    print "beam_diameter_fwhm=%4.3e m" % beam_parameters.beam_diameter_fwhm
 
     return beam_parameters
 

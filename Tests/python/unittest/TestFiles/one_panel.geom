@@ -1,0 +1,11 @@
+adu_per_eV = 1.25e-4
+min_fs = 0
+max_fs = 1023
+min_ss = 512
+max_ss = 1023
+corner_x = -512.00
+corner_y = 10.00
+fs = x
+ss = y
+clen = 50.0e-3
+res = 13333.3  ; 75 micron pixel size

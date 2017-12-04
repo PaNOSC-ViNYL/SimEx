@@ -1,4 +1,4 @@
-""" :module DetectorGeometryParameters: Module holding the DetectorGeometryParameters class. """
+""" :module DetectorGeometry: Module holding the DetectorGeometry class. """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -19,205 +19,591 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.Units import meter, electronvolt, joule
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber, checkAndSetPhysicalQuantity
+from SimEx import PhysicalQuantity
+from SimEx import AbstractBaseClass
 
-import scipy
-from scipy import constants
-import os
 import numpy
-from wpg.srwlib import srwl
-import math
+import sys
 
-from wpg import Wavefront, wpg_uti_wf
 
-class DetectorGeometryParameters(AbstractCalculatorParameters):
-    """ Class representing photon beam parameters. """
+
+class DetectorPanel(AbstractBaseClass):
+    """ Class representing one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
 
     def __init__(self,
-            photon_energy,
-            beam_diameter_fwhm,
-            pulse_energy,
-            photon_energy_relative_bandwidth=None,
-            divergence=None,
-            photon_energy_spectrum_type=None,
+            ranges                          = None,
+            pixel_size                      = None,
+            energy_response                 = None,
+            photon_response                 = None,
+            distance_from_interaction_plane = None,
+            distance_offset                 = None,
+            fast_scan_xyz                   = None,
+            slow_scan_xyz                   = None,
+            corners                         = None,
+            saturation_adu                  = None,
+            mask                            = None,
+            good_bit_mask                   = None,
+            bad_bit_mask                    = None,
+            saturation_map                  = None,
+            badregion_flag                  = None,
             **kwargs
             ):
         """
-        Constructor of the DetectorGeometryParameters class.
+        Constructor of the DetectorPanel.
 
-        :param photon_energy: The mean photon energy in units of electonvolts (eV).
-        :type photon_energy: float
 
-        :param photon_energy_relative_bandwidth: The relative energy bandwidth
-        :type photon_energy_relative_bandwidth: float (>0.0).
+        :param ranges: The minimum and maximum values pixel numbers on the respective transverse axis.
+        :type  ranges: Dictionary
+        ":example ranges: {"fast_scan_min : 11, "fast_scan_max" : 20, "slow_scan_min" : 1, "fast_scan_max" : 20} # First axis from 11 to 20 and second axis from 1 to 20."
 
-        :param beam_diameter_fwhm: Beam diameter in units of metre (m).
-        :type beam_diameter_fwhm: float
+        :param pixel_size: The physical size of the pixel (assuming quadratic shape) (SI units).
+        :type  pixel_size: PhysicalQuantity with unit meter.
 
-        :param pulse_energy: Total energy of the pulse in units of Joule (J).
-        :type pulse_energy: float
+        :param energy_response: Number of detector units (ADU) arising from one eV.
+        :type  energy_response: PhysicalQuantity with unit 1/eV (adu_per_eV)
 
-        :param divergence: Beam divergence angle in units of radian (rad).
-        :type divergence: float (0 < divergence < 2*pi)
+        :param photon_response: Number of detector units (ADU) arising from one photon.
+        :type  photon_response: float
 
-        :param photon_energy_spectrum_type: Type of energy spectrum ("SASE" | "tophat" | "twocolour", default "SASE").
-        :type photon_energy_spectrum_type: float (0 < photon_energy_spectrum_type < 2*pi)
+        :param distance_from_interaction_plane: Distance in z of this panel from the plane of interaction (transverse plane that contains the sample).
+        :type  distance_from_interaction_plane: PhysicalQuantity with unit meter.
+
+        :param distance_offset: Offset from distance_from_interaction_plane.
+        :type  distance_offset: PhysicalQuantity with unit meter.
+
+        :param fast_scan_xyz: Formula that lab frame coordinates to panel axes.
+        :type  fast_scan_xyz: str
+
+        :param slow_scan_xyz: Formula that lab frame coordinates to panel axes.
+        :type  slow_scan_xyz: str
+
+        :param corners: [x,y] coordinates of lower left pixel of this panel in the globale detector geometry.
+        :type  corners: dict
+        :example corners: corners={"x" : -10, "y" : 10 }
+
+        :param saturation_adu: Saturation level for this panel.
+        :type  saturation_adu: float.
+
+        :param mask: Mask to apply to this panel.
+        :type  mask: numpy.array of same shape as panel data.
+
+        :param good_bit_mask: Bitmask indicating the good pixels
+        :type  good_bit_mask: ???
+
+        :param bad_bit_mask: Bitmask indicating the bad pixels.
+        :type  bad_bit_mask: ???
+
+        :param saturation_map: Pixel map indicating saturated pixels.
+        :type  saturation_map: numpy.array of same shape as panel data.
+
+        :param badregion_flag: Flag to indicate this panel as a bad region.
+        :type  badregion_flag: bool
+
+        """
+
+        # Store on object using setters.
+        self.ranges                          = ranges
+        self.pixel_size                      = pixel_size
+        self.energy_response                 = energy_response
+        self.photon_response                 = photon_response
+        self.distance_from_interaction_plane = distance_from_interaction_plane
+        self.distance_offset                 = distance_offset
+        self.fast_scan_xyz                   = fast_scan_xyz
+        self.slow_scan_xyz                   = slow_scan_xyz
+        self.corners                         = corners
+        self.saturation_adu                  = saturation_adu
+        self.mask                            = mask
+        self.good_bit_mask                   = good_bit_mask
+        self.bad_bit_mask                    = bad_bit_mask
+        self.saturation_map                  = saturation_map
+        self.badregion_flag                  = badregion_flag
+
+        # Handle case that neither photon nor energy response is set.
+        if self.energy_response is None and self.photon_response is None:
+            self.photon_response = 1.0
+
+    ### Accessors.
+    # ranges
+    @property
+    def ranges(self):
+        """ Query the panel ranges. """
+        return self.__ranges
+    @ranges.setter
+    def ranges(self, val):
+        """ Set the panel ranges. """
+        self.__ranges = checkAndSetInstance( dict, val, None )
+
+    # pixel_size
+    @property
+    def pixel_size(self):
+        """ Query the panel pixel_size. """
+        return self.__pixel_size
+    @pixel_size.setter
+    def pixel_size(self, val):
+        """ Set the panel pixel_size. """
+        self.__pixel_size = checkAndSetPhysicalQuantity( val, 1.0e-4*meter, meter)
+
+    # energy_response
+    @property
+    def energy_response(self):
+        """ Query the panel energy_response. """
+        return self.__energy_response
+    @energy_response.setter
+    def energy_response(self, val):
+        """ Set the panel energy_response. """
+        if val is not None:
+            val = checkAndSetPhysicalQuantity( val, None, 1./electronvolt)
+        self.__energy_response = val
+
+        # Invalidate photon response.
+        if val is not None and self.__photon_response is not None:
+            self.__photon_response = None
+
+    # photon_response
+    @property
+    def photon_response(self):
+        """ Query the panel photon_response. """
+        return self.__photon_response
+    @photon_response.setter
+    def photon_response(self, val):
+        """ Set the panel photon_response. """
+        if val is not None:
+            val = checkAndSetInstance( float, val, None)
+
+        self.__photon_response = val
+
+        # Invalidate energy response.
+        if val is not None and self.__energy_response is not None:
+            self.__energy_response = None
+
+     # Distance_from_interaction_plane
+    @property
+    def distance_from_interaction_plane(self):
+        """ Query the panel distance_from_interaction_plane. """
+        return self.__distance_from_interaction_plane
+    @distance_from_interaction_plane.setter
+    def distance_from_interaction_plane(self, val):
+        """ Set the panel distance_from_interaction_plane. """
+        self.__distance_from_interaction_plane = checkAndSetPhysicalQuantity( val, 0.1*meter, meter )
+
+    # distance_offset
+    @property
+    def distance_offset(self):
+        """ Query the panel distance_offset. """
+        return self.__distance_offset
+    @distance_offset.setter
+    def distance_offset(self, val):
+        """ Set the panel distance_offset. """
+        self.__distance_offset = checkAndSetPhysicalQuantity( val, 0.0*meter, meter)
+
+    # fastscan_xyz
+    @property
+    def fast_scan_xyz(self):
+        """ Query the panel fast_scan_xyz. """
+        return self.__fast_scan_xyz
+    @fast_scan_xyz.setter
+    def fast_scan_xyz(self, val):
+        """ Set the panel fast_scan_xyz. """
+        self.__fast_scan_xyz = checkAndSetInstance( str, val, "1.0x" )
+
+    # slow_scan_xyz
+    @property
+    def slow_scan_xyz(self):
+        """ Query the panel slow_scan_xyz. """
+        return self.__slow_scan_xyz
+    @slow_scan_xyz.setter
+    def slow_scan_xyz(self, val):
+        """ Set the panel slow_scan_xyz. """
+        self.__slow_scan_xyz = checkAndSetInstance( str, val, "1.0y" )
+
+    # corners
+    @property
+    def corners(self):
+        """ Query the panel cornes. """
+        return self.__corners
+    @corners.setter
+    def corners(self, val):
+        """ Set the panel corners. """
+        self.__corners = checkAndSetInstance( dict, val, {"x" : 0.0, "y" : 0.0} )
+
+    # saturation_adu
+    @property
+    def saturation_adu(self):
+        """ Query the panel saturation_adu. """
+        return self.__saturation_adu
+    @saturation_adu.setter
+    def saturation_adu(self, val):
+        """ Set the panel saturation_adu. """
+        self.__saturation_adu = checkAndSetNumber( val, 1.0e4 )
+
+    # mask
+    @property
+    def mask(self):
+        """ Query the panel mask. """
+        return self.__mask
+    @mask.setter
+    def mask(self, val):
+        """ Set the panel mask. """
+        self.__mask = checkAndSetInstance( numpy.array, None )
+
+    # good_bit_mask
+    @property
+    def good_bit_mask(self):
+        """ Query the panel good_bit_mask. """
+        return self.__good_bit_mask
+    @good_bit_mask.setter
+    def good_bit_mask(self, val):
+        """ Set the panel good_bit_mask. """
+        self.__good_bit_mask = checkAndSetInstance( int, None )
+
+    # bad_bit_mask
+    @property
+    def bad_bit_mask(self):
+        """ Query the panel bad_bit_mask. """
+        return self.__bad_bit_mask
+    @bad_bit_mask.setter
+    def bad_bit_mask(self, val):
+        """ Set the panel bad_bit_mask. """
+        self.__bad_bit_mask = checkAndSetInstance( int, val, None )
+
+    # saturation_map
+    @property
+    def saturation_map(self):
+        """ Query the panel saturation_map. """
+        return self.__saturation_map
+    @saturation_map.setter
+    def saturation_map(self, val):
+        """ Set the panel saturation_map. """
+        self.__saturation_map = checkAndSetInstance( numpy.array, val, None )
+
+    # badregion_flag
+    @property
+    def badregion_flag(self):
+        """ Query the panel badregion_flag. """
+        return self.__badregion_flag
+    @badregion_flag.setter
+    def badregion_flag(self, val):
+        """ Set the panel badregion_flag. """
+        self.__badregion_flag = checkAndSetInstance( bool, val, False )
+    ### End accessors
+
+    def _serialize(self, stream=None, panel_id=None):
+        """ Serialize the panel.
+
+        :param stream: The stream to write the serialized panel to.
+        :type stream: file like (default sys.stdout)
+
+        """
+        # Check stream parameter.
+        if stream is None:
+            stream = sys.stdout
+
+        if not hasattr(stream, "write"):
+            raise IOError( "The given stream is not writable." )
+
+        # Check panel_id parameter.
+        panel_id = checkAndSetInstance( int, panel_id, 0 )
+
+        # Get panel id as a string.
+        panel_id_str = str(panel_id)
+
+        # Initialize the string to be written to.
+        serialization = ";panel %s\n" % (panel_id_str)
+        serialization += "panel%s/min_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_min"])
+        serialization += "panel%s/max_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_max"])
+        serialization += "panel%s/min_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_min"])
+        serialization += "panel%s/max_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_max"])
+        number_of_pixels_fast = self.ranges["fast_scan_max"] - self.ranges["fast_scan_min"] + 1
+        number_of_pixels_slow = self.ranges["slow_scan_max"] - self.ranges["slow_scan_min"] + 1
+
+        serialization += "panel%s/px            = %d\n" % (panel_id_str, number_of_pixels_fast)
+        serialization += "panel%s/py            = %d\n" % (panel_id_str, number_of_pixels_slow)
+        serialization += "panel%s/corner_x      = %d\n" % (panel_id_str, self.corners["x"])
+        serialization += "panel%s/corner_y      = %d\n" % (panel_id_str, self.corners["y"])
+        serialization += "panel%s/fs            = %s\n" % (panel_id_str, self.fast_scan_xyz)
+        serialization += "panel%s/ss            = %s\n" % (panel_id_str, self.slow_scan_xyz)
+        serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.m_as(meter))
+        serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.m_as(meter))
+        serialization += "panel%s/pix_width     = %8.7e\n" % (panel_id_str, self.pixel_size.m_as(meter))
+        serialization += "panel%s/coffset       = %8.7e\n" % (panel_id_str, self.distance_offset.m_as(meter))
+        if self.energy_response is not None:
+            serialization += "panel%s/adu_per_eV    = %8.7e\n" % (panel_id_str, self.energy_response.m_as(1/electronvolt))
+        if self.photon_response is not None:
+            serialization += "panel%s/adu_per_photon= %8.7e\n" % (panel_id_str, self.photon_response)
+        if self.saturation_adu is not None:
+            serialization += "panel%s/max_adu       = %8.7e\n" % (panel_id_str, self.saturation_adu)
+        if self.mask is not None:
+            serialization += "panel%s/badpixmap     = %s\n" % (panel_id_str, str(self.mask.magnitude))
+            serialization += "panel%s/badpixmap     = %s\n" % (panel_id_str, str(self.mask.magnitude))
+        if self.good_bit_mask is not None:
+            serialization += "panel%s/mask_good     = %d\n" % (panel_id_str, self.good_bit_mask.magnitude)
+        if self.bad_bit_mask is not None:
+            serialization += "panel%s/mask_bad      = %d\n" % (panel_id_str, self.bad_bit_mask.magnitude)
+        if self.saturation_map is not None:
+            serialization += "panel%s/saturation_map= %s\n" % (panel_id_str, str(self.saturation_map.magnitude) )
+        serialization += "\n"
+
+        # Finally write the serialized panel.
+        stream.write(serialization)
+
+
+
+class DetectorGeometry(AbstractCalculatorParameters):
+    """ Class representing the detector geometry. """
+
+    def __init__(self,
+            panels=None,
+            **kwargs
+            ):
+        """
+        Constructor of the DetectorGeometry class.
+
+        :param panels: Single or list of detector panels that constitute the detector.
+        :type  panels: list, tuple, or instance of DetectorPanel
 
         :param kwargs: Key-value pairs to be passed to the parent class constructor.
         :type kwargs: dict
 
         """
 
-        super(DetectorGeometryParameters, self).__init__(**kwargs)
+        super(DetectorGeometry, self).__init__(**kwargs)
 
-        self.photon_energy = photon_energy
-        self.photon_energy_relative_bandwidth = photon_energy_relative_bandwidth
-        self.beam_diameter_fwhm = beam_diameter_fwhm
-        self.pulse_energy = pulse_energy
-        self.divergence = divergence
-        self.photon_energy_spectrum_type = photon_energy_spectrum_type
+        self.panels = panels
+
+    @property
+    def panels(self):
+        return self.__panels
+    @panels.setter
+    def panels(self, val):
+        # Check if single instance, convert to list if true.
+        if not isinstance(val, (list, tuple)):
+            val = [val]
+        if not all([isinstance(v, DetectorPanel) for v in val]):
+            raise TypeError( "Parameter 'panels' must be a list of instances, tuple of instances, or a single instance of the  DetectorPanel class.")
+        self.__panels = val
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
+    def serialize(self, stream=None):
+        """ Serialize the geometry.
 
-    @property
-    def photon_energy(self):
-        """ Query the 'photon_energy' parameter. """
-        return self.__photon_energy
-    @photon_energy.setter
-    def photon_energy(self, val):
-        """ Set the 'photon_energy' parameter to val."""
-        self.__photon_energy = checkAndSetInstance( float, val, None)
+        :param stream: The stream to write the serialized geometry to (default sys.stdout).
+        :type  stream: File like object.
 
-    @property
-    def photon_energy_spectrum_type(self):
-        """ Query the 'photon_energy_spectrum_type' parameter. """
-        return self.__photon_energy_spectrum_type
-    @photon_energy_spectrum_type.setter
-    def photon_energy_spectrum_type(self, val):
-        """ Set the 'photon_energy_spectrum_type' parameter to val."""
-        self.__photon_energy_spectrum_type = checkAndSetInstance( str, val, "SASE")
+        """
 
-    @property
-    def photon_energy_relative_bandwidth(self):
-        """ Query the 'photon_energy_relative_bandwidth' parameter. """
-        return self.__photon_energy_relative_bandwidth
-    @photon_energy_relative_bandwidth.setter
-    def photon_energy_relative_bandwidth(self, val):
-        """ Set the 'photon_energy_relative_bandwidth' parameter to val."""
-        self.__photon_energy_relative_bandwidth = checkAndSetInstance( float, val, 0.01)
+        # Handle default case.
+        if stream is None:
+            stream = sys.stdout
 
-    @property
-    def beam_diameter_fwhm(self):
-        """ Query the 'beam_diameter_fwhm' parameter. """
-        return self.__beam_diameter_fwhm
-    @beam_diameter_fwhm.setter
-    def beam_diameter_fwhm(self, val):
-        """ Set the 'beam_diameter_fwhm' parameter to val."""
-        self.__beam_diameter_fwhm = checkAndSetInstance( float, val, None)
+        # If this is a string, open a corresponding file.
+        if isinstance( stream,  str):
+            with open(stream, 'w') as fstream:
+                self._serialize(fstream)
+                return
 
-    @property
-    def divergence(self):
-        """ Query the 'divergence' parameter. """
-        return self.__divergence
-    @divergence.setter
-    def divergence(self, val):
-        """ Set the 'divergence' parameter to val."""
-        self.__divergence = checkAndSetInstance( float, val, 0.0)
+        if not hasattr(stream, "write"):
+            raise IOError("The stream % is not writable." % (stream) )
 
-    @property
-    def pulse_energy(self):
-        """ Query the 'pulse_energy' parameter. """
-        return self.__pulse_energy
-    @pulse_energy.setter
-    def pulse_energy(self, val):
-        """ Set the 'pulse_energy' parameter to val."""
-        self.__pulse_energy = checkAndSetInstance( float, val, None)
+        # Loop over all panels and serialize each one.
+        self._serialize(stream)
 
-def propToBeamParameters( prop_output_path ):
-    """ Utility to setup a DetectorGeometryParameters instance from propagation output. """
+    def _serialize(self, stream=sys.stdout):
+        """ Workhorse function for serialization. """
 
-    # Check prop out exists.
-    if not os.path.isfile(prop_output_path):
-        raise IOError("File not found: %s." % (prop_output_path) )
+        for i,panel in enumerate(self.panels):
+            panel._serialize( stream, panel_id=i)
 
-    # Construct the wavefront.
-    wavefront = Wavefront()
-    wavefront.load_hdf5( prop_output_path )
+def _detectorPanelFromString( input_string, common_block=None):
+    """ Construct a DetectorPanel instance from a serialized panel.
+    :param input_string: The string from which to construct the panel.
+    :param common_block: String representing a block of common parameters for a group of panels.
 
-    pulse_energy = wpg_uti_wf.calc_pulse_energy( wavefront )
+    """
+    # First treat common block
+    common_dict = {}
+    if common_block is not None:
+        common_dict = _panelStringToDict(common_block)
 
-    mesh = wavefront.params.Mesh
-    dx = (mesh.xMax - mesh.xMin)/(mesh.nx - 1)
-    dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
-    int0 = wavefront.get_intensity().sum(axis=0).sum(axis=0)  # I(slice_num)
-    total_intensity = int0*dx*dy # [J]
 
-    times = numpy.linspace(mesh.sliceMin, mesh.sliceMax, mesh.nSlices)
+    panel_dict = _panelStringToDict( input_string )
 
-    t = times[:-1]
-    dt = times[1:] - times[:-1]
+    # Loop over common dict and fill into panel dict if not present there.
+    for key,val in common_dict.iteritems():
+        if panel_dict[key] is None:
+            panel_dict[key] = val
 
-    It = total_intensity[:-1]
+    # Now put the data into the DetectorPanel instance.
+    panel = DetectorPanel( ranges={"fast_scan_min" : float(panel_dict["min_fs"]),
+                                   "fast_scan_max" : float(panel_dict["max_fs"]),
+                                   "slow_scan_min" : float(panel_dict["min_ss"]),
+                                   "slow_scan_max" : float(panel_dict["max_ss"]),
+                                   },
+                           corners={"x" : float(panel_dict["corner_x"]),
+                                    "y" : float(panel_dict["corner_y"]),
+                                   },
+                           fast_scan_xyz=panel_dict["fs"],
+                           slow_scan_xyz=panel_dict["ss"],
+                           distance_from_interaction_plane=float(panel_dict["clen"])*meter,
+                           pixel_size=1.0/float(panel_dict["res"])*meter,
+                           )
 
-    m0 = numpy.sum( It*dt)
-    m1 = numpy.sum( It*t*dt )/m0
-    m2 = numpy.sum( It*t**2*dt)/m0
+    if panel_dict["adu_per_photon"] is not None:
+        panel.photon_response = float(panel_dict["adu_per_photon"])
+    if panel_dict["adu_per_eV"] is not None:
+        panel.energy_response = float(panel_dict["adu_per_eV"])/electronvolt
+    if panel_dict["coffset"] is not None:
+       panel.distance_offset = float(panel_dict["coffset"])*meter
+    else:
+       panel.distance_offset=None
+    if panel_dict["max_adu"] is not None:
+        panel.saturation_adu = float(panel_dict["max_adu"])
+    else:
+        panel.saturation_adu = None
+    if panel_dict["mask"] is not None:
+        panel.mask = numpy.array( eval(panel_dict["mask"]) )
+    else:
+        panel.mask = None
+    if panel_dict["mask_good"] is not None:
+        panel.good_bit_mask = panel_dict["mask_good"]
+    else:
+        panel.good_bit_mask = None
+    if panel_dict["mask_bad"] is not None:
+        panel.bad_bit_mask = panel_dict["mask_bad"]
+    else:
+        panel.bad_bit_mask = None
+    if panel_dict["saturation_map"] is not None:
+        panel.saturation_map = panel_dict["saturation_map"]
+    else:
+        panel.saturation_map = None
 
-    rms = math.sqrt(m2 - m1**2)
+    return panel
 
-    spike_fwhm_J = constants.hbar/rms
-    spike_fwhm_eV = spike_fwhm_J/constants.e
 
-    # Switch to energy domain
-    srwl.SetRepresElecField(wavefront._srwl_wf, 'f')
+def _panelStringToDict( input_string ):
+    """ Convert a panel block string to a dictionary. """
+    # Get rid of panel prefix
+    lines=input_string.split("\n")
 
-    mesh = wavefront.params.Mesh
-    spectrum = wavefront.get_intensity().sum(axis=0).sum(axis=0)  # I(slice_num)
-    energies = numpy.linspace(mesh.sliceMin, mesh.sliceMax, mesh.nSlices)
+    # Setup temporary dictionary.
+    tmp_dict = {
+            "min_fs"         : None,
+            "max_fs"         : None,
+            "min_ss"         : None,
+            "max_ss"         : None,
+            "corner_x"       : None,
+            "corner_y"       : None,
+            "fs"             : None,
+            "ss"             : None,
+            "clen"           : None,
+            "res"            : None,
+            "coffset"        : None,
+            "adu_per_eV"     : None,
+            "adu_per_photon" : None,
+            "max_adu"        : None,
+            "mask"           : None,
+            "mask_good"      : None,
+            "mask_bad"       : None,
+            "saturation_map" : None,
+            }
 
-    w = energies[:-1]
-    dw = energies[1:] - energies[:-1]
+    # Loop over lines and extract data.
+    for line in lines:
+        # Bail out if not containing an assignment.
+        if not "=" in line:
+            continue
+        # Get rid of white spaces.
+        line = line.replace(" ","")
+        line = line.replace("\t","")
 
-    Iw = spectrum[:-1]
+        # Check for commented lines.
+        if  line[0] == ";":
+            continue
 
-    m0 = numpy.sum( Iw*dw)
-    m1 = numpy.sum( Iw*w*dw )/m0
-    m2 = numpy.sum( Iw*w**2*dw)/m0
+        key_val = line.split("=")
+        key = key_val[0]
+        val = key_val[1]
 
-    rms = math.sqrt(m2 - m1**2)
+        # Check for comments after assignment.
+        if ";" in val:
+            val=val.split(";")[0]
 
-    photon_energy = m1
-    spec_fwhm_eV = rms
+        # Get rid of panel prefix.
+        key = key.split("/")[-1]
 
-    # Extract beam diameter fwhm
-    xy_fwhm = wpg_uti_wf.calculate_fwhm(wavefront)
+        # Store on dict.
+        tmp_dict[key] = val
 
-    # Extract divergence
-    # Switch to reciprocal space
-    srwl.SetRepresElecField(wavefront._srwl_wf, 'a')
-    qxqy_fwhm = wpg_uti_wf.calculate_fwhm(wavefront)
+    return tmp_dict
 
-    del wavefront
 
-    beam_parameters = DetectorGeometryParameters(
-            photon_energy=photon_energy,
-            photon_energy_relative_bandwidth=spike_fwhm_eV/photon_energy,
-            pulse_energy=pulse_energy,
-            divergence=max([qxqy_fwhm['fwhm_x'],qxqy_fwhm['fwhm_y']])/2.,
-            beam_diameter_fwhm=max([xy_fwhm['fwhm_x'],xy_fwhm['fwhm_y']]),
-            photon_energy_spectrum_type="SASE",
-            )
+def _detectorGeometryFromString( input_string):
+    """ Construct a DetectorGeometry instance from a serialized representation.
+    :param input_string: The string from which to construct the panel.
 
-    print "photon_energy=%5.4f eV" % beam_parameters.photon_energy
-    print "photon_energy_relative_bandwidth=", beam_parameters.photon_energy_relative_bandwidth
-    print "pulse_energy=%4.3e J" % beam_parameters.pulse_energy
-    print "divergence=%4.3e rad" % beam_parameters.divergence
-    print "beam_diameter_fwhm=%4.3e m" % beam_parameters.beam_diameter_fwhm
+    """
+    # Separate out panel blocks and common block.
+    # Get rid of empty lines.
+    while "\n\n" in input_string:
+        input_string = input_string.replace("\n\n", "\n")
+    # Get rid of white space.
+    input_string = input_string.replace(" ", "")
 
-    return beam_parameters
+    # Split into lines.
+    lines = input_string.split("\n")
 
+    common_block = ""
+    panel_blocks = ""
+    for line in lines:
+        if line == "":
+            continue
+        if line[0] == ";":
+            continue
+        if "/" in line:
+            panel_blocks += line+"\n"
+        else:
+            common_block += "COMMON_BLOCK/"+line+"\n"
+
+    # If no separate panels are defined, return.
+    if panel_blocks == "":
+        return DetectorGeometry(panels=_detectorPanelFromString(common_block))
+
+    # Now separate the panel block into lines again and loop.
+    lines = panel_blocks.split("\n")
+
+    # Sort to make sure lines belonging to same block are adjacent.
+    lines.sort()
+
+    # Get panel identifiers.
+    panel_identifiers = []
+    for line in lines:
+        if line == "":
+            continue
+        panel_identifiers.append(line.split("/")[0])
+
+    # Turn into set of unique identifiers.
+    panel_identifiers=list(set(panel_identifiers))
+    panel_identifiers.sort()
+
+    # Gather all panel blocks into a list of strings, separated by newline to make fit for _detectorPanelFromString().
+    panel_blocks = ["",]*len(panel_identifiers)
+    for line in lines:
+        if line == "":
+            continue
+        # Get id.
+        panel_identifier = line.split("/")[0]
+        # Get index in list.
+        block_index = panel_identifiers.index(panel_identifier)
+        # Insert in correct position.
+        panel_blocks[block_index] += line+"\n"
+
+    # Deserialize the blocks.
+    panels = [_detectorPanelFromString(block, common_block) for block in panel_blocks]
+
+    # Return novel geometry instance.
+    return DetectorGeometry(panels=panels)
