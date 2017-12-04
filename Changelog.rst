@@ -3,6 +3,13 @@ CHANGELOG
 
 Changes from 0.2 to 0.3
 -----------------------
+New in 0.3.4
+''''''''''''
+    * New classes DetectorGeometry and DetectorPanel as interfaces to 2D pixel area detectors.
+    * Use of physical units in Diffractors, DiffractofParameters, and DetectorGeometry.
+    * Compatible with new pysingfel interface.
+    * Fixed FindHDF cmake utility (Thanks to Andrea Dotti).
+    * Small improvements in Analysis classes.
 
 New in 0.3.3
 ''''''''''''
