@@ -432,13 +432,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns=2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun \
--np 2 \
---map-by node \
---bind-to none \
--x OMP_NUM_THREADS=2 \
--x OMPI_MCA_mpi_warn_on_fork=0 \
--x OMPI_MCA_btl_base_warn_component_unused=0',
+                     forced_mpi_command='mpirun -np 2 --map-by node --bind-to none -x OMP_NUM_THREADS=2 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0',
                      )
 
         # Construct the object.
