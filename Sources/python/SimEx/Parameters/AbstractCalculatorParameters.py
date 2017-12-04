@@ -23,8 +23,9 @@
 from abc import ABCMeta, abstractmethod
 
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger, checkAndSetInstance
+from SimEx import AbstractBaseClass
 
-class AbstractCalculatorParameters(object):
+class AbstractCalculatorParameters(AbstractBaseClass):
     """
     Abstract class for all calculator parameters.
     """

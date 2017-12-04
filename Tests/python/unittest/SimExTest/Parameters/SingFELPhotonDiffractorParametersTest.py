@@ -1,6 +1,7 @@
+""" :module: Test module hosting the test for the SingFELPhotonDiffractorParameter class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,26 +20,18 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the SingFELPhotonDiffractorParameter class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160721
-
-"""
 import paths
 import os
-import numpy
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
-import paths
 import unittest
 
-from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Utilities.Units import meter, electronvolt, joule
 
 
 class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
@@ -48,7 +41,26 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        detector_panel = DetectorPanel(ranges={'fast_scan_min': 0,
+                                               'fast_scan_max': 1023,
+                                               'slow_scan_min': 0,
+                                               'slow_scan_max': 1023},
+                                       pixel_size=2.2e-4*meter,
+                                       photon_response=1.0,
+                                       distance_from_interaction_plane=0.13*meter,
+                                       corners={'x': -512, 'y': 512},
+                                       )
+
+        cls.detector_geometry = DetectorGeometry(panels=[detector_panel])
+
+        cls.beam = PhotonBeamParameters(
+                                    photon_energy=8.6e3*electronvolt,
+                                    beam_diameter_fwhm=1.0e-6*meter,
+                                    pulse_energy=1.0e-3*joule,
+                                    photon_energy_relative_bandwidth=0.001,
+                                    divergence=None,
+                                    photon_energy_spectrum_type="SASE",
+                                )
 
     @classmethod
     def tearDownClass(cls):
@@ -76,47 +88,112 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         parameters = SingFELPhotonDiffractorParameters()
 
         # Check instance and inheritance.
-        self.assertIsInstance( parameters, SingFELPhotonDiffractorParameters )
-        self.assertIsInstance( parameters, AbstractCalculatorParameters )
+        self.assertIsInstance(parameters, SingFELPhotonDiffractorParameters)
+        self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual( parameters.uniform_rotation, None )
-        self.assertFalse( parameters.calculate_Compton )
-        self.assertEqual( parameters.slice_interval, 100 )
-        self.assertEqual( parameters.number_of_slices, 1 )
-        self.assertEqual( parameters.pmi_start_ID, 1 )
-        self.assertEqual( parameters.pmi_stop_ID, 1 )
-        self.assertEqual( parameters.beam_parameter_file, None )
-        self.assertEqual( parameters.beam_geometry_file, None )
+        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.slice_interval, 100)
+        self.assertEqual(parameters.number_of_slices, 1)
+        self.assertEqual(parameters.pmi_start_ID, 1)
+        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.beam_parameters, None)
+        self.assertEqual(parameters.detector_geometry, None)
+
+    def testConstructionWithGeometry(self):
+        """ Testing the construction of the class with a DetectorGeometry instance. """
+
+        # Attempt to construct an instance of the class.
+        parameters = SingFELPhotonDiffractorParameters(detector_geometry=self.detector_geometry)
+
+        # Check instance and inheritance.
+        self.assertIsInstance(parameters, SingFELPhotonDiffractorParameters)
+        self.assertIsInstance(parameters, AbstractCalculatorParameters)
+
+        # Check all parameters are set to default values.
+        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.slice_interval, 100)
+        self.assertEqual(parameters.number_of_slices, 1)
+        self.assertEqual(parameters.pmi_start_ID, 1)
+        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.beam_parameters, None)
+        self.assertEqual(parameters.detector_geometry, self.detector_geometry)
+
+    def testConstructionWithBeamParameters(self):
+        """ Testing the construction of the class with a PhotonBeamParameters instance. """
+
+        # Attempt to construct an instance of the class.
+        parameters = SingFELPhotonDiffractorParameters(detector_geometry=self.detector_geometry,
+                                                       beam_parameters=self.beam,
+                                                       )
+
+        # Check instance and inheritance.
+        self.assertIsInstance(parameters, SingFELPhotonDiffractorParameters)
+        self.assertIsInstance(parameters, AbstractCalculatorParameters)
+
+        # Check all parameters are set to default values.
+        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.slice_interval, 100)
+        self.assertEqual(parameters.number_of_slices, 1)
+        self.assertEqual(parameters.pmi_start_ID, 1)
+        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.beam_parameters, self.beam)
+        self.assertEqual(parameters.detector_geometry, self.detector_geometry)
+
+    def testConstructionWithSample(self):
+        """ Testing the construction of the class with a PhotonBeamParameters instance. """
+
+        # Attempt to construct an instance of the class.
+        parameters = SingFELPhotonDiffractorParameters(
+                sample='5udc.pdb',
+                detector_geometry=self.detector_geometry,
+                beam_parameters=self.beam
+                )
+
+        # Check instance and inheritance.
+        self.assertIsInstance(parameters, SingFELPhotonDiffractorParameters)
+        self.assertIsInstance(parameters, AbstractCalculatorParameters)
+
+        # Check all parameters are set to default values.
+        self.assertEqual(parameters.sample, '5udc.pdb')
+        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.slice_interval, 100)
+        self.assertEqual(parameters.number_of_slices, 1)
+        self.assertEqual(parameters.pmi_start_ID, 1)
+        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.beam_parameters, self.beam)
+        self.assertEqual(parameters.detector_geometry, self.detector_geometry)
 
     def testLegacyDictionary(self):
         """ Check parameter object can be initialized via a old-style dictionary. """
-        parameters_dict = { 'uniform_rotation': False,
-                           'calculate_Compton' : True,
-                           'slice_interval' : 12,
-                           'number_of_slices' : 2,
-                           'pmi_start_ID' : 4,
-                           'pmi_stop_ID'  : 5,
+        parameters_dict = {'uniform_rotation'               : False,
+                           'calculate_Compton'              : True,
+                           'slice_interval'                 : 12,
+                           'number_of_slices'               : 2,
+                           'pmi_start_ID'                   : 4,
+                           'pmi_stop_ID'                    : 5,
                            'number_of_diffraction_patterns' : 2,
-                           'beam_parameter_file' : TestUtilities.generateTestFilePath('s2e.beam'),
-                           'beam_geometry_file' : TestUtilities.generateTestFilePath('s2e.geom'),
-                           'number_of_MPI_processes' : 4, # Legacy, has no effect.
-                   }
-
+                           'beam_parameters'                : None,
+                           'detector_geometry'              : self.detector_geometry,
+                           'number_of_MPI_processes'        : 4,  # Legacy, has no effect.
+                           }
 
         parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameters_dict)
 
         # Check all parameters are set correctly.
-        self.assertFalse( parameters.uniform_rotation )
-        self.assertTrue( parameters.calculate_Compton )
-        self.assertEqual( parameters.slice_interval, 12 )
-        self.assertEqual( parameters.number_of_slices, 2 )
-        self.assertEqual( parameters.pmi_start_ID, 4 )
-        self.assertEqual( parameters.pmi_stop_ID, 5 )
-        self.assertEqual( parameters.beam_parameter_file, TestUtilities.generateTestFilePath('s2e.beam') )
-        self.assertEqual( parameters.beam_geometry_file, TestUtilities.generateTestFilePath('s2e.geom') )
-
+        self.assertFalse(parameters.uniform_rotation)
+        self.assertTrue(parameters.calculate_Compton)
+        self.assertEqual(parameters.slice_interval, 12)
+        self.assertEqual(parameters.number_of_slices, 2)
+        self.assertEqual(parameters.pmi_start_ID, 4)
+        self.assertEqual(parameters.pmi_stop_ID, 5)
+        self.assertEqual(parameters.beam_parameters, None)
+        self.assertEqual(parameters.detector_geometry, self.detector_geometry)
+        self.assertIsNone(parameters.sample)
 
 if __name__ == '__main__':
     unittest.main()
-

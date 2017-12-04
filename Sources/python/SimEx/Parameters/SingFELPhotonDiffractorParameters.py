@@ -1,3 +1,4 @@
+""" :module: Module that holds the SingFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -19,10 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the SingFELPhotonDiffractorParameters class.  """
 import os
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
@@ -31,6 +33,7 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
 
     def __init__(self,
+                sample=None,
                 uniform_rotation=None,
                 calculate_Compton=None,
                 slice_interval=None,
@@ -38,14 +41,17 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 pmi_start_ID=None,
                 pmi_stop_ID=None,
                 number_of_diffraction_patterns=None,
-                beam_parameter_file=None,
-                beam_geometry_file=None,
+                beam_parameters=None,
+                detector_geometry=None,
                 number_of_MPI_processes=None,
                 parameters_dictionary=None,
                 **kwargs
                 ):
         """
         Constructor for the SingFELPhotonDiffractorParameters.
+
+        :param sample: Name of file containing atomic sample geometry (default None).
+        :type sample: str
 
         :param uniform_rotation: Whether to perform uniform sampling of rotation space.
         :type uniform_rotation: bool, default True
@@ -68,11 +74,11 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param number_of_diffraction_patterns: Number of diffraction patterns to calculate from each trajectory.
         :type number_of_diffraction_patterns: int, default 1
 
-        :param beam_parameter_file: Path of the beam parameter file.
-        :type beam_parameter_file: str
+        :param beam_parameters: Path of the beam parameter file.
+        :type beam_parameters: str
 
-        :param beam_geometry_file: Path of the beam geometry file.
-        :type beam_geometry_file: str
+        :param detector_geometry: Path of the beam geometry file.
+        :type detector_geometry: str
 
         :param number_of_MPI_processes: Number of MPI processes
         :type number_of_MPI_processes: int, default 1
@@ -80,26 +86,28 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """
         # Legacy support for dictionaries.
         if parameters_dictionary is not None:
-            self.uniform_rotation = parameters_dictionary['uniform_rotation']
-            self.calculate_Compton = parameters_dictionary['calculate_Compton']
-            self.slice_interval = parameters_dictionary['slice_interval']
-            self.number_of_slices = parameters_dictionary['number_of_slices']
-            self.pmi_start_ID = parameters_dictionary['pmi_start_ID']
-            self.pmi_stop_ID = parameters_dictionary['pmi_stop_ID']
-            self.beam_parameter_file = parameters_dictionary['beam_parameter_file']
-            self.beam_geometry_file = parameters_dictionary['beam_geometry_file']
+            self.sample                         = None
+            self.uniform_rotation               = parameters_dictionary['uniform_rotation']
+            self.calculate_Compton              = parameters_dictionary['calculate_Compton']
+            self.slice_interval                 = parameters_dictionary['slice_interval']
+            self.number_of_slices               = parameters_dictionary['number_of_slices']
+            self.pmi_start_ID                   = parameters_dictionary['pmi_start_ID']
+            self.pmi_stop_ID                    = parameters_dictionary['pmi_stop_ID']
+            self.beam_parameters                = parameters_dictionary['beam_parameters']
+            self.detector_geometry              = parameters_dictionary['detector_geometry']
             self.number_of_diffraction_patterns = parameters_dictionary['number_of_diffraction_patterns']
 
         else:
             # Check all parameters.
-            self.uniform_rotation = uniform_rotation
-            self.calculate_Compton = calculate_Compton
-            self.slice_interval = slice_interval
-            self.number_of_slices = number_of_slices
-            self.pmi_start_ID = pmi_start_ID
-            self.pmi_stop_ID = pmi_stop_ID
-            self.beam_parameter_file = beam_parameter_file
-            self.beam_geometry_file = beam_geometry_file
+            self.sample                         = sample
+            self.uniform_rotation               = uniform_rotation
+            self.calculate_Compton              = calculate_Compton
+            self.slice_interval                 = slice_interval
+            self.number_of_slices               = number_of_slices
+            self.pmi_start_ID                   = pmi_start_ID
+            self.pmi_stop_ID                    = pmi_stop_ID
+            self.beam_parameters                = beam_parameters
+            self.detector_geometry              = detector_geometry
             self.number_of_diffraction_patterns = number_of_diffraction_patterns
 
         super(SingFELPhotonDiffractorParameters, self).__init__(**kwargs)
@@ -109,6 +117,20 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     ### Setters and queries.
+    @property
+    def sample(self):
+        """ Query for the 'sample' parameter. """
+        return self.__sample
+    @sample.setter
+    def sample(self, value):
+        """ Set the 'sample' parameter to a given value.
+        :param value: The value to set 'sample' to.
+        """
+        # Allow None.
+        if value is not None:
+            value = checkAndSetInstance( str, value, None )
+        self.__sample = value
+
     @property
     def uniform_rotation(self):
         """ Query for the 'uniform_rotation' parameter. """
@@ -198,40 +220,46 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             raise ValueError("The parameters 'pmi_stop_ID' must be a positive integer.")
 
     @property
-    def beam_parameter_file(self):
-        """ Query for the 'beam_parameter_file' parameter. """
-        return self.__beam_parameter_file
-    @beam_parameter_file.setter
-    def beam_parameter_file(self, value):
-        """ Set the 'beam_parameter_file' parameter to a given value.
-        :param value: The value to set 'beam_parameter_file' to.
+    def beam_parameters(self):
+        """ Query for the 'beam_parameters' parameter. """
+        return self.__beam_parameters
+    @beam_parameters.setter
+    def beam_parameters(self, value):
+        """ Set the 'beam_parameters' parameter to a given value.
+        :param value: The value to set 'beam_parameters' to.
         """
-        self.__beam_parameter_file = checkAndSetInstance( str, value, None )
+        value = checkAndSetInstance( (str,PhotonBeamParameters), value, None )
 
-        if self.__beam_parameter_file is not None:
-            if not os.path.isfile( self.__beam_parameter_file):
-                raise IOError("The beam_parameter_file %s is not a valid file or filename." % (self.__beam_parameter_file) )
-        else:
-            print ("WARNING: Beam parameter file not set, calculation will most probably fail.")
+        if isinstance(value, str):
+            if not os.path.isfile( value ):
+                raise IOError("The beam_parameters %s is not a valid file or filename." % (value) )
+            raise TypeError("Passing beam parameters as a file is currently unsupported. Please use the PhotonBeamParameters class.")
 
+        self.__beam_parameters = value
 
     @property
-    def beam_geometry_file(self):
-        """ Query for the 'beam_geometry_file' parameter. """
-        return self.__beam_geometry_file
-    @beam_geometry_file.setter
-    def beam_geometry_file(self, value):
-        """ Set the 'beam_geometry_file' parameter to a given value.
-        :param value: The value to set 'beam_geometry_file' to.
+    def detector_geometry(self):
+        """ Query for the 'detector_geometry' parameter. """
+        return self.__detector_geometry
+    @detector_geometry.setter
+    def detector_geometry(self, value):
+        """ Set the 'detector_geometry' parameter to a given value.
+        :param value: The value to set 'detector_geometry' to.
         """
-        self.__beam_geometry_file = checkAndSetInstance( str, value, None )
+        if value is None:
+            print ("WARNING: Geometry not set, calculation will most probably fail.")
 
-        if self.__beam_geometry_file is not None:
-            if not os.path.isfile( self.__beam_geometry_file):
-                raise IOError("The beam_parameter_file %s is not a valid file or filename." % (self.__beam_geometry_file) )
         else:
-            print ("WARNING: Geometry file not set, calculation will most probably fail.")
+            value = checkAndSetInstance( (str, DetectorGeometry), value, None )
 
+            if isinstance(value, str):
+                if not os.path.isfile( value ):
+                    raise IOError('The parameter "detector_geometry" %s is not a valid file or filename.' % (value) )
+
+                value = DetectorGeometry(filename=value)
+
+        # Store on object and return.
+        self.__detector_geometry = value
 
     @property
     def number_of_diffraction_patterns(self):
