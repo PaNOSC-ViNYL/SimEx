@@ -69,16 +69,16 @@
 <span class="c1">##########################################################################</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPhysicalQuantity</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.Units</span> <span class="k">import</span> <span class="n">meter</span><span class="p">,</span> <span class="n">electronvolt</span><span class="p">,</span> <span class="n">joule</span><span class="p">,</span> <span class="n">radian</span>
 
-<span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">wpg</span> <span class="k">import</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">wpg_uti_wf</span>
 <span class="kn">from</span> <span class="nn">wpg.srwlib</span> <span class="k">import</span> <span class="n">srwl</span>
 <span class="kn">import</span> <span class="nn">math</span>
-
-<span class="kn">from</span> <span class="nn">wpg</span> <span class="k">import</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">wpg_uti_wf</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <div class="viewcode-block" id="PhotonBeamParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.PhotonBeamParameters.PhotonBeamParameters">[docs]</a><span class="k">class</span> <span class="nc">PhotonBeamParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Class representing photon beam parameters. &quot;&quot;&quot;</span>
@@ -95,7 +95,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor of the PhotonBeamParameters class.</span>
 
-<span class="sd">        :param photon_energy: The mean photon energy in units of electonvolts (eV).</span>
+<span class="sd">        :param photon_energy: The mean photon energy in units of electronvolts (eV).</span>
 <span class="sd">        :type photon_energy: float</span>
 
 <span class="sd">        :param photon_energy_relative_bandwidth: The relative energy bandwidth</span>
@@ -139,7 +139,7 @@
     <span class="nd">@photon_energy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">photon_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;photon_energy&#39; parameter to val.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__photon_energy</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__photon_energy</span> <span class="o">=</span> <span class="n">checkAndSetPhysicalQuantity</span><span class="p">(</span> <span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>  <span class="n">electronvolt</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">photon_energy_spectrum_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -166,7 +166,7 @@
     <span class="nd">@beam_diameter_fwhm</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">beam_diameter_fwhm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;beam_diameter_fwhm&#39; parameter to val.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__beam_diameter_fwhm</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__beam_diameter_fwhm</span> <span class="o">=</span> <span class="n">checkAndSetPhysicalQuantity</span><span class="p">(</span> <span class="n">val</span> <span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">meter</span> <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">divergence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -175,7 +175,7 @@
     <span class="nd">@divergence</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">divergence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;divergence&#39; parameter to val.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__divergence</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__divergence</span> <span class="o">=</span> <span class="n">checkAndSetPhysicalQuantity</span><span class="p">(</span> <span class="n">val</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">radian</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pulse_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -184,7 +184,43 @@
     <span class="nd">@pulse_energy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">pulse_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the &#39;pulse_energy&#39; parameter to val.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__pulse_energy</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pulse_energy</span> <span class="o">=</span> <span class="n">checkAndSetPhysicalQuantity</span><span class="p">(</span> <span class="n">val</span><span class="p">,</span> <span class="mf">1.0e-3</span><span class="p">,</span> <span class="n">joule</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PhotonBeamParameters.serialize"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.PhotonBeamParameters.PhotonBeamParameters.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Serialize the object (write to a stream)</span>
+
+<span class="sd">        :param stream: The stream to write to (default sys.stdout)</span>
+<span class="sd">        :type stream:  str || file</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ostream</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_serialize</span><span class="p">(</span><span class="n">ostream</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="s1">&#39;write&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_serialize</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Workhorse serialization function &quot;&quot;&quot;</span>
+
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;; [Photon beam parameters]&quot;</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;; photon energy (eV)&quot;</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;beam/photon_energy = </span><span class="si">%8.7e</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">electronvolt</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;; Number of photons per pulse&quot;</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;beam/fluence = </span><span class="si">%8.7e</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulse_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">joule</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">joule</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;; Radius of X-ray beam (m)&quot;</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;beam/radius = </span><span class="si">%8.7e</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beam_diameter_fwhm</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">meter</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="propToBeamParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.PhotonBeamParameters.propToBeamParameters">[docs]</a><span class="k">def</span> <span class="nf">propToBeamParameters</span><span class="p">(</span> <span class="n">prop_output_path</span> <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Utility to setup a PhotonBeamParameters instance from propagation output. &quot;&quot;&quot;</span>
@@ -240,7 +276,7 @@
     <span class="n">rms</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">m2</span> <span class="o">-</span> <span class="n">m1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">m1</span>
-    <span class="n">spec_fwhm_eV</span> <span class="o">=</span> <span class="n">rms</span>
+    <span class="c1">#spec_fwhm_eV = rms</span>
 
     <span class="c1"># Extract beam diameter fwhm</span>
     <span class="n">xy_fwhm</span> <span class="o">=</span> <span class="n">wpg_uti_wf</span><span class="o">.</span><span class="n">calculate_fwhm</span><span class="p">(</span><span class="n">wavefront</span><span class="p">)</span>
@@ -253,19 +289,13 @@
     <span class="k">del</span> <span class="n">wavefront</span>
 
     <span class="n">beam_parameters</span> <span class="o">=</span> <span class="n">PhotonBeamParameters</span><span class="p">(</span>
-            <span class="n">photon_energy</span><span class="o">=</span><span class="n">photon_energy</span><span class="p">,</span>
+            <span class="n">photon_energy</span><span class="o">=</span><span class="n">photon_energy</span><span class="o">*</span><span class="n">electronvolt</span><span class="p">,</span>
             <span class="n">photon_energy_relative_bandwidth</span><span class="o">=</span><span class="n">spike_fwhm_eV</span><span class="o">/</span><span class="n">photon_energy</span><span class="p">,</span>
-            <span class="n">pulse_energy</span><span class="o">=</span><span class="n">pulse_energy</span><span class="p">,</span>
-            <span class="n">divergence</span><span class="o">=</span><span class="nb">max</span><span class="p">([</span><span class="n">qxqy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_x&#39;</span><span class="p">],</span><span class="n">qxqy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_y&#39;</span><span class="p">]])</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span>
-            <span class="n">beam_diameter_fwhm</span><span class="o">=</span><span class="nb">max</span><span class="p">([</span><span class="n">xy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_x&#39;</span><span class="p">],</span><span class="n">xy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_y&#39;</span><span class="p">]]),</span>
+            <span class="n">pulse_energy</span><span class="o">=</span><span class="n">pulse_energy</span><span class="o">*</span><span class="n">joule</span><span class="p">,</span>
+            <span class="n">divergence</span><span class="o">=</span><span class="nb">max</span><span class="p">([</span><span class="n">qxqy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_x&#39;</span><span class="p">],</span><span class="n">qxqy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_y&#39;</span><span class="p">]])</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="n">radian</span><span class="p">,</span>
+            <span class="n">beam_diameter_fwhm</span><span class="o">=</span><span class="nb">max</span><span class="p">([</span><span class="n">xy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_x&#39;</span><span class="p">],</span><span class="n">xy_fwhm</span><span class="p">[</span><span class="s1">&#39;fwhm_y&#39;</span><span class="p">]])</span><span class="o">*</span><span class="n">meter</span><span class="p">,</span>
             <span class="n">photon_energy_spectrum_type</span><span class="o">=</span><span class="s2">&quot;SASE&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-
-    <span class="nb">print</span> <span class="s2">&quot;photon_energy=</span><span class="si">%5.4f</span><span class="s2"> eV&quot;</span> <span class="o">%</span> <span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy</span>
-    <span class="nb">print</span> <span class="s2">&quot;photon_energy_relative_bandwidth=&quot;</span><span class="p">,</span> <span class="n">beam_parameters</span><span class="o">.</span><span class="n">photon_energy_relative_bandwidth</span>
-    <span class="nb">print</span> <span class="s2">&quot;pulse_energy=</span><span class="si">%4.3e</span><span class="s2"> J&quot;</span> <span class="o">%</span> <span class="n">beam_parameters</span><span class="o">.</span><span class="n">pulse_energy</span>
-    <span class="nb">print</span> <span class="s2">&quot;divergence=</span><span class="si">%4.3e</span><span class="s2"> rad&quot;</span> <span class="o">%</span> <span class="n">beam_parameters</span><span class="o">.</span><span class="n">divergence</span>
-    <span class="nb">print</span> <span class="s2">&quot;beam_diameter_fwhm=</span><span class="si">%4.3e</span><span class="s2"> m&quot;</span> <span class="o">%</span> <span class="n">beam_parameters</span><span class="o">.</span><span class="n">beam_diameter_fwhm</span>
 
     <span class="k">return</span> <span class="n">beam_parameters</span></div>
 
@@ -308,7 +338,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
     </div>
   </body>
 </html>

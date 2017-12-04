@@ -73,13 +73,15 @@
 <span class="kn">import</span> <span class="nn">exceptions</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
+<span class="kn">from</span> <span class="nn">SimEx</span> <span class="k">import</span> <span class="n">AbstractBaseClass</span>
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">ParallelUtilities</span>
 
 <span class="kn">import</span> <span class="nn">dill</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<div class="viewcode-block" id="AbstractBaseCalculator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator">[docs]</a><span class="k">class</span> <span class="nc">AbstractBaseCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="AbstractBaseCalculator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator">[docs]</a><span class="k">class</span> <span class="nc">AbstractBaseCalculator</span><span class="p">(</span><span class="n">AbstractBaseClass</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class for all simulation calculators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -164,7 +166,6 @@
         <span class="c1"># To be implemented by specialized calculator.</span>
         <span class="k">pass</span></div>
 
-<span class="c1"># TODO : think - should we make it abstract and remove default call of backengine?</span>
 <span class="c1">#    @abstractmethod</span>
     <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -191,6 +192,22 @@
             <span class="n">dill</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IOError</span><span class="p">(</span><span class="s2">&quot;Cannot dump to file &quot;</span><span class="o">+</span><span class="n">fname</span><span class="p">)</span></div>
+
+    <span class="c1">#def computeNTasks(self):</span>
+        <span class="c1">#resources=ParallelUtilities.getParallelResourceInfo()</span>
+        <span class="c1">#nnodes=resources[&#39;NNodes&#39;]</span>
+        <span class="c1">#ncores=resources[&#39;NCores&#39;]</span>
+
+        <span class="c1">#cpusPerTask=self.parameters.cpus_per_task</span>
+
+        <span class="c1">#if cpusPerTask==&quot;MAX&quot;:</span>
+            <span class="c1">#np=nnodes</span>
+            <span class="c1">#ncores=0</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#np=max(1,int(ncores/int(cpusPerTask)))</span>
+            <span class="c1">#ncores=int(cpusPerTask)</span>
+
+        <span class="c1">#return (np,ncores)</span>
 
 
 
@@ -343,7 +360,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
     </div>
   </body>
 </html>

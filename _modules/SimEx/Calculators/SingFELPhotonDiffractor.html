@@ -68,17 +68,26 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
+<span class="kn">from</span> <span class="nn">pysingfel.FileIO</span> <span class="k">import</span> <span class="n">saveAsDiffrOutFile</span><span class="p">,</span> <span class="n">prepH5</span>
+<span class="kn">from</span> <span class="nn">pysingfel.beam</span> <span class="k">import</span> <span class="n">Beam</span>
+<span class="kn">from</span> <span class="nn">pysingfel.detector</span> <span class="k">import</span> <span class="n">Detector</span>
+<span class="kn">from</span> <span class="nn">pysingfel.diffraction</span> <span class="k">import</span> <span class="n">calculate_molecularFormFactorSq</span>
+<span class="kn">from</span> <span class="nn">pysingfel.particle</span> <span class="k">import</span> <span class="n">Particle</span>
+<span class="kn">from</span> <span class="nn">pysingfel.radiationDamage</span> <span class="k">import</span> <span class="n">generateRotations</span><span class="p">,</span> <span class="n">rotateParticle</span>
+<span class="kn">from</span> <span class="nn">pysingfel.toolbox</span> <span class="k">import</span> <span class="n">convert_to_poisson</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span><span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
 
-<span class="kn">import</span> <span class="nn">prepHDF5</span>
-
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.Units</span> <span class="k">import</span> <span class="n">electronvolt</span><span class="p">,</span> <span class="n">meter</span><span class="p">,</span> <span class="n">joule</span>
 <span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.SingFELPhotonDiffractorParameters</span> <span class="k">import</span> <span class="n">SingFELPhotonDiffractorParameters</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">ParallelUtilities</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">IOUtilities</span>
+
 
 <div class="viewcode-block" id="SingFELPhotonDiffractor"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor">[docs]</a><span class="k">class</span> <span class="nc">SingFELPhotonDiffractor</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -98,18 +107,22 @@
 <span class="sd">        :type output_path: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">parameters</span><span class="p">,</span> <span class="nb">dict</span> <span class="p">):</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">(</span> <span class="n">parameters_dictionary</span> <span class="o">=</span> <span class="n">parameters</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">(</span><span class="n">parameters_dictionary</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
 
-        <span class="c1"># Set default parameters if no parameters given.</span>
-        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">()</span> <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span><span class="n">SingFELPhotonDiffractorParameters</span><span class="p">,</span>
+                                                <span class="n">parameters</span><span class="p">,</span>
+                                                <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">(),</span>
+                                                <span class="p">)</span>
 
+        <span class="c1"># Handle sample geometry provenience.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span><span class="o">.</span><span class="n">sample</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;One and only one of parameters.sample or input_path must be provided.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span><span class="o">.</span><span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span><span class="o">.</span><span class="n">sample</span>
 
         <span class="c1"># Init base class.</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SingFELPhotonDiffractor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingFELPhotonDiffractor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/ff&#39;</span><span class="p">,</span>
                                 <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/halfQ&#39;</span><span class="p">,</span>
@@ -157,64 +170,67 @@
         <span class="sd">&quot;&quot;&quot; Query for the data provided by the Diffractor. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span></div>
 
-
     <span class="k">def</span> <span class="nf">computeNTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">resources</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">getParallelResourceInfo</span><span class="p">()</span>
-        <span class="n">ncores</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span>
-        <span class="n">nnodes</span><span class="o">=</span><span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span>
+        <span class="n">resources</span> <span class="o">=</span> <span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">getParallelResourceInfo</span><span class="p">()</span>
+        <span class="n">ncores</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">resources</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="o">==</span><span class="s2">&quot;MAX&quot;</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">=</span><span class="n">nnodes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span> <span class="o">==</span> <span class="s2">&quot;MAX&quot;</span><span class="p">:</span>
+            <span class="n">np</span> <span class="o">=</span> <span class="n">nnodes</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="o">/</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="p">)),</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">np</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="o">/</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">np</span>
+        <span class="k">return</span> <span class="n">np</span><span class="p">,</span> <span class="n">ncores</span>
 
 <div class="viewcode-block" id="SingFELPhotonDiffractor.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; This method drives the backengine singFEL.&quot;&quot;&quot;</span>
 
-        <span class="c1"># Setup directory to pmi output.</span>
-        <span class="c1"># Backengine expects a directory name, so have to check if</span>
-        <span class="c1"># input_path is dir or file and handle accordingly.</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">):</span>
-            <span class="n">input_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span>
-
-        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">):</span>
-            <span class="n">input_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span>
-
-        <span class="c1"># Link the  python utility so the backengine can find it.</span>
-        <span class="c1">### Yes, this is messy.</span>
-        <span class="n">preph5_location</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsourcefile</span><span class="p">(</span><span class="n">prepHDF5</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">preph5_location</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;prepHDF5.py not found. Aborting the calculation.&quot;</span><span class="p">)</span>
-
         <span class="n">uniform_rotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">uniform_rotation</span>
-        <span class="n">calculate_Compton</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">calculate_Compton</span> <span class="p">)</span>
+        <span class="n">calculate_Compton</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">calculate_Compton</span><span class="p">)</span>
         <span class="n">slice_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">slice_interval</span>
         <span class="n">number_of_slices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_slices</span>
         <span class="n">pmi_start_ID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pmi_start_ID</span>
         <span class="n">pmi_stop_ID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pmi_stop_ID</span>
         <span class="n">number_of_diffraction_patterns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span>
-        <span class="n">beam_parameter_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameter_file</span>
-        <span class="n">beam_geometry_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_geometry_file</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">)</span>
-        <span class="n">output_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__output_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span>
+
+        <span class="c1"># If the sample is passed as a pdb, branch out to separate backengine implementation.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pdb&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+                <span class="c1"># Attempt to query from pdb.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="o">=</span> <span class="n">IOUtilities</span><span class="o">.</span><span class="n">checkAndGetPDB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backengineWithPdb</span><span class="p">()</span>
+
+        <span class="c1"># Ok, not a pdb, proceed.</span>
+        <span class="c1"># Serialize the geometry file.</span>
+        <span class="n">beam_geometry_file</span> <span class="o">=</span> <span class="s2">&quot;tmp.geom&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">detector_geometry</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">beam_geometry_file</span><span class="p">)</span>
+
+        <span class="c1"># Setup directory to pmi output.</span>
+        <span class="c1"># Backengine expects a directory name, so have to check if</span>
+        <span class="c1"># input_path is dir or file and handle accordingly.</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">input_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span>
+
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">input_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span>
 
         <span class="n">config_file</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
 
-<span class="c1"># collect MPI arguments</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span><span class="o">==</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">computeNTasks</span><span class="p">()</span>
-            <span class="n">mpicommand</span><span class="o">=</span><span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">prepareMPICommandArguments</span><span class="p">(</span><span class="n">np</span><span class="p">)</span>
+        <span class="c1"># collect MPI arguments</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">np</span><span class="p">,</span> <span class="n">ncores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computeNTasks</span><span class="p">()</span>
+            <span class="n">mpicommand</span> <span class="o">=</span> <span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">prepareMPICommandArguments</span><span class="p">(</span><span class="n">np</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mpicommand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span>
+            <span class="n">mpicommand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span>
 <span class="c1"># collect program arguments</span>
         <span class="n">command_sequence</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;radiationDamageMPI&#39;</span><span class="p">,</span>
                             <span class="s1">&#39;--inputDir&#39;</span><span class="p">,</span>         <span class="nb">str</span><span class="p">(</span><span class="n">input_dir</span><span class="p">),</span>
-                            <span class="s1">&#39;--outputDir&#39;</span><span class="p">,</span>        <span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span><span class="p">),</span>
-                            <span class="s1">&#39;--beamFile&#39;</span><span class="p">,</span>         <span class="nb">str</span><span class="p">(</span><span class="n">beam_parameter_file</span><span class="p">),</span>
+                            <span class="s1">&#39;--outputDir&#39;</span><span class="p">,</span>        <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__output_dir</span><span class="p">),</span>
                             <span class="s1">&#39;--geomFile&#39;</span><span class="p">,</span>         <span class="nb">str</span><span class="p">(</span><span class="n">beam_geometry_file</span><span class="p">),</span>
                             <span class="s1">&#39;--configFile&#39;</span><span class="p">,</span>       <span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">),</span>
                             <span class="s1">&#39;--uniformRotation&#39;</span><span class="p">,</span>  <span class="nb">str</span><span class="p">(</span><span class="n">uniform_rotation</span><span class="p">),</span>
@@ -224,8 +240,14 @@
                             <span class="s1">&#39;--pmiStartID&#39;</span><span class="p">,</span>       <span class="nb">str</span><span class="p">(</span><span class="n">pmi_start_ID</span><span class="p">),</span>
                             <span class="s1">&#39;--pmiEndID&#39;</span><span class="p">,</span>         <span class="nb">str</span><span class="p">(</span><span class="n">pmi_stop_ID</span><span class="p">),</span>
                             <span class="s1">&#39;--numDP&#39;</span><span class="p">,</span>            <span class="nb">str</span><span class="p">(</span><span class="n">number_of_diffraction_patterns</span><span class="p">),</span>
-                            <span class="s1">&#39;--prepHDF5File&#39;</span><span class="p">,</span>     <span class="n">preph5_location</span><span class="p">,</span>
                             <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beam_parameter_file</span> <span class="o">=</span> <span class="s2">&quot;tmp.beam&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">beam_parameter_file</span><span class="p">)</span>
+
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--beamFile&#39;</span><span class="p">)</span>
+            <span class="n">command_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">beam_parameter_file</span><span class="p">))</span>
 
         <span class="c1"># put MPI and program arguments together</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span> <span class="o">+</span> <span class="n">command_sequence</span>
@@ -240,6 +262,154 @@
         <span class="c1"># Return the return code from the backengine.</span>
         <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span></div>
 
+    <span class="k">def</span> <span class="nf">_backengineWithPdb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the diffraction simulation if the sample is a pdb.</span>
+<span class="sd">        Codes is based on pysingfel/tests/test_particle.test_calFromPDB</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Dump self to file.</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">IOUtilities</span><span class="o">.</span><span class="n">getTmpFileName</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToFile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="c1"># Setup the mpi call.</span>
+        <span class="n">forcedMPIcommand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">forced_mpi_command</span>
+
+        <span class="k">if</span> <span class="n">forcedMPIcommand</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">forcedMPIcommand</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">np</span><span class="p">,</span> <span class="n">ncores</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computeNTasks</span><span class="p">()</span>
+            <span class="n">mpicommand</span> <span class="o">=</span> <span class="n">ParallelUtilities</span><span class="o">.</span><span class="n">prepareMPICommandArguments</span><span class="p">(</span><span class="n">np</span><span class="p">,</span> <span class="n">ncores</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mpicommand</span> <span class="o">=</span> <span class="n">forcedMPIcommand</span>
+
+        <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;MPI&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_VERBOSE&#39;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SingFELPhotonDiffractor backengine mpicommand: &quot;</span><span class="o">+</span><span class="n">mpicommand</span><span class="p">)</span>
+
+        <span class="n">mpicommand</span> <span class="o">+=</span> <span class="s2">&quot; python &quot;</span> <span class="o">+</span> <span class="vm">__file__</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">fname</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span>
+
+        <span class="c1"># Launch the system command.</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span>
+
+    <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Local import of MPI to avoid premature call to MPI.init().</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+
+        <span class="c1"># Initialize MPI</span>
+        <span class="n">mpi_comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+        <span class="n">mpi_rank</span> <span class="o">=</span> <span class="n">mpi_comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+        <span class="n">mpi_size</span> <span class="o">=</span> <span class="n">mpi_comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+
+        <span class="c1"># Perform common work on all cores.</span>
+        <span class="n">initial_particle</span> <span class="o">=</span> <span class="n">Particle</span><span class="p">()</span>
+        <span class="n">initial_particle</span><span class="o">.</span><span class="n">readPDB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="n">ff</span><span class="o">=</span><span class="s1">&#39;WK&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Generate rotations.</span>
+        <span class="n">quaternions</span> <span class="o">=</span> <span class="n">generateRotations</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">uniform_rotation</span><span class="p">,</span>
+                <span class="s1">&#39;xyz&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span><span class="p">,</span>
+               <span class="p">)</span>
+
+        <span class="c1"># Setup the pysingfel detector using the simex object.</span>
+        <span class="c1"># TODO: only the first panel is considered for now, can loop over panels later.</span>
+        <span class="n">detector</span> <span class="o">=</span> <span class="n">Detector</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># read geom file</span>
+        <span class="n">panel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">detector_geometry</span><span class="o">.</span><span class="n">panels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">set_detector_dist</span><span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">distance_from_interaction_plane</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">meter</span><span class="p">))</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">set_pix_width</span><span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">pixel_size</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">meter</span><span class="p">))</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">set_pix_height</span><span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">pixel_size</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">meter</span><span class="p">))</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">set_numPix</span><span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;slow_scan_max&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;slow_scan_min&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>   <span class="c1"># y</span>
+                            <span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;fast_scan_max&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;fast_scan_min&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>   <span class="c1"># x</span>
+                            <span class="p">)</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">set_center_x</span><span class="p">((</span><span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;fast_scan_max&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;fast_scan_min&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">set_center_y</span><span class="p">((</span><span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;slow_scan_max&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">panel</span><span class="o">.</span><span class="n">ranges</span><span class="p">[</span><span class="s2">&quot;slow_scan_min&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+
+        <span class="c1"># Setup the beam based on the PhotonBeamParameters instance.</span>
+        <span class="n">beam</span> <span class="o">=</span> <span class="n">Beam</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">simex_beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">beam_parameters</span>
+        <span class="n">beam</span><span class="o">.</span><span class="n">set_photon_energy</span><span class="p">(</span><span class="n">simex_beam</span><span class="o">.</span><span class="n">photon_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">electronvolt</span><span class="p">))</span>
+        <span class="n">beam</span><span class="o">.</span><span class="n">set_focus</span><span class="p">(</span><span class="n">simex_beam</span><span class="o">.</span><span class="n">beam_diameter_fwhm</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">meter</span><span class="p">))</span>
+        <span class="n">beam</span><span class="o">.</span><span class="n">set_photonsPerPulse</span><span class="p">(</span><span class="n">simex_beam</span><span class="o">.</span><span class="n">pulse_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">joule</span><span class="p">)</span> <span class="o">/</span>
+                                 <span class="n">simex_beam</span><span class="o">.</span><span class="n">photon_energy</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">joule</span><span class="p">))</span>    <span class="c1"># Will update all other attributes.</span>
+
+        <span class="c1"># Initialize diffraction pattern</span>
+        <span class="n">detector</span><span class="o">.</span><span class="n">init_dp</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span>
+
+        <span class="c1"># Determine which patterns to run on which core.</span>
+        <span class="n">number_of_patterns_per_core</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">/</span> <span class="n">mpi_size</span>
+        <span class="c1"># Remainder of the division.</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">%</span> <span class="n">mpi_size</span>
+        <span class="c1"># Pattern indices</span>
+        <span class="n">pattern_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span><span class="p">)</span>
+
+        <span class="c1"># Distribute patterns over cores.</span>
+        <span class="n">rank_indices</span> <span class="o">=</span> <span class="n">pattern_indices</span><span class="p">[</span><span class="n">mpi_rank</span><span class="o">*</span><span class="n">number_of_patterns_per_core</span><span class="p">:(</span><span class="n">mpi_rank</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">number_of_patterns_per_core</span><span class="p">]</span>
+
+        <span class="c1"># Distribute remainder</span>
+        <span class="k">if</span> <span class="n">mpi_rank</span> <span class="o">&lt;</span> <span class="n">remainder</span><span class="p">:</span>
+            <span class="n">rank_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern_indices</span><span class="p">[</span><span class="n">mpi_size</span> <span class="o">*</span> <span class="n">number_of_patterns_per_core</span> <span class="o">+</span> <span class="n">mpi_rank</span><span class="p">])</span>
+
+        <span class="c1"># Setup the output file.</span>
+        <span class="n">outputName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_dir</span> <span class="o">+</span> <span class="s1">&#39;/diffr_out_&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">{0:07}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.h5&#39;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outputName</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">outputName</span><span class="p">)</span>
+
+        <span class="n">output_is_ready</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Loop over assigned tasks</span>
+        <span class="k">for</span> <span class="n">pattern_index</span> <span class="ow">in</span> <span class="n">rank_indices</span><span class="p">:</span>
+
+            <span class="c1"># Setup the output hdf5 file if not already done.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">output_is_ready</span><span class="p">:</span>
+                <span class="n">prepH5</span><span class="p">(</span><span class="n">outputName</span><span class="p">)</span>
+                <span class="n">output_is_ready</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># Make local copy of the sample.</span>
+            <span class="n">particle</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">initial_particle</span><span class="p">)</span>
+
+            <span class="c1"># Rotate particle.</span>
+            <span class="n">quaternion</span> <span class="o">=</span> <span class="n">quaternions</span><span class="p">[</span><span class="n">pattern_index</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">rotateParticle</span><span class="p">(</span><span class="n">quaternion</span><span class="p">,</span> <span class="n">particle</span><span class="p">)</span>
+
+            <span class="c1"># Calculate the diffraction intensity.</span>
+            <span class="n">detector_intensity</span> <span class="o">=</span> <span class="n">calculate_molecularFormFactorSq</span><span class="p">(</span><span class="n">particle</span><span class="p">,</span> <span class="n">detector</span><span class="p">)</span>
+
+            <span class="c1"># Correct for solid angle</span>
+            <span class="n">detector_intensity</span> <span class="o">*=</span> <span class="n">detector</span><span class="o">.</span><span class="n">solidAngle</span>
+
+            <span class="c1"># Correct for polarization</span>
+            <span class="n">detector_intensity</span> <span class="o">*=</span> <span class="n">detector</span><span class="o">.</span><span class="n">PolarCorr</span>
+
+            <span class="c1"># Multiply by photon fluence.</span>
+            <span class="n">detector_intensity</span> <span class="o">*=</span> <span class="n">beam</span><span class="o">.</span><span class="n">get_photonsPerPulsePerArea</span><span class="p">()</span>
+
+            <span class="c1"># Poissonize.</span>
+            <span class="n">detector_counts</span> <span class="o">=</span> <span class="n">convert_to_poisson</span><span class="p">(</span><span class="n">detector_intensity</span><span class="p">)</span>
+
+            <span class="c1"># Save to h5 file.</span>
+            <span class="n">saveAsDiffrOutFile</span><span class="p">(</span>
+                    <span class="n">outputName</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pattern_index</span><span class="p">,</span>
+                    <span class="n">detector_counts</span><span class="p">,</span>
+                    <span class="n">detector_intensity</span><span class="p">,</span>
+                    <span class="n">quaternion</span><span class="p">,</span>
+                    <span class="n">detector</span><span class="p">,</span>
+                    <span class="n">beam</span><span class="p">,</span>
+                   <span class="p">)</span>
+
+            <span class="k">del</span> <span class="n">particle</span>
+
+        <span class="n">mpi_comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="mi">0</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
@@ -247,7 +417,11 @@
 
     <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-        <span class="sd">&quot;&quot;&quot; Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private method for reading the hdf5 input and extracting the parameters</span>
+<span class="sd">        and data relevant to initialize the object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="SingFELPhotonDiffractor.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -263,10 +437,10 @@
         <span class="n">path_to_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span>
 
         <span class="c1"># Setup new file.</span>
-        <span class="n">h5_outfile</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span> <span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">h5_outfile</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 
         <span class="c1"># Files to read from.</span>
-        <span class="n">individual_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">path_to_files</span><span class="p">,</span> <span class="n">f</span> <span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="n">path_to_files</span> <span class="p">)</span> <span class="p">]</span>
+        <span class="n">individual_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">)]</span>
         <span class="n">individual_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
         <span class="c1"># Keep track of global parameters being linked.</span>
@@ -274,10 +448,7 @@
         <span class="c1"># Loop over all individual files and link in the top level groups.</span>
         <span class="k">for</span> <span class="n">ind_file</span> <span class="ow">in</span> <span class="n">individual_files</span><span class="p">:</span>
             <span class="c1"># Open file.</span>
-            <span class="n">h5_infile</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">ind_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-
-            <span class="c1"># Get file ID.</span>
-            <span class="n">file_ID</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">ind_file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.h5&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">h5_infile</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ind_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
 
             <span class="c1"># Links must be relative.</span>
             <span class="n">relative_link_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ind_file</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">ind_file</span><span class="p">)))</span>
@@ -307,9 +478,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="s2">&quot;.h5&quot;</span></div></div>
 
 
-
-
-
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">SingFELPhotonDiffractor</span><span class="o">.</span><span class="n">runFromCLI</span><span class="p">()</span>
 </pre></div>
 
           </div>
@@ -349,7 +519,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
     </div>
   </body>
 </html>
