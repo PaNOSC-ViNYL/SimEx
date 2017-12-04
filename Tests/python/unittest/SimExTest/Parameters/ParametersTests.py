@@ -25,6 +25,7 @@ import unittest
 # Import classes to test.
 from CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorParametersTest
 from DMPhasingParametersTest import DMPhasingParametersTest
+from DetectorGeometryTest import DetectorGeometryTest, DetectorPanelTest
 from EMCOrientationParametersTest import EMCOrientationParametersTest
 from EstherPhotonMatterInteractorParametersTest import EstherPhotonMatterInteractorParametersTest
 from PhotonBeamParametersTest import PhotonBeamParametersTest
@@ -36,6 +37,8 @@ from WavePropagatorParametersTest import WavePropagatorParametersTest
 def suite():
     suites = [
              unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
+             unittest.makeSuite(DetectorGeometryTest,                       'test'),
+             unittest.makeSuite(DetectorPanelTest,                          'test'),
              unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,         'test'),
              unittest.makeSuite(SingFELPhotonDiffractorParametersTest,      'test'),
              unittest.makeSuite(EMCOrientationParametersTest,               'test'),
