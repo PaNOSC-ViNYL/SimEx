@@ -24,17 +24,39 @@ FIND_PACKAGE (GSL REQUIRED)
 # Usage:
 # _get_h5_lib_dir(CXX VARIABLE_STORE_PATH)  
 # in case of errors the output variable is set to "NOT-FOUND"
+# Following, cmake recomendation, local variables/functions not to be 
+# used outside of the package have a name that starts with an underscore
+# character.
+# Usage:
+#    _get_h5_lib_dir( LANG OUTLIST)
+#    where LANG is the string of the language to be used e.g. CXX and
+#    OUTLIST is the output string variable that will contain the *list*
+#    of paths to be used
+# The intent of this macro is to find the path to be passed to old
+# configure style script to parameters like: --with-hdf5.
+# Please note that dependening on how HDF5 is instlled on your system the 
+# number of elements of OUTLIST could be >1, in such a case client code
+# should deal with this.
+# In case of erros, OUTLIST will be set to "NOT-FOUND"
+# Pre-requisite: find_package(HDF5 REQUIRED)
 MACRO(_get_h5_lib_dir language output_value)
+    #First check that compiler executable for gien language exists
     if (HDF5_${language}_COMPILER_EXECUTABLE)
+        #Call compiler with -show argument and capture output in
+        #_cmt_output
         EXEC_PROGRAM( ${HDF5_${language}_COMPILER_EXECUTABLE}
                     ARGS -show
                     OUTPUT_VARIABLE _cmp_output
                     RETURN_VALUE _cmp_ret_val
                     )
+        #If return code is zero, we can continue
         IF( ${_cmp_ret_val} EQUAL 0)
+            #Use reg-expr to search for the -L flags on the output
             STRING( REGEX MATCHALL "-L([^\" ]+|\"[^\"]|\")"
                     _lib_path_flags
                     "${_cmp_output}")
+            #The output is a list of options, now for each one
+            #remove -L string and normalize paths
             FOREACH( LPATH ${_lib_path_flags})
                 STRING(REGEX REPLACE "^-L" "" LPATH ${LPATH})
                 STRING(REPLACE "//" "/" LPATH ${LPATH})
@@ -55,9 +77,24 @@ MACRO(_get_h5_lib_dir language output_value)
 ENDMACRO()
     
 
+#Retrieve installation path for both C++ and C, do we need both?
 _get_h5_lib_dir(CXX MYHDF5_LIBRARY_DIRS)
 _get_h5_lib_dir(C MYHDF5_LIBRARY_DIRS)
+#Remove duplicates from list
 LIST(REMOVE_DUPLICATES MYHDF5_LIBRARY_DIRS)
+#Check how many paths have been identified, if more than one
+#make a workaround
+LIST(LENGTH MYHDF5_LIBRARY_DIRS _listlen)
+IF(${_listlen} GREATER 1)
+    MESSAGE(WARNING "Retrieved more than one installation path for "
+            "HDF5, using only the first one. This may not be correct.")
+    FOREACH(_path ${MYHDF5_LIBRARY_DIRS})
+            MESSAGE("Candidate path: " ${_path})
+    ENDFOREACH()
+    #If more than one path is found, extract from the list the first and
+    #use that.
+    LIST(GET MYHDF5_LIBRARY_DIRS 0 MYHDF5_LIBRARY_DIRS)
+ENDIF()
 # Add the project.
 ExternalProject_Add( crystfel
     URL http://www.desy.de/~twhite/crystfel/crystfel-0.6.3.tar.gz
