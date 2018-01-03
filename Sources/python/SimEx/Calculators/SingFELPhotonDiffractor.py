@@ -130,7 +130,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.cpus_per_task == "MAX":
             np = nnodes
         else:
-            np = max(int(ncores/int(self.parameters.cpus_per_task)), 1)
+            np = max(ncores//self.parameters.cpus_per_task, 1)
 
         return np, ncores
 
@@ -295,7 +295,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         detector.init_dp(beam)
 
         # Determine which patterns to run on which core.
-        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns / mpi_size
+        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns // mpi_size
         # Remainder of the division.
         remainder = self.parameters.number_of_diffraction_patterns % mpi_size
         # Pattern indices
@@ -303,7 +303,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Distribute patterns over cores.
         rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
-
         # Distribute remainder
         if mpi_rank < remainder:
             rank_indices.append(pattern_indices[mpi_size * number_of_patterns_per_core + mpi_rank])
