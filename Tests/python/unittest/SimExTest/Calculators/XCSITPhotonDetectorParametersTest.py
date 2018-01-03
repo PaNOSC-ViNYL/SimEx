@@ -20,20 +20,16 @@
 #                                                                        #
 ##########################################################################
 
-from . import paths
+import paths
 import os
-import numpy
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
-from . import paths
+import paths
 import unittest
 
-from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 
 class XCSITPhotonDetectorParametersTest(unittest.TestCase):
@@ -146,7 +142,7 @@ class XCSITPhotonDetectorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.plasma_simulation_flag, "BLANKPLASMA")
         parameters.plasma_search_flag = "BLANK"
         self.assertEqual(parameters.plasma_search_flag, "BLANK")
-        
+
         # Reset point_simulation_method to non-sense value
         self.assertRaises( TypeError,  parameters.point_simulation_method, None)
         self.assertRaises( TypeError,  parameters.point_simulation_method, 1)

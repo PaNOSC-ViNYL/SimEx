@@ -23,10 +23,8 @@
 # 3rd party imports
 from ocelot.adaptors import genesis
 from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
-import h5py
-import numpy
 import os, shutil
-from . import paths
+import paths
 import unittest
 
 # SimEx imports

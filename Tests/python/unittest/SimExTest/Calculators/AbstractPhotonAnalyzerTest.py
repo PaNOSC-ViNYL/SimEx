@@ -26,7 +26,7 @@
     @creation 20151006
 
 """
-from . import paths
+import paths
 import os, shutil
 import unittest
 

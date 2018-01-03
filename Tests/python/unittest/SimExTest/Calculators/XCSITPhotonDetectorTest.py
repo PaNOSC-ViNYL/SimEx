@@ -23,17 +23,14 @@
 import os
 import h5py
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
-from . import paths
+import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector, XCSITPhotonDetectorParameters
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from TestUtilities import TestUtilities
 
 class XCSITPhotonDetectorTest(unittest.TestCase):

@@ -27,10 +27,7 @@
 
 """
 import os
-
-from . import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource

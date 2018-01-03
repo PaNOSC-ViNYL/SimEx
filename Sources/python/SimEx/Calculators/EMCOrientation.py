@@ -27,7 +27,7 @@ import subprocess,shlex
 import tempfile
 import time
 
-from .EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
+from SimEx.Calculators.EMCCaseGenerator import EMCCaseGenerator, _print_to_log
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities import IOUtilities
@@ -220,7 +220,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         else:
             mpicommand=self.parameters.forced_mpi_command
         # collect program arguments
-        command_sequence = ['python',
+        command_sequence = ['python3',
                             __file__,
                             fname,
                             ]

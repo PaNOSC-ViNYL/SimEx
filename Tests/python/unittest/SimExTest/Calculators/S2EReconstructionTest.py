@@ -27,9 +27,7 @@
 
 """
 import os, shutil
-import subprocess
-
-from . import paths
+import paths
 import unittest
 
 

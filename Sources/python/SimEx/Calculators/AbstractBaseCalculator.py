@@ -63,7 +63,9 @@ class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
         """
 
         try:
-            calculator = dill.load(open(fname))
+            with open(fname,'rb') as file_handle:
+                calculator = dill.load(file_handle)
+
         except:
             raise IOError("Cannot read  from file "+fname)
         if not issubclass(type(calculator),AbstractBaseCalculator):
@@ -137,26 +139,10 @@ class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
         """
 
         try:
-            dill.dump(self, open(fname, "w"))
+            with open(fname, "wb") as file_handle:
+                dill.dump(self, file_handle)
         except:
             raise IOError("Cannot dump to file "+fname)
-
-    #def computeNTasks(self):
-        #resources=ParallelUtilities.getParallelResourceInfo()
-        #nnodes=resources['NNodes']
-        #ncores=resources['NCores']
-
-        #cpusPerTask=self.parameters.cpus_per_task
-
-        #if cpusPerTask=="MAX":
-            #np=nnodes
-            #ncores=0
-        #else:
-            #np=max(1,int(ncores/int(cpusPerTask)))
-            #ncores=int(cpusPerTask)
-
-        #return (np,ncores)
-
 
 
     @abstractmethod

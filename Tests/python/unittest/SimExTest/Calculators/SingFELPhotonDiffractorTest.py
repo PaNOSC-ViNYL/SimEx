@@ -26,9 +26,8 @@ import numpy
 import shutil
 
 # Include needed directories in sys.path.
-from . import paths
+import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor

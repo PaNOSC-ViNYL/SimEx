@@ -27,16 +27,11 @@
 
 """
 import os
-
-from . import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonPropagator import AbstractPhotonPropagator
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
-
-from TestUtilities import TestUtilities
 
 class TestPhotonPropagator(AbstractPhotonPropagator):
     """ Implements a dummy child instance of the AbstractPhotonPropagator base class."""

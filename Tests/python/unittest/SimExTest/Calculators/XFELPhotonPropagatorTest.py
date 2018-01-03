@@ -27,11 +27,8 @@
 
 """
 import os, shutil
-from . import paths
+import paths
 import unittest
-
-import numpy
-import h5py
 
 # Import the class to test.
 from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator

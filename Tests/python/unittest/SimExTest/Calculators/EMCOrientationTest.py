@@ -29,9 +29,8 @@
 import os
 import subprocess
 
-from . import paths
+import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.EMCOrientation import EMCOrientation, _checkPaths

@@ -22,10 +22,9 @@
 
 import h5py
 import os
-from . import paths
+import paths
 import shutil
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor

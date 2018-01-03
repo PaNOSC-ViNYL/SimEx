@@ -27,7 +27,7 @@ import shutil
 import unittest
 
 # Include needed directories in sys.path.
-from . import paths
+import paths
 
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor

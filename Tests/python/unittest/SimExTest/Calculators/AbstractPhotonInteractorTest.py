@@ -26,17 +26,13 @@
     @creation 20151006
 
 """
-from . import paths
-
+import paths
 import os
 import unittest
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
-
-from TestUtilities import TestUtilities
-
 
 class TestPhotonInteractor(AbstractPhotonInteractor):
     """ Implements a dummy child instance of the AbstractPhotonInteractor base class."""
