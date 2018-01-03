@@ -19,14 +19,14 @@
 #                                                                        #
 ##########################################################################
 
-from . import paths
+import paths
 import unittest
 
 # Import classes to test.
-from .EntityChecksTest import EntityChecksTest
-from .IOUtilitiesTest import IOUtilitiesTest
-from .ParallelUtilitiesTest import ParallelUtilitiesTest
-from .OpenPMDToolsTest import OpenPMDToolsTest
+from EntityChecksTest import EntityChecksTest
+from IOUtilitiesTest import IOUtilitiesTest
+from ParallelUtilitiesTest import ParallelUtilitiesTest
+from OpenPMDToolsTest import OpenPMDToolsTest
 
 # Setup the suite.
 def suite():

@@ -20,11 +20,10 @@
 #                                                                        #
 ##########################################################################
 
-import exceptions
 import os
 import shutil
 import numpy
-from . import paths
+import paths
 import unittest
 from wpg import Wavefront
 

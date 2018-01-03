@@ -25,15 +25,13 @@
     @institution XFEL
     @creation 20151006
 """
-from . import paths
-import exceptions
+import paths
 import unittest
 
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
 from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 from SimEx.Utilities.EntityChecks import checkAndSetPhysicalQuantity
-from SimEx import PhysicalQuantity
 from SimEx.Utilities.Units import *
 
 class EntityChecksTest(unittest.TestCase):
@@ -58,7 +56,7 @@ class EntityChecksTest(unittest.TestCase):
         """ Test the check and set utility raises if var is wrong type."""
 
         # Wrong type.
-        self.assertRaises(exceptions.TypeError, checkAndSetInstance, int, 1.01, 1)
+        self.assertRaises(TypeError, checkAndSetInstance, int, 1.01, 1)
 
     def testCheckAndSetInstanceDerived(self):
         """ Test the check and set utility works correctly also for abstract data and derived types. """
@@ -94,7 +92,7 @@ class EntityChecksTest(unittest.TestCase):
         tp = int
 
         # Check raises because default not of correct type.
-        self.assertRaises(exceptions.TypeError, checkAndSetInstance, tp, None, default)
+        self.assertRaises(TypeError, checkAndSetInstance, tp, None, default)
 
         default = 1
         # Use the utility to set the variable to the default.

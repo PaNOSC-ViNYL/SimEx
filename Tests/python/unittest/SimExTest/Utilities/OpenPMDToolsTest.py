@@ -24,14 +24,12 @@
     @institution XFEL
     @creation 20160517
 """
-import exceptions
 import h5py
 import numpy
 import os
-from . import paths
+import paths
 import unittest
 
-from SimEx.Utilities import OpenPMDTools as opmd
 from SimEx.Utilities.wpg_to_opmd import convertToOPMD
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 
