@@ -26,17 +26,14 @@
     @creation 20161003 (Germany's national holiday, but I'm in Trieste, Italy for the SOS workshop.)
 
 """
-from . import paths
+import paths
 import os
 import shutil
-import wpg
-from wpg.beamline import Beamline
 from prop import exfel_spb_kb_beamline as s2e_beamline
 
 # Include needed directories in sys.path.
 import unittest
 
-from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.WavePropagatorParameters import WavePropagatorParameters
 

@@ -20,19 +20,15 @@
 #                                                                        #
 ##########################################################################
 
-from . import paths
+import paths
 import os
-import numpy
 import shutil
-import subprocess
 import io
 
 # Include needed directories in sys.path.
-from . import paths
 import unittest
 
 from TestUtilities import TestUtilities
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
