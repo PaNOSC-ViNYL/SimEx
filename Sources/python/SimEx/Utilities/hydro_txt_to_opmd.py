@@ -22,7 +22,7 @@
 import h5py
 import numpy
 import os
-import sys
+
 from SimEx.Utilities import OpenPMDTools as opmd
 
 def convertTxtToOPMD(esther_dirname=None):
@@ -112,7 +112,7 @@ def convertTxtToOPMD(esther_dirname=None):
                 numpy.array([ 1.0,  0.0, 0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m
 
             # Write common attributes.
-            axis_label = ["Zones"]
+            axis_label = [b"Zones"]
             geometry = numpy.string_("other")
             grid_spacing = [numpy.float64(1.0)]
             grid_global_offset = [numpy.float64(0.0)]
