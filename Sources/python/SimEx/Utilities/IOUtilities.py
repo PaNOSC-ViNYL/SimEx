@@ -1,4 +1,4 @@
-""" Module for entity checks.  """
+""" Module for input/output utilities.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -29,6 +29,7 @@ import numpy
 import os, shutil
 import periodictable
 import urllib.request, urllib.parse, urllib.error
+import requests
 import uuid
 
 def getTmpFileName():
