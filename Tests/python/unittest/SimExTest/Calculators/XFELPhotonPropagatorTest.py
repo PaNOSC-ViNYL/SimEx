@@ -83,9 +83,9 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
     def testBackengineDefaultPaths(self):
         """ Test a backengine run with a default io paths."""
         # Prepare source.
-        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
         self.__dirs_to_remove.append( 'source' )
         self.__dirs_to_remove.append( 'prop' )
+        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
 
         # Construct the object.
         xfel_propagator = XFELPhotonPropagator()
