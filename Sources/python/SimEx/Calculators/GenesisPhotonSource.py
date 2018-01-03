@@ -80,7 +80,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
 
         # Merge guessed and external input.
         if hasattr(self, '_GenesisPhotonSource__genesis_input') and self.__genesis_input is not None:
-            for key,value in self.__genesis_input.__dict__.items():
+            for key,value in list(self.__genesis_input.__dict__.items()):
                 if value != 0.0:
                     setattr(genesis_input, key, value)
 

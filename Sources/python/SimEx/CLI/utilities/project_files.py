@@ -60,18 +60,18 @@ def update_main_file():
         if os.path.exists(dest):
             bakfile=dest.replace('.py','.bak')
             shutil.copy(dest,bakfile)
-            print ("Overwriting file %s, file %s created"%(dest,bakfile))
+            print(("Overwriting file %s, file %s created"%(dest,bakfile)))
         shutil.copy(src,dest)
         for line in fileinput.FileInput(dest, inplace=1):
             line=line.replace('${PROJECT_NAME}',fname)
-            print line.rstrip()
+            print(line.rstrip())
     except shutil.Error as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
     except :
-        print('Error: cannot create file %s'%dest )
+        print(('Error: cannot create file %s'%dest ))
         return
 
     modules = parse_settings.get_modules()
@@ -86,4 +86,4 @@ def update_main_file():
 
     for line in fileinput.FileInput(dest, inplace=1):
             line=line.replace('# modules will be added here',string)
-            print line.rstrip()
+            print(line.rstrip())

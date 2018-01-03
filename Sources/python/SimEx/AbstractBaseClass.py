@@ -1,11 +1,10 @@
 from abc import ABCMeta, abstractmethod
 import copy
 
-class AbstractBaseClass(object):
+class AbstractBaseClass(object, metaclass=ABCMeta):
     """
     The mother of all abstract classes.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def __init__(self, **kwargs):
@@ -25,7 +24,7 @@ class AbstractBaseClass(object):
         clone = copy.deepcopy(self)
 
         if kwargs is not None:
-            for key,value in kwargs.iteritems():
+            for key,value in kwargs.items():
                 setattr(clone, key, value)
 
         return clone
@@ -33,7 +32,7 @@ class AbstractBaseClass(object):
     def __eq__(self, comp):
         """ Test equality of this and another ABC instance. """
         eq = True
-        for key, val in self.__dict__.iteritems():
+        for key, val in self.__dict__.items():
             if not ( val == comp.__dict__[key] ):
                 #print key, val, comp.__dict__[key]
                 return not eq

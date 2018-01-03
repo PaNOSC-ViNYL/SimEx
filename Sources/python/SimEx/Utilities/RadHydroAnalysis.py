@@ -51,7 +51,7 @@ def radHydroAnalysis(filename):
     # Get data from h5 output.
     with h5py.File(filename, 'r') as h5:
         # Time snapshots.
-        snapshots = [int(k) for k in h5["/data"].keys()]
+        snapshots = [int(k) for k in list(h5["/data"].keys())]
         snapshots.sort()
         times = numpy.array([h5["/data/%s" % (s)].attrs["time"] for s in snapshots])*1e9 # ns
 
@@ -67,7 +67,7 @@ def radHydroAnalysis(filename):
     total_number_of_zones = positions.shape[1]
     number_of_ablator_zones = total_number_of_zones-number_of_sample_zones-number_of_window_zones
 
-    sample_indices = range(number_of_window_zones, number_of_window_zones+number_of_sample_zones)
+    sample_indices = list(range(number_of_window_zones, number_of_window_zones+number_of_sample_zones))
     #sample_start_index = sample_indices[0]
     #sample_end_index = sample_indices[-1]
     sample_start_index = 1

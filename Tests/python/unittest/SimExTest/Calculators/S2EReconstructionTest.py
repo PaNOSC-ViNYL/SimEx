@@ -29,7 +29,7 @@
 import os, shutil
 import subprocess
 
-import paths
+from . import paths
 import unittest
 
 

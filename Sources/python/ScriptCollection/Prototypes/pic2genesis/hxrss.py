@@ -127,7 +127,7 @@ stage=1  #(SASE)#
 #################
 
 if start_stage <= stage and stop_stage >= stage:
-    print ('Start STAGE ' + str(stage))
+    print(('Start STAGE ' + str(stage)))
     for run_id in run_ids:
         inp = generate_input(up, beam_pk, itdp=True)
         inp.stageid=stage
@@ -162,7 +162,7 @@ if start_stage <= stage and stop_stage >= stage:
         # inp.fbess0=0.810854
         # inp.xlamds=8.265645E-11
         #
-        print(inp.fbess0)
+        print((inp.fbess0))
 
         out = xfel_utils.run(inp, launcher, readout=0)
 

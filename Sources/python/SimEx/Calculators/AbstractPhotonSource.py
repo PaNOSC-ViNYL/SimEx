@@ -26,13 +26,10 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class AbstractPhotonSource(AbstractBaseCalculator):
+class AbstractPhotonSource(AbstractBaseCalculator, metaclass=ABCMeta):
     """
     Class representing an abstract photon source, serving as API for actual photon source simulation calculators.
     """
-
-    # Make this an abstract base class.
-    __metaclass__  = ABCMeta
 
     # Abstract constructor.
     @abstractmethod

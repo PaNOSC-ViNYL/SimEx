@@ -3,7 +3,7 @@ import sys
 import os
 
 import SimEx.Calculators
-import parse_classes
+from . import parse_classes
 
 def get_module_from_file(fname):
     f=open(fname,'r')
@@ -15,7 +15,7 @@ def get_module_from_file(fname):
 
 
 def get_available_modules():
-    import parse_classes
+    from . import parse_classes
     path = os.path.dirname(SimEx.Calculators.__file__)+'/RegisteredCalculators/'
     moduleList=[]
     for fname in os.listdir(path):
@@ -40,4 +40,4 @@ def get_module(moduleName):
 
 
 if __name__ == "__main__":
-        print get_available_modules()
+        print(get_available_modules())

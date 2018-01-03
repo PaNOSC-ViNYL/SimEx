@@ -20,14 +20,14 @@
 #                                                                        #
 ##########################################################################
 
-import paths
+from . import paths
 import os
 import numpy
 import shutil
 import subprocess
 
 # Include needed directories in sys.path.
-import paths
+from . import paths
 import unittest
 
 from TestUtilities import TestUtilities

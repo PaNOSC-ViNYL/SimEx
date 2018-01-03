@@ -32,7 +32,7 @@ import shutil
 import h5py
 
 # Include needed directories in sys.path.
-import paths
+from . import paths
 import unittest
 
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters

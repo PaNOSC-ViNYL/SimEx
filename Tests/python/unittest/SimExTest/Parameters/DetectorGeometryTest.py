@@ -20,7 +20,7 @@
 #                                                                        #
 ##########################################################################
 
-import paths
+from . import paths
 
 from SimEx import PhysicalQuantity
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
@@ -28,7 +28,7 @@ from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel, _
 from SimEx.Utilities.Units import meter, electronvolt
 from TestUtilities import TestUtilities
 
-import StringIO
+import io
 import os
 import shutil
 import unittest
@@ -137,7 +137,7 @@ class DetectorGeometryTest(unittest.TestCase):
         detector_geometry = DetectorGeometry(panels=[panel0, panel1])
 
         # Serialize to stream
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
 
         detector_geometry.serialize(stream)
 
@@ -312,7 +312,7 @@ panel1/max_adu       = 1.0000000e+04
         geometry = DetectorGeometry(panels=[self.__panel0, self.__panel1])
 
         # Serialize
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         geometry.serialize(stream=stream)
         serialized_panel = stream.getvalue()
         stream.close()
@@ -477,7 +477,7 @@ class DetectorPanelTest(unittest.TestCase):
         # Construct a panel.
         panel = self.__panel
 
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         panel._serialize(stream=stream)
 
         reference_string = """;panel 0
@@ -579,7 +579,7 @@ panel0/max_adu       = 1.0000000e+04
         # Get a panel.
         panel = self.__panel
         # Serialize it.
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         panel._serialize(stream)
         serialized_panel=stream.getvalue()
         stream.close()

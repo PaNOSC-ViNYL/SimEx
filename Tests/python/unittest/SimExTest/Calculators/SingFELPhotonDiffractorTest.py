@@ -26,7 +26,7 @@ import numpy
 import shutil
 
 # Include needed directories in sys.path.
-import paths
+from . import paths
 import unittest
 
 
@@ -568,14 +568,14 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         h5_filehandle = h5py.File( photon_diffractor.output_path, 'r')
 
         # Count groups under /data.
-        number_of_patterns = len(h5_filehandle['data'].keys())
+        number_of_patterns = len(list(h5_filehandle['data'].keys()))
 
         self.assertEqual( number_of_patterns, 8 )
 
         # Assert global metadata is present.
-        self.assertIn("params", h5_filehandle.keys() )
-        self.assertIn("version", h5_filehandle.keys() )
-        self.assertIn("info", h5_filehandle.keys() )
+        self.assertIn("params", list(h5_filehandle.keys()) )
+        self.assertIn("version", list(h5_filehandle.keys()) )
+        self.assertIn("info", list(h5_filehandle.keys()) )
 
     def testNoRotation(self):
         """ Test that we can run singfel with no-rotation option."""

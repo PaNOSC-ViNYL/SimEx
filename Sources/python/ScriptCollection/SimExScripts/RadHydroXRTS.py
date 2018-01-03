@@ -29,7 +29,7 @@ from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculator
 
 # Read hydro data
 path_to_data = os.path.abspath( os.path.join(r"..",r"..",r"..",r"..",r"Tests",r"python",r"unittest",r"TestFiles",r"hydro1D_out_0000001.opmd.h5") )
-print path_to_data
+print(path_to_data)
 hydro_data = h5py.File( path_to_data, 'r' )
 
 Kelvin_to_eV = 1./11806.
@@ -91,7 +91,7 @@ for k in ks:
         )
 
     # Run the calculation.
-    print "Processing zone 0 of %d" % (number_of_zones)
+    print("Processing zone 0 of %d" % (number_of_zones))
     xrts_calculator.backengine()
 
     # Get the total spectrum.
@@ -100,7 +100,7 @@ for k in ks:
     # Loop over all but last zones.
     for zone in range(number_of_zones - 1):
 
-        print "Processing zone %d of %d" % (zone, number_of_zones)
+        print("Processing zone %d of %d" % (zone, number_of_zones))
 
         # Decrement zone index.
         zone_index -= 1

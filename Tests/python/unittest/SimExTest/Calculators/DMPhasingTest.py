@@ -28,7 +28,7 @@
 """
 import os
 
-import paths
+from . import paths
 import unittest
 
 

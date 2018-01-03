@@ -20,15 +20,15 @@
 #                                                                        #
 ##########################################################################
 
-import paths
+from . import paths
 import os
 import numpy
 import shutil
 import subprocess
-import StringIO
+import io
 
 # Include needed directories in sys.path.
-import paths
+from . import paths
 import unittest
 
 from TestUtilities import TestUtilities
@@ -185,7 +185,7 @@ beam/radius = 5.0000000e-07
         """ Test the serialization of a PhotonBeamParameters instance. """
         parameters = self.beam
 
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         parameters.serialize(stream=stream)
 
 

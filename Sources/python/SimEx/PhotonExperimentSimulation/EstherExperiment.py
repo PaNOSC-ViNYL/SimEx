@@ -75,25 +75,25 @@ class EstherExperiment():
             sim_path=os.path.join(esther_sims_path,sim_name)
             if os.path.isdir(sim_path):
                 # List all iterations within the simulation name's folder
-                print ("These are the current simulations within %s" % sim_name)
+                print(("These are the current simulations within %s" % sim_name))
                 for sims in os.listdir(sim_path):
                     if not sims.startswith('.'):
                         print (sims)
                 # Create new folder with new iteration numbers
                 # TO DO: Generate updated parameters from SimName
                 output_sim = int(sims)+1
-                print ("New simulation iteration is %d" % output_sim)
+                print(("New simulation iteration is %d" % output_sim))
                 output_path=os.path.join(sim_path,str(output_sim))
                 filename = (sim_name+str(output_sim))
-                print ("Output path is set to %s" % (output_path))
-                print ("Output filename is set to %s" % (filename))
+                print(("Output path is set to %s" % (output_path)))
+                print(("Output filename is set to %s" % (filename)))
             else:
                 # Create new simulation folder called Sim_name and start first iteration /1/
                 print ("No simulation exists. Creating new simulation if asked to do so")
                 output_path = os.path.join(sim_path,"1")
                 filename = (sim_name+"1")
-                print ("Output path is set to %s" % (output_path))
-                print ("Output filename is set to %s" % (filename))
+                print(("Output path is set to %s" % (output_path)))
+                print(("Output filename is set to %s" % (filename)))
                 # TODO: Generate new parameters for new simulations from parameters.
 
 

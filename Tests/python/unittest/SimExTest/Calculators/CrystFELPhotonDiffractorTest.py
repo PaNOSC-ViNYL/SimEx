@@ -22,7 +22,7 @@
 
 import h5py
 import os
-import paths
+from . import paths
 import shutil
 import unittest
 
@@ -228,16 +228,16 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Open linked h5 file.
         with h5py.File(diffractor.output_path, 'r') as h5:
-            self.assertIn("data" , h5.keys())
-            self.assertIn("0000001" , h5["data"].keys())
-            self.assertIn("0000002" , h5["data"].keys())
-            self.assertIn("data" , h5["data/0000001"].keys())
-            self.assertIn("data" , h5["data/0000002"].keys())
+            self.assertIn("data" , list(h5.keys()))
+            self.assertIn("0000001" , list(h5["data"].keys()))
+            self.assertIn("0000002" , list(h5["data"].keys()))
+            self.assertIn("data" , list(h5["data/0000001"].keys()))
+            self.assertIn("data" , list(h5["data/0000002"].keys()))
 
-            self.assertIn("params" , h5.keys())
-            self.assertIn("beam" , h5["params"].keys())
-            self.assertIn("photonEnergy" , h5["params/beam"].keys())
-            self.assertIn("focusArea" , h5["params/beam"].keys())
+            self.assertIn("params" , list(h5.keys()))
+            self.assertIn("beam" , list(h5["params"].keys()))
+            self.assertIn("photonEnergy" , list(h5["params/beam"].keys()))
+            self.assertIn("focusArea" , list(h5["params/beam"].keys()))
 
         # Check metafile was created.
         self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )

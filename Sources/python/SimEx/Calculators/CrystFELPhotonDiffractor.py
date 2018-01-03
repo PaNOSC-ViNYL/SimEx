@@ -175,7 +175,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         command = " ".join(args)
 
         if 'SIMEX_VERBOSE' in os.environ:
-            print("CrystFELPhotonDiffractor backengine command: "+command)
+            print(("CrystFELPhotonDiffractor backengine command: "+command))
 
         # Run the backengine command.
         proc = subprocess.Popen(command, shell=True)
@@ -268,7 +268,7 @@ def _rename_files(path):
             continue
 
         new_filename = "%s_%07d.h5" % ("".join(f.split("-")[:-1]),i+1)
-        print "Renaming %s to %s." % (f, new_filename)
+        print("Renaming %s to %s." % (f, new_filename))
         os.rename(f, new_filename)
 
     os.chdir( old_wd )

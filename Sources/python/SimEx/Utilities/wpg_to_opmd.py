@@ -225,7 +225,7 @@ def convertToOPMD(input_file):
                 phases["x"][:,:] = numpy.angle(Ex)
                 phases["y"][:,:] = numpy.angle(Ey)
 
-            print "Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y)
+            print("Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y))
 
             opmd_h5.close()
             h5.close()
@@ -414,7 +414,7 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     phases["x"][:,:] = numpy.angle(Ex)
     phases["y"][:,:] = numpy.angle(Ey)
 
-    print "Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y)
+    print("Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y))
 
     opmd_h5.close()
     h5.close()

@@ -26,7 +26,7 @@ from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
 import h5py
 import numpy
 import os, shutil
-import paths
+from . import paths
 import unittest
 
 # SimEx imports

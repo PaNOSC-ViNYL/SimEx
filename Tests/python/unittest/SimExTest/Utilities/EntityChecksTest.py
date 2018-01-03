@@ -25,7 +25,7 @@
     @institution XFEL
     @creation 20151006
 """
-import paths
+from . import paths
 import exceptions
 import unittest
 

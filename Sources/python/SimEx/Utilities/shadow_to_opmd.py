@@ -46,7 +46,7 @@ hbar = constants.hbar
 
 LENGTH_UNIT = 'm'
 
-import OpenPMDTools as opmd
+from . import OpenPMDTools as opmd
 
 def convertToOPMD(beam, number_of_x_bins=None, number_of_y_bins=None, number_of_t_bins=None):
     """ Format beam entries to particles and fields in openpmd file (hdf5).
@@ -68,7 +68,7 @@ def convertToOPMD(beam, number_of_x_bins=None, number_of_y_bins=None, number_of_
         opmd.setup_root_attr( opmd_h5 )
 
         number_of_rays = beam['X'].shape[0]
-        print ("Found %d good rays." % (number_of_rays))
+        print(("Found %d good rays." % (number_of_rays)))
 
         E_max = max(beam['photon_energy'])
         E_min = min(beam['photon_energy'])
@@ -85,7 +85,7 @@ def convertToOPMD(beam, number_of_x_bins=None, number_of_y_bins=None, number_of_
 
         # Get 3D intensity histogram.
         xyz_array = numpy.empty((number_of_rays, 3))
-        print(xyz_array.shape)
+        print((xyz_array.shape))
         xyz_array[:,0] = beam["X"]
         xyz_array[:,1] = -beam["Z"]
         xyz_array[:,2] = -c*beam["Y"]
@@ -195,7 +195,7 @@ def convertToOPMD(beam, number_of_x_bins=None, number_of_y_bins=None, number_of_
             tmp = beam["Y"][it_rays]
             it_rays = numpy.where( -c*tmp <= t_his[it] )[0].tolist()
             number_of_it_rays = len(it_rays)
-            print ("Rays in this slice (it=%d) : %s (length %d)" % (it, str(it_rays), number_of_it_rays))
+            print(("Rays in this slice (it=%d) : %s (length %d)" % (it, str(it_rays), number_of_it_rays)))
 
             # Path to the photons
             print(" Setup photons.")
@@ -387,7 +387,7 @@ def convertToOPMD(beam, number_of_x_bins=None, number_of_y_bins=None, number_of_
 print("Getting data from beam object.")
 
 # Get required data from beam object.
-beam_data_columns = in_object_1._beam.getshcol(col = range(1,34),
+beam_data_columns = in_object_1._beam.getshcol(col = list(range(1,34)),
                                                nolost=1, # Don't use lost rays.
                                               )
 # Count number of unlost rays.

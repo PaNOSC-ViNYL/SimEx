@@ -143,11 +143,11 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
 
         # Error handling.
         if not err == "":
-            raise( RuntimeError, "Error during xrts backengine execution in %s. Error output follows. %s" % ( self.parameters._tmp_dir, err) )
+            raise RuntimeError
         # Check if data was produced.
         path_to_data = os.path.join( self.parameters._tmp_dir, 'xrts_out.txt' )
         if not os.path.isfile( path_to_data ):
-            raise( IOError, "No data generated. Check input deck %s." % ( os.path.join( self.parameters._tmp_dir, 'input.dat' ) ) )
+            raise IOError
 
         # Store output internally.
         self.__run_log = out
@@ -201,9 +201,9 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         self._input_data = {}
         photon_energy = wavefront.params.photonEnergy
         if self.parameters.photon_energy != photon_energy:
-            print  "WARNING: Parameter 'photon_energy' (%4.3e eV) not equal to source photon energy (%4.3e eV). Will proceed with source photon energy." % (self.parameters.photon_energy, photon_energy)
+            print("WARNING: Parameter 'photon_energy' (%4.3e eV) not equal to source photon energy (%4.3e eV). Will proceed with source photon energy." % (self.parameters.photon_energy, photon_energy))
         if abs(spectrum_mean - photon_energy) > 1.0 :
-            print "WARNING: Given photon energy (%4.3e eV) deviates from spectral mean (%4.3e) by > 1 eV. Will proceed with spectral mean." % (photon_energy, spectrum_mean)
+            print("WARNING: Given photon energy (%4.3e eV) deviates from spectral mean (%4.3e) by > 1 eV. Will proceed with spectral mean." % (photon_energy, spectrum_mean))
             photon_energy = spectrum_mean
 
         # Finally store the photon energy on the class.
@@ -259,7 +259,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
             self.__static_data = _parseStaticData( self.__run_log )
 
             # Save to h5 file.
-            for key, value in self.__static_data.items():
+            for key, value in list(self.__static_data.items()):
                 h5.create_dataset("/data/static/%s" % (key), data=value)
 
             # Attach a unit to the ionization potential lowering.
@@ -290,7 +290,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         try:
             numpy.savetxt( source_spectrum_path, source_spectrum_data, delimiter='\t' )
         except:
-            print  "Source spectrum could not be saved. Please check temporary directory %s exists. Backtrace follows."
+            print("Source spectrum could not be saved. Please check temporary directory %s exists. Backtrace follows.")
             raise
 
 def _parseStaticData(data_string):

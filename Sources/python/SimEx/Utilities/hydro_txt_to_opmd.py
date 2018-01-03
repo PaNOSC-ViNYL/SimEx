@@ -50,20 +50,19 @@ def convertTxtToOPMD(esther_dirname=None):
         tmp = f.readline() # Save header line as temp.
         tmp = tmp.split() # Split header line to obtain timesteps and zones.
         number_of_timesteps = int(tmp[0])
-        number_of_zones = int(tmp[1])
 
         # Close.
         f.close()
 
-	# Load data via numpy.
-	rho_array = numpy.loadtxt(str(esther_dirname)+"/densite_massique.txt",skiprows=3,unpack=True)
-	pres_array = numpy.loadtxt(str(esther_dirname)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
-	temp_array = numpy.loadtxt(str(esther_dirname)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
-	vel_array = numpy.loadtxt(str(esther_dirname)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
-	pos_array = numpy.loadtxt(str(esther_dirname)+"/position_externe_relative.txt",skiprows=3,unpack=True)
+    # Load data via numpy.
+    rho_array = numpy.loadtxt(str(esther_dirname)+"/densite_massique.txt",skiprows=3,unpack=True)
+    pres_array = numpy.loadtxt(str(esther_dirname)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
+    temp_array = numpy.loadtxt(str(esther_dirname)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
+    vel_array = numpy.loadtxt(str(esther_dirname)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
+    pos_array = numpy.loadtxt(str(esther_dirname)+"/position_externe_relative.txt",skiprows=3,unpack=True)
 
     # Slice out the timestamps.
-	time_array = rho_array[0]
+    time_array = rho_array[0]
     time_array = time_array
     time_step = time_array[1] - time_array[0]
 
@@ -122,7 +121,7 @@ def convertTxtToOPMD(esther_dirname=None):
             data_order = numpy.string_("C")
 
             # Write the common metadata to pass test
-            for key in meshes.keys():
+            for key in list(meshes.keys()):
                 meshes[key].attrs["unitSI"] = 1.0
                 meshes[key].attrs["axisLabels"] = axis_label
                 meshes[key].attrs["geometry"] = geometry

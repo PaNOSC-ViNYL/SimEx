@@ -21,23 +21,19 @@
 #                                                                        #
 ##########################################################################
 
-from abc import ABCMeta, abstractmethod
-import exceptions
-import os
-
 from SimEx import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities import ParallelUtilities
-
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from abc import ABCMeta, abstractmethod
 import dill
+import os
 import sys
 
-class AbstractBaseCalculator(AbstractBaseClass):
+class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
     """
     Abstract class for all simulation calculators.
     """
-    __metaclass__ = ABCMeta
 
     @classmethod
     def runFromCLI(cls):
@@ -69,7 +65,7 @@ class AbstractBaseCalculator(AbstractBaseClass):
         try:
             calculator = dill.load(open(fname))
         except:
-            raise exceptions.IOError("Cannot read  from file "+fname)
+            raise IOError("Cannot read  from file "+fname)
         if not issubclass(type(calculator),AbstractBaseCalculator):
             raise TypeError( "The argument to the script should be a path to a file "
                              "with object of subclass of AbstractBaseCalculator")
@@ -143,7 +139,7 @@ class AbstractBaseCalculator(AbstractBaseClass):
         try:
             dill.dump(self, open(fname, "w"))
         except:
-            raise exceptions.IOError("Cannot dump to file "+fname)
+            raise IOError("Cannot dump to file "+fname)
 
     #def computeNTasks(self):
         #resources=ParallelUtilities.getParallelResourceInfo()
@@ -226,18 +222,18 @@ def checkAndSetIO(io):
     # Check we have a tuple.
     io = checkAndSetInstance(tuple, io)
     if len(io) != 2:
-        raise exceptions.RuntimeError("The parameter 'io' can only be a tuple of two strings.")
+        raise RuntimeError("The parameter 'io' can only be a tuple of two strings.")
 
     # Check if input exists, if not, raise.
     i = checkAndSetInstance(str, io[0])
     if i is None:
-        raise exceptions.IOError("The parameter 'input_path' must be a valid filename.")
+        raise IOError("The parameter 'input_path' must be a valid filename.")
     i = os.path.abspath(i)
 #
     # Check if output file exists, otherwise attempt to create it.
     o = checkAndSetInstance(str, io[1])
     if o is None:
-        raise exceptions.IOError("The parameter 'output_path' must be a valid filename.")
+        raise IOError("The parameter 'output_path' must be a valid filename.")
     o = os.path.abspath(o)
 
     return (i, o)

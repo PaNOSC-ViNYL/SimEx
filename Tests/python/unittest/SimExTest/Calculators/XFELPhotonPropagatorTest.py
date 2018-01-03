@@ -27,7 +27,7 @@
 
 """
 import os, shutil
-import paths
+from . import paths
 import unittest
 
 import numpy

@@ -29,11 +29,11 @@
 from distutils.spawn import find_executable
 import h5py
 import os
-import paths
+from . import paths
 import shutil
 import unittest
 
-import StringIO
+import io
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
@@ -696,7 +696,7 @@ class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
                 )
 
         # Setup a stream to write to.
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         feff_parameters._serialize( stream = stream )
 
         # Compare to reference.

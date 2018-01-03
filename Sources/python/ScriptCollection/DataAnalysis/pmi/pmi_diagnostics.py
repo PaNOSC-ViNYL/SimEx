@@ -1,8 +1,8 @@
 #!/usr/bin/env python2.7
 
 from argparse import ArgumentParser
-import cPickle
-import commands
+import pickle
+import subprocess
 import copy
 import datetime
 import h5py
@@ -100,10 +100,10 @@ def f_num_snp( all_real ) :
 
 def f_eval_disp( a_snp , a_r0 , a_sample ) :
 
-    num_Z = len( a_sample['selZ'].keys() )
+    num_Z = len( list(a_sample['selZ'].keys()) )
     all_disp = numpy.zeros( ( num_Z , ) )
     cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
+    for sel_Z in list(a_sample['selZ'].keys()) :
         dr = a_snp['r'][a_sample['selZ'][sel_Z],:] - a_r0[a_sample['selZ'][sel_Z],:]
         all_disp[cc] = numpy.mean( numpy.sqrt( numpy.sum( dr * dr , axis = 1 ) ) ) / 1e-10
         cc = cc + 1
@@ -115,10 +115,10 @@ def f_eval_disp( a_snp , a_r0 , a_sample ) :
 
 def f_eval_numE( a_snp , a_sample ) :
 
-    num_Z = len( a_sample['selZ'].keys() )
+    num_Z = len( list(a_sample['selZ'].keys()) )
     all_numE = numpy.zeros( ( num_Z , ) )
     cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
+    for sel_Z in list(a_sample['selZ'].keys()) :
         all_numE[cc] = numpy.mean( a_snp['q'][a_sample['selZ'][sel_Z]] )
         cc = cc + 1
     return all_numE
@@ -128,7 +128,7 @@ def f_eval_numE( a_snp , a_sample ) :
 
 
 def   f_pmi_diagnostics_help() :
-    print """
+    print("""
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Usage - Detailed:
@@ -186,7 +186,7 @@ Usage - Quick (predefined):
     Quick  based on 5 realizations, 10 snapshots:
         $ pmi_diag.py  <PROJECT_FOLDER>  quick
 
-    """
+    """)
 
 ##############################################################################
 
@@ -269,18 +269,18 @@ def pmi_diagnostics( *args ) :
                 * ( f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMax' ) - f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMin' ) ) \
                 / f_num_snp( data['real'] ) +  f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMin' ) )  \
                 / 1e-15
-        print 'Project:    ' , data['prj']
-        print "Num. real.: " , data['num_real']
-        print "Num. snp:   " , data['num_snp']
+        print('Project:    ' , data['prj'])
+        print("Num. real.: " , data['num_real'])
+        print("Num. snp:   " , data['num_snp'])
 
 
-        data['disp'] = numpy.zeros( ( data['num_snp'] , len( data['sample']['selZ'].keys() ) ) )
-        data['numE'] = numpy.zeros( ( data['num_snp'] , len( data['sample']['selZ'].keys() ) ) )
+        data['disp'] = numpy.zeros( ( data['num_snp'] , len( list(data['sample']['selZ'].keys()) ) ) )
+        data['numE'] = numpy.zeros( ( data['num_snp'] , len( list(data['sample']['selZ'].keys()) ) ) )
         data['Nph']  = numpy.zeros( ( data['num_snp'] ,  ) )
 
         for x_real in data['real'] :
             #print 'Real: %0' + str(NUM_DIGITS) + 'd' % ( x_real ) ,
-            print '%07d  ' % ( x_real ) ,
+            print('%07d  ' % ( x_real ), end=' ')
             sys.stdout.flush()
 
 
@@ -296,7 +296,7 @@ def pmi_diagnostics( *args ) :
                 data['Nph'][cc]    += data_snp['Nph'] / data['num_real']
                 cc = cc + 1
 
-            print
+            print()
 
         return data
         #return data_snp
@@ -309,7 +309,7 @@ def pmi_diagnostics( *args ) :
         data = args[0] ;
 
         if args[1] == 'all' :
-            all_Z = data['sample']['selZ'].keys()
+            all_Z = list(data['sample']['selZ'].keys())
             legendtxt = []
             fig = pylab.figure()
             a1 = pylab.axes( ) ;
@@ -326,7 +326,7 @@ def pmi_diagnostics( *args ) :
 
         sel_Z = args[1]
         xcolor = args[2]
-        pylab.plot( data['time'] , data['disp'][ : , pylab.find( sel_Z == pylab.array( data['sample']['selZ'].keys() ) ) ] , xcolor  )
+        pylab.plot( data['time'] , data['disp'][ : , pylab.find( sel_Z == pylab.array( list(data['sample']['selZ'].keys()) ) ) ] , xcolor  )
         ha = pylab.gca()
         ha.set_xlabel( 'Time [fs]' )
         ha.set_ylabel( 'Average displacement [$\AA$]' )
@@ -340,7 +340,7 @@ def pmi_diagnostics( *args ) :
         data = args[0] ;
 
         if args[1] == 'all' :
-            all_Z = data['sample']['selZ'].keys()
+            all_Z = list(data['sample']['selZ'].keys())
             legendtxt = []
             pylab.figure()
             cc = 0
@@ -354,7 +354,7 @@ def pmi_diagnostics( *args ) :
 
         sel_Z = args[1]
         xcolor = args[2]
-        pylab.plot( data['time'] , data['numE'][ : , pylab.find( sel_Z == pylab.array( data['sample']['selZ'].keys() ) ) ] , xcolor  )
+        pylab.plot( data['time'] , data['numE'][ : , pylab.find( sel_Z == pylab.array( list(data['sample']['selZ'].keys()) ) ) ] , xcolor  )
         ha = pylab.gca()
         ha.set_xlabel( 'Time [fs]' )
         ha.set_ylabel( 'Number of bound electrons' )
@@ -366,7 +366,7 @@ def pmi_diagnostics( *args ) :
     if a_comm == 'plot-combined':
         lw = 4 ; fs = 20 ; inset_bgcolor = 'Yellow'
         data = args[0] ;
-        allZ = pylab.array( data['sample']['selZ'].keys() )
+        allZ = pylab.array( list(data['sample']['selZ'].keys()) )
 
         pmi_diagnostics( 'plot-disp' , data , 'all' ) ;
         ha = pylab.gca()
@@ -384,14 +384,14 @@ def pmi_diagnostics( *args ) :
         legendtxt = []
         for sel_Z in allZ :
             legendtxt.append( element_symbol[sel_Z] )   # legendtxt.append( str( sel_Z ) )
-        print legendtxt
+        print(legendtxt)
         pylab.legend( legendtxt , loc=(0.65 , 0.6) )
         pylab.draw() ; pylab.show() ;
-        print os.getcwd()
+        print(os.getcwd())
         try:
             import plot_disp
         except:
-            print 'plot_disp not loaded.'
+            print('plot_disp not loaded.')
         pylab.ylim( [0,18] )
 
 
@@ -432,7 +432,7 @@ def pmi_diagnostics( *args ) :
 
         lw = 4 ; fs = 20 ; inset_bgcolor = 'White' # 'Yellow'
         data = args[0] ;
-        allZ = pylab.array( data['sample']['selZ'].keys() )
+        allZ = pylab.array( list(data['sample']['selZ'].keys()) )
 
         pmi_diagnostics( 'plot-disp' , data , 'all' ) ;
 
@@ -456,15 +456,15 @@ def pmi_diagnostics( *args ) :
         legendtxt = []
         for sel_Z in allZ :
             legendtxt.append( element_symbol[sel_Z] )   # legendtxt.append( str( sel_Z ) )
-        print legendtxt
+        print(legendtxt)
         #pylab.legend( legendtxt , loc=(0.65 , 0.6) )
         pylab.legend( legendtxt , loc=(0.1 , 0.55) )
         pylab.draw() ; pylab.show() ;
-        print os.getcwd()
+        print(os.getcwd())
         try:
             import plot_disp
         except:
-            print 'plot_disp not loaded.'
+            print('plot_disp not loaded.')
         pylab.ylim( [0,18] )
         # EXTRA, TO BE COMMENTED OUT:
         # pylab.gca() .set_xticks( [-30, -15, 0, 15 ,30] )
@@ -545,14 +545,14 @@ def pmi_diagnostics( *args ) :
         for ext in [ 'png' ,  'eps' ] :
             pic_file = './pmi_diag-' + data['prj'] + '-disp.' + ext
             pylab.savefig( pic_file , dpi=200 )
-        print 'Saved image: ' + pic_file
+        print('Saved image: ' + pic_file)
 
         pylab.figure()
         pmi_diagnostics( 'plot-numE' , data , 'all' ) ;
         for ext in [ 'png' ,  'eps' ] :
             pic_file = './pmi_diag-' + data['prj'] + '-numE.' + ext
             pylab.savefig( pic_file , dpi=200 )
-        print 'Saved image: ' + pic_file
+        print('Saved image: ' + pic_file)
 
         combined_version = '2' ;
         pylab.figure()
@@ -560,7 +560,7 @@ def pmi_diagnostics( *args ) :
         for ext in [ 'png' ,  'eps' ] :
             pic_file = './pmi_diag-' + data['prj'] + '-combined' + combined_version + '.' + ext
             pylab.savefig( pic_file , dpi=200 )
-        print 'Saved image: ' + pic_file
+        print('Saved image: ' + pic_file)
 
         return data
 
@@ -571,7 +571,7 @@ def pmi_diagnostics( *args ) :
 #-------------------------------------------------------------------------
 
     if a_comm == 'test':
-        print 'TEST OPTION'
+        print('TEST OPTION')
 
     return
 

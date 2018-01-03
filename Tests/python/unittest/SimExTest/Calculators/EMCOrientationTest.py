@@ -29,7 +29,7 @@
 import os
 import subprocess
 
-import paths
+from . import paths
 import unittest
 
 

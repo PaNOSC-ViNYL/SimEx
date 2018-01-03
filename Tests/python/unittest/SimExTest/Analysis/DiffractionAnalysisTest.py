@@ -190,10 +190,10 @@ class DiffractionAnalysisTest(unittest.TestCase):
         parameters = diffractionParameters(path)
 
         # Check for some keys.
-        self.assertIn('beam', parameters.keys())
-        self.assertIn('geom', parameters.keys())
-        self.assertIn('photonEnergy', parameters['beam'].keys())
-        self.assertIn('pixelWidth', parameters['geom'].keys())
+        self.assertIn('beam', list(parameters.keys()))
+        self.assertIn('geom', list(parameters.keys()))
+        self.assertIn('photonEnergy', list(parameters['beam'].keys()))
+        self.assertIn('pixelWidth', list(parameters['geom'].keys()))
 
     def testPlotAndStatistics(self):
         """ Check that we can get two plots (resetting the iterator works.)"""
@@ -218,7 +218,7 @@ class DiffractionAnalysisTest(unittest.TestCase):
 
         # Setup the analyser with a sequence of patterns.
         analyzer = DiffractionAnalysis(input_path=self.__test_data,
-                                       pattern_indices=range(1,11),
+                                       pattern_indices=list(range(1,11)),
                                       )
 
         # Check exceptions on faulty path.

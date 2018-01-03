@@ -54,8 +54,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'simex_platform'
-copyright = u'2015-2017, Carsten Fortmann-Grote'
+project = 'simex_platform'
+copyright = '2015-2017, Carsten Fortmann-Grote'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -212,8 +212,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'simex_platform.tex', u'simex\\_platform Documentation',
-   u'Carsten Fortmann-Grote, Sergey Yakubov', 'manual'),
+  ('index', 'simex_platform.tex', 'simex\\_platform Documentation',
+   'Carsten Fortmann-Grote, Sergey Yakubov', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -242,8 +242,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'simex_platform', u'simex_platform Documentation',
-     [u'Carsten Fortmann-Grote, Sergey Yakubov'], 1)
+    ('index', 'simex_platform', 'simex_platform Documentation',
+     ['Carsten Fortmann-Grote, Sergey Yakubov'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -256,8 +256,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'simex_platform', u'simex_platform Documentation',
-   u'Carsten Fortmann-Grote, Sergey Yakubov', 'simex_platform', 'Simulation platform for photon science experiments.',
+  ('index', 'simex_platform', 'simex_platform Documentation',
+   'Carsten Fortmann-Grote, Sergey Yakubov', 'simex_platform', 'Simulation platform for photon science experiments.',
    'Science'),
 ]
 
@@ -277,10 +277,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'simex_platform'
-epub_author = u'Carsten Fortmann-Grote, Sergey Yakubov'
-epub_publisher = u'Carsten Fortmann-Grote, Sergey Yakubov'
-epub_copyright = u'2015-2017, Carsten Fortmann-Grote, Sergey Yakubov'
+epub_title = 'simex_platform'
+epub_author = 'Carsten Fortmann-Grote, Sergey Yakubov'
+epub_publisher = 'Carsten Fortmann-Grote, Sergey Yakubov'
+epub_copyright = '2015-2017, Carsten Fortmann-Grote, Sergey Yakubov'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'simex_platform'

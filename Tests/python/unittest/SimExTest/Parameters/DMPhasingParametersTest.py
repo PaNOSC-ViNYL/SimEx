@@ -26,7 +26,7 @@
     @creation 20160722
 
 """
-import paths
+from . import paths
 import os
 import shutil
 

@@ -57,7 +57,7 @@ def main(args=None):
     if args.animation_filename:
         analyzer.animatePatterns(output_path=args.animation_filename)
 
-        print "Animated gif saved to %s." % (analyzer._DiffractionAnalysis__animation_output_path)
+        print("Animated gif saved to %s." % (analyzer._DiffractionAnalysis__animation_output_path))
 
 if __name__ == '__main__':
 

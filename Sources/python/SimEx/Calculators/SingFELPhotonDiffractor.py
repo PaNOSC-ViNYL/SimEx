@@ -205,7 +205,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         args = shlex.split(mpicommand) + command_sequence
 
         if 'SIMEX_VERBOSE' in os.environ:
-            print("SingFELPhotonDiffractor backengine command: "+" ".join(args))
+            print(("SingFELPhotonDiffractor backengine command: "+" ".join(args)))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -236,7 +236,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand)
+                print(("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand))
 
         mpicommand += " python " + __file__ + " " + fname
 
@@ -299,7 +299,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Remainder of the division.
         remainder = self.parameters.number_of_diffraction_patterns % mpi_size
         # Pattern indices
-        pattern_indices = range(self.parameters.number_of_diffraction_patterns)
+        pattern_indices = list(range(self.parameters.number_of_diffraction_patterns))
 
         # Distribute patterns over cores.
         rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]

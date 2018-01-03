@@ -42,21 +42,21 @@ material_type[12] = ["Titanium","Ti#","Ti#_e_ses",4.43]
 #---------------------------------------------------------------------------
 # Ask question for raw input
 def ask(question, options):
-    choice = raw_input(question).lower() # Turn choice to lower case so we only have to check those
+    choice = input(question).lower() # Turn choice to lower case so we only have to check those
 
     while choice not in options:
-        print "You must pick one of the options above"
-        choice = raw_input("Try again:").lower()
+        print("You must pick one of the options above")
+        choice = input("Try again:").lower()
     return choice
 
 # Ask question for raw input with default values set as int, float or str
 def ask_default(question, default):
 
     ### State default
-    choice = raw_input("%s [%s]:" % (question, str(default)))
+    choice = input("%s [%s]:" % (question, str(default)))
 
     if choice == "":
-        print default
+        print(default)
         return default
 
     tpe = type(default)
@@ -109,7 +109,7 @@ number_of_zones = [0]
 # EG. Take ablator parameters from an input file and run script quicker (go straight to laser properties)
 #
 # Set the total number of layers
-number_of_layers = int(raw_input("\nNumber of layers in target (including ablator): "))
+number_of_layers = int(input("\nNumber of layers in target (including ablator): "))
 
 # Create arrays for each layer
 for i in range(number_of_layers):
@@ -122,9 +122,9 @@ for i in range(number_of_layers):
 #---------------------------------------------------------------------------
 # Provide list of materials for ablator
 # CHANGE THIS SO THAT IT ONLY SHOWS PLASTIC, DIAMOND ETC.
-print "\nAblating material:"
+print("\nAblating material:")
 for i,mtp in enumerate(material_type):
-    print "\n\t", i, "\b.", mtp[0],
+    print("\n\t", i, "\b.", mtp[0], end=' ')
 
 material_in_zone[1] = ask_default("\n\nChoice", 3)
 thick = ask_default("Enter ablator thickness in um", 20.0)
@@ -154,7 +154,7 @@ for i in range(n):
         root_found = True
 
 if root_found == False:
-    print "No ratio bigger than 1.000001 found...exiting"
+    print("No ratio bigger than 1.000001 found...exiting")
     exit()
 
 # Determine final feathered zone width (used in Esther)
@@ -172,31 +172,31 @@ mass_of_zone = a*(r**n)*material_type[material_in_zone[1]][3]
 # FIX SO THAT THE LAYERS CAN BE WRITTEN IN THE NORMAL WAY OF ABLATOR TO WINDOW
 # FOR NOW THIS MUST BE RUN FROM THE WINDOW TO THE SAMPLE
 for i in range(2,number_of_layers+1):
-    print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-    print "\nREMINDER: START FROM WINDOW AS 2ND LAYER, THEN ADD NEXT LAYERS TOWARDS ABLATOR AS 3, 4 ETC."
-    print "What material is layer",i,":\n"
+    print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+    print("\nREMINDER: START FROM WINDOW AS 2ND LAYER, THEN ADD NEXT LAYERS TOWARDS ABLATOR AS 3, 4 ETC.")
+    print("What material is layer",i,":\n")
     for j in range(1,len(material_type)):
-        print "\t", j, ". ", material_type[j][0]
+        print("\t", j, ". ", material_type[j][0])
     material_in_zone[i] = int(ask("\n\nChoice: ", ["1","2","3","4","5","6","7","8","9","10","11","12"]))
-    thickness[i] = float(raw_input("Thickness of layer " + str(i) + " (in um)? "))
+    thickness[i] = float(input("Thickness of layer " + str(i) + " (in um)? "))
 
     width_of_zone[i] = mass_of_zone/material_type[material_in_zone[i]][3]
     number_of_zones[i] = int(thickness[i]/width_of_zone[i])
 
 
 # PRINT USEFUL OUTPUTS FOR USER:
-print "-----------------------------------------------------------"
-print "Ablator configuration:"
-print "Number of zones required in non-feathered region: ", N
-print "Final feathered zone width : %.4f" % final_feathered_zone_width, "um"
-print "Zone information:"
-print "Number of zones in each region: ", number_of_zones
-print "Total number of zones: ", sum(number_of_zones)
-print "-----------------------------------------------------------"
+print("-----------------------------------------------------------")
+print("Ablator configuration:")
+print("Number of zones required in non-feathered region: ", N)
+print("Final feathered zone width : %.4f" % final_feathered_zone_width, "um")
+print("Zone information:")
+print("Number of zones in each region: ", number_of_zones)
+print("Total number of zones: ", sum(number_of_zones))
+print("-----------------------------------------------------------")
 print_to_file = ask("Print input file? (y/n): ",["y","n"])
 
 if print_to_file == "y":
-    file_number = raw_input("Filenumber: ")
+    file_number = input("Filenumber: ")
     is_number = False
     while is_number == False:
         try:
@@ -204,8 +204,8 @@ if print_to_file == "y":
             is_number = True
         except:
             is_number = False
-            print "Please enter a number."
-            file_number = raw_input("Filenumber: ")
+            print("Please enter a number.")
+            file_number = input("Filenumber: ")
 
     f = open(str(file_number) + ".txt", 'w')
     transfert_radiatif = ask("Include transfert_radiatif? (y/n): ", ["y","n"])
@@ -253,14 +253,14 @@ if print_to_file == "y":
     pulse_type[2] = ["Ramp - t**3", 2]
     pulse_type[3] = ["Ramp - linear",3]
 
-    print "\nLaser pulse shape"
+    print("\nLaser pulse shape")
     for i in range(1,len(pulse_type)):
-        print "\t", i, "\b.", pulse_type[i][0]
+        print("\t", i, "\b.", pulse_type[i][0])
 
-    pulse_choice = raw_input("\nChoose laser pulse 1, 2 or 3: ")
-    pulse_length = raw_input("Pulse Length (ns): ")
+    pulse_choice = input("\nChoose laser pulse 1, 2 or 3: ")
+    pulse_length = input("Pulse Length (ns): ")
     pulse_length = float(pulse_length)
-    laser_intensity = raw_input("Laser Intensity (TW/cm**2), e.g. 1.0 : ")
+    laser_intensity = input("Laser Intensity (TW/cm**2), e.g. 1.0 : ")
 
     if pulse_choice == "1":
         #print "Flat top"
@@ -279,7 +279,7 @@ if print_to_file == "y":
         y = [0,1.0]
         # ADD LINEAR DEFINITION TO START FOR WRITING TO MAIN FILE
     else:
-        print "Problem selecting laser pulse"
+        print("Problem selecting laser pulse")
     #quit
 
     f.write("\nSORTIES_GRAPHIQUES")

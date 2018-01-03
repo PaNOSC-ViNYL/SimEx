@@ -80,7 +80,7 @@ class PhotonExperimentSimulation(object):
             self.__calculators.insert(-1, self.__photon_detector )
 
         if any([calc is None for calc in self.__calculators]):
-            raise( TypeError, "No calculator can be None.")
+            raise TypeError
 
     #######################
     # Queries and setters #
@@ -139,29 +139,29 @@ class PhotonExperimentSimulation(object):
         if not self._checkInterfaceConsistency():
             raise RuntimeError(" Interfaces are not consistent, i.e. at least one module's expectations with respect to incoming data sets are not satisfied.")
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80])
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80]))
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80]))
         self.__photon_source._readH5()
         self.__photon_source.backengine()
         self.__photon_source.saveH5()
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80]))
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon-matter interaction.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon-matter interaction.", "#"*80]))
         self.__photon_interactor._readH5()
         self.__photon_interactor.backengine()
         self.__photon_interactor.saveH5()
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon diffraction.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon diffraction.", "#"*80]))
         self.__photon_diffractor._readH5()
         self.__photon_diffractor.backengine()
         self.__photon_diffractor.saveH5()
 
         if self.__photon_detector is not None:
-            print '\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80])
+            print('\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80]))
             self.__photon_detector._readH5()
             self.__photon_detector.backengine()
             self.__photon_detector.saveH5()
@@ -171,12 +171,12 @@ class PhotonExperimentSimulation(object):
             if not (os.path.isfile(self.__photon_analyzer.input_path) or os.path.isdir(self.__photon_analyzer.input_path)):
                 os.symlink(self.__photon_diffractor.output_path, self.__photon_analyzer.input_path)
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80]))
         self.__photon_analyzer._readH5()
         self.__photon_analyzer.backengine()
         self.__photon_analyzer.saveH5()
 
-        print '\n'.join(["#"*80,  "# SIMEX  done.", "#"*80])
+        print('\n'.join(["#"*80,  "# SIMEX  done.", "#"*80]))
 
 
     def _checkInterfaceConsistency(self):

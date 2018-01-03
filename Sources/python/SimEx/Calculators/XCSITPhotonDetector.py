@@ -23,7 +23,7 @@
 try:
     import libpy_detector_interface as lpdi
 except ImportError:
-    print "\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed properly on this system. The XCSITPhotonDetector class can still be instantiated, but the backengine() method will throw an exception.\n"
+    print("\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed properly on this system. The XCSITPhotonDetector class can still be instantiated, but the backengine() method will throw an exception.\n")
 except:
     raise
 
@@ -308,14 +308,14 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         except:
             err = sys.exc_info()
             print("Photon-Detector interaction error:")
-            print("Error type: " + str(err[0]))
-            print("Error value: " + str(err[1]))
-            print("Error traceback: " + str(err[2]))
+            print(("Error type: " + str(err[0])))
+            print(("Error value: " + str(err[1])))
+            print(("Error traceback: " + str(err[2])))
             is_successful = False
 
 
-        print("Detected " + str(self.__ia_data.size()) + " interactions from " +
-            str(self.__photon_data.size()) + " photons")
+        print(("Detected " + str(self.__ia_data.size()) + " interactions from " +
+            str(self.__photon_data.size()) + " photons"))
 
         # Results are directly written to the __ia_data instance
         return is_successful
@@ -350,9 +350,9 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         except:
             err = sys.exc_info()
             print("Charge propagation error:")
-            print("Error type: " + str(err[0]))
-            print("Error value: " + str(err[1]))
-            print("Error traceback: " + str(err[2]))
+            print(("Error type: " + str(err[0])))
+            print(("Error value: " + str(err[1])))
+            print(("Error traceback: " + str(err[2])))
             is_successful = False
             return is_successful
 
@@ -363,10 +363,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                 entry=self.__charge_data.getEntry(x,y)
                 if(entry.getCharge() != 0):
                     counter+=1
-        print("Found " + str(counter) + " signals in the detector of size " +
+        print(("Found " + str(counter) + " signals in the detector of size " +
             str(self.__charge_data.height()) + "x" + str(self.__charge_data.width()) +
             " for " + str(self.__ia_data.size()) + " interactions and " +
-            str(self.__photon_data.size()) + " photons")
+            str(self.__photon_data.size()) + " photons"))
 
         # Return if everything went well
         return is_successful
@@ -423,7 +423,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         # Open the file to read from
         with h5py.File(infile,"r") as h5_infile:
 
-            keys = h5_infile["/data"].keys()
+            keys = list(h5_infile["/data"].keys())
             matrix = h5_infile["/data/"+ keys[0] + "/diffr"].value
             photons = np.zeros((len(matrix),len(matrix[0])),dtype=np.float_)
 
@@ -432,7 +432,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             # Explaination:
             #       /data/.../data are poissonized patterns
             #       /data/.../diffr are the intensities
-            for i in h5_infile["/data"].keys():
+            for i in list(h5_infile["/data"].keys()):
                 photons += h5_infile["/data/"+i+"/diffr"].value
 
 
@@ -445,17 +445,17 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
             x_num = len(photons)        # Assuming an rectangle
             y_num = len(photons[0])
-            print("Size of input matrix: " + str(x_num) + "x" + str(y_num))
+            print(("Size of input matrix: " + str(x_num) + "x" + str(y_num)))
 
             # Parameters of the matrix
             x_pixel = h5_infile["/params/geom/pixelWidth"].value
-            print("pixel width: " + str(x_pixel))
+            print(("pixel width: " + str(x_pixel)))
             y_pixel = h5_infile["/params/geom/pixelHeight"].value
-            print("pixel height: " + str(y_pixel))
+            print(("pixel height: " + str(y_pixel)))
             center_energy = h5_infile["/params/beam/photonEnergy"].value # missing profile
-            print("central beam energy: " + str(center_energy))
+            print(("central beam energy: " + str(center_energy)))
             detector_dist = h5_infile["/params/geom/detectorDist"].value
-            print("Detector dist: " + str(detector_dist))
+            print(("Detector dist: " + str(detector_dist)))
 
             # Create the photon instance
             self.__photon_data = lpdi.PhotonData()
@@ -513,7 +513,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             # Close the input file
             h5_infile.close()
 
-        print("XCSITPhotonDetector read " + str(self.__photon_data.size())  + " photons from the input.")
+        print(("XCSITPhotonDetector read " + str(self.__photon_data.size())  + " photons from the input."))
 
     def saveH5(self):
         """
@@ -562,12 +562,12 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             for x in list(range(x_size)):
                 for y in list(range(y_size)):
                     if(np.isnan(charge_array[x][y])):
-                        print("Warning: Detected NaN in ChargeMatrix at (" + str(x) +
-                            "," + str(y) + ") (python conention: l-r, t-b)")
+                        print(("Warning: Detected NaN in ChargeMatrix at (" + str(x) +
+                            "," + str(y) + ") (python conention: l-r, t-b)"))
                         outfile.write(str(x) + "\t" + str(y) + "\tNaN")
                     if(np.isinf(charge_array[x][y])):
-                        print("Warning: Detected Inf in ChargeMatrix at (" + str(x) +
-                            "," + str(y) + ") (python conention: l-r, t-b)")
+                        print(("Warning: Detected Inf in ChargeMatrix at (" + str(x) +
+                            "," + str(y) + ") (python conention: l-r, t-b)"))
                         outfile.write(str(x) + "\t" + str(y) + "\tInf")
 
         # Create the new datasets

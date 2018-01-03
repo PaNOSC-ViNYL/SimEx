@@ -59,7 +59,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
         if sample_path is None:
             raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
         if not os.path.isfile( sample_path):
-            print "Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path)
+            print("Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path))
 
         self.__sample_path = sample_path
 
@@ -119,14 +119,14 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
                                 '/version',
                                 ]
 
-        if (self.parameters is None) or ('number_of_trajectories' not in self.parameters.keys()):
+        if (self.parameters is None) or ('number_of_trajectories' not in list(self.parameters.keys())):
             self.parameters = {'number_of_trajectories' : 1,
                     }
         if self.parameters['number_of_trajectories'] != 1:
-            print "\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n"
+            print("\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n")
             self.parameters['number_of_trajectories'] = 1
 
-        if "random_rotation" not in self.parameters.keys():
+        if "random_rotation" not in list(self.parameters.keys()):
             self.parameters["random_rotation"] = False
 
     def expectedData(self):
@@ -174,7 +174,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.g_s2e['sys'] = dict()
             pmi_demo.g_s2e['setup']['num_digits'] = 7
 
-            if 'number_of_steps' in self.parameters.keys():
+            if 'number_of_steps' in list(self.parameters.keys()):
                 pmi_demo.g_s2e['steps'] = self.parameters['number_of_steps']
             else:
                 pmi_demo.g_s2e['steps'] = 100
@@ -579,10 +579,10 @@ class PMIDemo(object):
 
 def f_eval_disp( a_snp , a_r0 , a_sample ) :
 
-    num_Z = len( a_sample['selZ'].keys() )
+    num_Z = len( list(a_sample['selZ'].keys()) )
     all_disp = numpy.zeros( ( num_Z , ) )
     cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
+    for sel_Z in list(a_sample['selZ'].keys()) :
         dr = a_snp['r'][a_sample['selZ'][sel_Z],:] - a_r0[a_sample['selZ'][sel_Z],:]
         all_disp[cc] = numpy.mean( numpy.sqrt( numpy.sum( dr * dr , axis = 1 ) ) ) / 1e-10
         cc = cc + 1
@@ -663,10 +663,10 @@ def s2e_rand_orient( r ,mat ) :
 ##############################################################################
 def f_eval_numE( a_snp , a_sample ) :
 
-    num_Z = len( a_sample['selZ'].keys() )
+    num_Z = len( list(a_sample['selZ'].keys()) )
     all_numE = numpy.zeros( ( num_Z , ) )
     cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
+    for sel_Z in list(a_sample['selZ'].keys()) :
         all_numE[cc] = numpy.mean( a_snp['q'][a_sample['selZ'][sel_Z]] )
         cc = cc + 1
     return all_numE
@@ -689,9 +689,9 @@ def f_md_step( r , v , m , dt ) :
 ##############################################################################
 
 def   f_pmi_diagnostics_help() :
-    print """
+    print("""
     ----
-    """
+    """)
 
 
     ##############################################################################
@@ -837,7 +837,7 @@ def f_h5_out2in( src , dest , *args ) :
     grp_hist_parent_detail = file_out.create_group( "history/parent/detail" )
 
     pre_s2e_module = os.path.basename( os.path.dirname( os.path.abspath( src ) ) )
-    print 'Previous module: ' , pre_s2e_module
+    print('Previous module: ' , pre_s2e_module)
 
     # Add attribute to history/parent
     grp_hist_parent.attrs['name'] =  "_" + pre_s2e_module
@@ -846,7 +846,7 @@ def f_h5_out2in( src , dest , *args ) :
     file_out.copy( grp_srchist , grp_hist_parent )
 
     # Copy everything to history except "data" & "history"
-    for objname in file_in.keys() :
+    for objname in list(file_in.keys()) :
         if   objname != "data" \
              and   objname != "history" :
             x = file_in.get( objname )
@@ -856,16 +856,16 @@ def f_h5_out2in( src , dest , *args ) :
             elif file_in.get( objname , getclass = True )  == h5py.highlevel.Group :
                 file_out.copy( x , "history/parent/detail/" + objname )
             else:
-                print objname  , " has been SKIPPED!!"
+                print(objname  , " has been SKIPPED!!")
                 #file_out.copy( x , os.path.dirname( "history/parent/detail/" + objname ) )
                 #file_in.get( objname ) .copy( os.path.dirname( "history/parent/detail/" + objname ) )
             #file_out.copy( x , "history/parent/detail/" )
-            print objname
+            print(objname)
         else :
-            print '  NOT:', objname
+            print('  NOT:', objname)
 
-    print file_in['data'].keys()
-    print file_in['data'].items()
+    print(list(file_in['data'].keys()))
+    print(list(file_in['data'].items()))
 
     # Create external link to parent's data
     #file_out['history/parent/detail/data'] = h5py.ExternalLink( src ,'/data')

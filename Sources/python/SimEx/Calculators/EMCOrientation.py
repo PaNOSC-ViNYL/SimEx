@@ -27,7 +27,7 @@ import subprocess,shlex
 import tempfile
 import time
 
-from EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
+from .EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities import IOUtilities
@@ -230,7 +230,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
-                print("EMCOrientation backengine mpicommand: "+mpicommand)
+                print(("EMCOrientation backengine mpicommand: "+mpicommand))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -413,7 +413,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             f.close()
         else:
             f = h5py.File(outFile, 'r')
-            offset_iter = len(f["/history/intensities"].keys())
+            offset_iter = len(list(f["/history/intensities"].keys()))
             f.close()
             msg = "Output will be appended to the results of %d iterations before this."%offset_iter
             _print_to_log(msg=msg, log_file=self._outputLog)

@@ -24,7 +24,7 @@ import exceptions
 import os
 import shutil
 import numpy
-import paths
+from . import paths
 import unittest
 from wpg import Wavefront
 

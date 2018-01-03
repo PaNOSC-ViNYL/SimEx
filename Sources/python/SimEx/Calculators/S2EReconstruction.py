@@ -22,8 +22,8 @@
 
 import os
 
-from DMPhasing import DMPhasing
-from EMCOrientation import EMCOrientation
+from .DMPhasing import DMPhasing
+from .EMCOrientation import EMCOrientation
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
 

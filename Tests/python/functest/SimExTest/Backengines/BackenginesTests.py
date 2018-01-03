@@ -23,8 +23,8 @@ import paths
 import unittest
 
 # Import classes to test.
-from WPG.WPGTest import WPGTest
-from singfel.singfelTest import singfelTest
+from .WPG.WPGTest import WPGTest
+from .singfel.singfelTest import singfelTest
 
 # Setup the suite.
 def suite():

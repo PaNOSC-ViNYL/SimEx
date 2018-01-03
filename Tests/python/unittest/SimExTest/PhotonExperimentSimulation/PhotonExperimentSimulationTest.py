@@ -22,7 +22,7 @@
 
 import h5py
 import os, shutil
-import paths
+from . import paths
 import unittest
 
 
@@ -421,7 +421,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         for directory in expected_dirs+expected_symlinks:
             self.assertTrue( os.path.isdir( directory ) )
         for f in expected_files:
-            print f
+            print(f)
             self.assertTrue( os.path.isfile( f ) )
 
     def testHistory(self):
@@ -517,47 +517,47 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         # Check histories.
         # prop.
         with h5py.File( os.path.join( prop_dir, 'prop_out_0000000.h5'), 'r') as prop_h5:
-            self.assertIn( 'history', prop_h5.keys() )
-            self.assertIn( 'parent', prop_h5['history'].keys() )
-            self.assertIn( 'detail', prop_h5['history/parent'].keys() )
-            self.assertIn( 'parent', prop_h5['history/parent'].keys() )
+            self.assertIn( 'history', list(prop_h5.keys()) )
+            self.assertIn( 'parent', list(prop_h5['history'].keys()) )
+            self.assertIn( 'detail', list(prop_h5['history/parent'].keys()) )
+            self.assertIn( 'parent', list(prop_h5['history/parent'].keys()) )
 
             prop_h5.close()
 
         # pmi.
         with h5py.File( os.path.join( pmi_dir, 'pmi_out_0000001.h5'), 'r') as pmi_h5:
 
-            self.assertIn( 'history', pmi_h5.keys() )
-            self.assertIn( 'parent', pmi_h5['history'].keys() )
-            self.assertIn( 'detail', pmi_h5['history/parent'].keys() )
-            self.assertIn( 'parent', pmi_h5['history/parent'].keys() )
-            self.assertIn( 'detail', pmi_h5['history/parent/parent'].keys() )
-            self.assertIn( 'parent', pmi_h5['history/parent/parent'].keys() )
+            self.assertIn( 'history', list(pmi_h5.keys()) )
+            self.assertIn( 'parent', list(pmi_h5['history'].keys()) )
+            self.assertIn( 'detail', list(pmi_h5['history/parent'].keys()) )
+            self.assertIn( 'parent', list(pmi_h5['history/parent'].keys()) )
+            self.assertIn( 'detail', list(pmi_h5['history/parent/parent'].keys()) )
+            self.assertIn( 'parent', list(pmi_h5['history/parent/parent'].keys()) )
 
             pmi_h5.close()
 
         # diffr.
         with h5py.File( os.path.join( diffr_dir, 'diffr_out_0000001.h5'), 'r') as diffr_h5:
 
-            tasks = diffr_h5['data'].keys()
+            tasks = list(diffr_h5['data'].keys())
             for task in tasks:
-                self.assertIn( 'history', diffr_h5["data"][task].keys() )
-                self.assertIn( 'parent',  diffr_h5["data"][task]['history'].keys() )
-                self.assertIn( 'detail',  diffr_h5["data"][task]['history/parent'].keys() )
-                self.assertIn( 'parent',  diffr_h5["data"][task]['history/parent'].keys() )
-                self.assertIn( 'parent',  diffr_h5["data"][task]['history/parent/parent'].keys() )
-                self.assertIn( 'detail',  diffr_h5["data"][task]['history/parent/parent'].keys() )
-                self.assertIn( 'parent',  diffr_h5["data"][task]['history/parent/parent/parent'].keys() )
-                self.assertIn( 'detail',  diffr_h5["data"][task]['history/parent/parent/parent'].keys() )
+                self.assertIn( 'history', list(diffr_h5["data"][task].keys()) )
+                self.assertIn( 'parent',  list(diffr_h5["data"][task]['history'].keys()) )
+                self.assertIn( 'detail',  list(diffr_h5["data"][task]['history/parent'].keys()) )
+                self.assertIn( 'parent',  list(diffr_h5["data"][task]['history/parent'].keys()) )
+                self.assertIn( 'parent',  list(diffr_h5["data"][task]['history/parent/parent'].keys()) )
+                self.assertIn( 'detail',  list(diffr_h5["data"][task]['history/parent/parent'].keys()) )
+                self.assertIn( 'parent',  list(diffr_h5["data"][task]['history/parent/parent/parent'].keys()) )
+                self.assertIn( 'detail',  list(diffr_h5["data"][task]['history/parent/parent/parent'].keys()) )
 
             diffr_h5.close()
 
         # phase.
         with h5py.File( os.path.join( recon_dir, 'phase_out.h5'), 'r') as dm_h5:
 
-            self.assertIn( 'history', dm_h5.keys() )
-            self.assertIn( 'error', dm_h5['history'].keys() )
-            self.assertIn( 'object', dm_h5['history'].keys() )
+            self.assertIn( 'history', list(dm_h5.keys()) )
+            self.assertIn( 'error', list(dm_h5['history'].keys()) )
+            self.assertIn( 'object', list(dm_h5['history'].keys()) )
 
             dm_h5.close()
 
@@ -745,7 +745,7 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
         for directory in expected_dirs:
             self.assertTrue( os.path.isdir( directory ) )
         for f in expected_files:
-            print f
+            print(f)
             self.assertTrue( os.path.isfile( f ) )
 
     def testSimS2EWorkflowDefaultPaths(self):
@@ -838,10 +838,10 @@ class PhotonExperimentSimulationTest( unittest.TestCase):
 
         # Check that all output files and directories are present.
         for directory in expected_dirs:
-            print directory
+            print(directory)
             self.assertTrue( os.path.isdir( directory ) )
         for f in expected_files:
-            print f
+            print(f)
             self.assertTrue( os.path.isfile( f ) )
 
     def reference2NIP(self):

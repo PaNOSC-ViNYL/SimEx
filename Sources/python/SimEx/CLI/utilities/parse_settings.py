@@ -6,12 +6,12 @@ def get_settings(key):
         fname = '.simex/settings'
         f=open(fname,'r')
         settings = json.load(f)
-        if key in settings.keys():
+        if key in list(settings.keys()):
             return settings[key]
         else:
            return None
     except:
-        print ("Cannot open open or corrupted file: %s"%fname)
+        print(("Cannot open open or corrupted file: %s"%fname))
         sys.exit(1)
 
 def get_project_name():
@@ -45,5 +45,5 @@ def set_settings(key,value):
         f.write(json.dumps(settings,indent=4))
         f.close()
     except:
-        print ("Cannot set value in file: %s"%fname)
+        print(("Cannot set value in file: %s"%fname))
         sys.exit(1)

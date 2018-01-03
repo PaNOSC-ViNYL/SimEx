@@ -434,7 +434,7 @@ def _detectorPanelFromString( input_string, common_block=None):
     panel_dict = _panelStringToDict( input_string )
 
     # Loop over common dict and fill into panel dict if not present there.
-    for key,val in common_dict.iteritems():
+    for key,val in common_dict.items():
         if panel_dict[key] is None:
             panel_dict[key] = val
 

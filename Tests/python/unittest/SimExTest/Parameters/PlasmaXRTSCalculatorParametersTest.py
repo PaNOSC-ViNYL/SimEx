@@ -22,13 +22,13 @@
 
 import numpy
 import os
-import paths
+from . import paths
 import shutil
 import subprocess
 import unittest
 
 # Include needed directories in sys.path.
-import paths
+from . import paths
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 

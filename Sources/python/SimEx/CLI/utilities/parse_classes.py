@@ -25,5 +25,5 @@ def get_class_priority(className):
     return None
 
 if __name__ == "__main__":
-        print get_available_classes()
+        print(get_available_classes())
 

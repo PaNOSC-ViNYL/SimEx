@@ -29,7 +29,7 @@
 import h5py
 import numpy
 import os
-import paths
+from . import paths
 import shutil
 import unittest
 

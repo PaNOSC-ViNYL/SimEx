@@ -23,14 +23,14 @@ import unittest
 import os, sys
 
 # Import suites to run.
-from SimExTest.Calculators import CalculatorsTests
-from SimExTest.Calculators import AbstractCalculatorsTests
-from SimExTest.Utilities import UtilitiesTests
-from SimExTest.Parameters import ParametersTests
-from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
+from .SimExTest.Calculators import CalculatorsTests
+from .SimExTest.Calculators import AbstractCalculatorsTests
+from .SimExTest.Utilities import UtilitiesTests
+from .SimExTest.Parameters import ParametersTests
+from .SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
 # Are we running on CI server?
-is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
+is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["TRAVIS_BUILD_DIR"] != "")
 
 
 # Define the test suite.
@@ -54,7 +54,7 @@ if __name__=="__main__":
     result = unittest.TextTestRunner(verbosity=2).run(suite())
 
     if result.wasSuccessful():
-        print '---> OK <---'
+        print('---> OK <---')
         sys.exit(0)
 
     sys.exit(1)

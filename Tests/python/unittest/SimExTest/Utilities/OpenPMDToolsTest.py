@@ -28,7 +28,7 @@ import exceptions
 import h5py
 import numpy
 import os
-import paths
+from . import paths
 import unittest
 
 from SimEx.Utilities import OpenPMDTools as opmd

@@ -26,7 +26,7 @@
     @creation 20161003 (Germany's national holiday, but I'm in Trieste, Italy for the SOS workshop.)
 
 """
-import paths
+from . import paths
 import os
 import shutil
 import wpg

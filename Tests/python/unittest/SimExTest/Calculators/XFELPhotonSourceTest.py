@@ -26,7 +26,7 @@
     @creation 20151104
 
 """
-import paths
+from . import paths
 import unittest
 
 import numpy
