@@ -238,7 +238,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             if 'MPI' in os.environ['SIMEX_VERBOSE']:
                 print(("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand))
 
-        mpicommand += " python " + __file__ + " " + fname
+        mpicommand += " python3 " + __file__ + " " + fname
 
         args = shlex.split(mpicommand)
 
@@ -389,42 +389,37 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         path_to_files = self.output_path
 
         # Setup new file.
-        h5_outfile = h5py.File(self.output_path + ".h5", "w")
+        with h5py.File(self.output_path + ".h5", "w") as h5_outfile:
 
-        # Files to read from.
-        individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
-        individual_files.sort()
+            # Files to read from.
+            individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
+            individual_files.sort()
 
-        # Keep track of global parameters being linked.
-        global_parameters = False
-        # Loop over all individual files and link in the top level groups.
-        for ind_file in individual_files:
-            # Open file.
-            h5_infile = h5py.File(ind_file, 'r')
+            # Keep track of global parameters being linked.
+            global_parameters = False
+            # Loop over all individual files and link in the top level groups.
+            for ind_file in individual_files:
+                # Open file.
+                with h5py.File(ind_file, 'r') as h5_infile:
 
-            # Links must be relative.
-            relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+                    # Links must be relative.
+                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
 
-            # Link global parameters.
-            if not global_parameters:
-                global_parameters = True
+                    # Link global parameters.
+                    if not global_parameters:
+                        global_parameters = True
 
-                h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
-                h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
-                h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
-                h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
+                        h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
+                        h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
+                        h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
+                        h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
 
-            for key in h5_infile['data']:
+                    for key in h5_infile['data']:
 
-                # Link in the data.
-                ds_path = "data/%s" % (key)
-                h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
+                        # Link in the data.
+                        ds_path = "data/%s" % (key)
+                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
 
-            # Close input file.
-            h5_infile.close()
-
-        # Close file.
-        h5_outfile.close()
 
         # Reset output path.
         self.output_path = self.output_path+".h5"

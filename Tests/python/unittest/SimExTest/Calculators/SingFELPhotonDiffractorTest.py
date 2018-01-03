@@ -596,7 +596,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                 output_path='diffr_newstyle')
 
         # Cleanup.
-        self.__dirs_to_remove.append(photon_diffractor.output_path)
+        #self.__dirs_to_remove.append(photon_diffractor.output_path)
 
         # Run backengine and convert files.
         photon_diffractor.backengine()
@@ -605,7 +605,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Cleanup new style files.
         self.__files_to_remove.append(photon_diffractor.output_path)
 
-        pattern = h5py.File(photon_diffractor.output_path)['data/0000001/diffr'].value
+        with h5py.File(photon_diffractor.output_path) as handle:
+            pattern = handle['data/0000001/diffr'].value
 
         # 2nd run.
         photon_diffractor = SingFELPhotonDiffractor(
@@ -618,7 +619,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         photon_diffractor.backengine()
         photon_diffractor.saveH5()
 
-        new_pattern = h5py.File(photon_diffractor.output_path)['data/0000001/diffr'].value
+        with h5py.File(photon_diffractor.output_path) as handle:
+            new_pattern = handle['data/0000001/diffr'].value
 
         self.assertAlmostEqual(numpy.linalg.norm(pattern-new_pattern), 0.0, 10)
 

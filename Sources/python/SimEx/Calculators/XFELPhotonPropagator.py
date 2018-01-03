@@ -95,7 +95,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print(("XFELPhotonPropagator backengine mpicommand: "+mpicommand))
 
-        mpicommand+=" python "+__file__+" "+fname
+        mpicommand+=" python3 "+__file__+" "+fname
 
         args = shlex.split(mpicommand)
 
@@ -114,7 +114,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         """
 
         # import should be here, not in header as it calls MPI_Init when imported. We want MPI to be
-        # initialized on this stage only.
+        # initialized at this stage only.
         from mpi4py import MPI
 
         # MPI info
