@@ -54,7 +54,7 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (PYPATH     ${LIBDIR}/python2.7)
+set (PYPATH     ${LIBDIR}/python3.4)
 set (DOCDIR share/doc)
 
 option (PACKAGE_MAKE "Use this option to create linux packages" OFF)
