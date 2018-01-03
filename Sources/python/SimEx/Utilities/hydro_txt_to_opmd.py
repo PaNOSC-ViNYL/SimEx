@@ -132,7 +132,5 @@ def convertTxtToOPMD(esther_dirname=None):
                 meshes[key].attrs["dataOrder"] = data_order
                 meshes[key].attrs["position"] = numpy.array([0.5, 0.5], dtype=numpy.float32)
 
-        opmd_h5.close()
-
-        return os.path.abspath(h5_path)
+    return os.path.abspath(h5_path)
 
