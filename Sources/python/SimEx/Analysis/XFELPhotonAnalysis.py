@@ -286,7 +286,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Switch to frequency (energy) domain if requested.
         if spectrum:
-            wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 'f')
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
             self.intensity = self.wavefront.get_intensity()
 
         # Get dimensions.
