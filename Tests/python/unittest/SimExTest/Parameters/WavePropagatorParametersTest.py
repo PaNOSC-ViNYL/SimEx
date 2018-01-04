@@ -26,7 +26,6 @@
     @creation 20161003 (Germany's national holiday, but I'm in Trieste, Italy for the SOS workshop.)
 
 """
-import paths
 import os
 import shutil
 from prop import exfel_spb_kb_beamline as s2e_beamline

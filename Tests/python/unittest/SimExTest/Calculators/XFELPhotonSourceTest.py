@@ -26,7 +26,6 @@
     @creation 20151104
 
 """
-import paths
 import unittest
 
 # Import the class to test.

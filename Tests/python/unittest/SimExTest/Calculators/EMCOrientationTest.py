@@ -29,7 +29,6 @@
 import os
 import subprocess
 
-import paths
 import unittest
 
 # Import the class to test.

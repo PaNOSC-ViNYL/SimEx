@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-from . import paths
 
 # Import SimEx modules.
 from .TestUtilities import TestUtilities

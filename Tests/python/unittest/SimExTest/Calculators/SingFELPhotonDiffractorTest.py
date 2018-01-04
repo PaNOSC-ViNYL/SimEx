@@ -26,7 +26,6 @@ import numpy
 import shutil
 
 # Include needed directories in sys.path.
-import paths
 import unittest
 
 # Import the class to test.

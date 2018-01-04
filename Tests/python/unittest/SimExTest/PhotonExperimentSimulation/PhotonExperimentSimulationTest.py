@@ -22,7 +22,6 @@
 
 import h5py
 import os, shutil
-from . import paths
 import unittest
 
 

@@ -26,7 +26,6 @@
     @creation 20151006
 
 """
-import paths
 import os, shutil
 import unittest
 

@@ -30,7 +30,6 @@ RENDER_PLOT=False # Set to True to show plots.
 import h5py
 import numpy
 import os, shutil
-import paths
 import unittest
 import wpg
 

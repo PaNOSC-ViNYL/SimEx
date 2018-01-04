@@ -24,7 +24,6 @@
 from ocelot.adaptors import genesis
 from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
 import os, shutil, sys
-import paths
 import unittest
 
 # SimEx imports

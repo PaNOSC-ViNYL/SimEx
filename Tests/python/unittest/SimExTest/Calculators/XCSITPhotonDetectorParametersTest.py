@@ -20,12 +20,9 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 import os
 import shutil
 
-# Include needed directories in sys.path.
-import paths
 import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters

@@ -26,9 +26,7 @@
     @creation 20151006
 
 """
-import paths
 import unittest
-import exceptions
 import os
 
 

@@ -25,7 +25,6 @@
     @institution XFEL
     @creation 20151006
 """
-import paths
 import unittest
 
 from SimEx.Utilities.EntityChecks import checkAndSetInstance

@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-from . import paths
 import unittest
 
 # Import classes to test.

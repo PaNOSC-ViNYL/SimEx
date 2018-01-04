@@ -20,23 +20,22 @@
 ##########################################################################
 
 import os
-import paths
 import unittest
 
 # Import classes to test.
-from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
-from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
-from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
-from GenesisPhotonSourceTest import GenesisPhotonSourceTest
-from PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
-from S2EReconstructionTest import S2EReconstructionTest
-from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
-from XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
-from XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
-from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
-from XFELPhotonSourceTest import XFELPhotonSourceTest
-from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
-from EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
+from .CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
+from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
+from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
+from .GenesisPhotonSourceTest import GenesisPhotonSourceTest
+from .PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
+from .S2EReconstructionTest import S2EReconstructionTest
+from .SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
+from .XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
+from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
+from .XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
+from .XFELPhotonSourceTest import XFELPhotonSourceTest
+from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
+#from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
 
 
 is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["TRAVIS_BUILD_DIR"] != "")
@@ -59,7 +58,7 @@ def suite():
         suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,           'test'))
-        suites.append(unittest.makeSuite(EstherPhotonMatterInteractorTest,  'test'))
+        #suites.append(unittest.makeSuite(EstherPhotonMatterInteractorTest,  'test'))
 
 
     return unittest.TestSuite(suites)

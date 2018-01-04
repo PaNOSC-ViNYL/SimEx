@@ -27,7 +27,6 @@
 
 """
 import os, shutil
-import paths
 import unittest
 
 

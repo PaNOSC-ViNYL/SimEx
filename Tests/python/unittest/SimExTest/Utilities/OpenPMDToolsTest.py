@@ -24,8 +24,6 @@
     @institution XFEL
     @creation 20160517
 """
-import paths
-
 import numpy
 import os
 import unittest

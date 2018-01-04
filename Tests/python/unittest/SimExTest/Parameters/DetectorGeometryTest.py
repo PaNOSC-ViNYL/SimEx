@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 
 from SimEx import PhysicalQuantity
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
