@@ -27,6 +27,7 @@ from pint import UnitRegistry
 ureg = UnitRegistry()
 PhysicalQuantity = ureg.Quantity
 
+
 from .version import __version__
 
 from .Analysis.DiffractionAnalysis import DiffractionAnalysis
@@ -38,7 +39,7 @@ from .Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
 from .Calculators.DMPhasing import DMPhasing
 from .Calculators.EMCCaseGenerator import EMCCaseGenerator
 from .Calculators.EMCOrientation import EMCOrientation
-#from .Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
+from .Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
 from .Calculators.GenesisPhotonSource import GenesisPhotonSource
 from .Calculators.IdealPhotonDetector import IdealPhotonDetector
 from .Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
@@ -51,7 +52,8 @@ from .Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterIn
 from .Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from .Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from .Parameters.DMPhasingParameters import DMPhasingParameters
-#from Parameters.DetectorGeometry import DetectorGeometry
+from .Parameters.DetectorGeometry import DetectorGeometry
+from .Parameters.DetectorGeometry import DetectorPanel
 from .Parameters.EMCOrientationParameters import EMCOrientationParameters
 from .Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
 from .Parameters.PhotonBeamParameters import PhotonBeamParameters
@@ -62,6 +64,7 @@ from .PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperim
 from .PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 
 from . import Utilities
+from .Utilities.Units import *
 
 
 #from AbstractBaseClass import AbstractBaseClass
