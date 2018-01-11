@@ -21,14 +21,15 @@
 ##########################################################################
 
 import h5py
+import numpy
 import os
 import subprocess,shlex
-
-from scipy import constants
+import tempfile
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.Units import electronvolt, meter
@@ -132,10 +133,18 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             mpicommand=self.parameters.forced_mpi_command
 
+        # Serialize geometry if necessary.
+        if isinstance(self.parameters.detector_geometry, DetectorGeometry):
+            geom_file = tempfile.NamedTemporaryFile(suffix=".geom", delete=True)
+            geom_filename = geom_file.name
+            self.parameters.detector_geometry.serialize(stream=geom_filename, caller=self.parameters)
+        elif os.path.isfile(self.parameters.detector_geometry):
+            geom_filename = self.parameters.detector_geometry
+
         # Setup command, minimum set first.
         command_sequence = ['pattern_sim',
-                            '-p %s'                 % self.parameters.sample,
-                            '--geometry=%s'         % self.parameters.detector_geometry,
+                            '-p%s'                  % self.parameters.sample,
+                            '--geometry=%s'         % geom_filename,
                             '--output=%s'           % output_file_base,
                             '--number=%d'           % self.parameters.number_of_diffraction_patterns,
                             ]
@@ -171,14 +180,13 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
-        #args =  command_sequence
         command = " ".join(args)
 
         if 'SIMEX_VERBOSE' in os.environ:
             print(("CrystFELPhotonDiffractor backengine command: "+command))
 
         # Run the backengine command.
-        proc = subprocess.Popen(command, shell=True)
+        proc = subprocess.Popen(args)
         proc.wait()
 
         # Return the return code from the backengine.
@@ -211,7 +219,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             data_group = h5_outfile.create_group("data")
             params_group = h5_outfile.create_group("params")
             beam_params_group = params_group.create_group("beam")
-            #geom_params_group = params_group.create_group("geom")
+            geom_params_group = params_group.create_group("geom")
 
             beam_params_group["photonEnergy"] = self.parameters.beam_parameters.photon_energy.m_as(electronvolt)
             beam_params_group["photonEnergy"].attrs["unit_symbol"] = "eV"
@@ -219,6 +227,16 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             beam_params_group["focusArea"] = self.parameters.beam_parameters.beam_diameter_fwhm.m_as(meter)**2
             beam_params_group["focusArea"].attrs["unit_symbol"] = "m^2"
             beam_params_group["focusArea"].attrs["unit_longname"] = "square_metre"
+
+            geom_params_group["detectorDist"] = self.parameters.detector_geometry.panels[0].distance_from_interaction_plane.m_as(meter)
+
+            mask = self.parameters.detector_geometry.panels[0].mask
+            if mask is None:
+                mask = numpy.ones((self.parameters.detector_geometry.panels[0].number_of_pixels_slow,
+                                   self.parameters.detector_geometry.panels[0].number_of_pixels_fast))
+            geom_params_group["mask"] = mask
+            geom_params_group["pixelHeight"] = self.parameters.detector_geometry.panels[0].pixel_size.m_as(meter)
+            geom_params_group["pixelWidth"] = self.parameters.detector_geometry.panels[0].pixel_size.m_as(meter)
 
             # Files to read from.
             individual_files = [os.path.join( path_to_files, f ) for f in os.listdir( path_to_files ) ]

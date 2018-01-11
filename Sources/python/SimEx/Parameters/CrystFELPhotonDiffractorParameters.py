@@ -27,6 +27,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysica
 from SimEx.Utilities import IOUtilities
 from SimEx.Utilities.Units import meter
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 
 class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
@@ -243,12 +244,12 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'detector_geometry' parameter to a given value.
         :param value: The value to set 'detector_geometry' to.
         """
-        self.__detector_geometry = checkAndSetInstance( str, value, None )
+        self.__detector_geometry = checkAndSetInstance( (str, DetectorGeometry), value, None )
 
-        if self.__detector_geometry is not None:
+        if isinstance(self.__detector_geometry, str):
             if not os.path.isfile( self.__detector_geometry):
                 raise IOError("The detector_geometry %s is not a valid file or filename." % (self.__detector_geometry) )
-        else:
+        if self.__detector_geometry is None:
             print ("WARNING: Geometry file not set, calculation will most probably fail.")
 
 

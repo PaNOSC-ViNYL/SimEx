@@ -31,6 +31,7 @@ from SimEx.Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
 from SimEx.Calculators.CrystFELPhotonDiffractor import _rename_files
 from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Utilities.Units import electronvolt, joule, meter
 from TestUtilities import TestUtilities
 
@@ -264,6 +265,51 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                beam_parameters=beam_parameters,
+                number_of_diffraction_patterns=2,
+                )
+
+        # Get calculator.
+        diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
+
+        # Run backengine
+        status = diffractor.backengine()
+
+        # Check return code.
+        self.assertEqual(status, 0)
+
+    def testBackengineWithBeamAndGeometry(self):
+        """ Check geom parameter logic if they are set as parameters. """
+
+        # Ensure cleanup.
+        self.__dirs_to_remove.append("diffr")
+        self.__files_to_remove.append("5udc.pdb")
+
+        # Setup beam parameters.
+        beam_parameters = PhotonBeamParameters(
+                photon_energy=16.0e3*electronvolt,
+                photon_energy_relative_bandwidth=0.001,
+                pulse_energy=2.0e-3*joule,
+                beam_diameter_fwhm=100e-9*meter,
+                divergence=None,
+                photon_energy_spectrum_type="tophat",
+                )
+
+        geometry = DetectorGeometry(panels=DetectorPanel(
+                                                         ranges={"fast_scan_min" : 0,
+                                                             "fast_scan_max" : 63,
+                                                             "slow_scan_min" : 0,
+                                                             "slow_scan_max" : 63},
+                                                         pixel_size=220.0e-6*meter,
+                                                         photon_response=1.0,
+                                                         distance_from_interaction_plane=0.1*meter,
+                                                         corners={"x" : -32, "y": -32},
+                                                         saturation_adu=1e4,
+                                                        )
+                                    )
+        # Get parameters.
+        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+                detector_geometry=geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,
                 )

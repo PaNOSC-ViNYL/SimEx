@@ -19,11 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.Units import meter, electronvolt, joule
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber, checkAndSetPhysicalQuantity
-from SimEx import PhysicalQuantity
 from SimEx import AbstractBaseClass
+from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber, checkAndSetPhysicalQuantity
+from SimEx.Utilities.Units import meter, electronvolt
 
 import numpy
 import sys
@@ -104,6 +103,10 @@ class DetectorPanel(AbstractBaseClass):
 
         """
 
+        # Handle case that neither photon nor energy response is set.
+        self.__photon_response = 1.0
+        self.__energy_response = None
+
         # Store on object using setters.
         self.ranges                          = ranges
         self.pixel_size                      = pixel_size
@@ -121,9 +124,8 @@ class DetectorPanel(AbstractBaseClass):
         self.saturation_map                  = saturation_map
         self.badregion_flag                  = badregion_flag
 
-        # Handle case that neither photon nor energy response is set.
-        if self.energy_response is None and self.photon_response is None:
-            self.photon_response = 1.0
+        self.number_of_pixels_fast = self.ranges["fast_scan_max"] - self.ranges["fast_scan_min"] + 1
+        self.number_of_pixels_slow = self.ranges["slow_scan_max"] - self.ranges["slow_scan_min"] + 1
 
     ### Accessors.
     # ranges
@@ -247,7 +249,7 @@ class DetectorPanel(AbstractBaseClass):
     @mask.setter
     def mask(self, val):
         """ Set the panel mask. """
-        self.__mask = checkAndSetInstance( numpy.array, None )
+        self.__mask = checkAndSetInstance( numpy.array, val, None )
 
     # good_bit_mask
     @property
@@ -257,7 +259,7 @@ class DetectorPanel(AbstractBaseClass):
     @good_bit_mask.setter
     def good_bit_mask(self, val):
         """ Set the panel good_bit_mask. """
-        self.__good_bit_mask = checkAndSetInstance( int, None )
+        self.__good_bit_mask = checkAndSetInstance( int, val, None )
 
     # bad_bit_mask
     @property
@@ -290,7 +292,7 @@ class DetectorPanel(AbstractBaseClass):
         self.__badregion_flag = checkAndSetInstance( bool, val, False )
     ### End accessors
 
-    def _serialize(self, stream=None, panel_id=None):
+    def _serialize(self, stream=None, panel_id=None, caller=None):
         """ Serialize the panel.
 
         :param stream: The stream to write the serialized panel to.
@@ -312,29 +314,22 @@ class DetectorPanel(AbstractBaseClass):
 
         # Initialize the string to be written to.
         serialization = ";panel %s\n" % (panel_id_str)
-        serialization += "panel%s/min_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_min"])
-        serialization += "panel%s/max_fs        = %d\n" %  (panel_id_str, self.ranges["fast_scan_max"])
-        serialization += "panel%s/min_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_min"])
-        serialization += "panel%s/max_ss        = %d\n" %  (panel_id_str, self.ranges["slow_scan_max"])
-        number_of_pixels_fast = self.ranges["fast_scan_max"] - self.ranges["fast_scan_min"] + 1
-        number_of_pixels_slow = self.ranges["slow_scan_max"] - self.ranges["slow_scan_min"] + 1
-
-        serialization += "panel%s/px            = %d\n" % (panel_id_str, number_of_pixels_fast)
-        serialization += "panel%s/py            = %d\n" % (panel_id_str, number_of_pixels_slow)
-        serialization += "panel%s/corner_x      = %d\n" % (panel_id_str, self.corners["x"])
-        serialization += "panel%s/corner_y      = %d\n" % (panel_id_str, self.corners["y"])
-        serialization += "panel%s/fs            = %s\n" % (panel_id_str, self.fast_scan_xyz)
-        serialization += "panel%s/ss            = %s\n" % (panel_id_str, self.slow_scan_xyz)
-        serialization += "panel%s/clen          = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.m_as(meter))
-        serialization += "panel%s/res           = %8.7e\n" % (panel_id_str, 1./self.pixel_size.m_as(meter))
-        serialization += "panel%s/pix_width     = %8.7e\n" % (panel_id_str, self.pixel_size.m_as(meter))
-        serialization += "panel%s/coffset       = %8.7e\n" % (panel_id_str, self.distance_offset.m_as(meter))
+        serialization += "panel%s/min_fs         = %d\n" %  (panel_id_str, self.ranges["fast_scan_min"])
+        serialization += "panel%s/max_fs         = %d\n" %  (panel_id_str, self.ranges["fast_scan_max"])
+        serialization += "panel%s/min_ss         = %d\n" %  (panel_id_str, self.ranges["slow_scan_min"])
+        serialization += "panel%s/max_ss         = %d\n" %  (panel_id_str, self.ranges["slow_scan_max"])
+        serialization += "panel%s/corner_y       = %d\n" % (panel_id_str, self.corners["y"])
+        serialization += "panel%s/fs             = %s\n" % (panel_id_str, self.fast_scan_xyz)
+        serialization += "panel%s/ss             = %s\n" % (panel_id_str, self.slow_scan_xyz)
+        serialization += "panel%s/clen           = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.m_as(meter))
+        serialization += "panel%s/res            = %8.7e\n" % (panel_id_str, 1./self.pixel_size.m_as(meter))
+        serialization += "panel%s/coffset        = %8.7e\n" % (panel_id_str, self.distance_offset.m_as(meter))
         if self.energy_response is not None:
-            serialization += "panel%s/adu_per_eV    = %8.7e\n" % (panel_id_str, self.energy_response.m_as(1/electronvolt))
+            serialization += "panel%s/adu_per_eV     = %8.7e\n" % (panel_id_str, self.energy_response.m_as(1/electronvolt))
         if self.photon_response is not None:
-            serialization += "panel%s/adu_per_photon= %8.7e\n" % (panel_id_str, self.photon_response)
+            serialization += "panel%s/adu_per_photon = %8.7e\n" % (panel_id_str, self.photon_response)
         if self.saturation_adu is not None:
-            serialization += "panel%s/max_adu       = %8.7e\n" % (panel_id_str, self.saturation_adu)
+            serialization += "panel%s/max_adu        = %8.7e\n" % (panel_id_str, self.saturation_adu)
         if self.mask is not None:
             serialization += "panel%s/badpixmap     = %s\n" % (panel_id_str, str(self.mask.magnitude))
             serialization += "panel%s/badpixmap     = %s\n" % (panel_id_str, str(self.mask.magnitude))
@@ -343,7 +338,14 @@ class DetectorPanel(AbstractBaseClass):
         if self.bad_bit_mask is not None:
             serialization += "panel%s/mask_bad      = %d\n" % (panel_id_str, self.bad_bit_mask.magnitude)
         if self.saturation_map is not None:
-            serialization += "panel%s/saturation_map= %s\n" % (panel_id_str, str(self.saturation_map.magnitude) )
+            serialization += "panel%s/saturation_map = %s\n" % (panel_id_str, str(self.saturation_map.magnitude) )
+
+        if 'CrystFELPhotonDiffractorParameters' not in caller.__str__():
+            serialization += "panel%s/px             = %d\n" % (panel_id_str, self.number_of_pixels_fast)
+            serialization += "panel%s/py             = %d\n" % (panel_id_str, self.number_of_pixels_slow)
+            serialization += "panel%s/pix_width      = %8.7e\n" % (panel_id_str, self.pixel_size.m_as(meter))
+            serialization += "panel%s/d              = %8.7e\n" % (panel_id_str, self.distance_from_interaction_plane.m_as(meter))
+        serialization += "panel%s/corner_x       = %d\n" % (panel_id_str, self.corners["x"])
         serialization += "\n"
 
         # Finally write the serialized panel.
@@ -389,7 +391,7 @@ class DetectorGeometry(AbstractCalculatorParameters):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
-    def serialize(self, stream=None):
+    def serialize(self, stream=None, caller=None):
         """ Serialize the geometry.
 
         :param stream: The stream to write the serialized geometry to (default sys.stdout).
@@ -404,20 +406,20 @@ class DetectorGeometry(AbstractCalculatorParameters):
         # If this is a string, open a corresponding file.
         if isinstance( stream,  str):
             with open(stream, 'w') as fstream:
-                self._serialize(fstream)
+                self._serialize(fstream, caller=caller)
                 return
 
         if not hasattr(stream, "write"):
             raise IOError("The stream % is not writable." % (stream) )
 
         # Loop over all panels and serialize each one.
-        self._serialize(stream)
+        self._serialize(stream, caller=caller)
 
-    def _serialize(self, stream=sys.stdout):
+    def _serialize(self, stream=sys.stdout, caller=None):
         """ Workhorse function for serialization. """
 
         for i,panel in enumerate(self.panels):
-            panel._serialize( stream, panel_id=i)
+            panel._serialize( stream, panel_id=i, caller=caller)
 
 def _detectorPanelFromString( input_string, common_block=None):
     """ Construct a DetectorPanel instance from a serialized panel.
