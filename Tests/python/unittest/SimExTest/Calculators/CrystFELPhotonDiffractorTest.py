@@ -48,7 +48,10 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        pass
+        files_to_remove = ['tmp.beam', 'tmp.geom']
+        for f in files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
 
     def setUp(self):
         """ Setting up a test. """

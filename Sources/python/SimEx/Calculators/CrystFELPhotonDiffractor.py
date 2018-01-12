@@ -29,7 +29,7 @@ import tempfile
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
-from SimEx.Parameters.DetectorGeometry import DetectorGeometry
+from SimEx.Parameters.DetectorGeometry import _detectorGeometryFromString
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.Units import electronvolt, meter
@@ -134,12 +134,15 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand=self.parameters.forced_mpi_command
 
         # Serialize geometry if necessary.
-        if isinstance(self.parameters.detector_geometry, DetectorGeometry):
-            geom_file = tempfile.NamedTemporaryFile(suffix=".geom", delete=True)
-            geom_filename = geom_file.name
-            self.parameters.detector_geometry.serialize(stream=geom_filename, caller=self.parameters)
-        elif os.path.isfile(self.parameters.detector_geometry):
-            geom_filename = self.parameters.detector_geometry
+        if os.path.isfile(self.parameters.detector_geometry):
+            with open(self.parameters.detector_geometry) as tmp_geom_file:
+                geom_string = "\n".join(tmp_geom_file.readlines())
+
+            self.parameters.detector_geometry = _detectorGeometryFromString( geom_string )
+
+        geom_file = tempfile.NamedTemporaryFile(suffix=".geom", delete=True)
+        geom_filename = geom_file.name
+        self.parameters.detector_geometry.serialize(stream=geom_filename, caller=self.parameters)
 
         # Setup command, minimum set first.
         command_sequence = ['pattern_sim',

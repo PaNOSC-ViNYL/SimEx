@@ -27,16 +27,15 @@ import shutil
 import unittest
 
 # Include needed directories in sys.path.
-
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
-from TestUtilities import TestUtilities
 
 # Import the class to test.
 from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
 from SimEx.Calculators.PlasmaXRTSCalculator import _parseStaticData
 
+from TestUtilities import TestUtilities
 
 class PlasmaXRTSCalculatorTest(unittest.TestCase):
     """

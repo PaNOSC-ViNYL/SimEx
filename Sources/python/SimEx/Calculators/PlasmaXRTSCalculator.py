@@ -28,7 +28,6 @@ import subprocess
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
@@ -142,7 +141,8 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         out, err = process.communicate(input=None)
 
         # Error handling.
-        if not err == "":
+        if not err == b'':
+            print (err)
             raise RuntimeError
         # Check if data was produced.
         path_to_data = os.path.join( self.parameters._tmp_dir, 'xrts_out.txt' )
@@ -150,11 +150,11 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
             raise IOError
 
         # Store output internally.
-        self.__run_log = out
+        self.__run_log = out.decode('utf-8')
 
         # Write to tmp_dir.
         with open( os.path.join( self.parameters._tmp_dir ,'xrts.log'), 'w') as log_file_handle:
-                log_file_handle.write(out)
+                log_file_handle.write(out.decode('utf-8'))
 
         # Store data internally.
         self.__run_data = numpy.loadtxt( path_to_data )

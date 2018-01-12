@@ -1,7 +1,7 @@
 """ Test module for the SingFELPhotonDiffractor."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015,2016 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -68,6 +68,10 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     def tearDownClass(cls):
         """ Tearing down the test class. """
         del cls.input_h5
+        files_to_remove = ['tmp.beam', 'tmp.geom', 'template.in']
+        for f in files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
 
     def setUp(self):
         """ Setting up a test. """
