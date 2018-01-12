@@ -136,6 +136,8 @@ class DetectorPanel(AbstractBaseClass):
     @ranges.setter
     def ranges(self, val):
         """ Set the panel ranges. """
+        if val is None:
+            raise ValueError( "The parameters 'ranges' must not be None." )
         self.__ranges = checkAndSetInstance( dict, val, None )
 
     # pixel_size

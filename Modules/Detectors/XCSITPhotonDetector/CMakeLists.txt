@@ -6,6 +6,7 @@ INCLUDE(ExternalProject)
 ExternalProject_Add(
 	py_detector_interface
 	GIT_REPOSITORY https://github.com/eucall-software/py_detector_interface.git
+    GIT_TAG python3
 	TIMEOUT 10
 	CMAKE_ARGS
     "-DXERCESC_ROOT=${XERCESC_ROOT}"
