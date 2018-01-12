@@ -21,7 +21,7 @@
 #                                                                        #
 ##########################################################################
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
-from matplotlib.colors import Normalize, LogNorm
+from matplotlib.colors import Normalize
 
 import h5py
 import math
@@ -307,13 +307,13 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True):
+def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
     qs, intensities = azimuthalIntegration(pattern, parameters)
 
     if logscale:
-        plt.semilogy(qs, intensities)
+        plt.semilogy(qs, intensities+offset)
     else:
         plt.plot(qs, intensities)
 
