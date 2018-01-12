@@ -27,10 +27,10 @@ import io
 # Include needed directories in sys.path.
 import unittest
 
-from TestUtilities import TestUtilities
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
+from TestUtilities import TestUtilities
 
 class PhotonBeamParametersTest(unittest.TestCase):
     """
@@ -201,7 +201,7 @@ beam/radius = 5.0000000e-07
         stream.close()
 
     def testPropToBeamParameters(self):
-        """ Test the utility function to construct a PhotonBeamParameters instance from prop output (wavefron file). """
+        """ Test the utility function to construct a PhotonBeamParameters instance from prop output (wavefront file). """
 
         beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out_0000001.h5"))
 
