@@ -9,7 +9,8 @@ sudo: required
 dist: trusty
 
 compiler:
-    - gcc
+    - g++-4.8
+
 matrix:
   allow_failures:
     - python: "2.7"
@@ -21,12 +22,12 @@ env:
     - TRIGGER_DOCKER_FOR_PYTHON: '3.4'
     - CXX_FLTO_FLAGS=
     - LD_FLTO_FLAGS=
-    - COMPILER=g++-5
+    - COMPILER=g++-4.8
 
 addons:
   apt:
     packages:
-      - g++-5
+      - g++-4.8
       - openmpi-bin
       - libopenmpi-dev
       - wget
