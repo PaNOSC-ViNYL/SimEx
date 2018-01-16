@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e # Exit with nonzero exit code if anything fails
 
-printenv
-
 # load git lfs files
 git lfs pull
 

@@ -1,8 +1,8 @@
 language: python
 python:
-  - "2.7"
   - "3.4"
   - "3.5"
+  - "3.6"
   - "nightly"
 
 sudo: required
@@ -10,17 +10,13 @@ dist: trusty
 
 matrix:
   allow_failures:
-    # not yet Python 3 compatible
-    - python: "3.4"
-    - python: "3.5"
-    # Python 3.6 "nightly" (upcoming)
-    - python: "nightly"
+    - python: "2.7"
 
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
-    - DEPLOY_DOCS_FOR_PYTHON: '2.7'
-    - TRIGGER_DOCKER_FOR_PYTHON: '2.7'
+    - DEPLOY_DOCS_FOR_PYTHON: '3.4'
+    - TRIGGER_DOCKER_FOR_PYTHON: '3.4'
 
 addons:
   apt:
@@ -51,12 +47,13 @@ cache:
 # install git lfs
 #   see https://github.com/travis-ci/travis-ci/issues/3634
 before_install:
-- mkdir -p $HOME/bin
-- wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
-- tar xvfz git-lfs-linux-amd64-1.1.2.tar.gz
-- mv git-lfs-1.1.2/git-lfs $HOME/bin/git-lfs
-- export PATH=$PATH:$HOME/bin/
-- bash $TRAVIS_BUILD_DIR/TravisCI/pyqt.sh
+    - printenv
+    - mkdir -p $HOME/bin
+    - wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
+    - tar xvfz git-lfs-linux-amd64-1.1.2.tar.gz
+    - mv git-lfs-1.1.2/git-lfs $HOME/bin/git-lfs
+    - export PATH=$PATH:$HOME/bin/
+    - bash $TRAVIS_BUILD_DIR/TravisCI/pyqt.sh
 before_script:
   # print interesting versions
   - python --version
