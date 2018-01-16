@@ -21,6 +21,7 @@ env:
 addons:
   apt:
     packages:
+      - g++-4.8
       - openmpi-bin
       - libopenmpi-dev
       - wget
@@ -57,6 +58,8 @@ before_install:
     - bash $TRAVIS_BUILD_DIR/TravisCI/pyqt.sh
 before_script:
   # print interesting versions
+
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
   - python --version
   - python -c "import numpy as np; print( np.__version__ )"
   - python -c "import h5py as h5; print( h5.__version__ )"
