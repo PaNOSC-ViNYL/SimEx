@@ -37,6 +37,7 @@ addons:
       - python3-sphinx
       - python3-pyqt5
       - libgsl0-dev
+      - llvm
 
 cache:
   apt: true
