@@ -19,10 +19,14 @@ env:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
     - DEPLOY_DOCS_FOR_PYTHON: '3.4'
     - TRIGGER_DOCKER_FOR_PYTHON: '3.4'
+    - CXX_FLTO_FLAGS=
+    - LD_FLTO_FLAGS=
+    - COMPILER=g++-5
 
 addons:
   apt:
     packages:
+      - g++-5
       - openmpi-bin
       - libopenmpi-dev
       - wget
