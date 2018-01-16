@@ -1,9 +1,9 @@
 language: python
 python:
   - "3.4"
-  - "3.5"
-  - "3.6"
-  - "nightly"
+    #- "3.5"
+    #- "3.6"
+    #- "nightly"
 
 sudo: required
 dist: trusty
@@ -32,10 +32,10 @@ addons:
       - cmake
       - gfortran
       - unzip
-      - cython
+      - cython3
       - sphinx-common
-      - python-sphinx
-      - python-qt4
+      - python3-sphinx
+      - python3-qt5
       - libgsl0-dev
 
 cache:
