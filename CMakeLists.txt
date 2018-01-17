@@ -52,8 +52,8 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
 
 ### PYTHON
 # find needed packages
-FIND_PACKAGE(PythonInterp 3.4 REQUIRED)
-FIND_PACKAGE (PythonLibs 3.4 REQUIRED)
+FIND_PACKAGE(PythonInterp 3.5 REQUIRED)
+FIND_PACKAGE (PythonLibs 3.5 REQUIRED)
 include(FindPythonModules)
 find_python_module(h5py REQUIRED)
 find_python_module(matplotlib REQUIRED)
