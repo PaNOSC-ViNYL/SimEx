@@ -50,11 +50,38 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
     -DPY_DETECTOR_INTERFACE_DEBUG=default: OFF | ON"
 )
 
+### PYTHON
+# find needed packages
+FIND_PACKAGE(PythonInterp 3.4 REQUIRED)
+FIND_PACKAGE (PythonLibs 3.4 REQUIRED)
+include(FindPythonModules)
+find_python_module(h5py REQUIRED)
+find_python_module(matplotlib REQUIRED)
+find_python_module(scipy REQUIRED)
+find_python_module(mpi4py REQUIRED)
+find_python_module(periodictable REQUIRED)
+find_python_module(dill REQUIRED)
+find_python_module(Bio REQUIRED)
+find_python_module(argparse REQUIRED)
+find_python_module(Cython REQUIRED)
+find_python_module(datetime REQUIRED)
+find_python_module(numpy REQUIRED)
+find_python_module(setuptools REQUIRED)
+find_python_module(breathe REQUIRED)
+find_python_module(sqlalchemy REQUIRED)
+find_python_module(pyfftw REQUIRED)
+find_python_module(pyFAI REQUIRED)
+find_python_module(PyQt5 REQUIRED)
+find_python_module(numba REQUIRED)
+find_python_module(pint REQUIRED)
+
 
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (PYPATH     ${LIBDIR}/python3.4)
+set (PYPATH     ${LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+message( "PYPATH=${PYPATH}" )
+
 set (DOCDIR share/doc)
 
 option (PACKAGE_MAKE "Use this option to create linux packages" OFF)

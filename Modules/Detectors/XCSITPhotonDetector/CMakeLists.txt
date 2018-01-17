@@ -40,7 +40,7 @@ install(DIRECTORY ${SOURCE_DIR}/include/py_detector_interface/
 
 # Copy the created shared object to the correct location
 install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION
-${LIBDIR}/python3.4
+${PYPATH}
                                         USE_SOURCE_PERMISSIONS
                                         FILES_MATCHING
                                         PATTERN "*.so"

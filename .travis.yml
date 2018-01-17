@@ -1,33 +1,27 @@
 language: python
 python:
-  - "3.4"
-    #- "3.5"
+    #- "3.4"
+  - "3.5"
     #- "3.6"
     #- "nightly"
 
 sudo: required
 dist: trusty
 
-compiler:
-    - g++-4.8
-
-matrix:
-  allow_failures:
-    - python: "2.7"
+#matrix:
+#allow_failures:
+      #- python: "3.4" # Can't build llvmlite for numba
+      #- python: "nightly" # Can't build llvmlite for numba
 
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
-    - DEPLOY_DOCS_FOR_PYTHON: '3.4'
-    - TRIGGER_DOCKER_FOR_PYTHON: '3.4'
-    - CXX_FLTO_FLAGS=
-    - LD_FLTO_FLAGS=
-    - COMPILER=g++-4.8
+    - DEPLOY_DOCS_FOR_PYTHON: '3.5'
+    - TRIGGER_DOCKER_FOR_PYTHON: '3.5'
 
 addons:
   apt:
     packages:
-      - g++-4.8
       - openmpi-bin
       - libopenmpi-dev
       - wget
@@ -55,10 +49,6 @@ cache:
 # install git lfs
 #   see https://github.com/travis-ci/travis-ci/issues/3634
 before_install:
-    - printenv
-    - echo "CC=$CC"
-    - echo "CXX=$CXX"
-    - echo "COMPILER=$COMPILER"
     - mkdir -p $HOME/bin
     - wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
     - tar xvfz git-lfs-linux-amd64-1.1.2.tar.gz
