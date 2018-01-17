@@ -22,6 +22,7 @@ env:
 addons:
   apt:
     packages:
+      - python3.5-dev
       - openmpi-bin
       - libopenmpi-dev
       - wget
