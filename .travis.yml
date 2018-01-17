@@ -43,9 +43,9 @@ addons:
 
 cache:
   apt: true
-  directories:
-    - $HOME/.cache/pip
-    - $HOME/lib
+  #directories:
+    #- $HOME/.cache/pip
+    #- $HOME/lib
 
 # install git lfs
 #   see https://github.com/travis-ci/travis-ci/issues/3634
