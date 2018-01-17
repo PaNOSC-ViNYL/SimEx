@@ -1,4 +1,6 @@
 #FIND_PACKAGE (PythonLibs 3.5 REQUIRED)
+#MESSAGE( "PYTHON_LIBRARIES=${PYTHON_LIBRARIES}" )
+#MESSAGE( "PYTHON_INCLUDE_DIRS=${PYTHON_INCLUDE_DIRS}" )
 # find needed packages
 include(FindPythonModules)
 find_python_module(h5py REQUIRED)
