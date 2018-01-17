@@ -1,6 +1,3 @@
-#FIND_PACKAGE (PythonLibs 3.5 REQUIRED)
-#MESSAGE( "PYTHON_LIBRARIES=${PYTHON_LIBRARIES}" )
-#MESSAGE( "PYTHON_INCLUDE_DIRS=${PYTHON_INCLUDE_DIRS}" )
 # find needed packages
 include(FindPythonModules)
 find_python_module(h5py REQUIRED)
@@ -22,8 +19,6 @@ find_python_module(pyFAI REQUIRED)
 find_python_module(PyQt5 REQUIRED)
 find_python_module(numba REQUIRED)
 find_python_module(pint REQUIRED)
-
-##message (STATUS "***** LAPACK_LIBRARIES ${LAPACK_LIBRARIES} ****")
 
 if (NOT DEVELOPER_INSTALL)
 	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/  DESTINATION ${PYPATH}
