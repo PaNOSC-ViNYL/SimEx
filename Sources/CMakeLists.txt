@@ -1,4 +1,4 @@
-FIND_PACKAGE (PythonLibs 3.5 REQUIRED)
+#FIND_PACKAGE (PythonLibs 3.5 REQUIRED)
 # find needed packages
 include(FindPythonModules)
 find_python_module(h5py REQUIRED)
