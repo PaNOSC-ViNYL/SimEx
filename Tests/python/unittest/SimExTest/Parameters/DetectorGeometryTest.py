@@ -413,9 +413,17 @@ panel0/corner_x       = -512
         panel = self.__panel
 
         # Check attributes.
-        self.assertEqual( panel.pixel_size, 2.2e-4*meter,)
-        self.assertIsInstance(panel.pixel_size, PhysicalQuantity )
-        self.assertRaises( DetectorPanel, pixel_size=1.0e-4)
+        self.assertEqual(panel.pixel_size, 2.2e-4*meter)
+        self.assertIsInstance(panel.pixel_size, PhysicalQuantity)
+
+        error = None
+        try:
+            panel.pixel_size = 1.0e-4
+        except Exception as exc:
+            error = exc
+
+        self.assertIsInstance(error, TypeError)
+
 
     def testSerialize(self):
         """ Test the _serialize() method for the panel. """

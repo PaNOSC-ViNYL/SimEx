@@ -24,8 +24,6 @@ import h5py
 import numpy
 import os
 import random
-import subprocess
-import sys
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities import IOUtilities
@@ -276,7 +274,7 @@ class PMIDemo(object):
     ##############################################################################
 
     def f_dbase_Zq2id(self, a_Z , a_q ) :
-        return ( a_Z * ( a_Z + 1 ) ) / 2 - 1*1 + a_q
+        return ( a_Z * ( a_Z + 1 ) ) // 2 - 1*1 + a_q
 
     ##############################################################################
 
@@ -500,8 +498,8 @@ class PMIDemo(object):
         xfp.close()
 
         # Take central pixel values.
-        sel_x = self.g_s2e['pulse']['nx'] / 2 ;
-        sel_y = self.g_s2e['pulse']['ny'] / 2 ;
+        sel_x = self.g_s2e['pulse']['nx'] // 2 ;
+        sel_y = self.g_s2e['pulse']['ny'] // 2 ;
         sel_pixV = self.g_s2e['pulse']['arrEver'] [sel_x,sel_y,:,:]
         sel_pixH = self.g_s2e['pulse']['arrEhor'] [sel_x,sel_y,:,:]
         dt = ( self.g_s2e['pulse']['sliceMax'] - self.g_s2e['pulse']['sliceMin'] ) / ( self.g_s2e['pulse']['nSlices'] * 1.0 )

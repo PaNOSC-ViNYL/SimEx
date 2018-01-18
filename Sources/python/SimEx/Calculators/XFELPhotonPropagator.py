@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-from prop import propagate_s2e
 
 import os
 import subprocess
@@ -32,6 +31,7 @@ from SimEx.Utilities import EntityChecks
 from SimEx.Utilities import IOUtilities
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities import wpg_to_opmd
+from prop import propagate_s2e
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
@@ -94,9 +94,12 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print(("XFELPhotonPropagator backengine mpicommand: "+mpicommand))
+            if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
+                import platform
+                print("Running python %s." % ( platform.python_version() ) )
 
-        #mpicommand+=" python3 "+__file__+" "+fname
-        mpicommand="python3 "+__file__+" "+fname
+        mpicommand+=" python "+__file__+" "+fname
+
 
         args = shlex.split(mpicommand)
 

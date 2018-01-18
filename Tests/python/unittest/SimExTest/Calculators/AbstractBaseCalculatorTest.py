@@ -146,15 +146,15 @@ class AbstractBaseCalculatorTest(unittest.TestCase):
 
         # Check exception on wrong types.
         io = (1,2)
-        self.assertRaises(exceptions.TypeError, checkAndSetIO, io )
+        self.assertRaises(TypeError, checkAndSetIO, io )
 
         # Check exception on wrong second type.
         io = ('test.in', 2)
-        self.assertRaises(exceptions.TypeError, checkAndSetIO, io )
+        self.assertRaises(TypeError, checkAndSetIO, io )
 
         # Check exception on wrong second type.
         io = ('test.in', None)
-        self.assertRaises(exceptions.IOError, checkAndSetIO, io )
+        self.assertRaises(IOError, checkAndSetIO, io )
 
     def testProvidedData(self):
         """ Check the provided data query. """

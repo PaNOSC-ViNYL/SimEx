@@ -124,8 +124,8 @@ class DetectorPanel(AbstractBaseClass):
         self.saturation_map                  = saturation_map
         self.badregion_flag                  = badregion_flag
 
-        self.number_of_pixels_fast = self.ranges["fast_scan_max"] - self.ranges["fast_scan_min"] + 1
-        self.number_of_pixels_slow = self.ranges["slow_scan_max"] - self.ranges["slow_scan_min"] + 1
+        self.number_of_pixels_fast = int(self.ranges["fast_scan_max"] - self.ranges["fast_scan_min"]) + 1
+        self.number_of_pixels_slow = int(self.ranges["slow_scan_max"] - self.ranges["slow_scan_min"]) + 1
 
     ### Accessors.
     # ranges

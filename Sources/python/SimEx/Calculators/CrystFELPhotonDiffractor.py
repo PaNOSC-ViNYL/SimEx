@@ -134,7 +134,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand=self.parameters.forced_mpi_command
 
         # Serialize geometry if necessary.
-        if os.path.isfile(self.parameters.detector_geometry):
+        if isinstance(self.parameters.detector_geometry, str) and os.path.isfile(self.parameters.detector_geometry):
             with open(self.parameters.detector_geometry) as tmp_geom_file:
                 geom_string = "\n".join(tmp_geom_file.readlines())
 

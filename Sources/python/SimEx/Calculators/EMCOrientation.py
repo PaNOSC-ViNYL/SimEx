@@ -220,7 +220,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         else:
             mpicommand=self.parameters.forced_mpi_command
         # collect program arguments
-        command_sequence = ['python3',
+        command_sequence = ['python',
                             __file__,
                             fname,
                             ]
@@ -231,6 +231,9 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print(("EMCOrientation backengine mpicommand: "+mpicommand))
+            if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
+                import platform
+                print("Running python version %s." % (platform.python_version()))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)

@@ -130,7 +130,6 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         self.__dirs_to_remove.append(xfel_propagator.output_path)
 
 
-
 if __name__ == '__main__':
     unittest.main()
 
