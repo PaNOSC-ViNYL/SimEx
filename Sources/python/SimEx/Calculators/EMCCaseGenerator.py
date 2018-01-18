@@ -243,7 +243,7 @@ class EMCCaseGenerator(object):
         #We expect the detector to always be square of length 2*self.numPixToEdge+1
         (r,c) = f["params/geom/mask"].shape
         if (r == c and (r%2==1)):
-            self.numPixToEdge = (r-1)/2
+            self.numPixToEdge = (r-1)//2
         else:
             msg = "Your array has shape %d %d, Only odd-length square detectors allowed now. Quitting"%(r,c)
             _print_to_log(msg, log_file=self.runLog)
