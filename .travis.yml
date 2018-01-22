@@ -8,8 +8,8 @@ python:
 sudo: required
 dist: trusty
 
-#matrix:
-#allow_failures:
+matrix:
+allow_failures:
     - python: "3.6"
     - python: "3.7"
     - python: "nightly"
