@@ -1,22 +1,22 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
+    #- "2.7"
+    #- "3.4"
   - "3.5"
-  - "3.6"
-  - "3.7"
-  - "nightly"
+    #- "3.6"
+    #- "3.7"
+    #- "nightly"
 
 sudo: required
 dist: trusty
 
-matrix:
-allow_failures:
-      - python: "2.7" # Can't build llvmlite for numba
-      - python: "3.4" # Can't build llvmlite for numba
-      - python: "3.6" # Can't build llvmlite for numba
-      - python: "3.7" # Can't build llvmlite for numba
-      - python: "nightly" # Can't build llvmlite for numba
+#matrix:
+#allow_failures:
+    #- python: "2.7"
+    #- python: "3.4"
+    #- python: "3.6"
+    #- python: "3.7"
+    #- python: "nightly"
 
 env:
   global:
