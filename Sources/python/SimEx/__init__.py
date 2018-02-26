@@ -30,41 +30,41 @@ PhysicalQuantity = ureg.Quantity
 
 from .version import __version__
 
-from .Analysis.DiffractionAnalysis import DiffractionAnalysis
-from .Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis
+#from .Analysis.DiffractionAnalysis import DiffractionAnalysis
+#from .Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis
 
-from .AbstractBaseClass import AbstractBaseClass
-from .Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from .Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
-from .Calculators.DMPhasing import DMPhasing
-from .Calculators.EMCCaseGenerator import EMCCaseGenerator
-from .Calculators.EMCOrientation import EMCOrientation
-from .Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
-from .Calculators.GenesisPhotonSource import GenesisPhotonSource
-from .Calculators.IdealPhotonDetector import IdealPhotonDetector
-from .Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
-from .Calculators.S2EReconstruction import S2EReconstruction
-from .Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
-from .Calculators.XFELPhotonPropagator import XFELPhotonPropagator
-from .Calculators.XFELPhotonSource import XFELPhotonSource
-from .Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
+#from .AbstractBaseClass import AbstractBaseClass
+#from .Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
+#from .Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
+#from .Calculators.DMPhasing import DMPhasing
+#from .Calculators.EMCCaseGenerator import EMCCaseGenerator
+#from .Calculators.EMCOrientation import EMCOrientation
+#from .Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
+#from .Calculators.GenesisPhotonSource import GenesisPhotonSource
+#from .Calculators.IdealPhotonDetector import IdealPhotonDetector
+#from .Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
+#from .Calculators.S2EReconstruction import S2EReconstruction
+#from .Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
+#from .Calculators.XFELPhotonPropagator import XFELPhotonPropagator
+#from .Calculators.XFELPhotonSource import XFELPhotonSource
+#from .Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 
-from .Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from .Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
-from .Parameters.DMPhasingParameters import DMPhasingParameters
-from .Parameters.DetectorGeometry import DetectorGeometry
-from .Parameters.DetectorGeometry import DetectorPanel
-from .Parameters.EMCOrientationParameters import EMCOrientationParameters
-from .Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
-from .Parameters.PhotonBeamParameters import PhotonBeamParameters
-from .Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
-from .Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
-from .Parameters.WavePropagatorParameters import WavePropagatorParameters
-from .PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
-from .PhotonExperimentSimulation.EstherExperiment import EstherExperiment
+#from .Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+#from .Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
+#from .Parameters.DMPhasingParameters import DMPhasingParameters
+#from .Parameters.DetectorGeometry import DetectorGeometry
+#from .Parameters.DetectorGeometry import DetectorPanel
+#from .Parameters.EMCOrientationParameters import EMCOrientationParameters
+#from .Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
+#from .Parameters.PhotonBeamParameters import PhotonBeamParameters
+#from .Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
+#from .Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
+#from .Parameters.WavePropagatorParameters import WavePropagatorParameters
+#from .PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
+#from .PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 
-from . import Utilities
-from .Utilities.Units import *
+#from . import Utilities
+#from .Utilities.Units import *
 
 
 #from AbstractBaseClass import AbstractBaseClass

@@ -23,7 +23,7 @@
 from abc import ABCMeta, abstractmethod
 
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger, checkAndSetInstance
-from SimEx import AbstractBaseClass
+from SimEx.AbstractBaseClass import AbstractBaseClass
 
 class AbstractCalculatorParameters(AbstractBaseClass, metaclass=ABCMeta):
     """

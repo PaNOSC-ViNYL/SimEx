@@ -60,6 +60,7 @@ def convertTxtToOPMD(esther_dirname=None):
     temp_array = numpy.loadtxt(str(esther_dirname)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
     vel_array = numpy.loadtxt(str(esther_dirname)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
     pos_array = numpy.loadtxt(str(esther_dirname)+"/position_externe_relative.txt",skiprows=3,unpack=True)
+    ionization_array = numpy.loadtxt(str(esther_dirname)+"/taux_ionisation.txt",skiprows=3,unpack=True)
 
     # Slice out the timestamps.
     time_array = rho_array[0]
@@ -90,6 +91,7 @@ def convertTxtToOPMD(esther_dirname=None):
             meshes.create_dataset('temp', data=temp_array[1:,it])
             meshes.create_dataset('vel',  data=vel_array[1:,it])
             meshes.create_dataset('pos',  data=pos_array[1:,it])
+            meshes.create_dataset('Z',  data=ionization_array[1:,it])
 
             # Assign documentation.
             meshes['rho'].attrs["info"] = "Mass density (mass per unit volume) stored on a 1D Lagrangian grid (zones)."
@@ -97,6 +99,7 @@ def convertTxtToOPMD(esther_dirname=None):
             meshes['temp'].attrs["info"] = "Temperature stored on a 1D Lagrangian grid (zones)."
             meshes['vel'].attrs["info"] = "Average velocity stored on a 1D Lagrangian grid (zones)."
             meshes['pos'].attrs["info"] = "External position stored on a 1D Lagrangian grid (zones)."
+            meshes['Z'].attrs["info"] = "Degree of ionization on a 1D Lagrangian grid (zones)."
 
             # Assign SI units
             #                L      M     t     I     T     N     Lum
@@ -110,6 +113,8 @@ def convertTxtToOPMD(esther_dirname=None):
                 numpy.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m s^-1
             meshes['pos'].attrs["unitDimension"] = \
                 numpy.array([ 1.0,  0.0, 0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m
+            meshes['Z'].attrs["unitDimension"] = \
+                numpy.array([ 0.0,  0.0, 0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # 1
 
             # Write common attributes.
             axis_label = [b"Zones"]

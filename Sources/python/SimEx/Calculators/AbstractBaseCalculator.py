@@ -20,12 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
+from abc import ABCMeta, abstractmethod
 
-from SimEx import AbstractBaseClass
+from SimEx.AbstractBaseClass import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-from abc import ABCMeta, abstractmethod
 import dill
 import os
 import sys

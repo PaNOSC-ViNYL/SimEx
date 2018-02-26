@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-from SimEx import AbstractBaseClass
+from SimEx.AbstractBaseClass import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber, checkAndSetPhysicalQuantity
 from SimEx.Utilities.Units import meter, electronvolt

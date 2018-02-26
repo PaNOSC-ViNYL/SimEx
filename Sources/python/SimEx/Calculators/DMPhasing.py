@@ -29,7 +29,7 @@ import shutil
 import subprocess
 import tempfile
 
-from .AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
+from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
