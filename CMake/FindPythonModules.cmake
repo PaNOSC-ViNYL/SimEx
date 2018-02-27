@@ -1,5 +1,5 @@
 function(find_python_module module)
-    set (PYTHON_EXECUTABLE python3.4)
+    set (PYTHON_EXECUTABLE python)
     execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
 	"import ${module};"
 	RESULT_VARIABLE _${module}_status
