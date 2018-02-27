@@ -130,8 +130,8 @@ class S2EReconstructionTest(unittest.TestCase):
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 
-        #self.__files_to_remove.append('orient_out.h5')
-        #self.__files_to_remove.append('recon_out.h5')
+        self.__files_to_remove.append('orient_out.h5')
+        self.__files_to_remove.append('recon_out.h5')
 
         emc_parameters = {'initial_number_of_quaternions' : 1,
                           'max_number_of_quaternions'     : 2,
