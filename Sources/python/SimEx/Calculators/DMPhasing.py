@@ -29,7 +29,7 @@ import shutil
 import subprocess
 import tempfile
 
-from .AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
+from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
@@ -144,7 +144,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
             intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
             output_file          = os.path.join(out_dir, "phase_out.h5")
 
-            #Read intensity and translate into ASCII *.dat format
+            # Read intensity and translate into ASCII *.dat format
             (qmax, t_intens, intens_len, qPos, qPos_full) = _load_intensities(input_intensity_file)
             input_intens = t_intens
             input_intens.tofile(intensity_tmp, sep=" ")

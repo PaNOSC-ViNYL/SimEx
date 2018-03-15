@@ -66,5 +66,3 @@ from .PhotonExperimentSimulation.EstherExperiment import EstherExperiment
 from . import Utilities
 from .Utilities.Units import *
 
-
-#from AbstractBaseClass import AbstractBaseClass
