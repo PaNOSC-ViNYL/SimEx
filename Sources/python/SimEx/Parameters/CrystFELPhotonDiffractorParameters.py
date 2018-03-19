@@ -117,7 +117,7 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
-        self._AbstractCalculatorParameters__cpus_per_task_default = 1
+        self._AbstractCalculatorParameters__cpus_per_task_default = "MAX"
 
     ### Setters and queries.
     @property

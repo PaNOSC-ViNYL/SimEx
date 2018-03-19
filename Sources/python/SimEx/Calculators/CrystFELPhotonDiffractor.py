@@ -22,7 +22,7 @@
 
 import h5py
 import numpy
-import os
+import os, sys
 import subprocess,shlex
 import tempfile
 
@@ -33,6 +33,7 @@ from SimEx.Parameters.DetectorGeometry import _detectorGeometryFromString
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.Units import electronvolt, meter
+from SimEx.Utilities import IOUtilities
 
 class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
@@ -104,9 +105,16 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
     def computeNTasks(self):
+        """ Calculate the number of MPI tasks as function of available resources and
+        assigned cpus per task."""
+
+
         resources=ParallelUtilities.getParallelResourceInfo()
         ncores=resources['NCores']
         nnodes=resources['NNodes']
+
+        if nnodes > 1:
+            raise RuntimeError( "Backengine does not support MPI parallelism. " )
 
         if self.parameters.cpus_per_task=="MAX":
             np=nnodes
@@ -118,20 +126,46 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
     def backengine(self):
         """ This method drives the backengine CrystFEL.pattern_sim."""
 
-        # Setup directory structure as needed.
-        if not os.path.isdir( self.output_path ):
-            os.makedirs( self.output_path )
-        output_file_base = os.path.join( self.output_path, "diffr_out")
-
-        if self.parameters.number_of_diffraction_patterns == 1:
-            output_file_base += "_0000001.h5"
-
         # collect MPI arguments
         if self.parameters.forced_mpi_command=="":
             np=self.computeNTasks()
             mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
         else:
             mpicommand=self.parameters.forced_mpi_command
+
+        # Dump to a temporary file.
+        fname = IOUtilities.getTmpFileName()
+        self.dumpToFile(fname)
+
+        mpicommand += " ".join([" ",sys.executable, __file__, fname])
+        args = shlex.split(mpicommand)
+
+
+        if 'SIMEX_VERBOSE' in os.environ and os.environ['SIMEX_VERBOSE'] == 'MPI':
+            print("MPI command: "+mpicommand)
+
+        #try:
+        proc = subprocess.Popen(args,universal_newlines=True)
+        proc.wait()
+        #except:
+            #raise
+        #finally:
+        os.remove(fname)
+
+        return proc.returncode
+
+
+    def _run(self):
+        """ Perform the actual calls to pattern_sim. """
+
+        # Setup directory structure as needed.
+        if not os.path.isdir( self.output_path ):
+            os.makedirs( self.output_path )
+
+        output_file_base = os.path.join( self.output_path, "diffr_out")
+
+        if self.parameters.number_of_diffraction_patterns == 1:
+            output_file_base += "_0000001.h5"
 
         # Serialize geometry if necessary.
         if isinstance(self.parameters.detector_geometry, str) and os.path.isfile(self.parameters.detector_geometry):
@@ -145,13 +179,14 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         self.parameters.detector_geometry.serialize(stream=geom_filename, caller=self.parameters)
 
         # Setup command, minimum set first.
+        # Distribute patterns over available processes in round-robin.
         command_sequence = ['pattern_sim',
                             '-p%s'                  % self.parameters.sample,
                             '--geometry=%s'         % geom_filename,
-                            '--output=%s'           % output_file_base,
-                            '--number=%d'           % self.parameters.number_of_diffraction_patterns,
+                            '--output=%s'           % (output_file_base),
+                            '--number=%d'           % (self.parameters.number_of_diffraction_patterns)
                             ]
-        # Handle random rotation is requested.
+        # Handle random rotation as requested.
         if self.parameters.uniform_rotation is True:
             command_sequence.append('--random-orientation')
             command_sequence.append('--really-random')
@@ -181,19 +216,14 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_max.m_as(1e-9*meter) ))
 
 
-        # put MPI and program arguments together
-        args = shlex.split(mpicommand) + command_sequence
-        command = " ".join(args)
-
         if 'SIMEX_VERBOSE' in os.environ:
-            print(("CrystFELPhotonDiffractor backengine command: "+command))
+            print("Pattern_sim call: "+ " ".join(command_sequence))
 
         # Run the backengine command.
-        proc = subprocess.Popen(args)
+        proc = subprocess.Popen(command_sequence)
         proc.wait()
 
-        # Return the return code from the backengine.
-        return proc.returncode
+        return 0
 
     @property
     def data(self):
@@ -209,12 +239,13 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         """
         Method to save the output to a file. Creates links to h5 files that all contain only one pattern.
         """
-
         # Path where individual h5 files are located.
         path_to_files = self.output_path
 
         # Rename files.
         _rename_files(path_to_files)
+
+        print("Linking all patterns into %s.h5." % (self.output_path))
 
         # Setup new file.
         with h5py.File( self.output_path + ".h5" , "w") as h5_outfile:
@@ -293,3 +324,7 @@ def _rename_files(path):
         os.rename(f, new_filename)
 
     os.chdir( old_wd )
+
+
+if __name__ == '__main__':
+    CrystFELPhotonDiffractor.runFromCLI()
