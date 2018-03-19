@@ -51,7 +51,7 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
 )
 
 ### PYTHON
-FIND_PACKAGE(PythonInterp 3.4 REQUIRED)
+FIND_PACKAGE(PythonInterp 3.5 REQUIRED)
 
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
