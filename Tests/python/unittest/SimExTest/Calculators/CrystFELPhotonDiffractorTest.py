@@ -155,7 +155,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
 
-    def testBackengineMultiplePatterns(self):
+    def notestBackengineMultiplePatterns(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
         # Ensure cleanup.
@@ -183,12 +183,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
-    def notestBackengine(self):
+    def testBackengine(self):
         """ Check a simple backengine calculation. """
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("diffr.h5")
         self.__files_to_remove.append("5udc.pdb")
 
         # Clean up to make sure no old files mess things up.
@@ -230,13 +229,12 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check return code.
         self.assertEqual(status, 0)
 
-        output_path = "%s" % diffractor.output_path
         # Check output dir was created.
+        output_path = "%s" % diffractor.output_path
         self.assertTrue(os.path.isdir(output_path))
 
         # Check pattern was written.
-        diffractor.saveH5()
-        self.assertIn("diffr_out_0000001.h5" , os.listdir(output_path))
+        self.assertIn("diffr_out-1.h5" , os.listdir(output_path))
 
     def notestBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
