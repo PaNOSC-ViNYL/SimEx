@@ -37,7 +37,7 @@ is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["T
 def suite():
     suites = [
                #AbstractCalculatorsTests.suite(),
-               CalculatorsTests.suite(),
+               #CalculatorsTests.suite(),
                UtilitiesTests.suite(),
                #ParametersTests.suite(),
              ]
