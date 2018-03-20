@@ -183,7 +183,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
-    def testBackengine(self):
+    def testMultiplePatternsNoMPI(self):
         """ Check a simple backengine calculation. """
 
         # Ensure cleanup.
