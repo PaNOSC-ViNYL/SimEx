@@ -1,5 +1,6 @@
 language: python
 python:
+  - "3.4"
   - "3.5"
   - "3.6"
   - "nightly"
@@ -9,14 +10,15 @@ dist: trusty
 
 matrix:
     allow_failures:
+        - python: "3.5"
         - python: "3.6"
         - python: "nightly"
 
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
-    - DEPLOY_DOCS_FOR_PYTHON: '3.5'
-    - TRIGGER_DOCKER_FOR_PYTHON: '3.5'
+    - DEPLOY_DOCS_FOR_PYTHON: '3.4'
+    - TRIGGER_DOCKER_FOR_PYTHON: '3.4'
     - SIMEX_VERBOSE=MPI:PYTHON
 
 addons:
