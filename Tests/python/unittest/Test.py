@@ -38,7 +38,7 @@ def suite():
     suites = [
                #AbstractCalculatorsTests.suite(),
                CalculatorsTests.suite(),
-               #UtilitiesTests.suite(),
+               UtilitiesTests.suite(),
                #ParametersTests.suite(),
              ]
 
