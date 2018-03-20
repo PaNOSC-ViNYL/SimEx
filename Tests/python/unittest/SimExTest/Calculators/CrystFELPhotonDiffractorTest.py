@@ -221,8 +221,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                     )
                 )
 
-    def notestBackengine(self):
-        # Get calculator.
         print("Setting up calculator parameters.")
         parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
                         beam_parameters=beam_parameters,
@@ -230,6 +228,8 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                         number_of_diffraction_patterns=10)
 
 
+    def notestBackengine(self):
+        # Get calculator.
         print("Setting up calculator .")
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
