@@ -229,7 +229,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         proc = subprocess.Popen(command_sequence)
         proc.wait()
 
-        return 0
+        return proc.returncode()
 
     @property
     def data(self):
