@@ -134,6 +134,7 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             raise ValueError( "A sample must be defined.")
         if val.split(".")[-1] == "pdb":
             print("Checking presence of %s. Will query from PDB if not found in $PWD." % (val))
+            import sys; sys.stdout.flush()
             self.__sample = IOUtilities.checkAndGetPDB(val)
 
     @property

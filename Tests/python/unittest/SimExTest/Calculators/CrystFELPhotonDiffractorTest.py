@@ -21,14 +21,13 @@
 ##########################################################################
 
 import h5py
-import os
+import os, sys
 import shutil
 import unittest
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.CrystFELPhotonDiffractor import CrystFELPhotonDiffractor
-from SimEx.Calculators.CrystFELPhotonDiffractor import _rename_files
 from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
@@ -222,6 +221,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 )
 
         print("Setting up calculator parameters.")
+        sys.stdout.flush()
         parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
