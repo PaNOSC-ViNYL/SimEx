@@ -206,7 +206,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertIsInstance(beam_parameters, PhotonBeamParameters)
 
-    def notestBackengine(self):
         print("Setting up geometry parameters.")
         geometry = DetectorGeometry(
                 panels=DetectorPanel(
@@ -229,6 +228,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                         number_of_diffraction_patterns=10)
 
 
+    def notestBackengine(self):
         # Get calculator.
         print("Setting up calculator .")
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
