@@ -188,13 +188,13 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertTrue(True)
 
-    def notestBackengine(self):
         # Ensure cleanup.
         print("Cleanup.")
         self.__dirs_to_remove.append("diffr")
         print("Cleanup.")
         self.__files_to_remove.append("5udc.pdb")
 
+    def notestBackengine(self):
         print("Setting up beam parameters.")
         # Setup parameters.
         beam_parameters = PhotonBeamParameters(
