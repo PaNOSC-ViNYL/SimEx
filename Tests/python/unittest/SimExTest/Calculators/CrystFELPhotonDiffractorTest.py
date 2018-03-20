@@ -155,7 +155,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
 
-    def notestBackengineMultiplePatterns(self):
+    def testBackengineMultiplePatterns(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
         # Ensure cleanup.
@@ -238,7 +238,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor.saveH5()
         self.assertIn("diffr_out_0000001.h5" , os.listdir(output_path))
 
-    def testBackengineGPU(self):
+    def notestBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
 
         # Ensure cleanup.
