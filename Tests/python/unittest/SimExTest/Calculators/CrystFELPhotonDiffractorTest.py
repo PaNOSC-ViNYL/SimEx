@@ -224,17 +224,23 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
         # Run backengine
+        print("Starting backengine.")
         status = diffractor.backengine()
+        print("Returned from backengine.")
 
         # Check return code.
+        print("Status = %s" % (status))
         self.assertEqual(status, 0)
 
         # Check output dir was created.
         output_path = "%s" % diffractor.output_path
+        print("Output_path = %s" % (output_path))
         self.assertTrue(os.path.isdir(output_path))
 
         # Check pattern was written.
+        print("Checking output_path content.")
         self.assertIn("diffr_out-1.h5" , os.listdir(output_path))
+        print("ALL DONE.")
 
     def notestBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
