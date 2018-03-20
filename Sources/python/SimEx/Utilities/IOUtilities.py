@@ -65,16 +65,14 @@ def checkAndGetPDB( path ):
         if pdb_target_dir == '':
             pdb_target_dir = '.'
 
-        try:
-            print("PDB file %s could not be found. Attempting to query from protein database server." % (path))
-            urllib.request.urlcleanup()
-            download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
-        except:
-            raise
-
-        finally:
-            urllib.request.urlcleanup()
-
+        #try:
+        print("PDB file %s could not be found. Attempting to query from protein database server." % (path))
+        urllib.request.urlcleanup()
+        download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
+        #except:
+            #raise
+        #finally:
+        urllib.request.urlcleanup()
 
         # Move and rename the downloaded file.
         shutil.move( download_target, path  )
