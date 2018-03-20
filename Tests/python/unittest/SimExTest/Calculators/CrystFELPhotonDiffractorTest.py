@@ -187,12 +187,13 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Check a simple backengine calculation. """
 
         # Ensure cleanup.
+        print("Cleanup.")
         self.__dirs_to_remove.append("diffr")
+        print("Cleanup.")
         self.__files_to_remove.append("5udc.pdb")
 
-        # Clean up to make sure no old files mess things up.
-        self.tearDown()
-
+        print("Setting up beam parameters.")
+        # Setup parameters.
         beam_parameters = PhotonBeamParameters(
             photon_energy=4.96e3*electronvolt,
             photon_energy_relative_bandwidth=0.01,
@@ -201,6 +202,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
             pulse_energy=1e-3*joule,
             photon_energy_spectrum_type='tophat')
 
+        print("Setting up geometry parameters.")
         geometry = DetectorGeometry(
                 panels=DetectorPanel(
                     ranges={"fast_scan_min" : 0,
@@ -214,6 +216,8 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                     saturation_adu=1e4,
                     )
                 )
+
+        print("Setting up calculator parameters.")
         parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
@@ -221,6 +225,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
 
         # Get calculator.
+        print("Setting up calculator .")
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
         # Run backengine
