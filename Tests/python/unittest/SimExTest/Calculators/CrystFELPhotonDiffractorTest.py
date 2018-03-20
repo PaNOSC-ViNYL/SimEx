@@ -194,7 +194,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         print("Cleanup.")
         self.__files_to_remove.append("5udc.pdb")
 
-    def notestBackengine(self):
         print("Setting up beam parameters.")
         # Setup parameters.
         beam_parameters = PhotonBeamParameters(
@@ -205,6 +204,9 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
             pulse_energy=1e-3*joule,
             photon_energy_spectrum_type='tophat')
 
+        self.assertIsInstance(beam_parameters, PhotonBeamParameters)
+
+    def notestBackengine(self):
         print("Setting up geometry parameters.")
         geometry = DetectorGeometry(
                 panels=DetectorPanel(
