@@ -126,6 +126,9 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
     def backengine(self):
         """ This method drives the backengine CrystFEL.pattern_sim."""
 
+        # pattern_sim backengine does not support MPI.
+        return self._run()
+
         # collect MPI arguments
         if self.parameters.forced_mpi_command=="":
             np=self.computeNTasks()
@@ -144,13 +147,13 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         if 'SIMEX_VERBOSE' in os.environ and os.environ['SIMEX_VERBOSE'] == 'MPI':
             print("MPI command: "+mpicommand)
 
-        #try:
-        proc = subprocess.Popen(args,universal_newlines=True)
-        proc.wait()
-        #except:
-            #raise
-        #finally:
-        os.remove(fname)
+        try:
+            proc = subprocess.Popen(args,universal_newlines=True)
+            proc.wait()
+        except:
+            raise
+        finally:
+            os.remove(fname)
 
         return proc.returncode
 
@@ -215,6 +218,12 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.crystal_size_max is not None:
             command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_max.m_as(1e-9*meter) ))
 
+        # Handle gpu acceleration.
+        if self.parameters.use_gpu:
+            command_sequence.append('--gpu')
+
+            # Always use first device
+            command_sequence.append('--gpu-dev=0')
 
         if 'SIMEX_VERBOSE' in os.environ:
             print("Pattern_sim call: "+ " ".join(command_sequence))

@@ -36,10 +36,10 @@ is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["T
 # Define the test suite.
 def suite():
     suites = [
-               AbstractCalculatorsTests.suite(),
+               #AbstractCalculatorsTests.suite(),
                CalculatorsTests.suite(),
-               UtilitiesTests.suite(),
-               ParametersTests.suite(),
+               #UtilitiesTests.suite(),
+               #ParametersTests.suite(),
              ]
 
     # Append if NOT on CI server.

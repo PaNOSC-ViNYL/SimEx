@@ -46,6 +46,7 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 suppress_fringes=None,
                 beam_parameters=None,
                 detector_geometry=None,
+                use_gpu=None,
                 **kwargs
                 ):
         """
@@ -87,10 +88,11 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param detector_geometry: Path of the beam geometry file.
         :type detector_geometry: str
 
+        :param use_gpu: Flag controlling whether to use GPU acceleration (with openCL) (default False).
+        :type use_gpu: bool
+
         :param kwargs: Key-value pairs to pass to the parent class.
         """
-
-
 
         # Check all parameters.
         self.sample = sample
@@ -105,6 +107,7 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.beam_parameters = beam_parameters
         self.detector_geometry = detector_geometry
         self.number_of_diffraction_patterns = number_of_diffraction_patterns
+        self.use_gpu = use_gpu
 
         # Handle single size case:
         if self.crystal_size_min is None or self.crystal_size_max is None:
@@ -197,14 +200,14 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'suppress_fringes' parameter to val."""
         self.__suppress_fringes = checkAndSetInstance( bool, val, False)
 
-    #@property
-    #def xxx(self):
-        #""" Query the 'xxx' parameter. """
-        #return self.__xxx
-    #@xxx.setter
-    #def xxx(self, val):
-        #""" Set the 'xxx' parameter to val."""
-        #self.__xxx = checkAndSetInstance( ttt, val, default)
+    @property
+    def use_gpu(self):
+        """ Query the 'use_gpu' parameter. """
+        return self.__use_gpu
+    @use_gpu.setter
+    def use_gpu(self, val):
+        """ Set the 'use_gpu' parameter to val."""
+        self.__use_gpu = checkAndSetInstance( bool, val, False)
 
     @property
     def uniform_rotation(self):

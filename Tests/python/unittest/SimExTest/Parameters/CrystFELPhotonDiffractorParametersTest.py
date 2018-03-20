@@ -250,6 +250,24 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         self.assertNotEqual( parameters.crystal_size_min, parameters.crystal_size_max )
 
+    def testUseGPU(self):
+        """ Check the use_gpu parameter handling."""
+
+        # Check default.
+        parameters = CrystFELPhotonDiffractorParameters(sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+        powder=True,
+        number_of_diffraction_patterns=10,
+        number_of_background_photons=100,
+        poissonize=True,
+        suppress_fringes=True,
+        crystal_size_min=10.0e-9*meter,
+        uniform_rotation=False,
+        )
+        self.assertFalse(parameters.use_gpu)
+
+        # Switch to True and check new value.
+        parameters.use_gpu = True
+        self.assertTrue(parameters.use_gpu)
 
 
 if __name__ == '__main__':
