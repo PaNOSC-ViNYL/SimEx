@@ -184,12 +184,15 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
     def testBackengine(self):
-        """ Check we a simple backengine calculation. """
+        """ Check a simple backengine calculation. """
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
         self.__files_to_remove.append("diffr.h5")
         self.__files_to_remove.append("5udc.pdb")
+
+        # Clean up to make sure no old files mess things up.
+        self.tearDown()
 
         beam_parameters = PhotonBeamParameters(
             photon_energy=4.96e3*electronvolt,
@@ -310,7 +313,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check metafile was created.
         self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
 
-    def notestRenameFiles(self):
+    def testRenameFiles(self):
 
         _rename_files( "diffr" )
 
@@ -318,8 +321,8 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Check beam parameter logic if they are set as parameters. """
 
         # Ensure cleanup.
-        self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
+        #self.__dirs_to_remove.append("diffr")
+        #self.__files_to_remove.append("5udc.pdb")
 
         # Setup beam parameters.
         beam_parameters = PhotonBeamParameters(
