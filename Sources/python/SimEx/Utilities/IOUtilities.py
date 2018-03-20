@@ -67,6 +67,9 @@ def checkAndGetPDB( path ):
 
         try:
             print("PDB file %s could not be found. Attempting to query from protein database server." % (path))
+            print("pdb_target_name=%s" % (pdb_target_name))
+            print("pdb_target_dir=%s" % (pdb_target_dir))
+            import sys; sys.stdout.flush()
             download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
         except:
             raise
