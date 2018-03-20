@@ -222,9 +222,6 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.use_gpu:
             command_sequence.append('--gpu')
 
-            # Always use first device
-            command_sequence.append('--gpu-dev=0')
-
         if 'SIMEX_VERBOSE' in os.environ:
             print("Pattern_sim call: "+ " ".join(command_sequence))
 
