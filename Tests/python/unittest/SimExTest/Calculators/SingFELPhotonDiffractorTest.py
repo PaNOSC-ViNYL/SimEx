@@ -174,9 +174,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Testing the construction with sample passed via parameters."""
 
         # Ensure proper cleanup.
-        sample_file = '5udc.pdb'
+        sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
         self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
-        self.__files_to_remove.append( sample_file )
 
         # Set up parameters.
         parameters=SingFELPhotonDiffractorParameters(
@@ -419,9 +418,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Test that we can start a test calculation if the sample was given via the parameters . """
 
         # Cleanup.
-        sample_file = '2nip.pdb'
+        sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
         self.__dirs_to_remove.append('diffr')
-        self.__files_to_remove.append( sample_file )
 
         # Make sure sample file does not exist.
         if sample_file in os.listdir( os.getcwd() ):

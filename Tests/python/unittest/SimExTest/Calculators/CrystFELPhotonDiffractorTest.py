@@ -56,6 +56,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Setting up a test. """
         self.__files_to_remove = []
         self.__dirs_to_remove = []
+        self.__sample = TestUtilities.generateTestFilePath("2nip.pdb")
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -66,11 +67,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def testShapedConstruction(self):
+    def notestShapedConstruction(self):
         """ Testing the construction of the class with parameters. """
 
         # Setup parameters.
-        parameters=CrystFELPhotonDiffractorParameters(sample="5udc.pdb")
+        parameters=CrystFELPhotonDiffractorParameters(sample=self.__sample)
 
         # Construct the object.
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None)
@@ -79,12 +80,12 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
         self.assertIsInstance(diffractor, AbstractPhotonDiffractor)
 
-    def testConstructionWithPropInput(self):
+    def notestConstructionWithPropInput(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
 
         parameters = CrystFELPhotonDiffractorParameters(
-                sample="5udc.pdb",
+                sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 beam_parameters=None,
                 number_of_diffraction_patterns=1,
@@ -102,14 +103,13 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check that beam parameters have been updated from prop output.
         self.assertAlmostEqual( diffractor.parameters.beam_parameters.photon_energy.m_as(electronvolt) , 4972.8402471221643, 5 )
 
-    def testBackengineWithPropInput(self):
+    def notestBackengineWithPropInput(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         parameters = CrystFELPhotonDiffractorParameters(
-                sample="5udc.pdb",
+                sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 beam_parameters=None,
                 number_of_diffraction_patterns=1,
@@ -127,15 +127,14 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check that beam parameters have been updated from prop output.
         diffractor.backengine()
 
-    def testBackengineSinglePattern(self):
+    def notestBackengineSinglePattern(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 number_of_diffraction_patterns=1)
 
@@ -154,15 +153,14 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
 
-    def testBackengineMultiplePatterns(self):
+    def notestBackengineMultiplePatterns(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 number_of_diffraction_patterns=2)
 
@@ -182,18 +180,12 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
-    def testDummy(self):
-        """ Check a simple backengine. """
-
-        self.assertTrue(True)
+    def notestBackengine(self):
+        # Get calculator.
 
         # Ensure cleanup.
-        print("Cleanup.")
         self.__dirs_to_remove.append("diffr")
-        print("Cleanup.")
-        self.__files_to_remove.append("5udc.pdb")
 
-        print("Setting up beam parameters.")
         # Setup parameters.
         beam_parameters = PhotonBeamParameters(
             photon_energy=4.96e3*electronvolt,
@@ -205,7 +197,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertIsInstance(beam_parameters, PhotonBeamParameters)
 
-        print("Setting up geometry parameters.")
         geometry = DetectorGeometry(
                 panels=DetectorPanel(
                     ranges={"fast_scan_min" : 0,
@@ -220,37 +211,27 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                     )
                 )
 
-        print("Setting up calculator parameters.")
         sys.stdout.flush()
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
                         number_of_diffraction_patterns=10)
 
 
-    def testBackengine(self):
-        # Get calculator.
-        print("Setting up calculator .")
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
         # Run backengine
-        print("Starting backengine.")
         status = diffractor.backengine()
-        print("Returned from backengine.")
 
         # Check return code.
-        print("Status = %s" % (status))
         self.assertEqual(status, 0)
 
         # Check output dir was created.
         output_path = "%s" % diffractor.output_path
-        print("Output_path = %s" % (output_path))
         self.assertTrue(os.path.isdir(output_path))
 
         # Check pattern was written.
-        print("Checking output_path content.")
         self.assertIn("diffr_out-1.h5" , os.listdir(output_path))
-        print("ALL DONE.")
 
     def testBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
@@ -258,7 +239,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
         self.__files_to_remove.append("diffr.h5")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Clean up to make sure no old files mess things up.
         self.tearDown()
@@ -286,7 +266,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                     )
                 )
 
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
                         number_of_diffraction_patterns=10,
@@ -310,12 +290,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor.saveH5()
         self.assertIn("diffr_out_0000001.h5" , os.listdir(output_path))
 
-    def testSaveH5(self):
+    def notestSaveH5(self):
         """ Check that saveh5() creates correct filenames. """
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
         self.__files_to_remove.append("diffr.h5")
 
         # Setup beam parameters.
@@ -341,7 +320,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 )
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2)
@@ -384,12 +363,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check metafile was created.
         self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
 
-    def testBackengineWithBeamParametersObject(self):
+    def notestBackengineWithBeamParametersObject(self):
         """ Check beam parameter logic if they are set as parameters. """
 
         # Ensure cleanup.
-        #self.__dirs_to_remove.append("diffr")
-        #self.__files_to_remove.append("5udc.pdb")
+        self.__dirs_to_remove.append("diffr")
 
         # Setup beam parameters.
         beam_parameters = PhotonBeamParameters(
@@ -402,7 +380,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 )
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,
@@ -417,12 +395,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check return code.
         self.assertEqual(status, 0)
 
-    def testBackengineWithBeamAndGeometry(self):
+    def notestBackengineWithBeamAndGeometry(self):
         """ Check geom parameter logic if they are set as parameters. """
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Setup beam parameters.
         beam_parameters = PhotonBeamParameters(
@@ -447,7 +424,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                                                         )
                                     )
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,

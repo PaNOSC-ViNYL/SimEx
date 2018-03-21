@@ -16,7 +16,7 @@ find_python_module(breathe REQUIRED)
 find_python_module(sqlalchemy REQUIRED)
 find_python_module(pyfftw REQUIRED)
 find_python_module(pyFAI REQUIRED)
-find_python_module(PyQt5 REQUIRED)
+#find_python_module(PyQt5 REQUIRED)
 find_python_module(numba REQUIRED)
 find_python_module(pint REQUIRED)
 

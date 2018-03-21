@@ -50,6 +50,8 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.__files_to_remove = []
         self.__dirs_to_remove = []
 
+        self.__sample = TestUtilities.generateTestFilePath('2nip.pdb')
+
     def tearDown(self):
         """ Tearing down a test. """
         for f in self.__files_to_remove:
@@ -63,7 +65,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         """ Testing the default construction. """
 
         # Attempt to construct an instance of the class.
-        parameters = CrystFELPhotonDiffractorParameters( sample=TestUtilities.generateTestFilePath("2nip.pdb")
+        parameters = CrystFELPhotonDiffractorParameters( sample=self.__sample
                 )
 
         # Check instance and inheritance.
@@ -71,7 +73,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance( parameters, AbstractCalculatorParameters )
 
         # Check all parameters are set to default values.
-        self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
+        self.assertEqual( parameters.sample, self.__sample )
         self.assertTrue( parameters.uniform_rotation )
         self.assertEqual( parameters.beam_parameters, None )
         self.assertEqual( parameters.detector_geometry, None )
@@ -99,7 +101,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         parameters = CrystFELPhotonDiffractorParameters(
-                sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+                sample=self.__sample,
                 powder=True,
                 number_of_diffraction_patterns=10,
                 number_of_background_photons=100,
@@ -149,7 +151,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
                       )
         # Attempt to construct an instance of the class.
         parameters = CrystFELPhotonDiffractorParameters(
-                sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+                sample=self.__sample,
                 powder=True,
                 number_of_diffraction_patterns=10,
                 number_of_background_photons=100,
@@ -183,10 +185,9 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.__files_to_remove.append("5udc.pdb")
 
         # Construct with defaults.
-        parameters = CrystFELPhotonDiffractorParameters(TestUtilities.generateTestFilePath("2nip.pdb"))
+        parameters = CrystFELPhotonDiffractorParameters(self.__sample)
 
         # Set some members to non-defaults.
-        parameters.sample="5udc.pdb"
         parameters.powder=True
         parameters.number_of_diffraction_patterns=10
         parameters.number_of_background_photons=100
@@ -197,7 +198,6 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         parameters.uniform_rotation=False
 
         # Check all parameters are set as intended.
-        self.assertEqual( parameters.sample, "5udc.pdb")
         self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 10 )
         self.assertTrue( parameters.powder )
@@ -210,7 +210,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
     def testCrystalSizes(self):
         """ Test the various ways to set the crystal size range. """
         # Construct with only minimum size.
-        parameters = CrystFELPhotonDiffractorParameters(sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
         powder=True,
         number_of_diffraction_patterns=10,
         number_of_background_photons=100,
@@ -223,7 +223,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual( parameters.crystal_size_min, parameters.crystal_size_max )
 
         # Construct with only max size.
-        parameters = CrystFELPhotonDiffractorParameters(sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
         powder=True,
         number_of_diffraction_patterns=10,
         number_of_background_photons=100,
@@ -237,7 +237,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Construct with both sizes set.
         parameters = CrystFELPhotonDiffractorParameters(
-                sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+                sample=self.__sample,
                 powder=True,
                 number_of_diffraction_patterns=10,
                 number_of_background_photons=100,
@@ -254,7 +254,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         """ Check the use_gpu parameter handling."""
 
         # Check default.
-        parameters = CrystFELPhotonDiffractorParameters(sample=TestUtilities.generateTestFilePath("2nip.pdb"),
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
         powder=True,
         number_of_diffraction_patterns=10,
         number_of_background_photons=100,

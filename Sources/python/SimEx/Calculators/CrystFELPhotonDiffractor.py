@@ -220,7 +220,13 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Handle gpu acceleration.
         if self.parameters.use_gpu:
-            command_sequence.append('--gpu')
+            # Check if crystfel was built with opencv support.
+            # Get pattern_sim's path.
+            pattern_sim_path = subprocess.check_output(shlex.split("which pattern_sim"))[:-1].decode('utf-8')
+            # Get list of dynamic dependencies.
+            ldd = subprocess.check_output(shlex.split("ldd "+pattern_sim_path)).decode('utf-8')
+            if "libOpenCL.so.1" in ldd:
+                command_sequence.append('--gpu')
 
         if 'SIMEX_VERBOSE' in os.environ:
             print("Pattern_sim call: "+ " ".join(command_sequence))

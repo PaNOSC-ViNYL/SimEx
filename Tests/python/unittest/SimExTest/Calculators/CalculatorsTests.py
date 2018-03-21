@@ -22,6 +22,8 @@
 import os
 import unittest
 
+from TestUtilities.TestUtilities import runs_on_travisCI
+
 # Import classes to test.
 from .CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
 from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
@@ -37,9 +39,6 @@ from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
 
-
-is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["TRAVIS_BUILD_DIR"] != "")
-
 # Setup the suite.
 def suite():
     suites = [
@@ -53,7 +52,7 @@ def suite():
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
              ]
 
-    if not is_travisCI:
+    if not runs_on_travisCI():
         suites.append(unittest.makeSuite(GenesisPhotonSourceTest,           'test'))
         suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
