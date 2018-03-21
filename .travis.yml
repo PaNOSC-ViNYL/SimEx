@@ -9,7 +9,6 @@ dist: trusty
 
 matrix:
     allow_failures:
-        - python: "3.6"
         - python: "nightly"
 
 env:
