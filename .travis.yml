@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.4"
   - "3.5"
   - "3.6"
   - "nightly"
@@ -10,6 +9,7 @@ dist: trusty
 
 matrix:
     allow_failures:
+        - python: "3.6"
         - python: "nightly"
 
 env:
