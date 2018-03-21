@@ -182,18 +182,13 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
-    def testDummy(self):
-        """ Check a simple backengine. """
-
-        self.assertTrue(True)
+    def testBackengine(self):
+        # Get calculator.
 
         # Ensure cleanup.
-        print("Cleanup.")
         self.__dirs_to_remove.append("diffr")
-        print("Cleanup.")
         self.__files_to_remove.append("5udc.pdb")
 
-        print("Setting up beam parameters.")
         # Setup parameters.
         beam_parameters = PhotonBeamParameters(
             photon_energy=4.96e3*electronvolt,
@@ -205,7 +200,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertIsInstance(beam_parameters, PhotonBeamParameters)
 
-        print("Setting up geometry parameters.")
         geometry = DetectorGeometry(
                 panels=DetectorPanel(
                     ranges={"fast_scan_min" : 0,
@@ -220,7 +214,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                     )
                 )
 
-        print("Setting up calculator parameters.")
         sys.stdout.flush()
         parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
                         beam_parameters=beam_parameters,
@@ -228,29 +221,20 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                         number_of_diffraction_patterns=10)
 
 
-    def testBackengine(self):
-        # Get calculator.
-        print("Setting up calculator .")
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
 
         # Run backengine
-        print("Starting backengine.")
         status = diffractor.backengine()
-        print("Returned from backengine.")
 
         # Check return code.
-        print("Status = %s" % (status))
         self.assertEqual(status, 0)
 
         # Check output dir was created.
         output_path = "%s" % diffractor.output_path
-        print("Output_path = %s" % (output_path))
         self.assertTrue(os.path.isdir(output_path))
 
         # Check pattern was written.
-        print("Checking output_path content.")
         self.assertIn("diffr_out-1.h5" , os.listdir(output_path))
-        print("ALL DONE.")
 
     def testBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
