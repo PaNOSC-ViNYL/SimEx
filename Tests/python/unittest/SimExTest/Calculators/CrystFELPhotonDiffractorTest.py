@@ -107,7 +107,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         parameters = CrystFELPhotonDiffractorParameters(
                 sample=self.__sample,
@@ -133,7 +132,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
@@ -160,7 +158,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
@@ -188,7 +185,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Setup parameters.
         beam_parameters = PhotonBeamParameters(
@@ -243,7 +239,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
         self.__files_to_remove.append("diffr.h5")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Clean up to make sure no old files mess things up.
         self.tearDown()
@@ -300,7 +295,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
         self.__files_to_remove.append("diffr.h5")
 
         # Setup beam parameters.
@@ -373,8 +367,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Check beam parameter logic if they are set as parameters. """
 
         # Ensure cleanup.
-        #self.__dirs_to_remove.append("diffr")
-        #self.__files_to_remove.append("5udc.pdb")
+        self.__dirs_to_remove.append("diffr")
 
         # Setup beam parameters.
         beam_parameters = PhotonBeamParameters(
@@ -407,7 +400,6 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
-        self.__files_to_remove.append("5udc.pdb")
 
         # Setup beam parameters.
         beam_parameters = PhotonBeamParameters(
