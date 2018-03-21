@@ -56,6 +56,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Setting up a test. """
         self.__files_to_remove = []
         self.__dirs_to_remove = []
+        self.__sample = TestUtilities.generateTestFilePath("2nip.pdb")
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -70,7 +71,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         """ Testing the construction of the class with parameters. """
 
         # Setup parameters.
-        parameters=CrystFELPhotonDiffractorParameters(sample="5udc.pdb")
+        parameters=CrystFELPhotonDiffractorParameters(sample=self.__sample)
 
         # Construct the object.
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None)
@@ -84,7 +85,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
 
         parameters = CrystFELPhotonDiffractorParameters(
-                sample="5udc.pdb",
+                sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 beam_parameters=None,
                 number_of_diffraction_patterns=1,
@@ -109,7 +110,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.__files_to_remove.append("5udc.pdb")
 
         parameters = CrystFELPhotonDiffractorParameters(
-                sample="5udc.pdb",
+                sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 beam_parameters=None,
                 number_of_diffraction_patterns=1,
@@ -135,7 +136,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.__files_to_remove.append("5udc.pdb")
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 number_of_diffraction_patterns=1)
 
@@ -162,7 +163,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.__files_to_remove.append("5udc.pdb")
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 number_of_diffraction_patterns=2)
 
@@ -215,7 +216,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 )
 
         sys.stdout.flush()
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
                         number_of_diffraction_patterns=10)
@@ -270,7 +271,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                     )
                 )
 
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
                         number_of_diffraction_patterns=10,
@@ -325,7 +326,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 )
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2)
@@ -386,7 +387,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 )
 
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,
@@ -431,7 +432,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                                                         )
                                     )
         # Get parameters.
-        parameters = CrystFELPhotonDiffractorParameters(sample="5udc.pdb",
+        parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,
