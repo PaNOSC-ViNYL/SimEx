@@ -63,8 +63,7 @@ before_script:
   - mpirun --version
 
 script:
-  - wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/divided/pdb/ni/pdb2nip.ent.gz
-    #- bash $TRAVIS_BUILD_DIR/TravisCI/build_and_test_simex.sh && bash $TRAVIS_BUILD_DIR/TravisCI/deploy_docs.sh
-
+    #- wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/divided/pdb/ni/pdb2nip.ent.gz
+  - bash $TRAVIS_BUILD_DIR/TravisCI/build_and_test_simex.sh && bash $TRAVIS_BUILD_DIR/TravisCI/deploy_docs.sh
 after_success:
-    #- bash $TRAVIS_BUILD_DIR/TravisCI/trigger_docker.sh
+  - bash $TRAVIS_BUILD_DIR/TravisCI/trigger_docker.sh
