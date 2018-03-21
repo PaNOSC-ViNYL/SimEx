@@ -44,13 +44,13 @@ is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["T
 def suite():
     suites = [
              unittest.makeSuite(CrystFELPhotonDiffractorTest,               'test'),
-             #unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
-             #unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
-             #unittest.makeSuite(S2EReconstructionTest,                      'test'),
-             #unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
-             #unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
-             #unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
-             #unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
+             unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
+             unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
+             unittest.makeSuite(S2EReconstructionTest,                      'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
+             unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
+             unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
+             unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
              ]
 
     if not is_travisCI:
