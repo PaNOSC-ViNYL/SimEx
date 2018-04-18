@@ -82,7 +82,7 @@ class AbstractCalculatorParameters(AbstractBaseClass, metaclass=ABCMeta):
     def nodes_per_task(self, value):
         self.__nodes_per_task = _checkAndSetNodesPerTask(value)
 
-        @property
+    @property
     def cpus_per_task(self):
         """ Query for the number of cpus per task. """
         return self.__cpus_per_task
