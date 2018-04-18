@@ -47,6 +47,7 @@ class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
             fname = sys.argv[1]
             calculator=cls.dumpLoader(fname)
             status = calculator._run()
+            calculator.saveH5()
             sys.exit(status)
 
     @classmethod
