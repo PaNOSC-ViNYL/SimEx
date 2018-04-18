@@ -38,6 +38,8 @@ addons:
       - python3-sphinx
       - libgsl0-dev
       - llvm
+      - nvidia-cuda-dev
+      - nvidia-profiler
       - nvidia-cuda-toolkit
 
 cache:
