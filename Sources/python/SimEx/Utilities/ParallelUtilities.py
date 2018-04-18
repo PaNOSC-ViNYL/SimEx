@@ -79,6 +79,8 @@ def _getParallelResourceInfoFromMpirun():
         process = subprocess.Popen([mpicmd, "hostname"], stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
+        # Decode
+        output = output.decode('utf-8')
 
         if process.returncode !=0:
             return None
@@ -121,6 +123,7 @@ def _getMPIVersionInfo():
         process = subprocess.Popen([mpi_cmd, "--version"], stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
+        output = output.decode('utf-8')
 
         version = {}
         if "(Open MPI)" in output:

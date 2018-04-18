@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -16,29 +16,24 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
-# Include needed directories in sys.path.                                #
 #                                                                        #
 ##########################################################################
 
-""" Utility to expose all modules under src/ in the unittest directories."""
+import unittest
 
-import os, sys
-import os.path
+# Import classes to test.
+from .DiffractionAnalysisTest import DiffractionAnalysisTest
+from .XFELPhotonAnalysisTest import XFELPhotonAnalysisTest
 
-file_path = os.path.abspath(os.path.dirname(__file__))
-separator = os.sep
-separated_file_path = file_path.split(separator)
-top_level_index = separated_file_path.index('python')
-top_level_path = os.path.abspath(separator.join(separated_file_path[:top_level_index+1]))
+# Setup the suite.
+def suite():
+    suites = [
+             unittest.makeSuite(DiffractionAnalysisTest, 'test'),
+             unittest.makeSuite(XFELPhotonAnalysisTest,  'test'),
+             ]
 
-paths_to_insert = ['src/',
-                   'unittest/',
-		   'lib/'
-                   ]
+    return unittest.TestSuite(suites)
 
-for p in paths_to_insert:
-    path = os.path.join(top_level_path, p)
-    if not path in sys.path:
-        sys.path.insert(1, path)
-
-del top_level_path, file_path, separated_file_path
+# If called as script, run the suite.
+if __name__=="__main__":
+    unittest.main(defaultTest="suite")

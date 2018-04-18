@@ -24,7 +24,7 @@ def create_project(name):
 		f.write(json.dumps(d,indent=4))
 		f.close()
 	except OSError:
-		print "Cannot create project, remove directory .simex"
+		print("Cannot create project, remove directory .simex")
 		return
 
 	update_main_file()

@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 import unittest
 
 from SimEx.Utilities.Units import meter

@@ -23,10 +23,10 @@
 import time,datetime,os
 
 def prGreen(prt,newline=True):
-	print ("\033[92m{}\033[00m" .format(prt))
+	print(("\033[92m{}\033[00m" .format(prt)))
 
 def prCyan(prt,newline=True):
-	print ("\033[96m{}\033[00m" .format(prt))
+	print(("\033[96m{}\033[00m" .format(prt)))
 
 start_time=time.time()
 prCyan("="*80)

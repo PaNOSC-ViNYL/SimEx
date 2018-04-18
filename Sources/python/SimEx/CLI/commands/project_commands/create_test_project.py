@@ -23,7 +23,7 @@
 import json
 import os
 
-import create_project
+from . import create_project
 
 
 def process_args(args):
@@ -31,15 +31,15 @@ def process_args(args):
 
 def prGreen(prt,newline=True):
 	if (newline):
-		print("\033[92m{}\033[00m" .format(prt))
+		print(("\033[92m{}\033[00m" .format(prt)))
 	else:
-		print("\033[92m{}\033[00m" .format(prt)),
+		print(("\033[92m{}\033[00m" .format(prt)), end=' ')
 
 def prCyan(prt,newline=True):
 	if (newline):
-		print("\033[96m{}\033[00m" .format(prt))
+		print(("\033[96m{}\033[00m" .format(prt)))
 	else:
-		print("\033[96m{}\033[00m" .format(prt)),
+		print(("\033[96m{}\033[00m" .format(prt)), end=' ')
 
 
 def runCommented(cmd,comment):

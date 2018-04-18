@@ -36,7 +36,7 @@ def _print_to_log(msg, log_file=None):
     fp.write("\n")
     fp.close()
 
-    print msg
+    print(msg)
     sys.stdout.flush()
 
 def _create_directory(dir_name, logging=True, log_file=None, err_msg=""):
@@ -44,13 +44,13 @@ def _create_directory(dir_name, logging=True, log_file=None, err_msg=""):
         if logging:
             _print_to_log(dir_name + " exists! " + err_msg, log_file=log_file)
         else:
-            print dir_name + " exists! "
+            print(dir_name + " exists! ")
     else:
         os.makedirs(dir_name)
         if logging:
             _print_to_log("Creating " + dir_name, log_file=log_file)
         else:
-            print "Creating " + dir_name
+            print("Creating " + dir_name)
 
 def load_intensities(ref_file):
 
@@ -75,7 +75,7 @@ def load_intensities(ref_file):
 
         else: # for data format version >= 0.2
             t_intens = []
-            tasks_in_file = fp.keys()
+            tasks_in_file = list(fp.keys())
             for task in tasks_in_file["data"]:
                 t_intens.append( (fp["data"][key]["data"].value()).astype("float") )
 
@@ -126,7 +126,7 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
     pos     = numpy.argwhere(numpy.abs(auto-thr_0) > numpy.abs(auto-thr_1))
     pos_set = set()
     pos_list= []
-    kerl    = range(-kl,kl+1)
+    kerl    = list(range(-kl,kl+1))
     ker     = [[i,j,k] for i in kerl for j in kerl for k in kerl]
 
     def trun(v):
@@ -243,7 +243,7 @@ class EMCCaseGenerator(object):
         #We expect the detector to always be square of length 2*self.numPixToEdge+1
         (r,c) = f["params/geom/mask"].shape
         if (r == c and (r%2==1)):
-            self.numPixToEdge = (r-1)/2
+            self.numPixToEdge = (r-1)//2
         else:
             msg = "Your array has shape %d %d, Only odd-length square detectors allowed now. Quitting"%(r,c)
             _print_to_log(msg, log_file=self.runLog)
@@ -344,7 +344,7 @@ class EMCCaseGenerator(object):
                     f.close()
                     count +=1
                 else:
-                    tasks = f["data"].keys()
+                    tasks = list(f["data"].keys())
                     for task in tasks:
                         meanPhoton += numpy.mean((f["data"][task]["data"].value).flatten())
                         totPhoton += numpy.sum((f["data"][task]["data"].value).flatten())
@@ -355,7 +355,7 @@ class EMCCaseGenerator(object):
             meanPhoton /= 1.*count
             totPhoton /= 1.*count
 
-            print "Found %f mean and %f total photons on average." % (meanPhoton, totPhoton)
+            print("Found %f mean and %f total photons on average." % (meanPhoton, totPhoton))
 
             # Start stepping through diffraction images and writing them to sparse format
             msg = "Average intensities: %lf"%(totPhoton)
@@ -402,7 +402,7 @@ class EMCCaseGenerator(object):
                     f.close()
 
                 else:
-                    tasks = f["data"].keys()
+                    tasks = list(f["data"].keys())
                     for task in tasks:
                         v = f["data"][task]["data"].value
 #                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
@@ -485,7 +485,7 @@ class EMCCaseGenerator(object):
         # (or total number of images, whichever is smaller)
         # Open dense file.
         h5_dense = h5py.File( dense_file, 'r')
-        number_of_patterns = len(h5_dense.keys()) - 3
+        number_of_patterns = len(list(h5_dense.keys())) - 3
         numFilesToAvgForMeanCount = min([200, number_of_patterns])
         meanPhoton = 0.
         totPhoton = 0.
@@ -493,7 +493,7 @@ class EMCCaseGenerator(object):
         # Open dense file.
         h5_dense = h5py.File( dense_file, 'r')
         excluded_keys = ["version", "params", "info"]
-        all_keys = h5_dense.keys()
+        all_keys = list(h5_dense.keys())
         relevant_keys = [k for k in all_keys if not k in excluded_keys]
         relevant_keys.sort()
         for fn in relevant_keys[:numFilesToAvgForMeanCount]:

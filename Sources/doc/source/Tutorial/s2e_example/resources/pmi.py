@@ -21,7 +21,7 @@ pmi_calculator._readH5()
 status = pmi_calculator.backengine()
 
 if status != 0:
-    print "PMI calculation failed, check output."
+    print("PMI calculation failed, check output.")
     sys.exit()
 
-print "PMI calculation succeeded."
+print("PMI calculation succeeded.")

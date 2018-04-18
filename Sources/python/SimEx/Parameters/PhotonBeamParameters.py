@@ -25,12 +25,13 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysica
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
 from scipy import constants
-from wpg import Wavefront, wpg_uti_wf
-from wpg.srwlib import srwl
 import math
 import numpy
 import os
 import sys
+from wpg import Wavefront, wpg_uti_wf
+from wpg.srwlib import srwl
+
 
 class PhotonBeamParameters(AbstractCalculatorParameters):
     """ Class representing photon beam parameters. """

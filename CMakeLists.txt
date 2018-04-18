@@ -50,11 +50,15 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
     -DPY_DETECTOR_INTERFACE_DEBUG=default: OFF | ON"
 )
 
+### PYTHON
+FIND_PACKAGE(PythonInterp 3.5 REQUIRED)
 
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (PYPATH     ${LIBDIR}/python2.7)
+set (PYPATH     ${LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+message( "PYPATH=${PYPATH}" )
+
 set (DOCDIR share/doc)
 
 option (PACKAGE_MAKE "Use this option to create linux packages" OFF)

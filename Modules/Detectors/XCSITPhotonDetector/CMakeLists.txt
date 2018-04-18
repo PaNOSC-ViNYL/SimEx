@@ -5,7 +5,8 @@ INCLUDE(ExternalProject)
 # Create a new target to with the external project
 ExternalProject_Add(
 	py_detector_interface
-	GIT_REPOSITORY https://github.com/JPBGoe/py_detector_interface.git
+	GIT_REPOSITORY https://github.com/eucall-software/py_detector_interface.git
+    GIT_TAG python3
 	TIMEOUT 10
 	CMAKE_ARGS
     "-DXERCESC_ROOT=${XERCESC_ROOT}"
@@ -39,7 +40,7 @@ install(DIRECTORY ${SOURCE_DIR}/include/py_detector_interface/
 
 # Copy the created shared object to the correct location
 install(DIRECTORY ${BINARY_DIR}/src/ DESTINATION
-${LIBDIR}/python2.7
+${PYPATH}
                                         USE_SOURCE_PERMISSIONS
                                         FILES_MATCHING
                                         PATTERN "*.so"

@@ -251,11 +251,11 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # If parameters already exist, read from parameters file
         if read_from_file is not None:
-            print ( "Parameters file is located here: %s" % (read_from_file))
+            print(( "Parameters file is located here: %s" % (read_from_file)))
             self._readParametersFromFile(read_from_file)
 
             # Update parameters from arguments.
-            for key,val in {
+            for key,val in list({
                     'number_of_layers':number_of_layers,
                     'ablator':ablator,
                     'ablator_thickness':ablator_thickness,
@@ -272,7 +272,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                     'laser_pulse_duration':laser_pulse_duration,
                     'laser_intensity':laser_intensity,
                     'run_time':run_time,
-                    'delta_time':delta_time}.items():
+                    'delta_time':delta_time}.items()):
                 if val is not None:
                     setattr(self, key, val)
         else:
@@ -314,7 +314,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     def _readParametersFromFile(self,path):
         # Read from parameters file
         json_path = os.path.join(path, 'parameters.json')
-        print ( "Parameters file is: %s" % (json_path))
+        print(( "Parameters file is: %s" % (json_path)))
         with open(json_path, 'r') as j:
             dictionary = json.load(j)
             j.close()
@@ -374,9 +374,9 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
         width_of_sample_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.sample]["mass_density"]
         self.__number_of_sample_zones=int(self.sample_thickness/width_of_sample_zone)
 
-        print ("Final feather zone width: ", self._final_feather_zone_width)
-        print ("Mass of zone: ", self._mass_of_zone)
-        print ("Number of non-feathered zones: ", self._non_feather_zones)
+        print(("Final feather zone width: ", self._final_feather_zone_width))
+        print(("Mass of zone: ", self._mass_of_zone))
+        print(("Number of non-feathered zones: ", self._non_feather_zones))
 
         if self.layer1 is not None:
             width_of_layer1_zone = self._mass_of_zone/ESTHER_MATERIAL_DICT[self.layer1]["mass_density"]
@@ -403,7 +403,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Write the input file
         input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'.txt')
-        print ("Writing input deck to ", input_deck_path, ".")
+        print(("Writing input deck to ", input_deck_path, "."))
 
         # Write json file of this parameter class instance.
         json_path = os.path.join( self._esther_files_path, 'parameters.json')
@@ -527,7 +527,7 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
 
         # Write the laser input file
         laser_input_deck_path = os.path.join( self._esther_files_path, self._esther_filename+'_intensite_impulsion.txt')
-        print ("Writing laser input deck to ", laser_input_deck_path, ".")
+        print(("Writing laser input deck to ", laser_input_deck_path, "."))
 
         # Write the parameters file (_intensitie_impulsion)
         with open(laser_input_deck_path, 'w') as laser_input_deck:
@@ -801,7 +801,7 @@ def checkAndSetAblatorThickness(ablator_thickness):
     # TO DO PLACEHOLDER
     # IF LASER INTENSITY IS TOO HIGH, ABLATOR MUST BE THICK TO ALLOW FOR ENOUGH MATERIAL TO VAPORISE (CH)
 
-    print ( "Ablator thickness is %4.1f " % ablator_thickness)
+    print(( "Ablator thickness is %4.1f " % ablator_thickness))
 
     return ablator_thickness
 
@@ -998,7 +998,7 @@ def checkAndSetLaserWavelength(laser_wavelength):
 
  # Convert to microns.
     laser_wavelength = laser_wavelength*1e-3
-    print ("Laser wavelength = %.3fe-6" % (laser_wavelength))
+    print(("Laser wavelength = %.3fe-6" % (laser_wavelength)))
 
     return laser_wavelength
 

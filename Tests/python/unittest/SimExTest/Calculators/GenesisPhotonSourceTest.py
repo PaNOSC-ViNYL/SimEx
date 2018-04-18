@@ -23,10 +23,7 @@
 # 3rd party imports
 from ocelot.adaptors import genesis
 from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
-import h5py
-import numpy
-import os, shutil
-import paths
+import os, shutil, sys
 import unittest
 
 # SimEx imports
@@ -48,7 +45,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
         """ Setting up the test class. """
         # Get pic test data.
         if "simData_8000.h5" in os.listdir("."):
-            cls.__simdata = testfile_path
+            cls.__simdata = 'simData_8000.h5'
         else:
             try:
                 cls.__simdata = wgetData(url = "https://docs.xfel.eu/alfresco/d/a/workspace/SpacesStore/4d00d480-34a5-462e-8459-5483a75445c5/simData_8000.h5")
@@ -59,7 +56,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
-        if os.isfile(cls.__simdata):
+        if os.path.isfile(cls.__simdata):
             os.remove(cls.__simdata)
 
 

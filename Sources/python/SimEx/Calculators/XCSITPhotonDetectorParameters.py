@@ -26,7 +26,7 @@ try:
     import libpy_detector_interface as lpdi
 
 except ImportError:
-    print "\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed or not being found. Expect errors.\n"
+    print("\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed or not being found. Expect errors.\n")
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -127,9 +127,9 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
                     not_valid_option = not_valid_option and False
         except:
             err = sys.exc_info()
-            print("Error type: " + str(err[0]))
-            print("Error value: " + str(err[1]))
-            print("Error traceback: " + str(err[2]))
+            print(("Error type: " + str(err[0])))
+            print(("Error value: " + str(err[1])))
+            print(("Error traceback: " + str(err[2])))
             not_valid_option = True
         if not_valid_option:
             raise ValueError("Unknown detector type: " + str(value))
@@ -162,9 +162,9 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
                     not_valid_option = not_valid_option and False
         except:
             err = sys.exc_info()
-            print("Error type: " + str(err[0]))
-            print("Error value: " + str(err[1]))
-            print("Error traceback: " + str(err[2]))
+            print(("Error type: " + str(err[0])))
+            print(("Error value: " + str(err[1])))
+            print(("Error traceback: " + str(err[2])))
             not_valid_option = True
         if not_valid_option:
            raise ValueError("Unknown plasma_search_flag: " + str(value))
@@ -195,9 +195,9 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
                     not_valid_option = not_valid_option and False
         except:
             err = sys.exc_info()
-            print("Error type: " + str(err[0]))
-            print("Error value: " + str(err[1]))
-            print("Error traceback: " + str(err[2]))
+            print(("Error type: " + str(err[0])))
+            print(("Error value: " + str(err[1])))
+            print(("Error traceback: " + str(err[2])))
             not_valid_option = True
         if not_valid_option:
             raise ValueError("Unknown plasma_simulation_flag: " + str(value))
@@ -231,9 +231,9 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
                     not_valid_option = not_valid_option and False
         except:
             err = sys.exc_info()
-            print("Error type: " + str(err[0]))
-            print("Error value: " + str(err[1]))
-            print("Error traceback: " + str(err[2]))
+            print(("Error type: " + str(err[0])))
+            print(("Error value: " + str(err[1])))
+            print(("Error traceback: " + str(err[2])))
             not_valid_option = True
         if not_valid_option:
             raise ValueError("Unknown point_simulation_method: " + str(value))

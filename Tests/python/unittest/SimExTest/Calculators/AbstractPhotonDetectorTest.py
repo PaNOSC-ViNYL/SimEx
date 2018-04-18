@@ -26,17 +26,12 @@
     @creation 20151006
 
 """
-import paths
-
 import os
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
-
-from TestUtilities import TestUtilities
 
 class TestPhotonDetector(AbstractPhotonDetector):
     """ Implements a dummy child of the AbstractPhotonDetector base class for testing purposes."""

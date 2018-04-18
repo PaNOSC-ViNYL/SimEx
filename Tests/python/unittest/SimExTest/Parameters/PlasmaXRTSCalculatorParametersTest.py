@@ -22,14 +22,10 @@
 
 import numpy
 import os
-import paths
 import shutil
-import subprocess
 import unittest
 
 # Include needed directories in sys.path.
-import paths
-
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 # Import the class to test.

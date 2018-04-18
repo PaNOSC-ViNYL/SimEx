@@ -1,7 +1,7 @@
 """ Test module for the SingFELPhotonDiffractor."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015,2016 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -26,9 +26,7 @@ import numpy
 import shutil
 
 # Include needed directories in sys.path.
-import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
@@ -70,6 +68,10 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     def tearDownClass(cls):
         """ Tearing down the test class. """
         del cls.input_h5
+        files_to_remove = ['tmp.beam', 'tmp.geom', 'template.in']
+        for f in files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
 
     def setUp(self):
         """ Setting up a test. """
@@ -172,9 +174,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Testing the construction with sample passed via parameters."""
 
         # Ensure proper cleanup.
-        sample_file = '5udc.pdb'
+        sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
         self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
-        self.__files_to_remove.append( sample_file )
 
         # Set up parameters.
         parameters=SingFELPhotonDiffractorParameters(
@@ -417,9 +418,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Test that we can start a test calculation if the sample was given via the parameters . """
 
         # Cleanup.
-        sample_file = '2nip.pdb'
+        sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
         self.__dirs_to_remove.append('diffr')
-        self.__files_to_remove.append( sample_file )
 
         # Make sure sample file does not exist.
         if sample_file in os.listdir( os.getcwd() ):
@@ -568,14 +568,14 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         h5_filehandle = h5py.File( photon_diffractor.output_path, 'r')
 
         # Count groups under /data.
-        number_of_patterns = len(h5_filehandle['data'].keys())
+        number_of_patterns = len(list(h5_filehandle['data'].keys()))
 
         self.assertEqual( number_of_patterns, 8 )
 
         # Assert global metadata is present.
-        self.assertIn("params", h5_filehandle.keys() )
-        self.assertIn("version", h5_filehandle.keys() )
-        self.assertIn("info", h5_filehandle.keys() )
+        self.assertIn("params", list(h5_filehandle.keys()) )
+        self.assertIn("version", list(h5_filehandle.keys()) )
+        self.assertIn("info", list(h5_filehandle.keys()) )
 
     def testNoRotation(self):
         """ Test that we can run singfel with no-rotation option."""
@@ -597,7 +597,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                 output_path='diffr_newstyle')
 
         # Cleanup.
-        self.__dirs_to_remove.append(photon_diffractor.output_path)
+        #self.__dirs_to_remove.append(photon_diffractor.output_path)
 
         # Run backengine and convert files.
         photon_diffractor.backengine()
@@ -606,7 +606,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Cleanup new style files.
         self.__files_to_remove.append(photon_diffractor.output_path)
 
-        pattern = h5py.File(photon_diffractor.output_path)['data/0000001/diffr'].value
+        with h5py.File(photon_diffractor.output_path) as handle:
+            pattern = handle['data/0000001/diffr'].value
 
         # 2nd run.
         photon_diffractor = SingFELPhotonDiffractor(
@@ -619,7 +620,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         photon_diffractor.backengine()
         photon_diffractor.saveH5()
 
-        new_pattern = h5py.File(photon_diffractor.output_path)['data/0000001/diffr'].value
+        with h5py.File(photon_diffractor.output_path) as handle:
+            new_pattern = handle['data/0000001/diffr'].value
 
         self.assertAlmostEqual(numpy.linalg.norm(pattern-new_pattern), 0.0, 10)
 

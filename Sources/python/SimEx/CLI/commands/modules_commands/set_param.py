@@ -1,5 +1,6 @@
 from SimEx.CLI.utilities import parse_modules,parse_classes,parse_settings,module_files
 import os
+from functools import reduce
 
 def process_args(args):
 	set_parameters(args.name,args.parameters)
@@ -29,14 +30,14 @@ def set_param(param,module):
 		setInDict(module.parameters,keys,value)
 		return True
 	except:
-		print ("Cannot set %s. Wrong parameter"%param)
+		print(("Cannot set %s. Wrong parameter"%param))
 		return False
 
 def set_parameters(name,params):
 	name=str(name[0])
 	enabledModules = parse_settings.get_modules()
 	if (name not in enabledModules):
-		print "Module %s not found"%name
+		print("Module %s not found"%name)
 		return
 
 	paramfile = name+'_params'

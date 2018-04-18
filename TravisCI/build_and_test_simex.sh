@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e # Exit with nonzero exit code if anything fails
 
-printenv
-
 # load git lfs files
 git lfs pull
 
@@ -23,7 +21,3 @@ python Test.py -v
 # Test doc.
 cd $VIRTUAL_ENV/Tests/doc
 python Test.py -v
-
-# functional tests
-#cd $VIRTUAL_ENV/Tests/python/functest/
-#python Test.py -v

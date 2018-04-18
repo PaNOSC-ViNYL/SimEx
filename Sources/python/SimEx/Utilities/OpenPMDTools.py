@@ -16,13 +16,8 @@
 #
 
 from dateutil.tz import tzlocal
-import collections
 import datetime
-import h5py
 import numpy
-import re
-import string
-import sys, getopt, os.path
 
 ext_list = {"ED-PIC": numpy.uint32(1),
             "HYDRO1D": numpy.uint32(2)}

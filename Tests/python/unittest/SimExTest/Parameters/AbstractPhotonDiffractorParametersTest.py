@@ -26,20 +26,15 @@
     @creation 20160721
 
 """
-import paths
 import os
-import numpy
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
-import paths
 import unittest
 
 from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.AbstractPhotonDiffractorParameters import AbstractPhotonDiffractorParameters
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 
 class AbstractPhotonDiffractorParametersTest(unittest.TestCase):

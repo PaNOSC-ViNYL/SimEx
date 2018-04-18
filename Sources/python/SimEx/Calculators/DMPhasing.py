@@ -29,7 +29,7 @@ import shutil
 import subprocess
 import tempfile
 
-from AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
+from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
@@ -144,7 +144,7 @@ class DMPhasing(AbstractPhotonAnalyzer):
             intensity_tmp = os.path.join(run_instance_dir, "object_intensity.dat")
             output_file          = os.path.join(out_dir, "phase_out.h5")
 
-            #Read intensity and translate into ASCII *.dat format
+            # Read intensity and translate into ASCII *.dat format
             (qmax, t_intens, intens_len, qPos, qPos_full) = _load_intensities(input_intensity_file)
             input_intens = t_intens
             input_intens.tofile(intensity_tmp, sep=" ")
@@ -283,7 +283,7 @@ def _support_from_autocorr(auto, qmax, thr_0, thr_1, supp_file, kl=1, write=True
     pos     = numpy.argwhere(numpy.abs(auto-thr_0) > numpy.abs(auto-thr_1))
     pos_set = set()
     pos_list= []
-    kerl    = range(-kl,kl+1)
+    kerl    = list(range(-kl,kl+1))
     ker     = [[i,j,k] for i in kerl for j in kerl for k in kerl]
 
     def trun(v):

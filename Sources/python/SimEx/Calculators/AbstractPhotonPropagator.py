@@ -26,13 +26,10 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class AbstractPhotonPropagator(AbstractBaseCalculator):
+class AbstractPhotonPropagator(AbstractBaseCalculator, metaclass=ABCMeta):
     """
     Class representing an abstract photon propagator, serving as API for actual photon propagation calculators.
     """
-
-    # Make this class an abstract base class.
-    __metaclass__  = ABCMeta
 
     # Abstract constructor.
     @abstractmethod

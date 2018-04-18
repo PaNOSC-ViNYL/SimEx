@@ -40,6 +40,6 @@ for p in paths_to_insert:
     if not path in sys.path:
         sys.path.insert(1, path)
 
-print sys.path[:3]
+print(sys.path[:3])
 
 del top_level_path, file_path, separated_file_path

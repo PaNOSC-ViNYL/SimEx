@@ -23,17 +23,13 @@
 import os
 import h5py
 import shutil
-import subprocess
 
 # Include needed directories in sys.path.
-import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector, XCSITPhotonDetectorParameters
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from TestUtilities import TestUtilities
 
 class XCSITPhotonDetectorTest(unittest.TestCase):
@@ -112,9 +108,9 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         # Check if we can read the output.
         with h5py.File( "detector_out.h5") as h5:
-            self.assertIn( "data", h5.keys() )
-            self.assertIn( "data", h5["data"].keys() )
-            self.assertIn( "photons", h5["data"].keys() )
+            self.assertIn( "data", list(h5.keys()) )
+            self.assertIn( "data", list(h5["data"].keys()) )
+            self.assertIn( "photons", list(h5["data"].keys()) )
 
 if __name__ == '__main__':
     unittest.main()

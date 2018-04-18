@@ -26,12 +26,10 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class AbstractPhotonDetector(AbstractBaseCalculator):
+class AbstractPhotonDetector(AbstractBaseCalculator, metaclass=ABCMeta):
     """
     Class representing an abstract photon detector, serving as API for actual photon detector simulation calculators.
     """
-
-    __metaclass__  = ABCMeta
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """

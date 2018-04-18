@@ -23,13 +23,12 @@
 from abc import ABCMeta, abstractmethod
 
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger, checkAndSetInstance
-from SimEx import AbstractBaseClass
+from SimEx.AbstractBaseClass import AbstractBaseClass
 
-class AbstractCalculatorParameters(AbstractBaseClass):
+class AbstractCalculatorParameters(AbstractBaseClass, metaclass=ABCMeta):
     """
     Abstract class for all calculator parameters.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def __init__(self, **kwargs):
@@ -43,12 +42,12 @@ class AbstractCalculatorParameters(AbstractBaseClass):
         self._setDefaults() # Calls the specialized method!
 
         # Check and set parameters.
-        if 'cpus_per_task' in kwargs.keys():
+        if 'cpus_per_task' in list(kwargs.keys()):
             self.cpus_per_task = kwargs['cpus_per_task']
         else:
             self.cpus_per_task = self.__cpus_per_task_default
 
-        if 'forced_mpi_command' in kwargs.keys():
+        if 'forced_mpi_command' in list(kwargs.keys()):
             self.forced_mpi_command = kwargs['forced_mpi_command']
         else:
             self.forced_mpi_command = None # Will set default "".

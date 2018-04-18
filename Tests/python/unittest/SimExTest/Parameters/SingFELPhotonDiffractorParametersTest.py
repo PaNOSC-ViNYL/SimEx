@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 import os
 import shutil
 
@@ -32,6 +31,8 @@ from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiff
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule
+
+from TestUtilities.TestUtilities import generateTestFilePath
 
 
 class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
@@ -148,7 +149,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         parameters = SingFELPhotonDiffractorParameters(
-                sample='5udc.pdb',
+                sample=generateTestFilePath('2nip.pdb'),
                 detector_geometry=self.detector_geometry,
                 beam_parameters=self.beam
                 )
@@ -158,7 +159,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.sample, '5udc.pdb')
+        self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
         self.assertEqual(parameters.uniform_rotation, None)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)

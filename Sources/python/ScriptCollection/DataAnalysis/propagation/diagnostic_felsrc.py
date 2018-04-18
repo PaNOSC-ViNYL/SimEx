@@ -12,7 +12,7 @@ def show_diagnostics(FELsource_out_number):
       FELsource_out_file = FELsource_out_number
 
       if not os.path.exists(FELsource_out_file):
-            print 'Input file {} not found.'.format(FELsource_out_file)
+            print('Input file {} not found.'.format(FELsource_out_file))
             return
 
       wf = Wavefront()

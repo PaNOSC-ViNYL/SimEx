@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import argparse
-from commands import modules,project,run
+from .commands import modules,project,run
 
 parser = argparse.ArgumentParser(prog='simex')
 

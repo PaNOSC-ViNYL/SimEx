@@ -30,7 +30,7 @@ EXTENSIONS = {"ED-PIC": np.uint32(1),
 def help():
     """ Print usage information for this file """
     print('This is the openPMD file check for HDF5 files.\n')
-    print('Check for format version: %s\n' % openPMD)
+    print(('Check for format version: %s\n' % openPMD))
     print('Usage:\n  checkOpenPMD_h5.py -i <fileName> [-v] [--EDPIC] [--HYDRO1D]')
     sys.exit()
 
@@ -57,7 +57,7 @@ def parse_cmd(argv):
         elif opt in ("-i", "--file"):
             file_name = arg
     if not os.path.isfile(file_name):
-        print("File '%s' not found!" % file_name)
+        print(("File '%s' not found!" % file_name))
         help()
 
     return(file_name, verbose, force_extension_pic, force_extension_hydro1d)
@@ -98,21 +98,21 @@ def get_extensions(f, v):
     bool states whether it is enabled or not
     """
     valid, extensionIDs = get_attr(f, "openPMDextension")
-    result = {ext: False for ext in EXTENSIONS.keys()}
+    result = {ext: False for ext in list(EXTENSIONS.keys())}
     if valid:
         enabledExtMask = 0
-        for extension, bitmask in EXTENSIONS.items():
+        for extension, bitmask in list(EXTENSIONS.items()):
             # This uses a bitmask to identify activated extensions
             if (bitmask & extensionIDs) == bitmask:
                 result[extension] = True
                 enabledExtMask |= bitmask
                 if v:
-                    print("Info: Found extension '%s'." % extension)
+                    print(("Info: Found extension '%s'." % extension))
         # Mask out the extension bits we have already detected so only
         # unknown ones are left
         excessIDs = extensionIDs & ~enabledExtMask
         if excessIDs:
-            print("Warning: Unknown extension Mask left: %s" % excessIDs)
+            print(("Warning: Unknown extension Mask left: %s" % excessIDs))
     return result
 
 
@@ -141,12 +141,12 @@ def test_record(g, r):
         if not is_scalar_record(g[r]) :
             for component_name in g[r]:
                 if not regEx.match(component_name):
-                    print("Error: Component %s of record %s is NOT" \
-                    " named properly (a-Z0-9_)!" %(component_name, g[r].name) )
+                    print(("Error: Component %s of record %s is NOT" \
+                    " named properly (a-Z0-9_)!" %(component_name, g[r].name) ))
                     result_array += np.array([1,0])
     else:
-        print("Error: Record %s is NOT named properly (a-Z0-9_)!" \
-              %(r.name) )
+        print(("Error: Record %s is NOT named properly (a-Z0-9_)!" \
+              %(r.name) ))
         result_array = np.array([1,0])
 
     return(result_array)
@@ -181,21 +181,21 @@ def test_key(f, v, request, name):
     valid = (name in list(f.keys()))
     if valid:
         if v:
-            print("Key %s (%s) exists in `%s`!" %(name, request, str(f.name) ) )
+            print(("Key %s (%s) exists in `%s`!" %(name, request, str(f.name) ) ))
         result_array = np.array([0,0])
     else:
         if request == "required":
-            print("Error: Key %s (%s) does NOT exist in `%s`!" \
-            %(name, request, str(f.name)) )
+            print(("Error: Key %s (%s) does NOT exist in `%s`!" \
+            %(name, request, str(f.name)) ))
             result_array = np.array([1, 0])
         elif request == "recommended":
-            print("Warning: Key %s (%s) does NOT exist in `%s`!" \
-            %(name, request, str(f.name)) )
+            print(("Warning: Key %s (%s) does NOT exist in `%s`!" \
+            %(name, request, str(f.name)) ))
             result_array = np.array([0, 1])
         elif request == "optional":
             if v:
-                print("Info: Key %s (%s) does NOT exist in `%s`!"  \
-            %(name, request, str(f.name)) )
+                print(("Info: Key %s (%s) does NOT exist in `%s`!"  \
+            %(name, request, str(f.name)) ))
             result_array = np.array([0, 0])
         else :
             raise ValueError("Unrecognized string for `request` : %s" %request)
@@ -241,18 +241,18 @@ def test_attr(f, v, request, name, is_type=None, type_format=None):
     valid, value = get_attr(f, name)
     if valid:
         if v:
-            print("Attribute %s (%s) exists in `%s`! Type = %s, Value = %s" \
-            %(name, request, str(f.name), type(value), str(value)) )
+            print(("Attribute %s (%s) exists in `%s`! Type = %s, Value = %s" \
+            %(name, request, str(f.name), type(value), str(value)) ))
 
         # test type
         if is_type is not None:
             if not type_format is None and not is_type is np.string_ and \
                not isinstance(type_format, collections.Iterable):
                 type_format = [type_format]
-                type_format_names = map(lambda x: x.__name__, type_format)
+                type_format_names = [x.__name__ for x in type_format]
             if not is_type is None and not isinstance(is_type, collections.Iterable):
                 is_type = [is_type]
-            is_type_names = map(lambda x: x.__name__, is_type)
+            is_type_names = [x.__name__ for x in is_type]
             # add for each type in is_type -> wrong, need to add this at the comparison level!
             if type(value) in is_type:
                 # np.string_ format or general ndarray dtype text
@@ -261,9 +261,9 @@ def test_attr(f, v, request, name, is_type=None, type_format=None):
                     if regEx.match(value.decode()) :
                         result_array = np.array([0,0])
                     else:
-                        print("Error: Attribute %s in `%s` does not satisfy " \
+                        print(("Error: Attribute %s in `%s` does not satisfy " \
                               "format ('%s' should be in format '%s')!" \
-                              %(name, str(f.name), value.decode(), type_format ) )
+                              %(name, str(f.name), value.decode(), type_format ) ))
                         result_array = np.array([1,0])
                 # ndarray dtypes
                 elif type(value) is np.ndarray:
@@ -272,34 +272,34 @@ def test_attr(f, v, request, name, is_type=None, type_format=None):
                     elif type_format is None:
                         result_array = np.array([0,0])
                     else:
-                        print("Error: Attribute %s in `%s` is not of type " \
+                        print(("Error: Attribute %s in `%s` is not of type " \
                               "ndarray of '%s' (is ndarray of '%s')!" \
                               %(name, str(f.name), type_format_names, \
-                              value.dtype.type.__name__) )
+                              value.dtype.type.__name__) ))
                         result_array = np.array([1,0])
                 else:
                     result_array = np.array([0,0])
             else:
-                print(
+                print((
                  "Error: Attribute %s in `%s` is not of type '%s' (is '%s')!" \
                  %(name, str(f.name), str(is_type_names), \
-                  type(value).__name__) )
+                  type(value).__name__) ))
                 result_array = np.array([1,0])
         else: # is_type is None (== arbitrary)
             result_array = np.array([0,0])
     else:
         if request == "required":
-            print("Error: Attribute %s (%s) does NOT exist in `%s`!" \
-            %(name, request, str(f.name)) )
+            print(("Error: Attribute %s (%s) does NOT exist in `%s`!" \
+            %(name, request, str(f.name)) ))
             result_array = np.array([1, 0])
         elif request == "recommended":
-            print("Warning: Attribute %s (%s) does NOT exist in `%s`!" \
-            %(name, request, str(f.name)) )
+            print(("Warning: Attribute %s (%s) does NOT exist in `%s`!" \
+            %(name, request, str(f.name)) ))
             result_array = np.array([0, 1])
         elif request == "optional":
             if v:
-                print("Info: Attribute %s (%s) does NOT exist in `%s`!"  \
-            %(name, request, str(f.name)) )
+                print(("Info: Attribute %s (%s) does NOT exist in `%s`!"  \
+            %(name, request, str(f.name)) ))
             result_array = np.array([0, 0])
         else :
             raise ValueError("Unrecognized string for `request` : %s" %request)
@@ -465,7 +465,7 @@ def check_iterations(f, v, extensionStates) :
               "actual integer.")
         return(np.array([1, 0]))
     else :
-        print("Found %d iteration(s)" % len(list_iterations) )
+        print(("Found %d iteration(s)" % len(list_iterations) ))
 
     # Initialize the result array
     # First element : number of errors
@@ -570,8 +570,8 @@ def check_meshes(f, iteration, v, extensionStates):
             list_meshes = list(f[full_meshes_path].keys())
         except KeyError:
             list_meshes = []
-    print( "Iteration %s : found %d meshes"
-        %( iteration, len(list_meshes) ) )
+    print(( "Iteration %s : found %d meshes"
+        %( iteration, len(list_meshes) ) ))
 
     # Check for the attributes of the STANDARD.md
     for field_name in list_meshes :
@@ -723,8 +723,8 @@ def check_particles(f, iteration, v, extensionStates) :
             list_species = list(f[full_particle_path].keys())
         except KeyError:
             list_species = []
-    print( "Iteration %s : found %d particle species"
-        %( iteration, len(list_species) ) )
+    print(( "Iteration %s : found %d particle species"
+        %( iteration, len(list_species) ) ))
 
     # Go through all the particle species
     for species_name in list_species :
@@ -740,15 +740,15 @@ def check_particles(f, iteration, v, extensionStates) :
         # Check the position offset record of the particles
         result_array += test_key(species, v, "required", "positionOffset")
         if result_array[0] == 0 :
-            position_dimensions = len(species["position"].keys())
-            positionOffset_dimensions = len(species["positionOffset"].keys())
+            position_dimensions = len(list(species["position"].keys()))
+            positionOffset_dimensions = len(list(species["positionOffset"].keys()))
             if position_dimensions != positionOffset_dimensions :
-                print("Error: `position` (ndim=%s) and `positionOffset` " \
+                print(("Error: `position` (ndim=%s) and `positionOffset` " \
                       "(ndim=%s) do not have the same dimensions in " \
                       "species `%s`!" \
                       %(str(position_dimensions), \
                         str(positionOffset_dimensions),
-                        species.name) )
+                        species.name) ))
                 result_array += np.array([ 1, 0])
 
         # Check the particlePatches record of the particles
@@ -852,8 +852,8 @@ if __name__ == "__main__":
     result_array += check_iterations(f, verbose, extensionStates)
 
     # results
-    print("Result: %d Errors and %d Warnings."
-          %( result_array[0], result_array[1]))
+    print(("Result: %d Errors and %d Warnings."
+          %( result_array[0], result_array[1])))
 
     # return code: non-zero is Unix-style for errors occurred
     sys.exit(int(result_array[0]))

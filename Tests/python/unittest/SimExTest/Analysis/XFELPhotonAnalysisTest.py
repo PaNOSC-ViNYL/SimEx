@@ -30,11 +30,9 @@ RENDER_PLOT=False # Set to True to show plots.
 import h5py
 import numpy
 import os, shutil
-import paths
 import unittest
 import wpg
 
-from TestUtilities import TestUtilities
 
 
 if 'RENDER_PLOT' in os.environ:
@@ -43,6 +41,8 @@ if 'RENDER_PLOT' in os.environ:
 # Import the class to test.
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt
 from SimEx.Analysis.XFELPhotonAnalysis import XFELPhotonAnalysis
+
+from TestUtilities import TestUtilities
 
 class XFELPhotonAnalysisTest(unittest.TestCase):
     """

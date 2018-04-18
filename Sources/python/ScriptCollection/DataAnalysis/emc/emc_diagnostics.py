@@ -89,7 +89,7 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
     pos     = numpy.argwhere(numpy.abs(auto-thr_0) > numpy.abs(auto-thr_1))
     pos_set = set()
     pos_list= []
-    kerl    = range(-kl,kl+1)
+    kerl    = list(range(-kl,kl+1))
     ker     = [[i,j,k] for i in kerl for j in kerl for k in kerl]
 
     def trun(v):
@@ -133,7 +133,7 @@ def do_analysis(args):
     cwd         = os.getcwd()
     curr_dir    = dirs[0]
     curr_file   = glob.glob(os.path.join(curr_dir, args.tmp_fn))[0]
-    print "Will read default parameters from reconstruction in " + curr_file
+    print("Will read default parameters from reconstruction in " + curr_file)
 
     (qmax, t_intens, intens_len, qPos, qPos_full) = load_reference_intensites(curr_file)
     quats       = load_quaternions(os.path.join(curr_dir, "quaternion.dat"))
@@ -162,7 +162,7 @@ def do_analysis(args):
             rotateIntens.interp_intensities(c_intens.ravel(), out_intens.ravel(), qPos_full.ravel(), ml_quat, intens_len)
             t1          = time.time()
             intens_stack[dir_ct] = out_intens.copy()
-            print "Done orienting intensity %d of %d. Took %lf s."%(dir_ct, num_dirs, t1-t0)
+            print("Done orienting intensity %d of %d. Took %lf s."%(dir_ct, num_dirs, t1-t0))
 
     # Save stack.
     h5 = h5py.File("3d_stack.h5", "w")
@@ -175,24 +175,24 @@ def do_analysis(args):
         for dir in dirs:
             os.chdir(dir)
             tmp_file = glob.glob(args.tmp_fn)[0]
-            print tmp_file
-            print "="*80
-            print "Making images for %s "%dir + "."*20
+            print(tmp_file)
+            print("="*80)
+            print("Making images for %s "%dir + "."*20)
             try:
                 viewRecon.make_panel_of_intensity_slices(tmp_file, c_n=16)
             except:
-                print "Making of intensity slices failed!"
+                print("Making of intensity slices failed!")
             viewRecon.make_error_time_plot(tmp_file)
             try:
                 viewRecon.make_mutual_info_plot(tmp_file)
             except:
-                print "Making of mutual information plot failed!"
-            print "="*80
+                print("Making of mutual information plot failed!")
+            print("="*80)
             os.chdir(cwd)
 
         tarBallName = (os.getcwd().split('/')[-1])+".tgz"
         os.system("tar -czf  %s  "%tarBallName + ''.join([s+"*.pdf " for s in dirs]))
-        print "Images saved in %s" % tarBallName
+        print("Images saved in %s" % tarBallName)
 
     # Make images from merging individual reconstructions
     # only if merge_imgs option is true

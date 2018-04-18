@@ -20,15 +20,13 @@
 #                                                                        #
 ##########################################################################
 
-import exceptions
 import os
 import shutil
 import numpy
-import paths
 import unittest
 from wpg import Wavefront
 
-from TestUtilities.TestUtilities import generateTestFilePath
+from TestUtilities.TestUtilities import generateTestFilePath, runs_on_travisCI
 from SimEx.Utilities import IOUtilities
 
 class IOUtilitiesTest(unittest.TestCase):
@@ -111,6 +109,7 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
 
 
+    @unittest.skipIf(runs_on_travisCI(), "Skipped because running on travisCI.")
     def testQueryPDB(self):
         """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
         # Setup path to pdb file.
@@ -127,6 +126,7 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check exception on wrong input type.
         #self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
 
+    @unittest.skipIf(runs_on_travisCI(), "Skipped because running on travisCI.")
     def testQueryPDBTwice(self):
         """ Check that we can do two subsequent queries (fails if urllib.urlcleanup is not called.) """
         # Setup path to pdb file.

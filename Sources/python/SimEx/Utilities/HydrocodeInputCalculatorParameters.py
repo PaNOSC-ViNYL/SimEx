@@ -215,7 +215,7 @@ class HydroParameters(AbstractCalculatorParameters):
 
         # Write the input file
         input_deck_path = os.path.join( self._tmp_dir, 'input.dat')
-        print "Writing input deck to ", input_deck_path, "."
+        print("Writing input deck to ", input_deck_path, ".")
 
         # Write the file.
         with open(input_deck_path, 'w') as input_deck:
@@ -402,7 +402,7 @@ def checkAndSetAblatorThickness(ablator_thickness):
 	if ablator_thickness <= 5.0 or ablator_thickness > 100.0:
 		raise ValueError( "Ablator must be between 5.0 and 100.0 microns")
 
-	print ( "Ablator thickness is %4.1f " % ablator_thickness)
+	print(( "Ablator thickness is %4.1f " % ablator_thickness))
 
 	return ablator_thickness
 
@@ -493,6 +493,6 @@ def checkAndSetLaserWavelength(laser_wavelength):
 
     # Convert to microns.
     laser_wavelength = laser_wavelength*1e-3
-    print ("Laser wavelength = %.3fe-6" % (laser_wavelength))
+    print(("Laser wavelength = %.3fe-6" % (laser_wavelength)))
 
     return laser_wavelength

@@ -20,12 +20,11 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 import unittest
 
 # Import classes to test.
-from PhotonExperimentSimulationTest import PhotonExperimentSimulationTest
-from EstherExperimentTest import EstherExperimentTest
+from .PhotonExperimentSimulationTest import PhotonExperimentSimulationTest
+from .EstherExperimentTest import EstherExperimentTest
 
 # Setup the suite.
 def suite():

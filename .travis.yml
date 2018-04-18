@@ -1,26 +1,22 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
+  - "3.6"
   - "nightly"
 
 sudo: required
 dist: trusty
 
 matrix:
-  allow_failures:
-    # not yet Python 3 compatible
-    - python: "3.4"
-    - python: "3.5"
-    # Python 3.6 "nightly" (upcoming)
-    - python: "nightly"
+    allow_failures:
+        - python: "nightly"
 
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
-    - DEPLOY_DOCS_FOR_PYTHON: '2.7'
-    - TRIGGER_DOCKER_FOR_PYTHON: '2.7'
+    - DEPLOY_DOCS_FOR_PYTHON: '3.5'
+    - TRIGGER_DOCKER_FOR_PYTHON: '3.5'
+    - SIMEX_VERBOSE=MPI:PYTHON
 
 addons:
   apt:
@@ -36,14 +32,14 @@ addons:
       - cmake
       - gfortran
       - unzip
-      - cython
+      - cython3
       - sphinx-common
-      - python-sphinx
-      - python-qt4
+      - python3-sphinx
       - libgsl0-dev
+      - llvm
 
 cache:
-  apt: true
+  apt: false
   directories:
     - $HOME/.cache/pip
     - $HOME/lib
@@ -51,20 +47,22 @@ cache:
 # install git lfs
 #   see https://github.com/travis-ci/travis-ci/issues/3634
 before_install:
-- mkdir -p $HOME/bin
-- wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
-- tar xvfz git-lfs-linux-amd64-1.1.2.tar.gz
-- mv git-lfs-1.1.2/git-lfs $HOME/bin/git-lfs
-- export PATH=$PATH:$HOME/bin/
-- bash $TRAVIS_BUILD_DIR/TravisCI/pyqt.sh
+    - mkdir -p $HOME/bin
+    - wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
+    - tar xvfz git-lfs-linux-amd64-1.1.2.tar.gz
+    - mv git-lfs-1.1.2/git-lfs $HOME/bin/git-lfs
+    - export PATH=$PATH:$HOME/bin/
+      #- bash $TRAVIS_BUILD_DIR/TravisCI/pyqt.sh ## only needed for python v<3.5
+
 before_script:
-  # print interesting versions
   - python --version
   - python -c "import numpy as np; print( np.__version__ )"
   - python -c "import h5py as h5; print( h5.__version__ )"
   - ulimit -c unlimited
   - mpirun --version
+
 script:
+    #- wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/divided/pdb/ni/pdb2nip.ent.gz
   - bash $TRAVIS_BUILD_DIR/TravisCI/build_and_test_simex.sh && bash $TRAVIS_BUILD_DIR/TravisCI/deploy_docs.sh
 after_success:
   - bash $TRAVIS_BUILD_DIR/TravisCI/trigger_docker.sh

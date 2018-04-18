@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 
 from SimEx import PhysicalQuantity
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
@@ -28,7 +27,7 @@ from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel, _
 from SimEx.Utilities.Units import meter, electronvolt
 from TestUtilities import TestUtilities
 
-import StringIO
+import io
 import os
 import shutil
 import unittest
@@ -40,7 +39,45 @@ class DetectorGeometryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        cls.__reference_serialization_string = """;panel 0
+panel0/min_fs         = 0
+panel0/max_fs         = 511
+panel0/min_ss         = 512
+panel0/max_ss         = 1023
+panel0/corner_y       = -256
+panel0/fs             = 1.0x
+panel0/ss             = 1.0y
+panel0/clen           = 1.3000000e-01
+panel0/res            = 4.5454545e+03
+panel0/coffset        = 0.0000000e+00
+panel0/adu_per_photon = 1.0000000e+00
+panel0/max_adu        = 1.0000000e+04
+panel0/px             = 512
+panel0/py             = 512
+panel0/pix_width      = 2.2000000e-04
+panel0/d              = 1.3000000e-01
+panel0/corner_x       = -512
+
+;panel 1
+panel1/min_fs         = 0
+panel1/max_fs         = 511
+panel1/min_ss         = 1024
+panel1/max_ss         = 1535
+panel1/corner_y       = 256
+panel1/fs             = 1.0x
+panel1/ss             = 1.0y
+panel1/clen           = 1.3000000e-01
+panel1/res            = 4.5454545e+03
+panel1/coffset        = 0.0000000e+00
+panel1/adu_per_photon = 1.0000000e+00
+panel1/max_adu        = 1.0000000e+04
+panel1/px             = 512
+panel1/py             = 512
+panel1/pix_width      = 2.2000000e-04
+panel1/d              = 1.3000000e-01
+panel1/corner_x       = -512
+
+"""
 
     @classmethod
     def tearDownClass(cls):
@@ -137,47 +174,11 @@ class DetectorGeometryTest(unittest.TestCase):
         detector_geometry = DetectorGeometry(panels=[panel0, panel1])
 
         # Serialize to stream
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
 
         detector_geometry.serialize(stream)
 
-        reference_string=""";panel 0
-panel0/min_fs        = 0
-panel0/max_fs        = 511
-panel0/min_ss        = 512
-panel0/max_ss        = 1023
-panel0/px            = 512
-panel0/py            = 512
-panel0/corner_x      = -512
-panel0/corner_y      = -256
-panel0/fs            = 1.0x
-panel0/ss            = 1.0y
-panel0/clen          = 1.3000000e-01
-panel0/res           = 4.5454545e+03
-panel0/pix_width     = 2.2000000e-04
-panel0/coffset       = 0.0000000e+00
-panel0/adu_per_photon= 1.0000000e+00
-panel0/max_adu       = 1.0000000e+04
-
-;panel 1
-panel1/min_fs        = 0
-panel1/max_fs        = 511
-panel1/min_ss        = 1024
-panel1/max_ss        = 1535
-panel1/px            = 512
-panel1/py            = 512
-panel1/corner_x      = -512
-panel1/corner_y      = 256
-panel1/fs            = 1.0x
-panel1/ss            = 1.0y
-panel1/clen          = 1.3000000e-01
-panel1/res           = 4.5454545e+03
-panel1/pix_width     = 2.2000000e-04
-panel1/coffset       = 0.0000000e+00
-panel1/adu_per_photon= 1.0000000e+00
-panel1/max_adu       = 1.0000000e+04
-
-"""
+        reference_string= self.__reference_serialization_string
         self.assertEqual(stream.getvalue(), reference_string)
 
     def testSerializeHandle(self):
@@ -200,44 +201,7 @@ panel1/max_adu       = 1.0000000e+04
             # Serialize into file handle.
             detector_geometry.serialize(stream)
 
-        reference_string=""";panel 0
-panel0/min_fs        = 0
-panel0/max_fs        = 511
-panel0/min_ss        = 512
-panel0/max_ss        = 1023
-panel0/px            = 512
-panel0/py            = 512
-panel0/corner_x      = -512
-panel0/corner_y      = -256
-panel0/fs            = 1.0x
-panel0/ss            = 1.0y
-panel0/clen          = 1.3000000e-01
-panel0/res           = 4.5454545e+03
-panel0/pix_width     = 2.2000000e-04
-panel0/coffset       = 0.0000000e+00
-panel0/adu_per_photon= 1.0000000e+00
-panel0/max_adu       = 1.0000000e+04
-
-;panel 1
-panel1/min_fs        = 0
-panel1/max_fs        = 511
-panel1/min_ss        = 1024
-panel1/max_ss        = 1535
-panel1/px            = 512
-panel1/py            = 512
-panel1/corner_x      = -512
-panel1/corner_y      = 256
-panel1/fs            = 1.0x
-panel1/ss            = 1.0y
-panel1/clen          = 1.3000000e-01
-panel1/res           = 4.5454545e+03
-panel1/pix_width     = 2.2000000e-04
-panel1/coffset       = 0.0000000e+00
-panel1/adu_per_photon= 1.0000000e+00
-panel1/max_adu       = 1.0000000e+04
-
-"""
-
+        reference_string = self.__reference_serialization_string
         # Open for reading.
         with open(geom_file, 'r') as stream:
             lines = "".join( stream.readlines() )
@@ -261,44 +225,7 @@ panel1/max_adu       = 1.0000000e+04
         # Serialize into file handle.
         detector_geometry.serialize(geom_file)
 
-        reference_string=""";panel 0
-panel0/min_fs        = 0
-panel0/max_fs        = 511
-panel0/min_ss        = 512
-panel0/max_ss        = 1023
-panel0/px            = 512
-panel0/py            = 512
-panel0/corner_x      = -512
-panel0/corner_y      = -256
-panel0/fs            = 1.0x
-panel0/ss            = 1.0y
-panel0/clen          = 1.3000000e-01
-panel0/res           = 4.5454545e+03
-panel0/pix_width     = 2.2000000e-04
-panel0/coffset       = 0.0000000e+00
-panel0/adu_per_photon= 1.0000000e+00
-panel0/max_adu       = 1.0000000e+04
-
-;panel 1
-panel1/min_fs        = 0
-panel1/max_fs        = 511
-panel1/min_ss        = 1024
-panel1/max_ss        = 1535
-panel1/px            = 512
-panel1/py            = 512
-panel1/corner_x      = -512
-panel1/corner_y      = 256
-panel1/fs            = 1.0x
-panel1/ss            = 1.0y
-panel1/clen          = 1.3000000e-01
-panel1/res           = 4.5454545e+03
-panel1/pix_width     = 2.2000000e-04
-panel1/coffset       = 0.0000000e+00
-panel1/adu_per_photon= 1.0000000e+00
-panel1/max_adu       = 1.0000000e+04
-
-"""
-
+        reference_string = self.__reference_serialization_string
         # Open for reading.
         with open(geom_file, 'r') as stream:
             lines = "".join( stream.readlines() )
@@ -312,7 +239,7 @@ panel1/max_adu       = 1.0000000e+04
         geometry = DetectorGeometry(panels=[self.__panel0, self.__panel1])
 
         # Serialize
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         geometry.serialize(stream=stream)
         serialized_panel = stream.getvalue()
         stream.close()
@@ -384,7 +311,26 @@ class DetectorPanelTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        cls.__reference_serialization_string = """;panel 0
+panel0/min_fs         = 0
+panel0/max_fs         = 511
+panel0/min_ss         = 512
+panel0/max_ss         = 1024
+panel0/corner_y       = -256
+panel0/fs             = 1.0x
+panel0/ss             = 1.0y
+panel0/clen           = 1.3000000e-01
+panel0/res            = 4.5454545e+03
+panel0/coffset        = 0.0000000e+00
+panel0/adu_per_photon = 1.0000000e+00
+panel0/max_adu        = 1.0000000e+04
+panel0/px             = 512
+panel0/py             = 513
+panel0/pix_width      = 2.2000000e-04
+panel0/d              = 1.3000000e-01
+panel0/corner_x       = -512
+
+"""
 
     @classmethod
     def tearDownClass(cls):
@@ -431,12 +377,11 @@ class DetectorPanelTest(unittest.TestCase):
 
         del self.__panel
 
-    def testDefaultConstruction(self):
-        """ Testing the default construction. """
+    def testDefaultConstructionRaises(self):
+        """ Testing that construction without ranges fails. """
 
         # Attempt to construct an instance of the class.
-        panel = DetectorPanel()
-        self.assertIsInstance( panel, DetectorPanel )
+        self.assertRaises( ValueError, DetectorPanel )
 
     def testShapedConstruction(self):
         """ Testing construction with parameters. """
@@ -468,37 +413,28 @@ class DetectorPanelTest(unittest.TestCase):
         panel = self.__panel
 
         # Check attributes.
-        self.assertEqual( panel.pixel_size, 2.2e-4*meter,)
-        self.assertIsInstance(panel.pixel_size, PhysicalQuantity )
-        self.assertRaises( DetectorPanel, pixel_size=1.0e-4)
+        self.assertEqual(panel.pixel_size, 2.2e-4*meter)
+        self.assertIsInstance(panel.pixel_size, PhysicalQuantity)
+
+        error = None
+        try:
+            panel.pixel_size = 1.0e-4
+        except Exception as exc:
+            error = exc
+
+        self.assertIsInstance(error, TypeError)
+
 
     def testSerialize(self):
         """ Test the _serialize() method for the panel. """
         # Construct a panel.
         panel = self.__panel
 
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         panel._serialize(stream=stream)
 
-        reference_string = """;panel 0
-panel0/min_fs        = 0
-panel0/max_fs        = 511
-panel0/min_ss        = 512
-panel0/max_ss        = 1024
-panel0/px            = 512
-panel0/py            = 513
-panel0/corner_x      = -512
-panel0/corner_y      = -256
-panel0/fs            = 1.0x
-panel0/ss            = 1.0y
-panel0/clen          = 1.3000000e-01
-panel0/res           = 4.5454545e+03
-panel0/pix_width     = 2.2000000e-04
-panel0/coffset       = 0.0000000e+00
-panel0/adu_per_photon= 1.0000000e+00
-panel0/max_adu       = 1.0000000e+04
+        reference_string = self.__reference_serialization_string
 
-"""
 
         self.assertEqual( stream.getvalue(), reference_string )
 
@@ -514,31 +450,10 @@ panel0/max_adu       = 1.0000000e+04
 
             # Construct a panel.
             panel = self.__panel
-
             panel._serialize(stream=panel_file)
 
-            panel_file.close()
-
         # Setup reference string.
-        reference_string = """;panel 0
-panel0/min_fs        = 0
-panel0/max_fs        = 511
-panel0/min_ss        = 512
-panel0/max_ss        = 1024
-panel0/px            = 512
-panel0/py            = 513
-panel0/corner_x      = -512
-panel0/corner_y      = -256
-panel0/fs            = 1.0x
-panel0/ss            = 1.0y
-panel0/clen          = 1.3000000e-01
-panel0/res           = 4.5454545e+03
-panel0/pix_width     = 2.2000000e-04
-panel0/coffset       = 0.0000000e+00
-panel0/adu_per_photon= 1.0000000e+00
-panel0/max_adu       = 1.0000000e+04
-
-"""
+        reference_string = self.__reference_serialization_string
         # Open for reading.
         with open(panel_file_name, "r") as panel_file:
             panel_string = "".join(panel_file.readlines())
@@ -579,7 +494,7 @@ panel0/max_adu       = 1.0000000e+04
         # Get a panel.
         panel = self.__panel
         # Serialize it.
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         panel._serialize(stream)
         serialized_panel=stream.getvalue()
         stream.close()

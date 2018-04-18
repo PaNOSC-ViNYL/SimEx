@@ -27,17 +27,15 @@ import shutil
 import unittest
 
 # Include needed directories in sys.path.
-import paths
-
 from SimEx.Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
-from TestUtilities import TestUtilities
 
 # Import the class to test.
 from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
 from SimEx.Calculators.PlasmaXRTSCalculator import _parseStaticData
 
+from TestUtilities import TestUtilities
 
 class PlasmaXRTSCalculatorTest(unittest.TestCase):
     """
@@ -169,7 +167,7 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         # Check that the all data to be provided is present.
         for key in xrts_calculator.providedData():
             group = key.split('/')[1]
-            self.assertTrue( group in h5.keys() )
+            self.assertTrue( group in list(h5.keys()) )
 
         # Check dynamic datasets shapes and units.
         self.assertEqual( numpy.array( h5['data/dynamic/']['energy_shifts']).shape, (201,) )
@@ -283,7 +281,7 @@ Real time: 12.0 seconds
         static_dict = _parseStaticData( log_text )
 
         # Check keys.
-        static_data_keys = static_dict.keys()
+        static_data_keys = list(static_dict.keys())
         self.assertIn( 'fk',            static_data_keys )
         self.assertIn( 'qk',            static_data_keys )
         self.assertIn( 'Sk_ion',        static_data_keys )
@@ -379,7 +377,7 @@ Real time: 12.0 seconds
         static_dict = _parseStaticData( log_text )
 
         # Check keys.
-        static_data_keys = static_dict.keys()
+        static_data_keys = list(static_dict.keys())
         self.assertIn( 'fk',            static_data_keys )
         self.assertIn( 'qk',            static_data_keys )
         self.assertIn( 'Sk_ion',        static_data_keys )
@@ -403,7 +401,7 @@ Real time: 12.0 seconds
 
         xrts_calculator._readH5()
 
-        self.assertIn( 'source_spectrum', xrts_calculator._input_data.keys() )
+        self.assertIn( 'source_spectrum', list(xrts_calculator._input_data.keys()) )
 
 
         e = xrts_calculator._input_data['source_spectrum'][:,0]

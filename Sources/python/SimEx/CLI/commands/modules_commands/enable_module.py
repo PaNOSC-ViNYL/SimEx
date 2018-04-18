@@ -17,20 +17,20 @@ def enable_module(names,enable):
 		if any(item == name for item in disabledModules+enabledModules):
 			if (name in enabledModules):
 				if (enable):
-					print "module %s is already enabled"%name
+					print("module %s is already enabled"%name)
 				else:
 					toDisable.append(name)
 					changed  = True
-					print "disabled module ",name
+					print("disabled module ",name)
 			else:
 				if (enable):
 					toEnable.append(name)
 					changed  = True
-					print "enabled module ",name
+					print("enabled module ",name)
 				else:
-					print "module %s is already disabled"%name
+					print("module %s is already disabled"%name)
 		else:
-			print "Module %s not found"%name
+			print("Module %s not found"%name)
 
 	if (changed):
 		enabledModules += toEnable

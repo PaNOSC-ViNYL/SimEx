@@ -26,17 +26,13 @@
     @creation 20161011
 
 """
-from distutils.spawn import find_executable
 import h5py
 import os
-import paths
 import shutil
 import unittest
-
-import StringIO
+import io
 
 # Import the class to test.
-from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Calculators.FEFFPhotonMatterInteractor import FEFFPhotonMatterInteractor
 from SimEx.Calculators.FEFFPhotonMatterInteractor import FEFFPhotonMatterInteractorParameters
 from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetAmplitudeReductionFactor
@@ -44,7 +40,6 @@ from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetAtoms
 from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetEdge
 from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetEffectivePathDistance
 from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetPotentials
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 from TestUtilities import TestUtilities
 
@@ -255,8 +250,6 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
 
         # Check that the pmi dir was created.
         self.assertTrue( os.path.isdir( 'pmi' ) )
-
-
 
     def testBackengine(self):
         """ Test the backengine execution. """
@@ -696,7 +689,7 @@ class FEFFPhotonMatterInteractorParametersTest(unittest.TestCase):
                 )
 
         # Setup a stream to write to.
-        stream = StringIO.StringIO()
+        stream = io.StringIO()
         feff_parameters._serialize( stream = stream )
 
         # Compare to reference.
