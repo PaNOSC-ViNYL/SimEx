@@ -14,7 +14,7 @@ matrix:
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
-    - CUDA>=7.5
+    - WITH_CUDA: true
     - DEPLOY_DOCS_FOR_PYTHON: '3.5'
     - TRIGGER_DOCKER_FOR_PYTHON: '3.5'
     - SIMEX_VERBOSE=MPI:PYTHON
