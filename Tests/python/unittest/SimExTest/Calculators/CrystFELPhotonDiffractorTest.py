@@ -67,7 +67,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def notestShapedConstruction(self):
+    def testShapedConstruction(self):
         """ Testing the construction of the class with parameters. """
 
         # Setup parameters.
@@ -80,7 +80,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, CrystFELPhotonDiffractor)
         self.assertIsInstance(diffractor, AbstractPhotonDiffractor)
 
-    def notestConstructionWithPropInput(self):
+    def testConstructionWithPropInput(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
 
@@ -103,7 +103,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check that beam parameters have been updated from prop output.
         self.assertAlmostEqual( diffractor.parameters.beam_parameters.photon_energy.m_as(electronvolt) , 4972.8402471221643, 5 )
 
-    def notestBackengineWithPropInput(self):
+    def testBackengineWithPropInput(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
         self.__dirs_to_remove.append("diffr")
@@ -127,7 +127,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check that beam parameters have been updated from prop output.
         diffractor.backengine()
 
-    def notestBackengineSinglePattern(self):
+    def testBackengineSinglePattern(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
         # Ensure cleanup.
@@ -153,7 +153,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
 
-    def notestBackengineMultiplePatterns(self):
+    def testBackengineMultiplePatterns(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
         # Ensure cleanup.
@@ -180,7 +180,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
-    def notestBackengine(self):
+    def testBackengine(self):
         # Get calculator.
 
         # Ensure cleanup.
@@ -290,7 +290,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor.saveH5()
         self.assertIn("diffr_out_0000001.h5" , os.listdir(output_path))
 
-    def notestSaveH5(self):
+    def testSaveH5(self):
         """ Check that saveh5() creates correct filenames. """
 
         # Ensure cleanup.
@@ -363,7 +363,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check metafile was created.
         self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
 
-    def notestBackengineWithBeamParametersObject(self):
+    def testBackengineWithBeamParametersObject(self):
         """ Check beam parameter logic if they are set as parameters. """
 
         # Ensure cleanup.
@@ -395,7 +395,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check return code.
         self.assertEqual(status, 0)
 
-    def notestBackengineWithBeamAndGeometry(self):
+    def testBackengineWithBeamAndGeometry(self):
         """ Check geom parameter logic if they are set as parameters. """
 
         # Ensure cleanup.
