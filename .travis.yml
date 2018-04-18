@@ -38,6 +38,7 @@ addons:
       - python3-sphinx
       - libgsl0-dev
       - llvm
+      - nvidia-cuda-toolkit
 
 cache:
   apt: false
