@@ -263,11 +263,10 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         crystal_size_min=10.0e-9*meter,
         uniform_rotation=False,
         )
-        self.assertFalse(parameters.use_gpu)
-
+        self.assertTrue(parameters.gpus_per_task == 0)
         # Switch to True and check new value.
-        parameters.use_gpu = True
-        self.assertTrue(parameters.use_gpu)
+        parameters.gpus_per_task = 1
+        self.assertTrue(parameters.gpus_per_task == 1)
 
 
 if __name__ == '__main__':
