@@ -2,8 +2,8 @@
 
 # Sample installation script. Adjustments might be neccessary.
 
-INSTALL_PREFIX=$PWD
-THIRD_PARTY_ROOT=/home/grotec/local
+INSTALL_PREFIX=$HOME/.conda/envs/py36
+THIRD_PARTY_ROOT=/home/reppinjo/.local/
 
 # Check for existing build directory, remove if foun.d
 if [ -d build ]
@@ -23,10 +23,10 @@ echo "Changed dir to $PWD."
 export FC=ifort
 
 # Some needed environment variables.
-export BOOST_ROOT=${THIRD_PARTY_ROOT}/local
-export HDF5_ROOT=/usr
+export BOOST_ROOT=${THIRD_PARTY_ROOT}
+#export HDF5_ROOT=/usr
 export Boost_NO_SYSTEM_PATHS=ON
-CMAKE=/usr/bin/cmake
+CMAKE=$HOME/.local/bin/cmake
 
 #TODO:
 # Please edit the pathes below according to your file system
@@ -42,14 +42,13 @@ ${CMAKE} -DSRW_OPTIMIZED=ON \
       -DS2EReconstruction_EMC=ON\
       -DS2EReconstruction_DM=ON\
       -DFEFFPhotonInteractor=ON\
+      -DXCSITPhotonDetector=OFF \
       -Dwpg=ON\
       -Dgenesis=ON\
       -Docelot=ON\
-      -DXCSITPhotonDetector=ON \
-      -DXERCESC_ROOT=/usr\
-      -DGEANT4_ROOT=${THIRD_PARTY_ROOT}/local \
-      -DXCSIT_ROOT=${THIRD_PARTY_ROOT}/local \
+      -DGEANT4_ROOT=${THIRD_PARTY_ROOT}/geant4.10 \
       -DBOOST_ROOT=${BOOST_ROOT} \
+      -DXERCESC_ROOT=${THIRD_PARTY_ROOT} \
       ..
 
 # Build the project.
