@@ -500,8 +500,9 @@ class PMIDemo(object):
         # Take central pixel values.
         sel_x = self.g_s2e['pulse']['nx'] // 2 ;
         sel_y = self.g_s2e['pulse']['ny'] // 2 ;
-        sel_pixV = self.g_s2e['pulse']['arrEver'] [sel_x,sel_y,:,:]
-        sel_pixH = self.g_s2e['pulse']['arrEhor'] [sel_x,sel_y,:,:]
+        # note: the data order in the HDF5 file is not x,y but y,x
+        sel_pixV = self.g_s2e['pulse']['arrEver'] [sel_y,sel_x,:,:]
+        sel_pixH = self.g_s2e['pulse']['arrEhor'] [sel_y,sel_x,:,:]
         dt = ( self.g_s2e['pulse']['sliceMax'] - self.g_s2e['pulse']['sliceMin'] ) / ( self.g_s2e['pulse']['nSlices'] * 1.0 )
         dx = ( self.g_s2e['pulse']['xMax'] - self.g_s2e['pulse']['xMin'] ) / ( self.g_s2e['pulse']['nx'] * 1.0 )
         dy = ( self.g_s2e['pulse']['yMax'] - self.g_s2e['pulse']['yMin'] ) / ( self.g_s2e['pulse']['ny'] * 1.0 )
