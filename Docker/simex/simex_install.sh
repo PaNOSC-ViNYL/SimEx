@@ -34,6 +34,7 @@ cd build
 # Uncomment the next line and specify the install dir for a developer install.
 cmake -DXCSITPhotonDetector=OFF \
       -DGAPDPhotonDiffractor=OFF \
+      -DCrystFELPhotonDiffractor=OFF \
       -DINSTALL_TESTS=OFF \
       -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=OFF \
