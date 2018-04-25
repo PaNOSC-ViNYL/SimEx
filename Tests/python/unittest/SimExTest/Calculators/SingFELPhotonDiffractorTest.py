@@ -199,6 +199,60 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertEqual( diffractor.input_path,  os.path.abspath( sample_file ) )
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
+    def testH5Output(self):
+        """ Test that data, params and misc are present in hdf5 output file. """
+
+        # Ensure proper cleanup.
+        sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
+        #self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+
+        # Set up parameters.
+        parameters=SingFELPhotonDiffractorParameters(
+                sample=sample_file,
+                uniform_rotation = False,
+                calculate_Compton = False,
+                slice_interval = 100,
+                number_of_slices = 3,
+                pmi_start_ID = 1,
+                pmi_stop_ID = 1,
+                number_of_diffraction_patterns= 1,
+                beam_parameters=self.beam,
+                detector_geometry= self.detector_geometry,
+                forced_mpi_command='mpirun -np 1'
+                )
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters)
+        diffractor.backengine()
+        diffractor.saveH5()
+
+        with h5py.File(diffractor.output_path, 'r') as h5:
+            # Datagroups in /"
+            self.assertIn("data", h5.keys())
+            self.assertIn("params", h5.keys())
+            self.assertIn("misc", h5.keys())
+
+            # Data.
+            data = h5["data"]
+            self.assertIn("0000001", data.keys())
+
+            # Parameters
+            params = h5["params"]
+            self.assertIn("beam", params.keys())
+            self.assertIn("geom", params.keys())
+
+            # Beam
+            beam = h5["params/beam"]
+            self.assertIn("focusArea", beam.keys())
+            self.assertIn("photonEnergy", beam.keys())
+
+            # Geometry
+            geom = h5["params/geom"]
+            self.assertIn("detectorDist", geom.keys())
+            self.assertIn("mask", geom.keys())
+            self.assertIn("pixelHeight", geom.keys())
+            self.assertIn("pixelWidth", geom.keys())
+
     def testDefaultConstructionLegacy(self):
         """ Testing the default construction of the class with MPI parameter. """
 

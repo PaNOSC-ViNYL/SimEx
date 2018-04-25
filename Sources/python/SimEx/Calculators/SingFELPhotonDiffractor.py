@@ -62,9 +62,14 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if isinstance(parameters, dict):
             parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameters)
 
+        if parameters is None:
+            parameters_default = SingFELPhotonDiffractorParameters(),
+        else:
+            parameters_default = None
+
         self.__parameters = checkAndSetInstance(SingFELPhotonDiffractorParameters,
                                                 parameters,
-                                                SingFELPhotonDiffractorParameters(),
+                                                parameters_default,
                                                 )
 
         # Handle sample geometry provenience.
