@@ -219,7 +219,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
             command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_max.m_as(1e-9*meter) ))
 
         # Handle gpu acceleration.
-        if self.parameters.use_gpu:
+        if self.parameters.gpus_per_task > 0:
             # Check if crystfel was built with opencv support.
             # Get pattern_sim's path.
             pattern_sim_path = subprocess.check_output(shlex.split("which pattern_sim"))[:-1].decode('utf-8')
