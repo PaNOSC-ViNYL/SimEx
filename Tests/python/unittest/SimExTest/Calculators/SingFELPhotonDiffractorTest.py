@@ -87,7 +87,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-    def notestShapedConstructionDict(self):
+    def testShapedConstructionDict(self):
         """ Testing the construction of the class with parameters given as a dict. """
 
         parameters={ 'uniform_rotation': True,
@@ -106,7 +106,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
 
-    def notestConstructionParameters(self):
+    def testConstructionParameters(self):
         """ Check we can construct with a parameter object. """
         parameters=SingFELPhotonDiffractorParameters(uniform_rotation=True,
                                                        calculate_Compton=False,
@@ -123,7 +123,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check instance.
         self.assertIsInstance( diffractor, SingFELPhotonDiffractor )
 
-    def notestShapedConstruction2(self):
+    def testShapedConstruction2(self):
         """ Testing the construction of the class with parameters. """
 
         parameters={ 'uniform_rotation': True,
@@ -143,7 +143,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
 
 
-    def notestDefaultConstruction(self):
+    def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
 
         # Prepare input.
@@ -170,7 +170,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
-    def notestConstructionWithSample(self):
+    def testConstructionWithSample(self):
         """ Testing the construction with sample passed via parameters."""
 
         # Ensure proper cleanup.
@@ -253,7 +253,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
             self.assertIn("pixelHeight", geom.keys())
             self.assertIn("pixelWidth", geom.keys())
 
-    def notestDefaultConstructionLegacy(self):
+    def testDefaultConstructionLegacy(self):
         """ Testing the default construction of the class with MPI parameter. """
 
         # Prepare input.
@@ -284,7 +284,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check default output_path.
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
-    def notestConstructionExceptions(self):
+    def testConstructionExceptions(self):
         """ Check that proper exceptions are thrown if object is constructed incorrectly. """
         # Parameter not a dict.
         self.assertRaises( TypeError, SingFELPhotonDiffractor, 1, self.input_h5, 'diffr.h5')
@@ -379,7 +379,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         parameters['detector_geometry'] = self.detector_geometry
 
 
-    def notestBackengine(self):
+    def testBackengine(self):
         """ Test that we can start a test calculation. """
 
         # Cleanup.
@@ -407,7 +407,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    def notestBackengineNoBeam(self):
+    def testBackengineNoBeam(self):
         """ Test that we can start a test calculation with no explicit beam parameters. """
 
         # Cleanup.
@@ -434,7 +434,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    def notestBackengineDefaultPaths(self):
+    def testBackengineDefaultPaths(self):
         """ Test that we can start a calculation with default paths given. """
 
         # Prepare input.
@@ -468,7 +468,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
 
-    def notestBackengineWithSample(self):
+    def testBackengineWithSample(self):
         """ Test that we can start a test calculation if the sample was given via the parameters . """
 
         # Cleanup.
@@ -507,7 +507,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( diffractor.output_path ) )
         self.assertIn( 'diffr_out_0000002.h5', os.listdir( diffractor.output_path ) )
 
-    def notestBackengineInputFile(self):
+    def testBackengineInputFile(self):
         """ Test that we can start a test calculation if the input path is a single file. """
 
         # Cleanup.
@@ -534,7 +534,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    def notestBackengineInputDir(self):
+    def testBackengineInputDir(self):
         """ Test that we can start a test calculation if the input path is a directory. """
 
         # Cleanup.
@@ -561,7 +561,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    def notestBug53(self):
+    def testBug53(self):
         """ Tests a script that was found to raise if run in parallel mode. """
 
         self.__dirs_to_remove.append('diffr')
@@ -584,7 +584,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         photon_diffractor.backengine()
 
-    def notestSingleFile(self):
+    def testSingleFile(self):
         """ Test that saveH5() generates only one linked hdf. """
 
 
@@ -631,7 +631,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("version", list(h5_filehandle.keys()) )
         self.assertIn("info", list(h5_filehandle.keys()) )
 
-    def notestNoRotation(self):
+    def testNoRotation(self):
         """ Test that we can run singfel with no-rotation option."""
 
 
