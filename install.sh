@@ -2,10 +2,10 @@
 
 # Sample installation script. Adjustments might be neccessary.
 
-INSTALL_PREFIX=$HOME/.conda/envs/py36
-THIRD_PARTY_ROOT=/home/reppinjo/.local/
+INSTALL_PREFIX=..
+THIRD_PARTY_ROOT=
 
-# Check for existing build directory, remove if foun.d
+# Check for existing build directory, remove if found
 if [ -d build ]
 then
     echo "Found build/ directory, will remove it now."
@@ -18,41 +18,43 @@ cd build
 echo "Changed dir to $PWD."
 
 # Uncomment the next line if you want to use Intel Fotran compiler
-# (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by sourcing
-# where $INTEL_HOME is the root of the intel compiler suite (typically /opt/intel), and <arch> is either intel64 or ia32, following need to be load externally
+# (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by
+# $> source `which compilervars.sh` <arch>
+# where <arch> is either intel64 or ia32
 export FC=ifort
 
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}
-#export HDF5_ROOT=/usr
 export Boost_NO_SYSTEM_PATHS=ON
-CMAKE=$HOME/.local/bin/cmake
+export XERCESC_ROOT=${THIRD_PARTY_ROOT}
+export GEANT4_ROOT=${THIRD_PARTY_ROOT}
+export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
+export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
-#TODO:
-# Please edit the pathes below according to your file system
-# If your have another version of xerces_c than 3.1 please edit also the single
-# entry in ./src/CMakeLists.txt which starts with ${XERCES} and ends with .so
-${CMAKE} --version
-${CMAKE} -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=ON \
+cmake -DSRW_OPTIMIZED=ON \
+      -DDEVELOPER_INSTALL=OFF \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-      -DSingFElPhotonDiffractor=ON \
-      -DCrystFElPhotonDiffractor=ON \
+      -DSingFELPhotonDiffractor=ON \
+      -DCrystFELPhotonDiffractor=ON \
+      -DGAPDPhotonDiffractor=ON \
       -Ds2e=ON \
-      -DS2EReconstruction_EMC=ON\
-      -DS2EReconstruction_DM=ON\
-      -DFEFFPhotonInteractor=ON\
-      -DXCSITPhotonDetector=OFF \
-      -Dwpg=ON\
-      -Dgenesis=ON\
-      -Docelot=ON\
-      -DGEANT4_ROOT=${THIRD_PARTY_ROOT}/geant4.10 \
-      -DBOOST_ROOT=${BOOST_ROOT} \
-      -DXERCESC_ROOT=${THIRD_PARTY_ROOT} \
+      -DS2EReconstruction_EMC=ON \
+      -DS2EReconstruction_DM=ON \
+      -Dwpg=ON \
+      -DGenesisPhotonSource=ON \
+      -DXCSITPhotonDetector=OFF \ # Requires closed code.
+      -DFEFFPhotonInteractor=ON \
+      -DXERCESC_ROOT=$XERCESC_ROOT \
+      -DGEANT4_ROOT=$GEANT4_ROOT \
+      -DXCSIT_ROOT=$XCSIT_ROOT \
+      -DBOOST_ROOT=$BOOST_ROOT \
       ..
 
 # Build the project.
-make -j8
+make
+#make -j32
 
 # Install the project.
 make install
+
+cd ..
