@@ -15,4 +15,3 @@ pyfftw
 pyFAI
 numba
 pint
-#pyqt5
