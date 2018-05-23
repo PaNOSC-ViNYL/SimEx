@@ -14,12 +14,13 @@ find_python_module(Cython REQUIRED)
 find_python_module(datetime REQUIRED)
 find_python_module(numpy REQUIRED)
 find_python_module(setuptools REQUIRED)
-find_python_module(breathe REQUIRED)
-find_python_module(sqlalchemy REQUIRED)
-find_python_module(pyfftw REQUIRED)
 find_python_module(pyFAI REQUIRED)
-find_python_module(numba REQUIRED)
-find_python_module(PyQt4 REQUIRED)
+#The following are actually not used anywere in Sources
+find_python_module(breathe REQUIRED) 
+find_python_module(sqlalchemy REQUIRED) 
+find_python_module(pyfftw REQUIRED)
+find_python_module(numba REQUIRED) #Used in Modules/Diffractors/SingFELPhotonDiffractor
+find_python_module(PyQt4 REQUIRED) 
 
 #FIND_PACKAGE (LAPACK REQUIRED)
 ##message (STATUS "***** LAPACK_LIBRARIES ${LAPACK_LIBRARIES} ****")
