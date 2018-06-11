@@ -19,33 +19,8 @@ option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF
 
 option (INSTALL_TESTS "Install tests" ON)
 
-
 # options required for building the py_detector_interface module:
 # XCSITPotonDetector
-option(GEANT4_ROOT "-DGEANT4_ROOT=<abs path> absolute path to the geant4
-    installation directory that includes \n
-    ./bin/\n
-    ./include/Geant4/\n
-    ./lib64/Geant4-<ver>/\n
-    ./share/Geant4-<ver>/data/"
-)
-option(XERCESC_ROOT "-DXERCESC_ROOT=<abs path> absolute path to the xercesc
-    installation directory that includes\n
-    ./include/xercesc/\n
-    ./lib/"
-)
-option(XCSIT_ROOT "-DXCSIT_ROOT=<abs path> absolute path to the xcist
-    installation directory that includes\n
-    ./include/xcsit/
-    ./lib/
-    ./lib/xcsit/
-    ./bin/"
-)
-option(BOOST_ROOT "-DBOOST_ROOT=<abs path> absolute path to the boost
-    installation directory that includes\n
-    ./include/boost/
-    ./lib/"
-)
 option(PY_DETECTOR_INTERFACE_DEBUG "
     -DPY_DETECTOR_INTERFACE_DEBUG=default: OFF | ON"
 )
@@ -81,25 +56,57 @@ else()
   endif()
 endif()
 
-  message (STATUS "************************ checking python dependencies *****************************")
-  add_subdirectory (Sources)
+message (STATUS "************************ checking python dependencies *****************************")
+add_subdirectory (Sources)
 
+#By default all modules are included/excluded depending on this flag.
+#If a flag: USE_${module_name} is passed, this will overwrite teh default.
+#For example:
+# [De-]activate all modules:
+#      cmake -DUSE_MODULES_DEFAULT=[OFF]ON [...]
+# Activate a single module:
+#      cmake -DUSE_MODULES_DEFAULT=OFF -DUSE_wpg=ON [...]
+# Deactivate a single module:
+#      cmake -DUSE_MODULES_DEFAULT=ON -DUSE_wpg=OFF [...]
+option(USE_MODULES_DEFAULT "Default to include/exclude a module" ON)
+message(STATUS "**************** Including modules (default "
+            "${USE_MODULES_DEFAULT}) ****************")
 # find and add modules
 set (SIMEX_MODULES_ROOT "${SIMEX_SOURCE_DIR}/Modules")
 include (find_modules)
 foreach(module ${SIMEX_MODULES})
     MESSAGE("CHECKING ${module}")
     get_filename_component(module_name ${module} NAME)
-    option(${module_name} "include ${module_name} module" ON)
+    #If a variable USE_${module_name} is defined, use its value 
+    #overwrite the default.
+    #Since we add the USE_* variable to the cache, we re-use it with
+    #multiple cmake calls
+    if(DEFINED USE_${module_name})
+        #Add a cache variable with some help text. Note the 
+        #use of FORCE option to be sure the value is updated in the
+        #cache
+        set(USE_${module_name} ${USE_${module_name}} 
+                CACHE BOOL "Include mdoule ${module_name}" FORCE)
+    endif()
 endforeach()
 
 foreach(module ${SIMEX_MODULES})
     get_filename_component(module_name ${module} NAME)
-    if (${module_name})
-	    message (STATUS "***** Including module : ${module} ****")
-        add_subdirectory("${SIMEX_MODULES_ROOT}/${module}")
-	    message (STATUS "*********************************************************")
+    #If a request specific to this module was done, use it
+    if (DEFINED USE_${module_name})
+        if(USE_${module_name})
+            message (STATUS "***** Including module ${module_name} from: ${module} ****")
+            add_subdirectory("${SIMEX_MODULES_ROOT}/${module}")
+	        message (STATUS "*********************************************************")
+        endif()
+    else()
+        if(USE_MODULES_DEFAULT)
+            message (STATUS "***** Including module ${module_name} from: ${module} ****")
+            add_subdirectory("${SIMEX_MODULES_ROOT}/${module}")
+	        message (STATUS "*********************************************************")
+        endif()
 	endif()
+
 endforeach()
 
 # create simex_vars.sh file
