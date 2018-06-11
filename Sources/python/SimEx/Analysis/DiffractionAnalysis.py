@@ -168,6 +168,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                     continue
 
         else: # v0.2
+
             # Open file for reading
             with h5py.File(path, 'r') as h5:
                 if indices is None or indices == 'all':
