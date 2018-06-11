@@ -1,6 +1,24 @@
 #
 INCLUDE(ExternalProject)
 
+#Check for dependencies
+#I think Geant4 is required w/ gdml support
+#To specify directory of Geant4 use standard cmake argument:
+# -DGeant4_DIR=<g4install>/lib[64]/Geant4-<version>
+find_package(Geant4 REQUIRED gdml)
+#Given we required gdml above, there is no more need of this here
+#find_package(XercesC REQUIRED)
+
+#Are we really sure about the minimal version needed?
+find_package(Boost 1.54 REQUIRED)
+
+option(XCSIT_ROOT "-DXCSIT_ROOT=<abs path> absolute path to the xcist
+    installation directory that includes\n
+    ./include/xcsit/
+    ./lib/
+    ./lib/xcsit/
+    ./bin/"
+)
 
 # Create a new target to with the external project
 ExternalProject_Add(
