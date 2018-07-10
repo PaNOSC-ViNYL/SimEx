@@ -77,15 +77,15 @@ include (find_modules)
 foreach(module ${SIMEX_MODULES})
     MESSAGE("CHECKING ${module}")
     get_filename_component(module_name ${module} NAME)
-    #If a variable USE_${module_name} is defined, use its value 
+    #If a variable USE_${module_name} is defined, use its value
     #overwrite the default.
     #Since we add the USE_* variable to the cache, we re-use it with
     #multiple cmake calls
     if(DEFINED USE_${module_name})
-        #Add a cache variable with some help text. Note the 
+        #Add a cache variable with some help text. Note the
         #use of FORCE option to be sure the value is updated in the
         #cache
-        set(USE_${module_name} ${USE_${module_name}} 
+        set(USE_${module_name} ${USE_${module_name}}
                 CACHE BOOL "Include mdoule ${module_name}" FORCE)
     endif()
 endforeach()
