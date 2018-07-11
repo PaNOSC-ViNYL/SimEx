@@ -2,8 +2,34 @@
 
 # Sample installation script. Adjustments might be neccessary.
 
-INSTALL_PREFIX=..
-THIRD_PARTY_ROOT=
+HOSTNAME=`hostname`
+if [[ "$HOSTNAME" == max-*.desy.de ]]
+then
+    THIRD_PARTY_ROOT=/data/netapp/s2e/simex
+    git apply patch_for_maxwell
+else
+    THIRD_PARTY_ROOT=
+fi
+
+echo $THIRD_PARTY_ROOT
+
+MODE=$1
+if [ $MODE = "maxwell" ]
+then
+    echo $MODE
+    INSTALL_PREFIX=$THIRD_PARTY_ROOT
+    DEVELOPER_MODE=OFF
+    XCSIT=OFF
+elif [ $MODE = "develop" ]
+then
+    echo $MODE
+    INSTALL_PREFIX=..
+    DEVELOPER_MODE=ON
+    XCSIT=ON
+fi
+
+
+# Build for python3.4
 
 # Check for existing build directory, remove if found
 if [ -d build ]
@@ -32,18 +58,18 @@ export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
 export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
 cmake -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=OFF \
+      -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-      -DSingFELPhotonDiffractor=ON \
-      -DCrystFELPhotonDiffractor=ON \
-      -DGAPDPhotonDiffractor=ON \
-      -Ds2e=ON \
-      -DS2EReconstruction_EMC=ON \
-      -DS2EReconstruction_DM=ON \
-      -Dwpg=ON \
-      -DGenesisPhotonSource=ON \
-      -DXCSITPhotonDetector=OFF \ # Requires closed code.
-      -DFEFFPhotonInteractor=ON \
+      -DUSE_SingFELPhotonDiffractor=ON \
+      -DUSE_CrystFELPhotonDiffractor=ON \
+      -DUSE_GAPDPhotonDiffractor=ON \
+      -DUSE_s2e=ON \
+      -DUSE_S2EReconstruction_EMC=ON \
+      -DUSE_S2EReconstruction_DM=ON \
+      -DUSE_wpg=ON \
+      -DUSE_GenesisPhotonSource=ON \
+      -DUSE_XCSITPhotonDetector=$XCSIT \
+      -DUSE_FEFFPhotonInteractor=ON \
       -DXERCESC_ROOT=$XERCESC_ROOT \
       -DGEANT4_ROOT=$GEANT4_ROOT \
       -DXCSIT_ROOT=$XCSIT_ROOT \
@@ -51,10 +77,12 @@ cmake -DSRW_OPTIMIZED=ON \
       ..
 
 # Build the project.
-make
-#make -j32
+make -j32
 
 # Install the project.
 make install
 
 cd ..
+
+# Revert
+git checkout -- CMakeLists.txt

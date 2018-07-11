@@ -2,7 +2,8 @@ INCLUDE(ExternalProject)
 
 ExternalProject_Add(
 ocelot
-URL https://github.com/eucall-software/ocelot/archive/dev_gen.zip
+#URL https://github.com/eucall-software/ocelot/archive/dev_gen.zip
+URL https://github.com/ocelot-collab/ocelot/archive/dev_gen.zip
 PATCH_COMMAND ""
 INSTALL_COMMAND ""
 CONFIGURE_COMMAND ""
@@ -10,7 +11,7 @@ BUILD_COMMAND ""
 )
 
 ExternalProject_Get_Property(ocelot SOURCE_DIR)
-install(DIRECTORY ${SOURCE_DIR} DESTINATION  ${PYPATH})
+install(DIRECTORY ${SOURCE_DIR}/ocelot DESTINATION  ${PYPATH})
 
 set (makestring "make")
 

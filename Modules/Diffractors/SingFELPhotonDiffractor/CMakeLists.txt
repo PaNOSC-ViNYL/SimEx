@@ -17,6 +17,6 @@ INSTALL_COMMAND ""
 )
 
 ExternalProject_Get_Property(singfel SOURCE_DIR)
-install(PROGRAMS ${SOURCE_DIR}/bin/ DESTINATION ${BINDIR})
+install(PROGRAMS ${SOURCE_DIR}/bin/radiationDamageMPI DESTINATION ${BINDIR})
 install(DIRECTORY ${SOURCE_DIR}/pysingfel DESTINATION  ${PYPATH})
 

@@ -846,19 +846,15 @@ def f_h5_out2in( src , dest , *args ) :
 
     # Copy everything to history except "data" & "history"
     for objname in list(file_in.keys()) :
-        if   objname != "data" \
-             and   objname != "history" :
+        if objname != "data" and   objname != "history" :
             x = file_in.get( objname )
-            if file_in.get( objname , getclass = True )  == h5py.highlevel.Dataset :
+            if isinstance(x, h5py.Dataset):
                 mygroup = file_in['/']
                 file_out["history/parent/detail/"+objname] = mygroup[objname][...]
-            elif file_in.get( objname , getclass = True )  == h5py.highlevel.Group :
-                file_out.copy( x , "history/parent/detail/" + objname )
+            elif isinstance(x, h5py.Group):
+                file_out.copy( x , "history/parent/detail/" + objname)
             else:
                 print(objname  , " has been SKIPPED!!")
-                #file_out.copy( x , os.path.dirname( "history/parent/detail/" + objname ) )
-                #file_in.get( objname ) .copy( os.path.dirname( "history/parent/detail/" + objname ) )
-            #file_out.copy( x , "history/parent/detail/" )
             print(objname)
         else :
             print('  NOT:', objname)

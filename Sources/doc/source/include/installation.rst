@@ -116,6 +116,14 @@ v. Create deb packages::
   installation dir. In this case `simex_vars.sh` should be
   modified manually to set paths correctly.
 
+vi. Disable/activate modules::
+
+    $> #Disable all modules
+    $> cmake -DUSE_MODULES_DEFAULT=OFF [...]
+    $> #Enable all modules (this is the default)
+    $> cmake -DUSE_MODULES_DEFAULT=ON [...]
+    $> #Disable all moules except the one named wpg
+    $> cmak -DUSE_MODULES_DEFAULT=OFF -DUSE_wpg=ON [...]
 
 Troubleshooting
 """""""""""""""
