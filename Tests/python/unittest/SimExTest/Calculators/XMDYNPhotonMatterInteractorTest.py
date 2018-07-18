@@ -28,7 +28,6 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.XMDYNPhotonMatterInteractor import XMDYNPhotonMatterInteractor
-from SimEx.Calculators.XMDYNPhotonMatterInteractor import PMI
 from TestUtilities import TestUtilities
 
 class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
@@ -40,6 +39,7 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         cls.input_h5 = TestUtilities.generateTestFilePath('prop_out_0000001.h5')
+        cls.input_xmdyn_dir = TestUtilities.generateTestFilePath('xmdyn_run')
 
     @classmethod
     def tearDownClass(cls):
@@ -314,51 +314,65 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
     def test_write_to_s2e_h5(self):
         """ Test writing to s2e formatted hdf5. """
 
-        pmi = XMDYNPhotonMatterInteractor(load_from_path=TestUtilities.generateTestFilePath('xmdyn_run'))
-        pmi.output_path = 'pmi'
+        # Construct with load path.
+        pmi = XMDYNPhotonMatterInteractor(load_from_path=TestUtilities.generateTestFilePath('xmdyn_run'), output_path = 'pmi')
 
+        # Write to h5.
         pmi.saveH5()
 
-        self.assertIn('pmi_out_0000000.h5', os.listdir(pmi.output_path))
+        # Check.
+        self.assertTrue( os.path.isfile(pmi.output_path))
 
+        # Check groups.
+        expected_groups = [
+            'data',
+            'history',
+            'info',
+            'misc',
+            'params',
+            'version',
+            ]
 
+        expected_data_groups = [
+                    'snp_00000000',
+                    'snp_00005200',
+                    'snp_00010000',
+                    ]
 
-class PMITest(unittest.TestCase):
-    """
-    Test class for the PMI class.
-    """
+        expected_snapshot_groups = [
+                    'Sq_bound',
+                    'Sq_free',
+                    'Sq_halfQ',
+                    'T',
+                    'Z',
+                    'ff',
+                    'halfQ',
+                    'r',
+                    'xyz',
+                    ]
 
-    @classmethod
-    def setUpClass(cls):
-        """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath('prop_out_0000001.h5')
-        cls.input_xmdyn_dir = TestUtilities.generateTestFilePath('xmdyn_run')
+        with h5py.File(pmi.output_path, 'r') as h5:
+            present_groups = h5.keys()
+            for expected_group in expected_groups:
+                self.assertIn(expected_group, present_groups)
 
-    @classmethod
-    def tearDownClass(cls):
-        """ Tearing down the test class. """
+            present_groups = h5['data'].keys()
+            for expected_group in expected_data_groups:
+                self.assertIn(expected_group, present_groups)
 
-    def setUp(self):
-        """ Setting up a test. """
-        self.__files_to_remove = []
-        self.__dirs_to_remove = []
+            present_groups = h5['data/snp_00000000'].keys()
+            for expected_group in expected_snapshot_groups:
+                self.assertIn(expected_group, present_groups)
 
-    def tearDown(self):
-        """ Tearing down a test. """
-        # Clean up.
-        for f in self.__files_to_remove:
-            if os.path.isfile(f):
-                os.remove(f)
-        for p in self.__dirs_to_remove:
-            if os.path.isdir(p):
-                shutil.rmtree(p)
+        # Check data shapes.
+
 
     def test_load_snapshot_from_dir(self):
         """ Test loading a xmdyn snapshot from a directory that contains xmdyn output. """
 
-        pmi_demo = PMI()
+        pmi = XMDYNPhotonMatterInteractor()
 
-        snapshot = pmi_demo.f_load_snp_from_dir(os.path.join(self.input_xmdyn_dir, 'snp', '1600'.zfill(8)))
+        snapshot = pmi.f_load_snp_from_dir(os.path.join(self.input_xmdyn_dir, 'snp', '1600'.zfill(8)))
 
         self.assertIsInstance(snapshot, dict)
 

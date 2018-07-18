@@ -20,7 +20,9 @@
 #                                                                        #
 ##########################################################################
 
+import csv
 import h5py
+import math
 import numpy
 import os
 import random
@@ -28,6 +30,10 @@ import random
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities import IOUtilities
 from SimEx.Utilities.Units import electronvolt, second, meter, joule
+
+from scipy import constants
+from scipy.constants import e,c,m_e,hbar,h
+bohr_radius = constants.value('Bohr radius')
 
 class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
     """
@@ -129,6 +135,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             self._init_from_data()
 
             sample_path = os.path.join(load_from_path, 'sample')
+            self.output_path = os.path.join(self.output_path, 'pmi_out.h5')
 
         # Check sample path.
         if sample_path is None:
@@ -161,36 +168,22 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         # Sort dirs.
         snapshots.sort()
-
         # Check and parse xmdyn input file to extract time steps and photon numbers.
         input_file_path = os.path.join(self.__load_from_path,'xparams.txt') # We use the file written at xmdyn runtime which reflects the actual state of affairs.
         if not os.path.isfile(input_file_path):
             raise IOError("XMDYN input file %s was not found." % (input_file_path))
 
         xmdyn_parameters = _parse_xmdyn_xparams(input_file_path)
+        fluence = numpy.loadtxt(os.path.join(snapshot_dir, 'beam.dat'))
+        focus_area = xmdyn_parameters['DIAM']**2*math.pi/2.0
+        photon_energy = xmdyn_parameters['EPH']*1e3*e # [J]
+        number_of_photons_per_snapshot = fluence * focus_area / photon_energy
+        timestamps = numpy.loadtxt(os.path.join(snapshot_dir, 'snp_times.dat'))
 
-        # Setup a pmi demo object to facilitate loading of data.
-        pmi = PMI()
-
-        time_max = xmdyn_parameters['stop_time'].m_as(second)
-        time_min = xmdyn_parameters['start_time'].m_as(second)
-        time_step = xmdyn_parameters['time_step'].m_as(second)
-
-        photon_energy = xmdyn_parameters['photon_energy'].m_as(joule)
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
-
-        # Open in and out files.
-        with h5py.File(self.output_path, 'w') as h5:
-
-            for it, snp in enumerate(snapshots):
-
-                # Load snapshot data as a dict
-                snapshot_dict = pmi.f_load_snp_from_dir(snp)
-
-                pmi.f_save_snp(h5, snapshot_dict)
+        self.__xmdyn_parameters = xmdyn_parameters
+        self.__snapshots = snapshots
+        self.__number_of_photons = number_of_photons_per_snapshot
+        self.__timestamps = timestamps*xmdyn_parameters['DT']*1e-18*second
 
     def expectedData(self):
         """ Query for the data expected by the Interactor. """
@@ -297,25 +290,22 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         :param output_path: The file where to save the object's data.
         :type output_path: str
         """
-        pass # No action required since output is written in backengine.
 
-class PMI(object):
-
-    def __init__(self):
-        self.g_s2e = {}
-        self.g_dbase = {}
-
-        self.f_s2e_setup()
-
-    def f_s2e_setup(self) :
-        self.g_s2e['setup'] = dict()
-        self.g_s2e['sys'] = dict()
-        self.g_s2e['setup']['num_digits'] = 7
-        self.g_s2e['steps'] = 100
-        self.g_s2e['maxZ'] = 100
+        ### TODO: Store parameters to /params in h5.
+        xmdyn_parameters = self.__xmdyn_parameters
+        snapshots = self.__snapshots
 
 
-    ##############################################################################
+        with h5py.File(self.output_path, 'w') as h5:
+            self.setup_hierarchy(h5)
+            for it, snp in enumerate(snapshots):
+
+                # Load snapshot data as a dict
+                snapshot_dict = self.f_load_snp_from_dir(snp)
+                snapshot_dict['number_of_photons'] = self.__number_of_photons[it]
+                snapshot_dict['timestamp'] = self.__timestamps[it]
+
+                self._save_snapshot(h5, snapshot_dict)
 
     def f_save_info(self):
         pmi_file = self.g_s2e['setup']['pmi_out']
@@ -433,6 +423,7 @@ class PMI(object):
         xsnp['q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'q.dat' )) # Ion charge
         xsnp['f0']  = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' )) # Form factors of each atom type.
         xsnp['Q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Q.dat' )) # Wavenumber grid for form factors.
+        xsnp['id'] = os.path.split(path_to_snapshot)[-1]
 
         return xsnp
 
@@ -481,33 +472,62 @@ class PMI(object):
         self.g_s2e['sys']['Nph'] = 1e99
         #print '   NOTE: Nph is uniform.'
 
-    def f_save_snp( self, xfp, a_snp ) :
-        self.g_s2e['sys']['xyz'] = self.f_dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
-        self.g_s2e['sys']['T'] = numpy.sort( numpy.unique( self.g_s2e['sys']['xyz'] ) )
-        ff = numpy.zeros( ( len( self.g_s2e['sys']['T'] ) , len( self.g_dbase['halfQ'] ) ) )
-        for ii in range( len( self.g_s2e['sys']['T'] ) ) :
-            ff[ii,:] =  self.g_dbase['ff'][self.g_s2e['sys']['T'][ii].astype(int),:].copy()
-    ###        print self.g_s2e['sys']['T'][ii].astype(int) , ff[ii,:]
+    def setup_hierarchy(self,h5_handle):
+        """ Create all datagroups in the output hdf5 file.
 
-        pmi_file = self.g_s2e['setup']['pmi_out']
-        grp = '/data/snp_' + str( a_snp ).zfill( self.g_s2e['setup']['num_digits'] )
-        try:
-            grp_hist_parent = xfp.create_group( '/data' )
-        except:
-            1
-        grp_hist_parent = xfp.create_group( grp )
-        xfp[ grp + '/Z' ]   = self.g_s2e['sys']['Z']
-        xfp[ grp + '/T' ]   = self.g_s2e['sys']['T'] .astype(numpy.int32)
-        xfp[ grp + '/xyz' ] = self.g_s2e['sys']['xyz'] .astype(numpy.int32)
-        xfp[ grp + '/r' ] = self.g_s2e['sys']['r'] .astype(numpy.float32)
-        xfp[ grp + '/Nph' ] = numpy.array( [self.g_s2e['pulse']['sel_int'][a_snp-1]] )
-        xfp[ grp + '/halfQ' ] = self.g_dbase['halfQ'] .astype(numpy.float32)
-        xfp[ grp + '/ff' ] = ff .astype(numpy.float32)
-        xfp[ grp + '/Sq_halfQ' ] = self.g_dbase['Sq_halfQ'] .astype(numpy.float32)
-        xfp[ grp + '/Sq_bound' ] = self.g_dbase['Sq_bound'] .astype(numpy.float32)
-        xfp[ grp + '/Sq_free' ] = self.g_dbase['Sq_free'] .astype(numpy.float32)
+        :param h5_handle: File handle to writable hdf5 file.
+        :type h5_handle: h5py.File
 
-    ##############################################################################
+        """
+        top_level_groups = [
+                'data',
+                'history',
+                'info',
+                'misc',
+                'params',
+                'version',
+                ]
+
+        for i, group in enumerate(top_level_groups):
+            h5_handle.create_group(group)
+
+    def _save_snapshot( self, h5_handle, snapshot_dict ) :
+        """ Write a given snapshot to an open hdf5 file.
+
+        :param h5_handle: Handle to an open writable hdf5 file.
+        :type h5_handle: h5py.File
+
+        :param snapshot_dict: The snapshot to save.
+        :type snapshot: dict
+
+        """
+
+        #self.g_s2e['sys']['xyz'] = self.f_dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
+        #self.g_s2e['sys']['T'] = numpy.sort( numpy.unique( self.g_s2e['sys']['xyz'] ) )
+        #ff = numpy.zeros( ( len( self.g_s2e['sys']['T'] ) , len( self.g_dbase['halfQ'] ) ) )
+        #for ii in range( len( self.g_s2e['sys']['T'] ) ) :
+            #ff[ii,:] =  self.g_dbase['ff'][self.g_s2e['sys']['T'][ii].astype(int),:].copy()
+    ####        print self.g_s2e['sys']['T'][ii].astype(int) , ff[ii,:]
+
+        data_group = h5_handle['/data']
+
+        snapshot_group = data_group.create_group('snp_'+snapshot_dict['id'])
+
+        snapshot_group.create_dataset('Z',   data=snapshot_dict['Z'])
+        snapshot_group.create_dataset('T',   data=snapshot_dict['T'].astype(numpy.int32))
+        ### WIP
+        xyz = self.f_dbase_Zq2id( snapshot_dict['Z'] , snapshot_dict['q'] ).astype(numpy.int32)
+        snapshot_group.create_dataset('xyz', data=xyz)
+        snapshot_group.create_dataset('r', data=snapshot_dict['r'] .astype(numpy.float32))
+        snapshot_group.create_dataset('Nph', data=numpy.array( [snapshot_dict['number_of_photons'].astype(numpy.int32)]))
+        snapshot_group.create_dataset('t', data=numpy.array( [snapshot_dict['timestamp'].astype(numpy.float32)]))
+        halfQ = snapshot_dict['Q']/ ( 2.0 * numpy.pi * bohr_radius * 2.0 )
+
+        snapshot_group.create_dataset('halfQ', data=halfQ.astype(numpy.float32))
+        snapshot_group.create_dataset('ff', data=snapshot_dict['f0'].astype(numpy.float32))
+        snapshot_group.create_dataset('Sq_halfQ', data=halfQ.astype(numpy.float32))
+        snapshot_group.create_dataset('Sq_bound', data=numpy.zeros_like(snapshot_dict['f0']))
+        snapshot_group.create_dataset('Sq_free', data=numpy.zeros_like(snapshot_dict['f0']))
 
 
     def f_num_snp_xxx( self, all_real ) :
@@ -946,13 +966,54 @@ def _parse_xmdyn_xparams(input_file_path):
     :rtype: dict || XMDYNPhotonMatterInteractorParameters
 
     """
-    ret = {
-            'start_time' : 0.0*second,
-            'stop_time'  : 100.0e-15*second,
-            'time_step'  : 1.0e-16*second,
-            'number_of_photons' : 3.5e14,
-            'photon_energy' : 10.0e3*electronvolt,
-          }
+    # Open parameters file.
+    with open(input_file_path, newline='') as csv_handle:
 
-    return ret
+        # Get a csv reader.
+        reader = csv.reader(csv_handle, delimiter=' ' )
 
+        # Setup return dictionary.
+        ret ={}
+
+        # These fields shall be handled as numeric data.
+        numeric_keys = [
+                'N',
+                'Z',
+                'DIST',
+                'EPH',
+                'NPH',
+                'DIAM',
+                'FLU_MAX',
+                'T',
+                'T0',
+                'R0',
+                'DT',
+                'STEPS',
+                'PROGRESS',
+                'RANDSEED',
+                'RSTARTE',
+                ]
+
+        # Iterate through read lines.
+        for line in reader:
+            # Skip empty lines and comments.
+            if line == []:
+                continue
+            if line[0][0] == '#':
+                continue
+
+            # Get key-value pair (they're separated by random number of whitespaces.
+            key, val = line[0], line[-1]
+
+            # Fix numeric data.
+            if key in numeric_keys:
+                try:
+                    val = float(val)
+                except:
+                    raise
+
+            # Store on dict.
+            ret[key] = val
+
+        # Return finished dict.
+        return ret
