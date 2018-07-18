@@ -1,3 +1,4 @@
+""" Test module for the XMDYNDemoPhotonMatterInteractor. """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the XMDYNDemoPhotonMatterInteractor.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151215
-
-"""
 import h5py
 import numpy
 import os
@@ -34,6 +28,7 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
+from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import PMIDemo
 from TestUtilities import TestUtilities
 
 class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
@@ -316,6 +311,45 @@ class XMDYNDemoPhotonMatterInteractorTest(unittest.TestCase):
             # Check we have a non-zero rotation.
             self.assertNotEqual( numpy.linalg.norm(angle), 0.)
 
+
+class PMIDemoTest(unittest.TestCase):
+    """
+    Test class for the PMIDemo class.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Setting up the test class. """
+        cls.input_h5 = TestUtilities.generateTestFilePath('prop_out_0000001.h5')
+        cls.input_xmdyn_dir = TestUtilities.generateTestFilePath('xmdyn_run')
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tearing down the test class. """
+
+    def setUp(self):
+        """ Setting up a test. """
+        self.__files_to_remove = []
+        self.__dirs_to_remove = []
+
+    def tearDown(self):
+        """ Tearing down a test. """
+        # Clean up.
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
+        for p in self.__dirs_to_remove:
+            if os.path.isdir(p):
+                shutil.rmtree(p)
+
+    def test_load_snapshot_from_dir(self):
+        """ Test loading a xmdyn snapshot from a directory that contains xmdyn output. """
+
+        pmi_demo = PMIDemo()
+
+        snapshot = pmi_demo.f_load_snp_from_dir(self.input_xmdyn_dir, 1600 )
+
+        self.assertIsInstance(snapshot, dict)
 
 if __name__ == '__main__':
     unittest.main()

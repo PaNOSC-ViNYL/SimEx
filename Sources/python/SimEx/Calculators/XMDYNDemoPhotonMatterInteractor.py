@@ -240,6 +240,8 @@ class PMIDemo(object):
         self.g_s2e = {}
         self.g_dbase = {}
 
+        self.f_s2e_setup()
+
     def f_s2e_setup(self) :
         self.g_s2e['setup'] = dict()
         self.g_s2e['sys'] = dict()
@@ -322,8 +324,6 @@ class PMIDemo(object):
     ###    g_dbase['ph_sigma'] ;
 
 
-
-
     def f_load_snp_content(self, a_fp , a_snp ) :
         dbase_root = "/data/snp_" + str( a_snp ).zfill(self.g_s2e['setup']['num_digits']) + "/"
         xsnp = dict()
@@ -338,18 +338,40 @@ class PMIDemo(object):
 
         return xsnp
 
-
-    ##############################################################################
-
-
     def f_load_snp_xxx(self, a_real , a_snp ) :
         xfp  = h5py.File( self.g_s2e['prj'] + '/pmi/pmi_out_' + str( a_real ).zfill(self.g_s2e['setup']['num_digits'])  + '.h5' , "r" )
         xsnp = self.f_load_snp_content( xfp , a_snp )
         xfp.close()
         return xsnp
 
+    def f_load_snp_from_dir(self, path, snapshot_index ) :
+        """ Load xmdyn output from an xmdyn directory.
 
-    ##############################################################################
+        :param path: The directory path to xmdyn output.
+        :type path: str
+
+        :param snapshot_index: Which snapshot to load.
+        :type snapshot_index: int
+
+        :returns: The snapshot data.
+        :rtype: dict
+
+        """
+
+        path_to_snapshot  = os.path.join(path, 'snp', str(snapshot_index).zfill(8))
+
+        xsnp = dict()
+        xsnp['Z']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Z.dat' ))
+        xsnp['T']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'T.dat' ))
+        xsnp['ff']  = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' ))
+        xsnp['xyz'] = numpy.loadtxt(os.path.join(path_to_snapshot, 'uid.dat' ))
+        xsnp['r']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'r.dat' ))
+        N = xsnp['Z'].size
+
+        #xsnp['q'] = numpy.array( [ xsnp['ff'][ numpy.nonzero( xsnp['T'] == x )[0] , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
+        xsnp['snp'] = snapshot_index ;
+
+        return xsnp
 
 
     def f_load_sample( self, sample_path ) :
@@ -366,8 +388,6 @@ class PMIDemo(object):
         self.g_s2e['sample'] = sample
 
 
-    ##############################################################################
-
     def f_save_data(self, dset , data ) :
         xfp  = h5py.File( self.g_s2e['setup']['pmi_out'] , "a" )
         try:
@@ -378,13 +398,7 @@ class PMIDemo(object):
         xfp[ dset ] = data
         xfp.close()
 
-
-
-    ##############################################################################
-
-
     def f_rotate_sample( self ) :
-
         # Init quaternion for rotation.
         self.g_s2e['sample']['rot_quaternion'] = numpy.array([0,0,0,0])
 
@@ -397,17 +411,7 @@ class PMIDemo(object):
 
         self.f_save_data( '/data/angle' , self.g_s2e['sample']['rot_quaternion'] .reshape((1,4)) )
 
-
-
-
-    ##############################################################################
-
-
-
-    ##############################################################################
-
     def f_system_setup( self ) :
-
         self.g_s2e['sys']['r'] = self.g_s2e['sample']['r'].copy()
         self.g_s2e['sys']['q'] = numpy.zeros( self.g_s2e['sample']['Z'].shape )
         self.g_s2e['sys']['NE'] = self.g_s2e['sample']['Z'].copy()
@@ -415,11 +419,7 @@ class PMIDemo(object):
         self.g_s2e['sys']['Nph'] = 1e99
         #print '   NOTE: Nph is uniform.'
 
-
-    ##############################################################################
-
     def f_save_snp( self,  a_snp ) :
-
         self.g_s2e['sys']['xyz'] = self.f_dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
         self.g_s2e['sys']['T'] = numpy.sort( numpy.unique( self.g_s2e['sys']['xyz'] ) )
         ff = numpy.zeros( ( len( self.g_s2e['sys']['T'] ) , len( self.g_dbase['halfQ'] ) ) )
