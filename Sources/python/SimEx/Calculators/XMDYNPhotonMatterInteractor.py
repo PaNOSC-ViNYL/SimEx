@@ -498,8 +498,11 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         snapshot_group.create_dataset('T_xmdyn',   data=snapshot_dict['T'].astype(numpy.int32))
         snapshot_group.create_dataset('uid',   data=snapshot_dict['uid'].astype(numpy.int32))
         snapshot_group.create_dataset('Z',  data=snapshot_dict['Z'])
+        ####
+        # Needed? Or can we use uid and T from xmdyn output? Copied here from l 488 above.
         xyz = self.f_dbase_Zq2id( snapshot_dict['Z'] , snapshot_dict['q'] ).astype(numpy.int32)
         T = numpy.sort(numpy.unique(xyz))
+        ####
         snapshot_group.create_dataset('T',   data=T.astype(numpy.int32))
         ### WIP
         snapshot_group.create_dataset('xyz', data=xyz)
@@ -509,8 +512,14 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         halfQ = snapshot_dict['Q']/ ( 2.0 * numpy.pi * bohr_radius * 2.0 )
 
         snapshot_group.create_dataset('halfQ', data=halfQ.astype(numpy.float32))
+        ###
+        # do we need to sort rows in ff? See l 490 ff above.
+        ###
         snapshot_group.create_dataset('ff', data=snapshot_dict['f0'].astype(numpy.float32))
         snapshot_group.create_dataset('Sq_halfQ', data=halfQ.astype(numpy.float32))
+        ###
+        # Where do we get Sq_bound?
+        ###
         snapshot_group.create_dataset('Sq_bound', data=numpy.zeros_like(halfQ))
         snapshot_group.create_dataset('Sq_free', data=numpy.zeros_like(halfQ))
 
