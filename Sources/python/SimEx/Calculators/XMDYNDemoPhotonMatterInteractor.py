@@ -344,7 +344,7 @@ class PMIDemo(object):
         xfp.close()
         return xsnp
 
-    def f_load_snp_from_dir(self, path, snapshot_index ) :
+    def f_load_snp_from_dir(self, path_to_snapshot) :
         """ Load xmdyn output from an xmdyn directory.
 
         :param path: The directory path to xmdyn output.
@@ -358,21 +358,18 @@ class PMIDemo(object):
 
         """
 
-        path_to_snapshot  = os.path.join(path, 'snp', str(snapshot_index).zfill(8))
-
         xsnp = dict()
-        xsnp['Z']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Z.dat' ))
-        xsnp['T']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'T.dat' ))
-        xsnp['ff']  = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' ))
-        xsnp['xyz'] = numpy.loadtxt(os.path.join(path_to_snapshot, 'uid.dat' ))
-        xsnp['r']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'r.dat' ))
-        N = xsnp['Z'].size
-
-        #xsnp['q'] = numpy.array( [ xsnp['ff'][ numpy.nonzero( xsnp['T'] == x )[0] , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
-        xsnp['snp'] = snapshot_index ;
+        xsnp['Z']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Z.dat' )) # Atom numbers
+        xsnp['T']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'T.dat' )) # Atom type
+        xsnp['uid'] = numpy.loadtxt(os.path.join(path_to_snapshot, 'uid.dat' )) #Unique atom ID.
+        xsnp['r']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'r.dat' )) # Cartesian coordinates.
+        xsnp['v']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'v.dat' )) # Cartesian velocities.
+        xsnp['m']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'm.dat' )) # Masses.
+        xsnp['q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'q.dat' )) # Ion charge
+        xsnp['ff']  = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' )) # Form factors of each atom type.
+        xsnp['Q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Q.dat' )) # Wavenumber grid for form factors.
 
         return xsnp
-
 
     def f_load_sample( self, sample_path ) :
         sample = dict()
