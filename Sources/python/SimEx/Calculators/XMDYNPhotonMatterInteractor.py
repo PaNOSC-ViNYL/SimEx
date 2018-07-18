@@ -1,7 +1,7 @@
 """ Module that holds the XMDYNPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -360,24 +360,6 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         g_dbase['Sq_free']  = numpy.zeros( (numQ,) ) ;
 
         self.g_dbase = g_dbase
-    #    g_dbase['ph_sigma'] ;
-
-
-    ##    g_dbase['halfQ'] = numpy.array( [ 0 , 1 , 2 ] ) ;
-    ##    maxZ = g_s2e['maxZ']  #99
-    ##    g_dbase['ff'] = numpy.zeros( ( f_dbase_Zq2id( maxZ , maxZ ) + 1 , len( g_dbase['halfQ'] ) ) )
-    ##    ii = 0
-    ##    for ZZ in range( 1 , maxZ+1 ) :
-    ##        for qq in range( ZZ+1 ) :
-    ##            g_dbase['ff'][ ii , : ] = numpy.array( [ 1.0 , 0.5 , 0.25 ] ) * ( ZZ - qq ) ;
-    #####            print ZZ,  qq, ii
-    #####            print  g_dbase['ff'][ ii , : ]
-    ##            ii = ii + 1
-    ##    g_dbase['Sq_halfQ'] = numpy.array( [ 0 , 0 , 0 ] ) ;
-    ##    g_dbase['Sq_bound'] = numpy.array( [ 0 , 0 , 0 ] ) ;
-    ##    g_dbase['Sq_free']  = numpy.array( [ 0 , 0 , 0 ] ) ;
-    ###    g_dbase['ph_sigma'] ;
-
 
     def f_load_snp_content(self, a_fp , a_snp ) :
         dbase_root = "/data/snp_" + str( a_snp ).zfill(self.g_s2e['setup']['num_digits']) + "/"
@@ -513,10 +495,13 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         snapshot_group = data_group.create_group('snp_'+snapshot_dict['id'])
 
-        snapshot_group.create_dataset('Z',   data=snapshot_dict['Z'])
-        snapshot_group.create_dataset('T',   data=snapshot_dict['T'].astype(numpy.int32))
-        ### WIP
+        snapshot_group.create_dataset('T_xmdyn',   data=snapshot_dict['T'].astype(numpy.int32))
+        snapshot_group.create_dataset('uid',   data=snapshot_dict['uid'].astype(numpy.int32))
+        snapshot_group.create_dataset('Z',  data=snapshot_dict['Z'])
         xyz = self.f_dbase_Zq2id( snapshot_dict['Z'] , snapshot_dict['q'] ).astype(numpy.int32)
+        T = numpy.sort(numpy.unique(xyz))
+        snapshot_group.create_dataset('T',   data=T.astype(numpy.int32))
+        ### WIP
         snapshot_group.create_dataset('xyz', data=xyz)
         snapshot_group.create_dataset('r', data=snapshot_dict['r'] .astype(numpy.float32))
         snapshot_group.create_dataset('Nph', data=numpy.array( [snapshot_dict['number_of_photons'].astype(numpy.int32)]))
@@ -526,8 +511,8 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         snapshot_group.create_dataset('halfQ', data=halfQ.astype(numpy.float32))
         snapshot_group.create_dataset('ff', data=snapshot_dict['f0'].astype(numpy.float32))
         snapshot_group.create_dataset('Sq_halfQ', data=halfQ.astype(numpy.float32))
-        snapshot_group.create_dataset('Sq_bound', data=numpy.zeros_like(snapshot_dict['f0']))
-        snapshot_group.create_dataset('Sq_free', data=numpy.zeros_like(snapshot_dict['f0']))
+        snapshot_group.create_dataset('Sq_bound', data=numpy.zeros_like(halfQ))
+        snapshot_group.create_dataset('Sq_free', data=numpy.zeros_like(halfQ))
 
 
     def f_num_snp_xxx( self, all_real ) :
