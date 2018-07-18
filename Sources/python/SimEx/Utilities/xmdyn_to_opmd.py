@@ -370,25 +370,6 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
 
     opmd_h5.close()
     h5.close()
-
-def _parse_xmdyn_xparams(input_file_path):
-    """ Parse XMDYN parameters file and extract timeing and photon information.
-
-    :param input_file_path: Path to xmdyn input file.
-    :type input_file_path: str
-
-    :return: Parameter dictionary / object.
-    :rtype: dict || XMDYNPhotonMatterInteractorParameters
-
-    """
-    ret = {
-            'start_time' : 0.0*second,
-            'stop_time'  : 100.0e-15*second,
-            'time_step'  : 1.0e-16*second,
-            'number_of_photons' : 3.5e14,
-          }
-
-    return ret
 if __name__ == "__main__":
 
     # Parse arguments.

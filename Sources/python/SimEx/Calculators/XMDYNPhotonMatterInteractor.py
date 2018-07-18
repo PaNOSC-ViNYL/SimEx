@@ -1,4 +1,4 @@
-""" Module that holds the XMDYNDemoPhotonMatterInteractor class.  """
+""" Module that holds the XMDYNPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -27,13 +27,14 @@ import random
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities import IOUtilities
+from SimEx.Utilities.Units import electronvolt, second, meter, joule
 
 class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
     """
     Interface class for photon-matter interaction calculations using the XMDYN code.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None, sample_path=None):
+    def __init__(self,  parameters=None, input_path=None, output_path=None, sample_path=None, load_from_path=None):
         """
         Constructor for the xfel photon propagator.
 
@@ -48,18 +49,13 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         :param sample_path: Location of the sample/target geometry file. Can be either a simS2E sample file or a pdb file. Specifying a pdb will first check if it's present in a database, if not, it will issue a query for the basename of the file to the RCSB protein data bank.
         :type sample_path: str
+
+        :param load_from_path: Specify a directory where a previous XMDYN run was written to.
+        :type load_from_path: str
         """
 
         # Initialize base class.
-        super(XMDYNDemoPhotonMatterInteractor, self).__init__(parameters,input_path,output_path)
-
-        # Check sample path.
-        if sample_path is None:
-            raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
-        if not os.path.isfile( sample_path):
-            print("Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path))
-
-        self.__sample_path = sample_path
+        super(XMDYNPhotonMatterInteractor, self).__init__(parameters,input_path,output_path)
 
         self.__provided_data = ['/data/snp_<7 digit index>/ff',
                                 '/data/snp_<7 digit index>/halfQ',
@@ -126,6 +122,75 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         if "random_rotation" not in list(self.parameters.keys()):
             self.parameters["random_rotation"] = False
+
+        # Load previous data if given.
+        if load_from_path is not None:
+            self.__load_from_path = load_from_path
+            self._init_from_data()
+
+            sample_path = os.path.join(load_from_path, 'sample')
+
+        # Check sample path.
+        if sample_path is None:
+            raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
+        if not os.path.isfile( sample_path):
+            print("Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path))
+
+        self.__sample_path = sample_path
+
+
+    def _init_from_data(self):
+        """ Read data from previous run. """
+
+        # Check input path.
+        if not os.path.isdir(self.__load_from_path):
+            raise IOError("Directory %s not found." % (self.__load_from_path))
+
+        # Check all required data is present.
+        snapshot_dir = os.path.join(self.__load_from_path, 'snp')
+        if not os.path.isdir(snapshot_dir):
+            raise IOError("%s does not contain a snapshot directory snp/." % (self.__load_from_path))
+
+        # Get all snapshot directories.
+        snapshots = [os.path.join(snapshot_dir,snp) for snp in os.listdir(snapshot_dir) if snp not in ['beam.dat', 'snp_times.dat', 'all_energy.dat']]
+
+        # Get number of snapshots.
+        number_of_snapshots = len(snapshots)
+        if number_of_snapshots == 0:
+            raise RuntimeError("%s does not contain any snapshots." % (snapshot_dir))
+
+        # Sort dirs.
+        snapshots.sort()
+
+        # Check and parse xmdyn input file to extract time steps and photon numbers.
+        input_file_path = os.path.join(self.__load_from_path,'xparams.txt') # We use the file written at xmdyn runtime which reflects the actual state of affairs.
+        if not os.path.isfile(input_file_path):
+            raise IOError("XMDYN input file %s was not found." % (input_file_path))
+
+        xmdyn_parameters = _parse_xmdyn_xparams(input_file_path)
+
+        # Setup a pmi demo object to facilitate loading of data.
+        pmi = PMI()
+
+        time_max = xmdyn_parameters['stop_time'].m_as(second)
+        time_min = xmdyn_parameters['start_time'].m_as(second)
+        time_step = xmdyn_parameters['time_step'].m_as(second)
+
+        photon_energy = xmdyn_parameters['photon_energy'].m_as(joule)
+        ###############################################
+        import ipdb
+        ipdb.set_trace()
+        ###############################################
+
+        # Open in and out files.
+        with h5py.File(self.output_path, 'w') as h5:
+
+            for it, snp in enumerate(snapshots):
+
+                # Load snapshot data as a dict
+                snapshot_dict = pmi.f_load_snp_from_dir(snp)
+
+                pmi.f_save_snp(h5, snapshot_dict)
 
     def expectedData(self):
         """ Query for the data expected by the Interactor. """
@@ -416,7 +481,7 @@ class PMI(object):
         self.g_s2e['sys']['Nph'] = 1e99
         #print '   NOTE: Nph is uniform.'
 
-    def f_save_snp( self,  a_snp ) :
+    def f_save_snp( self, xfp, a_snp ) :
         self.g_s2e['sys']['xyz'] = self.f_dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
         self.g_s2e['sys']['T'] = numpy.sort( numpy.unique( self.g_s2e['sys']['xyz'] ) )
         ff = numpy.zeros( ( len( self.g_s2e['sys']['T'] ) , len( self.g_dbase['halfQ'] ) ) )
@@ -426,8 +491,6 @@ class PMI(object):
 
         pmi_file = self.g_s2e['setup']['pmi_out']
         grp = '/data/snp_' + str( a_snp ).zfill( self.g_s2e['setup']['num_digits'] )
-    ###    print pmi_file , grp
-        xfp  = h5py.File( pmi_file , "a" )
         try:
             grp_hist_parent = xfp.create_group( '/data' )
         except:
@@ -443,11 +506,6 @@ class PMI(object):
         xfp[ grp + '/Sq_halfQ' ] = self.g_dbase['Sq_halfQ'] .astype(numpy.float32)
         xfp[ grp + '/Sq_bound' ] = self.g_dbase['Sq_bound'] .astype(numpy.float32)
         xfp[ grp + '/Sq_free' ] = self.g_dbase['Sq_free'] .astype(numpy.float32)
-
-        xfp.close()
-
-
-
 
     ##############################################################################
 
@@ -877,3 +935,24 @@ def f_h5_out2in( src , dest , *args ) :
 
     file_out.close()
     file_in.close()
+
+def _parse_xmdyn_xparams(input_file_path):
+    """ Parse XMDYN parameters file and extract timeing and photon information.
+
+    :param input_file_path: Path to xmdyn input file.
+    :type input_file_path: str
+
+    :return: Parameter dictionary / object.
+    :rtype: dict || XMDYNPhotonMatterInteractorParameters
+
+    """
+    ret = {
+            'start_time' : 0.0*second,
+            'stop_time'  : 100.0e-15*second,
+            'time_step'  : 1.0e-16*second,
+            'number_of_photons' : 3.5e14,
+            'photon_energy' : 10.0e3*electronvolt,
+          }
+
+    return ret
+

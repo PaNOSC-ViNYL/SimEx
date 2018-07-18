@@ -311,6 +311,17 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
             # Check we have a non-zero rotation.
             self.assertNotEqual( numpy.linalg.norm(angle), 0.)
 
+    def test_write_to_s2e_h5(self):
+        """ Test writing to s2e formatted hdf5. """
+
+        pmi = XMDYNPhotonMatterInteractor(load_from_path=TestUtilities.generateTestFilePath('xmdyn_run'))
+        pmi.output_path = 'pmi'
+
+        pmi.saveH5()
+
+        self.assertIn('pmi_out_0000000.h5', os.listdir(pmi.output_path))
+
+
 
 class PMITest(unittest.TestCase):
     """
