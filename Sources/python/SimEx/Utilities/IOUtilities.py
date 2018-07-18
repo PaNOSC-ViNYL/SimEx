@@ -135,11 +135,6 @@ def loadXYZ( path=None):
     # Return.
     return atoms_dict
 
-
-
-
-
-
 def loadPDB( path = None ):
     """ Wrapper to convert a given pdb file to a sample dictionary used by e.g. the XMDYNCalculator.
 
@@ -355,5 +350,3 @@ def wgetData(url=None, path=None):
         #numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
     #if sys.argv[2] == 'simplex':
         #numpy.savetxt( fname='beam.dist', X=data)
-
-
