@@ -135,7 +135,9 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             self._init_from_data()
 
             sample_path = os.path.join(load_from_path, 'sample')
-            self.output_path = os.path.join(self.output_path, 'pmi_out.h5')
+
+            if os.path.isdir(self.output_path):
+                self.output_path = os.path.join(self.output_path, 'pmi_out.h5')
 
         # Check sample path.
         if sample_path is None:
@@ -395,6 +397,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         """
 
+        print("LOG: Loading %s." % (path_to_snapshot))
         xsnp = dict()
         xsnp['Z']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Z.dat' )) # Atom numbers
         xsnp['T']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'T.dat' )) # Atom type

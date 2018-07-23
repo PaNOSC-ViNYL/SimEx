@@ -48,6 +48,7 @@ from .Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from .Calculators.XFELPhotonPropagator import XFELPhotonPropagator
 from .Calculators.XFELPhotonSource import XFELPhotonSource
 from .Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
+from .Calculators.XMDYNPhotonMatterInteractor import XMDYNPhotonMatterInteractor
 
 from .Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from .Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters

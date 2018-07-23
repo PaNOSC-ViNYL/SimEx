@@ -5,11 +5,9 @@ from argparse import ArgumentParser
 import numpy
 import h5py
 import csv
-import sys
 import os
 
 csv.QUOTE_NONNUMERIC=True
-sample_dir = sys.argv[1]
 sample_h5_fname = 'sample.h5'
 
 def main(sample_dir):
@@ -48,5 +46,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args['input_dir'])
+    main(args.input_dir)
 
