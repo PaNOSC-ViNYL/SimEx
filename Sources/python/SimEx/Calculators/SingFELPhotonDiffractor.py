@@ -170,11 +170,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Setup directory to pmi output.
         # Backengine expects a directory name, so have to check if
         # input_path is dir or file and handle accordingly.
-        ###############################################
-        import ipdb
-        ipdb.set_trace()
-        ###############################################
-
         if os.path.isdir(self.input_path):
             input_dir = self.input_path
 

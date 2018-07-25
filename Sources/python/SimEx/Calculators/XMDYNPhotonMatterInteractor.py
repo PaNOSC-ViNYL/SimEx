@@ -178,8 +178,8 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         xmdyn_parameters = _parse_xmdyn_xparams(input_file_path)
         fluence = numpy.loadtxt(os.path.join(snapshot_dir, 'beam.dat'))
         focus_area = xmdyn_parameters['DIAM']**2*math.pi/2.0
-        photon_energy = xmdyn_parameters['EPH']*1e3*e # [J]
-        number_of_photons_per_snapshot = fluence * focus_area / photon_energy
+        photon_energy = xmdyn_parameters['EPH'] # [eV]
+        number_of_photons_per_snapshot = fluence*focus_area/photon_energy/e
         timestamps = numpy.loadtxt(os.path.join(snapshot_dir, 'snp_times.dat'))
 
         self.__xmdyn_parameters = xmdyn_parameters
@@ -406,7 +406,12 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         xsnp['v']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'v.dat' )) # Cartesian velocities.
         xsnp['m']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'm.dat' )) # Masses.
         xsnp['q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'q.dat' )) # Ion charge
-        xsnp['f0']  = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' )) # Form factors of each atom type.
+        f0 = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' )) # Form factors of each atom type.
+        # Patch if only one atomic species.
+        if f0.ndim == 1:
+            f0 = f0[numpy.newaxis,:]
+        xsnp['f0']  = f0
+
         xsnp['Q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Q.dat' )) # Wavenumber grid for form factors.
         xsnp['id'] = os.path.split(path_to_snapshot)[-1]
 
@@ -476,6 +481,20 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         for i, group in enumerate(top_level_groups):
             h5_handle.create_group(group)
 
+        # Store global parameters.
+        # Photon energy.
+        h5_handle['params'].create_dataset('photon_energy', data=self.__xmdyn_parameters['EPH'])
+        h5_handle['params/photon_energy'].attrs['unit'] = 'eV'
+
+        # Focus size
+        x_fwhm = y_fwhm = self.__xmdyn_parameters['DIAM']
+        focus = h5_handle['params'].create_group('focus')
+        focus.create_dataset('xFWHM', data=x_fwhm)
+        focus.create_dataset('yFWHM', data=y_fwhm)
+        focus.attrs['unit'] = "m"
+        h5_handle['params/photon_energy'].attrs['unit'] = 'eV'
+
+
     def _save_snapshot( self, h5_handle, snapshot_dict ) :
         """ Write a given snapshot to an open hdf5 file.
 
@@ -518,7 +537,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         ###
         # do we need to sort rows in ff? See l 490 ff above.
         ###
-        snapshot_group.create_dataset('ff', data=snapshot_dict['f0'].astype(numpy.float32))
+        snapshot_group.create_dataset('ff', data=snapshot_dict['f0'].astype(numpy.float32), )
         snapshot_group.create_dataset('Sq_halfQ', data=halfQ.astype(numpy.float32))
         ###
         # Where do we get Sq_bound?
