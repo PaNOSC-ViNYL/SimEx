@@ -293,8 +293,6 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         :type output_path: str
         """
 
-        ### TODO: Store parameters to /params in h5.
-        xmdyn_parameters = self.__xmdyn_parameters
         snapshots = self.__snapshots
 
 
@@ -306,6 +304,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
                 snapshot_dict = self.f_load_snp_from_dir(snp)
                 snapshot_dict['number_of_photons'] = self.__number_of_photons[it]
                 snapshot_dict['timestamp'] = self.__timestamps[it]
+                snapshot_dict['s2e_id'] = "{0:07d}".format(it+1)
 
                 self._save_snapshot(h5, snapshot_dict)
 
@@ -494,6 +493,8 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         focus.attrs['unit'] = "m"
         h5_handle['params/photon_energy'].attrs['unit'] = 'eV'
 
+        ### TODO: Store parameters to /params in h5.
+        xmdyn_parameters = self.__xmdyn_parameters
 
     def _save_snapshot( self, h5_handle, snapshot_dict ) :
         """ Write a given snapshot to an open hdf5 file.
@@ -515,7 +516,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         data_group = h5_handle['/data']
 
-        snapshot_group = data_group.create_group('snp_'+snapshot_dict['id'])
+        snapshot_group = data_group.create_group('snp_'+snapshot_dict['s2e_id'])
 
         snapshot_group.create_dataset('T_xmdyn',   data=snapshot_dict['T'].astype(numpy.int32))
         snapshot_group.create_dataset('uid',   data=snapshot_dict['uid'].astype(numpy.int32))

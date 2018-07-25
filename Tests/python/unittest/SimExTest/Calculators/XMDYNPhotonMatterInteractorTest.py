@@ -334,9 +334,9 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
             ]
 
         expected_data_groups = [
-                    'snp_00000000',
-                    'snp_00005200',
-                    'snp_00010000',
+                    'snp_0000001',
+                    'snp_0000002',
+                    'snp_0000003',
                     ]
 
         expected_snapshot_groups = [
@@ -360,19 +360,21 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
             for expected_group in expected_data_groups:
                 self.assertIn(expected_group, present_groups)
 
-            present_groups = h5['data/snp_00000000'].keys()
+            present_groups = h5['data/snp_0000001'].keys()
             for expected_group in expected_snapshot_groups:
                 self.assertIn(expected_group, present_groups)
 
         # Check data shapes.
+        # Since this is a single-species calculation, there should be only one row in ff.
+        self.assertEqual(h5['data/snp_0000001/ff'].value.shape[0], 1)
 
 
     def test_load_snapshot_from_dir(self):
         """ Test loading a xmdyn snapshot from a directory that contains xmdyn output. """
 
-        pmi = XMDYNPhotonMatterInteractor()
+        pmi = XMDYNPhotonMatterInteractor(load_from_path=TestUtilities.generateTestFilePath('xmdyn_run'), output_path = 'pmi')
 
-        snapshot = pmi.f_load_snp_from_dir(os.path.join(self.input_xmdyn_dir, 'snp', '1600'.zfill(8)))
+        snapshot = pmi.f_load_snp_from_dir(os.path.join(self.input_xmdyn_dir, 'snp', '1280'.zfill(8)))
 
         self.assertIsInstance(snapshot, dict)
 
