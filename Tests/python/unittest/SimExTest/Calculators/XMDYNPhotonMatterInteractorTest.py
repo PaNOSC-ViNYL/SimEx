@@ -314,6 +314,7 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
     def test_write_to_s2e_h5(self):
         """ Test writing to s2e formatted hdf5. """
 
+        self.__files_to_remove.append('pmi')
         # Construct with load path.
         pmi = XMDYNPhotonMatterInteractor(load_from_path=TestUtilities.generateTestFilePath('xmdyn_run'), output_path = 'pmi')
 
