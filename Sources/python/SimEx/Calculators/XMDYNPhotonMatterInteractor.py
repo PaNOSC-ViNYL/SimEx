@@ -77,7 +77,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
                                 '/history/parent/parent',
                                 '/info/package_version',
                                 '/info/contact',
-                                '/info/data_description',
+                                '/info/datdescription',
                                 '/info/method_description',
                                 '/version']
 
@@ -112,19 +112,19 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
                                 '/params/yCentre',
                                 '/info/package_version',
                                 '/info/contact',
-                                '/info/data_description',
+                                '/info/datdescription',
                                 '/info/method_description',
                                 '/misc/xFWHM',
                                 '/misc/yFWHM',
                                 '/version',
                                 ]
 
-        if (self.parameters is None) or ('number_of_trajectories' not in list(self.parameters.keys())):
-            self.parameters = {'number_of_trajectories' : 1,
+        if (self.parameters is None) or ('number_otrajectories' not in list(self.parameters.keys())):
+            self.parameters = {'number_otrajectories' : 1,
                     }
-        if self.parameters['number_of_trajectories'] != 1:
+        if self.parameters['number_otrajectories'] != 1:
             print("\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n")
-            self.parameters['number_of_trajectories'] = 1
+            self.parameters['number_otrajectories'] = 1
 
         if "random_rotation" not in list(self.parameters.keys()):
             self.parameters["random_rotation"] = False
@@ -164,8 +164,8 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         snapshots = [os.path.join(snapshot_dir,snp) for snp in os.listdir(snapshot_dir) if snp not in ['beam.dat', 'snp_times.dat', 'all_energy.dat']]
 
         # Get number of snapshots.
-        number_of_snapshots = len(snapshots)
-        if number_of_snapshots == 0:
+        number_osnapshots = len(snapshots)
+        if number_osnapshots == 0:
             raise RuntimeError("%s does not contain any snapshots." % (snapshot_dir))
 
         # Sort dirs.
@@ -179,12 +179,12 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         fluence = numpy.loadtxt(os.path.join(snapshot_dir, 'beam.dat'))
         focus_area = xmdyn_parameters['DIAM']**2*math.pi/2.0
         photon_energy = xmdyn_parameters['EPH'] # [eV]
-        number_of_photons_per_snapshot = fluence*focus_area/photon_energy/e
+        number_ophotons_per_snapshot = fluence*focus_area/photon_energy/e
         timestamps = numpy.loadtxt(os.path.join(snapshot_dir, 'snp_times.dat'))
 
         self.__xmdyn_parameters = xmdyn_parameters
         self.__snapshots = snapshots
-        self.__number_of_photons = number_of_photons_per_snapshot
+        self.__number_ophotons = number_ophotons_per_snapshot
         self.__timestamps = timestamps*xmdyn_parameters['DT']*1e-18*second
 
     def expectedData(self):
@@ -219,7 +219,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         for i,input_file in enumerate(input_files):
             tail = input_file.split( 'prop' )[-1]
             output_file = os.path.join( self.output_path , 'pmi_out_%07d.h5' % (i+1) )
-            f_h5_out2in( input_file, output_file)
+            h5_out2in( input_file, output_file)
 
             # Get the backengine calculator.
             pmi_demo = PMIDemo()
@@ -232,8 +232,8 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.g_s2e['sys'] = dict()
             pmi_demo.g_s2e['setup']['num_digits'] = 7
 
-            if 'number_of_steps' in list(self.parameters.keys()):
-                pmi_demo.g_s2e['steps'] = self.parameters['number_of_steps']
+            if 'number_osteps' in list(self.parameters.keys()):
+                pmi_demo.g_s2e['steps'] = self.parameters['number_osteps']
             else:
                 pmi_demo.g_s2e['steps'] = 100
 
@@ -241,19 +241,19 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.g_s2e['random_rotation'] = self.parameters['random_rotation']
             pmi_demo.g_s2e['setup']['pmi_out'] = output_file
             # Setup the database.
-            pmi_demo.f_dbase_setup()
+            pmi_demo.dbase_setup()
 
             # Go through the pmi workflow.
-            pmi_demo.f_init_random()
-            pmi_demo.f_save_info()
-            pmi_demo.f_load_pulse( pmi_demo.g_s2e['prop_out'] )
+            pmi_demo.init_random()
+            pmi_demo.save_info()
+            pmi_demo.load_pulse( pmi_demo.g_s2e['prop_out'] )
 
             # Get file extension.
             extension = self.__sample_path.split(".")[-1]
             if extension.lower() == "h5":
                 h5 = h5py.File(self.__sample_path, 'r')
                 h5.close()
-                pmi_demo.f_load_sample(self.__sample_path)
+                pmi_demo.load_sample(self.__sample_path)
             elif extension.lower() == "pdb":
                 atoms_dict = IOUtilities.loadPDB(self.__sample_path)
                 pmi_demo.g_s2e['sample'] = atoms_dict
@@ -265,12 +265,12 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             else:
                 raise IOError("Sample file is in an unsupported format (supported are h5, pdb, xyz).")
 
-            pmi_demo.f_rotate_sample()
-            pmi_demo.f_system_setup()
+            pmi_demo.rotate_sample()
+            pmi_demo.system_setup()
 
             # Perform the trajectories for this pulse and orientation.
-            for traj in range( self.parameters['number_of_trajectories'] ):
-                pmi_demo.f_time_evolution()
+            for traj in range( self.parameters['number_otrajectories'] ):
+                pmi_demo.time_evolution()
 
         return status
 
@@ -301,14 +301,14 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             for it, snp in enumerate(snapshots):
 
                 # Load snapshot data as a dict
-                snapshot_dict = self.f_load_snp_from_dir(snp)
-                snapshot_dict['number_of_photons'] = self.__number_of_photons[it]
+                snapshot_dict = self.load_snp_from_dir(snp)
+                snapshot_dict['number_ophotons'] = self.__number_ophotons[it]
                 snapshot_dict['timestamp'] = self.__timestamps[it]
                 snapshot_dict['s2e_id'] = "{0:07d}".format(it+1)
 
                 self._save_snapshot(h5, snapshot_dict)
 
-    def f_save_info(self):
+    def save_info(self):
         pmi_file = self.g_s2e['setup']['pmi_out']
 
         grp = '/info'
@@ -325,21 +325,21 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
     ##############################################################################
 
-    def f_init_random(self) :
+    def init_random(self) :
         random.seed( self.g_s2e['id'] )
 
 
     ##############################################################################
 
-    def f_dbase_Zq2id(self, a_Z , a_q ) :
-        return ( a_Z * ( a_Z + 1 ) ) // 2 - 1*1 + a_q
+    def dbase_Zq2id(self, Z , q ) :
+        return ( Z * ( Z + 1 ) ) // 2 - 1*1 + q
 
     ##############################################################################
 
 
-    def f_dbase_setup(self) :
+    def dbase_setup(self) :
         #print '   Update database!!!'
-        xdbase = load_ff_database()
+        xdbase = load_fdatabase()
 
         g_dbase = dict()
 
@@ -349,7 +349,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         maxZ = self.g_s2e['maxZ']  #99
         numQ = len( g_dbase['halfQ'] )
-        g_dbase['ff'] = numpy.zeros( ( self.f_dbase_Zq2id( maxZ , maxZ ) + 1 , numQ ) )
+        g_dbase['ff'] = numpy.zeros( ( self.dbase_Zq2id( maxZ , maxZ ) + 1 , numQ ) )
         ii = 0
         for ZZ in range( 1 , maxZ+1 ) :
             for qq in range( ZZ+1 ) :
@@ -362,27 +362,27 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         self.g_dbase = g_dbase
 
-    def f_load_snp_content(self, a_fp , a_snp ) :
-        dbase_root = "/data/snp_" + str( a_snp ).zfill(self.g_s2e['setup']['num_digits']) + "/"
+    def load_snp_content(self, fp , snp ) :
+        dbase_root = "/data/snp_" + str( snp ).zfill(self.g_s2e['setup']['num_digits']) + "/"
         xsnp = dict()
-        xsnp['Z']   = a_fp.get( dbase_root + 'Z' )   .value
-        xsnp['T']   = a_fp.get( dbase_root + 'T' )   .value
-        xsnp['ff']  = a_fp.get( dbase_root + 'ff' )  .value
-        xsnp['xyz'] = a_fp.get( dbase_root + 'xyz' ) .value
-        xsnp['r']   = a_fp.get( dbase_root + 'r' )   .value
+        xsnp['Z']   = fp.get( dbase_root + 'Z' )   .value
+        xsnp['T']   = fp.get( dbase_root + 'T' )   .value
+        xsnp['ff']  = fp.get( dbase_root + 'ff' )  .value
+        xsnp['xyz'] = fp.get( dbase_root + 'xyz' ) .value
+        xsnp['r']   = fp.get( dbase_root + 'r' )   .value
         N = xsnp['Z'].size
         xsnp['q'] = numpy.array( [ xsnp['ff'][ numpy.nonzero( xsnp['T'] == x )[0] , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
-        xsnp['snp'] = a_snp ;
+        xsnp['snp'] = snp ;
 
         return xsnp
 
-    def f_load_snp_xxx(self, a_real , a_snp ) :
-        xfp  = h5py.File( self.g_s2e['prj'] + '/pmi/pmi_out_' + str( a_real ).zfill(self.g_s2e['setup']['num_digits'])  + '.h5' , "r" )
-        xsnp = self.f_load_snp_content( xfp , a_snp )
+    def load_snp_xxx(self, real , snp ) :
+        xfp  = h5py.File( self.g_s2e['prj'] + '/pmi/pmi_out_' + str( real ).zfill(self.g_s2e['setup']['num_digits'])  + '.h5' , "r" )
+        xsnp = self.load_snp_content( xfp , snp )
         xfp.close()
         return xsnp
 
-    def f_load_snp_from_dir(self, path_to_snapshot) :
+    def load_snp_from_dir(self, path_to_snapshot) :
         """ Load xmdyn output from an xmdyn directory.
 
         :param path: The directory path to xmdyn output.
@@ -416,7 +416,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         return xsnp
 
-    def f_load_sample( self, sample_path ) :
+    def load_sample( self, sample_path ) :
         sample = dict()
         xfp = h5py.File( sample_path, 'r' )
         xxx = xfp.get( 'Z' )   ;  sample['Z']   = xxx.value
@@ -430,7 +430,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         self.g_s2e['sample'] = sample
 
 
-    def f_save_data(self, dset , data ) :
+    def save_data(self, dset , data ) :
         xfp  = h5py.File( self.g_s2e['setup']['pmi_out'] , "a" )
         try:
             xfp.create_group( os.path.dirname( dset ) )
@@ -440,7 +440,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         xfp[ dset ] = data
         xfp.close()
 
-    def f_rotate_sample( self ) :
+    def rotate_sample( self ) :
         # Init quaternion for rotation.
         self.g_s2e['sample']['rot_quaternion'] = numpy.array([0,0,0,0])
 
@@ -451,9 +451,9 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             s2e_gen_randrot_quat( self.g_s2e['sample']['rot_quaternion'] ,  self.g_s2e['sample']['rotmat'] ) ;
             s2e_rand_orient( self.g_s2e['sample']['r'] , self.g_s2e['sample']['rotmat'] ) ;
 
-        self.f_save_data( '/data/angle' , self.g_s2e['sample']['rot_quaternion'] .reshape((1,4)) )
+        self.save_data( '/data/angle' , self.g_s2e['sample']['rot_quaternion'] .reshape((1,4)) )
 
-    def f_system_setup( self ) :
+    def system_setup( self ) :
         self.g_s2e['sys']['r'] = self.g_s2e['sample']['r'].copy()
         self.g_s2e['sys']['q'] = numpy.zeros( self.g_s2e['sample']['Z'].shape )
         self.g_s2e['sys']['NE'] = self.g_s2e['sample']['Z'].copy()
@@ -507,30 +507,30 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         """
 
-        #self.g_s2e['sys']['xyz'] = self.f_dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
+        #self.g_s2e['sys']['xyz'] = self.dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
         #self.g_s2e['sys']['T'] = numpy.sort( numpy.unique( self.g_s2e['sys']['xyz'] ) )
         #ff = numpy.zeros( ( len( self.g_s2e['sys']['T'] ) , len( self.g_dbase['halfQ'] ) ) )
         #for ii in range( len( self.g_s2e['sys']['T'] ) ) :
             #ff[ii,:] =  self.g_dbase['ff'][self.g_s2e['sys']['T'][ii].astype(int),:].copy()
     ####        print self.g_s2e['sys']['T'][ii].astype(int) , ff[ii,:]
 
-        data_group = h5_handle['/data']
+        datgroup = h5_handle['/data']
 
-        snapshot_group = data_group.create_group('snp_'+snapshot_dict['s2e_id'])
+        snapshot_group = datgroup.create_group('snp_'+snapshot_dict['s2e_id'])
 
         snapshot_group.create_dataset('T_xmdyn',   data=snapshot_dict['T'].astype(numpy.int32))
         snapshot_group.create_dataset('uid',   data=snapshot_dict['uid'].astype(numpy.int32))
         snapshot_group.create_dataset('Z',  data=snapshot_dict['Z'])
         ####
         # Needed? Or can we use uid and T from xmdyn output? Copied here from l 488 above.
-        xyz = self.f_dbase_Zq2id( snapshot_dict['Z'] , snapshot_dict['q'] ).astype(numpy.int32)
+        xyz = self.dbase_Zq2id( snapshot_dict['Z'] , snapshot_dict['q'] ).astype(numpy.int32)
         T = numpy.sort(numpy.unique(xyz))
         ####
         snapshot_group.create_dataset('T',   data=T.astype(numpy.int32))
         ### WIP
         snapshot_group.create_dataset('xyz', data=xyz)
         snapshot_group.create_dataset('r', data=snapshot_dict['r'] .astype(numpy.float32))
-        snapshot_group.create_dataset('Nph', data=numpy.array( [snapshot_dict['number_of_photons'].astype(numpy.int32)]))
+        snapshot_group.create_dataset('Nph', data=numpy.array( [snapshot_dict['number_ophotons'].astype(numpy.int32)]))
         snapshot_group.create_dataset('t', data=numpy.array( [snapshot_dict['timestamp'].astype(numpy.float32)]))
         halfQ = snapshot_dict['Q']/ ( 2.0 * numpy.pi * bohr_radius * 2.0 )
 
@@ -547,7 +547,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         snapshot_group.create_dataset('Sq_free', data=numpy.zeros_like(halfQ))
 
 
-    def f_num_snp_xxx( self, all_real ) :
+    def num_snp_xxx( self, all_real ) :
         xfp  = h5py.File( self.g_s2e['prj'] + '/pmi/pmi_out_' + str( all_real[0] ).zfill(self.g_s2e['setup']['num_digits'])  + '.h5' , "r" )
         cc = 1
         while 1 :
@@ -557,7 +557,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             cc = cc + 1
 
     #        try:
-    #            if type( a_fp.get( "/data/snp_" + str( cc ).zfill(NUM_DIGITS) + '/Nph' ) ) == 'NoneType' :
+    #            if type( fp.get( "/data/snp_" + str( cc ).zfill(NUM_DIGITS) + '/Nph' ) ) == 'NoneType' :
     #                print 'N'
     #            else :
     #                print 1
@@ -568,9 +568,9 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
     ##############################################################################
 
-    def f_load_pulse(self, a_prop_out ) :
+    def load_pulse(self, prop_out ) :
 
-        xfp  = h5py.File( a_prop_out , "r" )
+        xfp  = h5py.File( prop_out , "r" )
         self.g_s2e['pulse'] = dict()
         self.g_s2e['pulse']['xFWHM']   = xfp.get( '/misc/xFWHM' )   .value
         self.g_s2e['pulse']['yFWHM']   = xfp.get( '/misc/yFWHM' )   .value
@@ -631,54 +631,42 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
 
     #    /**  Some transformation  and  derived useful parameters  */
-    #    data_prop_out.sliceMax = data_prop_out.sliceMax - data_prop_out.sliceMin ;
-    #    data_prop_out.sliceMin = 0 ;
+    #    datprop_out.sliceMax = datprop_out.sliceMax - datprop_out.sliceMin ;
+    #    datprop_out.sliceMin = 0 ;
     #
-    #    data_prop_out.sliceDelta = data_prop_out.sliceMax / (double) (data_prop_out.nSlices-1) ;
+    #    datprop_out.sliceDelta = datprop_out.sliceMax / (double) (datprop_out.nSlices-1) ;
 
-    #    data_prop_out.slices = calloc( data_prop_out.nSlices , sizeof(double) ) ;
-    #    for ( ii = 0 ; ii < data_prop_out.nSlices ; ii++ )
+    #    datprop_out.slices = calloc( datprop_out.nSlices , sizeof(double) ) ;
+    #    for ( ii = 0 ; ii < datprop_out.nSlices ; ii++ )
     #    {
-    #        data_prop_out.slices[ii] = data_prop_out.sliceDelta * ii ;
+    #        datprop_out.slices[ii] = datprop_out.sliceDelta * ii ;
     #    }
 
-    #    data_prop_out.xMax =  ( data_prop_out.xMax - data_prop_out.xMin ) / 2.0 ;
-    #    data_prop_out.xMin = - data_prop_out.xMax ;
-    #    data_prop_out.xDelta = ( data_prop_out.xMax - data_prop_out.xMin ) /
-    #                           (double) (data_prop_out.nx - 1 ) ;
+    #    datprop_out.xMax =  ( datprop_out.xMax - datprop_out.xMin ) / 2.0 ;
+    #    datprop_out.xMin = - datprop_out.xMax ;
+    #    datprop_out.xDelta = ( datprop_out.xMax - datprop_out.xMin ) /
+    #                           (double) (datprop_out.nx - 1 ) ;
 
-    #    data_prop_out.yMax =  ( data_prop_out.yMax - data_prop_out.yMin ) / 2.0 ;
+    #    datprop_out.yMax =  ( datprop_out.yMax - datprop_out.yMin ) / 2.0 ;
     #
-    #    data_prop_out.yMin = - data_prop_out.yMax ;
-    #    data_prop_out.yDelta = ( data_prop_out.yMax - data_prop_out.yMin ) /
-    #                           (double) ( data_prop_out.ny - 1 ) ;
+    #    datprop_out.yMin = - datprop_out.yMax ;
+    #    datprop_out.yDelta = ( datprop_out.yMax - datprop_out.yMin ) /
+    #                           (double) ( datprop_out.ny - 1 ) ;
 
     #    /**  Selecting center (ot highest fluence) pixel */
-    #    data_prop_out.sel_pix_x = ( data_prop_out.nx + 1 ) / 2 ;
-    #    data_prop_out.sel_pix_y = ( data_prop_out.ny + 1 ) / 2 ;
+    #    datprop_out.sel_pix_x = ( datprop_out.nx + 1 ) / 2 ;
+    #    datprop_out.sel_pix_y = ( datprop_out.ny + 1 ) / 2 ;
 
     ##############################################################################
 
-    def f_time_evolution(self) :
+    def time_evolution(self) :
 
         for step in range( 1 , self.g_s2e['steps'] + 1 ) :
-            self.f_save_snp( step )
+            self.save_snp( step )
 
 
 
     ##############################################################################
-
-def f_eval_disp( a_snp , a_r0 , a_sample ) :
-
-    num_Z = len( list(a_sample['selZ'].keys()) )
-    all_disp = numpy.zeros( ( num_Z , ) )
-    cc = 0 ;
-    for sel_Z in list(a_sample['selZ'].keys()) :
-        dr = a_snp['r'][a_sample['selZ'][sel_Z],:] - a_r0[a_sample['selZ'][sel_Z],:]
-        all_disp[cc] = numpy.mean( numpy.sqrt( numpy.sum( dr * dr , axis = 1 ) ) ) / 1e-10
-        cc = cc + 1
-    return all_disp
-
 def s2e_gen_randrot_quat( quat , rotmat ) :
 
         if ( 0 == quat[0] * quat[0] +
@@ -752,20 +740,7 @@ def s2e_rand_orient( r ,mat ) :
 
 
 ##############################################################################
-def f_eval_numE( a_snp , a_sample ) :
-
-    num_Z = len( list(a_sample['selZ'].keys()) )
-    all_numE = numpy.zeros( ( num_Z , ) )
-    cc = 0 ;
-    for sel_Z in list(a_sample['selZ'].keys()) :
-        all_numE[cc] = numpy.mean( a_snp['q'][a_sample['selZ'][sel_Z]] )
-        cc = cc + 1
-    return all_numE
-
-
-##############################################################################
-
-def f_md_step( r , v , m , dt ) :
+def md_step( r , v , m , dt ) :
     r = r.copy()
     v = v.copy()
     a = ( force( config , param ) + external_force( config , param ) ) / m
@@ -774,28 +749,17 @@ def f_md_step( r , v , m , dt ) :
     an = ( force( config , param ) + external_force( config , param ) ) / m
     v = v + 0.5* (a+an) * dt
     config['v'] = v
-    E = f_sysenergy_kin(v,m) + syspot( config , param ) + ext_syspot( config , param )
+    E = sysenergy_kin(v,m) + syspot( config , param ) + ext_syspot( config , param )
 
 
 ##############################################################################
-
-def   f_pmi_diagnostics_help() :
-    print("""
-    ----
-    """)
-
-
-    ##############################################################################
-    ##############################################################################
-    ##############################################################################
-
-def load_ff_database():
+def load_fdatabase():
 
     # INTERNAL NOTE #  ########    To get to the nice array below:    ########
     # INTERNAL NOTE #   for x in `seq 1 100` ; do echo $x ; RES=`time xatom -Z $x  -formfactor -Q 10 -N_Q 100 2>ff-$x.err` ; echo "$RES" | grep -v \# > ff-$x.dat ; echo "$RES" | grep \# > ff-$x.log ; done
-    # INTERNAL NOTE #   cp ff-1.dat ff_all.dat
-    # INTERNAL NOTE #   for x in `seq 2 100` ; do cat ff-${x}.dat| cut -c14-26 | paste -d" " ff_all.dat - > ff_all.xxx ; mv ff_all.xxx ff_all.dat ; done
-    # INTERNAL NOTE #   cat ff_all.dat |while read x; do echo '[' `echo $x|sed s/\ /\ ,\ /g` '] ,'; done > ff_all.dat--numpy_array
+    # INTERNAL NOTE #   cp ff-1.dat fall.dat
+    # INTERNAL NOTE #   for x in `seq 2 100` ; do cat ff-${x}.dat| cut -c14-26 | paste -d" " fall.dat - > fall.xxx ; mv fall.xxx fall.dat ; done
+    # INTERNAL NOTE #   cat fall.dat |while read x; do echo '[' `echo $x|sed s/\ /\ ,\ /g` '] ,'; done > fall.dat--numpy_array
 
     dbase = numpy.array(
             [
@@ -909,16 +873,9 @@ def load_ff_database():
 
 ##############################################################################
 
-def f_hdf5_simple_read(self, a_file , a_dataset ) :
-    xfp  = h5py.File( a_file , "r" )
-    xxx = xfp.get( a_dataset ).value
-    xfp.close()
-    return xxx
-
 
 ##############################################################################
-
-def f_h5_out2in( src , dest , *args ) :
+def h5_out2in( src , dest , *args ) :
 
     file_in  = h5py.File( src , "r")
     file_out =  h5py.File( dest , "w")
@@ -972,7 +929,6 @@ def f_h5_out2in( src , dest , *args ) :
 
     file_out.close()
     file_in.close()
-
 def _parse_xmdyn_xparams(input_file_path):
     """ Parse XMDYN parameters file and extract timeing and photon information.
 
