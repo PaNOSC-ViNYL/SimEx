@@ -78,7 +78,7 @@ class XMDYNPhotonMatterAnalysisTest(unittest.TestCase):
         # Constructing the object without input fails.
         self.assertRaises(TypeError, XMDYNPhotonMatterAnalysis )
 
-    def testShapedConstruction(self):
+    def testShapedConstructionWithPath(self):
         """ Testing the construction of the class with non-default parameters. """
 
         # Construct the object.
@@ -90,6 +90,53 @@ class XMDYNPhotonMatterAnalysisTest(unittest.TestCase):
 
         self.assertIsInstance( analyzer.input_path, str )
         self.assertEqual( analyzer.input_path, self.__test_data)
+
+    def test_snapshot_indices(self):
+        """ Testing the elements acceptance. """
+
+        # Construct the object.
+        analyzer = XMDYNPhotonMatterAnalysis(input_path=self.__test_data)
+
+        self.assertEqual(analyzer.snapshot_indices, ['All'])
+
+        fails = False
+        exception = ''
+        try:
+            analyzer.snapshot_indices = [1,2]
+            analyzer.snapshot_indices = 1
+            analyzer.elements = range(1,10)
+
+        except Exception as exception:
+            fails = True
+            self.assertFalse(fails)
+            raise exception
+
+        self.assertRaises(TypeError, analyzer.snapshot_indices, [0.1,0.0])
+        self.assertRaises(TypeError, analyzer.snapshot_indices, "0000001")
+
+    def test_elements(self):
+        """ Testing the elements acceptance. """
+
+        # Construct the object.
+        analyzer = XMDYNPhotonMatterAnalysis(input_path=self.__test_data)
+
+        self.assertEqual(analyzer.elements, ['All'])
+
+        fails = False
+        exception = ''
+        try:
+            analyzer.elements = [1,2]
+            analyzer.elements = ["H", 'He']
+            analyzer.elements = [1,10, 'He']
+            analyzer.elements = 1
+            analyzer.elements = "H"
+            analyzer.elements = range(1,10)
+        except Exception as exception:
+            fails = True
+            self.assertFalse(fails)
+            raise exception
+
+        self.assertRaises(TypeError, analyzer.elements, "Helium")
 
     def test_load_snapshot(self) :
         """ Test loading a snapshot's content. """
@@ -153,6 +200,31 @@ class XMDYNPhotonMatterAnalysisTest(unittest.TestCase):
         E = calculate_ion_charge(snapshot, sample)
 
         self.assertIsInstance(E, numpy.ndarray)
+
+    def test_plot_displacement(self):
+        """ Test the displacement analysis. """
+
+        analysis = XMDYNPhotonMatterAnalysis(
+                input_path=self.__test_data,
+                snapshot_indices=range(1,10),
+                elements=["All"],
+                sample_path=TestUtilities.generateTestFilePath('sample.h5'),
+                )
+
+
+        analysis.plot_displacement()
+
+    def test_plot_charge(self):
+        """ Test the charge analysis. """
+
+        analysis = XMDYNPhotonMatterAnalysis(
+                input_path=self.__test_data,
+                snapshot_indices=range(1,10),
+                elements=["All"],
+                sample_path=TestUtilities.generateTestFilePath('sample.h5'),
+                )
+
+        analysis.plot_charge()
 
 
 if __name__ == '__main__':

@@ -27,12 +27,13 @@ import numpy
 import os
 import random
 
+from SimEx.Utilities.IOUtilities import get_dict_from_lines
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities import IOUtilities
-from SimEx.Utilities.Units import electronvolt, second, meter, joule
+from SimEx.Utilities.Units import second
 
 from scipy import constants
-from scipy.constants import e,c,m_e,hbar,h
+from scipy.constants import e
 bohr_radius = constants.value('Bohr radius')
 
 class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
@@ -493,8 +494,6 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         focus.attrs['unit'] = "m"
         h5_handle['params/photon_energy'].attrs['unit'] = 'eV'
 
-        ### TODO: Store parameters to /params in h5.
-        xmdyn_parameters = self.__xmdyn_parameters
 
     def _save_snapshot( self, h5_handle, snapshot_dict ) :
         """ Write a given snapshot to an open hdf5 file.
@@ -929,8 +928,9 @@ def h5_out2in( src , dest , *args ) :
 
     file_out.close()
     file_in.close()
+
 def _parse_xmdyn_xparams(input_file_path):
-    """ Parse XMDYN parameters file and extract timeing and photon information.
+    """ Parse XMDYN parameters file and extract timing and photon information.
 
     :param input_file_path: Path to xmdyn input file.
     :type input_file_path: str
@@ -944,49 +944,9 @@ def _parse_xmdyn_xparams(input_file_path):
 
         # Get a csv reader.
         reader = csv.reader(csv_handle, delimiter=' ' )
-
-        # Setup return dictionary.
-        ret ={}
-
-        # These fields shall be handled as numeric data.
-        numeric_keys = [
-                'N',
-                'Z',
-                'DIST',
-                'EPH',
-                'NPH',
-                'DIAM',
-                'FLU_MAX',
-                'T',
-                'T0',
-                'R0',
-                'DT',
-                'STEPS',
-                'PROGRESS',
-                'RANDSEED',
-                'RSTARTE',
-                ]
-
         # Iterate through read lines.
-        for line in reader:
-            # Skip empty lines and comments.
-            if line == []:
-                continue
-            if line[0][0] == '#':
-                continue
 
-            # Get key-value pair (they're separated by random number of whitespaces.
-            key, val = line[0], line[-1]
+        ret = get_dict_from_lines(reader)
 
-            # Fix numeric data.
-            if key in numeric_keys:
-                try:
-                    val = float(val)
-                except:
-                    raise
+    return ret
 
-            # Store on dict.
-            ret[key] = val
-
-        # Return finished dict.
-        return ret
