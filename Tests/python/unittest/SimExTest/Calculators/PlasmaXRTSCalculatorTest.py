@@ -65,6 +65,7 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
                             electron_temperature=10.0,
                             ion_charge=2.3,
                             scattering_angle=90.,
+                            energy_range={'min': -50.0, 'max': 50.0, 'step': 0.5},
                             )
 
     def tearDown(self):
@@ -183,11 +184,12 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         self.assertEqual( str( h5['data/dynamic/']['Skw_total'].attrs['unit']), 'eV**-1')
 
         # Check static data.
+        self.assertAlmostEqual( h5['data/static']['k'].value,           3.555,  3)
         self.assertAlmostEqual( h5['data/static']['fk'].value,          1.532,  3)
         self.assertAlmostEqual( h5['data/static']['qk'].value,          0.4427, 4)
         self.assertAlmostEqual( h5['data/static']['Sk_ion'].value,      1.048,  3)
         self.assertAlmostEqual( h5['data/static']['Sk_free'].value,     0.8075, 4)
-        self.assertAlmostEqual( h5['data/static']['Sk_core'].value,     0.0601, 4)
+        self.assertAlmostEqual( h5['data/static']['Sk_core'].value,     0.05999, 4)
         self.assertAlmostEqual( h5['data/static']['Wk'].value,          4.084 ,  2)
         self.assertAlmostEqual( h5['data/static']['Sk_total'].value,    6.002,  3)
         self.assertAlmostEqual( h5['data/static']['ipl'].value,        38.353,  3)

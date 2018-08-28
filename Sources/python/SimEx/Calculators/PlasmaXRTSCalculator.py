@@ -158,6 +158,10 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
 
         # Store data internally.
         self.__run_data = numpy.loadtxt( path_to_data )
+
+        # Static data.
+        self.__static_data = _parseStaticData( self.__run_log )
+
         # Cd back to where we came from.
         #os.chdir( pwd )
 
@@ -244,26 +248,23 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
             #collfreq  = self.__run_data[:,4]
 
             energy_shifts = h5.create_dataset("data/dynamic/energy_shifts", data=energies)
-            energy_shifts.attrs.create('unit', 'eV')
+            energy_shifts.attrs['unit'] = 'eV'
 
             Skw_free = h5.create_dataset("data/dynamic/Skw_free", data=Skw_free)
-            Skw_free.attrs.create('unit', 'eV**-1')
+            Skw_free.attrs['unit'] =  'eV**-1'
 
             Skw_bound = h5.create_dataset("data/dynamic/Skw_bound", data=Skw_bound)
-            Skw_bound.attrs.create('unit', 'eV**-1')
+            Skw_bound.attrs['unit'] =  'eV**-1'
 
             Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
-            Skw_total.attrs.create('unit', 'eV**-1')
-
-            # Static data.
-            self.__static_data = _parseStaticData( self.__run_log )
+            Skw_total.attrs['unit'] = 'eV**-1'
 
             # Save to h5 file.
             for key, value in list(self.__static_data.items()):
                 h5.create_dataset("/data/static/%s" % (key), data=value)
 
             # Attach a unit to the ionization potential lowering.
-            h5['/data/static/']['ipl'].attrs.create('unit', 'eV')
+            h5['/data/static/']['ipl'].attrs['unit'] = 'eV'
 
 
                                     #'/history/parent/detail',
@@ -309,6 +310,7 @@ def _parseStaticData(data_string):
         static_dict = {}
 
         # Extract static data from
+        static_dict['k']           = extractDate("k\(w=0\)\\s+\[m\^-1] =\\s\\d+\.\\d+", data_string)
         static_dict['fk']           = extractDate("f\(k\)\\s+=\\s\\d+\.\\d+", data_string)
         static_dict['qk']           = extractDate("q\(k\)\\s+=\\s\\d+\.\\d+", data_string)
         static_dict['Sk_ion']       = extractDate("S_ii\(k\)\\s+=\\s\\d+\.\\d+", data_string)
@@ -318,6 +320,7 @@ def _parseStaticData(data_string):
         static_dict['Sk_total']     = extractDate("S_total\(k\)\\s+=\\s\\d+\.\\d+", data_string)
         static_dict['ipl']          = extractDate("IP depression \[eV\]\\s+=\\s\\d+\.\\d+", data_string)
         static_dict['lfc']          = extractDate("G\(k\)\\s+=\\s\\d+\.\\d+", data_string)
+
         static_dict['debye_waller'] = extractDate("Debye-Waller\\s+=\\s+[1|\\d+.\\d+]", data_string)
 
         return static_dict
