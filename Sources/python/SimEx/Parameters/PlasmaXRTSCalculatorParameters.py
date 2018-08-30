@@ -154,7 +154,8 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__source_spectrum    = checkAndSetSourceSpectrum(source_spectrum)
         self.__source_spectrum_fwhm=checkAndSetSourceSpectrumFWHM(source_spectrum_fwhm)
 
-        # Set internal parameters.
+        # HACK
+
         self._setSeeFlags()
         self._setSiiFlags()
         self._setSbfNormFlags()
@@ -176,12 +177,14 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__use_rpa         = int(self.model_See == "RPA")
         self.__use_bma         = int(self.model_See == "BMA")
         self.__use_bma_slfc    = int(self.model_See == 'BMA+sLFC')
-        self.__write_bma = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
+        self.__write_bma       = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
         self.__use_lindhard    = int(self.model_See == 'Lindhard')
         self.__use_landen      = int(self.model_See == 'Landen')
         self.__use_static_lfc  = int(self.model_See == 'sLFC')
         self.__use_dynamic_lfc = int(self.model_See == 'dLFC')
         self.__use_mff = int(self.model_See == 'MFF')
+        self.__write_core = 1
+        self.__write_total = 1
 
     def _setSiiFlags(self):
         """ Set the internal Sii parameters as used in the input deck generator."""
@@ -326,8 +329,8 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('DYNAMIC_LFC                        %d    0\n' % (self.__use_dynamic_lfc) )
             input_deck.write('MFF                                %d    0\n' % (self.__use_mff) )
             input_deck.write('BMA(+sLFC)                         %d    0\n' % (self.__write_bma))
-            input_deck.write('CORE                                1    0\n')
-            input_deck.write('TOTAL                               1    0\n')
+            input_deck.write('CORE                               %d    0\n' % (self.__write_core))
+            input_deck.write('TOTAL                              %d    0\n' % (self.__write_total))
             input_deck.write('E_MIN                              %8.7f  \n' % (self.energy_range['min']))
             input_deck.write('E_MAX                              %8.7f  \n' % (self.energy_range['max']))
             input_deck.write('E_STEP                             %8.7f  \n' % (self.energy_range['step']))
@@ -862,8 +865,8 @@ def checkAndSetModelSee( model ):
     valid_models = ['RPA',
                     'Lindhard',
                     'Landen',
-                    'static LFC',
-                    'dynamic LFC',
+                    'sLFC',
+                    'dLFC',
                     'BMA',
                     'BMA+sLFC',
                     'BMA+dLFC',

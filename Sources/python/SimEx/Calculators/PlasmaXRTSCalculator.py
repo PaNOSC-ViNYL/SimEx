@@ -135,6 +135,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Setup command sequence and issue the system call.
         # Make sure to cd to correct directory where input deck is located.
         command_sequence = ['xrs']
+
         process = subprocess.Popen( command_sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.parameters._tmp_dir )
 
         # Catch stdout and stderr, wait until process terminates.
@@ -169,6 +170,12 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def data(self):
         """ Query for the field data. """
         return self.__run_data
+
+    @property
+    def static_data(self):
+        """ Query for the static data. """
+        return self.__static_data
+
 
     def _readH5(self):
         """
@@ -310,18 +317,18 @@ def _parseStaticData(data_string):
         static_dict = {}
 
         # Extract static data from
-        static_dict['k']           = extractDate("k\(w=0\)\\s+\[m\^-1] =\\s\\d+\.\\d+", data_string)
-        static_dict['fk']           = extractDate("f\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['qk']           = extractDate("q\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_ion']       = extractDate("S_ii\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_free']      = extractDate("S_ee\^0\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_core']      = extractDate("Core_inelastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Wk']           = extractDate("Elastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_total']     = extractDate("S_total\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['ipl']          = extractDate("IP depression \[eV\]\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['lfc']          = extractDate("G\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-
-        static_dict['debye_waller'] = extractDate("Debye-Waller\\s+=\\s+[1|\\d+.\\d+]", data_string)
+        pattern_after_equal = '\\s\\d+\\.\\d+e[\+,\-]\\d+'
+        static_dict['k']           = extractDate('k\(w=0\)\\s+\[m\^-1\]\\s+='+pattern_after_equal, data_string)
+        static_dict['fk']           = extractDate('f\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['qk']           = extractDate('q\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_ion']       = extractDate('S_ii\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_free']      = extractDate('S_ee\^0\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_core']      = extractDate('Core_inelastic\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Wk']           = extractDate('Elastic\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_total']     = extractDate('S_total\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['ipl']          = extractDate('IP depression \[eV\]\\s+='+pattern_after_equal, data_string)
+        static_dict['lfc']          = extractDate('G\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['debye_waller'] = extractDate('Debye-Waller\\s+='+pattern_after_equal, data_string)
 
         return static_dict
 
