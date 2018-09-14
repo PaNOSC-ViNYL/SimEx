@@ -41,14 +41,16 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
     __slots__ = "__detector_type",\
                 "__plasma_search_flag",\
                 "__plasma_simulation_flag",\
-                "__point_simulation_method"
+                "__point_simulation_method",\
+                "__patterns"
 
     # Create the instance attributes
     def __init__(self,
                  detector_type=None,
                  plasma_search_flag=None,
                  plasma_simulation_flag=None,
-                 point_simulation_method=None
+                 point_simulation_method=None,
+                 patterns=None,
                 ):
         """
         Constructor for the XCSITPhotonDetectorParameters class.
@@ -64,6 +66,12 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
 
         :param point_simulation_method: Method for the charge point simulation ("FULL" | "FANO" | "LUT" | "BINNING").
         :type point_simulation_method: str
+
+        :param patterns: Which patterns to feed into the detector simulation. Default: Use all patterns.
+        :type patterns: (str || int) or iterable over these types.
+        :example patterns: patterns=0 # use the first pattern.
+        :example patterns: patterns=range(10) # use the first 10 patterns
+        :example patterns: patterns=['0000001','0001001'] # user patterns with Ids  '0000001' and '0001001'.
         """
 
         # Prohibit calling the detector with nothing
@@ -80,7 +88,8 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
             plasma_simulation_flag="BLANKPLASMA"
         if point_simulation_method is None:
             point_simulation_method="FULL"
-
+        if patterns is None:
+            patterns = [0]
 
         # Use the setters: They check the type of the input and set the private
         # attributes or raise an exception if the the type does not match the
@@ -88,6 +97,7 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         self.detector_type = detector_type
         self.plasma_search_flag = plasma_search_flag
         self.plasma_simulation_flag = plasma_simulation_flag
+        self.patterns = patterns
         self.point_simulation_method = point_simulation_method
 
 
@@ -134,7 +144,19 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
         if not_valid_option:
             raise ValueError("Unknown detector type: " + str(value))
 
-
+    @property
+    def patterns(self):
+        """
+        :return: The patterns to use in the detector simulation.
+        """
+        return self.__patterns
+    @patterns.setter
+    def patterns(self, val):
+        if hasattr(val, '__iter__'):
+            self.__patterns = val
+        else:
+            self.__patterns = [val]
+        ### TODO: more sanity checks (all items of same type, only int or str allowed).
 
     @property
     def plasma_search_flag(self):

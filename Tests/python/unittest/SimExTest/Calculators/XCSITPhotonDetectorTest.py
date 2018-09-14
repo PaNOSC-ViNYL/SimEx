@@ -28,7 +28,8 @@ import shutil
 import unittest
 
 # Import the class to test.
-from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector, XCSITPhotonDetectorParameters
+from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector
+from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 from TestUtilities import TestUtilities
 
@@ -40,7 +41,11 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        pass
+
+        cls._parameters = XCSITPhotonDetectorParameters(
+                detector_type="AGIPDSPB",
+                )
+
 
     @classmethod
     def tearDownClass(cls):
@@ -50,7 +55,13 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
         self.__files_to_remove = []
-        self.__dirs_to_remove = []
+        self.__dirs_to_remove = ["detector_out.h5",]
+
+        self._detector = XCSITPhotonDetector(
+                parameters=self._parameters,
+                input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
+                output_path="detector_out.h5",
+                )
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -83,14 +94,136 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, XCSITPhotonDetector)
         self.assertIsInstance(diffractor, AbstractPhotonDetector)
 
-    @unittest.skip("Run this only on large memory machine.")
+    def testReadH5(self):
+        """ Test the readH5 method."""
+
+        # Get a fresh detector.
+        detector = self._detector
+        detector.parameters.patterns = range(10)
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 10)
+
+    def testCreateXCSITInteractions(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 1)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+        interactions = detector.getInteractionData()
+
+        # Check.
+        self.assertIsNotNone(interactions)
+
+    def testCreateXCSITInteractionsMultiPatterns(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+        detector.parameters.patterns = range(10)
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 10)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+        interactions = detector.getInteractionData()
+
+        # Check.
+        self.assertIsNotNone(interactions)
+
+    def testBackengineIA(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 1)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+
+
+        backengineIA_ret = detector._XCSITPhotonDetector__backengineIA()
+
+        self.assertTrue(backengineIA_ret)
+
+        self.assertEqual(len(detector.getInteractionData()), 1)
+
+    def testBackengineIAMultiPatterns(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+        detector.parameters.patterns = range(10)
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 10)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+
+
+        backengineIA_ret = detector._XCSITPhotonDetector__backengineIA()
+
+        self.assertTrue(backengineIA_ret)
+
+        self.assertEqual(len(detector.getInteractionData()), 10)
+
+    def testBackengineCP(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 1)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+
+        # Simualte interactions
+        self.assertTrue(detector._XCSITPhotonDetector__backengineIA())
+
+        # Create charge matrices.
+        detector._XCSITPhotonDetector__createXCSITChargeMatrix()
+
+        # Run the charge simulation.
+        self.assertTrue(detector._XCSITPhotonDetector__backengineCP())
+
+    #@unittest.skip("Run this only on large memory machine.")
     def testMinimalExample(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
-        self.__files_to_remove.append("detector_out.h5")
+        #self.__files_to_remove.append("detector_out.h5")
 
         parameters = XCSITPhotonDetectorParameters(
                 detector_type="AGIPDSPB",
+                patterns=range(10),
                 )
 
         diffractor = XCSITPhotonDetector(
@@ -109,8 +242,8 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         # Check if we can read the output.
         with h5py.File( "detector_out.h5") as h5:
             self.assertIn( "data", list(h5.keys()) )
-            self.assertIn( "data", list(h5["data"].keys()) )
-            self.assertIn( "photons", list(h5["data"].keys()) )
+            self.assertIn( "0000032", list(h5["data"].keys()) )
+            self.assertIn( "data", list(h5["data/0000032"].keys()) )
 
 if __name__ == '__main__':
     unittest.main()
