@@ -1,7 +1,7 @@
 """ Test module for the XCSITPhotonDetector."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -27,10 +27,16 @@ import shutil
 # Include needed directories in sys.path.
 import unittest
 
+from TestUtilities.TestUtilities import runs_on_travisCI
 # Import the class to test.
 from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector
 from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
+from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
+from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
+from SimEx.Utilities.Units import *
 from TestUtilities import TestUtilities
 
 class XCSITPhotonDetectorTest(unittest.TestCase):
@@ -215,11 +221,11 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         # Run the charge simulation.
         self.assertTrue(detector._XCSITPhotonDetector__backengineCP())
 
-    #@unittest.skip("Run this only on large memory machine.")
+    @unittest.skipIf(runs_on_travisCI(), reason="Backengine not available.")
     def testMinimalExample(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
-        #self.__files_to_remove.append("detector_out.h5")
+        self.__files_to_remove.append("detector_out.h5")
 
         parameters = XCSITPhotonDetectorParameters(
                 detector_type="AGIPDSPB",
@@ -244,6 +250,72 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
             self.assertIn( "data", list(h5.keys()) )
             self.assertIn( "0000032", list(h5["data"].keys()) )
             self.assertIn( "data", list(h5["data/0000032"].keys()) )
+
+    @unittest.skipIf(runs_on_travisCI(), reason="Backengine not available.")
+    @unittest.expectedFailure
+    def testAGIPDQuad(self):
+        """ Check numbers for 1 AGIPD Quad. """
+
+        self.__files_to_remove.append('5mzd.pdb')
+        self.__files_to_remove.append('diffr.h5')
+        self.__files_to_remove.append('detector_out.h5')
+        self.__dirs_to_remove.append('diffr')
+
+        detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
+                                                'fast_scan_max' : 511,
+                                                'slow_scan_min' : 0,
+                                                'slow_scan_max' : 511},
+                                        pixel_size=2.2e-4*meter,
+                                        photon_response=1.0,
+                                        distance_from_interaction_plane=0.13*meter,
+                                        corners={'x': -256, 'y' : -256},
+                                        )
+
+        detector_geometry = DetectorGeometry(panels=[detector_panel])
+
+        beam = PhotonBeamParameters(photon_energy=4.96e3*electronvolt,
+                                    beam_diameter_fwhm=1.0e-6*meter,
+                                    pulse_energy=1.0e-3*joule,
+                                    photon_energy_relative_bandwidth=0.001,
+                                    divergence=1e-3*radian,
+                                    photon_energy_spectrum_type="SASE",
+                                    )
+
+        diffraction_parameters=SingFELPhotonDiffractorParameters(
+                uniform_rotation=None,
+                calculate_Compton=False,
+                number_of_diffraction_patterns=1,
+                detector_geometry=detector_geometry,
+                beam_parameters=beam,
+                sample="5mzd.pdb",
+                forced_mpi_command='mpirun -np 1',
+              )
+
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                output_path='diffr',
+                )
+
+        photon_diffractor.backengine()
+
+        parameters = XCSITPhotonDetectorParameters(
+                detector_type="AGIPDSPB",
+                patterns=[0],
+                )
+
+        diffractor = XCSITPhotonDetector(
+                parameters=parameters,
+                input_path="diffr.h5",
+                output_path="detector_out.h5",
+                )
+
+        diffractor._readH5()
+        diffractor.backengine()
+        diffractor.saveH5()
+
+        pattern = h5py.File("detector_out.h5", 'r')['data/0000001/data'].value
+        self.assertGreater(pattern.sum(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

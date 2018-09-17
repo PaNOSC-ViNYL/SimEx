@@ -310,7 +310,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                 print(("Error traceback: " + str(err[2])))
                 is_successful = False
 
-            print("Detected {0:d} interactions from {1:d} photons in pattern {2:s}.".format(self.__ia_data[i].size(), pd.size(), self.__pattern_ids[i]))
+            print("\nSUMMARY:\nDetected {0:d} interactions from {1:d} photons in pattern {2:s}.\n".format(self.__ia_data[i].size(), pd.size(), self.__pattern_ids[i]))
 
         return is_successful
 
@@ -356,7 +356,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                     entry=self.__charge_data[i].getEntry(x,y)
                     if(entry.getCharge() != 0):
                         counter+=1
-            print(("Found " + str(counter) + " signals in the detector of size " +
+            print(("\nSUMMARY:\nFound " + str(counter) + " signals in the detector of size " +
                 str(self.__charge_data[i].height()) + "x" + str(self.__charge_data[i].width()) +
                 " for " + str(self.__ia_data[i].size()) + " interactions and " +
                 str(self.__photon_data[i].size()) + " photons"))
