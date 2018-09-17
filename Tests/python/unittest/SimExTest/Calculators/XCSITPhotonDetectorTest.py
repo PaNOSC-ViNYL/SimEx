@@ -256,11 +256,12 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
     def testAGIPDQuad(self):
         """ Check numbers for 1 AGIPD Quad. """
 
+        # Cleanup.
         self.__files_to_remove.append('5mzd.pdb')
         self.__files_to_remove.append('diffr.h5')
-        self.__files_to_remove.append('detector_out.h5')
         self.__dirs_to_remove.append('diffr')
 
+        # Setup detector geometry.
         detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
                                                 'fast_scan_max' : 511,
                                                 'slow_scan_min' : 0,
@@ -273,6 +274,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         detector_geometry = DetectorGeometry(panels=[detector_panel])
 
+        # Setup photon beam.
         beam = PhotonBeamParameters(photon_energy=4.96e3*electronvolt,
                                     beam_diameter_fwhm=1.0e-6*meter,
                                     pulse_energy=1.0e-3*joule,
@@ -281,6 +283,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
                                     photon_energy_spectrum_type="SASE",
                                     )
 
+        # Setup and run the diffraction sim.
         diffraction_parameters=SingFELPhotonDiffractorParameters(
                 uniform_rotation=None,
                 calculate_Compton=False,
@@ -298,6 +301,9 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         photon_diffractor.backengine()
 
+        # Setup and run the detector sim.
+        self.__files_to_remove.append('detector_out.h5')
+
         parameters = XCSITPhotonDetectorParameters(
                 detector_type="AGIPDSPB",
                 patterns=[0],
@@ -313,6 +319,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         diffractor.backengine()
         diffractor.saveH5()
 
+        # Weak test Check we have photons in the signal.
         pattern = h5py.File("detector_out.h5", 'r')['data/0000001/data'].value
         self.assertGreater(pattern.sum(), 0)
 
