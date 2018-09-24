@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from wpg import Wavefront
 from wpg.wpg_uti_wf import plot_t_wf,look_at_q_space

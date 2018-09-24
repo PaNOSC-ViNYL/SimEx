@@ -1,7 +1,7 @@
 """ Test module for the XCSITPhotonDetector."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -27,9 +27,16 @@ import shutil
 # Include needed directories in sys.path.
 import unittest
 
+from TestUtilities.TestUtilities import runs_on_travisCI
 # Import the class to test.
-from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector, XCSITPhotonDetectorParameters
+from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector
+from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
+from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
+from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
+from SimEx.Utilities.Units import *
 from TestUtilities import TestUtilities
 
 class XCSITPhotonDetectorTest(unittest.TestCase):
@@ -40,7 +47,11 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        pass
+
+        cls._parameters = XCSITPhotonDetectorParameters(
+                detector_type="AGIPDSPB",
+                )
+
 
     @classmethod
     def tearDownClass(cls):
@@ -50,7 +61,13 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
         self.__files_to_remove = []
-        self.__dirs_to_remove = []
+        self.__dirs_to_remove = ["detector_out.h5",]
+
+        self._detector = XCSITPhotonDetector(
+                parameters=self._parameters,
+                input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
+                output_path="detector_out.h5",
+                )
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -83,7 +100,128 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, XCSITPhotonDetector)
         self.assertIsInstance(diffractor, AbstractPhotonDetector)
 
-    @unittest.skip("Run this only on large memory machine.")
+    def testReadH5(self):
+        """ Test the readH5 method."""
+
+        # Get a fresh detector.
+        detector = self._detector
+        detector.parameters.patterns = range(10)
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 10)
+
+    def testCreateXCSITInteractions(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 1)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+        interactions = detector.getInteractionData()
+
+        # Check.
+        self.assertIsNotNone(interactions)
+
+    def testCreateXCSITInteractionsMultiPatterns(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+        detector.parameters.patterns = range(10)
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 10)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+        interactions = detector.getInteractionData()
+
+        # Check.
+        self.assertIsNotNone(interactions)
+
+    def testBackengineIA(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 1)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+
+
+        backengineIA_ret = detector._XCSITPhotonDetector__backengineIA()
+
+        self.assertTrue(backengineIA_ret)
+
+        self.assertEqual(len(detector.getInteractionData()), 1)
+
+    def testBackengineIAMultiPatterns(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+        detector.parameters.patterns = range(10)
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 10)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+
+
+        backengineIA_ret = detector._XCSITPhotonDetector__backengineIA()
+
+        self.assertTrue(backengineIA_ret)
+
+        self.assertEqual(len(detector.getInteractionData()), 10)
+
+    def testBackengineCP(self):
+        """ """
+
+        # Get a fresh detector.
+        detector = self._detector
+
+        # Read the data.
+        detector._readH5()
+
+        # Check data shapes
+        self.assertEqual(len(detector.getPhotonData()), 1)
+
+        # Get interactions.
+        detector._XCSITPhotonDetector__createXCSITInteractions()
+
+        # Simualte interactions
+        self.assertTrue(detector._XCSITPhotonDetector__backengineIA())
+
+        # Create charge matrices.
+        detector._XCSITPhotonDetector__createXCSITChargeMatrix()
+
+        # Run the charge simulation.
+        self.assertTrue(detector._XCSITPhotonDetector__backengineCP())
+
+    @unittest.skipIf(runs_on_travisCI(), reason="Backengine not available.")
     def testMinimalExample(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
@@ -91,6 +229,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         parameters = XCSITPhotonDetectorParameters(
                 detector_type="AGIPDSPB",
+                patterns=range(10),
                 )
 
         diffractor = XCSITPhotonDetector(
@@ -109,8 +248,81 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         # Check if we can read the output.
         with h5py.File( "detector_out.h5") as h5:
             self.assertIn( "data", list(h5.keys()) )
-            self.assertIn( "data", list(h5["data"].keys()) )
-            self.assertIn( "photons", list(h5["data"].keys()) )
+            self.assertIn( "0000032", list(h5["data"].keys()) )
+            self.assertIn( "data", list(h5["data/0000032"].keys()) )
+
+    @unittest.skipIf(runs_on_travisCI(), reason="Backengine not available.")
+    @unittest.expectedFailure
+    def testAGIPDQuad(self):
+        """ Check numbers for 1 AGIPD Quad. """
+
+        # Cleanup.
+        self.__files_to_remove.append('5mzd.pdb')
+        self.__files_to_remove.append('diffr.h5')
+        self.__dirs_to_remove.append('diffr')
+
+        # Setup detector geometry.
+        detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
+                                                'fast_scan_max' : 511,
+                                                'slow_scan_min' : 0,
+                                                'slow_scan_max' : 511},
+                                        pixel_size=2.2e-4*meter,
+                                        photon_response=1.0,
+                                        distance_from_interaction_plane=0.13*meter,
+                                        corners={'x': -256, 'y' : -256},
+                                        )
+
+        detector_geometry = DetectorGeometry(panels=[detector_panel])
+
+        # Setup photon beam.
+        beam = PhotonBeamParameters(photon_energy=4.96e3*electronvolt,
+                                    beam_diameter_fwhm=1.0e-6*meter,
+                                    pulse_energy=1.0e-3*joule,
+                                    photon_energy_relative_bandwidth=0.001,
+                                    divergence=1e-3*radian,
+                                    photon_energy_spectrum_type="SASE",
+                                    )
+
+        # Setup and run the diffraction sim.
+        diffraction_parameters=SingFELPhotonDiffractorParameters(
+                uniform_rotation=None,
+                calculate_Compton=False,
+                number_of_diffraction_patterns=1,
+                detector_geometry=detector_geometry,
+                beam_parameters=beam,
+                sample="5mzd.pdb",
+                forced_mpi_command='mpirun -np 1',
+              )
+
+        photon_diffractor = SingFELPhotonDiffractor(
+                parameters=diffraction_parameters,
+                output_path='diffr',
+                )
+
+        photon_diffractor.backengine()
+
+        # Setup and run the detector sim.
+        self.__files_to_remove.append('detector_out.h5')
+
+        parameters = XCSITPhotonDetectorParameters(
+                detector_type="AGIPDSPB",
+                patterns=[0],
+                )
+
+        diffractor = XCSITPhotonDetector(
+                parameters=parameters,
+                input_path="diffr.h5",
+                output_path="detector_out.h5",
+                )
+
+        diffractor._readH5()
+        diffractor.backengine()
+        diffractor.saveH5()
+
+        # Weak test Check we have photons in the signal.
+        pattern = h5py.File("detector_out.h5", 'r')['data/0000001/data'].value
+        self.assertGreater(pattern.sum(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
