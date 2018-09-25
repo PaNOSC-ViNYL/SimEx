@@ -25,7 +25,7 @@
 import os
 import subprocess
 from distutils.version import StrictVersion
-
+from py3nvml import py3nvml as nvml
 def _getParallelResourceInfoFromEnv():
     resource = {}
     try:
@@ -190,3 +190,31 @@ def prepareMPICommandArguments(ntasks, threads_per_task=0):
 
 
     return mpi_cmd
+
+def getCUDAEnvironment():
+    """ Get the CUDA runtime environment parameters (number of cards etc.). """
+
+    rdict = dict()
+    rdict['first_available_device_index'] = None
+    rdict['device_count'] = 0
+
+    try:
+        nvml.nvmlInit()
+        rdict['device_count'] = nvml.nvmlDeviceGetCount()
+
+    except:
+        print('WARNING: At least one of (py3nvml.nvml, CUDA) is not available. Will continue without GPU.')
+        return rdict
+
+    for i in range(rdict['device_count']):
+        memory_info = nvml.nvmlDeviceGetMemoryInfo(nvml.nvmlDeviceGetHandleByIndex(i))
+        memory_usage_percentage = memory_info.used / memory_info.total
+
+        if memory_usage_percentage <= 0.1:
+            rdict['first_available_device_index'] = i
+            break
+
+    nvml.nvmlShutdown()
+
+    return rdict
+
