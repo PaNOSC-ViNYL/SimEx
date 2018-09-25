@@ -27,10 +27,7 @@ import shutil
 import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
-from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
-from SimEx.Utilities.Units import meter, electronvolt, joule
+from SimEx.Parameters.PhotonMatterInteractorParameters import PhotonMatterInteractorParameters
 
 from TestUtilities.TestUtilities import generateTestFilePath
 
@@ -42,26 +39,7 @@ class PhotonMatterInteractorParametersTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        detector_panel = DetectorPanel(ranges={'fast_scan_min': 0,
-                                               'fast_scan_max': 1023,
-                                               'slow_scan_min': 0,
-                                               'slow_scan_max': 1023},
-                                       pixel_size=2.2e-4*meter,
-                                       photon_response=1.0,
-                                       distance_from_interaction_plane=0.13*meter,
-                                       corners={'x': -512, 'y': 512},
-                                       )
-
-        cls.detector_geometry = DetectorGeometry(panels=[detector_panel])
-
-        cls.beam = PhotonBeamParameters(
-                                    photon_energy=8.6e3*electronvolt,
-                                    beam_diameter_fwhm=1.0e-6*meter,
-                                    pulse_energy=1.0e-3*joule,
-                                    photon_energy_relative_bandwidth=0.001,
-                                    divergence=None,
-                                    photon_energy_spectrum_type="SASE",
-                                )
+        pass
 
     @classmethod
     def tearDownClass(cls):
@@ -87,6 +65,37 @@ class PhotonMatterInteractorParametersTest(unittest.TestCase):
 
         # Attempt to construct an instance of the class.
         parameters = PhotonMatterInteractorParameters()
+
+        self.assertIsInstance(parameters, PhotonMatterInteractorParameters)
+
+        self.assertEqual(parameters.rotation, [1,0,0,0])
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.number_of_trajectories, 1)
+
+        self.assertEqual(parameters._AbstractCalculatorParameters__cpus_per_task_default, 1)
+
+    def testShapedConstruction(self):
+        """ Testing the default construction of the class using a dictionary. """
+
+        # Attempt to construct an instance of the class.
+        parameters = PhotonMatterInteractorParameters(
+            rotation=[-0.5, 0.5, 0.5, 0.5],
+            calculate_Compton=True,
+            number_of_trajectories=100
+            )
+
+        self.assertEqual(parameters.rotation, [-0.5, 0.5, 0.5, 0.5])
+        self.assertTrue(parameters.calculate_Compton)
+        self.assertEqual(parameters.number_of_trajectories, 100)
+
+    def testConstructionFaultyInput(self):
+        """ Test the exceptions risen on faulty parameter input. """
+
+        self.assertRaises( PhotonMatterInteractorParameters, rotation=2.0)
+        self.assertRaises( PhotonMatterInteractorParameters, rotation=[])
+        self.assertRaises( PhotonMatterInteractorParameters, rotation=[1.0, 0, 0])
+        self.assertRaises( PhotonMatterInteractorParameters, rotation=[1, 'O', 'O', 'P' ])
+
 
 
 if __name__ == '__main__':
