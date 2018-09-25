@@ -96,7 +96,36 @@ class PhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertRaises( PhotonMatterInteractorParameters, rotation=[1.0, 0, 0])
         self.assertRaises( PhotonMatterInteractorParameters, rotation=[1, 'O', 'O', 'P' ])
 
+    def testConstructionFromDict(self):
+        """ Test constructing the parameters from a dictionary."""
 
+        parameters_dict = {
+                'rotation' : [0.4, 0.3, 0.9, 0.5],
+                'calculate_Compton' : False,
+                'number_of_trajectories' : 10}
+
+        parameters = PhotonMatterInteractorParameters(parameters_dictionary=parameters_dict)
+
+        self.assertIsInstance(parameters, PhotonMatterInteractorParameters)
+
+        self.assertEqual(parameters.rotation, [0.4, 0.3, 0.9, 0.5])
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.number_of_trajectories, 10)
+
+    def testConstructionFromDictIncomplete(self):
+        """ Test constructing the parameters from a dictionary with only some keys."""
+
+        parameters_dict = {
+                'calculate_Compton' : True,
+                }
+
+        parameters = PhotonMatterInteractorParameters(parameters_dictionary=parameters_dict)
+
+        self.assertIsInstance(parameters, PhotonMatterInteractorParameters)
+
+        self.assertEqual(parameters.rotation, [1.0, 0.0, 0.0, 0.0])
+        self.assertTrue(parameters.calculate_Compton)
+        self.assertEqual(parameters.number_of_trajectories, 1)
 
 if __name__ == '__main__':
     unittest.main()
