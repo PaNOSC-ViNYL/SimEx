@@ -219,7 +219,7 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
         """ Check that the backengine method works correctly. """
 
         # Clean up.
-        #self.__dirs_to_remove.append('pmi')
+        self.__dirs_to_remove.append('pmi')
 
         # Get test instance.
         pmi_parameters = {
@@ -231,7 +231,7 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
                                                           output_path='pmi',
                                                           sample_path = TestUtilities.generateTestFilePath('sample.h5') )
 
-        #self.__dirs_to_remove.append(test_interactor.root_path)
+        self.__dirs_to_remove.append(test_interactor.root_path)
         # Call backengine
         status = test_interactor.backengine()
 
