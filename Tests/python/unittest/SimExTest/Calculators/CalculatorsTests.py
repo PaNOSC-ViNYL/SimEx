@@ -37,6 +37,7 @@ from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
 from .XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
+from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
 from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
 
 # Setup the suite.
@@ -46,10 +47,11 @@ def suite():
              unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
              unittest.makeSuite(S2EReconstructionTest,                      'test'),
-#             unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
+             unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
              unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
+             unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
              ]
 
     if not runs_on_travisCI():

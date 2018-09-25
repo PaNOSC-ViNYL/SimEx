@@ -31,6 +31,7 @@ from .PhotonBeamParametersTest import PhotonBeamParametersTest
 from .PlasmaXRTSCalculatorParametersTest import PlasmaXRTSCalculatorParametersTest
 from .SingFELPhotonDiffractorParametersTest import SingFELPhotonDiffractorParametersTest
 from .WavePropagatorParametersTest import WavePropagatorParametersTest
+from .PhotonMatterInteractorParametersTest import PhotonMatterInteractorParametersTest
 
 # Setup the suite.
 def suite():
@@ -45,6 +46,7 @@ def suite():
              unittest.makeSuite(WavePropagatorParametersTest,               'test'),
              unittest.makeSuite(PhotonBeamParametersTest,                   'test'),
              unittest.makeSuite(EstherPhotonMatterInteractorParametersTest, 'test'),
+             unittest.makeSuite(PhotonMatterInteractorParametersTest,       'test'),
              ]
 
     return unittest.TestSuite(suites)
