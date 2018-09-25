@@ -36,6 +36,8 @@ class PhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 rotation=None,
                 calculate_Compton=None,
                 number_of_trajectories=None,
+                beam_parameters=None,
+                parameters_dictionary=None,
                 **kwargs
                 ):
         """
@@ -50,18 +52,45 @@ class PhotonMatterInteractorParameters(AbstractCalculatorParameters):
         :param number_of_trajectories: Number of trajectories to simulate.
         :type number_of_trajectories: int, default 1
 
+        :param beam_parameters: Parameters of the photon beam.
+        :type beam_parameters: PhotonBeamParameters
+
+        :param parameters_dictionary: A legacy parameters dictionary (Default: None).
+        :type parameters_dictionary: dict
+
         """
 
         # Check all parameters.
         self.rotation                = rotation
         self.calculate_Compton              = calculate_Compton
         self.number_of_trajectories = number_of_trajectories
+        self.beam_parameters = beam_parameters
+
+        # Legacy support.
+        if parameters_dictionary is not None and all([p is None for p in [rotation, calculate_Compton, number_of_trajectories]]):
+            for key,value in parameters_dictionary.items():
+                setattr(self, key, value)
 
         super(PhotonMatterInteractorParameters, self).__init__(**kwargs)
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
+
+    @property
+    def beam_parameters(self):
+        """ Query for the 'beam_parameters' parameter. """
+        return self.__beam_parameters
+    @beam_parameters.setter
+    def beam_parameters(self, value):
+        """ Set the 'beam_parameters' parameter to a given value.
+        :param value: The value to set 'beam_parameters' to.
+        """
+        if value is None:
+            self.__beam_parameters = None
+
+        if isinstance(value, PhotonBeamParameters):
+            self.__beam_parameters = value
 
     @property
     def rotation(self):

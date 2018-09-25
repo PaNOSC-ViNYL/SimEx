@@ -71,6 +71,7 @@ class PhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.rotation, [1,0,0,0])
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.number_of_trajectories, 1)
+        self.assertIsNone(parameters.beam_parameters)
 
         self.assertEqual(parameters._AbstractCalculatorParameters__cpus_per_task_default, 1)
 
@@ -87,6 +88,7 @@ class PhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.rotation, [-0.5, 0.5, 0.5, 0.5])
         self.assertTrue(parameters.calculate_Compton)
         self.assertEqual(parameters.number_of_trajectories, 100)
+        self.assertIsNone(parameters.beam_parameters)
 
     def testConstructionFaultyInput(self):
         """ Test the exceptions risen on faulty parameter input. """
@@ -111,6 +113,7 @@ class PhotonMatterInteractorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.rotation, [0.4, 0.3, 0.9, 0.5])
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.number_of_trajectories, 10)
+        self.assertIsNone(parameters.beam_parameters)
 
     def testConstructionFromDictIncomplete(self):
         """ Test constructing the parameters from a dictionary with only some keys."""

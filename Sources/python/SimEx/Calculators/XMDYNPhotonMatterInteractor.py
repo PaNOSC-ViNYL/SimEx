@@ -25,12 +25,17 @@ import h5py
 import math
 import numpy
 import os
+import shlex
+import subprocess
 import random
-from subprocess import Popen
+import string
 
 from SimEx.Utilities.IOUtilities import get_dict_from_lines
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
+from SimEx.Parameters.PhotonMatterInteractorParameters import PhotonMatterInteractorParameters
 from SimEx.Utilities.Units import second
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.ParallelUtilities import getCUDAEnvironment
 
 from scipy import constants
 from scipy.constants import e
@@ -41,7 +46,15 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
     Interface class for photon-matter interaction calculations using the XMDYN code.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None, sample_path=None, load_from_path=None):
+    def __init__(
+            self,
+            parameters=None,
+            input_path=None,
+            output_path=None,
+            sample_path=None,
+            seed=1,
+            root_path=None,
+            ):
         """
         Constructor for the XMDYN Photon Matter Interactor.
 
@@ -57,8 +70,9 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         :param sample_path: Location of the sample/target geometry file. Can be either a simS2E sample file or a pdb file. Specifying a pdb will first check if it's present in a database, if not, it will issue a query for the basename of the file to the RCSB protein data bank.
         :type sample_path: str
 
-        :param load_from_path: Specify a directory where a previous XMDYN run was written to.
-        :type load_from_path: str
+        :param root_path: Path to a root directory from which to restart a (previously failed) simulation.
+        :type root_path: str
+
         """
 
         # Initialize base class.
@@ -121,23 +135,37 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
                                 ]
 
         self.parameters = parameters
-                # Load previous data if given.
-        if load_from_path is not None:
-            self.__load_from_path = load_from_path
-            self._init_from_data()
-
-            sample_path = os.path.join(load_from_path, 'sample')
-
-            if os.path.isdir(self.output_path):
-                self.output_path = os.path.join(self.output_path, 'pmi_out.h5')
 
         # Check sample path.
         if sample_path is None:
             raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
-        if not os.path.isfile( sample_path):
+        if not os.path.isfile(sample_path):
             print("Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path))
 
         self.__sample_path = sample_path
+        self.__cudadev = getCUDAEnvironment()['first_available_device_index']
+        self.__seed = seed
+        self.root_path = root_path
+
+    @property
+    def root_path(self):
+        """ Get the path to the restart data."""
+        return self.__root_path
+
+    @root_path.setter
+    def root_path(self, val):
+        """ Set the path to the restart data."""
+
+        if val is None:
+            val = os.path.join(self.output_path, "root."+''.join(random.choice(string.ascii_lowercase) for _ in range(8)))
+
+        if not isinstance(val, str):
+            raise TypeError("Parameter 'root_path' must be a path to a xmdyn root directory containing restart data.")
+
+        self.__root_path = val
+
+        if os.path.isdir(val):
+            self.__is_restart = True
 
     @property
     def parameters(self):
@@ -146,58 +174,29 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         :return: The parameters of this Calculator.
 
         """
+        return self.__parameters
 
-        if par
-        if (self.parameters is None) or ('number_of_trajectories' not in list(self.parameters.keys())):
-            self.parameters = {'number_of_trajectories' : 1,
-                    }
-        if self.parameters['number_of_trajectories'] != 1:
-            print("\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n")
-            self.parameters['number_of_trajectories'] = 1
+    @parameters.setter
+    def parameters(self, val):
+        """ Set (and check) the parameters. """
 
-        if "random_rotation" not in list(self.parameters.keys()):
-            self.parameters["random_rotation"] = False
+        if val is None:
+            self.__parameters = PhotonMatterInteractorParameters()
 
+        if isinstance(val, dict):
+            self.__parameters = PhotonMatterInteractorParameters(parameters_dictionary=val)
 
+        if isinstance(val, PhotonMatterInteractorParameters):
+            self.__parameters = val
 
-    def _init_from_data(self):
-        """ Read data from previous run. """
+    @property
+    def sample_path(self):
+        """ Get the path to the sample geometry file. """
+        return self.__sample_path
 
-        # Check input path.
-        if not os.path.isdir(self.__load_from_path):
-            raise IOError("Directory %s not found." % (self.__load_from_path))
-
-        # Check all required data is present.
-        snapshot_dir = os.path.join(self.__load_from_path, 'snp')
-        if not os.path.isdir(snapshot_dir):
-            raise IOError("%s does not contain a snapshot directory snp/." % (self.__load_from_path))
-
-        # Get all snapshot directories.
-        snapshots = [os.path.join(snapshot_dir,snp) for snp in os.listdir(snapshot_dir) if snp not in ['beam.dat', 'snp_times.dat', 'all_energy.dat']]
-
-        # Get number of snapshots.
-        number_osnapshots = len(snapshots)
-        if number_osnapshots == 0:
-            raise RuntimeError("%s does not contain any snapshots." % (snapshot_dir))
-
-        # Sort dirs.
-        snapshots.sort()
-        # Check and parse xmdyn input file to extract time steps and photon numbers.
-        input_file_path = os.path.join(self.__load_from_path,'xparams.txt') # We use the file written at xmdyn runtime which reflects the actual state of affairs.
-        if not os.path.isfile(input_file_path):
-            raise IOError("XMDYN input file %s was not found." % (input_file_path))
-
-        xmdyn_parameters = _parse_xmdyn_xparams(input_file_path)
-        fluence = numpy.loadtxt(os.path.join(snapshot_dir, 'beam.dat'))
-        focus_area = xmdyn_parameters['DIAM']**2*math.pi/2.0
-        photon_energy = xmdyn_parameters['EPH'] # [eV]
-        number_ophotons_per_snapshot = fluence*focus_area/photon_energy/e
-        timestamps = numpy.loadtxt(os.path.join(snapshot_dir, 'snp_times.dat'))
-
-        self.__xmdyn_parameters = xmdyn_parameters
-        self.__snapshots = snapshots
-        self.__number_ophotons = number_ophotons_per_snapshot
-        self.__timestamps = timestamps*xmdyn_parameters['DT']*1e-18*second
+    @sample_path.setter
+    def sample_path(self, value):
+        self.__sample_path=checkAndSetInstance(str, value, 'sample.h5')
 
     def expectedData(self):
         """ Query for the data expected by the Interactor. """
@@ -209,7 +208,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
     def backengine(self):
         """ This method drives the backengine code."""
-        status = 0
+
         input_files = []
         if os.path.isfile(self.input_path):
             input_files = [self.input_path]
@@ -229,25 +228,36 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         # Generate formatted output files (i.e. attach history to output file).
         for i,input_file in enumerate(input_files):
-            tail = input_file.split( 'prop' )[-1]
             output_file = os.path.join( self.output_path , 'pmi_out_%07d.h5' % (i+1) )
-            h5_out2in( input_file, output_file)
 
-        command = 'xmdyn --s2e_sample {0:s}'.format(self.sample_path) \
-                + '--prop_out {0:s}'.format(self.input_path) \
-                + '--pmi_out {0:s}'.format(self.output_path) \
-                + '--xatom-exe {0:s}'.format(sys.env["XMDYN"]) \
-                + '--dbase {0:s}'.format(sys.env["XMDYNXATOMDBPATH"]) \
-                + '--seed {0:d}'.format(self.__seed) \
-                + '--s2e-rot {0:f} {1:f} {2:f} {3:f}'.format(*self.parameters.rotation) \
-                + '--pmi-params -' \
-                + '--root {0:d}'.format(self.__seed) \
-                + '--cudadev {0:d}'.format(self.__cudadev)
+            command = os.environ["XMDYN"] + \
+            ' --s2e_sample {0:s}'.format(self.sample_path) + \
+            ' --prop_out {0:s}'.format(input_file) + \
+            ' --pmi_out {0:s}'.format(output_file) + \
+            ' --xatom-exe {0:s}'.format(os.environ["XATOM"]) + \
+            ' --dbase {0:s}'.format(os.environ["XMDYNANDXATOMDBPATH"]) + \
+            ' --seed {0:d}'.format(self.__seed) + \
+            ' --s2e-rot "{0:f} {1:f} {2:f} {3:f}"'.format(*self.parameters.rotation) + \
+            ' --pmi_params -' + \
+            ' --root {0:s}'.format(self.__root_path)
 
-        proc = Popen(command, shell=True)
-        proc.wait()
+            command = shlex.split(command)
+            if self.__cudadev is not None:
+                command = command + ['--cudadev', '{0:d}'.format(self.__cudadev)]
 
-                #--s2e_sample /home/grotec/Projects/simex_benchmarking/AMO/pmi_asym/sample.h5 --prop_out prop_out_0000001.h5 --pmi_out /home/grotec/Projects/simex_benchmarking/AMO/pmi_asym/pmi_out_0000001.h5 --xatom-exe /home/grotec/Codes/xraypack/18.7/xatom --dbase /gpfs/exfel/data/user/grotec/xmdyn/dbase --seed 1 --s2e-rot "1 0 0 0" --pmi_params - --root /home/grotec/Projects/simex_benchmarking/AMO/pmi_asym/root.0000001 --cudadev 0
+            if 'SIMEX_VERBOSE' in os.environ.keys():
+                print("PMI command:", " ".join(command))
+
+            proc = subprocess.Popen(command, stdout=subprocess.PIPE)
+            out, err = proc.communicate()
+            self.__process = proc
+
+            proc.wait()
+
+            if err == "" or err is None:
+                return 0
+            else:
+                return 1
 
     @property
     def data(self):
