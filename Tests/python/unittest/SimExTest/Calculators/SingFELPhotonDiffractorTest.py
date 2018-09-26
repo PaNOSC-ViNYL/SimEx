@@ -528,7 +528,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2 -bind-to none',
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2 --bind-to none',
                      )
 
 
