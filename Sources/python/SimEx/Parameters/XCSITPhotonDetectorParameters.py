@@ -27,10 +27,12 @@ try:
 
 except ImportError:
     print("\nWARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed or not being found. Expect errors.\n")
+    SKIP=True
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
+@unittest.skipIf(SKIP, "xcsit not available.")
 class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
     """
     Datastructure to store the necessary parameters for a XCSITPhotonDetector

@@ -27,8 +27,9 @@ import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
+from TestUtilities import TestUtilities
 
-
+@unittest.skipIf(TestUtilities.runs_on_travisCI(), "CI")
 class XCSITPhotonDetectorParametersTest(unittest.TestCase):
     """
     Test class for the XCSITPhotonDetectorParameters class.
