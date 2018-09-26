@@ -30,12 +30,13 @@ import unittest
 
 # Import the class to test.
 from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
-from SimEx.Calculators.XMDYNPhotonMatterInteractor import XMDYNPhotonMatterInteractor
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 from TestUtilities import TestUtilities
+
+TRAVIS = TestUtilities.runs_on_travisCI()
 
 class SingFELPhotonDiffractorTest(unittest.TestCase):
     """
@@ -200,6 +201,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertEqual( diffractor.input_path,  os.path.abspath( sample_file ) )
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testH5Output(self):
         """ Test that data, params and misc are present in hdf5 output file. """
 
@@ -383,6 +385,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         parameters['detector_geometry'] = self.detector_geometry
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 
@@ -411,6 +414,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineNoBeam(self):
         """ Test that we can start a test calculation with no explicit beam parameters. """
 
@@ -439,6 +443,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineDefaultPaths(self):
         """ Test that we can start a calculation with default paths given. """
 
@@ -474,6 +479,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineWithSample(self):
         """ Test that we can start a test calculation if the sample was given via the parameters . """
 
@@ -513,6 +519,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( diffractor.output_path ) )
         self.assertIn( 'diffr_out_0000002.h5', os.listdir( diffractor.output_path ) )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineInputFile(self):
         """ Test that we can start a test calculation if the input path is a single file. """
 
@@ -541,6 +548,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineInputDir(self):
         """ Test that we can start a test calculation if the input path is a directory. """
 
@@ -568,6 +576,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBug53(self):
         """ Tests a script that was found to raise if run in parallel mode. """
 
@@ -592,6 +601,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         photon_diffractor.backengine()
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testSingleFile(self):
         """ Test that saveH5() generates only one linked hdf. """
 
@@ -639,6 +649,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("version", list(h5_filehandle.keys()) )
         self.assertIn("info", list(h5_filehandle.keys()) )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testNoRotation(self):
         """ Test that we can run singfel with no-rotation option."""
 

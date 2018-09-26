@@ -15,11 +15,11 @@ make install
 make docs install
 
 # unit tests
-#cd $VIRTUAL_ENV/Tests/python/unittest/
-#python Test.py -v
+cd $VIRTUAL_ENV/Tests/python/unittest/
+python Test.py -v
 ### DEBUG
-cd $VIRTUAL_ENV/Tests/python/unittest/SimExTest/Calculators
-python SingFELPhotonDiffractorTest.py SingFELPhotonDiffractorTest.testBackengine -v
+#cd $VIRTUAL_ENV/Tests/python/unittest/SimExTest/Calculators
+#python SingFELPhotonDiffractorTest.py SingFELPhotonDiffractorTest.testBackengine -v
 ### END DEBUG
 
 
