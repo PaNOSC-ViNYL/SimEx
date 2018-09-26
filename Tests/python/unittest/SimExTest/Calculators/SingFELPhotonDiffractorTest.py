@@ -217,10 +217,10 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                 number_of_slices = 3,
                 pmi_start_ID = 1,
                 pmi_stop_ID = 1,
-                number_of_diffraction_patterns= 1,
+                number_of_diffraction_patterns= 2,
                 beam_parameters=self.beam,
                 detector_geometry= self.detector_geometry,
-                forced_mpi_command='mpirun -np 1 --bind-to none',
+                forced_mpi_command='mpirun -np 2',
                 )
 
         # Construct the object.
@@ -399,7 +399,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = self.beam,
                      detector_geometry = self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 --bind-to none',
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -427,7 +427,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = None,
                      detector_geometry = self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 --bind-to none',
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -458,7 +458,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 --bind-to none',
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -492,7 +492,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns=2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2 -bind-to none',
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2',
                      )
 
         # Construct the object.
@@ -528,7 +528,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2 --bind-to none',
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2',
                      )
 
 
@@ -556,7 +556,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 --bind-to none',
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -580,9 +580,9 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_slices= 2,
                      pmi_start_ID= 1,
                      pmi_stop_ID = 9,
-                     number_of_diffraction_patterns= 1,
+                     number_of_diffraction_patterns=2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 --bind-to none',
+                     forced_mpi_command='mpirun -np 2',
                    )
 
         photon_diffractor = SingFELPhotonDiffractor(
@@ -649,9 +649,9 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        number_of_slices = 3,
                                                        pmi_start_ID = 1,
                                                        pmi_stop_ID  = 1,
-                                                       number_of_diffraction_patterns = 1,
+                                                       number_of_diffraction_patterns = 2,
                                                        detector_geometry = self.detector_geometry,
-                                                       forced_mpi_command='mpirun -np 2 --bind-to none',
+                                                       forced_mpi_command='mpirun -np 2',
                                                        )
 
         photon_diffractor = SingFELPhotonDiffractor(
