@@ -65,6 +65,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                     divergence=1e-3*radian,
                                     photon_energy_spectrum_type="SASE",
                                     )
+
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
@@ -143,7 +144,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
 
-
     def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
 
@@ -205,7 +205,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         # Ensure proper cleanup.
         sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
-        #self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+        self.__files_to_remove.append( os.path.abspath( 'diffr.h5' ) )
 
         # Set up parameters.
         parameters=SingFELPhotonDiffractorParameters(
@@ -219,14 +220,17 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                 number_of_diffraction_patterns= 1,
                 beam_parameters=self.beam,
                 detector_geometry= self.detector_geometry,
-                forced_mpi_command='mpirun -np 1'
+                forced_mpi_command='mpirun -np 1 --bind-to none',
                 )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters)
+
+        # Run and save.
         diffractor.backengine()
         diffractor.saveH5()
 
+        # Examine content of results hdf.
         with h5py.File(diffractor.output_path, 'r') as h5:
             # Datagroups in /"
             self.assertIn("data", h5.keys())
@@ -379,7 +383,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         parameters['detector_geometry'] = self.detector_geometry
 
-
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 
@@ -396,7 +399,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = self.beam,
                      detector_geometry = self.detector_geometry,
-                     forced_mpi_command='mpirun',
+                     forced_mpi_command='mpirun -np 2 --bind-to none',
                      )
 
         # Construct the object.
@@ -424,6 +427,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = None,
                      detector_geometry = self.detector_geometry,
+                     forced_mpi_command='mpirun -np 2 --bind-to none',
                      )
 
         # Construct the object.
@@ -454,7 +458,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun')
+                     forced_mpi_command='mpirun -np 2 --bind-to none',
+                     )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
@@ -487,7 +492,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns=2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2'
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2 -bind-to none',
                      )
 
         # Construct the object.
@@ -523,7 +528,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun')
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2 -bind-to none',
+                     )
 
 
         # Construct the object.
@@ -550,7 +556,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun',
+                     forced_mpi_command='mpirun -np 2 --bind-to none',
                      )
 
         # Construct the object.
@@ -576,6 +582,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 9,
                      number_of_diffraction_patterns= 1,
                      detector_geometry= self.detector_geometry,
+                     forced_mpi_command='mpirun -np 2 --bind-to none',
                    )
 
         photon_diffractor = SingFELPhotonDiffractor(
@@ -643,7 +650,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        pmi_start_ID = 1,
                                                        pmi_stop_ID  = 1,
                                                        number_of_diffraction_patterns = 1,
-                                                       detector_geometry = self.detector_geometry
+                                                       detector_geometry = self.detector_geometry,
+                                                       forced_mpi_command='mpirun -np 2 --bind-to none',
                                                        )
 
         photon_diffractor = SingFELPhotonDiffractor(
@@ -655,10 +663,14 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         #self.__dirs_to_remove.append(photon_diffractor.output_path)
 
         # Run backengine and convert files.
+        # Ensure removal of directory.
+        self.__dirs_to_remove.append(photon_diffractor.output_path)
+
         photon_diffractor.backengine()
         photon_diffractor.saveH5()
 
         # Cleanup new style files.
+        # Ensure removal of linked hdf.
         self.__files_to_remove.append(photon_diffractor.output_path)
 
         with h5py.File(photon_diffractor.output_path) as handle:
@@ -679,46 +691,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
             new_pattern = handle['data/0000001/diffr'].value
 
         self.assertAlmostEqual(numpy.linalg.norm(pattern-new_pattern), 0.0, 10)
-
-    def test_with_xmdyn_out(self):
-
-        """ Check we can process a pmi file generated by XMDYNPhotonMatterInteractor from a non-s2e xmdyn run. """
-
-        self.__files_to_remove.append('pmi_out_0000001.h5')
-        self.__dirs_to_remove.append('diffr_out')
-        # Locate xmdyn output.
-        pmi_out_dir = TestUtilities.generateTestFilePath('xmdyn_run')
-
-        # Construct PMI Calculator.
-        pmi = XMDYNPhotonMatterInteractor(load_from_path=pmi_out_dir, output_path='pmi_out_0000001.h5')
-
-        # Convert pmi out dir to hdf5.
-        pmi.saveH5()
-
-        # Setup diffraction parameters.
-        diffraction_parameters=SingFELPhotonDiffractorParameters(
-                uniform_rotation = None,
-                calculate_Compton = False,
-                slice_interval = 100,
-                number_of_slices = 1,
-                pmi_start_ID = 1,
-                pmi_stop_ID  = 1,
-                number_of_diffraction_patterns = 1,
-                detector_geometry = self.detector_geometry,
-                beam_parameters=None, # To be read from pmi input.
-                )
-
-        # Construct diffractor.
-        diffractor = SingFELPhotonDiffractor(input_path='pmi_out_0000001.h5',
-                                             output_path='diffr_out',
-                                             parameters=diffraction_parameters,
-                                             )
-
-        # Run.
-        diffractor.backengine()
-
-        # Check diffr out was written.
-        self.assertIn('diffr_out_0000001.h5', os.listdir('diffr_out'))
 
 
 if __name__ == '__main__':
