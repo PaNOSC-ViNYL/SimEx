@@ -1,3 +1,5 @@
+""" :module: Test module for the FEFFPhotonMatterInteractor.  """
+
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
@@ -19,13 +21,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the FEFFPhotonMatterInteractor.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20161011
-
-"""
 import h5py
 import os
 import shutil
@@ -34,12 +29,12 @@ import io
 
 # Import the class to test.
 from SimEx.Calculators.FEFFPhotonMatterInteractor import FEFFPhotonMatterInteractor
-from SimEx.Calculators.FEFFPhotonMatterInteractor import FEFFPhotonMatterInteractorParameters
-from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetAmplitudeReductionFactor
-from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetAtoms
-from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetEdge
-from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetEffectivePathDistance
-from SimEx.Calculators.FEFFPhotonMatterInteractor import _checkAndSetPotentials
+from SimEx.Parameters.FEFFPhotonMatterInteractorParameters import FEFFPhotonMatterInteractorParameters
+from SimEx.Parameters.FEFFPhotonMatterInteractorParameters import _checkAndSetAmplitudeReductionFactor
+from SimEx.Parameters.FEFFPhotonMatterInteractorParameters import _checkAndSetAtoms
+from SimEx.Parameters.FEFFPhotonMatterInteractorParameters import _checkAndSetEdge
+from SimEx.Parameters.FEFFPhotonMatterInteractorParameters import _checkAndSetEffectivePathDistance
+from SimEx.Parameters.FEFFPhotonMatterInteractorParameters import _checkAndSetPotentials
 
 from TestUtilities import TestUtilities
 

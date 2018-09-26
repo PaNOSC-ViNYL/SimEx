@@ -34,7 +34,6 @@ import numpy as np
 import sys
 
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
-from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 
 class XCSITPhotonDetector(AbstractPhotonDetector):
     """
@@ -60,7 +59,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         """
         :param parameters: Parameters of the calulator such as the type of
         detector
-        :type parameters: XCSITPhotonDetector
+        :type parameters: XCSITPhotonDetectorParameters
 
         :param input_path: Path to the hdf5 file holding the input data.
         :type input_path: str

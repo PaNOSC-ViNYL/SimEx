@@ -26,7 +26,7 @@ import shutil
 import unittest
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
+from SimEx.Parameters.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 
 
 class XCSITPhotonDetectorParametersTest(unittest.TestCase):
