@@ -28,10 +28,12 @@ import shutil
 import unittest
 
 # Import the class to test.
-from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector, XCSITPhotonDetectorParameters
+from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector
+from SimEx.Parameters.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 from TestUtilities import TestUtilities
 
+@unittest.skipIf(TestUtilities.runs_on_travisCI(), "CI.")
 class XCSITPhotonDetectorTest(unittest.TestCase):
     """
     Test class for the XCSITPhotonDetector class.

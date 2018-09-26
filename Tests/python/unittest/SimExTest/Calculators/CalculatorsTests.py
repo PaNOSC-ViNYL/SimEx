@@ -32,7 +32,6 @@ from .GenesisPhotonSourceTest import GenesisPhotonSourceTest
 from .PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
 from .S2EReconstructionTest import S2EReconstructionTest
 from .SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
-from .XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
 from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
 from .XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from .XFELPhotonSourceTest import XFELPhotonSourceTest
@@ -57,10 +56,8 @@ def suite():
     if not runs_on_travisCI():
         suites.append(unittest.makeSuite(GenesisPhotonSourceTest,           'test'))
         suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
-        suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,           'test'))
         suites.append(unittest.makeSuite(EstherPhotonMatterInteractorTest,  'test'))
-
 
     return unittest.TestSuite(suites)
 

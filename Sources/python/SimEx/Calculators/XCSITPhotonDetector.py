@@ -74,7 +74,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
             raise AttributeError("parameters and input_path are essential to"+
                 " to init an instance of this class")
 
-
         # Init base class
         super(XCSITPhotonDetector,self).__init__(parameters,input_path,output_path)
 
@@ -114,8 +113,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/geom/pixelHeight',
                                 '/params/beam/photonEnergy',
                                 ]
-
-
 
     @AbstractPhotonDetector.input_path.setter
     def input_path(self,value):
