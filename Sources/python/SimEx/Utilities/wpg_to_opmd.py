@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
@@ -24,8 +23,6 @@ from argparse import ArgumentParser
 import h5py
 import math
 import numpy
-import os
-import sys
 from scipy import constants
 
 # Get some constants.
@@ -225,10 +222,8 @@ def convertToOPMD(input_file):
                 phases["x"][:,:] = numpy.angle(Ex)
                 phases["y"][:,:] = numpy.angle(Ey)
 
-            print "Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y)
+    print("Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y))
 
-            opmd_h5.close()
-            h5.close()
 
 def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy=1.0e-3, pulse_duration=23.0e-15):
     """ Converter for non-time dependent wavefronts in frequency representation.
@@ -237,11 +232,6 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
 
     number_of_x_meshpoints = data_shape[0]
     number_of_y_meshpoints = data_shape[1]
-    number_of_time_steps = data_shape[2]
-
-
-    E_max = h5['params/Mesh/sliceMax'].value #eV
-    E_min = h5['params/Mesh/sliceMin'].value #eV
 
     photon_energy = h5['params/photonEnergy'].value # eV
     photon_energy = photon_energy * e # Convert to J
@@ -414,7 +404,7 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     phases["x"][:,:] = numpy.angle(Ex)
     phases["y"][:,:] = numpy.angle(Ey)
 
-    print "Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y)
+    print("Found %e and %e photons for horizontal and vertical polarization, respectively." % (sum_x, sum_y))
 
     opmd_h5.close()
     h5.close()

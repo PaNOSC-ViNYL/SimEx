@@ -24,19 +24,13 @@
     @institution XFEL
     @creation 20160517
 """
-import exceptions
-import h5py
 import numpy
 import os
-import paths
 import unittest
 
-from SimEx.Utilities import OpenPMDTools as opmd
-from SimEx.Utilities.wpg_to_opmd import convertToOPMD
-from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
-
 from SimEx.Utilities import checkOpenPMD_h5 as opmd_validator
-
+from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
+from SimEx.Utilities.wpg_to_opmd import convertToOPMD
 from TestUtilities.TestUtilities import generateTestFilePath
 
 class OpenPMDToolsTest(unittest.TestCase):
@@ -87,8 +81,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         result_array = numpy.array([0, 0])
         result_array += opmd_validator.check_root_attr(g, False)
 
-        # Go through all the iterations, checking both the particles.
-        # and the meshes
+        # Go through all the iterations, checking both the particles and the meshes
         extensions = {'ED-PIC': False, 'HYDRO1D': False}
         result_array += opmd_validator.check_iterations(g,False,extensions)
 

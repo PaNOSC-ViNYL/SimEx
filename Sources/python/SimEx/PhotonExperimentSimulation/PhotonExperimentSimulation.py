@@ -1,7 +1,7 @@
-""" Module that hosts the PhotonExperimentSimulation class."""
+""":module PhotonExperimentSimulation: Module that hosts the PhotonExperimentSimulation class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,10 +28,9 @@ from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffract
 from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
 from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
 from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class PhotonExperimentSimulation(object):
-    """ The PhotonExperimentSimulation is the top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
+    """ :class PhotonExperimentSimulation: Top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
 
     def __init__(self, photon_source=None,
                        photon_propagator=None,
@@ -40,25 +39,24 @@ class PhotonExperimentSimulation(object):
                        photon_detector=None,
                        photon_analyzer=None):
         """
-        !@brief  Constructor for the PhotonExperimentSimulation object.
 
-        @param photon_source: The calculator for the photon source.
-        <br/><b>type</b> : Child of AbstractPhotonSource
+        :param photon_source: The calculator for the photon source.
+        :type photon_source:  AbstractPhotonSource
 
-        @param photon_propagator : The calculator for the wave propagation from source to target.
-        <br/><b>type</b> : Child of AbstractPhotonPropagator
+        :param photon_propagator : The calculator for the wave propagation from source to target.
+        :type photon_propagator:  AbstractPhotonPropagator
 
-        @param photon_interactor : The calculator for the photon-matter interaction.
-        <br/><b>type</b> : Child of AbstractPhotonInteractor
+        :param photon_interactor : The calculator for the photon-matter interaction.
+        :type photon_interactor:  AbstractPhotonInteractor
 
-        @param : photon_diffractor : The calculator for the photon diffraction.
-        <br/><b>type</b> : Child of AbstractPhotonDiffractor
+        :param photon_diffractor : The calculator for the photon diffraction.
+        :type photon_diffractor:  AbstractPhotonDiffractor
 
-        @param photon_detector : The calculator for photon detection.
-        <br/><b>type</b> : Child of AbstractPhotonDetector
+        :param photon_detector: The calculator for photon detection.
+        :type photon_detector:  AbstractPhotonDetector
 
-        @param photon_analyzer : The calculator for  photon signal analysis.
-        <br/><b>type</b> : Child of AbstractPhotonAnalyzer
+        :param photon_analyzer: The calculator for  photon signal analysis.
+        :type photon_analyzer:  AbstractPhotonAnalyzer
         """
         self.__photon_source = checkAndSetPhotonSource(photon_source)
         self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)
@@ -80,7 +78,7 @@ class PhotonExperimentSimulation(object):
             self.__calculators.insert(-1, self.__photon_detector )
 
         if any([calc is None for calc in self.__calculators]):
-            raise( TypeError, "No calculator can be None.")
+            raise TypeError
 
     #######################
     # Queries and setters #
@@ -139,29 +137,29 @@ class PhotonExperimentSimulation(object):
         if not self._checkInterfaceConsistency():
             raise RuntimeError(" Interfaces are not consistent, i.e. at least one module's expectations with respect to incoming data sets are not satisfied.")
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80])
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80]))
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80]))
         self.__photon_source._readH5()
         self.__photon_source.backengine()
         self.__photon_source.saveH5()
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80]))
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon-matter interaction.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon-matter interaction.", "#"*80]))
         self.__photon_interactor._readH5()
         self.__photon_interactor.backengine()
         self.__photon_interactor.saveH5()
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon diffraction.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon diffraction.", "#"*80]))
         self.__photon_diffractor._readH5()
         self.__photon_diffractor.backengine()
         self.__photon_diffractor.saveH5()
 
         if self.__photon_detector is not None:
-            print '\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80])
+            print('\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80]))
             self.__photon_detector._readH5()
             self.__photon_detector.backengine()
             self.__photon_detector.saveH5()
@@ -171,12 +169,12 @@ class PhotonExperimentSimulation(object):
             if not (os.path.isfile(self.__photon_analyzer.input_path) or os.path.isdir(self.__photon_analyzer.input_path)):
                 os.symlink(self.__photon_diffractor.output_path, self.__photon_analyzer.input_path)
 
-        print '\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80])
+        print('\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80]))
         self.__photon_analyzer._readH5()
         self.__photon_analyzer.backengine()
         self.__photon_analyzer.saveH5()
 
-        print '\n'.join(["#"*80,  "# SIMEX  done.", "#"*80])
+        print('\n'.join(["#"*80,  "# SIMEX  done.", "#"*80]))
 
 
     def _checkInterfaceConsistency(self):

@@ -28,7 +28,7 @@ diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=pmi_path,
 status = diffractor.backengine()
 
 if status != 0:
-    print "Diffraction calculation failed, check output."
+    print("Diffraction calculation failed, check output.")
     sys.exit()
 
-print "Diffraction calculation succeeded."
+print("Diffraction calculation succeeded.")

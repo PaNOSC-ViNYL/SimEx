@@ -1,7 +1,7 @@
-""" Module for AbstractBaseCalculator """
+""":module AbstractBaseCalculator: Hosting the base class of all Calculators."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 #               2016-2017 Sergey Yakubov                                 #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
@@ -20,24 +20,39 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
 from abc import ABCMeta, abstractmethod
-import exceptions
-import os
 
-from SimEx import AbstractBaseClass
+from SimEx.AbstractBaseClass import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities import ParallelUtilities
-
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
 import dill
+import os
 import sys
 
-class AbstractBaseCalculator(AbstractBaseClass):
+class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
     """
-    Abstract class for all simulation calculators.
+    :class AbstractBaseCalculator: Abstract class for all simulation calculators.
     """
-    __metaclass__ = ABCMeta
+    @abstractmethod
+    def __init__(self, parameters=None, input_path=None, output_path=None):
+        """
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
+        """
+
+        # Check parameters.
+        self.__parameters = checkAndSetParameters(parameters)
+
+        self.__input_path, self.__output_path = checkAndSetIO((input_path, output_path))
+
 
     @classmethod
     def runFromCLI(cls):
@@ -67,32 +82,15 @@ class AbstractBaseCalculator(AbstractBaseClass):
         """
 
         try:
-            calculator = dill.load(open(fname))
+            with open(fname,'rb') as file_handle:
+                calculator = dill.load(file_handle)
+
         except:
-            raise exceptions.IOError("Cannot read  from file "+fname)
+            raise IOError("Cannot read  from file "+fname)
         if not issubclass(type(calculator),AbstractBaseCalculator):
             raise TypeError( "The argument to the script should be a path to a file "
                              "with object of subclass of AbstractBaseCalculator")
         return calculator
-
-    @abstractmethod
-    def __init__(self, parameters=None, input_path=None, output_path=None):
-        """
-
-        :param parameters: Parameters of the calculation (not data).
-        :type parameters: dict || AbstractCalculatorParameters
-
-        :param input_path: Path to hdf5 file holding the input data.
-        :type input_path: str
-
-        :param output_path: Path to hdf5 file for output.
-        :type output_path: str
-        """
-
-        # Check parameters.
-        self.__parameters = checkAndSetParameters(parameters)
-
-        self.__input_path, self.__output_path = checkAndSetIO((input_path, output_path))
 
     @abstractmethod
     def backengine(self):
@@ -141,26 +139,10 @@ class AbstractBaseCalculator(AbstractBaseClass):
         """
 
         try:
-            dill.dump(self, open(fname, "w"))
+            with open(fname, "wb") as file_handle:
+                dill.dump(self, file_handle)
         except:
-            raise exceptions.IOError("Cannot dump to file "+fname)
-
-    #def computeNTasks(self):
-        #resources=ParallelUtilities.getParallelResourceInfo()
-        #nnodes=resources['NNodes']
-        #ncores=resources['NCores']
-
-        #cpusPerTask=self.parameters.cpus_per_task
-
-        #if cpusPerTask=="MAX":
-            #np=nnodes
-            #ncores=0
-        #else:
-            #np=max(1,int(ncores/int(cpusPerTask)))
-            #ncores=int(cpusPerTask)
-
-        #return (np,ncores)
-
+            raise IOError("Cannot dump to file "+fname)
 
 
     @abstractmethod
@@ -226,18 +208,18 @@ def checkAndSetIO(io):
     # Check we have a tuple.
     io = checkAndSetInstance(tuple, io)
     if len(io) != 2:
-        raise exceptions.RuntimeError("The parameter 'io' can only be a tuple of two strings.")
+        raise RuntimeError("The parameter 'io' can only be a tuple of two strings.")
 
     # Check if input exists, if not, raise.
     i = checkAndSetInstance(str, io[0])
     if i is None:
-        raise exceptions.IOError("The parameter 'input_path' must be a valid filename.")
+        raise IOError("The parameter 'input_path' must be a valid filename.")
     i = os.path.abspath(i)
 #
     # Check if output file exists, otherwise attempt to create it.
     o = checkAndSetInstance(str, io[1])
     if o is None:
-        raise exceptions.IOError("The parameter 'output_path' must be a valid filename.")
+        raise IOError("The parameter 'output_path' must be a valid filename.")
     o = os.path.abspath(o)
 
     return (i, o)

@@ -1,6 +1,7 @@
+""":module ComptonScatteringCalculator: Hosts the ComptonScatteringCalculator class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,28 +20,16 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the ComptonScatteringCalculator class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160404
-
-"""
 import h5py
 import math
 import numpy
 import os
-import re
-#from scipy.optimize import newton as root
 from scipy.optimize import brentq as root
 from scipy.constants import physical_constants as PC
 from scipy import constants as C
-import subprocess
 import tempfile
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
-
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 
 # Some constants
@@ -50,16 +39,19 @@ ALPHA = C.alpha
 
 class ComptonScatteringCalculator(AbstractPhotonDiffractor):
     """
-    Class representing a Compton scattering calculator.
+    :class ComptonScatteringCalculator: Class representing a Compton scattering calculator.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the ComptonScatteringCalculator.
+        :param parameters : Parameters for the ComptonScatteringCalculator.
+        :type parameters : dict
 
-        @param parameters : Parameters for the ComptonScatteringCalculator.
-        @type : dict
-        @default : None
+        :param input_path: Path to input data for Compton Scattering calculations (Default: 'xrts_in.h5').
+        :type input_path: str
+
+        :param output_path: Path to output data for Compton Scatteroutg calculations (Default: 'xrts_out.h5').
+        :type output_path: str
         """
 
         # Check parameters.
@@ -70,7 +62,6 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
             tmppath = tempfile.mkdtemp()
             input_path = os.path.join(tmppath, 'xrts_in.h5')
             dummy = h5py.File(input_path, 'w')
-
 
         # Init base class.
         super( ComptonScatteringCalculator, self).__init__(parameters, input_path, output_path)
@@ -138,7 +129,7 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
         self.source_energy = self.parameters.photon_energy
         self.scattering_angle = self.parameters.scattering_angle
         self.electron_density = self.parameters.electron_density*1e6
-        print self.electron_density
+        print(self.electron_density)
         self.temperature = self.parameters.electron_temperature
 
         self.pzs = _pz( self.source_energy, self.source_energy - self.energy_shifts, self.scattering_angle)
@@ -205,11 +196,12 @@ class ComptonScatteringCalculator(AbstractPhotonDiffractor):
         """ Method to write the Compton profile to stdout. """
 
         for i in range(len(self.compton_profile)):
-            print self.pzs[i], self.energy_shifts[i], self.compton_profile[i]
+            print(self.pzs[i], self.energy_shifts[i], self.compton_profile[i])
 
 ##########################
 # Check and set functions #
 ###########################
+
 def checkAndSetParameters( parameters ):
     """ Utility to check if the parameters dictionary is ok ."""
 
@@ -283,7 +275,7 @@ def fermihalf(x,sgn):
                       27.0/381503,3923.0/110242,8220.0/919))
         g = lambda k:-0.5*numpy.sqrt(f(k)-x)/f(k)
 
-    F = numpy.polyval(a,x) + 2*numpy.sqrt(2*numpy.pi)*sum(map(g,range(1,21)))
+    F = numpy.polyval(a,x) + 2*numpy.sqrt(2*numpy.pi)*sum(map(g,list(range(1,21))))
 
     return  F # Prefactor to get normalized Fermi integral.
 

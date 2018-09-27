@@ -24,7 +24,6 @@
 
 import h5py
 import os
-import paths
 import shutil
 import unittest
 
@@ -167,19 +166,19 @@ class EstherPhotonMatterInteractorTest(unittest.TestCase):
         # Open file.
         with h5py.File( outfile ) as h5:
             # Check top level group.
-            self.assertIn( 'data' , h5.keys() )
+            self.assertIn( 'data' , list(h5.keys()) )
             # Check all times are present.
-            self.assertEqual( len(h5['data'].keys()), int(esther_calculator.parameters.run_time / esther_calculator.parameters.delta_time)+1 ) # run_time/delta_time
+            self.assertEqual( len(list(h5['data'].keys())), int(esther_calculator.parameters.run_time / esther_calculator.parameters.delta_time)+1 ) # run_time/delta_time
             # Check time 0 is present.
-            self.assertIn( '0' , h5['data'].keys() )
+            self.assertIn( '0' , list(h5['data'].keys()) )
             # Check  meshes group present.
-            self.assertIn( 'meshes' , h5['data/0'].keys() )
+            self.assertIn( 'meshes' , list(h5['data/0'].keys()) )
             # Check all meshes are present at time 0.
-            self.assertIn( 'pos'  , h5['data/0/meshes'].keys() )
-            self.assertIn( 'pres' , h5['data/0/meshes'].keys() )
-            self.assertIn( 'rho'  , h5['data/0/meshes'].keys() )
-            self.assertIn( 'temp' , h5['data/0/meshes'].keys() )
-            self.assertIn( 'vel'  , h5['data/0/meshes'].keys() )
+            self.assertIn( 'pos'  , list(h5['data/0/meshes'].keys()) )
+            self.assertIn( 'pres' , list(h5['data/0/meshes'].keys()) )
+            self.assertIn( 'rho'  , list(h5['data/0/meshes'].keys()) )
+            self.assertIn( 'temp' , list(h5['data/0/meshes'].keys()) )
+            self.assertIn( 'vel'  , list(h5['data/0/meshes'].keys()) )
 
             # Check dataset shape
             self.assertEqual( h5['data/0/meshes/vel'].value.shape[0], 2025)

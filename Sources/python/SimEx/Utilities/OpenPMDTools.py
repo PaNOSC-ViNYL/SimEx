@@ -1,6 +1,7 @@
+""":module OpenPMDTools: Hosts various utilities to setup openpmd compliant hdf structures. """
 #!/usr/bin/env python
 #
-# Copyright (c) 2015-2016, Axel Huebl, Remi Lehe, Carsten Fortmann-Grote
+# Copyright (c) 2015-2018, Axel Huebl, Remi Lehe, Carsten Fortmann-Grote
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +17,11 @@
 #
 
 from dateutil.tz import tzlocal
-import collections
 import datetime
-import h5py
 import numpy
-import re
-import string
-import sys, getopt, os.path
 
 ext_list = {"ED-PIC": numpy.uint32(1),
             "HYDRO1D": numpy.uint32(2)}
-
 
 def get_basePath(f, iteration):
     """

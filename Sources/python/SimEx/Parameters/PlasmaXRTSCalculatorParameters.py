@@ -1,4 +1,4 @@
-""" Module that holds the PlasmaXRTSCalculatorParameters class.  """
+""":module PlasmaXRTSCalculatorParameters: Module that holds the PlasmaXRTSCalculatorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -34,11 +34,10 @@ from SimEx.Utilities.Utilities import ALL_ELEMENTS
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.EntityChecks import checkAndSetInteger
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
-from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the plasma x-ray Thomson scattering calculator.
+    :class PlasmaXRTSCalculatorParameters: Encapsulates parameters for the plasma x-ray Thomson scattering calculator.
     """
 
     def __init__(self,
@@ -154,7 +153,8 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__source_spectrum    = checkAndSetSourceSpectrum(source_spectrum)
         self.__source_spectrum_fwhm=checkAndSetSourceSpectrumFWHM(source_spectrum_fwhm)
 
-        # Set internal parameters.
+        # HACK
+
         self._setSeeFlags()
         self._setSiiFlags()
         self._setSbfNormFlags()
@@ -176,12 +176,14 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
         self.__use_rpa         = int(self.model_See == "RPA")
         self.__use_bma         = int(self.model_See == "BMA")
         self.__use_bma_slfc    = int(self.model_See == 'BMA+sLFC')
-        self.__write_bma = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
+        self.__write_bma       = int(self.model_See == 'BMA+sLFC' or self.model_See == 'BMA')
         self.__use_lindhard    = int(self.model_See == 'Lindhard')
         self.__use_landen      = int(self.model_See == 'Landen')
         self.__use_static_lfc  = int(self.model_See == 'sLFC')
         self.__use_dynamic_lfc = int(self.model_See == 'dLFC')
         self.__use_mff = int(self.model_See == 'MFF')
+        self.__write_core = 1
+        self.__write_total = 1
 
     def _setSiiFlags(self):
         """ Set the internal Sii parameters as used in the input deck generator."""
@@ -292,7 +294,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('T_GRADIENT            0.0    \n')
             input_deck.write('DSTEP                 0.0    \n')
             input_deck.write('--ion_parameters----------------------------use_flag-\n')
-            input_deck.write('ION_TEMP %d 1\n' % (self.ion_temperature) )
+            input_deck.write('ION_TEMP %4.3f 1\n' % (self.ion_temperature) )
             input_deck.write('S_ION_FEATURE %4.3f %d\n' % (self.__Sii_value, self.__use_Sii_value) )
             input_deck.write('DEBYE_TEMP    %4.3f %d\n' % (self.__debye_temperature_value, self.__use_debye_temperature) )
             input_deck.write('BAND_GAP      %4.3f %d\n' % (self.__band_gap_value, self.__use_band_gap) )
@@ -303,7 +305,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('N_PVI          32\n')
             input_deck.write('N_LANDEN      512\n')
             input_deck.write('N_RELAXATION 1024\n')
-            input_deck.write('N_FFT        4096\n')
+            input_deck.write('N_FFT        1024\n')
             input_deck.write('EPS        1.0E-4\n')
             input_deck.write('--See(k,w)------------------------------use/norm-----\n')
             input_deck.write('STATIC_MODEL(DH,OCP,SOCP,SOCPN) %s\n' % (self.model_Sii) )
@@ -326,8 +328,8 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
             input_deck.write('DYNAMIC_LFC                        %d    0\n' % (self.__use_dynamic_lfc) )
             input_deck.write('MFF                                %d    0\n' % (self.__use_mff) )
             input_deck.write('BMA(+sLFC)                         %d    0\n' % (self.__write_bma))
-            input_deck.write('CORE                                1    0\n')
-            input_deck.write('TOTAL                               1    0\n')
+            input_deck.write('CORE                               %d    0\n' % (self.__write_core))
+            input_deck.write('TOTAL                              %d    0\n' % (self.__write_total))
             input_deck.write('E_MIN                              %8.7f  \n' % (self.energy_range['min']))
             input_deck.write('E_MAX                              %8.7f  \n' % (self.energy_range['max']))
             input_deck.write('E_STEP                             %8.7f  \n' % (self.energy_range['step']))
@@ -399,7 +401,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     def electron_density(self, value):
         """ Set the electron density to value. """
         self.__electron_density = value
-        print "WARNING: Electron density might be inconsistent with mass density and charge."
+        print("WARNING: Electron density might be inconsistent with mass density and charge.")
     @property
     def ion_temperature(self):
         """ Query for the ion temperature. """
@@ -417,7 +419,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     def ion_charge(self, value):
         """ Set the ion charge to value. """
         self.__ion_charge = value
-        print "WARNING: Ion charge might be inconsistent with electron density and mass density."
+        print("WARNING: Ion charge might be inconsistent with electron density and mass density.")
 
     @property
     def mass_density(self):
@@ -427,7 +429,7 @@ class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     def mass_density(self, value):
         """ Set the mass density to value. """
         self.__mass_density = value
-        print "WARNING: Mass density might be inconsistent with electron density and charge."
+        print("WARNING: Mass density might be inconsistent with electron density and charge.")
 
     @property
     def debye_temperature(self):
@@ -580,7 +582,7 @@ def checkAndSetScatteringAngle(angle):
     angle = checkAndSetInstance( float, angle, None)
     # Check if in range.
     if angle <= 0.0 or angle > 180.0:
-        raise( ValueError, "Scattering angle must be between 0 and 180 [degrees].")
+        raise ValueError
 
     # Return.
     return angle
@@ -600,7 +602,7 @@ def checkAndSetPhotonEnergy(energy):
 
     # Check if in range.
     if energy <= 0.0:
-        raise( ValueError, "Photon energy must be positive.")
+        raise ValueError
 
     # Return.
     return energy
@@ -664,13 +666,13 @@ def checkAndSetDensitiesAndCharge(electron_density, ion_charge, mass_density, el
     molar_weight = sum(element_abundances * molar_weights) / sum( element_abundances )
     if electron_density is None:
         electron_density = mass_density * ion_charge * Avogadro / molar_weight
-        print "Setting electron density to %5.4e/cm**3." % (electron_density)
+        print("Setting electron density to %5.4e/cm**3." % (electron_density))
     if ion_charge is None:
         ion_charge = electron_density / (mass_density * Avogadro / molar_weight)
-        print "Setting average ion charge to %5.4f." % (ion_charge)
+        print("Setting average ion charge to %5.4f." % (ion_charge))
     if mass_density is None:
         mass_density = electron_density / (ion_charge * Avogadro / molar_weight)
-        print "Setting mass density to %5.4f g/cm**3." % (mass_density)
+        print("Setting mass density to %5.4f g/cm**3." % (mass_density))
 
     # Adjust
     #negative_charge_element_index = numpy.where(element_charges == -1)
@@ -804,15 +806,15 @@ def checkAndSetEnergyRange(energy_range, electron_density=None):
     energy_range = checkAndSetInstance( dict, energy_range, energy_range_default)
 
     # Check keys.
-    if 'min' not in energy_range.keys():
+    if 'min' not in list(energy_range.keys()):
         raise ValueError( "'min' missing in energy range (keys).")
-    if 'max' not in energy_range.keys():
+    if 'max' not in list(energy_range.keys()):
         raise ValueError( "'max' missing in energy range (keys).")
-    if 'step' not in energy_range.keys():
+    if 'step' not in list(energy_range.keys()):
         raise ValueError( "'step' missing in energy range (keys).")
 
     # Check values.
-    for key in energy_range.keys():
+    for key in list(energy_range.keys()):
         if not isinstance( energy_range[key], float):
             raise TypeError( "All values in energy_range must be floats.")
     if energy_range['min'] > energy_range['max']:
@@ -862,8 +864,8 @@ def checkAndSetModelSee( model ):
     valid_models = ['RPA',
                     'Lindhard',
                     'Landen',
-                    'static LFC',
-                    'dynamic LFC',
+                    'sLFC',
+                    'dLFC',
                     'BMA',
                     'BMA+sLFC',
                     'BMA+dLFC',

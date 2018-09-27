@@ -1,5 +1,15 @@
 CHANGELOG
 =========
+Changes from 0.3 to 0.4
+-----------------------
+    * Debugged XCSITPhotonDetector
+    * Added phase grating simulation to WPG (wavefront propagation)
+    * Added SASE model for low gain FEL via ocelot
+    * GAPDPhotonDiffractor for polychromatic diffraction from large samples (>10^5 atoms. (GAPD code).
+    * Many new data analysis utilities
+    * Integration of python-pint to support pysical units and constants
+    * New XMDYNPhotonMatterInteractor to wrap XMDYN photon-matter interaction code
+    * New SLURM Submitter
 
 Changes from 0.2 to 0.3
 -----------------------

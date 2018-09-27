@@ -31,7 +31,7 @@ import h5py
 import math
 import numpy
 import os, shutil
-import paths
+from . import paths
 import unittest
 
 from TestUtilities import TestUtilities
@@ -111,7 +111,7 @@ class singfelTest(unittest.TestCase):
         this_hash = hash( diffraction_data.tostring() )
 
         if debug:
-            print "%15.14e" % (intensity)
+            print("%15.14e" % (intensity))
 
             # Save wavefront data for reference.
             #########################################################################################

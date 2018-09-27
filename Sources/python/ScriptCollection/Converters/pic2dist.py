@@ -43,7 +43,7 @@ def pic2dist( pic_file_name, target='genesis'):
     # Check if input is native or openPMD.
     with h5py.File( pic_file_name, 'r' ) as h5_handle:
 
-        timestep = h5_handle['data'].keys()[-1]
+        timestep = list(h5_handle['data'].keys())[-1]
 
         positions = '/data/%s/particles/e/position/' % (timestep)
         momenta = '/data/%s/particles/e/momentum/' % (timestep)
@@ -92,9 +92,9 @@ def pic2dist( pic_file_name, target='genesis'):
         gamma = numpy.sqrt( 1. + psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
         P = numpy.sqrt(psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
 
-        print "Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle
-        print "Total charge = ", total_charge
-        print "Number of macroparticles = ", number_of_macroparticles
+        print("Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle)
+        print("Total charge = ", total_charge)
+        print("Number of macroparticles = ", number_of_macroparticles)
 
         h5_handle.close()
 

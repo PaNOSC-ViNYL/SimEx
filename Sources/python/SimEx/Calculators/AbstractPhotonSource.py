@@ -1,7 +1,7 @@
-""" Module for AbstractPhotonSource """
+""":module AbstractPhotonSource: Hosting the base class for all PhotonSources."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -26,13 +26,10 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class AbstractPhotonSource(AbstractBaseCalculator):
+class AbstractPhotonSource(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon source, serving as API for actual photon source simulation calculators.
+    :class AbstractPhotonSource: Abstract base class for all PhotonSources.
     """
-
-    # Make this an abstract base class.
-    __metaclass__  = ABCMeta
 
     # Abstract constructor.
     @abstractmethod

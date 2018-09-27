@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from wpg import Wavefront
 from wpg.wpg_uti_wf import plot_t_wf,look_at_q_space
@@ -12,7 +12,7 @@ def show_diagnostics(FELsource_out_number):
       FELsource_out_file = FELsource_out_number
 
       if not os.path.exists(FELsource_out_file):
-            print 'Input file {} not found.'.format(FELsource_out_file)
+            print('Input file {} not found.'.format(FELsource_out_file))
             return
 
       wf = Wavefront()

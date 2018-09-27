@@ -1,7 +1,7 @@
-""" Module for entity checks.  """
+""":module IOUtilities: Module for input/output utilities.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,25 +20,15 @@
 #                                                                        #
 ##########################################################################
 
-
-import exceptions
+from Bio import PDB
+from SimEx.Utilities import xpdb
+from scipy.constants import m_e, c, e
+from wpg.converters.genesis_v2 import read_genesis_file as genesis2
 import h5py
 import numpy
-import urllib
 import os, shutil
 import periodictable
-import sys, os
-
-from SimEx.Utilities import xpdb
-
-
-from Bio import PDB
-from scipy.constants import m_e, c, e
-
-from wpg.converters.genesis_v2 import read_genesis_file as genesis2
-from wpg.converters.genesis import read_genesis_file as genesis3
-
-
+import requests
 import uuid
 
 def getTmpFileName():
@@ -75,15 +65,12 @@ def checkAndGetPDB( path ):
             pdb_target_dir = '.'
 
         try:
-            print "PDB file %s could not be found. Attempting to query from protein database server." % (path)
-            urllib.urlcleanup()
+            print("PDB file %s could not be found. Attempting to query from protein database server." % (path))
             download_target = pdb_list.retrieve_pdb_file( pdb_target_name, pdir=pdb_target_dir, file_format='pdb' )
+            if download_target in os.listdir( pdb_target_dir ):
+                print("Successfully downloaded structure from PDB.")
         except:
             raise
-
-        finally:
-            urllib.urlcleanup()
-
 
         # Move and rename the downloaded file.
         shutil.move( download_target, path  )
@@ -109,7 +96,7 @@ def loadXYZ( path=None):
         natoms = int(fin.readline())
         title = fin.readline()[:-1]
 
-        print "Reading %d atoms of %s from %s." % (natoms, title, path)
+        print("Reading %d atoms of %s from %s." % (natoms, title, path))
         for x in range(natoms):
             line = fin.readline().split()
 
@@ -123,7 +110,7 @@ def loadXYZ( path=None):
             charge = atom_obj.number
 
             xyz = numpy.zeros(3, dtype="float64")
-            xyz[:] = map(float, line[1:4])
+            xyz[:] = list(map(float, line[1:4]))
 
             # Write to dict.
             atoms_dict['Z'].append(charge)
@@ -146,11 +133,6 @@ def loadXYZ( path=None):
 
     # Return.
     return atoms_dict
-
-
-
-
-
 
 def loadPDB( path = None ):
     """ Wrapper to convert a given pdb file to a sample dictionary used by e.g. the XMDYNCalculator.
@@ -266,7 +248,7 @@ def pic2dist( pic_file_name, target='genesis'):
     # Check if input is native or openPMD.
     with h5py.File( pic_file_name, 'r' ) as h5_handle:
 
-        timestep = h5_handle['data'].keys()[-1]
+        timestep = list(h5_handle['data'].keys())[-1]
 
         positions = '/data/%s/particles/e/position/' % (timestep)
         momenta = '/data/%s/particles/e/momentum/' % (timestep)
@@ -315,9 +297,9 @@ def pic2dist( pic_file_name, target='genesis'):
         gamma = numpy.sqrt( 1. + psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
         P = numpy.sqrt(psquare/((number_of_electrons_per_macroparticle * m_e*c)**2))
 
-        print "Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle
-        print "Total charge = ", total_charge
-        print "Number of macroparticles = ", number_of_macroparticles
+        print("Number of electrons per macroparticle = ", number_of_electrons_per_macroparticle)
+        print("Total charge = ", total_charge)
+        print("Number of macroparticles = ", number_of_macroparticles)
 
         h5_handle.close()
 
@@ -340,7 +322,7 @@ def wgetData(url=None, path=None):
     local_filename = url.split('/')[-1]
 
     # Make https request.
-    print "Attempting to download %s." % (url)
+    print("Attempting to download %s." % (url))
     r = requests.get(url, stream=True)
 
     # Write to local file in chunks of 1 MB.
@@ -353,7 +335,7 @@ def wgetData(url=None, path=None):
     f.close()
 
     # Return.
-    print "Download completed and saved to %s." % (local_filename)
+    print("Download completed and saved to %s." % (local_filename))
     return local_filename
 #if __name__ == "__main__":
     #main()
@@ -367,5 +349,57 @@ def wgetData(url=None, path=None):
         #numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
     #if sys.argv[2] == 'simplex':
         #numpy.savetxt( fname='beam.dist', X=data)
+
+def get_dict_from_lines(reader):
+    """ Turn a list of [key, ' ', ..., value] elements into a dict.
+
+    :params reader: An iterable that contains lists of strings in format [key, ' ', ' ', ..., value]
+    :type: iterable (list, array, generator).
+
+    """
+    # These fields shall be handled as numeric data.
+    numeric_keys = [
+            'N',
+            'Z',
+            'DIST',
+            'EPH',
+            'NPH',
+            'DIAM',
+            'FLU_MAX',
+            'T',
+            'T0',
+            'R0',
+            'DT',
+            'STEPS',
+            'PROGRESS',
+            'RANDSEED',
+            'RSTARTE',
+            ]
+    # Initialize return dictionary.
+    ret = dict()
+
+    # Iteratoe through all lines.
+    for line in reader:
+        # Skip empty lines and comments.
+        if line == []:
+            continue
+        if line[0][0] == '#':
+            continue
+
+        # Get key-value pair (they're separated by random number of whitespaces.
+        key, val = line[0], line[-1]
+
+        # Fix numeric data.
+        if key in numeric_keys:
+            try:
+                val = float(val)
+            except:
+                raise
+
+        # Store on dict.
+        ret[key] = val
+
+    # Return finished dict.
+    return ret
 
 

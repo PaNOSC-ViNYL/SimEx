@@ -24,8 +24,7 @@
     @institution DESY
     @creation 20161111
 """
-import exceptions
-import os
+import os, shutil
 import unittest
 
 from SimEx.Utilities import ParallelUtilities
@@ -61,8 +60,6 @@ class ParallelUtilitiesTest(unittest.TestCase):
         except:
             pass
 
-
-
         for f in self.__files_to_remove:
             if os.path.isfile(f):
                 os.remove(f)
@@ -70,9 +67,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
             if os.path.isdir(p):
                 shutil.rmtree(p)
 
-    def testResourceInfoFromMPIWorks(self):
+    def testResourceInfoFromMPI(self):
         """ Test we can get resource info from MPI command."""
-
         resource = ParallelUtilities.getParallelResourceInfo()
         self.assertGreater(resource['NCores'],0)
         self.assertEqual(resource['NNodes'],1)
@@ -97,7 +93,7 @@ class ParallelUtilitiesTest(unittest.TestCase):
         os.environ["SIMEX_NCORES"]='1'
 
         resource = ParallelUtilities.getParallelResourceInfo()
-        
+
         self.assertEqual( resource['NCores'],1)
         self.assertEqual( resource['NNodes'],1)
 
@@ -136,9 +132,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
         self.assertEqual(resource['NCores'],200)
         self.assertEqual(resource['NNodes'],3)
 
-    def testGetVersionInfo_ReturnsCorrectData(self):
+    def testGetVersionInfo(self):
         """ Test we can extract MPI version infromation."""
-
         version=ParallelUtilities._getMPIVersionInfo()
 
         self.assertIn('Vendor',version)

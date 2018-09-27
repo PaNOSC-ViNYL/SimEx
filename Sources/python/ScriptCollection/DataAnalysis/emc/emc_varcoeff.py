@@ -95,7 +95,7 @@ averaged_values = values / norms
 averaged_squares = squares / norms
 
 std = numpy.sqrt( averaged_squares - averaged_values**2 )
-indices = range(central_index)
+indices = list(range(central_index))
 
 out_data = numpy.array([[i, averaged_values[i],  std[i]] for i in indices])
 numpy.savetxt('varcoeff.txt', out_data)

@@ -10,17 +10,17 @@ def write_module_parameters(moduleName,module):
         if os.path.exists(dest):
             bakfile=dest.replace('.py','.bak')
             shutil.copy(dest,bakfile)
-            print ("Overwriting file %s, file %s created"%(dest,bakfile))
+            print(("Overwriting file %s, file %s created"%(dest,bakfile)))
     except IOError as e:
-        print('Error: %s' % e)
+        print(('Error: %s' % e))
     except :
-        print('Error: cannot create file %s'%dest )
+        print(('Error: cannot create file %s'%dest ))
         return
     modfile = open(dest, 'w')
 
-    print>>modfile, 'input_path  = ',repr(module.input_path),'\n'
-    print>>modfile, 'output_path  = ',repr(module.output_path),'\n'
+    print('input_path  = ',repr(module.input_path),'\n', file=modfile)
+    print('output_path  = ',repr(module.output_path),'\n', file=modfile)
     s=pprint.pformat(module.parameters)
-    print>>modfile,'parameters = ',s
+    print('parameters = ',s, file=modfile)
 
     modfile.close()

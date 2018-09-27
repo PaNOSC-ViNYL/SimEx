@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,26 +20,24 @@
 ##########################################################################
 
 import os
-import paths
 import unittest
 
+from TestUtilities.TestUtilities import runs_on_travisCI
+
 # Import classes to test.
-from CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
-from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
-from FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
-from GenesisPhotonSourceTest import GenesisPhotonSourceTest
-from PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
-from S2EReconstructionTest import S2EReconstructionTest
-from SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
-from XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
-from XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
-from XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
-from XFELPhotonSourceTest import XFELPhotonSourceTest
-from XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
-from EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
-
-
-is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
+from .CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
+from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
+from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
+from .GenesisPhotonSourceTest import GenesisPhotonSourceTest
+from .PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
+from .S2EReconstructionTest import S2EReconstructionTest
+from .SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
+from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
+from .XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
+from .XFELPhotonSourceTest import XFELPhotonSourceTest
+from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
+from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
+from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
 
 # Setup the suite.
 def suite():
@@ -52,15 +50,14 @@ def suite():
              unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
+             unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
              ]
 
-    if not is_travisCI:
+    if not runs_on_travisCI():
         suites.append(unittest.makeSuite(GenesisPhotonSourceTest,           'test'))
         suites.append(unittest.makeSuite(PlasmaXRTSCalculatorTest,          'test'))
-        suites.append(unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'))
         suites.append(unittest.makeSuite(XCSITPhotonDetectorTest,           'test'))
         suites.append(unittest.makeSuite(EstherPhotonMatterInteractorTest,  'test'))
-
 
     return unittest.TestSuite(suites)
 

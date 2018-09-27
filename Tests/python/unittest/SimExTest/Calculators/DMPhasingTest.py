@@ -27,10 +27,7 @@
 
 """
 import os
-
-import paths
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.DMPhasing import DMPhasing

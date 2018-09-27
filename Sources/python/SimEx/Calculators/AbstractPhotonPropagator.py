@@ -1,7 +1,7 @@
-""" Module holding the AbstractPhotonPropagator abstract class."""
+""":module AbstractPhotonPropagator: Module holding the AbstractPhotonPropagator abstract class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -26,13 +26,10 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class AbstractPhotonPropagator(AbstractBaseCalculator):
+class AbstractPhotonPropagator(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon propagator, serving as API for actual photon propagation calculators.
+    :class AbstractPhotonPropagator: Base class for all PhotonPropagators.
     """
-
-    # Make this class an abstract base class.
-    __metaclass__  = ABCMeta
 
     # Abstract constructor.
     @abstractmethod

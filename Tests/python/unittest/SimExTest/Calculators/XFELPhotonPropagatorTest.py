@@ -27,11 +27,7 @@
 
 """
 import os, shutil
-import paths
 import unittest
-
-import numpy
-import h5py
 
 # Import the class to test.
 from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
@@ -86,9 +82,9 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
     def testBackengineDefaultPaths(self):
         """ Test a backengine run with a default io paths."""
         # Prepare source.
-        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
         self.__dirs_to_remove.append( 'source' )
         self.__dirs_to_remove.append( 'prop' )
+        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
 
         # Construct the object.
         xfel_propagator = XFELPhotonPropagator()
@@ -132,7 +128,6 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
 
         # Ensure clean-up.
         self.__dirs_to_remove.append(xfel_propagator.output_path)
-
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
-""" Module that holds the EstherPhotonMatterInteractor class.  """
+""":module EstherPhotonMatterInteractor: Module that holds the EstherPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,16 +28,16 @@ from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 try:
     from esther_execute import Esther_execute as EstherRun
 except ImportError:
-    print "\nWARNING: esther_execute could not be imported. This is most probably due to Esther not being installed or not found. Expect RunTimeErrors when attempting to run the EstherPhotonMatterInteractor.backengine()."
+    print("\nWARNING: esther_execute could not be imported. This is most probably due to Esther not being installed or not found. Expect RunTimeErrors when attempting to run the EstherPhotonMatterInteractor.backengine().")
 except:
     raise
 
 class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """
-    Class interfacing the Esther Radiation-Hydrodynamics simulation backengine.
+    :class EstherPhotonMatterInteractor: Class interfacing the Esther Radiation-Hydrodynamics simulation backengine.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
         :param parameters: Parameters for the EstherPhotonMatterInteractor.

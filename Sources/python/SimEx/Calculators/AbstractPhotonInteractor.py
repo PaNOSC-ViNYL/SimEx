@@ -1,7 +1,7 @@
-""" Module holding the AbstractPhotonInteractor."""
+""":module AbstractPhotonInteractor: Hosts the base class for all PhotonInteractors. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -26,14 +26,12 @@ from abc import abstractmethod
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class AbstractPhotonInteractor(AbstractBaseCalculator):
+class AbstractPhotonInteractor(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon(-matter) interactor, serving as API for actual photon matter simulation calculators.
+    :class AbstractPhotonInteractor: Abstract base class for all PhotonInteractors.
     """
-
-    __metaclass__  = ABCMeta
     @abstractmethod
-    def __init__(self, parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None, sample_path=None):
         """
 
         :param parameters: Parameters of the calculation (not data).
@@ -44,14 +42,19 @@ class AbstractPhotonInteractor(AbstractBaseCalculator):
 
         :param output_path: Path to hdf5 file for output.
         :type output_path: str
+
+        :param sample_path: Path to file containing the sample atom coordinates (at least atom type and cartesian coordinates).
+        :type sample_path: str
         """
 
-        # Check input path. Set to default if none given.
+        # Check paths.
         input_path = checkAndSetInstance(str, input_path, 'prop')
-        # Check output path. Set default if none given.
         output_path = checkAndSetInstance(str, output_path, 'pmi')
 
+        #self.sample_path = sample_path
+
         super(AbstractPhotonInteractor, self).__init__(parameters, input_path, output_path)
+
 
 def checkAndSetPhotonInteractor(var=None, default=None):
     """

@@ -1,4 +1,4 @@
-""" Module that holds the CrystFELPhotonDiffractorParameters class.  """
+""" :module CrystFELPhotonDiffractorParameters: Module that holds the CrystFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -27,10 +27,11 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysica
 from SimEx.Utilities import IOUtilities
 from SimEx.Utilities.Units import meter
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 
 class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the CrystFELPhotonDiffractor calculator.
+    :class CrystFELPhotonDiffractorParameters: Encapsulates parameters for the CrystFELPhotonDiffractor.
     """
     def __init__(self,
                 sample=None,
@@ -48,8 +49,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 **kwargs
                 ):
         """
-        Constructor for the CrystFELPhotonDiffractorParameters.
-
         :param sample: Location of file that contains the sample definition (pdb or crystfel format)
         :type sample: str
 
@@ -89,8 +88,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param kwargs: Key-value pairs to pass to the parent class.
         """
 
-
-
         # Check all parameters.
         self.sample = sample
         self.uniform_rotation = uniform_rotation
@@ -116,7 +113,7 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
-        self._AbstractCalculatorParameters__cpus_per_task_default = 1
+        self._AbstractCalculatorParameters__cpus_per_task_default = "MAX"
 
     ### Setters and queries.
     @property
@@ -129,8 +126,9 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         if val is None:
             raise ValueError( "A sample must be defined.")
         if val.split(".")[-1] == "pdb":
+            print("Checking presence of %s. Will query from PDB if not found in $PWD." % (val))
             self.__sample = IOUtilities.checkAndGetPDB(val)
-
+            print("Sample path is set to %s." % (self.__sample))
     @property
     def powder(self):
         """ Query the 'powder' parameter. """
@@ -196,15 +194,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'suppress_fringes' parameter to val."""
         self.__suppress_fringes = checkAndSetInstance( bool, val, False)
 
-    #@property
-    #def xxx(self):
-        #""" Query the 'xxx' parameter. """
-        #return self.__xxx
-    #@xxx.setter
-    #def xxx(self, val):
-        #""" Set the 'xxx' parameter to val."""
-        #self.__xxx = checkAndSetInstance( ttt, val, default)
-
     @property
     def uniform_rotation(self):
         """ Query for the 'uniform_rotation' parameter. """
@@ -243,12 +232,12 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'detector_geometry' parameter to a given value.
         :param value: The value to set 'detector_geometry' to.
         """
-        self.__detector_geometry = checkAndSetInstance( str, value, None )
+        self.__detector_geometry = checkAndSetInstance( (str, DetectorGeometry), value, None )
 
-        if self.__detector_geometry is not None:
+        if isinstance(self.__detector_geometry, str):
             if not os.path.isfile( self.__detector_geometry):
                 raise IOError("The detector_geometry %s is not a valid file or filename." % (self.__detector_geometry) )
-        else:
+        if self.__detector_geometry is None:
             print ("WARNING: Geometry file not set, calculation will most probably fail.")
 
 

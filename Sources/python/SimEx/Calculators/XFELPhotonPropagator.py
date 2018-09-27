@@ -1,7 +1,7 @@
-""" Module that holds the XFELPhotonPropagator class.  """
+""":module XFELPhotonPropagator: Module that holds the XFELPhotonPropagator class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-from prop import propagate_s2e
 
 import os
 import subprocess
@@ -32,15 +31,15 @@ from SimEx.Utilities import EntityChecks
 from SimEx.Utilities import IOUtilities
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities import wpg_to_opmd
+from prop import propagate_s2e
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    :class XFELPhotonPropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
     """
 
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the XFEL photon propagator.
 
         :param parameters: Parameters for the photon propagation.
         :type parameters: WavePropagatorParameters instance.
@@ -93,9 +92,13 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
-                print("XFELPhotonPropagator backengine mpicommand: "+mpicommand)
+                print(("XFELPhotonPropagator backengine mpicommand: "+mpicommand))
+            if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
+                import platform
+                print("Running python %s." % ( platform.python_version() ) )
 
         mpicommand+=" python "+__file__+" "+fname
+
 
         args = shlex.split(mpicommand)
 
@@ -114,7 +117,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         """
 
         # import should be here, not in header as it calls MPI_Init when imported. We want MPI to be
-        # initialized on this stage only.
+        # initialized at this stage only.
         from mpi4py import MPI
 
         # MPI info

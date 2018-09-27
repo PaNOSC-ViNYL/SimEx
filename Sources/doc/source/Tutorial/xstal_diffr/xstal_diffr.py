@@ -35,4 +35,4 @@ if not error:
     error = diffractor.saveH5()
 
 if not error:
-    print "Completed diffraction calculation, saved patterns to %s." % (diffractor.output_path)
+    print("Completed diffraction calculation, saved patterns to %s." % (diffractor.output_path))

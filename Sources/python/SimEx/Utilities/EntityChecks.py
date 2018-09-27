@@ -1,7 +1,7 @@
-""" Module for entity checks.  """
+""":module EntityChecks: Module for entity checks.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -21,8 +21,6 @@
 #                                                                        #
 ##########################################################################
 
-
-import exceptions
 from SimEx import PhysicalQuantity
 
 def checkAndSetInstance(cls, var=None, default=None):
@@ -41,11 +39,11 @@ def checkAndSetInstance(cls, var=None, default=None):
         if default is None:
             return None
         elif not isinstance(default, cls):
-            raise exceptions.TypeError("The default is not of correct type.")
+            raise TypeError("The default is not of correct type.")
         else: return default
 
     elif not isinstance(var, cls):
-        raise exceptions.TypeError("The parameter 'var' is not of correct type.")
+        raise TypeError("The parameter 'var' is not of correct type.")
 
     return var
 
@@ -61,11 +59,11 @@ def checkAndSetInteger(var=None, default=None):
 
     if var is None:
         if not (isinstance( default, int) ):
-            raise exceptions.TypeError("The default must be an integer.")
+            raise TypeError("The default must be an integer.")
         return default
 
     if not isinstance(var, int):
-            raise exceptions.TypeError("The parameter must be of type integer.")
+            raise TypeError("The parameter must be of type integer.")
     return var
 
 def checkAndSetPositiveInteger(var=None, default=None):
@@ -80,13 +78,13 @@ def checkAndSetPositiveInteger(var=None, default=None):
 
     if var is None:
         if not (isinstance( default, int) and default > 0):
-            raise exceptions.TypeError("The default must be a positive integer.")
+            raise TypeError("The default must be a positive integer.")
         return default
 
     if not isinstance(var, int):
-            raise exceptions.TypeError("The parameter must be of type integer.")
+            raise TypeError("The parameter must be of type integer.")
     if var <= 0:
-            raise exceptions.TypeError("The parameter must be a positive integer.")
+            raise TypeError("The parameter must be a positive integer.")
     return var
 
 def checkAndSetNonNegativeInteger(var=None, default=None):
@@ -101,24 +99,24 @@ def checkAndSetNonNegativeInteger(var=None, default=None):
 
     if var is None:
         if not (isinstance( default, int) and default >= 0):
-            raise exceptions.TypeError("The default must be a non-negative integer.")
+            raise TypeError("The default must be a non-negative integer.")
         return default
 
     if not isinstance(var, int):
-            raise exceptions.TypeError("The parameter must be of type integer.")
+            raise TypeError("The parameter must be of type integer.")
     if var < 0:
-            raise exceptions.TypeError("The parameter must be a non-negative integer.")
+            raise TypeError("The parameter must be a non-negative integer.")
     return var
 
 def checkAndSetNumber(var=None, default=None):
     """ Check if input is a numerical type. """
     if var is not None:
         if not isinstance( var, (int, float) ):
-            raise exceptions.TypeError("The given value must be a numerical type, got %s" % (type(var)))
+            raise TypeError("The given value must be a numerical type, got %s" % (type(var)))
         return var
 
     if not isinstance( default, (int, float)):
-            raise exceptions.TypeError("The default value must be a numerical type, got %s" % (type(default)))
+            raise TypeError("The default value must be a numerical type, got %s" % (type(default)))
     return default
 
 def checkAndSetIterable(var=None, default=None):

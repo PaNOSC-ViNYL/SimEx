@@ -1,7 +1,7 @@
-""" Module that holds the GenesisPhotonSource class."""
+""":module GenesisPhotonSource: Module that holds the GenesisPhotonSource class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2017 Carsten Fortmann-Grote                              #
+# Copyright (C) 2017-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,12 +20,9 @@
 #                                                                        #
 ##########################################################################
 
-import h5py
 import numpy
 import os
-import shutil
 import subprocess
-
 from ocelot.adaptors import genesis
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
@@ -33,12 +30,11 @@ from SimEx.Utilities.IOUtilities import pic2dist
 
 class GenesisPhotonSource(AbstractPhotonSource):
     """
-    Class representing a x-ray free electron laser photon source using the Genesis backengine.
+    :class GenesisPhotonSource: Representing a x-ray free electron laser photon source using the Genesis backengine.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the genesis photon source.
 
         :param parameters : Photon source parameters.
         :type parameters: dict
@@ -80,7 +76,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
 
         # Merge guessed and external input.
         if hasattr(self, '_GenesisPhotonSource__genesis_input') and self.__genesis_input is not None:
-            for key,value in self.__genesis_input.__dict__.items():
+            for key,value in list(self.__genesis_input.__dict__.items()):
                 if value != 0.0:
                     setattr(genesis_input, key, value)
 

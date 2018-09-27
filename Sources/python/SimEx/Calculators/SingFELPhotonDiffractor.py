@@ -1,7 +1,7 @@
-""" Module that holds the SingFELPhotonDiffractor class.  """
+""":module SingFELPhotonDiffractor: Module that holds the SingFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -32,6 +32,7 @@ import h5py
 import os
 import subprocess
 import shlex
+import sys
 
 from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -43,10 +44,10 @@ from SimEx.Utilities import IOUtilities
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    :class SingFELPhotonDiffractor: Representing scattering from a molecular sample into a detector plane.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
         :param parameters: Parameters of the calculation (not data).
@@ -62,9 +63,14 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if isinstance(parameters, dict):
             parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameters)
 
+        if parameters is None:
+            parameters_default = SingFELPhotonDiffractorParameters(),
+        else:
+            parameters_default = None
+
         self.__parameters = checkAndSetInstance(SingFELPhotonDiffractorParameters,
                                                 parameters,
-                                                SingFELPhotonDiffractorParameters(),
+                                                parameters_default,
                                                 )
 
         # Handle sample geometry provenience.
@@ -130,7 +136,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.cpus_per_task == "MAX":
             np = nnodes
         else:
-            np = max(int(ncores/int(self.parameters.cpus_per_task)), 1)
+            np = max(ncores//self.parameters.cpus_per_task, 1)
 
         return np, ncores
 
@@ -205,7 +211,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         args = shlex.split(mpicommand) + command_sequence
 
         if 'SIMEX_VERBOSE' in os.environ:
-            print("SingFELPhotonDiffractor backengine command: "+" ".join(args))
+            print(("SingFELPhotonDiffractor backengine command: "+" ".join(args)))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -234,23 +240,27 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             mpicommand = forcedMPIcommand
 
+        mpicommand += " ".join(("",sys.executable, __file__, fname))
+
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand)
-
-        mpicommand += " python " + __file__ + " " + fname
-
-        args = shlex.split(mpicommand)
+                print(("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand))
 
         # Launch the system command.
-        proc = subprocess.Popen(args, universal_newlines=True)
-        proc.wait()
+        args = shlex.split(mpicommand)
+        with subprocess.Popen(args, universal_newlines=True) as proc:
+            out, err = proc.communicate()
+
+        # Remove the dumped class.
         os.remove(fname)
 
         return proc.returncode
 
     def _run(self):
-
+        """ """
+        """ Workhorse function to run the pysingfel backengine.
+        Called if run from the command-line with dill dump.
+        """
         # Local import of MPI to avoid premature call to MPI.init().
         from mpi4py import MPI
 
@@ -295,21 +305,21 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         detector.init_dp(beam)
 
         # Determine which patterns to run on which core.
-        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns / mpi_size
+        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns // mpi_size
         # Remainder of the division.
         remainder = self.parameters.number_of_diffraction_patterns % mpi_size
         # Pattern indices
-        pattern_indices = range(self.parameters.number_of_diffraction_patterns)
+        pattern_indices = list(range(self.parameters.number_of_diffraction_patterns))
 
         # Distribute patterns over cores.
         rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
-
         # Distribute remainder
         if mpi_rank < remainder:
             rank_indices.append(pattern_indices[mpi_size * number_of_patterns_per_core + mpi_rank])
 
         # Setup the output file.
         outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(mpi_comm.Get_rank()+1) + '.h5'
+
         if os.path.exists(outputName):
             os.remove(outputName)
 
@@ -389,42 +399,37 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         path_to_files = self.output_path
 
         # Setup new file.
-        h5_outfile = h5py.File(self.output_path + ".h5", "w")
+        with h5py.File(self.output_path + ".h5", "w") as h5_outfile:
 
-        # Files to read from.
-        individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
-        individual_files.sort()
+            # Files to read from.
+            individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
+            individual_files.sort()
 
-        # Keep track of global parameters being linked.
-        global_parameters = False
-        # Loop over all individual files and link in the top level groups.
-        for ind_file in individual_files:
-            # Open file.
-            h5_infile = h5py.File(ind_file, 'r')
+            # Keep track of global parameters being linked.
+            global_parameters = False
+            # Loop over all individual files and link in the top level groups.
+            for ind_file in individual_files:
+                # Open file.
+                with h5py.File(ind_file, 'r') as h5_infile:
 
-            # Links must be relative.
-            relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+                    # Links must be relative.
+                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
 
-            # Link global parameters.
-            if not global_parameters:
-                global_parameters = True
+                    # Link global parameters.
+                    if not global_parameters:
+                        global_parameters = True
 
-                h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
-                h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
-                h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
-                h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
+                        h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
+                        h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
+                        h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
+                        h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
 
-            for key in h5_infile['data']:
+                    for key in h5_infile['data']:
 
-                # Link in the data.
-                ds_path = "data/%s" % (key)
-                h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
+                        # Link in the data.
+                        ds_path = "data/%s" % (key)
+                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
 
-            # Close input file.
-            h5_infile.close()
-
-        # Close file.
-        h5_outfile.close()
 
         # Reset output path.
         self.output_path = self.output_path+".h5"

@@ -1,4 +1,4 @@
-from modules_commands import add_module,available_modules,enable_module,list_modules,set_param
+from .modules_commands import add_module,available_modules,enable_module,list_modules,set_param
 
 def set_arguments(parser):
     subparsers = parser.add_subparsers(title='module commands',help='')

@@ -26,14 +26,12 @@
     @creation 20160722
 
 """
-import paths
 import os
 import shutil
 
 # Include needed directories in sys.path.
 import unittest
 
-from TestUtilities import TestUtilities
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.DMPhasingParameters import DMPhasingParameters
 

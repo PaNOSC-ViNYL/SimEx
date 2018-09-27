@@ -1,7 +1,7 @@
-""" Module that holds the EMCOrientation class.  """
+""":module EMCOrientation: Module that holds the EMCOrientation class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -27,7 +27,7 @@ import subprocess,shlex
 import tempfile
 import time
 
-from EMCCaseGenerator import  EMCCaseGenerator, _print_to_log
+from SimEx.Calculators.EMCCaseGenerator import EMCCaseGenerator, _print_to_log
 from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 from SimEx.Parameters.EMCOrientationParameters import EMCOrientationParameters
 from SimEx.Utilities import IOUtilities
@@ -35,9 +35,10 @@ from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class EMCOrientation(AbstractPhotonAnalyzer):
-
     """
-    Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
+    :class EMCOrientation: Representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume.
+    """
+
     def __init__(self, parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
         """
         :param  parameters: Parameters for the EMC orientation calculator.
@@ -230,7 +231,10 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
-                print("EMCOrientation backengine mpicommand: "+mpicommand)
+                print(("EMCOrientation backengine mpicommand: "+mpicommand))
+            if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
+                import platform
+                print("Running python version %s." % (platform.python_version()))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -413,7 +417,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             f.close()
         else:
             f = h5py.File(outFile, 'r')
-            offset_iter = len(f["/history/intensities"].keys())
+            offset_iter = len(list(f["/history/intensities"].keys()))
             f.close()
             msg = "Output will be appended to the results of %d iterations before this."%offset_iter
             _print_to_log(msg=msg, log_file=self._outputLog)

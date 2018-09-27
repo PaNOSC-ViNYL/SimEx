@@ -26,11 +26,7 @@
     @creation 20151104
 
 """
-import paths
 import unittest
-
-import numpy
-import h5py
 
 # Import the class to test.
 from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource

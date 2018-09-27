@@ -4,7 +4,7 @@
 #set -e # abort after any errors
 #set -u # exit after accessing an undefined variable
 
-libs=(PyQt4 sip.so sip.x86_64-linux-gnu.so sipconfig.py)
+libs=(PyQt5 sip.so sip.x86_64-linux-gnu.so sipconfig.py)
 
 python_version=python$(python -c "import sys; print (str(sys.version_info[0])+'.'+str(sys.version_info[1]))")
 var=( $(which -a ${python_version}) )

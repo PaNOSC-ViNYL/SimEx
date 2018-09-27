@@ -21,7 +21,6 @@
 ##########################################################################
 
 import os
-import paths
 import shutil
 import unittest
 
@@ -303,7 +302,7 @@ class EstherPhotonMatterInteractorParametersTest(unittest.TestCase):
                                          read_from_file=path_to_esther_files)
 
         # Check all members are equal.
-        for key,val in esther_parameters.__dict__.items():
+        for key,val in list(esther_parameters.__dict__.items()):
             self.assertEqual( val, getattr(new_esther_parameters, key) )
 
     def testReadFromFileWithUpdate(self):

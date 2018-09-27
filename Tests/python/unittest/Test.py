@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -30,7 +30,7 @@ from SimExTest.Parameters import ParametersTests
 from SimExTest.PhotonExperimentSimulation import PhotonExperimentSimulationTests
 
 # Are we running on CI server?
-is_travisCI = ("TRAVIS_BUILD_DIR" in os.environ.keys()) and (os.environ["TRAVIS_BUILD_DIR"] != "")
+is_travisCI = ("TRAVIS_BUILD_DIR" in list(os.environ.keys())) and (os.environ["TRAVIS_BUILD_DIR"] != "")
 
 
 # Define the test suite.
@@ -54,7 +54,7 @@ if __name__=="__main__":
     result = unittest.TextTestRunner(verbosity=2).run(suite())
 
     if result.wasSuccessful():
-        print '---> OK <---'
+        print('---> OK <---')
         sys.exit(0)
 
     sys.exit(1)

@@ -1,6 +1,8 @@
+""":module EstherExperiment: Hosts the EstherExperiment workflow class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Richard Briggs, Carsten Fortmann-Grote         #
+# Copyright (C) 2016-2017 Richard Briggs                                 #
+# Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,7 +27,7 @@ from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhoton
 
 class EstherExperiment():
     """
-    Class to represent creating new and iterative Rad-Hydro simulations.
+    :class EstherExperiment: Represents creating new and iterative Rad-Hydro simulations.
     """
     def __init__(self,
                  parameters=None,
@@ -36,7 +38,6 @@ class EstherExperiment():
                  ):
 
         """
-        Constructor for the Esther Experiment.
 
         :param parameters: Esther parameters.
         :type parameters: EstherPhotonMatterInteractorParameters
@@ -75,25 +76,25 @@ class EstherExperiment():
             sim_path=os.path.join(esther_sims_path,sim_name)
             if os.path.isdir(sim_path):
                 # List all iterations within the simulation name's folder
-                print ("These are the current simulations within %s" % sim_name)
+                print(("These are the current simulations within %s" % sim_name))
                 for sims in os.listdir(sim_path):
                     if not sims.startswith('.'):
                         print (sims)
                 # Create new folder with new iteration numbers
                 # TO DO: Generate updated parameters from SimName
                 output_sim = int(sims)+1
-                print ("New simulation iteration is %d" % output_sim)
+                print(("New simulation iteration is %d" % output_sim))
                 output_path=os.path.join(sim_path,str(output_sim))
                 filename = (sim_name+str(output_sim))
-                print ("Output path is set to %s" % (output_path))
-                print ("Output filename is set to %s" % (filename))
+                print(("Output path is set to %s" % (output_path)))
+                print(("Output filename is set to %s" % (filename)))
             else:
                 # Create new simulation folder called Sim_name and start first iteration /1/
                 print ("No simulation exists. Creating new simulation if asked to do so")
                 output_path = os.path.join(sim_path,"1")
                 filename = (sim_name+"1")
-                print ("Output path is set to %s" % (output_path))
-                print ("Output filename is set to %s" % (filename))
+                print(("Output path is set to %s" % (output_path)))
+                print(("Output filename is set to %s" % (filename)))
                 # TODO: Generate new parameters for new simulations from parameters.
 
 

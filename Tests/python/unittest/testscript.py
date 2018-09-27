@@ -20,10 +20,9 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 
 # Import SimEx modules.
-from TestUtilities import TestUtilities
+from .TestUtilities import TestUtilities
 from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
 from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
 from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor

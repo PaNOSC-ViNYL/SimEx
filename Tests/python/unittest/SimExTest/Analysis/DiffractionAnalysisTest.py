@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -27,20 +27,16 @@ RENDER_PLOT=False # Set to True or use environment variable to show plots.
     @creation 20170322
 
 """
-import h5py
 import numpy
 import os, shutil
-import paths
 import unittest
-import wpg
-
-from TestUtilities import TestUtilities
 
 # Import the class to test.
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis
 from SimEx.Analysis.DiffractionAnalysis import diffractionParameters, plotImage
 
+from TestUtilities import TestUtilities
 
 if 'RENDER_PLOT' in os.environ:
     RENDER_PLOT=bool(os.environ['RENDER_PLOT'])
@@ -121,64 +117,76 @@ class DiffractionAnalysisTest(unittest.TestCase):
         """ Check we can plot one diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=1)
         analyzer.plotPattern()
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testPlotOnePattern(self):
         """ Check we can plot one diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=4)
         analyzer.plotPattern()
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testPlotSumPatternLogscale(self):
         """ Check we can plot one diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data,
                 poissonize=False)
         analyzer.plotPattern(operation=numpy.sum, logscale=True)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
+    @unittest.skip("Obsolete.")
     def testPlotOnePatternLegacy(self):
         """ Check we can plot one diffraction pattern from a v0.1 dir as a color map. """
         analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'), pattern_indices=4)
         analyzer.plotPattern(operation=None)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testPlotAvgPattern(self):
         """ Check we can plot the average diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
         analyzer.plotPattern(operation=numpy.mean)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
+    @unittest.skip("Obsolete.")
     def testPlotAvgPatternLegacy(self):
         """ Check we can plot the average diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=TestUtilities.generateTestFilePath('diffr_0.1'))
         analyzer.plotPattern(operation=numpy.mean)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
 
     def testPlotPatternDefault(self):
         """ Check we the sum image of all patterns is plotted by default. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
         analyzer.plotPattern()
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
 
     def testPlotRMSPattern(self):
         """ Check we can plot the rms diffraction pattern as a color map. """
         analyzer = DiffractionAnalysis(input_path=self.__test_data)
         analyzer.plotPattern(operation=numpy.std)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testPlotAvgSequenceInt(self):
         """ Check we can plot the avg over a subset of patterns given as list of ints."""
         analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=[1,3,6])
         analyzer.plotPattern(operation=numpy.mean)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testPlotImage(self):
         """ Check we can plot an ndarray."""
         image = numpy.random.random((100, 100))
         plotImage(image)
-        plt.show()
+        if RENDER_PLOT:
+            plt.show()
 
     def testDiffractionParameters(self):
         """ Test the utility to extract parameters from a h5 file."""
@@ -190,10 +198,10 @@ class DiffractionAnalysisTest(unittest.TestCase):
         parameters = diffractionParameters(path)
 
         # Check for some keys.
-        self.assertIn('beam', parameters.keys())
-        self.assertIn('geom', parameters.keys())
-        self.assertIn('photonEnergy', parameters['beam'].keys())
-        self.assertIn('pixelWidth', parameters['geom'].keys())
+        self.assertIn('beam', list(parameters.keys()))
+        self.assertIn('geom', list(parameters.keys()))
+        self.assertIn('photonEnergy', list(parameters['beam'].keys()))
+        self.assertIn('pixelWidth', list(parameters['geom'].keys()))
 
     def testPlotAndStatistics(self):
         """ Check that we can get two plots (resetting the iterator works.)"""
@@ -210,7 +218,6 @@ class DiffractionAnalysisTest(unittest.TestCase):
         analyzer.logscale = False
         analyzer.plotRadialProjection()
         analyzer.plotRadialProjection(logscale=True)
-        analyzer.plotRadialProjection(operation=numpy.std)
 
 
     def testAnimatePatterns(self):
@@ -218,7 +225,7 @@ class DiffractionAnalysisTest(unittest.TestCase):
 
         # Setup the analyser with a sequence of patterns.
         analyzer = DiffractionAnalysis(input_path=self.__test_data,
-                                       pattern_indices=range(1,11),
+                                       pattern_indices=list(range(1,11)),
                                       )
 
         # Check exceptions on faulty path.

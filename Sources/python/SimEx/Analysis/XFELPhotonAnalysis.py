@@ -1,7 +1,7 @@
 """ :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -33,22 +33,20 @@ class XFELPhotonAnalysis(AbstractAnalysis):
     """
 
     def __init__(self, input_path=None,):
-        """ Constructor for the XFELPhotonAnalysis class.
-
+        """
         :param input_path: Name of file or directory that contains data to analyse.
         :type input_path: str
-
         """
-        print "\n Start initialization."
+        print("\n Start initialization.")
         # Initialize base class. This takes care of parameter checking.
         super(XFELPhotonAnalysis, self).__init__(input_path)
 
         # Get wavefront file name.
         wavefront = wpg.Wavefront()
 
-        print "\n Loading wavefront from %s." % (self.input_path)
+        print("\n Loading wavefront from %s." % (self.input_path))
         wavefront.load_hdf5(self.input_path)
-        print " ... done."
+        print(" ... done.")
 
         # Init intensity.
         self.__intensity = None
@@ -77,13 +75,13 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         self.__wavefront = val
 
         # Get intensities and mask nans
-        print "\n Getting intensities."
+        print("\n Getting intensities.")
         self.intensity = self.__wavefront.get_intensity()
-        print " ... done."
-        print " Data dimensions = ", self.intensity.shape
-        print "\n Masking NANs."
+        print(" ... done.")
+        print(" Data dimensions = ", self.intensity.shape)
+        print("\n Masking NANs.")
         self.__nans = mask_nans(self.intensity)
-        print " ... done."
+        print(" ... done.")
 
     def animate(self, qspace=False, logscale=False):
         """ Generate an animated gif from the wavefront data. """
@@ -101,9 +99,9 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         number_of_slices = intensity.shape[-1]
         # Setup a figure.
 
-        for i in xrange(0,number_of_slices):
+        for i in range(0,number_of_slices):
 
-            print "Processing slice #%d." % (i)
+            print("Processing slice #%d." % (i))
 
             # Plot profile as 2D colorcoded map.
             if logscale:
@@ -129,7 +127,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         """
 
-        print "\n Plotting intensity map."
+        print("\n Plotting intensity map.")
         # Setup new figure.
         plt.figure()
 
@@ -139,11 +137,11 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Switch to q-space if requested.
         if qspace:
-            print "\n Switching to reciprocal space."
+            print("\n Switching to reciprocal space.")
             srwl_wf_a = copy.deepcopy(self.wavefront._srwl_wf)
             wpg.srwlib.srwl.SetRepresElecField(srwl_wf_a, 'a')
             wf = wpg.Wavefront(srwl_wf_a)
-            print " ... done."
+            print(" ... done.")
             wf_intensity = wf.get_intensity()
             nans = mask_nans(wf_intensity)
 
@@ -219,13 +217,13 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         """
 
         """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
-        print "\n Plotting total power."
+        print("\n Plotting total power.")
         # Setup new figure.
         plt.figure()
 
         # Switch to frequency (energy) domain if requested.
         if spectrum:
-            print "\n Switching to frequency domain."
+            print("\n Switching to frequency domain.")
             wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
             self.intensity = self.wavefront.get_intensity()
 
@@ -258,7 +256,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
             plt.xlabel('time (fs)')
             plt.ylabel('Power (W)')
             dt = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
-            print('Pulse energy {:1.2g} J'.format(int0_mean.sum()*dt))
+            print(('Pulse energy {:1.2g} J'.format(int0_mean.sum()*dt)))
 
         else: #frequency domain
             plt.plot(xs, int0)
@@ -280,13 +278,13 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         """
         """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
 
-        print "\n Plotting on-axis power density."
+        print("\n Plotting on-axis power density.")
         # Setup new figure.
         plt.figure()
 
         # Switch to frequency (energy) domain if requested.
         if spectrum:
-            wpg.srwlib.srwl.SetRepresElecField(wf._srwl_wf, 'f')
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
             self.intensity = self.wavefront.get_intensity()
 
         # Get dimensions.
@@ -348,7 +346,7 @@ def mask_nans(a, replacement=0.0):
     isnan_array = numpy.isnan(a) # This can take a while ...
     if isnan_array.any():
         nans = numpy.where(isnan_array)
-        print "WARNING: Found intensity=NAN at", repr(nans)
+        print("WARNING: Found intensity=NAN at", repr(nans))
         a[nans] = 0.0 # Yes this works because a is a reference!
     return isnan_array
 

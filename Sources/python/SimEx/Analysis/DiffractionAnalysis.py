@@ -1,8 +1,8 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 """ :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -21,7 +21,7 @@
 #                                                                        #
 ##########################################################################
 from SimEx.Analysis.AbstractAnalysis import AbstractAnalysis, plt, mpl
-from matplotlib.colors import Normalize, LogNorm
+from matplotlib.colors import Normalize
 
 import h5py
 import math
@@ -42,7 +42,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                  poissonize=True,
                  mask=None
             ):
-        """ Constructor for the DiffractionAnalysis class.
+        """
 
         :param input_path: Name of file or directory that contains data to analyse.
         :type input_path: str
@@ -168,10 +168,11 @@ class DiffractionAnalysis(AbstractAnalysis):
                     continue
 
         else: # v0.2
+
             # Open file for reading
             with h5py.File(path, 'r') as h5:
                 if indices is None or indices == 'all':
-                    indices = [key for key in h5['data'].iterkeys()]
+                    indices = [key for key in h5['data'].keys()]
                 else:
                     indices = ["%0.7d" % ix for ix in indices]
                 for ix in indices:
@@ -206,7 +207,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Get pattern to plot.
         pi = self.patterns_iterator
         if len(self.pattern_indices) == 1:
-            pattern_to_plot = pi.next()
+            pattern_to_plot = next(pi)
         else:
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
@@ -231,7 +232,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Handle default operation
         if operation is not None and len(self.pattern_indices) == 1:
-            print "WARNING: Giving an operation with a single pattern has no effect."
+            print("WARNING: Giving an operation with a single pattern has no effect.")
             operation = None
         if operation is None and len(self.pattern_indices) > 1:
             operation = numpy.sum
@@ -239,7 +240,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Get pattern to plot.
         pi = self.patterns_iterator
         if len(self.pattern_indices) == 1:
-            pattern_to_plot = pi.next()
+            pattern_to_plot = next(pi)
         else:
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
@@ -307,13 +308,13 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True):
+def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
     qs, intensities = azimuthalIntegration(pattern, parameters)
 
     if logscale:
-        plt.semilogy(qs, intensities)
+        plt.semilogy(qs, intensities+offset)
     else:
         plt.plot(qs, intensities)
 
@@ -391,7 +392,7 @@ def diffractionParameters(path):
             # Loop over entries in /params.
             for top_key in ['beam', 'geom']:
                 # Loop over groups.
-                for key, val in h5['params/%s' % (top_key)].iteritems():
+                for key, val in h5['params/%s' % (top_key)].items():
                     # Insert into return dictionary.
                     parameters_dict[top_key][key] = val.value
     except:
@@ -492,10 +493,10 @@ def photonStatistics(stack):
     avg_photons = numpy.mean(photons)
     rms_photons =  numpy.std(photons)
 
-    print "*************************"
-    print "avg = %6.5e" % (avg_photons)
-    print "std = %6.5e" % (rms_photons)
-    print "*************************"
+    print("*************************")
+    print("avg = %6.5e" % (avg_photons))
+    print("std = %6.5e" % (rms_photons))
+    print("*************************")
 
 
     # Plot histogram.
@@ -509,7 +510,7 @@ def photonStatistics(stack):
     number_of_bins = min(20, number_of_images)
     binwidth = int( binwidth / number_of_bins )
 
-    plt.hist(photons, bins=xrange(min_photon_number, max_photon_number, binwidth), facecolor='red', alpha=0.75)
+    plt.hist(photons, bins=range(min_photon_number, max_photon_number, binwidth), facecolor='red', alpha=0.75)
     plt.xlim([min_photon_number, max_photon_number])
     plt.xlabel("Photons")
     plt.ylabel("Histogram")

@@ -1,8 +1,8 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,7 +25,6 @@
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis, plt
 
 from argparse import ArgumentParser
-import numpy
 
 def main(args=None):
 
@@ -57,7 +56,7 @@ def main(args=None):
     if args.animation_filename:
         analyzer.animatePatterns(output_path=args.animation_filename)
 
-        print "Animated gif saved to %s." % (analyzer._DiffractionAnalysis__animation_output_path)
+        print("Animated gif saved to %s." % (analyzer._DiffractionAnalysis__animation_output_path))
 
 if __name__ == '__main__':
 

@@ -22,7 +22,7 @@
 import h5py
 import numpy
 import os
-import sys
+
 from SimEx.Utilities import OpenPMDTools as opmd
 
 def convertTxtToOPMD(esther_dirname=None):
@@ -50,20 +50,20 @@ def convertTxtToOPMD(esther_dirname=None):
         tmp = f.readline() # Save header line as temp.
         tmp = tmp.split() # Split header line to obtain timesteps and zones.
         number_of_timesteps = int(tmp[0])
-        number_of_zones = int(tmp[1])
 
         # Close.
         f.close()
 
-	# Load data via numpy.
-	rho_array = numpy.loadtxt(str(esther_dirname)+"/densite_massique.txt",skiprows=3,unpack=True)
-	pres_array = numpy.loadtxt(str(esther_dirname)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
-	temp_array = numpy.loadtxt(str(esther_dirname)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
-	vel_array = numpy.loadtxt(str(esther_dirname)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
-	pos_array = numpy.loadtxt(str(esther_dirname)+"/position_externe_relative.txt",skiprows=3,unpack=True)
+    # Load data via numpy.
+    rho_array = numpy.loadtxt(str(esther_dirname)+"/densite_massique.txt",skiprows=3,unpack=True)
+    pres_array = numpy.loadtxt(str(esther_dirname)+"/pression_hydrostatique.txt",skiprows=3,unpack=True)
+    temp_array = numpy.loadtxt(str(esther_dirname)+"/temperature_du_milieu.txt",skiprows=3,unpack=True)
+    vel_array = numpy.loadtxt(str(esther_dirname)+"/vitesse_moyenne.txt",skiprows=3,unpack=True)
+    pos_array = numpy.loadtxt(str(esther_dirname)+"/position_externe_relative.txt",skiprows=3,unpack=True)
+    ionization_array = numpy.loadtxt(str(esther_dirname)+"/taux_ionisation.txt",skiprows=3,unpack=True)
 
     # Slice out the timestamps.
-	time_array = rho_array[0]
+    time_array = rho_array[0]
     time_array = time_array
     time_step = time_array[1] - time_array[0]
 
@@ -91,6 +91,7 @@ def convertTxtToOPMD(esther_dirname=None):
             meshes.create_dataset('temp', data=temp_array[1:,it])
             meshes.create_dataset('vel',  data=vel_array[1:,it])
             meshes.create_dataset('pos',  data=pos_array[1:,it])
+            meshes.create_dataset('Z',  data=ionization_array[1:,it])
 
             # Assign documentation.
             meshes['rho'].attrs["info"] = "Mass density (mass per unit volume) stored on a 1D Lagrangian grid (zones)."
@@ -98,6 +99,7 @@ def convertTxtToOPMD(esther_dirname=None):
             meshes['temp'].attrs["info"] = "Temperature stored on a 1D Lagrangian grid (zones)."
             meshes['vel'].attrs["info"] = "Average velocity stored on a 1D Lagrangian grid (zones)."
             meshes['pos'].attrs["info"] = "External position stored on a 1D Lagrangian grid (zones)."
+            meshes['Z'].attrs["info"] = "Degree of ionization on a 1D Lagrangian grid (zones)."
 
             # Assign SI units
             #                L      M     t     I     T     N     Lum
@@ -111,9 +113,11 @@ def convertTxtToOPMD(esther_dirname=None):
                 numpy.array([ 1.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m s^-1
             meshes['pos'].attrs["unitDimension"] = \
                 numpy.array([ 1.0,  0.0, 0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # m
+            meshes['Z'].attrs["unitDimension"] = \
+                numpy.array([ 0.0,  0.0, 0.0,  0.0,  0.0,  0.0,  0.0], dtype=numpy.float64) # 1
 
             # Write common attributes.
-            axis_label = ["Zones"]
+            axis_label = [b"Zones"]
             geometry = numpy.string_("other")
             grid_spacing = [numpy.float64(1.0)]
             grid_global_offset = [numpy.float64(0.0)]
@@ -122,7 +126,7 @@ def convertTxtToOPMD(esther_dirname=None):
             data_order = numpy.string_("C")
 
             # Write the common metadata to pass test
-            for key in meshes.keys():
+            for key in list(meshes.keys()):
                 meshes[key].attrs["unitSI"] = 1.0
                 meshes[key].attrs["axisLabels"] = axis_label
                 meshes[key].attrs["geometry"] = geometry
@@ -133,7 +137,5 @@ def convertTxtToOPMD(esther_dirname=None):
                 meshes[key].attrs["dataOrder"] = data_order
                 meshes[key].attrs["position"] = numpy.array([0.5, 0.5], dtype=numpy.float32)
 
-        opmd_h5.close()
-
-        return os.path.abspath(h5_path)
+    return os.path.abspath(h5_path)
 

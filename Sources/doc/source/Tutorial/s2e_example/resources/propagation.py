@@ -27,9 +27,9 @@ propagator._readH5()
 status = propagator.backengine()
 
 if status != 0:
-    print "Wave propagation failed, check output."
+    print("Wave propagation failed, check output.")
     sys.exit()
 
 propagator.saveH5()
 
-print "Wave propagation succeeded."
+print("Wave propagation succeeded.")

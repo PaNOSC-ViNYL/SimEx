@@ -1,3 +1,4 @@
+""":module ParallelUtilities: Hosts utilities to query HPC runtime parameters."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -20,13 +21,12 @@
 #                                                                        #
 ##########################################################################
 
-""" Module with utilities for parallel job.  """
-
 import os
 import subprocess
 from distutils.version import StrictVersion
-
+from py3nvml import py3nvml as nvml
 def _getParallelResourceInfoFromEnv():
+    """ """
     resource = {}
     try:
         resource['NCores'] = int(os.environ['SIMEX_NCORES'])
@@ -39,6 +39,7 @@ def _getParallelResourceInfoFromEnv():
     return resource
 
 def _getParallelResourceInfoFromSlurm():
+    """ """
     resource = {}
     try:
         resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
@@ -64,6 +65,7 @@ def _getParallelResourceInfoFromSlurm():
     return resource
 
 def _MPICommandName():
+    """ """
     if 'SIMEX_MPICOMMAND' in os.environ:
         mpicmd=os.environ['SIMEX_MPICOMMAND']
     else:
@@ -72,6 +74,7 @@ def _MPICommandName():
     return mpicmd
 
 def _getParallelResourceInfoFromMpirun():
+    """ """
 # we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be
 # listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node
     try:
@@ -79,6 +82,8 @@ def _getParallelResourceInfoFromMpirun():
         process = subprocess.Popen([mpicmd, "hostname"], stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
+        # Decode
+        output = output.decode('utf-8')
 
         if process.returncode !=0:
             return None
@@ -116,11 +121,13 @@ def getParallelResourceInfo():
         return dict([("NCores", 0),("NNodes",1)])
 
 def _getMPIVersionInfo():
+    """ """
     try:
         mpi_cmd = _MPICommandName()
         process = subprocess.Popen([mpi_cmd, "--version"], stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
+        output = output.decode('utf-8')
 
         version = {}
         if "(Open MPI)" in output:
@@ -136,6 +143,7 @@ def _getMPIVersionInfo():
         return None
 
 def _getVendorSpecificMPIArguments(version, threads_per_task):
+    """ """
 
     if version == None:
         raise IOError( "Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or "
@@ -187,3 +195,31 @@ def prepareMPICommandArguments(ntasks, threads_per_task=0):
 
 
     return mpi_cmd
+
+def getCUDAEnvironment():
+    """ Get the CUDA runtime environment parameters (number of cards etc.). """
+
+    rdict = dict()
+    rdict['first_available_device_index'] = None
+    rdict['device_count'] = 0
+
+    try:
+        nvml.nvmlInit()
+        rdict['device_count'] = nvml.nvmlDeviceGetCount()
+
+    except:
+        print('WARNING: At least one of (py3nvml.nvml, CUDA) is not available. Will continue without GPU.')
+        return rdict
+
+    for i in range(rdict['device_count']):
+        memory_info = nvml.nvmlDeviceGetMemoryInfo(nvml.nvmlDeviceGetHandleByIndex(i))
+        memory_usage_percentage = memory_info.used / memory_info.total
+
+        if memory_usage_percentage <= 0.1:
+            rdict['first_available_device_index'] = i
+            break
+
+    nvml.nvmlShutdown()
+
+    return rdict
+

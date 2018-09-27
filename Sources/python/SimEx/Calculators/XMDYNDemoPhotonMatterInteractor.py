@@ -1,7 +1,7 @@
-""" Module that holds the XMDYNDemoPhotonMatterInteractor class.  """
+""":module XMDYNDemoPhotonMatterInteractor: Module that holds the XMDYNDemoPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -24,20 +24,17 @@ import h5py
 import numpy
 import os
 import random
-import subprocess
-import sys
 
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Utilities import IOUtilities
 
 class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
     """
-    Interface class for photon-matter interaction calculations using the XMDYN code.
+    :class XMDYNDemoPhotonMatterInteractor: Interface class for photon-matter interaction calculations using the demo version of the XMDYN code.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None, sample_path=None):
         """
-        Constructor for the xfel photon propagator.
 
         :param parameters: Parameters that govern the PMI calculation.
         :type parameters: dict
@@ -59,7 +56,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
         if sample_path is None:
             raise ValueError( "A target/sample must be specified through the 'sample_path' argument." )
         if not os.path.isfile( sample_path):
-            print "Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path)
+            print("Sample file %s was not found. Will attempt to query from RCSB protein data bank." % ( sample_path))
 
         self.__sample_path = sample_path
 
@@ -119,14 +116,14 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
                                 '/version',
                                 ]
 
-        if (self.parameters is None) or ('number_of_trajectories' not in self.parameters.keys()):
+        if (self.parameters is None) or ('number_of_trajectories' not in list(self.parameters.keys())):
             self.parameters = {'number_of_trajectories' : 1,
                     }
         if self.parameters['number_of_trajectories'] != 1:
-            print "\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n"
+            print("\n WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.\n")
             self.parameters['number_of_trajectories'] = 1
 
-        if "random_rotation" not in self.parameters.keys():
+        if "random_rotation" not in list(self.parameters.keys()):
             self.parameters["random_rotation"] = False
 
     def expectedData(self):
@@ -174,7 +171,7 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.g_s2e['sys'] = dict()
             pmi_demo.g_s2e['setup']['num_digits'] = 7
 
-            if 'number_of_steps' in self.parameters.keys():
+            if 'number_of_steps' in list(self.parameters.keys()):
                 pmi_demo.g_s2e['steps'] = self.parameters['number_of_steps']
             else:
                 pmi_demo.g_s2e['steps'] = 100
@@ -242,6 +239,8 @@ class PMIDemo(object):
         self.g_s2e = {}
         self.g_dbase = {}
 
+        self.f_s2e_setup()
+
     def f_s2e_setup(self) :
         self.g_s2e['setup'] = dict()
         self.g_s2e['sys'] = dict()
@@ -276,7 +275,7 @@ class PMIDemo(object):
     ##############################################################################
 
     def f_dbase_Zq2id(self, a_Z , a_q ) :
-        return ( a_Z * ( a_Z + 1 ) ) / 2 - 1*1 + a_q
+        return ( a_Z * ( a_Z + 1 ) ) // 2 - 1*1 + a_q
 
     ##############################################################################
 
@@ -324,8 +323,6 @@ class PMIDemo(object):
     ###    g_dbase['ph_sigma'] ;
 
 
-
-
     def f_load_snp_content(self, a_fp , a_snp ) :
         dbase_root = "/data/snp_" + str( a_snp ).zfill(self.g_s2e['setup']['num_digits']) + "/"
         xsnp = dict()
@@ -340,19 +337,38 @@ class PMIDemo(object):
 
         return xsnp
 
-
-    ##############################################################################
-
-
     def f_load_snp_xxx(self, a_real , a_snp ) :
         xfp  = h5py.File( self.g_s2e['prj'] + '/pmi/pmi_out_' + str( a_real ).zfill(self.g_s2e['setup']['num_digits'])  + '.h5' , "r" )
         xsnp = self.f_load_snp_content( xfp , a_snp )
         xfp.close()
         return xsnp
 
+    def f_load_snp_from_dir(self, path_to_snapshot) :
+        """ Load xmdyn output from an xmdyn directory.
 
-    ##############################################################################
+        :param path: The directory path to xmdyn output.
+        :type path: str
 
+        :param snapshot_index: Which snapshot to load.
+        :type snapshot_index: int
+
+        :returns: The snapshot data.
+        :rtype: dict
+
+        """
+
+        xsnp = dict()
+        xsnp['Z']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Z.dat' )) # Atom numbers
+        xsnp['T']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'T.dat' )) # Atom type
+        xsnp['uid'] = numpy.loadtxt(os.path.join(path_to_snapshot, 'uid.dat' )) #Unique atom ID.
+        xsnp['r']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'r.dat' )) # Cartesian coordinates.
+        xsnp['v']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'v.dat' )) # Cartesian velocities.
+        xsnp['m']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'm.dat' )) # Masses.
+        xsnp['q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'q.dat' )) # Ion charge
+        xsnp['ff']  = numpy.loadtxt(os.path.join(path_to_snapshot, 'f0.dat' )) # Form factors of each atom type.
+        xsnp['Q']   = numpy.loadtxt(os.path.join(path_to_snapshot, 'Q.dat' )) # Wavenumber grid for form factors.
+
+        return xsnp
 
     def f_load_sample( self, sample_path ) :
         sample = dict()
@@ -368,8 +384,6 @@ class PMIDemo(object):
         self.g_s2e['sample'] = sample
 
 
-    ##############################################################################
-
     def f_save_data(self, dset , data ) :
         xfp  = h5py.File( self.g_s2e['setup']['pmi_out'] , "a" )
         try:
@@ -380,13 +394,7 @@ class PMIDemo(object):
         xfp[ dset ] = data
         xfp.close()
 
-
-
-    ##############################################################################
-
-
     def f_rotate_sample( self ) :
-
         # Init quaternion for rotation.
         self.g_s2e['sample']['rot_quaternion'] = numpy.array([0,0,0,0])
 
@@ -399,17 +407,7 @@ class PMIDemo(object):
 
         self.f_save_data( '/data/angle' , self.g_s2e['sample']['rot_quaternion'] .reshape((1,4)) )
 
-
-
-
-    ##############################################################################
-
-
-
-    ##############################################################################
-
     def f_system_setup( self ) :
-
         self.g_s2e['sys']['r'] = self.g_s2e['sample']['r'].copy()
         self.g_s2e['sys']['q'] = numpy.zeros( self.g_s2e['sample']['Z'].shape )
         self.g_s2e['sys']['NE'] = self.g_s2e['sample']['Z'].copy()
@@ -417,11 +415,7 @@ class PMIDemo(object):
         self.g_s2e['sys']['Nph'] = 1e99
         #print '   NOTE: Nph is uniform.'
 
-
-    ##############################################################################
-
     def f_save_snp( self,  a_snp ) :
-
         self.g_s2e['sys']['xyz'] = self.f_dbase_Zq2id( self.g_s2e['sys']['Z'] , self.g_s2e['sys']['q'] )
         self.g_s2e['sys']['T'] = numpy.sort( numpy.unique( self.g_s2e['sys']['xyz'] ) )
         ff = numpy.zeros( ( len( self.g_s2e['sys']['T'] ) , len( self.g_dbase['halfQ'] ) ) )
@@ -500,10 +494,11 @@ class PMIDemo(object):
         xfp.close()
 
         # Take central pixel values.
-        sel_x = self.g_s2e['pulse']['nx'] / 2 ;
-        sel_y = self.g_s2e['pulse']['ny'] / 2 ;
-        sel_pixV = self.g_s2e['pulse']['arrEver'] [sel_x,sel_y,:,:]
-        sel_pixH = self.g_s2e['pulse']['arrEhor'] [sel_x,sel_y,:,:]
+        sel_x = self.g_s2e['pulse']['nx'] // 2 ;
+        sel_y = self.g_s2e['pulse']['ny'] // 2 ;
+        # note: the data order in the HDF5 file is not x,y but y,x
+        sel_pixV = self.g_s2e['pulse']['arrEver'] [sel_y,sel_x,:,:]
+        sel_pixH = self.g_s2e['pulse']['arrEhor'] [sel_y,sel_x,:,:]
         dt = ( self.g_s2e['pulse']['sliceMax'] - self.g_s2e['pulse']['sliceMin'] ) / ( self.g_s2e['pulse']['nSlices'] * 1.0 )
         dx = ( self.g_s2e['pulse']['xMax'] - self.g_s2e['pulse']['xMin'] ) / ( self.g_s2e['pulse']['nx'] * 1.0 )
         dy = ( self.g_s2e['pulse']['yMax'] - self.g_s2e['pulse']['yMin'] ) / ( self.g_s2e['pulse']['ny'] * 1.0 )
@@ -579,10 +574,10 @@ class PMIDemo(object):
 
 def f_eval_disp( a_snp , a_r0 , a_sample ) :
 
-    num_Z = len( a_sample['selZ'].keys() )
+    num_Z = len( list(a_sample['selZ'].keys()) )
     all_disp = numpy.zeros( ( num_Z , ) )
     cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
+    for sel_Z in list(a_sample['selZ'].keys()) :
         dr = a_snp['r'][a_sample['selZ'][sel_Z],:] - a_r0[a_sample['selZ'][sel_Z],:]
         all_disp[cc] = numpy.mean( numpy.sqrt( numpy.sum( dr * dr , axis = 1 ) ) ) / 1e-10
         cc = cc + 1
@@ -663,10 +658,10 @@ def s2e_rand_orient( r ,mat ) :
 ##############################################################################
 def f_eval_numE( a_snp , a_sample ) :
 
-    num_Z = len( a_sample['selZ'].keys() )
+    num_Z = len( list(a_sample['selZ'].keys()) )
     all_numE = numpy.zeros( ( num_Z , ) )
     cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
+    for sel_Z in list(a_sample['selZ'].keys()) :
         all_numE[cc] = numpy.mean( a_snp['q'][a_sample['selZ'][sel_Z]] )
         cc = cc + 1
     return all_numE
@@ -689,9 +684,9 @@ def f_md_step( r , v , m , dt ) :
 ##############################################################################
 
 def   f_pmi_diagnostics_help() :
-    print """
+    print("""
     ----
-    """
+    """)
 
 
     ##############################################################################
@@ -837,7 +832,7 @@ def f_h5_out2in( src , dest , *args ) :
     grp_hist_parent_detail = file_out.create_group( "history/parent/detail" )
 
     pre_s2e_module = os.path.basename( os.path.dirname( os.path.abspath( src ) ) )
-    print 'Previous module: ' , pre_s2e_module
+    print('Previous module: ' , pre_s2e_module)
 
     # Add attribute to history/parent
     grp_hist_parent.attrs['name'] =  "_" + pre_s2e_module
@@ -846,26 +841,22 @@ def f_h5_out2in( src , dest , *args ) :
     file_out.copy( grp_srchist , grp_hist_parent )
 
     # Copy everything to history except "data" & "history"
-    for objname in file_in.keys() :
-        if   objname != "data" \
-             and   objname != "history" :
+    for objname in list(file_in.keys()) :
+        if objname != "data" and   objname != "history" :
             x = file_in.get( objname )
-            if file_in.get( objname , getclass = True )  == h5py.highlevel.Dataset :
+            if isinstance(x, h5py.Dataset):
                 mygroup = file_in['/']
                 file_out["history/parent/detail/"+objname] = mygroup[objname][...]
-            elif file_in.get( objname , getclass = True )  == h5py.highlevel.Group :
-                file_out.copy( x , "history/parent/detail/" + objname )
+            elif isinstance(x, h5py.Group):
+                file_out.copy( x , "history/parent/detail/" + objname)
             else:
-                print objname  , " has been SKIPPED!!"
-                #file_out.copy( x , os.path.dirname( "history/parent/detail/" + objname ) )
-                #file_in.get( objname ) .copy( os.path.dirname( "history/parent/detail/" + objname ) )
-            #file_out.copy( x , "history/parent/detail/" )
-            print objname
+                print(objname  , " has been SKIPPED!!")
+            print(objname)
         else :
-            print '  NOT:', objname
+            print('  NOT:', objname)
 
-    print file_in['data'].keys()
-    print file_in['data'].items()
+    print(list(file_in['data'].keys()))
+    print(list(file_in['data'].items()))
 
     # Create external link to parent's data
     #file_out['history/parent/detail/data'] = h5py.ExternalLink( src ,'/data')

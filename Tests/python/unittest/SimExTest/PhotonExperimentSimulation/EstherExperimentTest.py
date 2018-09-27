@@ -22,7 +22,6 @@
 
 import json
 import os
-import paths
 import shutil
 import unittest
 

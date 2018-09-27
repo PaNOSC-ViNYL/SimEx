@@ -1,6 +1,7 @@
+""":module EMCCaseGenerator: Hosting the EMCCaseGenerator class that sets up a EMC run."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Based on simS2E script provided by N.-D. Loh.                          #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
@@ -36,7 +37,7 @@ def _print_to_log(msg, log_file=None):
     fp.write("\n")
     fp.close()
 
-    print msg
+    print(msg)
     sys.stdout.flush()
 
 def _create_directory(dir_name, logging=True, log_file=None, err_msg=""):
@@ -44,13 +45,13 @@ def _create_directory(dir_name, logging=True, log_file=None, err_msg=""):
         if logging:
             _print_to_log(dir_name + " exists! " + err_msg, log_file=log_file)
         else:
-            print dir_name + " exists! "
+            print(dir_name + " exists! ")
     else:
         os.makedirs(dir_name)
         if logging:
             _print_to_log("Creating " + dir_name, log_file=log_file)
         else:
-            print "Creating " + dir_name
+            print("Creating " + dir_name)
 
 def load_intensities(ref_file):
 
@@ -75,7 +76,7 @@ def load_intensities(ref_file):
 
         else: # for data format version >= 0.2
             t_intens = []
-            tasks_in_file = fp.keys()
+            tasks_in_file = list(fp.keys())
             for task in tasks_in_file["data"]:
                 t_intens.append( (fp["data"][key]["data"].value()).astype("float") )
 
@@ -126,7 +127,7 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
     pos     = numpy.argwhere(numpy.abs(auto-thr_0) > numpy.abs(auto-thr_1))
     pos_set = set()
     pos_list= []
-    kerl    = range(-kl,kl+1)
+    kerl    = list(range(-kl,kl+1))
     ker     = [[i,j,k] for i in kerl for j in kerl for k in kerl]
 
     def trun(v):
@@ -160,11 +161,9 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
 ###############################################################
 
 class EMCCaseGenerator(object):
-    """ Class that represents an EMC case. """
+    """ :class EMCCaseGenerator: Encapsulates one EMC case. """
     def __init__(self, runLog=None):
         """
-        Wrapper for initializing the essential data for EMC recon.
-
         :param runLog: Flag that indicates where to save the runtime log.
         :type runLog: str, default None (don't save log.)"
 
@@ -243,7 +242,7 @@ class EMCCaseGenerator(object):
         #We expect the detector to always be square of length 2*self.numPixToEdge+1
         (r,c) = f["params/geom/mask"].shape
         if (r == c and (r%2==1)):
-            self.numPixToEdge = (r-1)/2
+            self.numPixToEdge = (r-1)//2
         else:
             msg = "Your array has shape %d %d, Only odd-length square detectors allowed now. Quitting"%(r,c)
             _print_to_log(msg, log_file=self.runLog)
@@ -344,7 +343,7 @@ class EMCCaseGenerator(object):
                     f.close()
                     count +=1
                 else:
-                    tasks = f["data"].keys()
+                    tasks = list(f["data"].keys())
                     for task in tasks:
                         meanPhoton += numpy.mean((f["data"][task]["data"].value).flatten())
                         totPhoton += numpy.sum((f["data"][task]["data"].value).flatten())
@@ -355,7 +354,7 @@ class EMCCaseGenerator(object):
             meanPhoton /= 1.*count
             totPhoton /= 1.*count
 
-            print "Found %f mean and %f total photons on average." % (meanPhoton, totPhoton)
+            print("Found %f mean and %f total photons on average." % (meanPhoton, totPhoton))
 
             # Start stepping through diffraction images and writing them to sparse format
             msg = "Average intensities: %lf"%(totPhoton)
@@ -402,7 +401,7 @@ class EMCCaseGenerator(object):
                     f.close()
 
                 else:
-                    tasks = f["data"].keys()
+                    tasks = list(f["data"].keys())
                     for task in tasks:
                         v = f["data"][task]["data"].value
 #                        print "In %s/%s/data, found max. %f and avg %f photons." % (fn, task, v.max(), v.mean())
@@ -485,7 +484,7 @@ class EMCCaseGenerator(object):
         # (or total number of images, whichever is smaller)
         # Open dense file.
         h5_dense = h5py.File( dense_file, 'r')
-        number_of_patterns = len(h5_dense.keys()) - 3
+        number_of_patterns = len(list(h5_dense.keys())) - 3
         numFilesToAvgForMeanCount = min([200, number_of_patterns])
         meanPhoton = 0.
         totPhoton = 0.
@@ -493,7 +492,7 @@ class EMCCaseGenerator(object):
         # Open dense file.
         h5_dense = h5py.File( dense_file, 'r')
         excluded_keys = ["version", "params", "info"]
-        all_keys = h5_dense.keys()
+        all_keys = list(h5_dense.keys())
         relevant_keys = [k for k in all_keys if not k in excluded_keys]
         relevant_keys.sort()
         for fn in relevant_keys[:numFilesToAvgForMeanCount]:
@@ -556,7 +555,6 @@ class EMCCaseGenerator(object):
         outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
         outh5.close()
 
-
     def showDetector(self):
         """
         Shows detector pixels as points on scatter plot; could be slow for large detectors.
@@ -573,11 +571,9 @@ class EMCCaseGenerator(object):
             #msg = "Detector not initiated."
             #_print_to_log(msg, log_file=self.runLog)
 
-    # The following functions have not been tested. Use with caution!!!
-
-
     def makeTestParticleAndSupport(self, inParticleRadius=5.9, inDamping=1.5, inFrac=0.5, inPad=1.8):
         """
+        ATTENTION: Untested!
         Recipe for creating random, "low-passed-filtered binary" contrast by
         alternating binary projection and low-pass-filter on an random, 3D array of numbers.
 
@@ -624,6 +620,7 @@ class EMCCaseGenerator(object):
 
     def createTestScatteringGeometry(self):
         """
+        ATTENTION: Untested!
         Contains recipe to create, diffract and show a low-pass-filtered, random particle contrast.
 
         If particle and diffraction parameters are not given, then default ones are used:
@@ -663,6 +660,7 @@ class EMCCaseGenerator(object):
 
     def diffractTestCase(self, inMaxScattAngDeg=45., inSigma=6.0, inQminNumShannonPix=1.4302966531242025):
         """
+        ATTENTION: Untested!
         Requires makeMonster() to first be called, so that particle density is created.
 
         Function diffract() needs the maximum scattering angle to the edge of the detector, the
@@ -697,6 +695,7 @@ class EMCCaseGenerator(object):
 
     def showDensity(self):
         """
+        ATTENTION: Untested!
         Shows particle density as an array of sequential, equal-sized 2D sections.
         """
         subplotlen = int(numpy.ceil(numpy.sqrt(len(self.density))))
@@ -710,6 +709,7 @@ class EMCCaseGenerator(object):
 
     def showLogIntensity(self, inSection=0):
         """
+        ATTENTION: Untested!
         Show a particular intensities section of Fourier intensities.
         Sections range from -qmax to qmax.
         """
@@ -726,6 +726,7 @@ class EMCCaseGenerator(object):
 
     def showLogIntensitySlices(self):
         """
+        ATTENTION: Untested!
         Shows Fourier intensities as an array of sequential, equal-sized 2D sections.
         Maximum intensities set to logarithm of maximum intensity in 3D Fourier volume.
         """
@@ -744,6 +745,7 @@ class EMCCaseGenerator(object):
 
     def writeSupportToFile(self, filename="support.dat"):
         """ Write the support range to a file.
+        ATTENTION: Untested!
         :param filename: Path to file.
         :type filename: str
         """
@@ -758,6 +760,7 @@ class EMCCaseGenerator(object):
 
     def writeDensityToFile(self, filename="density.dat"):
         """ Write electron density to a file.
+        ATTENTION: Untested!
         :param filename: Path to file.
         :type filename: str
         """
@@ -768,6 +771,7 @@ class EMCCaseGenerator(object):
 
     def writeAllOuputToFile(self, supportFileName="support.dat", densityFileName="density.dat", detectorFileName="detector.dat", intensitiesFileName="intensity.dat"):
         """
+        ATTENTION: Untested!
         Convenience function for writing output
 
         :param supportFileName: Path to file for support data.

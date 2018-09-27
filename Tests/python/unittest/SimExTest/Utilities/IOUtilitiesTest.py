@@ -1,7 +1,7 @@
 """ Test module for the IO Utilities.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,16 +20,16 @@
 #                                                                        #
 ##########################################################################
 
-import exceptions
 import os
+import h5py
 import shutil
 import numpy
-import paths
 import unittest
 from wpg import Wavefront
 
-from TestUtilities.TestUtilities import generateTestFilePath
+from TestUtilities.TestUtilities import generateTestFilePath, runs_on_travisCI
 from SimEx.Utilities import IOUtilities
+from SimEx.Utilities.sample2h5 import main as sample2h5
 
 class IOUtilitiesTest(unittest.TestCase):
     """ Test class for the IOUtilities. """
@@ -111,6 +111,7 @@ class IOUtilitiesTest(unittest.TestCase):
         self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
 
 
+    @unittest.skipIf(runs_on_travisCI(), "Skipped because running on travisCI.")
     def testQueryPDB(self):
         """ Check that we can query a non-existing pdb from pdb.org and convert it to a dict. """
         # Setup path to pdb file.
@@ -127,6 +128,7 @@ class IOUtilitiesTest(unittest.TestCase):
         # Check exception on wrong input type.
         #self.assertRaises( IOError, IOUtilities.checkAndGetPDB, 'xyz.pdb' )
 
+    @unittest.skipIf(runs_on_travisCI(), "Skipped because running on travisCI.")
     def testQueryPDBTwice(self):
         """ Check that we can do two subsequent queries (fails if urllib.urlcleanup is not called.) """
         # Setup path to pdb file.
@@ -188,8 +190,36 @@ class IOUtilitiesTest(unittest.TestCase):
 
         self.assertIsInstance(wf, Wavefront)
 
+    def test_sample2h5(self):
+        """ Test the conversion utility to convert a sample directory to hdf5. """
+        # Expected file to be generated.
+        sample_file = 'sample.h5'
 
+        # Clean up.
+        self.__files_to_remove.append(sample_file)
 
+        # Input dir.
+        sample_dir = generateTestFilePath("sample_dir")
+
+        # Run utility.
+        sample2h5(sample_dir)
+
+        # Check file was generated.
+        self.assertIn(sample_file, os.listdir('.'))
+        self.assertTrue(os.path.isfile(sample_file))
+
+        # Check data is sane.
+        expected_keys = ['Z', 'r']
+        with h5py.File(sample_file,'r') as h5:
+            present_keys = h5.keys()
+            for pk in present_keys:
+                self.assertIn(pk, expected_keys)
+
+            Z = h5['Z'].value
+            r = h5['r'].value
+
+        # Check data shapes are consistent.
+        self.assertEqual( r.shape, (len(Z), 3) )
 
 if __name__ == '__main__':
     unittest.main()

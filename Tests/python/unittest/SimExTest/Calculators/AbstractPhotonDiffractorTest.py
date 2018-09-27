@@ -26,17 +26,12 @@
     @creation 20151006
 
 """
-import paths
-
 import os
 import unittest
-
 
 # Import the class to test.
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
-
-from TestUtilities import TestUtilities
 
 class TestPhotonDiffractor(AbstractPhotonDiffractor):
 

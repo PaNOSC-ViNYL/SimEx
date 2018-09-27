@@ -1,7 +1,7 @@
-""" Module that holds the PlasmaXRTSCalculator class."""
+""":module PlasmaXRTSCalculator: Module that holds the PlasmaXRTSCalculator class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,15 +28,15 @@ import subprocess
 
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPositiveInteger
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
-    Class representing a plasma x-ray Thomson scattering calculation.
+    :class PlasmaXRTSCalculator: Represents a plasma x-ray Thomson scattering calculation.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
+
         :param parameters: Parameters for the PlasmaXRTSCalculator.
         :type parameters: PlasmaXRTSCalculatorParameters
 
@@ -136,28 +136,34 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         # Setup command sequence and issue the system call.
         # Make sure to cd to correct directory where input deck is located.
         command_sequence = ['xrs']
+
         process = subprocess.Popen( command_sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.parameters._tmp_dir )
 
         # Catch stdout and stderr, wait until process terminates.
         out, err = process.communicate(input=None)
 
         # Error handling.
-        if not err == "":
-            raise( RuntimeError, "Error during xrts backengine execution in %s. Error output follows. %s" % ( self.parameters._tmp_dir, err) )
+        if not err == b'':
+            print (err)
+            raise RuntimeError
         # Check if data was produced.
         path_to_data = os.path.join( self.parameters._tmp_dir, 'xrts_out.txt' )
         if not os.path.isfile( path_to_data ):
-            raise( IOError, "No data generated. Check input deck %s." % ( os.path.join( self.parameters._tmp_dir, 'input.dat' ) ) )
+            raise IOError
 
         # Store output internally.
-        self.__run_log = out
+        self.__run_log = out.decode('utf-8')
 
         # Write to tmp_dir.
         with open( os.path.join( self.parameters._tmp_dir ,'xrts.log'), 'w') as log_file_handle:
-                log_file_handle.write(out)
+                log_file_handle.write(out.decode('utf-8'))
 
         # Store data internally.
         self.__run_data = numpy.loadtxt( path_to_data )
+
+        # Static data.
+        self.__static_data = _parseStaticData( self.__run_log )
+
         # Cd back to where we came from.
         #os.chdir( pwd )
 
@@ -165,6 +171,12 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     def data(self):
         """ Query for the field data. """
         return self.__run_data
+
+    @property
+    def static_data(self):
+        """ Query for the static data. """
+        return self.__static_data
+
 
     def _readH5(self):
         """
@@ -201,9 +213,9 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         self._input_data = {}
         photon_energy = wavefront.params.photonEnergy
         if self.parameters.photon_energy != photon_energy:
-            print  "WARNING: Parameter 'photon_energy' (%4.3e eV) not equal to source photon energy (%4.3e eV). Will proceed with source photon energy." % (self.parameters.photon_energy, photon_energy)
+            print("WARNING: Parameter 'photon_energy' (%4.3e eV) not equal to source photon energy (%4.3e eV). Will proceed with source photon energy." % (self.parameters.photon_energy, photon_energy))
         if abs(spectrum_mean - photon_energy) > 1.0 :
-            print "WARNING: Given photon energy (%4.3e eV) deviates from spectral mean (%4.3e) by > 1 eV. Will proceed with spectral mean." % (photon_energy, spectrum_mean)
+            print("WARNING: Given photon energy (%4.3e eV) deviates from spectral mean (%4.3e) by > 1 eV. Will proceed with spectral mean." % (photon_energy, spectrum_mean))
             photon_energy = spectrum_mean
 
         # Finally store the photon energy on the class.
@@ -244,26 +256,23 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
             #collfreq  = self.__run_data[:,4]
 
             energy_shifts = h5.create_dataset("data/dynamic/energy_shifts", data=energies)
-            energy_shifts.attrs.create('unit', 'eV')
+            energy_shifts.attrs['unit'] = 'eV'
 
             Skw_free = h5.create_dataset("data/dynamic/Skw_free", data=Skw_free)
-            Skw_free.attrs.create('unit', 'eV**-1')
+            Skw_free.attrs['unit'] =  'eV**-1'
 
             Skw_bound = h5.create_dataset("data/dynamic/Skw_bound", data=Skw_bound)
-            Skw_bound.attrs.create('unit', 'eV**-1')
+            Skw_bound.attrs['unit'] =  'eV**-1'
 
             Skw_total = h5.create_dataset("data/dynamic/Skw_total", data=Skw_total)
-            Skw_total.attrs.create('unit', 'eV**-1')
-
-            # Static data.
-            self.__static_data = _parseStaticData( self.__run_log )
+            Skw_total.attrs['unit'] = 'eV**-1'
 
             # Save to h5 file.
-            for key, value in self.__static_data.items():
+            for key, value in list(self.__static_data.items()):
                 h5.create_dataset("/data/static/%s" % (key), data=value)
 
             # Attach a unit to the ionization potential lowering.
-            h5['/data/static/']['ipl'].attrs.create('unit', 'eV')
+            h5['/data/static/']['ipl'].attrs['unit'] = 'eV'
 
 
                                     #'/history/parent/detail',
@@ -290,7 +299,7 @@ class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
         try:
             numpy.savetxt( source_spectrum_path, source_spectrum_data, delimiter='\t' )
         except:
-            print  "Source spectrum could not be saved. Please check temporary directory %s exists. Backtrace follows."
+            print("Source spectrum could not be saved. Please check temporary directory %s exists. Backtrace follows.")
             raise
 
 def _parseStaticData(data_string):
@@ -309,16 +318,18 @@ def _parseStaticData(data_string):
         static_dict = {}
 
         # Extract static data from
-        static_dict['fk']           = extractDate("f\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['qk']           = extractDate("q\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_ion']       = extractDate("S_ii\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_free']      = extractDate("S_ee\^0\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_core']      = extractDate("Core_inelastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Wk']           = extractDate("Elastic\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['Sk_total']     = extractDate("S_total\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['ipl']          = extractDate("IP depression \[eV\]\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['lfc']          = extractDate("G\(k\)\\s+=\\s\\d+\.\\d+", data_string)
-        static_dict['debye_waller'] = extractDate("Debye-Waller\\s+=\\s+[1|\\d+.\\d+]", data_string)
+        pattern_after_equal = '\\s\\d+\\.\\d+e[\+,\-]\\d+'
+        static_dict['k']           = extractDate('k\(w=0\)\\s+\[m\^-1\]\\s+='+pattern_after_equal, data_string)
+        static_dict['fk']           = extractDate('f\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['qk']           = extractDate('q\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_ion']       = extractDate('S_ii\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_free']      = extractDate('S_ee\^0\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_core']      = extractDate('Core_inelastic\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Wk']           = extractDate('Elastic\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['Sk_total']     = extractDate('S_total\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['ipl']          = extractDate('IP depression \[eV\]\\s+='+pattern_after_equal, data_string)
+        static_dict['lfc']          = extractDate('G\(k\)\\s+='+pattern_after_equal, data_string)
+        static_dict['debye_waller'] = extractDate('Debye-Waller\\s+='+pattern_after_equal, data_string)
 
         return static_dict
 

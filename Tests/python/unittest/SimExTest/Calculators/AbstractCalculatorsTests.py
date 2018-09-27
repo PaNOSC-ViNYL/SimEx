@@ -19,17 +19,16 @@
 #                                                                        #
 ##########################################################################
 
-import paths
 import unittest
 
 # Import classes to test.
-from AbstractBaseCalculatorTest import AbstractBaseCalculatorTest
-from AbstractBaseCalculatorTest import AbstractCalculatorParametersTest
-from AbstractPhotonSourceTest import AbstractPhotonSourceTest
-from AbstractPhotonPropagatorTest import AbstractPhotonPropagatorTest
-from AbstractPhotonInteractorTest import AbstractPhotonInteractorTest
-from AbstractPhotonDiffractorTest import AbstractPhotonDiffractorTest
-from AbstractPhotonDetectorTest import AbstractPhotonDetectorTest
+from .AbstractBaseCalculatorTest import AbstractBaseCalculatorTest
+from .AbstractBaseCalculatorTest import AbstractCalculatorParametersTest
+from .AbstractPhotonSourceTest import AbstractPhotonSourceTest
+from .AbstractPhotonPropagatorTest import AbstractPhotonPropagatorTest
+from .AbstractPhotonInteractorTest import AbstractPhotonInteractorTest
+from .AbstractPhotonDiffractorTest import AbstractPhotonDiffractorTest
+from .AbstractPhotonDetectorTest import AbstractPhotonDetectorTest
 
 # Setup the suite.
 def suite():

@@ -1,134 +1,30 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
+
+##########################################################################
+#                                                                        #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+#                                                                        #
+##########################################################################
 
 from argparse import ArgumentParser
-import cPickle
-import commands
-import copy
-import datetime
-import h5py
-import matplotlib
-import numpy
-import os
-import pylab
-import scipy
-import scipy.interpolate
-import select
-import shelve
-import string
-import sys
-import time
 
-from SimEx.Utilities.IOUtilities import loadPDB
-
-global g_s2e_setup
-
-pdb = '2nip.pdb'
-
-##############################################################################
-def f_hdf5_simple_read( a_file , a_dataset ) :
-    xfp  = h5py.File( a_file , "r" )
-    xxx = xfp.get( a_dataset ).value
-    xfp.close()
-    return xxx
-
-
-##############################################################################
-
-
-def f_load_snp_content( a_fp , a_snp ) :
-    global g_s2e_setup
-    dbase_root = "/data/snp_" + str( a_snp ).zfill(g_s2e_setup['num_digits']) + "/"
-    xsnp = dict()
-    xsnp['Z']   = a_fp.get( dbase_root + 'Z' )   .value
-    xsnp['T']   = a_fp.get( dbase_root + 'T' )   .value
-    xsnp['ff']  = a_fp.get( dbase_root + 'ff' )  .value
-    xsnp['xyz'] = a_fp.get( dbase_root + 'xyz' ) .value
-    xsnp['r']   = a_fp.get( dbase_root + 'r' )   .value
-    xsnp['Nph']   = a_fp.get( dbase_root + 'Nph' )   .value
-    N = xsnp['Z'].size
-    xsnp['q'] = numpy.array( [ xsnp['ff'][ pylab.find( xsnp['T'] == x ) , 0 ]  for x in xsnp['xyz'] ] ) .reshape(N,)
-    xsnp['snp'] = a_snp ;
-
-    return xsnp
-
-
-##############################################################################
-
-
-def f_load_snp( a_real , a_snp ) :
-    global g_s2e_setup
-    xfp  = h5py.File( g_s2e_setup['prj'] + '/pmi/pmi_out_' + str( a_real ).zfill(g_s2e_setup['num_digits'])  + '.h5' , "r" )
-    xsnp = f_load_snp_content( xfp , a_snp )
-    xfp.close()
-    return xsnp
-
-
-##############################################################################
-
-
-def f_load_sample( ) :
-    global g_s2e_setup
-    sample = dict()
-
-    xfp = h5py.File( g_s2e_setup['prj'] + '/sample/sample.h5' , "r" )
-    xxx = xfp.get( 'Z' )   ;  sample['Z']   = xxx.value
-    xxx = xfp.get( 'r' )   ;  sample['r']   = xxx.value
-    xfp.close()
-    sample['selZ'] = dict()
-    for sel_Z in numpy.unique( sample['Z'] ) :
-        sample['selZ'][sel_Z] = pylab.find( sel_Z == sample['Z'] )
-
-    return sample
-
-
-##############################################################################
-
-
-def f_num_snp( all_real ) :
-    global g_s2e_setup
-    xfp  = h5py.File( g_s2e_setup['prj'] + '/pmi/pmi_out_' + str( all_real[0] ).zfill(g_s2e_setup['num_digits'])  + '.h5' , "r" )
-    cc = 1
-    while 1 :
-        if not  xfp.get( "/data/snp_" + str( cc ).zfill(g_s2e_setup['num_digits']) )  :
-            xfp.close()
-            return cc - 1
-        cc = cc + 1
-
-
-##############################################################################
-
-
-def f_eval_disp( a_snp , a_r0 , a_sample ) :
-
-    num_Z = len( a_sample['selZ'].keys() )
-    all_disp = numpy.zeros( ( num_Z , ) )
-    cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
-        dr = a_snp['r'][a_sample['selZ'][sel_Z],:] - a_r0[a_sample['selZ'][sel_Z],:]
-        all_disp[cc] = numpy.mean( numpy.sqrt( numpy.sum( dr * dr , axis = 1 ) ) ) / 1e-10
-        cc = cc + 1
-    return all_disp
-
-
-##############################################################################
-
-
-def f_eval_numE( a_snp , a_sample ) :
-
-    num_Z = len( a_sample['selZ'].keys() )
-    all_numE = numpy.zeros( ( num_Z , ) )
-    cc = 0 ;
-    for sel_Z in a_sample['selZ'].keys() :
-        all_numE[cc] = numpy.mean( a_snp['q'][a_sample['selZ'][sel_Z]] )
-        cc = cc + 1
-    return all_numE
-
-
-##############################################################################
-
-
-def   f_pmi_diagnostics_help() :
-    print """
+def   pmi_diagnostics_help() :
+    print("""
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Usage - Detailed:
@@ -186,45 +82,21 @@ Usage - Quick (predefined):
     Quick  based on 5 realizations, 10 snapshots:
         $ pmi_diag.py  <PROJECT_FOLDER>  quick
 
-    """
+    """)
+import periodictable as pte
+XCOLORS = [ 'b', 'r', 'g', 'k', 'm', 'c',  'b--', 'r--', 'g--', 'k--', 'm--', 'c--'  ]
+ELEMENT_SYMBOL = ['-'] + [e.symbol for e in pte.elements()]
 
-##############################################################################
+def main(args) :
 
+    #OPT_real_test    = numpy.array([1]) ; OPT_num_snp_test  = numpy.array( [50] )
+    #OPT_real_quick   = numpy.arange(1,6) ; OPT_num_snp_quick = numpy.array( [10] )
+    #OPT_real_default = numpy.arange(1,21) ;
 
-### if to be called as a function:
-def pmi_diagnostics( *args ) :
-    global g_s2e_setup
-
-    xcolors = [ 'b', 'r', 'g', 'k', 'm', 'c',  'b--', 'r--', 'g--', 'k--', 'm--', 'c--'  ]
-    element_symbol = [ '-' , 'H' , 'He' , 'Li' , 'Be' , 'B' , 'C' , 'N' , 'O' , 'F' , 'Ne' , 'Na' , 'Mg' , 'Al' , 'Si' , 'P' , 'S' , 'Cl' , 'Ar' , 'K' , 'Ca' , 'Sc' , 'Ti' , 'V' , 'Cr' , 'Mn' , 'Fe' , 'Co' , 'Ni' , 'Cu' , 'Zn' , 'Ga' , 'Ge' , 'As' , 'Se' , 'Br' , 'Kr' , 'Rb' , 'Sr' , 'Y' , 'Zr' , 'Nb' , 'Mo' , 'Tc' , 'Ru' , 'Rh' , 'Pd' , 'Ag' , 'Cd' , 'In' , 'Sn' , 'Sb' , 'Te' , 'I' , 'Xe' , 'Cs' , 'Ba' , 'La' , 'Ce' , 'Pr' , 'Nd' , 'Pm' , 'Sm' , 'Eu' , 'Gd' , 'Tb' , 'Dy' , 'Ho' , 'Er' , 'Tm' , 'Yb' , 'Lu' , 'Hf' , 'Ta' , 'W' , 'Re' , 'Os' , 'Ir' , 'Pt' , 'Au' , 'Hg' , 'Tl' , 'Pb' , 'Bi' , 'Po' , 'At' , 'Rn' , 'Fr' , 'Ra' , 'Ac' , 'Th' , 'Pa' , 'U' , 'Np' , 'Pu' , 'Am' , 'Cm' , 'Bk' , 'Cf' , 'Es' , 'Fm' , 'Md' , 'No' , 'Lr' , 'Rf' , 'Db' , 'Sg' , 'Bh' , 'Hs' , 'Mt' , 'Ds' , 'Rg' , 'Cp' , 'Uut' , 'Uuq' , 'Uup' , 'Uuh' , 'Uus' , 'Uuo' ]
-
-    OPT_real_test    = numpy.array([1]) ; OPT_num_snp_test  = numpy.array( [50] )
-    OPT_real_quick   = numpy.arange(1,6) ; OPT_num_snp_quick = numpy.array( [10] )
-    OPT_real_default = numpy.arange(1,21) ;
-
-    a_comm = 'default'
-
-    if len( args ) == 0 :
-        f_pmi_diagnostics_help()
-        return
-
-### if to be called from command line:
-#    if __name__ == '__main__':
-#        if len( sys.argv ) > 1 :
-#            #a_comm = sys.argv[1]
-#            #sys.argv = sys.argv[2:]
-#            args = sys.argv[1:]
-    if isinstance( args[0] , list ) :
-        args = args[0]
-
-
-    g_s2e_setup = dict()
-    g_s2e_setup['prj'] = '.'
-    g_s2e_setup['num_digits'] = 7
 
 
     if os.path.isdir( args[0] ) :
-        g_s2e_setup['prj']  = args[0] ; args = args[1:]
+        self.__prj  = args[0] ; args = args[1:]
     if  len(args) > 0 :
         a_comm = args[0] ; args = args[1:]
 
@@ -239,68 +111,6 @@ def pmi_diagnostics( *args ) :
 #-------------------------------------------------------------------------
     if a_comm == 'load' :
 
-        ref_prop_out = g_s2e_setup['prj'] + '/pmi/pmi_out_' + str( 1 ).zfill(g_s2e_setup['num_digits'])  + '.h5'
-
-        data = dict() ;
-        data['prj'] = os.path.abspath(  g_s2e_setup['prj'] ).split('/')[-1]
-
-        if  len(args) > 0 :
-            data['real'] = numpy.array( args[0] )
-
-        if  len(args) > 1 :
-            data['snp'] = args[1]
-        else :
-            data['snp'] = numpy.arange( 1 ,  f_num_snp( data['real'] ) + 1 )
-
-        if len( data['snp'] ) == 1 :
-            data['snp'] = numpy.around( numpy.linspace( 1 ,  f_num_snp( data['real'] ) ,  data['snp'] ) ) .astype(int)
-
-        # Read sample data.
-        try:
-            data['sample']   = f_load_sample()
-        except:
-            # Assume it's a pdb file. Will raise if not.
-            data['sample'] = loadPDB(pdb)
-
-
-        data['num_real'] = data['real'].size
-        data['num_snp'] = data['snp'].size
-        data['time'] = ( data['snp'] \
-                * ( f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMax' ) - f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMin' ) ) \
-                / f_num_snp( data['real'] ) +  f_hdf5_simple_read( ref_prop_out , '/history/parent/detail/params/Mesh/sliceMin' ) )  \
-                / 1e-15
-        print 'Project:    ' , data['prj']
-        print "Num. real.: " , data['num_real']
-        print "Num. snp:   " , data['num_snp']
-
-
-        data['disp'] = numpy.zeros( ( data['num_snp'] , len( data['sample']['selZ'].keys() ) ) )
-        data['numE'] = numpy.zeros( ( data['num_snp'] , len( data['sample']['selZ'].keys() ) ) )
-        data['Nph']  = numpy.zeros( ( data['num_snp'] ,  ) )
-
-        for x_real in data['real'] :
-            #print 'Real: %0' + str(NUM_DIGITS) + 'd' % ( x_real ) ,
-            print '%07d  ' % ( x_real ) ,
-            sys.stdout.flush()
-
-
-            data_snp0 = f_load_snp( x_real , 1 )
-            cc = 0
-            for xsnp in data['snp'] :
-                #print '.',
-                sys.stdout.write('.')
-                sys.stdout.flush()
-                data_snp = f_load_snp( x_real , xsnp )
-                data['disp'][cc,:] += f_eval_disp( data_snp , data_snp0['r'] , data['sample'] ) / data['num_real']
-                data['numE'][cc,:] += f_eval_numE( data_snp , data['sample'] ) / data['num_real']
-                data['Nph'][cc]    += data_snp['Nph'] / data['num_real']
-                cc = cc + 1
-
-            print
-
-        return data
-        #return data_snp
-
 
 
 #-------------------------------------------------------------------------
@@ -309,7 +119,7 @@ def pmi_diagnostics( *args ) :
         data = args[0] ;
 
         if args[1] == 'all' :
-            all_Z = data['sample']['selZ'].keys()
+            all_Z = list(data['sample']['selZ'].keys())
             legendtxt = []
             fig = pylab.figure()
             a1 = pylab.axes( ) ;
@@ -326,21 +136,17 @@ def pmi_diagnostics( *args ) :
 
         sel_Z = args[1]
         xcolor = args[2]
-        pylab.plot( data['time'] , data['disp'][ : , pylab.find( sel_Z == pylab.array( data['sample']['selZ'].keys() ) ) ] , xcolor  )
+        pylab.plot( data['time'] , data['disp'][ : , pylab.find( sel_Z == pylab.array( list(data['sample']['selZ'].keys()) ) ) ] , xcolor  )
         ha = pylab.gca()
         ha.set_xlabel( 'Time [fs]' )
         ha.set_ylabel( 'Average displacement [$\AA$]' )
 
 
-
-
-#-------------------------------------------------------------------------
-
     if a_comm == 'plot-numE':
         data = args[0] ;
 
         if args[1] == 'all' :
-            all_Z = data['sample']['selZ'].keys()
+            all_Z = list(data['sample']['selZ'].keys())
             legendtxt = []
             pylab.figure()
             cc = 0
@@ -354,7 +160,7 @@ def pmi_diagnostics( *args ) :
 
         sel_Z = args[1]
         xcolor = args[2]
-        pylab.plot( data['time'] , data['numE'][ : , pylab.find( sel_Z == pylab.array( data['sample']['selZ'].keys() ) ) ] , xcolor  )
+        pylab.plot( data['time'] , data['numE'][ : , pylab.find( sel_Z == pylab.array( list(data['sample']['selZ'].keys()) ) ) ] , xcolor  )
         ha = pylab.gca()
         ha.set_xlabel( 'Time [fs]' )
         ha.set_ylabel( 'Number of bound electrons' )
@@ -366,32 +172,32 @@ def pmi_diagnostics( *args ) :
     if a_comm == 'plot-combined':
         lw = 4 ; fs = 20 ; inset_bgcolor = 'Yellow'
         data = args[0] ;
-        allZ = pylab.array( data['sample']['selZ'].keys() )
+        allZ = pylab.array( list(data['sample']['selZ'].keys()) )
 
         pmi_diagnostics( 'plot-disp' , data , 'all' ) ;
         ha = pylab.gca()
         ha.get_xaxis() .get_label() .set_fontsize( fs )
         ha.get_yaxis() .get_label() .set_fontsize( fs )
-	for hh in ha.lines:
-	    hh.set_linewidth( lw )
-	for hh in ha.get_xticklabels():
-	    hh.set_fontsize( fs )
-	for hh in ha.get_yticklabels():
-	    hh.set_fontsize( fs )
+    for hh in ha.lines:
+        hh.set_linewidth( lw )
+    for hh in ha.get_xticklabels():
+        hh.set_fontsize( fs )
+    for hh in ha.get_yticklabels():
+        hh.set_fontsize( fs )
         pylab.axis( [ min( data['time'] ) ,  max( data['time'] ) , ha.get_ylim()[0] , ha.get_ylim()[1] ] )
 #	ha.axhline(linewidth=lw, color='k')
 #	ha.axvline(linewidth=lw, color='k')
         legendtxt = []
         for sel_Z in allZ :
             legendtxt.append( element_symbol[sel_Z] )   # legendtxt.append( str( sel_Z ) )
-        print legendtxt
+        print(legendtxt)
         pylab.legend( legendtxt , loc=(0.65 , 0.6) )
         pylab.draw() ; pylab.show() ;
-        print os.getcwd()
+        print(os.getcwd())
         try:
             import plot_disp
         except:
-            print 'plot_disp not loaded.'
+            print('plot_disp not loaded.')
         pylab.ylim( [0,18] )
 
 
@@ -419,10 +225,10 @@ def pmi_diagnostics( *args ) :
         a2.set_xlabel( '' )
 
 
-	for hh in a1.lines:
-	    hh.set_linewidth( lw )
-	for hh in a2.lines:
-	    hh.set_linewidth( lw )
+    for hh in a1.lines:
+        hh.set_linewidth( lw )
+    for hh in a2.lines:
+        hh.set_linewidth( lw )
 
 
 
@@ -432,7 +238,7 @@ def pmi_diagnostics( *args ) :
 
         lw = 4 ; fs = 20 ; inset_bgcolor = 'White' # 'Yellow'
         data = args[0] ;
-        allZ = pylab.array( data['sample']['selZ'].keys() )
+        allZ = pylab.array( list(data['sample']['selZ'].keys()) )
 
         pmi_diagnostics( 'plot-disp' , data , 'all' ) ;
 
@@ -444,27 +250,27 @@ def pmi_diagnostics( *args ) :
         ha .set_position([0.12,  0.12 ,  0.35 ,  0.83 ]) ;
         ha.get_xaxis() .get_label() .set_fontsize( fs )
         ha.get_yaxis() .get_label() .set_fontsize( fs )
-	for hh in ha.lines:
-	    hh.set_linewidth( lw )
-	for hh in ha.get_xticklabels():
-	    hh.set_fontsize( fs )
-	for hh in ha.get_yticklabels():
-	    hh.set_fontsize( fs )
+    for hh in ha.lines:
+        hh.set_linewidth( lw )
+    for hh in ha.get_xticklabels():
+        hh.set_fontsize( fs )
+    for hh in ha.get_yticklabels():
+        hh.set_fontsize( fs )
         pylab.axis( [ min( data['time'] ) ,  max( data['time'] ) , ha.get_ylim()[0] , ha.get_ylim()[1] ] )
 #	ha.axhline(linewidth=lw, color='k')
 #	ha.axvline(linewidth=lw, color='k')
         legendtxt = []
         for sel_Z in allZ :
             legendtxt.append( element_symbol[sel_Z] )   # legendtxt.append( str( sel_Z ) )
-        print legendtxt
+        print(legendtxt)
         #pylab.legend( legendtxt , loc=(0.65 , 0.6) )
         pylab.legend( legendtxt , loc=(0.1 , 0.55) )
         pylab.draw() ; pylab.show() ;
-        print os.getcwd()
+        print(os.getcwd())
         try:
             import plot_disp
         except:
-            print 'plot_disp not loaded.'
+            print('plot_disp not loaded.')
         pylab.ylim( [0,18] )
         # EXTRA, TO BE COMMENTED OUT:
         # pylab.gca() .set_xticks( [-30, -15, 0, 15 ,30] )
@@ -483,12 +289,12 @@ def pmi_diagnostics( *args ) :
         #pylab.axis( [ min( data['time'] ) ,  max( data['time'] ) , 0 , a1.get_ylim()[1] * 1.05 ] )
         pylab.axis( [ min( data['time'] ) ,  max( data['time'] ) , 0 , allZ.max() * 1.1  ] )
 
-	for hh in a1.lines:
-	    hh.set_linewidth( lw )
-	for hh in a1.get_xticklabels():
-	    hh.set_fontsize( fs )
-	for hh in a1.get_yticklabels():
-	    hh.set_fontsize( fs )
+    for hh in a1.lines:
+        hh.set_linewidth( lw )
+    for hh in a1.get_xticklabels():
+        hh.set_fontsize( fs )
+    for hh in a1.get_yticklabels():
+        hh.set_fontsize( fs )
 
         # EXTRA, TO BE COMMENTED OUT:
         # pylab.gca() .set_xticks( [-30, -15, 0, 15 ,30] )
@@ -521,10 +327,10 @@ def pmi_diagnostics( *args ) :
         a2.set_xlabel( '' )
 
 
-	for hh in a1.lines:
-	    hh.set_linewidth( lw )
-	for hh in a2.lines:
-	    hh.set_linewidth( lw )
+    for hh in a1.lines:
+        hh.set_linewidth( lw )
+    for hh in a2.lines:
+        hh.set_linewidth( lw )
 
 
 
@@ -534,57 +340,91 @@ def pmi_diagnostics( *args ) :
     if  a_comm == 'default'   or   a_comm == 'quick'   or   a_comm == 'test' :
 
         if a_comm == 'default' :
-            data = pmi_diagnostics( g_s2e_setup['prj']  , 'load' , OPT_real_default )
+            data = pmi_diagnostics( self.__prj  , 'load' , OPT_real_default )
         if  a_comm == 'quick' :
-            data = pmi_diagnostics( g_s2e_setup['prj']  , 'load' , OPT_real_quick , OPT_num_snp_quick )
+            data = pmi_diagnostics( self.__prj  , 'load' , OPT_real_quick , OPT_num_snp_quick )
         if  a_comm == 'test' :
-            data = pmi_diagnostics( g_s2e_setup['prj']  , 'load' , OPT_real_test  , OPT_num_snp_test  )
+            data = pmi_diagnostics( self.__prj  , 'load' , OPT_real_test  , OPT_num_snp_test  )
 
         pylab.figure()
         pmi_diagnostics( 'plot-disp' , data , 'all' ) ;
         for ext in [ 'png' ,  'eps' ] :
-            pic_file = './pmi_diag-' + data['prj'] + '-disp.' + ext
+            pic_file = './pmi_diag-' + data['__prj'] + '-disp.' + ext
             pylab.savefig( pic_file , dpi=200 )
-        print 'Saved image: ' + pic_file
+        print('Saved image: ' + pic_file)
 
         pylab.figure()
         pmi_diagnostics( 'plot-numE' , data , 'all' ) ;
         for ext in [ 'png' ,  'eps' ] :
-            pic_file = './pmi_diag-' + data['prj'] + '-numE.' + ext
+            pic_file = './pmi_diag-' + data['__prj'] + '-numE.' + ext
             pylab.savefig( pic_file , dpi=200 )
-        print 'Saved image: ' + pic_file
+        print('Saved image: ' + pic_file)
 
         combined_version = '2' ;
         pylab.figure()
         pmi_diagnostics( 'plot-combined' + combined_version , data ) ;
         for ext in [ 'png' ,  'eps' ] :
-            pic_file = './pmi_diag-' + data['prj'] + '-combined' + combined_version + '.' + ext
+            pic_file = './pmi_diag-' + data['__prj'] + '-combined' + combined_version + '.' + ext
             pylab.savefig( pic_file , dpi=200 )
-        print 'Saved image: ' + pic_file
+        print('Saved image: ' + pic_file)
 
         return data
 
-        #pylab.close() ;  pylab.close() ;
-
-
-
-#-------------------------------------------------------------------------
-
-    if a_comm == 'test':
-        print 'TEST OPTION'
-
-    return
-
-
-### if to be called from command line:
 if __name__ == '__main__':
+    # Setup argument parser.
+    parser = ArgumentParser()
 
-    if len( sys.argv ) > 1 :
-        pmi_diagnostics( sys.argv[1:] )
-        pylab.draw()
-        pylab.show()
+    # Add arguments.
+    parser.add_argument("input_path",
+                        metavar="input_path",
+                        help="Name (path) of input file (dir).",
+                        default=None)
 
-    else:
-        f_pmi_diagnostics_help()
+    parser.add_argument(
+            "-q",
+            "--quick",
+            action="store_true",
+            dest="quick",
+            default=True,
+            help="Quick analysis selecting only few random snapshots.",
+            )
 
+    parser.add_argument(
+            "-c",
+            "--charge",
+            action="store_true",
+            dest="charge",
+            default=True,
+            help="Calculate and plot average ion charge.",
+            )
+
+    parser.add_argument(
+            "-d",
+            "--displacement",
+            action="store_true",
+            dest="disp",
+            default=True,
+            help="Calculate and plot average displacement.",
+            )
+
+    parser.add_argument(
+            "-s",
+            "--snapshots",
+            dest=snapshot_indices,
+            default=None,
+            help="Select which snapshots to include in the analysis.",
+            )
+
+    parser.add_argument(
+            "-a",
+            "--animation",
+            dest="animation_filename",
+            default="",
+            help="Animate the trajectory.",
+            )
+
+
+    args = parser.parse_args()
+
+    main(args)
 

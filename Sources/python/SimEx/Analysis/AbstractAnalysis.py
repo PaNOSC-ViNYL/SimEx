@@ -1,7 +1,7 @@
-""" Module for AbstractAnalysis """
+""":module AbstractAnalysis: Hosts the abstract base class for all analysis classes."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -21,24 +21,17 @@
 ##########################################################################
 
 from abc import ABCMeta, abstractmethod
-import exceptions
-import os
-
-# The one and only pyplot import.
-import matplotlib as mpl
-mpl.use("Qt4Agg")
-from matplotlib import pyplot as plt
-
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
-
+import matplotlib as mpl
+from matplotlib import pyplot as plt
 import dill
+import os
 import sys
 
-class AbstractAnalysis(object):
+class AbstractAnalysis(object, metaclass=ABCMeta):
     """
-    Abstract class for all data analysis classes.
+    :class AbstractAnalysis: Abstract base class for all data analysis classes.
     """
-    __metaclass__ = ABCMeta
 
     @classmethod
     def runFromCLI(cls):
@@ -70,7 +63,7 @@ class AbstractAnalysis(object):
         try:
             calculator = dill.load(open(fname))
         except:
-            raise exceptions.IOError("Cannot read  from file "+fname)
+            raise IOError("Cannot read  from file "+fname)
         if not issubclass(type(calculator),AbstractBaseCalculator):
             raise TypeError( "The argument to the script should be a path to a file "
                              "with object of subclass of AbstractAnalysis")
@@ -116,12 +109,7 @@ class AbstractAnalysis(object):
         try:
             dill.dump(self, open(fname, "w"))
         except:
-            raise exceptions.IOError("Cannot dump to file "+fname)
-
-    #######################################################################
-    # Queries and setters
-    #######################################################################
-    # control_parameters
+            raise IOError("Cannot dump to file "+fname)
 
     # input
     @property
