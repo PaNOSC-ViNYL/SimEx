@@ -1,7 +1,7 @@
-""" Module for AbstractPhotonDetector. """
+""":module AbstractPhotonDetector: Hosts the base class for all PhotonDetectors."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,12 +28,11 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonDetector(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon detector, serving as API for actual photon detector simulation calculators.
+    :class AbstractPhotonDetector: Abstract base class for all PhotonDetectors.
     """
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the Abstract Photon Detector.
         """
 
         # Check input path. Set to default if none given.
@@ -56,3 +55,4 @@ def checkAndSetPhotonDetector(var=None, default=None):
     """
 
     return checkAndSetInstance(AbstractPhotonDetector, var, default)
+

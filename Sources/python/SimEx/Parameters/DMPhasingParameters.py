@@ -1,4 +1,4 @@
-""" Module that holds the DMPhasingParameters class.  """
+""" :module DMPhasingParameters: Module that holds the DMPhasingParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -20,20 +20,12 @@
 #                                                                        #
 ##########################################################################
 
-from scipy.constants import Avogadro
-from scipy.constants import physical_constants
-import copy
-import math
-import numpy
-import os
-import tempfile
-
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class DMPhasingParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the DMPhasing analyzer.
+    :class DMPhasingParameters: Encapsulates parameters for the DMPhasing analyzer.
     """
 
     def __init__(self,
@@ -46,7 +38,6 @@ class DMPhasingParameters(AbstractCalculatorParameters):
                  **kwargs
                 ):
         """
-        Constructor for the DMPhasingParameters.
         :param number_of_trials: How many trials to run in each iteration.
         :type number_of_trials: int>0, default 500
 

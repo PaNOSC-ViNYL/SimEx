@@ -1,6 +1,7 @@
+""" :module XCSITPhotonDetectorParameters: Hosts the XCSITPhotonDetectorParameters class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Jan-Philipp Burchert, Carsten Fortmann-Grote   #
+# Copyright (C) 2015-2018 Jan-Philipp Burchert, Carsten Fortmann-Grote   #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-import os
 import sys
 
 try:
@@ -33,18 +33,8 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
     """
-    Datastructure to store the necessary parameters for a XCSITPhotonDetector
-    simulation
-    """
+    :class XCSITPhotonDetectorParameters: Encapsulates all parameters for the XCSITPhotonDetector class. """
 
-    # set the only allowed attributes of instances of this class
-    __slots__ = "__detector_type",\
-                "__plasma_search_flag",\
-                "__plasma_simulation_flag",\
-                "__point_simulation_method",\
-                "__patterns"
-
-    # Create the instance attributes
     def __init__(self,
                  detector_type=None,
                  plasma_search_flag=None,
@@ -53,8 +43,6 @@ class XCSITPhotonDetectorParameters(AbstractCalculatorParameters):
                  patterns=None,
                 ):
         """
-        Constructor for the XCSITPhotonDetectorParameters class.
-
         :param detector_type: The detector type to simulate ("pnCCD" | "LPD" | "AGIPD | "AGIPDSPB").
         :type detector_type: str
 

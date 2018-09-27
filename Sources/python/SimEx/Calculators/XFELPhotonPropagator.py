@@ -1,7 +1,7 @@
-""" Module that holds the XFELPhotonPropagator class.  """
+""":module XFELPhotonPropagator: Module that holds the XFELPhotonPropagator class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -35,12 +35,11 @@ from prop import propagate_s2e
 
 class XFELPhotonPropagator(AbstractPhotonPropagator):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    :class XFELPhotonPropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
     """
 
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the XFEL photon propagator.
 
         :param parameters: Parameters for the photon propagation.
         :type parameters: WavePropagatorParameters instance.

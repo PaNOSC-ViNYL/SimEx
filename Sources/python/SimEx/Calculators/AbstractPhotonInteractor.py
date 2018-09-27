@@ -1,7 +1,7 @@
-""" Module holding the AbstractPhotonInteractor."""
+""":module AbstractPhotonInteractor: Hosts the base class for all PhotonInteractors. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,7 +28,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonInteractor(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon(-matter) interactor, serving as API for actual photon matter simulation calculators.
+    :class AbstractPhotonInteractor: Abstract base class for all PhotonInteractors.
     """
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None, sample_path=None):

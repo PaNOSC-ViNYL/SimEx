@@ -1,3 +1,4 @@
+""":module ParallelUtilities: Hosts utilities to query HPC runtime parameters."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -20,13 +21,12 @@
 #                                                                        #
 ##########################################################################
 
-""" Module with utilities for parallel job.  """
-
 import os
 import subprocess
 from distutils.version import StrictVersion
 from py3nvml import py3nvml as nvml
 def _getParallelResourceInfoFromEnv():
+    """ """
     resource = {}
     try:
         resource['NCores'] = int(os.environ['SIMEX_NCORES'])
@@ -39,6 +39,7 @@ def _getParallelResourceInfoFromEnv():
     return resource
 
 def _getParallelResourceInfoFromSlurm():
+    """ """
     resource = {}
     try:
         resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
@@ -64,6 +65,7 @@ def _getParallelResourceInfoFromSlurm():
     return resource
 
 def _MPICommandName():
+    """ """
     if 'SIMEX_MPICOMMAND' in os.environ:
         mpicmd=os.environ['SIMEX_MPICOMMAND']
     else:
@@ -72,6 +74,7 @@ def _MPICommandName():
     return mpicmd
 
 def _getParallelResourceInfoFromMpirun():
+    """ """
 # we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be
 # listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node
     try:
@@ -118,6 +121,7 @@ def getParallelResourceInfo():
         return dict([("NCores", 0),("NNodes",1)])
 
 def _getMPIVersionInfo():
+    """ """
     try:
         mpi_cmd = _MPICommandName()
         process = subprocess.Popen([mpi_cmd, "--version"], stdout=subprocess.PIPE,
@@ -139,6 +143,7 @@ def _getMPIVersionInfo():
         return None
 
 def _getVendorSpecificMPIArguments(version, threads_per_task):
+    """ """
 
     if version == None:
         raise IOError( "Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or "

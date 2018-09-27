@@ -1,4 +1,4 @@
-""" Module that holds the WavePropagatorParameters class.  """
+""" :module WavePropagatorParameters: Module that holds the WavePropagatorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -20,23 +20,14 @@
 #                                                                        #
 ##########################################################################
 
-from scipy.constants import Avogadro
-from scipy.constants import physical_constants
-from wpg.beamline import Beamline
-import copy
-import math
-import numpy
-import os,sys
 import prop.exfel_spb_kb_beamline as default_beamline
-import tempfile
-import wpg
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class WavePropagatorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the WavePropagator analyzer.
+    :class WavePropagatorParameters: Class representing parameters for the WavePropagator.
     """
 
     def __init__(self,
@@ -45,8 +36,6 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
                  **kwargs
                 ):
         """
-        Constructor for the WavePropagatorParameters.
-
         :param use_opmd: Whether to use the openPMD output format.
         :type use_opmd: bool, default False
 

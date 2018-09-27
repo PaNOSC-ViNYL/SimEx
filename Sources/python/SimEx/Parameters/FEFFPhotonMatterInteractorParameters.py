@@ -1,7 +1,7 @@
-""" :module: Holds the FEFFPhotonMatterInteractorParameters class.
+""" :module: Holds the FEFFPhotonMatterInteractorParameters class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 - 2018 Carsten Fortmann-Grote                        #
+# Copyright (C) 2015 - 2018 Carsten Fortmann-Grote                       #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,17 +19,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-"""
 
 import sys
-
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.Utilities import ALL_ELEMENTS
 
 class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     """
-    Interface class for photon-matter interaction calculations using the FEFF code.
+    :class FEFFPhotonMatterInteractorParameters: Interface class for photon-matter interaction calculations using the FEFF code.
     """
 
     def __init__(self,
@@ -40,8 +38,6 @@ class FEFFPhotonMatterInteractorParameters(AbstractCalculatorParameters):
             effective_path_distance=None,
             ):
         """
-        Constructor for the FEFF photon interactor.
-
         :param atoms: The atomic structure (Atom coordinates ([x,y,z] in Angstrom), element symbol, and potential index). If no potential index is given, all atoms of the same species will be assigned the default potential. The scattering atom must have the potential index 0.
         :type atoms: list || tuple
         :example atoms: ([[0.0, 0.0, 0.0], 'Cu', 0], [[0.0, 1.0, 1.2], 'O', 1], ...)

@@ -1,6 +1,7 @@
+""":module EMCOrientationParameters: Hosts the EMCOrientationParameters class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,20 +20,12 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the EMCOrientationParameters class.  """
-
-import copy
-import math
-import numpy
-import os
-import tempfile
-
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class EMCOrientationParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the EMCOrientation analyzer.
+    :class EMCOrientationParameters: Class representing parameters for the EMCOrientation analyzer.
     """
 
     def __init__(self,
@@ -46,7 +39,6 @@ class EMCOrientationParameters(AbstractCalculatorParameters):
                 **kwargs
                 ):
         """
-        Constructor for the EMCOrientationParameters.
         :param initial_number_of_quaternions: Number of quaternions to start the EMC algorithm.
         :type initial_number_of_quaternions: int (0<n<10), default 1
 

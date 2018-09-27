@@ -1,6 +1,7 @@
+""":module EMCCaseGenerator: Hosting the EMCCaseGenerator class that sets up a EMC run."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Based on simS2E script provided by N.-D. Loh.                          #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
@@ -160,11 +161,9 @@ def support_from_autocorr(auto, qmax, thr_0, thr_1, kl=1, write=True):
 ###############################################################
 
 class EMCCaseGenerator(object):
-    """ Class that represents an EMC case. """
+    """ :class EMCCaseGenerator: Encapsulates one EMC case. """
     def __init__(self, runLog=None):
         """
-        Wrapper for initializing the essential data for EMC recon.
-
         :param runLog: Flag that indicates where to save the runtime log.
         :type runLog: str, default None (don't save log.)"
 
@@ -556,7 +555,6 @@ class EMCCaseGenerator(object):
         outh5.create_dataset("mask", data=mask, compression="gzip", compression_opts=9)
         outh5.close()
 
-
     def showDetector(self):
         """
         Shows detector pixels as points on scatter plot; could be slow for large detectors.
@@ -573,11 +571,9 @@ class EMCCaseGenerator(object):
             #msg = "Detector not initiated."
             #_print_to_log(msg, log_file=self.runLog)
 
-    # The following functions have not been tested. Use with caution!!!
-
-
     def makeTestParticleAndSupport(self, inParticleRadius=5.9, inDamping=1.5, inFrac=0.5, inPad=1.8):
         """
+        ATTENTION: Untested!
         Recipe for creating random, "low-passed-filtered binary" contrast by
         alternating binary projection and low-pass-filter on an random, 3D array of numbers.
 
@@ -624,6 +620,7 @@ class EMCCaseGenerator(object):
 
     def createTestScatteringGeometry(self):
         """
+        ATTENTION: Untested!
         Contains recipe to create, diffract and show a low-pass-filtered, random particle contrast.
 
         If particle and diffraction parameters are not given, then default ones are used:
@@ -663,6 +660,7 @@ class EMCCaseGenerator(object):
 
     def diffractTestCase(self, inMaxScattAngDeg=45., inSigma=6.0, inQminNumShannonPix=1.4302966531242025):
         """
+        ATTENTION: Untested!
         Requires makeMonster() to first be called, so that particle density is created.
 
         Function diffract() needs the maximum scattering angle to the edge of the detector, the
@@ -697,6 +695,7 @@ class EMCCaseGenerator(object):
 
     def showDensity(self):
         """
+        ATTENTION: Untested!
         Shows particle density as an array of sequential, equal-sized 2D sections.
         """
         subplotlen = int(numpy.ceil(numpy.sqrt(len(self.density))))
@@ -710,6 +709,7 @@ class EMCCaseGenerator(object):
 
     def showLogIntensity(self, inSection=0):
         """
+        ATTENTION: Untested!
         Show a particular intensities section of Fourier intensities.
         Sections range from -qmax to qmax.
         """
@@ -726,6 +726,7 @@ class EMCCaseGenerator(object):
 
     def showLogIntensitySlices(self):
         """
+        ATTENTION: Untested!
         Shows Fourier intensities as an array of sequential, equal-sized 2D sections.
         Maximum intensities set to logarithm of maximum intensity in 3D Fourier volume.
         """
@@ -744,6 +745,7 @@ class EMCCaseGenerator(object):
 
     def writeSupportToFile(self, filename="support.dat"):
         """ Write the support range to a file.
+        ATTENTION: Untested!
         :param filename: Path to file.
         :type filename: str
         """
@@ -758,6 +760,7 @@ class EMCCaseGenerator(object):
 
     def writeDensityToFile(self, filename="density.dat"):
         """ Write electron density to a file.
+        ATTENTION: Untested!
         :param filename: Path to file.
         :type filename: str
         """
@@ -768,6 +771,7 @@ class EMCCaseGenerator(object):
 
     def writeAllOuputToFile(self, supportFileName="support.dat", densityFileName="density.dat", detectorFileName="detector.dat", intensitiesFileName="intensity.dat"):
         """
+        ATTENTION: Untested!
         Convenience function for writing output
 
         :param supportFileName: Path to file for support data.

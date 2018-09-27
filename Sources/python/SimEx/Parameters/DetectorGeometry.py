@@ -1,7 +1,7 @@
 """ :module DetectorGeometry: Module holding the DetectorGeometry class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,9 +28,8 @@ import numpy
 import sys
 
 
-
 class DetectorPanel(AbstractBaseClass):
-    """ Class representing one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
+    """:class DetectorPanel: Represents one detector panel (contiguous array of pixels, i.e. not separated by gaps).  """
 
     def __init__(self,
             ranges                          = None,
@@ -51,9 +50,6 @@ class DetectorPanel(AbstractBaseClass):
             **kwargs
             ):
         """
-        Constructor of the DetectorPanel.
-
-
         :param ranges: The minimum and maximum values pixel numbers on the respective transverse axis.
         :type  ranges: Dictionary
         ":example ranges: {"fast_scan_min : 11, "fast_scan_max" : 20, "slow_scan_min" : 1, "fast_scan_max" : 20} # First axis from 11 to 20 and second axis from 1 to 20."
@@ -352,7 +348,6 @@ class DetectorPanel(AbstractBaseClass):
 
         # Finally write the serialized panel.
         stream.write(serialization)
-
 
 
 class DetectorGeometry(AbstractCalculatorParameters):

@@ -1,4 +1,4 @@
-""" :module: Module that holds the PhotonMatterInteractorParameter class.  """
+""" :module PhotonMatterInteractorParameters: Module that holds the PhotonMatterInteractorParameter class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-import os
 import numbers
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
@@ -29,7 +28,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class PhotonMatterInteractorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the PhotonMatterInteractor calculator.
+    :class PhotonMatterInteractorParameters: Encapsulates parameters for the PhotonMatterInteractor calculator.
     """
 
     def __init__(self,
@@ -41,8 +40,6 @@ class PhotonMatterInteractorParameters(AbstractCalculatorParameters):
                 **kwargs
                 ):
         """
-        Constructor for the PhotonMatterInteractorParameters.
-
         :param rotation: Rotation to apply to the sample atoms' positions (Default: no rotation).
         :type random_rotation: List or tuple of length 4 (Giving the four coordinates of the rotation quaternion).
 

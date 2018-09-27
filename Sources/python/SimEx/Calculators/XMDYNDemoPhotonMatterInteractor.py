@@ -1,7 +1,7 @@
-""" Module that holds the XMDYNDemoPhotonMatterInteractor class.  """
+""":module XMDYNDemoPhotonMatterInteractor: Module that holds the XMDYNDemoPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -30,12 +30,11 @@ from SimEx.Utilities import IOUtilities
 
 class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
     """
-    Interface class for photon-matter interaction calculations using the XMDYN code.
+    :class XMDYNDemoPhotonMatterInteractor: Interface class for photon-matter interaction calculations using the demo version of the XMDYN code.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None, sample_path=None):
         """
-        Constructor for the xfel photon propagator.
 
         :param parameters: Parameters that govern the PMI calculation.
         :type parameters: dict

@@ -1,7 +1,7 @@
-""" Module that holds the EstherPhotonMatterInteractor class.  """
+""":module EstherPhotonMatterInteractor: Module that holds the EstherPhotonMatterInteractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -34,10 +34,10 @@ except:
 
 class EstherPhotonMatterInteractor(AbstractPhotonInteractor):
     """
-    Class interfacing the Esther Radiation-Hydrodynamics simulation backengine.
+    :class EstherPhotonMatterInteractor: Class interfacing the Esther Radiation-Hydrodynamics simulation backengine.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
         :param parameters: Parameters for the EstherPhotonMatterInteractor.

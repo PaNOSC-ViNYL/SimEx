@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Richard Briggs, Carsten Fortmann-Grote              #
+# Copyright (C) 2016-2018 Richard Briggs, Carsten Fortmann-Grote         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,22 +19,19 @@
 #                                                                        #
 ##########################################################################
 
-import numpy
-import os
-import sys
 
 def calculateLaserIntensity(laser_energy=None):
     """
     Converts the laser energy (in J), pulse length (flat top, in nanoseconds) and spot size (diameter in microns) to intensity in TW/cm^2.
-    @param laser_energy: Energy (J)
-    @type : float, int
+    :param laser_energy: Energy (J)
+    :type laser_energy: Number
     """
-    
+
     if laser_energy is None:
         Energy = float(input("Energy (J) : "))
     else:
         Energy = laser_energy
-    
+
     SpotSize = float(input("Spot size (diameter in um) : "))
     PulseLength = float(input("Pulse length (ns) : "))
 
@@ -46,5 +43,5 @@ def calculateLaserIntensity(laser_energy=None):
     Intensity = Intensity/1e12
 
     print("Intensity = ", Intensity, "TW/cm**2")
-    
+
     return Intensity
