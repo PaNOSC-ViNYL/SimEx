@@ -32,6 +32,7 @@ import h5py
 import os
 import subprocess
 import shlex
+import sys
 
 from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -239,23 +240,27 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             mpicommand = forcedMPIcommand
 
+        mpicommand += " ".join(("",sys.executable, __file__, fname))
+
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in os.environ['SIMEX_VERBOSE']:
                 print(("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand))
 
-        mpicommand += " python3 " + __file__ + " " + fname
-
-        args = shlex.split(mpicommand)
-
         # Launch the system command.
-        proc = subprocess.Popen(args, universal_newlines=True)
-        proc.wait()
+        args = shlex.split(mpicommand)
+        with subprocess.Popen(args, universal_newlines=True) as proc:
+            out, err = proc.communicate()
+
+        # Remove the dumped class.
         os.remove(fname)
 
         return proc.returncode
 
     def _run(self):
-
+        """ """
+        """ Workhorse function to run the pysingfel backengine.
+        Called if run from the command-line with dill dump.
+        """
         # Local import of MPI to avoid premature call to MPI.init().
         from mpi4py import MPI
 
@@ -314,6 +319,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Setup the output file.
         outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(mpi_comm.Get_rank()+1) + '.h5'
+
         if os.path.exists(outputName):
             os.remove(outputName)
 

@@ -1,8 +1,10 @@
 Reference Manual
 ----------------
 
+.. .. Analysis classes
 .. autoclass:: SimEx.Analysis.DiffractionAnalysis.DiffractionAnalysis
 .. autoclass:: SimEx.Analysis.XFELPhotonAnalysis.XFELPhotonAnalysis
+.. .. Calculator classes
 .. autoclass:: SimEx.Calculators.AbstractBaseCalculator.AbstractBaseCalculator
 .. autoclass:: SimEx.Calculators.AbstractPhotonAnalyzer.AbstractPhotonAnalyzer
 .. autoclass:: SimEx.Calculators.AbstractPhotonDetector.AbstractPhotonDetector
@@ -12,30 +14,37 @@ Reference Manual
 .. autoclass:: SimEx.Calculators.AbstractPhotonSource.AbstractPhotonSource
 .. autoclass:: SimEx.Calculators.ComptonScatteringCalculator.ComptonScatteringCalculator
 .. autoclass:: SimEx.Calculators.CrystFELPhotonDiffractor.CrystFELPhotonDiffractor
-.. autoclass:: SimEx.Calculators.CrystFELPhotonDiffractorParameters.CrystFELPhotonDiffractorParameters
 .. autoclass:: SimEx.Calculators.DMPhasing.DMPhasing
 .. autoclass:: SimEx.Calculators.EMCOrientation.EMCOrientation
-.. autoclass:: SimEx.PhotonExperimentSimulation.EstherExperiment.EstherExperiment
 .. autoclass:: SimEx.Calculators.EstherPhotonMatterInteractor.EstherPhotonMatterInteractor
 .. autoclass:: SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractor
-.. autoclass:: SimEx.Calculators.FEFFPhotonMatterInteractor.FEFFPhotonMatterInteractorParameters
 .. autoclass:: SimEx.Calculators.GenesisPhotonSource.GenesisPhotonSource
 .. autoclass:: SimEx.Calculators.IdealPhotonDetector.IdealPhotonDetector
 .. autoclass:: SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator
 .. autoclass:: SimEx.Calculators.S2EReconstruction.S2EReconstruction
 .. autoclass:: SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor
 .. autoclass:: SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector
-.. autoclass:: SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters
 .. autoclass:: SimEx.Calculators.XFELPhotonPropagator.XFELPhotonPropagator
 .. autoclass:: SimEx.Calculators.XFELPhotonSource.XFELPhotonSource
 .. autoclass:: SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor
+.. autoclass:: SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor
+.. .. Parameter classes
+.. autoclass:: SimEx.Parameters.CrystFELPhotonDiffractorParameters.CrystFELPhotonDiffractorParameters
 .. autoclass:: SimEx.Parameters.DMPhasingParameters.DMPhasingParameters
 .. autoclass:: SimEx.Parameters.EMCOrientationParameters.EMCOrientationParameters
 .. autoclass:: SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters
+.. autoclass:: SimEx.Parameters.FEFFPhotonMatterInteractorParameters.FEFFPhotonMatterInteractorParameters
 .. autoclass:: SimEx.Parameters.PhotonBeamParameters.PhotonBeamParameters
+.. autoclass:: SimEx.Parameters.PhotonMatterInteractorParameters.PhotonMatterInteractorParameters
 .. autoclass:: SimEx.Parameters.PlasmaXRTSCalculatorParameters.PlasmaXRTSCalculatorParameters
 .. autoclass:: SimEx.Parameters.SingFELPhotonDiffractorParameters.SingFELPhotonDiffractorParameters
 .. autoclass:: SimEx.Parameters.WavePropagatorParameters.WavePropagatorParameters
+.. autoclass:: SimEx.Parameters.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters
+
+.. .. Workflows
+.. autoclass:: SimEx.PhotonExperimentSimulation.EstherExperiment.EstherExperiment
+
+.. .. Functions
 .. autofunction:: SimEx.Calculators.AbstractPhotonAnalyzer.checkAndSetPhotonAnalyzer
 .. autofunction:: SimEx.Calculators.AbstractPhotonDetector.checkAndSetPhotonDetector
 .. autofunction:: SimEx.Calculators.AbstractPhotonDiffractor.checkAndSetPhotonDiffractor

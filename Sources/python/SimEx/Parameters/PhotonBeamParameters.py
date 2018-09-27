@@ -34,8 +34,7 @@ from wpg.srwlib import srwl
 
 
 class PhotonBeamParameters(AbstractCalculatorParameters):
-    """ Class representing photon beam parameters. """
-
+    """ :class PhotonBeamParameters: Class encapsulating photon beam parameters. """
     def __init__(self,
             photon_energy,
             beam_diameter_fwhm,

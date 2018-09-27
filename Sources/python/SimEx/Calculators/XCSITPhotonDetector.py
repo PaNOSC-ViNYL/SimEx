@@ -59,7 +59,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         """
         :param parameters: Parameters of the calulator such as the type of
         detector
-        :type parameters: XCSITPhotonDetector
+        :type parameters: XCSITPhotonDetectorParameters
 
         :param input_path: Path to the hdf5 file holding the input data.
         :type input_path: str
@@ -73,7 +73,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                 input_path is None]):
             raise AttributeError("parameters and input_path are essential to"+
                 " to init an instance of this class")
-
 
         # Init base class
         super(XCSITPhotonDetector,self).__init__(parameters,input_path,output_path)
@@ -114,8 +113,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                 '/params/geom/pixelHeight',
                                 '/params/beam/photonEnergy',
                                 ]
-
-
 
     @AbstractPhotonDetector.input_path.setter
     def input_path(self,value):

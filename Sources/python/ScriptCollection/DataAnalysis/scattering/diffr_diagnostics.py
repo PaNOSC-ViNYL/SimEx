@@ -2,7 +2,7 @@
 
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,7 +25,6 @@
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis, plt
 
 from argparse import ArgumentParser
-import numpy
 
 def main(args=None):
 
