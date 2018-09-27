@@ -1,0 +1,231 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Utilities.RadHydroInputPlots &#8212; simex_platform 0.4.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Utilities.RadHydroInputPlots</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;:module RadHydroInputPlots: Hosts utilities to plot target absorption profiles.&quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2017-2018 Carsten Fortmann-Grote, Richard Briggs         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; Collection of utilities to analyse output from (esther) rad-hydro simulations. &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span>
+<span class="kn">from</span> <span class="nn">xraydb</span> <span class="k">import</span> <span class="n">XrayDB</span>
+
+<div class="viewcode-block" id="plotTransmission"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.RadHydroInputPlots.plotTransmission">[docs]</a><span class="k">def</span> <span class="nf">plotTransmission</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">energies</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Plots absorption in a given material as function of wavelength.</span>
+
+<span class="sd">    :param symbol: The chemical symbol of the material.</span>
+<span class="sd">    :type symbol: str</span>
+
+<span class="sd">    :param edge: The requested absorption edge (K, L1, L2, M1, M2, ...)</span>
+<span class="sd">    :type edge: str</span>
+
+<span class="sd">    :param thickness: The material thickness in centimeters.&quot;</span>
+<span class="sd">    :type thickness: float</span>
+
+<span class="sd">    :param energies: For which energies to plot the transmission.</span>
+<span class="sd">    :type energies: ndarray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Instantiate the database.</span>
+    <span class="n">xdb</span> <span class="o">=</span> <span class="n">XrayDB</span><span class="p">()</span>
+
+    <span class="c1"># Get info on requested edge.</span>
+    <span class="n">edge_data</span> <span class="o">=</span> <span class="n">xdb</span><span class="o">.</span><span class="n">xray_edge</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+    <span class="n">edge_position</span> <span class="o">=</span> <span class="n">edge_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Mass density (ambient).</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">xdb</span><span class="o">.</span><span class="n">density</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+
+    <span class="c1"># Fix energy range.</span>
+    <span class="n">min_energy</span> <span class="o">=</span> <span class="mf">0.7</span><span class="o">*</span><span class="n">edge_position</span>
+    <span class="n">max_energy</span> <span class="o">=</span> <span class="mf">1.3</span><span class="o">*</span><span class="n">edge_position</span>
+
+    <span class="c1"># Setup arrays</span>
+    <span class="k">if</span> <span class="n">energies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_energy</span><span class="p">,</span> <span class="n">max_energy</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">xdb</span><span class="o">.</span><span class="n">mu_chantler</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energies</span><span class="p">)</span>
+
+
+    <span class="c1"># Convert to iterable if needed.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">thickness</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="n">thickness</span><span class="p">]</span>
+
+    <span class="n">absorption</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">mu</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">th</span><span class="p">)</span> <span class="k">for</span> <span class="n">th</span> <span class="ow">in</span> <span class="n">thickness</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">abso</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">absorption</span><span class="p">):</span>
+        <span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">abso</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> $\mu$m&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thickness</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e4</span><span class="p">))</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Transmission&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">-edge&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
+
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="plotTargetAndTransmission"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.RadHydroInputPlots.plotTargetAndTransmission">[docs]</a><span class="k">def</span> <span class="nf">plotTargetAndTransmission</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">energies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ablator_thickness</span><span class="o">=</span><span class="mf">0.0025</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Plots absorption in a given material as function of wavelength.</span>
+
+<span class="sd">    :param symbol: The chemical symbol of the material.</span>
+<span class="sd">    :type symbol: str</span>
+
+<span class="sd">    :param edge: The requested absorption edge (K, L1, L2, M1, M2, ...)</span>
+<span class="sd">    :type edge: str</span>
+
+<span class="sd">    :param thickness: The material thickness in centimeters.&quot;</span>
+<span class="sd">    :type thickness: float</span>
+
+<span class="sd">    :param energies: For which energies to plot the transmission.</span>
+<span class="sd">    :type energies: ndarray</span>
+
+<span class="sd">    :param ablator_thickness: Thickness of ablator</span>
+<span class="sd">    :type ablator_thickness: float</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Instantiate the database.</span>
+    <span class="n">xdb</span> <span class="o">=</span> <span class="n">XrayDB</span><span class="p">()</span>
+
+    <span class="c1"># Get info on requested edge.</span>
+    <span class="n">edge_data</span> <span class="o">=</span> <span class="n">xdb</span><span class="o">.</span><span class="n">xray_edge</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+    <span class="n">edge_position</span> <span class="o">=</span> <span class="n">edge_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Mass density (ambient).</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">xdb</span><span class="o">.</span><span class="n">density</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+
+    <span class="c1"># Fix energy range.</span>
+    <span class="n">min_energy</span> <span class="o">=</span> <span class="mf">0.7</span><span class="o">*</span><span class="n">edge_position</span>
+    <span class="n">max_energy</span> <span class="o">=</span> <span class="mf">1.3</span><span class="o">*</span><span class="n">edge_position</span>
+
+    <span class="c1"># Setup arrays</span>
+    <span class="k">if</span> <span class="n">energies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_energy</span><span class="p">,</span> <span class="n">max_energy</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">xdb</span><span class="o">.</span><span class="n">mu_chantler</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energies</span><span class="p">)</span>
+
+
+    <span class="c1"># Convert to iterable if needed.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">thickness</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="n">thickness</span><span class="p">]</span>
+
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Transmission&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">-edge&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
+
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+    <span class="n">absorption</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">mu</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">th</span><span class="p">)</span> <span class="k">for</span> <span class="n">th</span> <span class="ow">in</span> <span class="n">thickness</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">abso</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">absorption</span><span class="p">):</span>
+        <span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">abso</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> $\mu$m&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thickness</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e4</span><span class="p">))</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Transmission&#39;</span><span class="p">)</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">-edge&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
+
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">plotTransmission</span><span class="p">(</span><span class="s2">&quot;Fe&quot;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+    </div>
+  </body>
+</html>

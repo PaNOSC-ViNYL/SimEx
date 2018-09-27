@@ -1,0 +1,344 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Parameters.CrystFELPhotonDiffractorParameters &#8212; simex_platform 0.4.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Parameters.CrystFELPhotonDiffractorParameters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; :module CrystFELPhotonDiffractorParameters: Module that holds the CrystFELPhotonDiffractorParameters class.  &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPhysicalQuantity</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">IOUtilities</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.Units</span> <span class="k">import</span> <span class="n">meter</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.PhotonBeamParameters</span> <span class="k">import</span> <span class="n">PhotonBeamParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.DetectorGeometry</span> <span class="k">import</span> <span class="n">DetectorGeometry</span>
+
+<div class="viewcode-block" id="CrystFELPhotonDiffractorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.CrystFELPhotonDiffractorParameters.CrystFELPhotonDiffractorParameters">[docs]</a><span class="k">class</span> <span class="nc">CrystFELPhotonDiffractorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :class CrystFELPhotonDiffractorParameters: Encapsulates parameters for the CrystFELPhotonDiffractor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">sample</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">uniform_rotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">number_of_diffraction_patterns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">powder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">intensities_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">crystal_size_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">crystal_size_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">poissonize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">number_of_background_photons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">suppress_fringes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">beam_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">detector_geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param sample: Location of file that contains the sample definition (pdb or crystfel format)</span>
+<span class="sd">        :type sample: str</span>
+
+<span class="sd">        :param uniform_rotation: Whether to perform uniform sampling of rotation space.</span>
+<span class="sd">        :type uniform_rotation: bool, default True</span>
+
+<span class="sd">        :param powder: Whether to sum all patterns to generate a simulated powder diffraction pattern.</span>
+<span class="sd">        :type powder: bool</span>
+
+<span class="sd">        :param intensities_file: Location of file that contains intensities and phases at reciprocal lattice points. See CrystFEL documentation for more info. Default: Constant intensities and phases across entire sample.</span>
+<span class="sd">        :type intensities_file: str</span>
+
+<span class="sd">        :param crystal_size_min: Minimum crystal size.</span>
+<span class="sd">        :type crystal_size_min: PhysicalQuantity with unit of length (meter).</span>
+
+<span class="sd">        :param crystal_size_max: Maximum crystal size.</span>
+<span class="sd">        :type crystal_size_max: PhysicalQuantity with unit of length (meter).</span>
+
+<span class="sd">        :param poissonize: Whether to add Poisson noise to pixel values.</span>
+<span class="sd">        :type poissonize: bool</span>
+
+<span class="sd">        :param number_of_background_photons: Add this number of Poisson distributed photons uniformly over the detector surface (default 0).</span>
+<span class="sd">        :type number_of_background_photons: int</span>
+
+<span class="sd">        :param number_of_diffraction_patterns: Number of diffraction patterns to calculate from each trajectory.</span>
+<span class="sd">        :type number_of_diffraction_patterns: int, default 1</span>
+
+<span class="sd">        :param suppress_fringes: Whether to suppress subsidiary maxima beyond first minimum of the shape transform (default False).</span>
+<span class="sd">        :type suppress_fringes: bool</span>
+
+<span class="sd">        :param beam_parameters: Path of the beam parameter file.</span>
+<span class="sd">        :type beam_parameters: str</span>
+
+<span class="sd">        :param detector_geometry: Path of the beam geometry file.</span>
+<span class="sd">        :type detector_geometry: str</span>
+
+<span class="sd">        :param kwargs: Key-value pairs to pass to the parent class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check all parameters.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uniform_rotation</span> <span class="o">=</span> <span class="n">uniform_rotation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">powder</span> <span class="o">=</span> <span class="n">powder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intensities_file</span> <span class="o">=</span> <span class="n">intensities_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_min</span> <span class="o">=</span> <span class="n">crystal_size_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_max</span> <span class="o">=</span> <span class="n">crystal_size_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poissonize</span> <span class="o">=</span> <span class="n">poissonize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_background_photons</span> <span class="o">=</span> <span class="n">number_of_background_photons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">suppress_fringes</span> <span class="o">=</span> <span class="n">suppress_fringes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam_parameters</span> <span class="o">=</span> <span class="n">beam_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_geometry</span> <span class="o">=</span> <span class="n">detector_geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">=</span> <span class="n">number_of_diffraction_patterns</span>
+
+        <span class="c1"># Handle single size case:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_min</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_min</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_max</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_size_min</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CrystFELPhotonDiffractorParameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set default for required inherited parameters. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractCalculatorParameters__cpus_per_task_default</span> <span class="o">=</span> <span class="s2">&quot;MAX&quot;</span>
+
+    <span class="c1">### Setters and queries.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;sample&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sample</span>
+    <span class="nd">@sample</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;sample&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;A sample must be defined.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;pdb&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking presence of </span><span class="si">%s</span><span class="s2">. Will query from PDB if not found in $PWD.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sample</span> <span class="o">=</span> <span class="n">IOUtilities</span><span class="o">.</span><span class="n">checkAndGetPDB</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample path is set to </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sample</span><span class="p">))</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">powder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;powder&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__powder</span>
+    <span class="nd">@powder</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">powder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;powder&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__powder</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">intensities_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;intensities_file&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__intensities_file</span>
+    <span class="nd">@intensities_file</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">intensities_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;intensities_file&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__intensities_file</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">str</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">crystal_size_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;crystal_size_min&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__crystal_size_min</span>
+    <span class="nd">@crystal_size_min</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">crystal_size_min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;crystal_size_min&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="c1"># Check if iterable.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__crystal_size_min</span> <span class="o">=</span> <span class="n">checkAndSetPhysicalQuantity</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">meter</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">crystal_size_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;crystal_size_max&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__crystal_size_max</span>
+    <span class="nd">@crystal_size_max</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">crystal_size_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;crystal_size_max&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="c1"># Check if iterable.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__crystal_size_max</span> <span class="o">=</span> <span class="n">checkAndSetPhysicalQuantity</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">meter</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">poissonize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;poissonize&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__poissonize</span>
+    <span class="nd">@poissonize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">poissonize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;poissonize&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__poissonize</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_background_photons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;number_of_background_photons&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_background_photons</span>
+    <span class="nd">@number_of_background_photons</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">number_of_background_photons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;number_of_background_photons&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_background_photons</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">int</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">suppress_fringes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the &#39;suppress_fringes&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__suppress_fringes</span>
+    <span class="nd">@suppress_fringes</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">suppress_fringes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;suppress_fringes&#39; parameter to val.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__suppress_fringes</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uniform_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;uniform_rotation&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__uniform_rotation</span>
+    <span class="nd">@uniform_rotation</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">uniform_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;uniform_rotation&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;uniform_rotation&#39; to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__uniform_rotation</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="kc">True</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">beam_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;beam_parameters&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__beam_parameters</span>
+    <span class="nd">@beam_parameters</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">beam_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;beam_parameters&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;beam_parameters&#39; to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;WARNING: Beam parameters not set, will use crystFEL/pattern_sim defaults.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__beam_parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">PhotonBeamParameters</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__beam_parameters</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__beam_parameters</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;The beam_parameters </span><span class="si">%s</span><span class="s2"> is not a valid file or filename.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__beam_parameters</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">detector_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;detector_geometry&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__detector_geometry</span>
+    <span class="nd">@detector_geometry</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">detector_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;detector_geometry&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;detector_geometry&#39; to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__detector_geometry</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">DetectorGeometry</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__detector_geometry</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__detector_geometry</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;The detector_geometry </span><span class="si">%s</span><span class="s2"> is not a valid file or filename.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__detector_geometry</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__detector_geometry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;WARNING: Geometry file not set, calculation will most probably fail.&quot;</span><span class="p">)</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_diffraction_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the &#39;number_of_diffraction_patterns_file&#39; parameter. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_diffraction_patterns</span>
+    <span class="nd">@number_of_diffraction_patterns</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">number_of_diffraction_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the &#39;number_of_diffraction_patterns&#39; parameter to a given value.</span>
+<span class="sd">        :param value: The value to set &#39;number_of_diffraction_patterns&#39; to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">number_of_diffraction_patterns</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="mi">1</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">number_of_diffraction_patterns</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_diffraction_patterns</span> <span class="o">=</span> <span class="n">number_of_diffraction_patterns</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The parameters &#39;number_of_diffraction_patterns&#39; must be a positive integer.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+    </div>
+  </body>
+</html>

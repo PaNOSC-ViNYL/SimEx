@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Calculators.SingFELPhotonDiffractor &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Calculators.SingFELPhotonDiffractor &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,10 +39,10 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.SingFELPhotonDiffractor</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot; Module that holds the SingFELPhotonDiffractor class.  &quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;:module SingFELPhotonDiffractor: Module that holds the SingFELPhotonDiffractor class.  &quot;&quot;&quot;</span>
 <span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2015 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -80,6 +73,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Utilities.Units</span> <span class="k">import</span> <span class="n">electronvolt</span><span class="p">,</span> <span class="n">meter</span><span class="p">,</span> <span class="n">joule</span>
 <span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
@@ -91,10 +85,10 @@
 
 <div class="viewcode-block" id="SingFELPhotonDiffractor"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.SingFELPhotonDiffractor.SingFELPhotonDiffractor">[docs]</a><span class="k">class</span> <span class="nc">SingFELPhotonDiffractor</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class representing a x-ray free electron laser photon propagator.</span>
+<span class="sd">    :class SingFELPhotonDiffractor: Representing scattering from a molecular sample into a detector plane.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param parameters: Parameters of the calculation (not data).</span>
@@ -110,9 +104,14 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">(</span><span class="n">parameters_dictionary</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters_default</span> <span class="o">=</span> <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">(),</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parameters_default</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">checkAndSetInstance</span><span class="p">(</span><span class="n">SingFELPhotonDiffractorParameters</span><span class="p">,</span>
                                                 <span class="n">parameters</span><span class="p">,</span>
-                                                <span class="n">SingFELPhotonDiffractorParameters</span><span class="p">(),</span>
+                                                <span class="n">parameters_default</span><span class="p">,</span>
                                                 <span class="p">)</span>
 
         <span class="c1"># Handle sample geometry provenience.</span>
@@ -178,7 +177,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span> <span class="o">==</span> <span class="s2">&quot;MAX&quot;</span><span class="p">:</span>
             <span class="n">np</span> <span class="o">=</span> <span class="n">nnodes</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">np</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ncores</span><span class="o">/</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">np</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ncores</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">cpus_per_task</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="p">,</span> <span class="n">ncores</span>
 
@@ -253,7 +252,7 @@
         <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span> <span class="o">+</span> <span class="n">command_sequence</span>
 
         <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SingFELPhotonDiffractor backengine command: &quot;</span><span class="o">+</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;SingFELPhotonDiffractor backengine command: &quot;</span><span class="o">+</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)))</span>
 
         <span class="c1"># Run the backengine command.</span>
         <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -282,23 +281,27 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mpicommand</span> <span class="o">=</span> <span class="n">forcedMPIcommand</span>
 
+        <span class="n">mpicommand</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+
         <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;MPI&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_VERBOSE&#39;</span><span class="p">]:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SingFELPhotonDiffractor backengine mpicommand: &quot;</span><span class="o">+</span><span class="n">mpicommand</span><span class="p">)</span>
-
-        <span class="n">mpicommand</span> <span class="o">+=</span> <span class="s2">&quot; python &quot;</span> <span class="o">+</span> <span class="vm">__file__</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">fname</span>
-
-        <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;SingFELPhotonDiffractor backengine mpicommand: &quot;</span><span class="o">+</span><span class="n">mpicommand</span><span class="p">))</span>
 
         <span class="c1"># Launch the system command.</span>
-        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mpicommand</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+        <span class="c1"># Remove the dumped class.</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span>
 
     <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Workhorse function to run the pysingfel backengine.</span>
+<span class="sd">        Called if run from the command-line with dill dump.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Local import of MPI to avoid premature call to MPI.init().</span>
         <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
 
@@ -343,21 +346,21 @@
         <span class="n">detector</span><span class="o">.</span><span class="n">init_dp</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span>
 
         <span class="c1"># Determine which patterns to run on which core.</span>
-        <span class="n">number_of_patterns_per_core</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">/</span> <span class="n">mpi_size</span>
+        <span class="n">number_of_patterns_per_core</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">//</span> <span class="n">mpi_size</span>
         <span class="c1"># Remainder of the division.</span>
         <span class="n">remainder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span> <span class="o">%</span> <span class="n">mpi_size</span>
         <span class="c1"># Pattern indices</span>
-        <span class="n">pattern_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span><span class="p">)</span>
+        <span class="n">pattern_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_diffraction_patterns</span><span class="p">))</span>
 
         <span class="c1"># Distribute patterns over cores.</span>
         <span class="n">rank_indices</span> <span class="o">=</span> <span class="n">pattern_indices</span><span class="p">[</span><span class="n">mpi_rank</span><span class="o">*</span><span class="n">number_of_patterns_per_core</span><span class="p">:(</span><span class="n">mpi_rank</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">number_of_patterns_per_core</span><span class="p">]</span>
-
         <span class="c1"># Distribute remainder</span>
         <span class="k">if</span> <span class="n">mpi_rank</span> <span class="o">&lt;</span> <span class="n">remainder</span><span class="p">:</span>
             <span class="n">rank_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern_indices</span><span class="p">[</span><span class="n">mpi_size</span> <span class="o">*</span> <span class="n">number_of_patterns_per_core</span> <span class="o">+</span> <span class="n">mpi_rank</span><span class="p">])</span>
 
         <span class="c1"># Setup the output file.</span>
         <span class="n">outputName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_dir</span> <span class="o">+</span> <span class="s1">&#39;/diffr_out_&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">{0:07}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.h5&#39;</span>
+
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outputName</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">outputName</span><span class="p">)</span>
 
@@ -437,42 +440,37 @@
         <span class="n">path_to_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span>
 
         <span class="c1"># Setup new file.</span>
-        <span class="n">h5_outfile</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5_outfile</span><span class="p">:</span>
 
-        <span class="c1"># Files to read from.</span>
-        <span class="n">individual_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">)]</span>
-        <span class="n">individual_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="c1"># Files to read from.</span>
+            <span class="n">individual_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path_to_files</span><span class="p">)]</span>
+            <span class="n">individual_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-        <span class="c1"># Keep track of global parameters being linked.</span>
-        <span class="n">global_parameters</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="c1"># Loop over all individual files and link in the top level groups.</span>
-        <span class="k">for</span> <span class="n">ind_file</span> <span class="ow">in</span> <span class="n">individual_files</span><span class="p">:</span>
-            <span class="c1"># Open file.</span>
-            <span class="n">h5_infile</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ind_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="c1"># Keep track of global parameters being linked.</span>
+            <span class="n">global_parameters</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Loop over all individual files and link in the top level groups.</span>
+            <span class="k">for</span> <span class="n">ind_file</span> <span class="ow">in</span> <span class="n">individual_files</span><span class="p">:</span>
+                <span class="c1"># Open file.</span>
+                <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ind_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5_infile</span><span class="p">:</span>
 
-            <span class="c1"># Links must be relative.</span>
-            <span class="n">relative_link_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ind_file</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">ind_file</span><span class="p">)))</span>
+                    <span class="c1"># Links must be relative.</span>
+                    <span class="n">relative_link_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ind_file</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">ind_file</span><span class="p">)))</span>
 
-            <span class="c1"># Link global parameters.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">global_parameters</span><span class="p">:</span>
-                <span class="n">global_parameters</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># Link global parameters.</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">global_parameters</span><span class="p">:</span>
+                        <span class="n">global_parameters</span> <span class="o">=</span> <span class="kc">True</span>
 
-                <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">)</span>
-                <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">)</span>
-                <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;misc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;misc&quot;</span><span class="p">)</span>
-                <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">)</span>
+                        <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">)</span>
+                        <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">)</span>
+                        <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;misc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;misc&quot;</span><span class="p">)</span>
+                        <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]:</span>
 
-                <span class="c1"># Link in the data.</span>
-                <span class="n">ds_path</span> <span class="o">=</span> <span class="s2">&quot;data/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="n">h5_outfile</span><span class="p">[</span><span class="n">ds_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="n">ds_path</span><span class="p">)</span>
+                        <span class="c1"># Link in the data.</span>
+                        <span class="n">ds_path</span> <span class="o">=</span> <span class="s2">&quot;data/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                        <span class="n">h5_outfile</span><span class="p">[</span><span class="n">ds_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="n">relative_link_target</span><span class="p">,</span> <span class="n">ds_path</span><span class="p">)</span>
 
-            <span class="c1"># Close input file.</span>
-            <span class="n">h5_infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-        <span class="c1"># Close file.</span>
-        <span class="n">h5_outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="c1"># Reset output path.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="s2">&quot;.h5&quot;</span></div></div>
@@ -492,12 +490,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -513,13 +513,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

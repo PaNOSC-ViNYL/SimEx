@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Calculators.PlasmaXRTSCalculator &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Calculators.PlasmaXRTSCalculator &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,10 +39,10 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.PlasmaXRTSCalculator</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot; Module that holds the PlasmaXRTSCalculator class.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;:module PlasmaXRTSCalculator: Module that holds the PlasmaXRTSCalculator class.&quot;&quot;&quot;</span>
 <span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2016 Carsten Fortmann-Grote                              #</span>
+<span class="c1"># Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -76,15 +69,15 @@
 
 <span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDiffractor</span> <span class="k">import</span> <span class="n">AbstractPhotonDiffractor</span>
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
-<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span><span class="p">,</span> <span class="n">checkAndSetPositiveInteger</span>
 
 <div class="viewcode-block" id="PlasmaXRTSCalculator"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.PlasmaXRTSCalculator.PlasmaXRTSCalculator">[docs]</a><span class="k">class</span> <span class="nc">PlasmaXRTSCalculator</span><span class="p">(</span><span class="n">AbstractPhotonDiffractor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class representing a plasma x-ray Thomson scattering calculation.</span>
+<span class="sd">    :class PlasmaXRTSCalculator: Represents a plasma x-ray Thomson scattering calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="sd">        :param parameters: Parameters for the PlasmaXRTSCalculator.</span>
 <span class="sd">        :type parameters: PlasmaXRTSCalculatorParameters</span>
 
@@ -184,28 +177,34 @@
         <span class="c1"># Setup command sequence and issue the system call.</span>
         <span class="c1"># Make sure to cd to correct directory where input deck is located.</span>
         <span class="n">command_sequence</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;xrs&#39;</span><span class="p">]</span>
+
         <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="n">command_sequence</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_tmp_dir</span> <span class="p">)</span>
 
         <span class="c1"># Catch stdout and stderr, wait until process terminates.</span>
         <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Error handling.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="s2">&quot;Error during xrts backengine execution in </span><span class="si">%s</span><span class="s2">. Error output follows. </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span>
         <span class="c1"># Check if data was produced.</span>
         <span class="n">path_to_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span> <span class="s1">&#39;xrts_out.txt&#39;</span> <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="n">path_to_data</span> <span class="p">):</span>
-            <span class="k">raise</span><span class="p">(</span> <span class="ne">IOError</span><span class="p">,</span> <span class="s2">&quot;No data generated. Check input deck </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span> <span class="s1">&#39;input.dat&#39;</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IOError</span>
 
         <span class="c1"># Store output internally.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__run_log</span> <span class="o">=</span> <span class="n">out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__run_log</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 
         <span class="c1"># Write to tmp_dir.</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_tmp_dir</span> <span class="p">,</span><span class="s1">&#39;xrts.log&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">log_file_handle</span><span class="p">:</span>
-                <span class="n">log_file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                <span class="n">log_file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
 
         <span class="c1"># Store data internally.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span> <span class="n">path_to_data</span> <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span> <span class="n">path_to_data</span> <span class="p">)</span>
+
+        <span class="c1"># Static data.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span> <span class="o">=</span> <span class="n">_parseStaticData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_log</span> <span class="p">)</span></div>
+
         <span class="c1"># Cd back to where we came from.</span>
         <span class="c1">#os.chdir( pwd )</span>
 
@@ -213,6 +212,12 @@
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">static_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the static data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span>
+
 
     <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -249,9 +254,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">photonEnergy</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span> <span class="o">!=</span> <span class="n">photon_energy</span><span class="p">:</span>
-            <span class="nb">print</span>  <span class="s2">&quot;WARNING: Parameter &#39;photon_energy&#39; (</span><span class="si">%4.3e</span><span class="s2"> eV) not equal to source photon energy (</span><span class="si">%4.3e</span><span class="s2"> eV). Will proceed with source photon energy.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Parameter &#39;photon_energy&#39; (</span><span class="si">%4.3e</span><span class="s2"> eV) not equal to source photon energy (</span><span class="si">%4.3e</span><span class="s2"> eV). Will proceed with source photon energy.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">spectrum_mean</span> <span class="o">-</span> <span class="n">photon_energy</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;WARNING: Given photon energy (</span><span class="si">%4.3e</span><span class="s2"> eV) deviates from spectral mean (</span><span class="si">%4.3e</span><span class="s2">) by &gt; 1 eV. Will proceed with spectral mean.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">spectrum_mean</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Given photon energy (</span><span class="si">%4.3e</span><span class="s2"> eV) deviates from spectral mean (</span><span class="si">%4.3e</span><span class="s2">) by &gt; 1 eV. Will proceed with spectral mean.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">photon_energy</span><span class="p">,</span> <span class="n">spectrum_mean</span><span class="p">))</span>
             <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">spectrum_mean</span>
 
         <span class="c1"># Finally store the photon energy on the class.</span>
@@ -292,26 +297,23 @@
             <span class="c1">#collfreq  = self.__run_data[:,4]</span>
 
             <span class="n">energy_shifts</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/energy_shifts&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">energies</span><span class="p">)</span>
-            <span class="n">energy_shifts</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+            <span class="n">energy_shifts</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV&#39;</span>
 
             <span class="n">Skw_free</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_free&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_free</span><span class="p">)</span>
-            <span class="n">Skw_free</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
+            <span class="n">Skw_free</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s1">&#39;eV**-1&#39;</span>
 
             <span class="n">Skw_bound</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_bound&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_bound</span><span class="p">)</span>
-            <span class="n">Skw_bound</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
+            <span class="n">Skw_bound</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s1">&#39;eV**-1&#39;</span>
 
             <span class="n">Skw_total</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/dynamic/Skw_total&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Skw_total</span><span class="p">)</span>
-            <span class="n">Skw_total</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV**-1&#39;</span><span class="p">)</span>
-
-            <span class="c1"># Static data.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span> <span class="o">=</span> <span class="n">_parseStaticData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_log</span> <span class="p">)</span>
+            <span class="n">Skw_total</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV**-1&#39;</span>
 
             <span class="c1"># Save to h5 file.</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__static_data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
                 <span class="n">h5</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;/data/static/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
 
             <span class="c1"># Attach a unit to the ionization potential lowering.</span>
-            <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;/data/static/&#39;</span><span class="p">][</span><span class="s1">&#39;ipl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;eV&#39;</span><span class="p">)</span>
+            <span class="n">h5</span><span class="p">[</span><span class="s1">&#39;/data/static/&#39;</span><span class="p">][</span><span class="s1">&#39;ipl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV&#39;</span>
 
 
                                     <span class="c1">#&#39;/history/parent/detail&#39;,</span>
@@ -338,7 +340,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span> <span class="n">source_spectrum_path</span><span class="p">,</span> <span class="n">source_spectrum_data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span>  <span class="s2">&quot;Source spectrum could not be saved. Please check temporary directory </span><span class="si">%s</span><span class="s2"> exists. Backtrace follows.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Source spectrum could not be saved. Please check temporary directory </span><span class="si">%s</span><span class="s2"> exists. Backtrace follows.&quot;</span><span class="p">)</span>
             <span class="k">raise</span></div>
 
 <span class="k">def</span> <span class="nf">_parseStaticData</span><span class="p">(</span><span class="n">data_string</span><span class="p">):</span>
@@ -357,20 +359,22 @@
         <span class="n">static_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Extract static data from</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;fk&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;f\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;qk&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;q\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_ion&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;S_ii\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_free&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;S_ee\^0\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_core&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;Core_inelastic\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Wk&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;Elastic\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_total&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;S_total\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;ipl&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;IP depression \[eV\]</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;lfc&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;G\(k\)</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s</span><span class="se">\\</span><span class="s2">d+\.</span><span class="se">\\</span><span class="s2">d+&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
-        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;debye_waller&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s2">&quot;Debye-Waller</span><span class="se">\\</span><span class="s2">s+=</span><span class="se">\\</span><span class="s2">s+[1|</span><span class="se">\\</span><span class="s2">d+.</span><span class="se">\\</span><span class="s2">d+]&quot;</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">pattern_after_equal</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">s</span><span class="se">\\</span><span class="s1">d+</span><span class="se">\\</span><span class="s1">.</span><span class="se">\\</span><span class="s1">d+e[\+,\-]</span><span class="se">\\</span><span class="s1">d+&#39;</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;k\(w=0\)</span><span class="se">\\</span><span class="s1">s+\[m\^-1\]</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;fk&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;f\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;qk&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;q\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_ion&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;S_ii\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_free&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;S_ee\^0\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_core&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;Core_inelastic\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Wk&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;Elastic\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;Sk_total&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;S_total\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;ipl&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;IP depression \[eV\]</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;lfc&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;G\(k\)</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
+        <span class="n">static_dict</span><span class="p">[</span><span class="s1">&#39;debye_waller&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extractDate</span><span class="p">(</span><span class="s1">&#39;Debye-Waller</span><span class="se">\\</span><span class="s1">s+=&#39;</span><span class="o">+</span><span class="n">pattern_after_equal</span><span class="p">,</span> <span class="n">data_string</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">static_dict</span>
 
-<span class="k">def</span> <span class="nf">extractDate</span><span class="p">(</span><span class="n">pattern_string</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<div class="viewcode-block" id="extractDate"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.PlasmaXRTSCalculator.extractDate">[docs]</a><span class="k">def</span> <span class="nf">extractDate</span><span class="p">(</span><span class="n">pattern_string</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Workhorse function to get a pattern from text using a regular expression.</span>
 <span class="sd">    :param pattern_string: The regex pattern to find.</span>
 <span class="sd">    :type pattern_string: str (argument to re.compile)</span>
@@ -389,12 +393,12 @@
 
     <span class="c1"># Extract value (behind the &#39;=&#39; symbol).</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;=</span><span class="se">\\</span><span class="s2">s&quot;</span><span class="p">)</span>
-    <span class="k">return</span>  <span class="nb">float</span><span class="p">(</span> <span class="n">pattern</span><span class="o">.</span><span class="n">split</span><span class="p">(</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">return</span>  <span class="nb">float</span><span class="p">(</span> <span class="n">pattern</span><span class="o">.</span><span class="n">split</span><span class="p">(</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span></div>
 <span class="c1">#</span>
 <span class="c1"># Check and set functions</span>
 <span class="c1">#</span>
 
-<span class="k">def</span> <span class="nf">checkAndSetParameters</span><span class="p">(</span> <span class="n">parameters</span> <span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.PlasmaXRTSCalculator.checkAndSetParameters">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetParameters</span><span class="p">(</span> <span class="n">parameters</span> <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the parameters dictionary is ok .</span>
 
@@ -404,7 +408,7 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">AbstractCalculatorParameters</span> <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span> <span class="s2">&quot;The &#39;parameters&#39; argument must be of the type AbstractCalculatorParameters.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">parameters</span>
+    <span class="k">return</span> <span class="n">parameters</span></div>
 </pre></div>
 
           </div>
@@ -417,12 +421,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -438,13 +444,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

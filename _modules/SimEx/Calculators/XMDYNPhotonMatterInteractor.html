@@ -1,0 +1,557 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SimEx.Calculators.XMDYNPhotonMatterInteractor &#8212; simex_platform 0.4.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SimEx.Calculators.XMDYNPhotonMatterInteractor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;:module XMDYNPhotonMatterInteractor: Module that holds the XMDYNPhotonMatterInteractor class.&quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># This file is part of simex_platform.                                   #</span>
+<span class="c1"># simex_platform is free software: you can redistribute it and/or modify #</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by   #</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or      #</span>
+<span class="c1"># (at your option) any later version.                                    #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># simex_platform is distributed in the hope that it will be useful,      #</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of         #</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #</span>
+<span class="c1"># GNU General Public License for more details.                           #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1"># You should have received a copy of the GNU General Public License      #</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.  #</span>
+<span class="c1">#                                                                        #</span>
+<span class="c1">##########################################################################</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span>
+
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.IOUtilities</span> <span class="k">import</span> <span class="n">get_dict_from_lines</span>
+<span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonInteractor</span> <span class="k">import</span> <span class="n">AbstractPhotonInteractor</span>
+<span class="kn">from</span> <span class="nn">SimEx.Parameters.PhotonMatterInteractorParameters</span> <span class="k">import</span> <span class="n">PhotonMatterInteractorParameters</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
+<span class="kn">from</span> <span class="nn">SimEx.Utilities.ParallelUtilities</span> <span class="k">import</span> <span class="n">getCUDAEnvironment</span>
+
+<span class="n">bohr_radius</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s1">&#39;Bohr radius&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor">[docs]</a><span class="k">class</span> <span class="nc">XMDYNPhotonMatterInteractor</span><span class="p">(</span><span class="n">AbstractPhotonInteractor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; :class XMDYNPhotonMatterInteractor: Wrapper class for photon-matter interaction calculations using the XMDYN code.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sample_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">root_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param parameters: Parameters that govern the PMI calculation.</span>
+<span class="sd">        :type parameters: dict</span>
+
+<span class="sd">        :param input_path: Location of data needed by the PMI calculation (Laser source wavefront data).</span>
+<span class="sd">        :type input_path: str</span>
+
+<span class="sd">        :param output_path: Where to store the data generated by the PMI calculation.</span>
+<span class="sd">        :type output_path: str</span>
+
+<span class="sd">        :param sample_path: Location of the sample/target geometry file. Can be either a simS2E sample file or a pdb file. Specifying a pdb will first check if it&#39;s present in a database, if not, it will issue a query for the basename of the file to the RCSB protein data bank.</span>
+<span class="sd">        :type sample_path: str</span>
+
+<span class="sd">        :param root_path: Path to a root directory from which to restart a (previously failed) simulation.</span>
+<span class="sd">        :type root_path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialize base class.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">XMDYNPhotonMatterInteractor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/ff&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/halfQ&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/Nph&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/r&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/T&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/Z&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/xyz&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/Sq_halfQ&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/Sq_bound&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/snp_&lt;7 digit index&gt;/Sq_free&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/history/parent/detail&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/history/parent/parent&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/package_version&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/contact&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/datdescription&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/method_description&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/version&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/data/arrEhor&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/data/arrEver&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/nSlices&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/nx&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/ny&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qxMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qxMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qyMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/qyMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/sliceMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/sliceMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Mesh/xMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/xMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/yMax&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/yMin&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/zCoord&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/beamline/printout&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Rx&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/Ry&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/dRx&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/dRy&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/nval&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/photonEnergy&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wDomain&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wEFieldUnit&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wFloatType&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/wSpace&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/xCentre&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/params/yCentre&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/package_version&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/contact&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/datdescription&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/info/method_description&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/misc/xFWHM&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/misc/yFWHM&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;/version&#39;</span><span class="p">,</span>
+                                <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+
+        <span class="c1"># Check sample path.</span>
+        <span class="k">if</span> <span class="n">sample_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;A target/sample must be specified through the &#39;sample_path&#39; argument.&quot;</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">sample_path</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample file </span><span class="si">%s</span><span class="s2"> was not found. Will attempt to query from RCSB protein data bank.&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">sample_path</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sample_path</span> <span class="o">=</span> <span class="n">sample_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cudadev</span> <span class="o">=</span> <span class="n">getCUDAEnvironment</span><span class="p">()[</span><span class="s1">&#39;first_available_device_index&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the path to the restart data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__root_path</span>
+
+    <span class="nd">@root_path</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">root_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the path to the restart data.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;root.&quot;</span><span class="o">+</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;root_path&#39; must be a path to a xmdyn root directory containing restart data.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root_path</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__is_restart</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query the calculator parameters.</span>
+
+<span class="sd">        :return: The parameters of this Calculator.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span>
+
+    <span class="nd">@parameters</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set (and check) the parameters. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">PhotonMatterInteractorParameters</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">PhotonMatterInteractorParameters</span><span class="p">(</span><span class="n">parameters_dictionary</span><span class="o">=</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">PhotonMatterInteractorParameters</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parameters</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sample_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the path to the sample geometry file. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sample_path</span>
+
+    <span class="nd">@sample_path</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sample_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sample_path</span><span class="o">=</span><span class="n">checkAndSetInstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;sample.h5&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor.expectedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor.expectedData">[docs]</a>    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data expected by the Interactor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expected_data</span></div>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor.providedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor.providedData">[docs]</a>    <span class="k">def</span> <span class="nf">providedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the data provided by the Interactor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__provided_data</span></div>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This method drives the backengine code.&quot;&quot;&quot;</span>
+
+        <span class="n">input_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">input_files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">):</span>
+            <span class="n">input_files</span> <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_path</span> <span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;h5&#39;</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;opmd&#39;</span> <span class="p">]</span>
+            <span class="n">input_files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Input file </span><span class="si">%s</span><span class="s2"> does not exist or cannot be read.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="c1"># Create output directory if not existing yet.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Output file </span><span class="si">%s</span><span class="s2"> already exists, cowardly refusing to overwrite.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="c1"># Generate formatted output files (i.e. attach history to output file).</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">input_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_files</span><span class="p">):</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="p">,</span> <span class="s1">&#39;pmi_out_</span><span class="si">%07d</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;XMDYN&quot;</span><span class="p">]</span> <span class="o">+</span> \
+            <span class="s1">&#39; --s2e_sample </span><span class="si">{0:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_path</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="s1">&#39; --prop_out </span><span class="si">{0:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="s1">&#39; --pmi_out </span><span class="si">{0:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="s1">&#39; --xatom-exe </span><span class="si">{0:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;XATOM&quot;</span><span class="p">])</span> <span class="o">+</span> \
+            <span class="s1">&#39; --dbase </span><span class="si">{0:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;XMDYNANDXATOMDBPATH&quot;</span><span class="p">])</span> <span class="o">+</span> \
+            <span class="s1">&#39; --seed </span><span class="si">{0:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__seed</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="s1">&#39; --s2e-rot &quot;</span><span class="si">{0:f}</span><span class="s1"> </span><span class="si">{1:f}</span><span class="s1"> </span><span class="si">{2:f}</span><span class="s1"> </span><span class="si">{3:f}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rotation</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="s1">&#39; --pmi_params -&#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39; --root </span><span class="si">{0:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__root_path</span><span class="p">)</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cudadev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="n">command</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;--cudadev&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{0:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cudadev</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="s1">&#39;SIMEX_VERBOSE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PMI command:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__process</span> <span class="o">=</span> <span class="n">proc</span>
+
+            <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">err</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">1</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Query for the field data. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+
+    <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. &quot;&quot;&quot;</span>
+        <span class="k">pass</span> <span class="c1"># Nothing to be done since IO happens in backengine.</span>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private method to save the object to a file.</span>
+
+<span class="sd">        :param output_path: The file where to save the object&#39;s data.</span>
+<span class="sd">        :type output_path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots</span>
+
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_hierarchy</span><span class="p">(</span><span class="n">h5</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">snp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">snapshots</span><span class="p">):</span>
+
+                <span class="c1"># Load snapshot data as a dict</span>
+                <span class="n">snapshot_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_snp_from_dir</span><span class="p">(</span><span class="n">snp</span><span class="p">)</span>
+                <span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;number_ophotons&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_ophotons</span><span class="p">[</span><span class="n">it</span><span class="p">]</span>
+                <span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__timestamps</span><span class="p">[</span><span class="n">it</span><span class="p">]</span>
+                <span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;s2e_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0:07d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save_snapshot</span><span class="p">(</span><span class="n">h5</span><span class="p">,</span> <span class="n">snapshot_dict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor.load_snp_from_dir"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor.load_snp_from_dir">[docs]</a>    <span class="k">def</span> <span class="nf">load_snp_from_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_snapshot</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Load xmdyn output from an xmdyn directory.</span>
+
+<span class="sd">        :param path: The directory path to xmdyn output.</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        :param snapshot_index: Which snapshot to load.</span>
+<span class="sd">        :type snapshot_index: int</span>
+
+<span class="sd">        :returns: The snapshot data.</span>
+<span class="sd">        :rtype: dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LOG: Loading </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">))</span>
+        <span class="n">xsnp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;Z.dat&#39;</span> <span class="p">))</span> <span class="c1"># Atom numbers</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;T.dat&#39;</span> <span class="p">))</span> <span class="c1"># Atom type</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;uid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;uid.dat&#39;</span> <span class="p">))</span> <span class="c1">#Unique atom ID.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;r.dat&#39;</span> <span class="p">))</span> <span class="c1"># Cartesian coordinates.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;v.dat&#39;</span> <span class="p">))</span> <span class="c1"># Cartesian velocities.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;m.dat&#39;</span> <span class="p">))</span> <span class="c1"># Masses.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;q.dat&#39;</span> <span class="p">))</span> <span class="c1"># Ion charge</span>
+        <span class="n">f0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;f0.dat&#39;</span> <span class="p">))</span> <span class="c1"># Form factors of each atom type.</span>
+        <span class="c1"># Patch if only one atomic species.</span>
+        <span class="k">if</span> <span class="n">f0</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">f0</span> <span class="o">=</span> <span class="n">f0</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;f0&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">f0</span>
+
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;Q.dat&#39;</span> <span class="p">))</span> <span class="c1"># Wavenumber grid for form factors.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">xsnp</span></div>
+
+<div class="viewcode-block" id="XMDYNPhotonMatterInteractor.setup_hierarchy"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNPhotonMatterInteractor.XMDYNPhotonMatterInteractor.setup_hierarchy">[docs]</a>    <span class="k">def</span> <span class="nf">setup_hierarchy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">h5_handle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create all datagroups in the output hdf5 file.</span>
+
+<span class="sd">        :param h5_handle: File handle to writable hdf5 file.</span>
+<span class="sd">        :type h5_handle: h5py.File</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">top_level_groups</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;data&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;history&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;info&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;misc&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;params&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;version&#39;</span><span class="p">,</span>
+                <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">top_level_groups</span><span class="p">):</span>
+            <span class="n">h5_handle</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+
+        <span class="c1"># Store global parameters.</span>
+        <span class="c1"># Photon energy.</span>
+        <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__xmdyn_parameters</span><span class="p">[</span><span class="s1">&#39;EPH&#39;</span><span class="p">])</span>
+        <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;params/photon_energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV&#39;</span>
+
+        <span class="c1"># Focus size</span>
+        <span class="n">x_fwhm</span> <span class="o">=</span> <span class="n">y_fwhm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xmdyn_parameters</span><span class="p">[</span><span class="s1">&#39;DIAM&#39;</span><span class="p">]</span>
+        <span class="n">focus</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;focus&#39;</span><span class="p">)</span>
+        <span class="n">focus</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;xFWHM&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">x_fwhm</span><span class="p">)</span>
+        <span class="n">focus</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;yFWHM&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y_fwhm</span><span class="p">)</span>
+        <span class="n">focus</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+        <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;params/photon_energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eV&#39;</span></div>
+
+    <span class="k">def</span> <span class="nf">_save_snapshot</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">h5_handle</span><span class="p">,</span> <span class="n">snapshot_dict</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Write a given snapshot to an open hdf5 file.</span>
+
+<span class="sd">        :param h5_handle: Handle to an open writable hdf5 file.</span>
+<span class="sd">        :type h5_handle: h5py.File</span>
+
+<span class="sd">        :param snapshot_dict: The snapshot to save.</span>
+<span class="sd">        :type snapshot: dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">datgroup</span> <span class="o">=</span> <span class="n">h5_handle</span><span class="p">[</span><span class="s1">&#39;/data&#39;</span><span class="p">]</span>
+
+        <span class="n">snapshot_group</span> <span class="o">=</span> <span class="n">datgroup</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;snp_&#39;</span><span class="o">+</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;s2e_id&#39;</span><span class="p">])</span>
+
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;T_xmdyn&#39;</span><span class="p">,</span>   <span class="n">data</span><span class="o">=</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;uid&#39;</span><span class="p">,</span>   <span class="n">data</span><span class="o">=</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;uid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span>  <span class="n">data</span><span class="o">=</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">])</span>
+        <span class="c1">####</span>
+        <span class="c1"># Needed? Or can we use uid and T from xmdyn output? Copied here from l 488 above.</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbase_Zq2id</span><span class="p">(</span> <span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">xyz</span><span class="p">))</span>
+        <span class="c1">####</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span>   <span class="n">data</span><span class="o">=</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+        <span class="c1">### WIP</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">xyz</span><span class="p">)</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;Nph&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;number_ophotons&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)]))</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)]))</span>
+        <span class="n">halfQ</span> <span class="o">=</span> <span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">/</span> <span class="p">(</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">bohr_radius</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="p">)</span>
+
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;halfQ&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">halfQ</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="c1">###</span>
+        <span class="c1"># do we need to sort rows in ff? See l 490 ff above.</span>
+        <span class="c1">###</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;ff&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">snapshot_dict</span><span class="p">[</span><span class="s1">&#39;f0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="p">)</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;Sq_halfQ&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">halfQ</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="c1">###</span>
+        <span class="c1"># Where do we get Sq_bound?</span>
+        <span class="c1">###</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;Sq_bound&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">halfQ</span><span class="p">))</span>
+        <span class="n">snapshot_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;Sq_free&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">halfQ</span><span class="p">))</span></div>
+
+<span class="k">def</span> <span class="nf">h5_out2in</span><span class="p">(</span> <span class="n">src</span> <span class="p">,</span> <span class="n">dest</span> <span class="p">,</span> <span class="o">*</span><span class="n">args</span> <span class="p">)</span> <span class="p">:</span>
+
+    <span class="n">file_in</span>  <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">src</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">file_out</span> <span class="o">=</span>  <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">dest</span> <span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+    <span class="n">grp_hist</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;history&quot;</span> <span class="p">)</span>
+    <span class="n">grp_hist_parent</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;history/parent&quot;</span> <span class="p">)</span>
+    <span class="n">grp_hist_parent_detail</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;history/parent/detail&quot;</span> <span class="p">)</span>
+
+    <span class="n">pre_s2e_module</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span> <span class="n">src</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Previous module: &#39;</span> <span class="p">,</span> <span class="n">pre_s2e_module</span><span class="p">)</span>
+
+    <span class="c1"># Add attribute to history/parent</span>
+    <span class="n">grp_hist_parent</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">pre_s2e_module</span>
+
+    <span class="n">grp_srchist</span> <span class="o">=</span> <span class="n">file_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="s2">&quot;history/parent&quot;</span> <span class="p">)</span> <span class="p">;</span>
+    <span class="n">file_out</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span> <span class="n">grp_srchist</span> <span class="p">,</span> <span class="n">grp_hist_parent</span> <span class="p">)</span>
+
+    <span class="c1"># Copy everything to history except &quot;data&quot; &amp; &quot;history&quot;</span>
+    <span class="k">for</span> <span class="n">objname</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">file_in</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">objname</span> <span class="o">!=</span> <span class="s2">&quot;data&quot;</span> <span class="ow">and</span>   <span class="n">objname</span> <span class="o">!=</span> <span class="s2">&quot;history&quot;</span> <span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">file_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">objname</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+                <span class="n">mygroup</span> <span class="o">=</span> <span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="p">]</span>
+                <span class="n">file_out</span><span class="p">[</span><span class="s2">&quot;history/parent/detail/&quot;</span><span class="o">+</span><span class="n">objname</span><span class="p">]</span> <span class="o">=</span> <span class="n">mygroup</span><span class="p">[</span><span class="n">objname</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+                <span class="n">file_out</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span> <span class="n">x</span> <span class="p">,</span> <span class="s2">&quot;history/parent/detail/&quot;</span> <span class="o">+</span> <span class="n">objname</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">objname</span>  <span class="p">,</span> <span class="s2">&quot; has been SKIPPED!!&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">objname</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  NOT:&#39;</span><span class="p">,</span> <span class="n">objname</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+
+    <span class="c1"># Create external link to parent&#39;s data</span>
+    <span class="c1">#file_out[&#39;history/parent/detail/data&#39;] = h5py.ExternalLink( src ,&#39;/data&#39;)</span>
+    <span class="n">parent_module</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="n">src</span> <span class="p">)</span> <span class="p">[</span> <span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="n">src</span> <span class="p">)</span> <span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="s1">&#39;_out&#39;</span> <span class="p">)</span> <span class="p">]</span>
+    <span class="n">file_out</span><span class="p">[</span><span class="s1">&#39;history/parent/detail/data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span> <span class="s1">&#39;../&#39;</span> <span class="o">+</span> <span class="n">parent_module</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="n">src</span> <span class="p">)</span> <span class="p">,</span> <span class="s1">&#39;/data&#39;</span> <span class="p">)</span>
+
+
+    <span class="c1"># Create your own groups</span>
+    <span class="n">grp_data</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;data&quot;</span> <span class="p">)</span>
+    <span class="n">grp_param</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;params&quot;</span> <span class="p">)</span>
+    <span class="n">grp_param</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;misc&quot;</span> <span class="p">)</span>
+    <span class="n">grp_param</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;info&quot;</span> <span class="p">)</span>
+
+	<span class="c1"># Create s2e interface version</span>
+    <span class="n">interface</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;info/interface_version&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+    <span class="n">interface</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">file_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">file_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_parse_xmdyn_xparams</span><span class="p">(</span><span class="n">input_file_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parse XMDYN parameters file and extract timing and photon information.</span>
+
+<span class="sd">    :param input_file_path: Path to xmdyn input file.</span>
+<span class="sd">    :type input_file_path: str</span>
+
+<span class="sd">    :return: Parameter dictionary / object.</span>
+<span class="sd">    :rtype: dict || XMDYNPhotonMatterInteractorParameters</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Open parameters file.</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file_path</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_handle</span><span class="p">:</span>
+
+        <span class="c1"># Get a csv reader.</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csv_handle</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span> <span class="p">)</span>
+        <span class="c1"># Iterate through read lines.</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">get_dict_from_lines</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+    </div>
+  </body>
+</html>

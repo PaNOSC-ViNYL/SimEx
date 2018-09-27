@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Analysis.XFELPhotonAnalysis &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Analysis.XFELPhotonAnalysis &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -49,7 +42,7 @@
 <span></span><span class="sd">&quot;&quot;&quot; :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class.&quot;&quot;&quot;</span>
 <span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -81,22 +74,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,):</span>
-        <span class="sd">&quot;&quot;&quot; Constructor for the XFELPhotonAnalysis class.</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param input_path: Name of file or directory that contains data to analyse.</span>
 <span class="sd">        :type input_path: str</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Start initialization.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Start initialization.&quot;</span><span class="p">)</span>
         <span class="c1"># Initialize base class. This takes care of parameter checking.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">XFELPhotonAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
 
         <span class="c1"># Get wavefront file name.</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wpg</span><span class="o">.</span><span class="n">Wavefront</span><span class="p">()</span>
 
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Loading wavefront from </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Loading wavefront from </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">))</span>
         <span class="n">wavefront</span><span class="o">.</span><span class="n">load_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_path</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="s2">&quot; ... done.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; ... done.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Init intensity.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__intensity</span> <span class="o">=</span> <span class="kc">None</span>
@@ -125,13 +116,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__wavefront</span> <span class="o">=</span> <span class="n">val</span>
 
         <span class="c1"># Get intensities and mask nans</span>
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Getting intensities.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Getting intensities.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__wavefront</span><span class="o">.</span><span class="n">get_intensity</span><span class="p">()</span>
-        <span class="nb">print</span> <span class="s2">&quot; ... done.&quot;</span>
-        <span class="nb">print</span> <span class="s2">&quot; Data dimensions = &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intensity</span><span class="o">.</span><span class="n">shape</span>
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Masking NANs.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; ... done.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Data dimensions = &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intensity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Masking NANs.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__nans</span> <span class="o">=</span> <span class="n">mask_nans</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intensity</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="s2">&quot; ... done.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; ... done.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="XFELPhotonAnalysis.animate"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.XFELPhotonAnalysis.XFELPhotonAnalysis.animate">[docs]</a>    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qspace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Generate an animated gif from the wavefront data. &quot;&quot;&quot;</span>
@@ -149,9 +140,9 @@
         <span class="n">number_of_slices</span> <span class="o">=</span> <span class="n">intensity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="c1"># Setup a figure.</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_slices</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_slices</span><span class="p">):</span>
 
-            <span class="nb">print</span> <span class="s2">&quot;Processing slice #</span><span class="si">%d</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing slice #</span><span class="si">%d</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
             <span class="c1"># Plot profile as 2D colorcoded map.</span>
             <span class="k">if</span> <span class="n">logscale</span><span class="p">:</span>
@@ -177,7 +168,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Plotting intensity map.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Plotting intensity map.&quot;</span><span class="p">)</span>
         <span class="c1"># Setup new figure.</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 
@@ -187,11 +178,11 @@
 
         <span class="c1"># Switch to q-space if requested.</span>
         <span class="k">if</span> <span class="n">qspace</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Switching to reciprocal space.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Switching to reciprocal space.&quot;</span><span class="p">)</span>
             <span class="n">srwl_wf_a</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">_srwl_wf</span><span class="p">)</span>
             <span class="n">wpg</span><span class="o">.</span><span class="n">srwlib</span><span class="o">.</span><span class="n">srwl</span><span class="o">.</span><span class="n">SetRepresElecField</span><span class="p">(</span><span class="n">srwl_wf_a</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
             <span class="n">wf</span> <span class="o">=</span> <span class="n">wpg</span><span class="o">.</span><span class="n">Wavefront</span><span class="p">(</span><span class="n">srwl_wf_a</span><span class="p">)</span>
-            <span class="nb">print</span> <span class="s2">&quot; ... done.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; ... done.&quot;</span><span class="p">)</span>
             <span class="n">wf_intensity</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">get_intensity</span><span class="p">()</span>
             <span class="n">nans</span> <span class="o">=</span> <span class="n">mask_nans</span><span class="p">(</span><span class="n">wf_intensity</span><span class="p">)</span>
 
@@ -267,13 +258,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="sd">&quot;&quot;&quot; Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() &quot;&quot;&quot;</span>
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Plotting total power.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Plotting total power.&quot;</span><span class="p">)</span>
         <span class="c1"># Setup new figure.</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 
         <span class="c1"># Switch to frequency (energy) domain if requested.</span>
         <span class="k">if</span> <span class="n">spectrum</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Switching to frequency domain.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Switching to frequency domain.&quot;</span><span class="p">)</span>
             <span class="n">wpg</span><span class="o">.</span><span class="n">srwlib</span><span class="o">.</span><span class="n">srwl</span><span class="o">.</span><span class="n">SetRepresElecField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">_srwl_wf</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">get_intensity</span><span class="p">()</span>
 
@@ -306,7 +297,7 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time (fs)&#39;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Power (W)&#39;</span><span class="p">)</span>
             <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">sliceMax</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">sliceMin</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">nSlices</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Pulse energy </span><span class="si">{:1.2g}</span><span class="s1"> J&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">int0_mean</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">*</span><span class="n">dt</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;Pulse energy </span><span class="si">{:1.2g}</span><span class="s1"> J&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">int0_mean</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">*</span><span class="n">dt</span><span class="p">)))</span>
 
         <span class="k">else</span><span class="p">:</span> <span class="c1">#frequency domain</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">int0</span><span class="p">)</span>
@@ -328,13 +319,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="sd">&quot;&quot;&quot; Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() &quot;&quot;&quot;</span>
 
-        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Plotting on-axis power density.&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Plotting on-axis power density.&quot;</span><span class="p">)</span>
         <span class="c1"># Setup new figure.</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 
         <span class="c1"># Switch to frequency (energy) domain if requested.</span>
         <span class="k">if</span> <span class="n">spectrum</span><span class="p">:</span>
-            <span class="n">wpg</span><span class="o">.</span><span class="n">srwlib</span><span class="o">.</span><span class="n">srwl</span><span class="o">.</span><span class="n">SetRepresElecField</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">_srwl_wf</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
+            <span class="n">wpg</span><span class="o">.</span><span class="n">srwlib</span><span class="o">.</span><span class="n">srwl</span><span class="o">.</span><span class="n">SetRepresElecField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">_srwl_wf</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">get_intensity</span><span class="p">()</span>
 
         <span class="c1"># Get dimensions.</span>
@@ -382,7 +373,7 @@
             <span class="n">wpg</span><span class="o">.</span><span class="n">srwlib</span><span class="o">.</span><span class="n">srwl</span><span class="o">.</span><span class="n">SetRepresElecField</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">_srwl_wf</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavefront</span><span class="o">.</span><span class="n">get_intensity</span><span class="p">()</span></div></div>
 
-<span class="k">def</span> <span class="nf">mask_nans</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">replacement</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<div class="viewcode-block" id="mask_nans"><a class="viewcode-back" href="../../../index.html#SimEx.Analysis.XFELPhotonAnalysis.mask_nans">[docs]</a><span class="k">def</span> <span class="nf">mask_nans</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">replacement</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Find nans in an array and replace.</span>
 <span class="sd">    :param  a: Array to mask.</span>
 <span class="sd">    :type a: numpy.array</span>
@@ -396,9 +387,9 @@
     <span class="n">isnan_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="c1"># This can take a while ...</span>
     <span class="k">if</span> <span class="n">isnan_array</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
         <span class="n">nans</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">isnan_array</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="s2">&quot;WARNING: Found intensity=NAN at&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">nans</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Found intensity=NAN at&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">nans</span><span class="p">))</span>
         <span class="n">a</span><span class="p">[</span><span class="n">nans</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># Yes this works because a is a reference!</span>
-    <span class="k">return</span> <span class="n">isnan_array</span>
+    <span class="k">return</span> <span class="n">isnan_array</span></div>
 
 </pre></div>
 
@@ -412,12 +403,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -433,13 +426,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

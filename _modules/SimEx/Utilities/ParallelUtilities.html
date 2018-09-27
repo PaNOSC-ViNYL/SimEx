@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Utilities.ParallelUtilities &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Utilities.ParallelUtilities &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,7 +39,8 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Utilities.ParallelUtilities</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+<span></span><span class="sd">&quot;&quot;&quot;:module ParallelUtilities: Hosts utilities to query HPC runtime parameters.&quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #</span>
 <span class="c1">#               2016-2017 Sergey Yakubov                                 #</span>
@@ -68,13 +62,12 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
-<span class="sd">&quot;&quot;&quot; Module with utilities for parallel job.  &quot;&quot;&quot;</span>
-
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">from</span> <span class="nn">distutils.version</span> <span class="k">import</span> <span class="n">StrictVersion</span>
-
+<span class="kn">from</span> <span class="nn">py3nvml</span> <span class="k">import</span> <span class="n">py3nvml</span> <span class="k">as</span> <span class="n">nvml</span>
 <span class="k">def</span> <span class="nf">_getParallelResourceInfoFromEnv</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">resource</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NCores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_NCORES&#39;</span><span class="p">])</span>
@@ -87,6 +80,7 @@
     <span class="k">return</span> <span class="n">resource</span>
 
 <span class="k">def</span> <span class="nf">_getParallelResourceInfoFromSlurm</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">resource</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">resource</span><span class="p">[</span><span class="s1">&#39;NNodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SLURM_JOB_NUM_NODES&#39;</span><span class="p">])</span>
@@ -112,6 +106,7 @@
     <span class="k">return</span> <span class="n">resource</span>
 
 <span class="k">def</span> <span class="nf">_MPICommandName</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;SIMEX_MPICOMMAND&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
         <span class="n">mpicmd</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SIMEX_MPICOMMAND&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -120,6 +115,7 @@
     <span class="k">return</span> <span class="n">mpicmd</span>
 
 <span class="k">def</span> <span class="nf">_getParallelResourceInfoFromMpirun</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
 <span class="c1"># we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be</span>
 <span class="c1"># listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node</span>
     <span class="k">try</span><span class="p">:</span>
@@ -127,6 +123,8 @@
         <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">mpicmd</span><span class="p">,</span> <span class="s2">&quot;hostname&quot;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                                    <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
         <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="c1"># Decode</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -164,11 +162,13 @@
         <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="s2">&quot;NCores&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),(</span><span class="s2">&quot;NNodes&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span></div>
 
 <span class="k">def</span> <span class="nf">_getMPIVersionInfo</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">mpi_cmd</span> <span class="o">=</span> <span class="n">_MPICommandName</span><span class="p">()</span>
         <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">mpi_cmd</span><span class="p">,</span> <span class="s2">&quot;--version&quot;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                                     <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
         <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 
         <span class="n">version</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="s2">&quot;(Open MPI)&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
@@ -184,6 +184,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
 <span class="k">def</span> <span class="nf">_getVendorSpecificMPIArguments</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">threads_per_task</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span> <span class="s2">&quot;Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or &quot;</span>
@@ -235,6 +236,34 @@
 
 
     <span class="k">return</span> <span class="n">mpi_cmd</span></div>
+
+<div class="viewcode-block" id="getCUDAEnvironment"><a class="viewcode-back" href="../../../index.html#SimEx.Utilities.ParallelUtilities.getCUDAEnvironment">[docs]</a><span class="k">def</span> <span class="nf">getCUDAEnvironment</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Get the CUDA runtime environment parameters (number of cards etc.). &quot;&quot;&quot;</span>
+
+    <span class="n">rdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;first_available_device_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;device_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nvml</span><span class="o">.</span><span class="n">nvmlInit</span><span class="p">()</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;device_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nvml</span><span class="o">.</span><span class="n">nvmlDeviceGetCount</span><span class="p">()</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: At least one of (py3nvml.nvml, CUDA) is not available. Will continue without GPU.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rdict</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;device_count&#39;</span><span class="p">]):</span>
+        <span class="n">memory_info</span> <span class="o">=</span> <span class="n">nvml</span><span class="o">.</span><span class="n">nvmlDeviceGetMemoryInfo</span><span class="p">(</span><span class="n">nvml</span><span class="o">.</span><span class="n">nvmlDeviceGetHandleByIndex</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">memory_usage_percentage</span> <span class="o">=</span> <span class="n">memory_info</span><span class="o">.</span><span class="n">used</span> <span class="o">/</span> <span class="n">memory_info</span><span class="o">.</span><span class="n">total</span>
+
+        <span class="k">if</span> <span class="n">memory_usage_percentage</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+            <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;first_available_device_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">break</span>
+
+    <span class="n">nvml</span><span class="o">.</span><span class="n">nvmlShutdown</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">rdict</span></div>
+
 </pre></div>
 
           </div>
@@ -247,12 +276,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -268,13 +299,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

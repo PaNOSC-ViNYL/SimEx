@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Calculators.XMDYNDemoPhotonMatterInteractor &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Calculators.XMDYNDemoPhotonMatterInteractor &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,10 +39,10 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.XMDYNDemoPhotonMatterInteractor</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot; Module that holds the XMDYNDemoPhotonMatterInteractor class.  &quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;:module XMDYNDemoPhotonMatterInteractor: Module that holds the XMDYNDemoPhotonMatterInteractor class.  &quot;&quot;&quot;</span>
 <span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #</span>
+<span class="c1"># Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -72,20 +65,17 @@
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonInteractor</span> <span class="k">import</span> <span class="n">AbstractPhotonInteractor</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities</span> <span class="k">import</span> <span class="n">IOUtilities</span>
 
 <div class="viewcode-block" id="XMDYNDemoPhotonMatterInteractor"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor">[docs]</a><span class="k">class</span> <span class="nc">XMDYNDemoPhotonMatterInteractor</span><span class="p">(</span><span class="n">AbstractPhotonInteractor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interface class for photon-matter interaction calculations using the XMDYN code.</span>
+<span class="sd">    :class XMDYNDemoPhotonMatterInteractor: Interface class for photon-matter interaction calculations using the demo version of the XMDYN code.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor for the xfel photon propagator.</span>
 
 <span class="sd">        :param parameters: Parameters that govern the PMI calculation.</span>
 <span class="sd">        :type parameters: dict</span>
@@ -107,7 +97,7 @@
         <span class="k">if</span> <span class="n">sample_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;A target/sample must be specified through the &#39;sample_path&#39; argument.&quot;</span> <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="n">sample_path</span><span class="p">):</span>
-            <span class="nb">print</span> <span class="s2">&quot;Sample file </span><span class="si">%s</span><span class="s2"> was not found. Will attempt to query from RCSB protein data bank.&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">sample_path</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample file </span><span class="si">%s</span><span class="s2"> was not found. Will attempt to query from RCSB protein data bank.&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">sample_path</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__sample_path</span> <span class="o">=</span> <span class="n">sample_path</span>
 
@@ -167,14 +157,14 @@
                                 <span class="s1">&#39;/version&#39;</span><span class="p">,</span>
                                 <span class="p">]</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;number_of_trajectories&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;number_of_trajectories&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number_of_trajectories&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
                     <span class="p">}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;number_of_trajectories&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> WARNING: Number of trajectories != 1 not supported for this demo version of the PMI module. Falling back to 1 trajectory.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;number_of_trajectories&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="s2">&quot;random_rotation&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s2">&quot;random_rotation&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;random_rotation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="XMDYNDemoPhotonMatterInteractor.expectedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XMDYNDemoPhotonMatterInteractor.XMDYNDemoPhotonMatterInteractor.expectedData">[docs]</a>    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -222,7 +212,7 @@
             <span class="n">pmi_demo</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="n">pmi_demo</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="s1">&#39;num_digits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">7</span>
 
-            <span class="k">if</span> <span class="s1">&#39;number_of_steps&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;number_of_steps&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
                 <span class="n">pmi_demo</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;steps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;number_of_steps&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pmi_demo</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;steps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
@@ -290,6 +280,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_dbase</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_s2e_setup</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">f_s2e_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -324,7 +316,7 @@
     <span class="c1">##############################################################################</span>
 
     <span class="k">def</span> <span class="nf">f_dbase_Zq2id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_Z</span> <span class="p">,</span> <span class="n">a_q</span> <span class="p">)</span> <span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span> <span class="n">a_Z</span> <span class="o">*</span> <span class="p">(</span> <span class="n">a_Z</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">a_q</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="n">a_Z</span> <span class="o">*</span> <span class="p">(</span> <span class="n">a_Z</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">a_q</span>
 
     <span class="c1">##############################################################################</span>
 
@@ -372,8 +364,6 @@
     <span class="c1">###    g_dbase[&#39;ph_sigma&#39;] ;</span>
 
 
-
-
     <span class="k">def</span> <span class="nf">f_load_snp_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_fp</span> <span class="p">,</span> <span class="n">a_snp</span> <span class="p">)</span> <span class="p">:</span>
         <span class="n">dbase_root</span> <span class="o">=</span> <span class="s2">&quot;/data/snp_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span> <span class="n">a_snp</span> <span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="s1">&#39;num_digits&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
         <span class="n">xsnp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -388,19 +378,38 @@
 
         <span class="k">return</span> <span class="n">xsnp</span>
 
-
-    <span class="c1">##############################################################################</span>
-
-
     <span class="k">def</span> <span class="nf">f_load_snp_xxx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_real</span> <span class="p">,</span> <span class="n">a_snp</span> <span class="p">)</span> <span class="p">:</span>
         <span class="n">xfp</span>  <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;prj&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/pmi/pmi_out_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span> <span class="n">a_real</span> <span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="s1">&#39;num_digits&#39;</span><span class="p">])</span>  <span class="o">+</span> <span class="s1">&#39;.h5&#39;</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span>
         <span class="n">xsnp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_load_snp_content</span><span class="p">(</span> <span class="n">xfp</span> <span class="p">,</span> <span class="n">a_snp</span> <span class="p">)</span>
         <span class="n">xfp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">xsnp</span>
 
+    <span class="k">def</span> <span class="nf">f_load_snp_from_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_snapshot</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Load xmdyn output from an xmdyn directory.</span>
 
-    <span class="c1">##############################################################################</span>
+<span class="sd">        :param path: The directory path to xmdyn output.</span>
+<span class="sd">        :type path: str</span>
 
+<span class="sd">        :param snapshot_index: Which snapshot to load.</span>
+<span class="sd">        :type snapshot_index: int</span>
+
+<span class="sd">        :returns: The snapshot data.</span>
+<span class="sd">        :rtype: dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">xsnp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;Z.dat&#39;</span> <span class="p">))</span> <span class="c1"># Atom numbers</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;T.dat&#39;</span> <span class="p">))</span> <span class="c1"># Atom type</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;uid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;uid.dat&#39;</span> <span class="p">))</span> <span class="c1">#Unique atom ID.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;r.dat&#39;</span> <span class="p">))</span> <span class="c1"># Cartesian coordinates.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;v.dat&#39;</span> <span class="p">))</span> <span class="c1"># Cartesian velocities.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;m.dat&#39;</span> <span class="p">))</span> <span class="c1"># Masses.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;q.dat&#39;</span> <span class="p">))</span> <span class="c1"># Ion charge</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;ff&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;f0.dat&#39;</span> <span class="p">))</span> <span class="c1"># Form factors of each atom type.</span>
+        <span class="n">xsnp</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">,</span> <span class="s1">&#39;Q.dat&#39;</span> <span class="p">))</span> <span class="c1"># Wavenumber grid for form factors.</span>
+
+        <span class="k">return</span> <span class="n">xsnp</span>
 
     <span class="k">def</span> <span class="nf">f_load_sample</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sample_path</span> <span class="p">)</span> <span class="p">:</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -416,8 +425,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span>
 
 
-    <span class="c1">##############################################################################</span>
-
     <span class="k">def</span> <span class="nf">f_save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dset</span> <span class="p">,</span> <span class="n">data</span> <span class="p">)</span> <span class="p">:</span>
         <span class="n">xfp</span>  <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="s1">&#39;pmi_out&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="s2">&quot;a&quot;</span> <span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -428,13 +435,7 @@
         <span class="n">xfp</span><span class="p">[</span> <span class="n">dset</span> <span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
         <span class="n">xfp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-
-
-    <span class="c1">##############################################################################</span>
-
-
     <span class="k">def</span> <span class="nf">f_rotate_sample</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">:</span>
-
         <span class="c1"># Init quaternion for rotation.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">][</span><span class="s1">&#39;rot_quaternion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
 
@@ -447,17 +448,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">f_save_data</span><span class="p">(</span> <span class="s1">&#39;/data/angle&#39;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">][</span><span class="s1">&#39;rot_quaternion&#39;</span><span class="p">]</span> <span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span> <span class="p">)</span>
 
-
-
-
-    <span class="c1">##############################################################################</span>
-
-
-
-    <span class="c1">##############################################################################</span>
-
     <span class="k">def</span> <span class="nf">f_system_setup</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">:</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">][</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;NE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">][</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -465,11 +456,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;Nph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e99</span>
         <span class="c1">#print &#39;   NOTE: Nph is uniform.&#39;</span>
 
-
-    <span class="c1">##############################################################################</span>
-
     <span class="k">def</span> <span class="nf">f_save_snp</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span>  <span class="n">a_snp</span> <span class="p">)</span> <span class="p">:</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_dbase_Zq2id</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;Z&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;xyz&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
         <span class="n">ff</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="p">,</span> <span class="nb">len</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_dbase</span><span class="p">[</span><span class="s1">&#39;halfQ&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
@@ -548,10 +535,11 @@
         <span class="n">xfp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="c1"># Take central pixel values.</span>
-        <span class="n">sel_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;nx&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="p">;</span>
-        <span class="n">sel_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;ny&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span> <span class="p">;</span>
-        <span class="n">sel_pixV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;arrEver&#39;</span><span class="p">]</span> <span class="p">[</span><span class="n">sel_x</span><span class="p">,</span><span class="n">sel_y</span><span class="p">,:,:]</span>
-        <span class="n">sel_pixH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;arrEhor&#39;</span><span class="p">]</span> <span class="p">[</span><span class="n">sel_x</span><span class="p">,</span><span class="n">sel_y</span><span class="p">,:,:]</span>
+        <span class="n">sel_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;nx&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span> <span class="p">;</span>
+        <span class="n">sel_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;ny&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span> <span class="p">;</span>
+        <span class="c1"># note: the data order in the HDF5 file is not x,y but y,x</span>
+        <span class="n">sel_pixV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;arrEver&#39;</span><span class="p">]</span> <span class="p">[</span><span class="n">sel_y</span><span class="p">,</span><span class="n">sel_x</span><span class="p">,:,:]</span>
+        <span class="n">sel_pixH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;arrEhor&#39;</span><span class="p">]</span> <span class="p">[</span><span class="n">sel_y</span><span class="p">,</span><span class="n">sel_x</span><span class="p">,:,:]</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;sliceMax&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;sliceMin&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="o">/</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;nSlices&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="p">)</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;xMax&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;xMin&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="o">/</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;nx&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="p">)</span>
         <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;yMax&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;yMin&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="o">/</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_s2e</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">][</span><span class="s1">&#39;ny&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="p">)</span>
@@ -627,10 +615,10 @@
 
 <span class="k">def</span> <span class="nf">f_eval_disp</span><span class="p">(</span> <span class="n">a_snp</span> <span class="p">,</span> <span class="n">a_r0</span> <span class="p">,</span> <span class="n">a_sample</span> <span class="p">)</span> <span class="p">:</span>
 
-    <span class="n">num_Z</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">num_Z</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
     <span class="n">all_disp</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="n">num_Z</span> <span class="p">,</span> <span class="p">)</span> <span class="p">)</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
-    <span class="k">for</span> <span class="n">sel_Z</span> <span class="ow">in</span> <span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">:</span>
+    <span class="k">for</span> <span class="n">sel_Z</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">:</span>
         <span class="n">dr</span> <span class="o">=</span> <span class="n">a_snp</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">][</span><span class="n">sel_Z</span><span class="p">],:]</span> <span class="o">-</span> <span class="n">a_r0</span><span class="p">[</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">][</span><span class="n">sel_Z</span><span class="p">],:]</span>
         <span class="n">all_disp</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span> <span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="o">/</span> <span class="mf">1e-10</span>
         <span class="n">cc</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">+</span> <span class="mi">1</span>
@@ -711,10 +699,10 @@
 <span class="c1">##############################################################################</span>
 <span class="k">def</span> <span class="nf">f_eval_numE</span><span class="p">(</span> <span class="n">a_snp</span> <span class="p">,</span> <span class="n">a_sample</span> <span class="p">)</span> <span class="p">:</span>
 
-    <span class="n">num_Z</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">num_Z</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
     <span class="n">all_numE</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="n">num_Z</span> <span class="p">,</span> <span class="p">)</span> <span class="p">)</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
-    <span class="k">for</span> <span class="n">sel_Z</span> <span class="ow">in</span> <span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">:</span>
+    <span class="k">for</span> <span class="n">sel_Z</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">:</span>
         <span class="n">all_numE</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span> <span class="n">a_snp</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">][</span><span class="n">a_sample</span><span class="p">[</span><span class="s1">&#39;selZ&#39;</span><span class="p">][</span><span class="n">sel_Z</span><span class="p">]]</span> <span class="p">)</span>
         <span class="n">cc</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">all_numE</span>
@@ -737,9 +725,9 @@
 <span class="c1">##############################################################################</span>
 
 <span class="k">def</span>   <span class="nf">f_pmi_diagnostics_help</span><span class="p">()</span> <span class="p">:</span>
-    <span class="nb">print</span> <span class="s2">&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    ----</span>
-<span class="s2">    &quot;&quot;&quot;</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
 
 
     <span class="c1">##############################################################################</span>
@@ -885,7 +873,7 @@
     <span class="n">grp_hist_parent_detail</span> <span class="o">=</span> <span class="n">file_out</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span> <span class="s2">&quot;history/parent/detail&quot;</span> <span class="p">)</span>
 
     <span class="n">pre_s2e_module</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span> <span class="n">src</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
-    <span class="nb">print</span> <span class="s1">&#39;Previous module: &#39;</span> <span class="p">,</span> <span class="n">pre_s2e_module</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Previous module: &#39;</span> <span class="p">,</span> <span class="n">pre_s2e_module</span><span class="p">)</span>
 
     <span class="c1"># Add attribute to history/parent</span>
     <span class="n">grp_hist_parent</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">pre_s2e_module</span>
@@ -894,26 +882,22 @@
     <span class="n">file_out</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span> <span class="n">grp_srchist</span> <span class="p">,</span> <span class="n">grp_hist_parent</span> <span class="p">)</span>
 
     <span class="c1"># Copy everything to history except &quot;data&quot; &amp; &quot;history&quot;</span>
-    <span class="k">for</span> <span class="n">objname</span> <span class="ow">in</span> <span class="n">file_in</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">:</span>
-        <span class="k">if</span>   <span class="n">objname</span> <span class="o">!=</span> <span class="s2">&quot;data&quot;</span> \
-             <span class="ow">and</span>   <span class="n">objname</span> <span class="o">!=</span> <span class="s2">&quot;history&quot;</span> <span class="p">:</span>
+    <span class="k">for</span> <span class="n">objname</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">file_in</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">objname</span> <span class="o">!=</span> <span class="s2">&quot;data&quot;</span> <span class="ow">and</span>   <span class="n">objname</span> <span class="o">!=</span> <span class="s2">&quot;history&quot;</span> <span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">file_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">objname</span> <span class="p">)</span>
-            <span class="k">if</span> <span class="n">file_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">objname</span> <span class="p">,</span> <span class="n">getclass</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">)</span>  <span class="o">==</span> <span class="n">h5py</span><span class="o">.</span><span class="n">highlevel</span><span class="o">.</span><span class="n">Dataset</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
                 <span class="n">mygroup</span> <span class="o">=</span> <span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="p">]</span>
                 <span class="n">file_out</span><span class="p">[</span><span class="s2">&quot;history/parent/detail/&quot;</span><span class="o">+</span><span class="n">objname</span><span class="p">]</span> <span class="o">=</span> <span class="n">mygroup</span><span class="p">[</span><span class="n">objname</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">file_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">objname</span> <span class="p">,</span> <span class="n">getclass</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">)</span>  <span class="o">==</span> <span class="n">h5py</span><span class="o">.</span><span class="n">highlevel</span><span class="o">.</span><span class="n">Group</span> <span class="p">:</span>
-                <span class="n">file_out</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span> <span class="n">x</span> <span class="p">,</span> <span class="s2">&quot;history/parent/detail/&quot;</span> <span class="o">+</span> <span class="n">objname</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+                <span class="n">file_out</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span> <span class="n">x</span> <span class="p">,</span> <span class="s2">&quot;history/parent/detail/&quot;</span> <span class="o">+</span> <span class="n">objname</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="n">objname</span>  <span class="p">,</span> <span class="s2">&quot; has been SKIPPED!!&quot;</span>
-                <span class="c1">#file_out.copy( x , os.path.dirname( &quot;history/parent/detail/&quot; + objname ) )</span>
-                <span class="c1">#file_in.get( objname ) .copy( os.path.dirname( &quot;history/parent/detail/&quot; + objname ) )</span>
-            <span class="c1">#file_out.copy( x , &quot;history/parent/detail/&quot; )</span>
-            <span class="nb">print</span> <span class="n">objname</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">objname</span>  <span class="p">,</span> <span class="s2">&quot; has been SKIPPED!!&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">objname</span><span class="p">)</span>
         <span class="k">else</span> <span class="p">:</span>
-            <span class="nb">print</span> <span class="s1">&#39;  NOT:&#39;</span><span class="p">,</span> <span class="n">objname</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  NOT:&#39;</span><span class="p">,</span> <span class="n">objname</span><span class="p">)</span>
 
-    <span class="nb">print</span> <span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    <span class="nb">print</span> <span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">file_in</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
 
     <span class="c1"># Create external link to parent&#39;s data</span>
     <span class="c1">#file_out[&#39;history/parent/detail/data&#39;] = h5py.ExternalLink( src ,&#39;/data&#39;)</span>
@@ -945,12 +929,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -966,13 +952,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

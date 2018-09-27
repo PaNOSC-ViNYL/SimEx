@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Calculators.XCSITPhotonDetector &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Calculators.XCSITPhotonDetector &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,9 +39,11 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Calculators.XCSITPhotonDetector</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+<span></span><span class="sd">&quot;&quot;&quot;:module XCSITPhotonDetector: Hosts the XCSITPhotonDetector class.&quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2015-2017 Jan-Philipp Burchert, Carsten Fortmann-Grote   #</span>
+<span class="c1"># Copyright (C) 2015-2017 Jan-Philipp Burchert                           #</span>
+<span class="c1"># Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -71,35 +66,22 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">libpy_detector_interface</span> <span class="k">as</span> <span class="nn">lpdi</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed properly on this system. The XCSITPhotonDetector class can still be instantiated, but the backengine() method will throw an exception.</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed properly on this system. The XCSITPhotonDetector class can still be instantiated, but the backengine() method will throw an exception.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="k">raise</span>
 
 
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Calculators.AbstractPhotonDetector</span> <span class="k">import</span> <span class="n">AbstractPhotonDetector</span>
-<span class="kn">from</span> <span class="nn">SimEx.Calculators.XCSITPhotonDetectorParameters</span> <span class="k">import</span> <span class="n">XCSITPhotonDetectorParameters</span>
 
 <div class="viewcode-block" id="XCSITPhotonDetector"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector">[docs]</a><span class="k">class</span> <span class="nc">XCSITPhotonDetector</span><span class="p">(</span><span class="n">AbstractPhotonDetector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class representing an free electorn laser photon detector</span>
+<span class="sd">    :class XCSITPhotonDetector: Wraps detector simulations with XCSIT.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Define the allowed attributes</span>
-    <span class="c1"># inherited from AbstractBaseCalculator(object)</span>
-    <span class="c1">#       __parameters</span>
-    <span class="c1">#       __input_path            &lt;- here redefined as array of strings</span>
-    <span class="c1">#       (pathes)</span>
-    <span class="c1">#       __output_path</span>
-    <span class="n">__slot__</span> <span class="o">=</span>  <span class="s2">&quot;__expected_data&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__provided_data&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__photon_data&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__ia_data&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__charge_data&quot;</span>
 
     <span class="c1"># Constructor.</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -108,7 +90,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param parameters: Parameters of the calulator such as the type of</span>
 <span class="sd">        detector</span>
-<span class="sd">        :type parameters: XCSITPhotonDetector</span>
+<span class="sd">        :type parameters: XCSITPhotonDetectorParameters</span>
 
 <span class="sd">        :param input_path: Path to the hdf5 file holding the input data.</span>
 <span class="sd">        :type input_path: str</span>
@@ -122,7 +104,6 @@
                 <span class="n">input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;parameters and input_path are essential to&quot;</span><span class="o">+</span>
                 <span class="s2">&quot; to init an instance of this class&quot;</span><span class="p">)</span>
-
 
         <span class="c1"># Init base class</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">XCSITPhotonDetector</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span><span class="n">input_path</span><span class="p">,</span><span class="n">output_path</span><span class="p">)</span>
@@ -163,8 +144,6 @@
                                 <span class="s1">&#39;/params/geom/pixelHeight&#39;</span><span class="p">,</span>
                                 <span class="s1">&#39;/params/beam/photonEnergy&#39;</span><span class="p">,</span>
                                 <span class="p">]</span>
-
-
 
     <span class="nd">@AbstractPhotonDetector</span><span class="o">.</span><span class="n">input_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">input_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
@@ -307,14 +286,11 @@
         <span class="c1"># set the value to the attribute</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_AbstractBaseCalculator__output_path</span><span class="o">=</span><span class="n">value</span>
 
+<div class="viewcode-block" id="XCSITPhotonDetector.expectedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.expectedData">[docs]</a>    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expectedData</span></div>
 
-
-
-    <span class="k">def</span> <span class="nf">expectedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expectedData</span>
-
-    <span class="k">def</span> <span class="nf">providedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__providedData</span>
+<div class="viewcode-block" id="XCSITPhotonDetector.providedData"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.providedData">[docs]</a>    <span class="k">def</span> <span class="nf">providedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__providedData</span></div>
 
     <span class="k">def</span> <span class="nf">getChargeData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span>
@@ -326,10 +302,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span>
 
     <span class="k">def</span> <span class="nf">__createXCSITInteractions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">InteractionData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lpdi</span><span class="o">.</span><span class="n">InteractionData</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">patterns</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__createXCSITChargeMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">ChargeMatrix</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lpdi</span><span class="o">.</span><span class="n">ChargeMatrix</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">patterns</span><span class="p">]</span>
 
     <span class="c1"># Subengine to calulate the particle simulation: The interaction of the</span>
     <span class="c1"># photons with the detector of choice</span>
@@ -344,30 +320,27 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Photon container has not been initialized yet.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Interaction container has not been initialized yet.&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">pd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="p">):</span>
+            <span class="c1"># Run the simulation, catch everything that might happen and report</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+                <span class="n">ps</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">ParticleSim</span><span class="p">()</span>
+                <span class="n">ps</span><span class="o">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">pd</span><span class="p">)</span>
+                <span class="n">ps</span><span class="o">.</span><span class="n">setOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">ps</span><span class="o">.</span><span class="n">initialization</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">detector_type</span><span class="p">)</span>
+                <span class="n">ps</span><span class="o">.</span><span class="n">runSimulation</span><span class="p">()</span>
 
-        <span class="c1"># Run the simulation, catch everything that might happen and report</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
-            <span class="n">ps</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">ParticleSim</span><span class="p">()</span>
-            <span class="n">ps</span><span class="o">.</span><span class="n">setInput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="p">)</span>
-            <span class="n">ps</span><span class="o">.</span><span class="n">setOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="p">)</span>
-            <span class="n">ps</span><span class="o">.</span><span class="n">initialization</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">detector_type</span><span class="p">)</span>
-            <span class="n">ps</span><span class="o">.</span><span class="n">runSimulation</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Photon-Detector interaction error:&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-            <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Photon-Detector interaction error:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">SUMMARY:</span><span class="se">\n</span><span class="s2">Detected </span><span class="si">{0:d}</span><span class="s2"> interactions from </span><span class="si">{1:d}</span><span class="s2"> photons in pattern </span><span class="si">{2:s}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">pd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pattern_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Detected &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; interactions from &quot;</span> <span class="o">+</span>
-            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; photons&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Results are directly written to the __ia_data instance</span>
         <span class="k">return</span> <span class="n">is_successful</span>
-
 
     <span class="k">def</span> <span class="nf">__backengineCP</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -381,44 +354,43 @@
                 <span class="s2">&quot; yet.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Run the simulation</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">para</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
-            <span class="n">cs</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">ChargeSim</span><span class="p">()</span>
-            <span class="n">cs</span><span class="o">.</span><span class="n">setInput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="p">)</span>
-            <span class="n">cs</span><span class="o">.</span><span class="n">setOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">)</span>
-            <span class="n">cs</span><span class="o">.</span><span class="n">setComponents</span><span class="p">(</span><span class="n">para</span><span class="o">.</span><span class="n">plasma_search_flag</span><span class="p">,</span>
-                            <span class="n">para</span><span class="o">.</span><span class="n">point_simulation_method</span><span class="p">,</span>
-                            <span class="n">para</span><span class="o">.</span><span class="n">plasma_simulation_flag</span><span class="p">,</span>
-                            <span class="n">para</span><span class="o">.</span><span class="n">detector_type</span>
-                            <span class="p">)</span>
-            <span class="n">cs</span><span class="o">.</span><span class="n">runSimulation</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ia</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">para</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+                <span class="n">cs</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">ChargeSim</span><span class="p">()</span>
+                <span class="n">cs</span><span class="o">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">ia</span><span class="p">)</span>
+                <span class="n">cs</span><span class="o">.</span><span class="n">setOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">cs</span><span class="o">.</span><span class="n">setComponents</span><span class="p">(</span><span class="n">para</span><span class="o">.</span><span class="n">plasma_search_flag</span><span class="p">,</span>
+                                <span class="n">para</span><span class="o">.</span><span class="n">point_simulation_method</span><span class="p">,</span>
+                                <span class="n">para</span><span class="o">.</span><span class="n">plasma_simulation_flag</span><span class="p">,</span>
+                                <span class="n">para</span><span class="o">.</span><span class="n">detector_type</span>
+                                <span class="p">)</span>
+                <span class="n">cs</span><span class="o">.</span><span class="n">runSimulation</span><span class="p">()</span>
 
-            <span class="c1"># Necessary due to the definition of XChargeData.hh</span>
-            <span class="c1"># self.__charge_data = cs.getOutput()</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Charge propagation error:&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-            <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">return</span> <span class="n">is_successful</span>
+                <span class="c1"># Necessary due to the definition of XChargeData.hh</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Charge propagation error:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">return</span> <span class="n">is_successful</span>
 
-        <span class="c1"># Count how many pixels have charge</span>
-        <span class="n">counter</span><span class="o">=</span><span class="mi">0</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">width</span><span class="p">())):</span>
-            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">height</span><span class="p">())):</span>
-                <span class="n">entry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">getEntry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-                <span class="k">if</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">getCharge</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">counter</span><span class="o">+=</span><span class="mi">1</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; signals in the detector of size &quot;</span> <span class="o">+</span>
-            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;x&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">width</span><span class="p">())</span> <span class="o">+</span>
-            <span class="s2">&quot; for &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; interactions and &quot;</span> <span class="o">+</span>
-            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; photons&quot;</span><span class="p">)</span>
+            <span class="c1"># Count how many pixels have charge</span>
+            <span class="n">counter</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">())):</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="p">())):</span>
+                    <span class="n">entry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getEntry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">getCharge</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">counter</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">SUMMARY:</span><span class="se">\n</span><span class="s2">Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; signals in the detector of size &quot;</span> <span class="o">+</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;x&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">())</span> <span class="o">+</span>
+                <span class="s2">&quot; for &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; interactions and &quot;</span> <span class="o">+</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; photons&quot;</span><span class="p">))</span>
 
-        <span class="c1"># Return if everything went well</span>
+            <span class="c1"># Return if everything went well</span>
         <span class="k">return</span> <span class="n">is_successful</span>
-
 
 <div class="viewcode-block" id="XCSITPhotonDetector.backengine"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.backengine">[docs]</a>    <span class="k">def</span> <span class="nf">backengine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -446,13 +418,13 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Charge propagation simulation in the detector is finished.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
-
     <span class="k">def</span> <span class="nf">_readH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads the hdf5 file and create the storage container for the photons</span>
 <span class="sd">        according to that data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># The __input_path is a non relative path to an existing file</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__input_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Input file &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__input_path</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span>
                 <span class="s2">&quot; does not exists&quot;</span><span class="p">)</span>
@@ -471,152 +443,162 @@
         <span class="c1"># Open the file to read from</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5_infile</span><span class="p">:</span>
 
-            <span class="n">keys</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-            <span class="n">matrix</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data/&quot;</span><span class="o">+</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/diffr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="n">photons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-            <span class="c1"># TODO: Single pattern treatment is not implemented yet</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data/&quot;</span><span class="o">+</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/diffr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="n">pattern_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">patterns</span>
+            <span class="n">number_of_patterns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern_ids</span><span class="p">)</span>
+
             <span class="c1"># Get the array where each pixel contains a number of photons</span>
             <span class="c1"># Explaination:</span>
             <span class="c1">#       /data/.../data are poissonized patterns</span>
             <span class="c1">#       /data/.../diffr are the intensities</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">photons</span> <span class="o">+=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data/&quot;</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="s2">&quot;/diffr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">patterns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+                <span class="n">pattern_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pattern_ids</span><span class="p">]</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pattern_ids</span> <span class="o">=</span> <span class="n">pattern_ids</span>
+            <span class="n">photons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">number_of_patterns</span><span class="p">,</span>
+                                         <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                         <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                         <span class="p">)</span>
+                                 <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">pid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pattern_ids</span><span class="p">):</span>
+                <span class="n">photons</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data/</span><span class="si">{0:s}</span><span class="s2">/diffr&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">)]</span><span class="o">.</span><span class="n">value</span>
 
-
-            <span class="c1"># TODO: need to be removed and replaced by a proper transition</span>
-            <span class="c1"># Rescaling with factor 100000</span>
-            <span class="n">photons</span> <span class="o">=</span> <span class="n">photons</span><span class="o">*</span><span class="mi">100000</span>
-            <span class="n">photons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">photons</span><span class="p">)</span>
+            <span class="n">photons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">photons</span><span class="p">)</span>
             <span class="n">photons</span> <span class="o">=</span> <span class="n">photons</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
-            <span class="n">x_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">photons</span><span class="p">)</span>        <span class="c1"># Assuming an rectangle</span>
-            <span class="n">y_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">photons</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of input matrix: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;x&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_num</span><span class="p">))</span>
+            <span class="n">x_num</span><span class="p">,</span> <span class="n">y_num</span> <span class="o">=</span> <span class="n">photons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Size of input matrix: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;x&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_num</span><span class="p">)))</span>
 
             <span class="c1"># Parameters of the matrix</span>
             <span class="n">x_pixel</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/geom/pixelWidth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pixel width: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x_pixel</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;pixel width: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x_pixel</span><span class="p">)))</span>
             <span class="n">y_pixel</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/geom/pixelHeight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pixel height: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_pixel</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;pixel height: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_pixel</span><span class="p">)))</span>
             <span class="n">center_energy</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/beam/photonEnergy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1"># missing profile</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;central beam energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">center_energy</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;central beam energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">center_energy</span><span class="p">)))</span>
             <span class="n">detector_dist</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/geom/detectorDist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Detector dist: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">detector_dist</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Detector dist: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">detector_dist</span><span class="p">)))</span>
 
             <span class="c1"># Create the photon instance</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span> <span class="o">=</span> <span class="n">lpdi</span><span class="o">.</span><span class="n">PhotonData</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lpdi</span><span class="o">.</span><span class="n">PhotonData</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">photons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
             <span class="c1"># Assumptions</span>
             <span class="c1"># - All the photon originate from the center</span>
             <span class="c1"># - photon energy is everywhere the same in the beam</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating the photons&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">x_num</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">y_num</span><span class="p">)):</span>
-                    <span class="c1"># Transfer from python to cartesian</span>
-                    <span class="n">direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_num</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">j</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-                    <span class="c1"># Center center and correct for center of element</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span> <span class="n">x_num</span> <span class="o">+</span> <span class="mf">0.5</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span> <span class="n">y_num</span> <span class="o">+</span> <span class="mf">0.5</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">ipd</span><span class="p">,</span> <span class="n">pd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x_num</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_num</span><span class="p">):</span>
 
-                    <span class="c1"># calculate the length</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x_pixel</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y_pixel</span>
-                    <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector_dist</span>
+                        <span class="n">number_of_photons_in_pixel</span> <span class="o">=</span> <span class="n">photons</span><span class="p">[</span><span class="n">ipd</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">number_of_photons_in_pixel</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="k">continue</span>
 
 
-                    <span class="c1"># Calculate the photon flight vector with respect to the matrix</span>
-                    <span class="c1"># center and the origin of diffraction</span>
-                    <span class="c1">#direct[0] = x_pixel*(i + 0.5 - 0.5 *x_num) # x-coordinate</span>
-                    <span class="c1">#direct[1] = y_num*y_pixel - y_pixel*(j + 0.5 -0.5 *y_num)</span>
-                    <span class="c1"># python goes from left 2 right top 2 to bottom</span>
-                    <span class="c1"># in conrast to our coordinate space</span>
-                    <span class="c1">#direct[2] = detector_dist</span>
+                        <span class="c1"># Transfer from python to cartesian</span>
+                        <span class="n">direct</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_num</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">j</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-                    <span class="c1"># calculate the normalized direction vector</span>
-                    <span class="n">le</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">direct</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
-                    <span class="n">normal_direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">le</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">normal_direction</span> <span class="o">=</span> <span class="n">direct</span><span class="o">/</span><span class="n">le</span>
+                        <span class="c1"># Center center and correct for center of element</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span> <span class="n">x_num</span> <span class="o">+</span> <span class="mf">0.5</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span> <span class="n">y_num</span> <span class="o">+</span> <span class="mf">0.5</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-                    <span class="c1"># For each photon detected at (i,j) create an instance</span>
-                    <span class="c1"># shift into the koordinate system where the detector is in</span>
-                    <span class="c1"># the origin  direct - (0,0,detector_dist)</span>
-                    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">photons</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])):</span>
-                        <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="o">.</span><span class="n">addEntry</span><span class="p">()</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setPositionX</span><span class="p">(</span><span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setPositionY</span><span class="p">(</span><span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setPositionZ</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionX</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionY</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionZ</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-                        <span class="n">entry</span><span class="o">.</span><span class="n">setEnergy</span><span class="p">(</span><span class="n">center_energy</span><span class="p">)</span>
+                        <span class="c1"># calculate the length</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x_pixel</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y_pixel</span>
+                        <span class="n">direct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector_dist</span>
+
+
+                        <span class="c1"># Calculate the photon flight vector with respect to the matrix</span>
+                        <span class="c1"># center and the origin of diffraction</span>
+                        <span class="c1">#direct[0] = x_pixel*(i + 0.5 - 0.5 *x_num) # x-coordinate</span>
+                        <span class="c1">#direct[1] = y_num*y_pixel - y_pixel*(j + 0.5 -0.5 *y_num)</span>
+                        <span class="c1"># python goes from left 2 right top 2 bottom</span>
+                        <span class="c1"># in conrast to our coordinate space</span>
+                        <span class="c1">#direct[2] = detector_dist</span>
+
+                        <span class="c1"># calculate the normalized direction vector</span>
+                        <span class="n">le</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">direct</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+                        <span class="n">normal_direction</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">le</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">normal_direction</span> <span class="o">=</span> <span class="n">direct</span><span class="o">/</span><span class="n">le</span>
+
+                        <span class="c1"># For each photon detected at (i,j) create an instance</span>
+                        <span class="c1"># shift into the koordinate system where the detector is in</span>
+                        <span class="c1"># the origin  direct - (0,0,detector_dist)</span>
+                        <span class="n">entries</span> <span class="o">=</span> <span class="p">[</span> <span class="n">pd</span><span class="o">.</span><span class="n">addEntry</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_photons_in_pixel</span><span class="p">)]</span>
+                        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setPositionX</span><span class="p">(</span><span class="n">direct</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setPositionY</span><span class="p">(</span><span class="n">direct</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setPositionZ</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionX</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionY</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionZ</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setEnergy</span><span class="p">(</span><span class="n">center_energy</span><span class="p">)</span>
 
             <span class="c1"># Close the input file</span>
             <span class="n">h5_infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;XCSITPhotonDetector read &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>  <span class="o">+</span> <span class="s2">&quot; photons from the input.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;XCSITPhotonDetector read </span><span class="si">{0:d}</span><span class="s2"> patterns from the input.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span><span class="p">)))</span>
 
 <div class="viewcode-block" id="XCSITPhotonDetector.saveH5"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XCSITPhotonDetector.XCSITPhotonDetector.saveH5">[docs]</a>    <span class="k">def</span> <span class="nf">saveH5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the results in a file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Save the data&quot;</span><span class="p">)</span>
-
         <span class="c1"># Write the new data into python arrays</span>
-        <span class="c1"># -------------------------------------</span>
-
         <span class="c1"># Convert the interaction data to a 2D numpy array  (size x 5)</span>
-        <span class="n">num_ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span><span class="mi">5</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="o">.</span><span class="n">size</span><span class="p">())):</span>
-            <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span><span class="o">.</span><span class="n">getEntry</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-            <span class="n">num_ia</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getPositionX</span><span class="p">()</span>
-            <span class="n">num_ia</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getPositionY</span><span class="p">()</span>
-            <span class="n">num_ia</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getPositionZ</span><span class="p">()</span>
-            <span class="n">num_ia</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getEnergy</span><span class="p">()</span>
-            <span class="n">num_ia</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span>
-
+        <span class="c1">#num_ia = numpy.zeros((self.__ia_data.size(),5),dtype=numpy.float_)</span>
+        <span class="c1">#for i in list(range(self.__ia_data.size())):</span>
+            <span class="c1">#entry = self.__ia_data.getEntry(i)</span>
+            <span class="c1">#num_ia[i][0] = entry.getPositionX()</span>
+            <span class="c1">#num_ia[i][1] = entry.getPositionY()</span>
+            <span class="c1">#num_ia[i][2] = entry.getPositionZ()</span>
+            <span class="c1">#num_ia[i][3] = entry.getEnergy()</span>
+            <span class="c1">#num_ia[i][4] = entry.getTime()</span>
 
         <span class="c1"># Convert the ChargeMatrix to a numpy array to be able to store its</span>
         <span class="c1"># content</span>
-        <span class="n">x_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
-        <span class="n">y_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
-        <span class="n">charge_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x_size</span><span class="p">,</span><span class="n">y_size</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>    <span class="c1"># float64</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">x_size</span><span class="p">)):</span>
-            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">y_size</span><span class="p">)):</span>
-                <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="o">.</span><span class="n">getEntry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-                <span class="n">charge_array</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getCharge</span><span class="p">()</span>
+        <span class="n">x_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">y_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">charge_array</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x_size</span><span class="p">,</span><span class="n">y_size</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pattern_ids</span><span class="p">]</span>  <span class="c1"># float64</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">ca</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">charge_array</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x_size</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_size</span><span class="p">):</span>
+                    <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__charge_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getEntry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+                    <span class="n">ca</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">getCharge</span><span class="p">()</span>
 
-        <span class="c1"># TODO settle this issue:</span>
-        <span class="c1"># For unknown reasons the interaction entries and the chargematrix is</span>
-        <span class="c1"># rotated of 180 degree to each other</span>
-        <span class="n">charge_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">charge_array</span><span class="p">)</span>
-        <span class="n">charge_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">charge_array</span><span class="p">)</span>
+            <span class="c1"># TODO settle this issue:</span>
+            <span class="c1"># For unknown reasons the interaction entries and the chargematrix is</span>
+            <span class="c1"># rotated of 180 degree to each other</span>
+            <span class="n">ca</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">ca</span><span class="p">)</span>
+            <span class="n">ca</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">ca</span><span class="p">)</span>
 
-        <span class="c1"># Identify Nan and Inf in ChargeSim output</span>
-        <span class="n">parent</span> <span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">parent</span><span class="p">):</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-        <span class="n">ofn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;NaNInf.txt&quot;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ofn</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
-            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# All the coordinates are in typical python convention&quot;</span><span class="p">)</span>
-            <span class="c1"># Search for Nan and Inf</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">x_size</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">y_size</span><span class="p">)):</span>
-                    <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">charge_array</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])):</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Detected NaN in ChargeMatrix at (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span>
-                            <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;) (python conention: l-r, t-b)&quot;</span><span class="p">)</span>
-                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">NaN&quot;</span><span class="p">)</span>
-                    <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">charge_array</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])):</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Detected Inf in ChargeMatrix at (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span>
-                            <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;) (python conention: l-r, t-b)&quot;</span><span class="p">)</span>
-                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Inf&quot;</span><span class="p">)</span>
+            <span class="c1">## Identify Nan and Inf in ChargeSim output</span>
+            <span class="c1">#parent =os.path.dirname(self.output_path)</span>
+            <span class="c1">#if not os.path.isdir(parent):</span>
+                <span class="c1">#parent=os.makedirs(parent)</span>
+            <span class="c1">#ofn = os.path.join(parent,&quot;NaNInf.txt&quot;)</span>
+            <span class="c1">#with open(ofn,&#39;w&#39;) as outfile:</span>
+                <span class="c1">#outfile.write(&quot;# All the coordinates are in typical python convention&quot;)</span>
+                <span class="c1">## Search for Nan and Inf</span>
+                <span class="c1">#for x in list(range(x_size)):</span>
+                    <span class="c1">#for y in list(range(y_size)):</span>
+                        <span class="c1">#if(numpy.isnan(ca[x][y])):</span>
+                            <span class="c1">#print((&quot;Warning: Detected NaN in ChargeMatrix at (&quot; + str(x) +</span>
+                                <span class="c1">#&quot;,&quot; + str(y) + &quot;) (python conention: l-r, t-b)&quot;))</span>
+                            <span class="c1">#outfile.write(str(x) + &quot;\t&quot; + str(y) + &quot;\tNaN&quot;)</span>
+                        <span class="c1">#if(numpy.isinf(ca[x][y])):</span>
+                            <span class="c1">#print((&quot;Warning: Detected Inf in ChargeMatrix at (&quot; + str(x) +</span>
+                                <span class="c1">#&quot;,&quot; + str(y) + &quot;) (python conention: l-r, t-b)&quot;))</span>
+                            <span class="c1">#outfile.write(str(x) + &quot;\t&quot; + str(y) + &quot;\tInf&quot;)</span>
 
         <span class="c1"># Create the new datasets</span>
         <span class="c1"># ------------------------------------------------------------</span>
@@ -628,10 +610,11 @@
             <span class="n">param_geom_gr</span><span class="o">=</span> <span class="n">h5_outfile</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;params/geom&quot;</span><span class="p">)</span>
             <span class="n">param_beam_gr</span><span class="o">=</span> <span class="n">h5_outfile</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;params/beam&quot;</span><span class="p">)</span>
 
-            <span class="c1"># Create the direct data values independent of the input file</span>
-            <span class="n">data_gr</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">charge_array</span><span class="p">)</span>
-            <span class="n">data_gr</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;interactions&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">num_ia</span><span class="p">)</span>
-            <span class="n">info_gr</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;package_version&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pattern_ids</span><span class="p">):</span>
+                <span class="c1"># Create the direct data values independent of the input file</span>
+                <span class="n">data_gr</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:s}</span><span class="s2">/data&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">charge_array</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="c1">#data_gr.create_dataset(&quot;{0:s}/interactions&quot;.format(pid), data=num_ia[i])</span>
+            <span class="n">info_gr</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;package_version&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
 
             <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__input_path</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;r&quot;</span> <span class="p">)</span> <span class="k">as</span>  <span class="n">h5_infile</span><span class="p">:</span>
 
@@ -654,7 +637,6 @@
 
             <span class="c1"># Link in the input file root.</span>
             <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;/history/parent/&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__input_path</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-            <span class="n">h5_outfile</span><span class="p">[</span><span class="s2">&quot;/data/photons/&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">ExternalLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__input_path</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot;/data&quot;</span><span class="p">)</span>
 
             <span class="c1"># Close file</span>
             <span class="n">h5_outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
@@ -670,12 +652,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -691,13 +675,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

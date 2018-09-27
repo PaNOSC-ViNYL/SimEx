@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Calculators.XCSITPhotonDetectorParameters &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Parameters.XCSITPhotonDetectorParameters &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -45,10 +38,11 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>Source code for SimEx.Calculators.XCSITPhotonDetectorParameters</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+  <h1>Source code for SimEx.Parameters.XCSITPhotonDetectorParameters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; :module XCSITPhotonDetectorParameters: Hosts the XCSITPhotonDetectorParameters class. &quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
-<span class="c1"># Copyright (C) 2015-2017 Jan-Philipp Burchert, Carsten Fortmann-Grote   #</span>
+<span class="c1"># Copyright (C) 2015-2018 Jan-Philipp Burchert, Carsten Fortmann-Grote   #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># This file is part of simex_platform.                                   #</span>
@@ -67,40 +61,29 @@
 <span class="c1">#                                                                        #</span>
 <span class="c1">##########################################################################</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">libpy_detector_interface</span> <span class="k">as</span> <span class="nn">lpdi</span>
 
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed or not being found. Expect errors.</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: Importing libpy_detector_interface failed. This is most probably due to XCSIT and/or Geant4 not being installed or not being found. Expect errors.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">SimEx.Parameters.AbstractCalculatorParameters</span> <span class="k">import</span> <span class="n">AbstractCalculatorParameters</span>
 <span class="kn">from</span> <span class="nn">SimEx.Utilities.EntityChecks</span> <span class="k">import</span> <span class="n">checkAndSetInstance</span>
 
-<div class="viewcode-block" id="XCSITPhotonDetectorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Calculators.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters">[docs]</a><span class="k">class</span> <span class="nc">XCSITPhotonDetectorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
+<div class="viewcode-block" id="XCSITPhotonDetectorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.XCSITPhotonDetectorParameters.XCSITPhotonDetectorParameters">[docs]</a><span class="k">class</span> <span class="nc">XCSITPhotonDetectorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Datastructure to store the necessary parameters for a XCSITPhotonDetector</span>
-<span class="sd">    simulation</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    :class XCSITPhotonDetectorParameters: Encapsulates all parameters for the XCSITPhotonDetector class. &quot;&quot;&quot;</span>
 
-    <span class="c1"># set the only allowed attributes of instances of this class</span>
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;__detector_type&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__plasma_search_flag&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__plasma_simulation_flag&quot;</span><span class="p">,</span>\
-                <span class="s2">&quot;__point_simulation_method&quot;</span>
-
-    <span class="c1"># Create the instance attributes</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">detector_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">plasma_search_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">plasma_simulation_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">point_simulation_method</span><span class="o">=</span><span class="kc">None</span>
+                 <span class="n">point_simulation_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">patterns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor for the XCSITPhotonDetectorParameters class.</span>
-
 <span class="sd">        :param detector_type: The detector type to simulate (&quot;pnCCD&quot; | &quot;LPD&quot; | &quot;AGIPD | &quot;AGIPDSPB&quot;).</span>
 <span class="sd">        :type detector_type: str</span>
 
@@ -112,6 +95,12 @@
 
 <span class="sd">        :param point_simulation_method: Method for the charge point simulation (&quot;FULL&quot; | &quot;FANO&quot; | &quot;LUT&quot; | &quot;BINNING&quot;).</span>
 <span class="sd">        :type point_simulation_method: str</span>
+
+<span class="sd">        :param patterns: Which patterns to feed into the detector simulation. Default: Use all patterns.</span>
+<span class="sd">        :type patterns: (str || int) or iterable over these types.</span>
+<span class="sd">        :example patterns: patterns=0 # use the first pattern.</span>
+<span class="sd">        :example patterns: patterns=range(10) # use the first 10 patterns</span>
+<span class="sd">        :example patterns: patterns=[&#39;0000001&#39;,&#39;0001001&#39;] # user patterns with Ids  &#39;0000001&#39; and &#39;0001001&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Prohibit calling the detector with nothing</span>
@@ -128,7 +117,8 @@
             <span class="n">plasma_simulation_flag</span><span class="o">=</span><span class="s2">&quot;BLANKPLASMA&quot;</span>
         <span class="k">if</span> <span class="n">point_simulation_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">point_simulation_method</span><span class="o">=</span><span class="s2">&quot;FULL&quot;</span>
-
+        <span class="k">if</span> <span class="n">patterns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Use the setters: They check the type of the input and set the private</span>
         <span class="c1"># attributes or raise an exception if the the type does not match the</span>
@@ -136,6 +126,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">detector_type</span> <span class="o">=</span> <span class="n">detector_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plasma_search_flag</span> <span class="o">=</span> <span class="n">plasma_search_flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plasma_simulation_flag</span> <span class="o">=</span> <span class="n">plasma_simulation_flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span> <span class="o">=</span> <span class="n">patterns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point_simulation_method</span> <span class="o">=</span> <span class="n">point_simulation_method</span>
 
 
@@ -175,14 +166,26 @@
                     <span class="n">not_valid_option</span> <span class="o">=</span> <span class="n">not_valid_option</span> <span class="ow">and</span> <span class="kc">False</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
             <span class="n">not_valid_option</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">not_valid_option</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown detector type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The patterns to use in the detector simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__patterns</span>
+    <span class="nd">@patterns</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__patterns</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">]</span>
+        <span class="c1">### TODO: more sanity checks (all items of same type, only int or str allowed).</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">plasma_search_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -210,9 +213,9 @@
                     <span class="n">not_valid_option</span> <span class="o">=</span> <span class="n">not_valid_option</span> <span class="ow">and</span> <span class="kc">False</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
             <span class="n">not_valid_option</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">not_valid_option</span><span class="p">:</span>
            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown plasma_search_flag: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
@@ -243,9 +246,9 @@
                     <span class="n">not_valid_option</span> <span class="o">=</span> <span class="n">not_valid_option</span> <span class="ow">and</span> <span class="kc">False</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
             <span class="n">not_valid_option</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">not_valid_option</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown plasma_simulation_flag: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
@@ -279,9 +282,9 @@
                     <span class="n">not_valid_option</span> <span class="o">=</span> <span class="n">not_valid_option</span> <span class="ow">and</span> <span class="kc">False</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error type: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Error traceback: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
             <span class="n">not_valid_option</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">not_valid_option</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown point_simulation_method: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
@@ -298,12 +301,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -319,13 +324,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>

@@ -4,28 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Parameters.EstherPhotonMatterInteractorParameters &#8212; simex_platform 0.3.4 documentation</title>
+    <title>SimEx.Parameters.EstherPhotonMatterInteractorParameters &#8212; simex_platform 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -35,7 +28,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -46,7 +39,8 @@
           <div class="body" role="main">
             
   <h1>Source code for SimEx.Parameters.EstherPhotonMatterInteractorParameters</h1><div class="highlight"><pre>
-<span></span><span class="c1">##########################################################################</span>
+<span></span><span class="sd">&quot;&quot;&quot; :module EstherPhotonMatterInteractorParameters: Hosting the parameter class for the EstherPhotonMatterInteractor.&quot;&quot;&quot;</span>
+<span class="c1">##########################################################################</span>
 <span class="c1">#                                                                        #</span>
 <span class="c1"># Copyright (C) 2016, 2017 Richard Briggs, Carsten Fortmann-Grote        #</span>
 <span class="c1"># Contact: Carsten Fortmann-Grote &lt;carsten.grote@xfel.eu&gt;                #</span>
@@ -69,7 +63,6 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -215,7 +208,7 @@
 
 <div class="viewcode-block" id="EstherPhotonMatterInteractorParameters"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.EstherPhotonMatterInteractorParameters">[docs]</a><span class="k">class</span> <span class="nc">EstherPhotonMatterInteractorParameters</span><span class="p">(</span><span class="n">AbstractCalculatorParameters</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    class representing parameters for the Hydrocode Input Calculator</span>
+<span class="sd">    :class EstherPhotonMatterInteractorParameters: representing parameters for the Esthe Hydrocode Calculator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">number_of_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -242,8 +235,6 @@
                  <span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor for the HydroParameters</span>
-
 <span class="sd">        :param ablator: The ablating material ( &quot;Al&quot; | &quot;CH&quot; | &quot;Diamond&quot; | &quot;Kapton&quot; | &quot;Mylar&quot; )</span>
 <span class="sd">        :type ablator: str</span>
 
@@ -299,11 +290,11 @@
 
         <span class="c1"># If parameters already exist, read from parameters file</span>
         <span class="k">if</span> <span class="n">read_from_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Parameters file is located here: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">read_from_file</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">((</span> <span class="s2">&quot;Parameters file is located here: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">read_from_file</span><span class="p">)))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_readParametersFromFile</span><span class="p">(</span><span class="n">read_from_file</span><span class="p">)</span>
 
             <span class="c1"># Update parameters from arguments.</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">({</span>
                     <span class="s1">&#39;number_of_layers&#39;</span><span class="p">:</span><span class="n">number_of_layers</span><span class="p">,</span>
                     <span class="s1">&#39;ablator&#39;</span><span class="p">:</span><span class="n">ablator</span><span class="p">,</span>
                     <span class="s1">&#39;ablator_thickness&#39;</span><span class="p">:</span><span class="n">ablator_thickness</span><span class="p">,</span>
@@ -320,7 +311,7 @@
                     <span class="s1">&#39;laser_pulse_duration&#39;</span><span class="p">:</span><span class="n">laser_pulse_duration</span><span class="p">,</span>
                     <span class="s1">&#39;laser_intensity&#39;</span><span class="p">:</span><span class="n">laser_intensity</span><span class="p">,</span>
                     <span class="s1">&#39;run_time&#39;</span><span class="p">:</span><span class="n">run_time</span><span class="p">,</span>
-                    <span class="s1">&#39;delta_time&#39;</span><span class="p">:</span><span class="n">delta_time</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="s1">&#39;delta_time&#39;</span><span class="p">:</span><span class="n">delta_time</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
                 <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -362,7 +353,7 @@
     <span class="k">def</span> <span class="nf">_readParametersFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">):</span>
         <span class="c1"># Read from parameters file</span>
         <span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;parameters.json&#39;</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Parameters file is: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">json_path</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">((</span> <span class="s2">&quot;Parameters file is: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">json_path</span><span class="p">)))</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">j</span><span class="p">:</span>
             <span class="n">dictionary</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
             <span class="n">j</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -422,9 +413,9 @@
         <span class="n">width_of_sample_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span><span class="o">/</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">][</span><span class="s2">&quot;mass_density&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_sample_zones</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_thickness</span><span class="o">/</span><span class="n">width_of_sample_zone</span><span class="p">)</span>
 
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Final feather zone width: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_feather_zone_width</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Mass of zone: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Number of non-feathered zones: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zones</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Final feather zone width: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_feather_zone_width</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Mass of zone: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Number of non-feathered zones: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_non_feather_zones</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">width_of_layer1_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mass_of_zone</span><span class="o">/</span><span class="n">ESTHER_MATERIAL_DICT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">layer1</span><span class="p">][</span><span class="s2">&quot;mass_density&quot;</span><span class="p">]</span>
@@ -451,7 +442,7 @@
 
         <span class="c1"># Write the input file</span>
         <span class="n">input_deck_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_filename</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Writing input deck to &quot;</span><span class="p">,</span> <span class="n">input_deck_path</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Writing input deck to &quot;</span><span class="p">,</span> <span class="n">input_deck_path</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
 
         <span class="c1"># Write json file of this parameter class instance.</span>
         <span class="n">json_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span><span class="p">,</span> <span class="s1">&#39;parameters.json&#39;</span><span class="p">)</span>
@@ -575,7 +566,7 @@
 
         <span class="c1"># Write the laser input file</span>
         <span class="n">laser_input_deck_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_files_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_esther_filename</span><span class="o">+</span><span class="s1">&#39;_intensite_impulsion.txt&#39;</span><span class="p">)</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Writing laser input deck to &quot;</span><span class="p">,</span> <span class="n">laser_input_deck_path</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Writing laser input deck to &quot;</span><span class="p">,</span> <span class="n">laser_input_deck_path</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
 
         <span class="c1"># Write the parameters file (_intensitie_impulsion)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">laser_input_deck_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">laser_input_deck</span><span class="p">:</span>
@@ -776,7 +767,7 @@
 <span class="c1"># Material check and set functions</span>
 <span class="c1">##################################</span>
 
-<span class="k">def</span> <span class="nf">checkAndSetNumberOfLayers</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetNumberOfLayers"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetNumberOfLayers">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetNumberOfLayers</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the number of layers is reasonable.</span>
 
@@ -794,9 +785,9 @@
     <span class="k">if</span> <span class="n">number_of_layers</span> <span class="o">&lt;</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">number_of_layers</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Number of layers must be between 1 and 4 only.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">number_of_layers</span>
+    <span class="k">return</span> <span class="n">number_of_layers</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetAblator</span><span class="p">(</span><span class="n">ablator</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetAblator"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetAblator">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetAblator</span><span class="p">(</span><span class="n">ablator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the ablator exists in the EOS database.</span>
 
@@ -827,9 +818,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Ablator is not valid. Use &#39;CH&#39;, &#39;Al&#39;, &#39;dia&#39;, &#39;Myl&#39;, or &#39;Kap&#39; as ablator.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">ablator</span>
+    <span class="k">return</span> <span class="n">ablator</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetAblatorThickness</span><span class="p">(</span><span class="n">ablator_thickness</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetAblatorThickness"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetAblatorThickness">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetAblatorThickness</span><span class="p">(</span><span class="n">ablator_thickness</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the ablator thickness is &gt; 5 um and &lt; 100 um</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -849,11 +840,11 @@
     <span class="c1"># TO DO PLACEHOLDER</span>
     <span class="c1"># IF LASER INTENSITY IS TOO HIGH, ABLATOR MUST BE THICK TO ALLOW FOR ENOUGH MATERIAL TO VAPORISE (CH)</span>
 
-    <span class="nb">print</span> <span class="p">(</span> <span class="s2">&quot;Ablator thickness is </span><span class="si">%4.1f</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">ablator_thickness</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">((</span> <span class="s2">&quot;Ablator thickness is </span><span class="si">%4.1f</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">ablator_thickness</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">ablator_thickness</span>
+    <span class="k">return</span> <span class="n">ablator_thickness</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetSample</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetSample"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetSample">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetSample</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the sample is in the list of known EOS materials</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -875,9 +866,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;sample is not in list of known EOS materials&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">sample</span>
+    <span class="k">return</span> <span class="n">sample</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetSampleThickness</span><span class="p">(</span><span class="n">sample_thickness</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetSampleThickness"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetSampleThickness">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetSampleThickness</span><span class="p">(</span><span class="n">sample_thickness</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the sample thickness is in permitted range set by Esther.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -894,9 +885,9 @@
     <span class="k">if</span> <span class="n">sample_thickness</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">sample_thickness</span> <span class="o">&gt;</span> <span class="mf">200.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Ablator must be between 1.0 and 200.0 microns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">sample_thickness</span>
+    <span class="k">return</span> <span class="n">sample_thickness</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLayer1</span><span class="p">(</span><span class="n">layer1</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLayer1"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLayer1">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLayer1</span><span class="p">(</span><span class="n">layer1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the layer1 is in the list of known EOS materials</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -919,9 +910,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;layer1 is not in list of known EOS materials&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">layer1</span>
+    <span class="k">return</span> <span class="n">layer1</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLayer1Thickness</span><span class="p">(</span><span class="n">layer1_thickness</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLayer1Thickness"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLayer1Thickness">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLayer1Thickness</span><span class="p">(</span><span class="n">layer1_thickness</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the layer1 thickness is in permitted range set by Esther.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -938,9 +929,9 @@
     <span class="k">if</span> <span class="n">layer1_thickness</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">layer1_thickness</span> <span class="o">&gt;</span> <span class="mf">200.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;layer1 must be between 1.0 and 200.0 microns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">layer1_thickness</span>
+    <span class="k">return</span> <span class="n">layer1_thickness</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLayer2</span><span class="p">(</span><span class="n">layer2</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLayer2"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLayer2">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLayer2</span><span class="p">(</span><span class="n">layer2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check if the layer2 is in the list of known EOS materials</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -963,9 +954,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;layer2 is not in list of known EOS materials&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">layer2</span>
+    <span class="k">return</span> <span class="n">layer2</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLayer2Thickness</span><span class="p">(</span><span class="n">layer2_thickness</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLayer2Thickness"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLayer2Thickness">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLayer2Thickness</span><span class="p">(</span><span class="n">layer2_thickness</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the layer2 thickness is in permitted range set by Esther.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -982,9 +973,9 @@
     <span class="k">if</span> <span class="n">layer2_thickness</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">layer2_thickness</span> <span class="o">&gt;</span> <span class="mf">200.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;layer2 must be between 1.0 and 200.0 microns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">layer2_thickness</span>
+    <span class="k">return</span> <span class="n">layer2_thickness</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetWindow</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetWindow"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetWindow">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetWindow</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the window exists in the EOS database.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1002,9 +993,9 @@
     <span class="k">if</span> <span class="n">window</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;window is not in list of known EOS materials&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">window</span>
+    <span class="k">return</span> <span class="n">window</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetWindowThickness</span><span class="p">(</span><span class="n">window_thickness</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetWindowThickness"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetWindowThickness">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetWindowThickness</span><span class="p">(</span><span class="n">window_thickness</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the window thickness is &gt; 1 um and &lt; 500 um</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1023,13 +1014,13 @@
     <span class="k">elif</span> <span class="n">window_thickness</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">window_thickness</span> <span class="o">&gt;</span> <span class="mf">500.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Window must be between 1.0 and 500.0 microns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">window_thickness</span>
+    <span class="k">return</span> <span class="n">window_thickness</span></div>
 
 <span class="c1">#################################</span>
 <span class="c1"># LASER CHECK AND SET FUNCTIONS #</span>
 <span class="c1">#################################</span>
 
-<span class="k">def</span> <span class="nf">checkAndSetLaserWavelength</span><span class="p">(</span><span class="n">laser_wavelength</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLaserWavelength"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLaserWavelength">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLaserWavelength</span><span class="p">(</span><span class="n">laser_wavelength</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the laser wavelength is correct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1046,11 +1037,11 @@
 
  <span class="c1"># Convert to microns.</span>
     <span class="n">laser_wavelength</span> <span class="o">=</span> <span class="n">laser_wavelength</span><span class="o">*</span><span class="mf">1e-3</span>
-    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Laser wavelength = </span><span class="si">%.3f</span><span class="s2">e-6&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">laser_wavelength</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Laser wavelength = </span><span class="si">%.3f</span><span class="s2">e-6&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">laser_wavelength</span><span class="p">)))</span>
 
-    <span class="k">return</span> <span class="n">laser_wavelength</span>
+    <span class="k">return</span> <span class="n">laser_wavelength</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLaserPulse</span><span class="p">(</span><span class="n">laser_pulse</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLaserPulse"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLaserPulse">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLaserPulse</span><span class="p">(</span><span class="n">laser_pulse</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the laser pulse type is correct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1070,9 +1061,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse shape is not in specified list.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">laser_pulse</span>
+    <span class="k">return</span> <span class="n">laser_pulse</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLaserPulseDuration</span><span class="p">(</span><span class="n">laser_pulse_duration</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLaserPulseDuration"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLaserPulseDuration">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLaserPulseDuration</span><span class="p">(</span><span class="n">laser_pulse_duration</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the laser pulse duration is valid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1087,9 +1078,9 @@
     <span class="k">if</span> <span class="n">laser_pulse_duration</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">laser_pulse_duration</span> <span class="o">&gt;</span> <span class="mf">50.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse must be between 1.0 and 50.0 ns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">laser_pulse_duration</span>
+    <span class="k">return</span> <span class="n">laser_pulse_duration</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetLaserIntensity</span><span class="p">(</span><span class="n">laser_intensity</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetLaserIntensity"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetLaserIntensity">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetLaserIntensity</span><span class="p">(</span><span class="n">laser_intensity</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility to check that the laser intensity is valid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1105,9 +1096,9 @@
     <span class="k">if</span> <span class="n">laser_intensity</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">or</span> <span class="n">laser_intensity</span> <span class="o">&gt;</span> <span class="mf">100.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Laser pulse must be between 1.0 and 50.0 ns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">laser_intensity</span>
+    <span class="k">return</span> <span class="n">laser_intensity</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetRunTime</span><span class="p">(</span><span class="n">run_time</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetRunTime"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetRunTime">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetRunTime</span><span class="p">(</span><span class="n">run_time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility for checking the simulation run time is valid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1119,9 +1110,9 @@
     <span class="k">if</span> <span class="n">run_time</span> <span class="o">&lt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">run_time</span> <span class="o">&gt;</span> <span class="mf">50.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Simulation run time should be &gt; 5.0 ns and &lt; 50.0 ns&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">run_time</span>
+    <span class="k">return</span> <span class="n">run_time</span></div>
 
-<span class="k">def</span> <span class="nf">checkAndSetDeltaTime</span><span class="p">(</span><span class="n">delta_time</span><span class="p">):</span>
+<div class="viewcode-block" id="checkAndSetDeltaTime"><a class="viewcode-back" href="../../../index.html#SimEx.Parameters.EstherPhotonMatterInteractorParameters.checkAndSetDeltaTime">[docs]</a><span class="k">def</span> <span class="nf">checkAndSetDeltaTime</span><span class="p">(</span><span class="n">delta_time</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Utility for checking the simulation delta time (resolution) is valid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1132,7 +1123,7 @@
     <span class="k">if</span> <span class="n">delta_time</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">or</span> <span class="n">delta_time</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Simulation delta time should be &gt; 10 ps and &lt; 500 ps&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">delta_time</span>
+    <span class="k">return</span> <span class="n">delta_time</span></div>
 </pre></div>
 
           </div>
@@ -1145,12 +1136,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1166,13 +1159,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.3.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2017, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
     </div>
   </body>
 </html>
