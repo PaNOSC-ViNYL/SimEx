@@ -1,6 +1,8 @@
+""":module XCSITPhotonDetector: Hosts the XCSITPhotonDetector class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Jan-Philipp Burchert, Carsten Fortmann-Grote   #
+# Copyright (C) 2015-2017 Jan-Philipp Burchert                           #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -37,20 +39,8 @@ from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 
 class XCSITPhotonDetector(AbstractPhotonDetector):
     """
-    Class representing an free electorn laser photon detector
+    :class XCSITPhotonDetector: Wraps detector simulations with XCSIT.
     """
-
-    # Define the allowed attributes
-    # inherited from AbstractBaseCalculator(object)
-    #       __parameters
-    #       __input_path            <- here redefined as array of strings
-    #       (pathes)
-    #       __output_path
-    __slot__ =  "__expected_data",\
-                "__provided_data",\
-                "__photon_data",\
-                "__ia_data",\
-                "__charge_data"
 
     # Constructor.
     def __init__(self,parameters=None,

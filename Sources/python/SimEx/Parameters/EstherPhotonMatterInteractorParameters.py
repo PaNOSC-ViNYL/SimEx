@@ -1,3 +1,4 @@
+""" :module EstherPhotonMatterInteractorParameters: Hosting the parameter class for the EstherPhotonMatterInteractor."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016, 2017 Richard Briggs, Carsten Fortmann-Grote        #
@@ -21,7 +22,6 @@
 
 import numpy
 import os
-import sys
 import tempfile
 import json
 
@@ -167,7 +167,7 @@ ESTHER_MATERIAL_DICT = { "Aluminium" : {"name" : "Aluminium",
 
 class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
     """
-    class representing parameters for the Hydrocode Input Calculator
+    :class EstherPhotonMatterInteractorParameters: representing parameters for the Esthe Hydrocode Calculator.
     """
     def __init__(self,
                  number_of_layers=None,
@@ -194,8 +194,6 @@ class EstherPhotonMatterInteractorParameters(AbstractCalculatorParameters):
                  ):
 
         """
-        Constructor for the HydroParameters
-
         :param ablator: The ablating material ( "Al" | "CH" | "Diamond" | "Kapton" | "Mylar" )
         :type ablator: str
 

@@ -1,4 +1,4 @@
-""" :module: Holds the FEFFPhotonMatterInteractor class.
+""" :module FEFFPhotonMatterInteractor: Holds the FEFFPhotonMatterInteractor class."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
@@ -19,7 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-"""
 
 import h5py
 import numpy
@@ -35,12 +34,11 @@ from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 
 class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
     """
-    Interface class for photon-matter interaction calculations using the FEFF code.
+    :class FEFFPhotonMatterInteractor: Interface class for photon-matter interaction calculations using the FEFF code.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the FEFF photon interactor.
 
         :param parameters: Parameters that govern the PMI calculation.
         :type parameters: FEFFPhotonMatterInteractorParameters

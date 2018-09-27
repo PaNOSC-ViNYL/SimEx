@@ -1,7 +1,7 @@
-""" Module that holds the PlasmaXRTSCalculator class."""
+""":module PlasmaXRTSCalculator: Module that holds the PlasmaXRTSCalculator class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -31,11 +31,12 @@ from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorPara
 
 class PlasmaXRTSCalculator(AbstractPhotonDiffractor):
     """
-    Class representing a plasma x-ray Thomson scattering calculation.
+    :class PlasmaXRTSCalculator: Represents a plasma x-ray Thomson scattering calculation.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):
         """
+
         :param parameters: Parameters for the PlasmaXRTSCalculator.
         :type parameters: PlasmaXRTSCalculatorParameters
 

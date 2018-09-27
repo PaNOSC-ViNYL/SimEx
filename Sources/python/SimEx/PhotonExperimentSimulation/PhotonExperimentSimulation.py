@@ -1,7 +1,7 @@
-""" Module that hosts the PhotonExperimentSimulation class."""
+""":module PhotonExperimentSimulation: Module that hosts the PhotonExperimentSimulation class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,10 +28,9 @@ from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffract
 from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
 from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
 from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
-from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class PhotonExperimentSimulation(object):
-    """ The PhotonExperimentSimulation is the top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
+    """ :class PhotonExperimentSimulation: Top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
 
     def __init__(self, photon_source=None,
                        photon_propagator=None,
@@ -40,25 +39,24 @@ class PhotonExperimentSimulation(object):
                        photon_detector=None,
                        photon_analyzer=None):
         """
-        !@brief  Constructor for the PhotonExperimentSimulation object.
 
-        @param photon_source: The calculator for the photon source.
-        <br/><b>type</b> : Child of AbstractPhotonSource
+        :param photon_source: The calculator for the photon source.
+        :type photon_source:  AbstractPhotonSource
 
-        @param photon_propagator : The calculator for the wave propagation from source to target.
-        <br/><b>type</b> : Child of AbstractPhotonPropagator
+        :param photon_propagator : The calculator for the wave propagation from source to target.
+        :type photon_propagator:  AbstractPhotonPropagator
 
-        @param photon_interactor : The calculator for the photon-matter interaction.
-        <br/><b>type</b> : Child of AbstractPhotonInteractor
+        :param photon_interactor : The calculator for the photon-matter interaction.
+        :type photon_interactor:  AbstractPhotonInteractor
 
-        @param : photon_diffractor : The calculator for the photon diffraction.
-        <br/><b>type</b> : Child of AbstractPhotonDiffractor
+        :param photon_diffractor : The calculator for the photon diffraction.
+        :type photon_diffractor:  AbstractPhotonDiffractor
 
-        @param photon_detector : The calculator for photon detection.
-        <br/><b>type</b> : Child of AbstractPhotonDetector
+        :param photon_detector: The calculator for photon detection.
+        :type photon_detector:  AbstractPhotonDetector
 
-        @param photon_analyzer : The calculator for  photon signal analysis.
-        <br/><b>type</b> : Child of AbstractPhotonAnalyzer
+        :param photon_analyzer: The calculator for  photon signal analysis.
+        :type photon_analyzer:  AbstractPhotonAnalyzer
         """
         self.__photon_source = checkAndSetPhotonSource(photon_source)
         self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)

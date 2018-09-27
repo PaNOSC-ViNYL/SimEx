@@ -1,7 +1,7 @@
-""" Module that holds the S2EReconstruction class.  """
+""":module S2EReconstruction: Module that holds the S2EReconstruction class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -29,9 +29,8 @@ from SimEx.Calculators.AbstractPhotonAnalyzer import AbstractPhotonAnalyzer
 
 class S2EReconstruction(AbstractPhotonAnalyzer):
     """
-    Class representing photon data analysis for electron density reconstruction from 2D diffraction patterns.
-    Uses the EMC orientation module and the DM phasing module.
-
+    :class S2EReconstruction: Class representing photon data analysis for electron density reconstruction from 2D diffraction patterns.
+    Wraps the EMC orientation module and the DM phasing module.
     """
 
     def __init__(self,  parameters=None, input_path=None, output_path=None):

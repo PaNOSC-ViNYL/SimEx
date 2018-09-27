@@ -1,4 +1,4 @@
-""" Module that holds the CrystFELPhotonDiffractorParameters class.  """
+""" :module CrystFELPhotonDiffractorParameters: Module that holds the CrystFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -31,7 +31,7 @@ from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 
 class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the CrystFELPhotonDiffractor calculator.
+    :class CrystFELPhotonDiffractorParameters: Encapsulates parameters for the CrystFELPhotonDiffractor.
     """
     def __init__(self,
                 sample=None,
@@ -49,8 +49,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 **kwargs
                 ):
         """
-        Constructor for the CrystFELPhotonDiffractorParameters.
-
         :param sample: Location of file that contains the sample definition (pdb or crystfel format)
         :type sample: str
 

@@ -1,4 +1,4 @@
-""" Module that holds the IdealPhotonDetector class.  """
+""":module IdealPhotonDetector: Module that holds the IdealPhotonDetector class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -27,15 +27,15 @@ from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 
 class IdealPhotonDetector(AbstractPhotonDetector):
     """
-    Class representing an ideal photon detector.
+    :class IdealPhotonDetector: Class representing an ideal photon detector.
     This is just a dummy calculator that copies input data to output data.
     """
 
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for ideal photon detector.
 
         :param parameters: Parameters for the Detector simulation.
+        :type parameters: dict
 
         :param input_path: Path to input files for the detector simulation.
         :type input_path: str
@@ -86,7 +86,6 @@ class IdealPhotonDetector(AbstractPhotonDetector):
                                 '/params/beam/focusArea',
                                 '/params/info',
                                 ]
-
 
     def expectedData(self):
         """ Query for the data expected by the Interactor. """

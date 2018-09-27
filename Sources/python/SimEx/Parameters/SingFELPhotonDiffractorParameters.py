@@ -1,4 +1,4 @@
-""" :module: Module that holds the SingFELPhotonDiffractorParameters class.  """
+""" :module SingFELPhotonDiffractorParameters: Module that holds the SingFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -29,7 +29,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the SingFELPhotonDiffractor calculator.
+    :class SingFELPhotonDiffractorParameters: Class representing parameters for the SingFELPhotonDiffractor calculator.
     """
 
     def __init__(self,
@@ -48,8 +48,6 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 **kwargs
                 ):
         """
-        Constructor for the SingFELPhotonDiffractorParameters.
-
         :param sample: Name of file containing atomic sample geometry (default None).
         :type sample: str
 

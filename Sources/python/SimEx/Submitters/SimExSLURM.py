@@ -1,18 +1,32 @@
-from os.path import isfile, isdir
-from os import getcwd, listdir
+""":module SimExSLURM: Hosts the SLURMSubmitter class to submit simex jobs via SLURM."""
+
+from os import getcwd
 import inspect
-from subprocess import Popen, call, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT
 from ipywidgets import widgets
 
 class SLURMSubmitter(widgets.VBox):
     """
+    :class SLURMSubmitter: Represents job submission via the SLURM scheduler.
     """
 
     def __init__(self, simex_calc, time='00:10:00', partition="all"):
-        
+        """
+
+        :param simex_calc: The SimEx Calculator that represents the simulation to perform
+        :type simex_calc: AbstractBaseCalculator
+
+        :param time: The time to reserve on the job scheduler (Default: '00:10:00 i.e. 10 minutes).
+        :type time: str (HH:MM::SS) or (D-HH:MM:SS)
+
+        :param partition: The SLURM partition to run this job on (Default: "all")
+        :type partition: str
+
+        """
+
         widgets.VBox.__init__(self, layout=widgets.Layout(width='100%'))
-        
-        self.verbose = False        
+
+        self.verbose = False
         self.simex_calc = simex_calc
         #self.nodes_widget = widgets.IntSlider(min=1, max=10, value=nnodes)
         #self.task_widget = widgets.IntSlider(min=1, max=100,
@@ -25,7 +39,7 @@ class SLURMSubmitter(widgets.VBox):
         self.partition_widget = widgets.Dropdown(options=["all",
                                                          "maxwell",
                                                          "cfel",
-                                                         "exfel"], 
+                                                         "exfel"],
                                                  value=partition)
         # ui representation
         self.children = [
@@ -37,14 +51,14 @@ class SLURMSubmitter(widgets.VBox):
             #              self.parallelism_widget]),
             self.submit_widget
         ]
-        
+
         temp_prefix = '''#!/bin/sh
 #SBATCH --partition={0}
 #SBATCH --time={1}
 #SBATCH --nodes={2}
 #SBATCH --cpus-per-task={3}
 #SBATCH --output={4}'''
-        
+
         temp_suffix = '''
 export MODULEPATH=$MODULEPATH:$HOME/simex_dev_workshop/modulefiles
 module load python3/3.4
@@ -65,16 +79,16 @@ python3 {5} {6}
 
         # get the path to the module from which the simex_calc is an instance of
         path_to_module = inspect.getfile(type(self.simex_calc))
-        
+
         final_script = self.batch_template.format(
-            self.partition_widget.value, 
-            self.time_widget.value, 
+            self.partition_widget.value,
+            self.time_widget.value,
             self.simex_calc.parameters.nodes_per_task,
             self.simex_calc.parameters.cpus_per_task,
-            getcwd() + "/" + classname + '_%A.out', 
-            #self.parallelism_widget.value, 
-            #self.task_widget.value, 
-            path_to_module, 
+            getcwd() + "/" + classname + '_%A.out',
+            #self.parallelism_widget.value,
+            #self.task_widget.value,
+            path_to_module,
             dfile)
 
         if self.verbose:
@@ -83,6 +97,6 @@ python3 {5} {6}
         fname = 'batch.sh'
         with open(fname, 'w') as ffile:
             ffile.write(final_script)
-        
+
         slurm = Popen(['sbatch', fname], stdout=PIPE, stderr=STDOUT)
         print(slurm.stdout.read().strip().decode('utf-8'))

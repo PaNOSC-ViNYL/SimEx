@@ -1,7 +1,7 @@
-""" Module that holds the DMPhasing class.  """
+""":module DMPhasing: Module that holds the DMPhasing class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -35,12 +35,11 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class DMPhasing(AbstractPhotonAnalyzer):
     """
-    Class representing photon data analysis for electron density reconstruction from oriented 3D diffraction patterns.
+    :class DMPhasing: Encapsulates photon diffraction analysis for electron density reconstruction from oriented 3D diffraction patterns.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the phasing analyser.
 
         :param  parameters: Phasing parameters.
         :type parameters: DMPhasingParameters instance

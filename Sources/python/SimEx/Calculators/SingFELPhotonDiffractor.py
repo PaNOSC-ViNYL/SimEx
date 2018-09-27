@@ -1,7 +1,7 @@
-""" Module that holds the SingFELPhotonDiffractor class.  """
+""":module SingFELPhotonDiffractor: Module that holds the SingFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -44,10 +44,10 @@ from SimEx.Utilities import IOUtilities
 
 class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    :class SingFELPhotonDiffractor: Representing scattering from a molecular sample into a detector plane.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
         :param parameters: Parameters of the calculation (not data).

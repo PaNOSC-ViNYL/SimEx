@@ -1,9 +1,9 @@
-#!/usr/bin/env python2.7
-""" Collection of utilities to analyse output from (esther) rad-hydro simulations. """
+#!/usr/bin/env python
+""":module RadHydroAnalysis: Collection of utilities to analyse output from (esther) rad-hydro simulations. """
 
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2017 Carsten Fortmann-Grote, Richard Briggs              #
+# Copyright (C) 2017-2018 Carsten Fortmann-Grote, Richard Briggs         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -31,16 +31,17 @@ import h5py
 from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
 
 def radHydroAnalysis(filename):
-    """ Generates four plots to analyse shock compression data.
+    """
+    Generates four plots to analyse shock compression data.
 
     :param filename: Filename of hdf5 file containing rad-hydro data in openPMD format.
     :type filename: str
 
     """
-    
+
     # Get parameters for the corresponding esther run.
     esther_parameters = EstherPhotonMatterInteractorParameters(read_from_file=os.path.dirname(filename))
-    
+
     # Get zone dimensions.
     number_of_sample_zones = esther_parameters._EstherPhotonMatterInteractorParameters__number_of_sample_zones
     try:

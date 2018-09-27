@@ -1,4 +1,4 @@
-""" Module for AbstractPhotonDiffractor """
+""":module AbstractPhotonDiffractor: Hosts the base class for all Diffractors."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015 Carsten Fortmann-Grote                              #
@@ -28,7 +28,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonDiffractor(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon diffractor, serving as API for actual photon diffraction simulation calculators.
+    Abstract base class for all PhotonDiffractors.
     """
 
     @abstractmethod

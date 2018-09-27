@@ -1,4 +1,4 @@
-""" Module that holds the XMDYNPhotonMatterInteractor class.  """
+""":module XMDYNPhotonMatterInteractor: Module that holds the XMDYNPhotonMatterInteractor class."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
@@ -22,30 +22,24 @@
 
 import csv
 import h5py
-import math
 import numpy
 import os
 import shlex
 import subprocess
 import random
 import string
+from scipy import constants
 
 from SimEx.Utilities.IOUtilities import get_dict_from_lines
 from SimEx.Calculators.AbstractPhotonInteractor import AbstractPhotonInteractor
 from SimEx.Parameters.PhotonMatterInteractorParameters import PhotonMatterInteractorParameters
-from SimEx.Utilities.Units import second
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.ParallelUtilities import getCUDAEnvironment
 
-from scipy import constants
-from scipy.constants import e
 bohr_radius = constants.value('Bohr radius')
 
 class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
-    """
-    Interface class for photon-matter interaction calculations using the XMDYN code.
-    """
-
+    """ :class XMDYNPhotonMatterInteractor: Wrapper class for photon-matter interaction calculations using the XMDYN code."""
     def __init__(
             self,
             parameters=None,
@@ -56,7 +50,6 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             root_path=None,
             ):
         """
-        Constructor for the XMDYN Photon Matter Interactor.
 
         :param parameters: Parameters that govern the PMI calculation.
         :type parameters: dict
@@ -72,7 +65,6 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
 
         :param root_path: Path to a root directory from which to restart a (previously failed) simulation.
         :type root_path: str
-
         """
 
         # Initialize base class.

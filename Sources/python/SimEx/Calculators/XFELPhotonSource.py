@@ -1,7 +1,7 @@
-""" Module that holds the XFELPhotonSource class.  """
+""":module XFELPhotonSource: Module that holds the XFELPhotonSource class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -27,12 +27,11 @@ from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 
 class XFELPhotonSource(AbstractPhotonSource):
     """
-    Class representing a x-ray free electron laser photon source.
+    :class XFELPhotonSource: Class representing a x-ray free electron laser photon source.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
-        Constructor for the xfel photon source.
 
         :param parameters : Photon source parameters.
         :type parameters: dict
@@ -46,7 +45,6 @@ class XFELPhotonSource(AbstractPhotonSource):
 
         # Initialize base class.
         super(XFELPhotonSource, self).__init__(parameters, input_path, output_path)
-
 
     def backengine(self):
         # Copy input to output.
