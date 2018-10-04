@@ -36,7 +36,7 @@ from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
-from SimEx.Utilities.Units import *
+from SimEx.Utilities import Units
 from TestUtilities import TestUtilities
 
 @unittest.skipIf(TestUtilities.runs_on_travisCI(), "CI.")
@@ -233,15 +233,15 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
                 patterns=range(10),
                 )
 
-        diffractor = XCSITPhotonDetector(
+        detector = XCSITPhotonDetector(
                 parameters=parameters,
                 input_path=TestUtilities.generateTestFilePath("diffr/diffr_out_0000001.h5"),
                 output_path="detector_out.h5",
                 )
 
-        diffractor._readH5()
-        diffractor.backengine()
-        diffractor.saveH5()
+        detector._readH5()
+        detector.backengine()
+        detector.saveH5()
 
         # Assert output was created.
         self.assertTrue(os.path.isfile("detector_out.h5"))
@@ -258,29 +258,31 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         """ Check numbers for 1 AGIPD Quad. """
 
         # Cleanup.
-        self.__files_to_remove.append('5mzd.pdb')
-        self.__files_to_remove.append('diffr.h5')
-        self.__dirs_to_remove.append('diffr')
+        #self.__files_to_remove.append('5mzd.pdb')
+        #self.__files_to_remove.append('diffr.h5')
+        #self.__dirs_to_remove.append('diffr')
 
         # Setup detector geometry.
         detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
                                                 'fast_scan_max' : 511,
                                                 'slow_scan_min' : 0,
                                                 'slow_scan_max' : 511},
-                                        pixel_size=2.2e-4*meter,
+                                        pixel_size=2.2e-4*Units.meter,
                                         photon_response=1.0,
-                                        distance_from_interaction_plane=0.13*meter,
+                                        distance_from_interaction_plane=0.13*Units.meter,
                                         corners={'x': -256, 'y' : -256},
                                         )
 
         detector_geometry = DetectorGeometry(panels=[detector_panel])
 
         # Setup photon beam.
-        beam = PhotonBeamParameters(photon_energy=4.96e3*electronvolt,
-                                    beam_diameter_fwhm=1.0e-6*meter,
-                                    pulse_energy=1.0e-3*joule,
+        beam = PhotonBeamParameters(
+                #photon_energy=4.96e3*Units.electronvolt,
+                                    photon_energy=10.0e3*Units.electronvolt,
+                                    beam_diameter_fwhm=1.0e-6*Units.meter,
+                                    pulse_energy=1.0e-3*Units.joule,
                                     photon_energy_relative_bandwidth=0.001,
-                                    divergence=1e-3*radian,
+                                    divergence=1e-3*Units.radian,
                                     photon_energy_spectrum_type="SASE",
                                     )
 
@@ -300,7 +302,8 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
                 output_path='diffr',
                 )
 
-        photon_diffractor.backengine()
+        #photon_diffractor.backengine()
+        #photon_diffractor.saveH5()
 
         # Setup and run the detector sim.
         self.__files_to_remove.append('detector_out.h5')
@@ -310,15 +313,15 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
                 patterns=[0],
                 )
 
-        diffractor = XCSITPhotonDetector(
+        detector = XCSITPhotonDetector(
                 parameters=parameters,
                 input_path="diffr.h5",
                 output_path="detector_out.h5",
                 )
 
-        diffractor._readH5()
-        diffractor.backengine()
-        diffractor.saveH5()
+        detector._readH5()
+        detector.backengine()
+        detector.saveH5()
 
         # Weak test Check we have photons in the signal.
         pattern = h5py.File("detector_out.h5", 'r')['data/0000001/data'].value
