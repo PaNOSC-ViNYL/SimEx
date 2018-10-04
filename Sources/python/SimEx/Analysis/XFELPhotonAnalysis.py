@@ -1,7 +1,7 @@
 """ :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -33,11 +33,9 @@ class XFELPhotonAnalysis(AbstractAnalysis):
     """
 
     def __init__(self, input_path=None,):
-        """ Constructor for the XFELPhotonAnalysis class.
-
+        """
         :param input_path: Name of file or directory that contains data to analyse.
         :type input_path: str
-
         """
         print("\n Start initialization.")
         # Initialize base class. This takes care of parameter checking.

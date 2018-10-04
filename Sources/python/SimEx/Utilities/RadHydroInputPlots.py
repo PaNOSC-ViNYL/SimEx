@@ -1,7 +1,8 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
+""":module RadHydroInputPlots: Hosts utilities to plot target absorption profiles."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2017 Carsten Fortmann-Grote, Richard Briggs              #
+# Copyright (C) 2017-2018 Carsten Fortmann-Grote, Richard Briggs         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -24,7 +25,6 @@
 
 import numpy
 from matplotlib import pyplot
-from matplotlib import patches
 from xraydb import XrayDB
 
 def plotTransmission(symbol, edge="K", thickness=0.001, energies=None):
@@ -49,8 +49,6 @@ def plotTransmission(symbol, edge="K", thickness=0.001, energies=None):
     # Get info on requested edge.
     edge_data = xdb.xray_edge(symbol, edge)
     edge_position = edge_data[0]
-    edge_fyield = edge_data[1]
-    edge_jump = edge_data[2]
 
     # Mass density (ambient).
     rho = xdb.density(symbol)
@@ -93,7 +91,7 @@ def plotTargetAndTransmission(symbol, edge="K", thickness=0.001, energies=None, 
 
     :param energies: For which energies to plot the transmission.
     :type energies: ndarray
-    
+
     :param ablator_thickness: Thickness of ablator
     :type ablator_thickness: float
 
@@ -104,8 +102,6 @@ def plotTargetAndTransmission(symbol, edge="K", thickness=0.001, energies=None, 
     # Get info on requested edge.
     edge_data = xdb.xray_edge(symbol, edge)
     edge_position = edge_data[0]
-    edge_fyield = edge_data[1]
-    edge_jump = edge_data[2]
 
     # Mass density (ambient).
     rho = xdb.density(symbol)
@@ -123,10 +119,10 @@ def plotTargetAndTransmission(symbol, edge="K", thickness=0.001, energies=None, 
     # Convert to iterable if needed.
     if not hasattr(thickness, "__iter__"):
         thickness = [thickness]
-        
+
     pyplot.figure(num=None, figsize=(10, 8), dpi=100, facecolor='w', edgecolor='k')
     pyplot.subplot(221)
-    
+
     pyplot.xlabel('Energy (eV)')
     pyplot.ylabel('Transmission')
     pyplot.legend()
@@ -140,7 +136,7 @@ def plotTargetAndTransmission(symbol, edge="K", thickness=0.001, energies=None, 
     pyplot.ylabel('Transmission')
     pyplot.legend()
     pyplot.title("%s %s-edge" % (symbol, edge))
-    
+
     pyplot.tight_layout()
     pyplot.show()
 

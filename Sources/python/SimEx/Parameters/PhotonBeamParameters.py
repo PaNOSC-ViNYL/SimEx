@@ -1,7 +1,7 @@
-""" :module PhotonBeamParameters: Module holding the PhotonBeamParameters class. """
+""" :module PhotonBeamParameters: Contains the PhotonBeamParameters class and associated functions."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,17 +25,14 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysica
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
 from scipy import constants
+from wpg import Wavefront, wpg_uti_wf
+from wpg.srwlib import srwl
 import math
 import numpy
 import os
 import sys
-from wpg import Wavefront, wpg_uti_wf
-from wpg.srwlib import srwl
-
 
 class PhotonBeamParameters(AbstractCalculatorParameters):
-    """ Class representing photon beam parameters. """
-
     def __init__(self,
             photon_energy,
             beam_diameter_fwhm,
@@ -46,7 +43,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
             **kwargs
             ):
         """
-        Constructor of the PhotonBeamParameters class.
+        :class PhotonBeamParameters: Encapsulates the parameters of a photon beam.
 
         :param photon_energy: The mean photon energy in units of electronvolts (eV).
         :type photon_energy: float
@@ -64,7 +61,7 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         :type divergence: float (0 < divergence < 2*pi)
 
         :param photon_energy_spectrum_type: Type of energy spectrum ("SASE" | "tophat" | "twocolour", default "SASE").
-        :type photon_energy_spectrum_type: float (0 < photon_energy_spectrum_type < 2*pi)
+        :type photon_energy_spectrum_type: float
 
         :param kwargs: Key-value pairs to be passed to the parent class constructor.
         :type kwargs: dict
@@ -83,7 +80,6 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
-
 
     @property
     def photon_energy(self):

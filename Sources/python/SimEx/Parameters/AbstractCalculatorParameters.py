@@ -1,7 +1,7 @@
-""" Module for AbstractCalculatorParameters class """
+""":module AbstractCalculatorParameters: Hosting the abstract base class for all parameter classes."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -22,9 +22,10 @@
 
 from abc import ABCMeta, abstractmethod
 
-from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger,\
-    checkAndSetInstance, checkAndSetNonNegativeInteger
 from SimEx.AbstractBaseClass import AbstractBaseClass
+from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
+from SimEx.Utilities.EntityChecks import checkAndSetInstance
+from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 class AbstractCalculatorParameters(AbstractBaseClass, metaclass=ABCMeta):
     """
@@ -34,8 +35,6 @@ class AbstractCalculatorParameters(AbstractBaseClass, metaclass=ABCMeta):
     @abstractmethod
     def __init__(self, **kwargs):
         """
-        Constructor for the Abstract Calculator Parameters.
-
         :param **kwargs:  key=value pairs for calculator specific parameters.
         """
         # Set default for parameters that have to be defined on every Parameters class but

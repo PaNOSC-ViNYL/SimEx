@@ -1,6 +1,8 @@
+""":module EstherExperiment: Hosts the EstherExperiment workflow class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Richard Briggs, Carsten Fortmann-Grote         #
+# Copyright (C) 2016-2017 Richard Briggs                                 #
+# Copyright (C) 2016-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,7 +27,7 @@ from SimEx.Parameters.EstherPhotonMatterInteractorParameters import EstherPhoton
 
 class EstherExperiment():
     """
-    Class to represent creating new and iterative Rad-Hydro simulations.
+    :class EstherExperiment: Represents creating new and iterative Rad-Hydro simulations.
     """
     def __init__(self,
                  parameters=None,
@@ -36,7 +38,6 @@ class EstherExperiment():
                  ):
 
         """
-        Constructor for the Esther Experiment.
 
         :param parameters: Esther parameters.
         :type parameters: EstherPhotonMatterInteractorParameters

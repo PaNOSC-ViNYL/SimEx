@@ -1,7 +1,7 @@
-""" Module for AbstractAnalysis """
+""":module AbstractAnalysis: Hosts the abstract base class for all analysis classes."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-
 from abc import ABCMeta, abstractmethod
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 import matplotlib as mpl
@@ -31,7 +30,7 @@ import sys
 
 class AbstractAnalysis(object, metaclass=ABCMeta):
     """
-    Abstract class for all data analysis classes.
+    :class AbstractAnalysis: Abstract base class for all data analysis classes.
     """
 
     @classmethod
@@ -111,11 +110,6 @@ class AbstractAnalysis(object, metaclass=ABCMeta):
             dill.dump(self, open(fname, "w"))
         except:
             raise IOError("Cannot dump to file "+fname)
-
-    #######################################################################
-    # Queries and setters
-    #######################################################################
-    # control_parameters
 
     # input
     @property

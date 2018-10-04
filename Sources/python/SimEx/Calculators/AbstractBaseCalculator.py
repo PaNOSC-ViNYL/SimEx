@@ -1,7 +1,7 @@
-""" Module for AbstractBaseCalculator """
+""":module AbstractBaseCalculator: Hosting the base class of all Calculators."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 #               2016-2017 Sergey Yakubov                                 #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
@@ -32,8 +32,27 @@ import sys
 
 class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
     """
-    Abstract class for all simulation calculators.
+    :class AbstractBaseCalculator: Abstract class for all simulation calculators.
     """
+    @abstractmethod
+    def __init__(self, parameters=None, input_path=None, output_path=None):
+        """
+
+        :param parameters: Parameters of the calculation (not data).
+        :type parameters: dict || AbstractCalculatorParameters
+
+        :param input_path: Path to hdf5 file holding the input data.
+        :type input_path: str
+
+        :param output_path: Path to hdf5 file for output.
+        :type output_path: str
+        """
+
+        # Check parameters.
+        self.__parameters = checkAndSetParameters(parameters)
+
+        self.__input_path, self.__output_path = checkAndSetIO((input_path, output_path))
+
 
     @classmethod
     def runFromCLI(cls):
@@ -47,7 +66,6 @@ class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
             fname = sys.argv[1]
             calculator=cls.dumpLoader(fname)
             status = calculator._run()
-            calculator.saveH5()
             sys.exit(status)
 
     @classmethod
@@ -73,25 +91,6 @@ class AbstractBaseCalculator(AbstractBaseClass, metaclass=ABCMeta):
             raise TypeError( "The argument to the script should be a path to a file "
                              "with object of subclass of AbstractBaseCalculator")
         return calculator
-
-    @abstractmethod
-    def __init__(self, parameters=None, input_path=None, output_path=None):
-        """
-
-        :param parameters: Parameters of the calculation (not data).
-        :type parameters: dict || AbstractCalculatorParameters
-
-        :param input_path: Path to hdf5 file holding the input data.
-        :type input_path: str
-
-        :param output_path: Path to hdf5 file for output.
-        :type output_path: str
-        """
-
-        # Check parameters.
-        self.__parameters = checkAndSetParameters(parameters)
-
-        self.__input_path, self.__output_path = checkAndSetIO((input_path, output_path))
 
     @abstractmethod
     def backengine(self):

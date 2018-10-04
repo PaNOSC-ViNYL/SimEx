@@ -1,7 +1,7 @@
-""" Module for AbstractPhotonAnalyzer """
+""":module AbstractPhotonAnalyzer: Module for AbstractPhotonAnalyzer """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -29,7 +29,7 @@ from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class AbstractPhotonAnalyzer(AbstractBaseCalculator, metaclass=ABCMeta):
     """
-    Class representing an abstract photon analyzer, serving as API for actual photon analysis calculators.
+    :class AbstractPhotonAnalyzer: Abstract base class for all PhotonAnalyzers.
     """
     @abstractmethod
     def __init__(self, parameters=None, input_path=None, output_path=None):

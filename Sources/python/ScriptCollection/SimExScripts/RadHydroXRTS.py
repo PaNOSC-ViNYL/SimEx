@@ -1,7 +1,7 @@
-""" Prototype to generate XRTS spectra from inhomogeneous matter using 1D rad-hydro data. """
+""":module RadHydroXRTS: Hosting a prototype for calculation of XRTS from rad-hydro trajectories. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -21,7 +21,6 @@
 ##########################################################################
 
 import h5py
-import numpy
 import os
 
 from SimEx.Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator

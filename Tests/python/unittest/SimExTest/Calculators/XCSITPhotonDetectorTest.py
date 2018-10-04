@@ -30,15 +30,16 @@ import unittest
 from TestUtilities.TestUtilities import runs_on_travisCI
 # Import the class to test.
 from SimEx.Calculators.XCSITPhotonDetector import XCSITPhotonDetector
-from SimEx.Calculators.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
+from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
+from SimEx.Parameters.XCSITPhotonDetectorParameters import XCSITPhotonDetectorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
-from SimEx.Calculators.SingFELPhotonDiffractor import SingFELPhotonDiffractor
 from SimEx.Calculators.AbstractPhotonDetector import AbstractPhotonDetector
 from SimEx.Utilities.Units import *
 from TestUtilities import TestUtilities
 
+@unittest.skipIf(TestUtilities.runs_on_travisCI(), "CI.")
 class XCSITPhotonDetectorTest(unittest.TestCase):
     """
     Test class for the XCSITPhotonDetector class.

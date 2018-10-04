@@ -1,7 +1,7 @@
-""" Module that holds the EMCOrientation class.  """
+""":module EMCOrientation: Module that holds the EMCOrientation class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -35,9 +35,10 @@ from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
 class EMCOrientation(AbstractPhotonAnalyzer):
-
     """
-    Class representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume. """
+    :class EMCOrientation: Representing photon data analysis for orientation of 2D diffraction patterns to a 3D diffraction volume.
+    """
+
     def __init__(self, parameters=None, input_path=None, output_path=None, tmp_files_path=None, run_files_path=None):
         """
         :param  parameters: Parameters for the EMC orientation calculator.

@@ -1,3 +1,4 @@
+""" :module  AbstractPhotonDiffractorParameters: Hosts the abstract base class for all PhotonDiffractors."""
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -19,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Module that holds the AbstractPhotonDiffractorParameters class.  """
 import os
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
@@ -29,7 +29,7 @@ from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the AbstractPhotonDiffractor calculator.
+    :class AbstractPhotonDiffractorParameters: Abstract base class for all PhotonDiffractors.
     """
     def __init__(self,
                 sample=None,
@@ -40,8 +40,6 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
                 **kwargs
                 ):
         """
-        Constructor for the AbstractPhotonDiffractorParameters.
-
         :param sample: Location of file that contains the sample definition (pdb or crystfel format)
         :type sample: str
 

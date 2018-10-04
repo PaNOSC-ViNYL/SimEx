@@ -1,7 +1,7 @@
-""" Module for input/output utilities.  """
+""":module IOUtilities: Module for input/output utilities.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,7 +28,6 @@ import h5py
 import numpy
 import os, shutil
 import periodictable
-import urllib.request, urllib.parse, urllib.error
 import requests
 import uuid
 
@@ -350,5 +349,57 @@ def wgetData(url=None, path=None):
         #numpy.savetxt( fname='beam.dist', X=data, header=header, comments=comments)
     #if sys.argv[2] == 'simplex':
         #numpy.savetxt( fname='beam.dist', X=data)
+
+def get_dict_from_lines(reader):
+    """ Turn a list of [key, ' ', ..., value] elements into a dict.
+
+    :params reader: An iterable that contains lists of strings in format [key, ' ', ' ', ..., value]
+    :type: iterable (list, array, generator).
+
+    """
+    # These fields shall be handled as numeric data.
+    numeric_keys = [
+            'N',
+            'Z',
+            'DIST',
+            'EPH',
+            'NPH',
+            'DIAM',
+            'FLU_MAX',
+            'T',
+            'T0',
+            'R0',
+            'DT',
+            'STEPS',
+            'PROGRESS',
+            'RANDSEED',
+            'RSTARTE',
+            ]
+    # Initialize return dictionary.
+    ret = dict()
+
+    # Iteratoe through all lines.
+    for line in reader:
+        # Skip empty lines and comments.
+        if line == []:
+            continue
+        if line[0][0] == '#':
+            continue
+
+        # Get key-value pair (they're separated by random number of whitespaces.
+        key, val = line[0], line[-1]
+
+        # Fix numeric data.
+        if key in numeric_keys:
+            try:
+                val = float(val)
+            except:
+                raise
+
+        # Store on dict.
+        ret[key] = val
+
+    # Return finished dict.
+    return ret
 
 

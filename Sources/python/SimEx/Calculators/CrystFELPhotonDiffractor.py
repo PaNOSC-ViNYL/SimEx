@@ -1,7 +1,7 @@
-""" Module that holds the CrystFELPhotonDiffractor class.  """
+""":module CrystFELPhotonDiffractor: Module that holds the CrystFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2017 Carsten Fortmann-Grote                              #
+# Copyright (C) 2017-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -37,10 +37,10 @@ from SimEx.Utilities import IOUtilities
 
 class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
-    Class representing a x-ray free electron laser photon propagator.
+    :class CrystFELPhotonDiffractor: Represents simulation of photon diffraction by crystals using CrystFEL.oattern_sim.
     """
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
+    def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
         :param parameters: Parameters of the calculation (not data).

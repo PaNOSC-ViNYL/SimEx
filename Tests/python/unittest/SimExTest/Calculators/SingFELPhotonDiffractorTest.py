@@ -36,6 +36,8 @@ from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 from TestUtilities import TestUtilities
 
+TRAVIS = TestUtilities.runs_on_travisCI()
+
 class SingFELPhotonDiffractorTest(unittest.TestCase):
     """
     Test class for the SingFELPhotonDiffractor class.
@@ -64,6 +66,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                     divergence=1e-3*radian,
                                     photon_energy_spectrum_type="SASE",
                                     )
+
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
@@ -142,7 +145,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
 
-
     def testDefaultConstruction(self):
         """ Testing the default construction of the class. """
 
@@ -199,12 +201,14 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertEqual( diffractor.input_path,  os.path.abspath( sample_file ) )
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testH5Output(self):
         """ Test that data, params and misc are present in hdf5 output file. """
 
         # Ensure proper cleanup.
         sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
-        #self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+        self.__files_to_remove.append( os.path.abspath( 'diffr.h5' ) )
 
         # Set up parameters.
         parameters=SingFELPhotonDiffractorParameters(
@@ -215,17 +219,20 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                 number_of_slices = 3,
                 pmi_start_ID = 1,
                 pmi_stop_ID = 1,
-                number_of_diffraction_patterns= 1,
+                number_of_diffraction_patterns= 2,
                 beam_parameters=self.beam,
                 detector_geometry= self.detector_geometry,
-                forced_mpi_command='mpirun -np 1'
+                forced_mpi_command='mpirun -np 2',
                 )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters)
+
+        # Run and save.
         diffractor.backengine()
         diffractor.saveH5()
 
+        # Examine content of results hdf.
         with h5py.File(diffractor.output_path, 'r') as h5:
             # Datagroups in /"
             self.assertIn("data", h5.keys())
@@ -378,7 +385,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
         parameters['detector_geometry'] = self.detector_geometry
 
-
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 
@@ -395,7 +402,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = self.beam,
                      detector_geometry = self.detector_geometry,
-                     forced_mpi_command='mpirun',
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -407,6 +414,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineNoBeam(self):
         """ Test that we can start a test calculation with no explicit beam parameters. """
 
@@ -423,6 +431,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns = 2,
                      beam_parameters = None,
                      detector_geometry = self.detector_geometry,
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -434,6 +443,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineDefaultPaths(self):
         """ Test that we can start a calculation with default paths given. """
 
@@ -453,7 +463,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun')
+                     forced_mpi_command='mpirun -np 2',
+                     )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
@@ -468,6 +479,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertTrue( os.path.isdir( os.path.abspath( 'diffr' ) ) )
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( os.path.abspath( 'diffr' ) ) )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineWithSample(self):
         """ Test that we can start a test calculation if the sample was given via the parameters . """
 
@@ -486,7 +498,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_diffraction_patterns=2,
                      beam_parameters=self.beam,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2'
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2',
                      )
 
         # Construct the object.
@@ -507,6 +519,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( 'diffr_out_0000001.h5', os.listdir( diffractor.output_path ) )
         self.assertIn( 'diffr_out_0000002.h5', os.listdir( diffractor.output_path ) )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineInputFile(self):
         """ Test that we can start a test calculation if the input path is a single file. """
 
@@ -522,7 +535,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun')
+                     forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2',
+                     )
 
 
         # Construct the object.
@@ -534,6 +548,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineInputDir(self):
         """ Test that we can start a test calculation if the input path is a directory. """
 
@@ -549,7 +564,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_stop_ID = 1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
-                     forced_mpi_command='mpirun',
+                     forced_mpi_command='mpirun -np 2',
                      )
 
         # Construct the object.
@@ -561,6 +576,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testBug53(self):
         """ Tests a script that was found to raise if run in parallel mode. """
 
@@ -573,8 +589,9 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      number_of_slices= 2,
                      pmi_start_ID= 1,
                      pmi_stop_ID = 9,
-                     number_of_diffraction_patterns= 1,
+                     number_of_diffraction_patterns=2,
                      detector_geometry= self.detector_geometry,
+                     forced_mpi_command='mpirun -np 2',
                    )
 
         photon_diffractor = SingFELPhotonDiffractor(
@@ -584,6 +601,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
         photon_diffractor.backengine()
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testSingleFile(self):
         """ Test that saveH5() generates only one linked hdf. """
 
@@ -631,6 +649,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("version", list(h5_filehandle.keys()) )
         self.assertIn("info", list(h5_filehandle.keys()) )
 
+    @unittest.skipIf(TRAVIS, "CI.")
     def testNoRotation(self):
         """ Test that we can run singfel with no-rotation option."""
 
@@ -641,8 +660,9 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                                                        number_of_slices = 3,
                                                        pmi_start_ID = 1,
                                                        pmi_stop_ID  = 1,
-                                                       number_of_diffraction_patterns = 1,
-                                                       detector_geometry = self.detector_geometry
+                                                       number_of_diffraction_patterns = 2,
+                                                       detector_geometry = self.detector_geometry,
+                                                       forced_mpi_command='mpirun -np 2',
                                                        )
 
         photon_diffractor = SingFELPhotonDiffractor(
@@ -654,10 +674,14 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         #self.__dirs_to_remove.append(photon_diffractor.output_path)
 
         # Run backengine and convert files.
+        # Ensure removal of directory.
+        self.__dirs_to_remove.append(photon_diffractor.output_path)
+
         photon_diffractor.backengine()
         photon_diffractor.saveH5()
 
         # Cleanup new style files.
+        # Ensure removal of linked hdf.
         self.__files_to_remove.append(photon_diffractor.output_path)
 
         with h5py.File(photon_diffractor.output_path) as handle:

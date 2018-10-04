@@ -15,3 +15,4 @@ pyfftw
 pyFAI
 numba
 pint
+py3nvml

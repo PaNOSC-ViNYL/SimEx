@@ -1,4 +1,4 @@
-""" Module that holds the PlasmaXRTSCalculatorParameters class.  """
+""":module PlasmaXRTSCalculatorParameters: Module that holds the PlasmaXRTSCalculatorParameters class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
@@ -34,11 +34,10 @@ from SimEx.Utilities.Utilities import ALL_ELEMENTS
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.EntityChecks import checkAndSetInteger
 from SimEx.Utilities.EntityChecks import checkAndSetPositiveInteger
-from SimEx.Utilities.EntityChecks import checkAndSetNonNegativeInteger
 
 class PlasmaXRTSCalculatorParameters(AbstractCalculatorParameters):
     """
-    Class representing parameters for the plasma x-ray Thomson scattering calculator.
+    :class PlasmaXRTSCalculatorParameters: Encapsulates parameters for the plasma x-ray Thomson scattering calculator.
     """
 
     def __init__(self,
