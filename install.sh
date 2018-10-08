@@ -3,13 +3,6 @@
 # Sample installation script. Adjustments might be neccessary.
 
 HOSTNAME=`hostname`
-if [[ "$HOSTNAME" == max-*.desy.de ]]
-then
-    THIRD_PARTY_ROOT=/data/netapp/s2e/simex
-    git apply patch_for_maxwell
-else
-    THIRD_PARTY_ROOT=
-fi
 
 echo $THIRD_PARTY_ROOT
 
@@ -20,10 +13,18 @@ then
     INSTALL_PREFIX=$THIRD_PARTY_ROOT
     DEVELOPER_MODE=OFF
     XCSIT=OFF
+    git apply patch_for_maxwell
 elif [ $MODE = "develop" ]
 then
     echo $MODE
     INSTALL_PREFIX=..
+    DEVELOPER_MODE=ON
+    XCSIT=ON
+    git apply patch_for_maxwell
+elif [ $MODE = "conda" ]
+then
+    echo $MODE
+    INSTALL_PREFIX=$HOME/Codes/anaconda3/envs/simex
     DEVELOPER_MODE=ON
     XCSIT=ON
 fi
