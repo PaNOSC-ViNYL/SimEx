@@ -1,7 +1,8 @@
 """ :module XCSITPhotonDetectorParameters: Hosts the XCSITPhotonDetectorParameters class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Jan-Philipp Burchert, Carsten Fortmann-Grote   #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2017 Jan-Philipp Burchert                                #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
