@@ -9,3 +9,6 @@ mpi4py
 dill
 sqlalchemy
 numba
+pyfftw
+pint
+pyFAI
