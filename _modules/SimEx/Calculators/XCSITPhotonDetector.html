@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>SimEx.Calculators.XCSITPhotonDetector &#8212; simex_platform 0.4.0 documentation</title>
+    <meta charset="utf-8" />
+    <title>SimEx.Calculators.XCSITPhotonDetector &#8212; simex_platform 0.4.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
@@ -14,7 +12,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -28,7 +26,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -302,6 +300,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span>
 
     <span class="k">def</span> <span class="nf">__createXCSITInteractions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">__ia_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lpdi</span><span class="o">.</span><span class="n">InteractionData</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">patterns</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__createXCSITChargeMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -439,7 +438,6 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__input_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Currently there should be only one input file.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># TODO Accept multiple input pathes as input</span>
         <span class="c1"># Open the file to read from</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5_infile</span><span class="p">:</span>
 
@@ -465,9 +463,10 @@
                                          <span class="p">)</span>
                                  <span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">pid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pattern_ids</span><span class="p">):</span>
-                <span class="n">photons</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data/</span><span class="si">{0:s}</span><span class="s2">/diffr&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">)]</span><span class="o">.</span><span class="n">value</span>
+                <span class="c1">#photons[i,:,:] = h5_infile[&quot;/data/{0:s}/diffr&quot;.format(pid)].value</span>
+                <span class="n">photons</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/data/</span><span class="si">{0:s}</span><span class="s2">/data&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">)]</span><span class="o">.</span><span class="n">value</span>
 
-            <span class="n">photons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">photons</span><span class="p">)</span>
+            <span class="c1">#photons = numpy.floor(photons)</span>
             <span class="n">photons</span> <span class="o">=</span> <span class="n">photons</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
             <span class="n">x_num</span><span class="p">,</span> <span class="n">y_num</span> <span class="o">=</span> <span class="n">photons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
@@ -475,13 +474,13 @@
 
             <span class="c1"># Parameters of the matrix</span>
             <span class="n">x_pixel</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/geom/pixelWidth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;pixel width: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x_pixel</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pixel width = </span><span class="si">{0:e}</span><span class="s2"> m.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x_pixel</span><span class="p">))</span>
             <span class="n">y_pixel</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/geom/pixelHeight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;pixel height: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_pixel</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pixel height= </span><span class="si">{0:e}</span><span class="s2"> m.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y_pixel</span><span class="p">))</span>
             <span class="n">center_energy</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/beam/photonEnergy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1"># missing profile</span>
-            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;central beam energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">center_energy</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;central beam energy = </span><span class="si">{0:e}</span><span class="s2"> eV&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">center_energy</span><span class="p">))</span>
             <span class="n">detector_dist</span> <span class="o">=</span> <span class="n">h5_infile</span><span class="p">[</span><span class="s2">&quot;/params/geom/detectorDist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Detector dist: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">detector_dist</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Detector distance = </span><span class="si">{0:e}</span><span class="s2"> m.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">detector_dist</span><span class="p">))</span>
 
             <span class="c1"># Create the photon instance</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__photon_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">lpdi</span><span class="o">.</span><span class="n">PhotonData</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">photons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
@@ -542,7 +541,9 @@
                             <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionX</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                             <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionY</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                             <span class="n">entry</span><span class="o">.</span><span class="n">setDirectionZ</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-                            <span class="n">entry</span><span class="o">.</span><span class="n">setEnergy</span><span class="p">(</span><span class="n">center_energy</span><span class="p">)</span>
+
+                            <span class="c1">#Photon energies have be set in units of keV.</span>
+                            <span class="n">entry</span><span class="o">.</span><span class="n">setEnergy</span><span class="p">(</span><span class="n">center_energy</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">)</span>
 
             <span class="c1"># Close the input file</span>
             <span class="n">h5_infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -651,13 +652,11 @@
               <img class="logo" src="../../../_static/eucall_logo_print_transparent.png" alt="Logo"/>
             </a></p>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -675,13 +674,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">simex_platform 0.4.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, Carsten Fortmann-Grote.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.1.
     </div>
   </body>
 </html>
