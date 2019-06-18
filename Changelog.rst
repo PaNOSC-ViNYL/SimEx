@@ -1,5 +1,9 @@
 CHANGELOG
 =========
+Changes in 0.4
+--------------
+    * 0.4.1: Bugfix to compensate for no longer supported matplolib feature (set_aspect('datalim'))
+
 Changes from 0.3 to 0.4
 -----------------------
     * Debugged XCSITPhotonDetector
