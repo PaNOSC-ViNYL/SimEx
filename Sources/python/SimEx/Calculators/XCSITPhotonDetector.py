@@ -261,6 +261,7 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         return self.__photon_data
 
     def __createXCSITInteractions(self):
+
         self.__ia_data = [lpdi.InteractionData() for i in self.parameters.patterns]
 
     def __createXCSITChargeMatrix(self):
@@ -398,7 +399,6 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
         if len(self.__input_path) > 1:
             raise RuntimeError("Currently there should be only one input file.")
 
-        # TODO Accept multiple input pathes as input
         # Open the file to read from
         with h5py.File(infile,"r") as h5_infile:
 
@@ -424,9 +424,10 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                                          )
                                  )
             for i,pid in enumerate(pattern_ids):
-                photons[i,:,:] = h5_infile["/data/{0:s}/diffr".format(pid)].value
+                #photons[i,:,:] = h5_infile["/data/{0:s}/diffr".format(pid)].value
+                photons[i,:,:] = h5_infile["/data/{0:s}/data".format(pid)].value
 
-            photons = numpy.floor(photons)
+            #photons = numpy.floor(photons)
             photons = photons.astype(int)
 
             x_num, y_num = photons.shape[1:]
@@ -434,13 +435,13 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
 
             # Parameters of the matrix
             x_pixel = h5_infile["/params/geom/pixelWidth"].value
-            print(("pixel width: " + str(x_pixel)))
+            print("pixel width = {0:e} m.".format(x_pixel))
             y_pixel = h5_infile["/params/geom/pixelHeight"].value
-            print(("pixel height: " + str(y_pixel)))
+            print("pixel height= {0:e} m.".format(y_pixel))
             center_energy = h5_infile["/params/beam/photonEnergy"].value # missing profile
-            print(("central beam energy: " + str(center_energy)))
+            print("central beam energy = {0:e} eV".format(center_energy))
             detector_dist = h5_infile["/params/geom/detectorDist"].value
-            print(("Detector dist: " + str(detector_dist)))
+            print("Detector distance = {0:e} m.".format(detector_dist))
 
             # Create the photon instance
             self.__photon_data = [lpdi.PhotonData() for i in range(photons.shape[0])]
@@ -501,7 +502,9 @@ class XCSITPhotonDetector(AbstractPhotonDetector):
                             entry.setDirectionX(numpy.asscalar(normal_direction[0]))
                             entry.setDirectionY(numpy.asscalar(normal_direction[1]))
                             entry.setDirectionZ(numpy.asscalar(normal_direction[2]))
-                            entry.setEnergy(center_energy)
+
+                            #Photon energies have be set in units of keV.
+                            entry.setEnergy(center_energy*1e-3)
 
             # Close the input file
             h5_infile.close()
