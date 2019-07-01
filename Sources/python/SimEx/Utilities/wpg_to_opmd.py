@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2019 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
 from argparse import ArgumentParser
 import h5py
 import math
@@ -30,14 +29,52 @@ c = constants.speed_of_light
 eps0 = constants.epsilon_0
 e = constants.e
 
+OPMD_DATATYPES={
+                0 :opmd.Datatype.CHAR,
+                1 :opmd.Datatype.UCHAR,
+                2 :opmd.Datatype.SHORT,
+                3 :opmd.Datatype.INT,
+                4 :opmd.Datatype.LONG,
+                5 :opmd.Datatype.LONG,
+                6 :opmd.Datatype.USHORT,
+                7 :opmd.Datatype.UINT,
+                8 :opmd.Datatype.ULONG,
+                9 :opmd.Datatype.ULONG,
+                10:opmd.Datatype.FLOAT,
+                11:opmd.Datatype.DOUBLE,
+                12:opmd.Datatype.LONG_DOUBLE,
+                13:opmd.Datatype.STRING,
+                14:opmd.Datatype.VEC_CHAR,
+                15:opmd.Datatype.VEC_SHORT,
+                16:opmd.Datatype.VEC_INT,
+                17:opmd.Datatype.VEC_LONG,
+                18:opmd.Datatype.VEC_LONG,
+                19:opmd.Datatype.VEC_UCHAR,
+                20:opmd.Datatype.VEC_USHORT,
+                21:opmd.Datatype.VEC_UINT,
+                22:opmd.Datatype.VEC_ULONG,
+                23:opmd.Datatype.VEC_ULONG,
+                24:opmd.Datatype.VEC_FLOAT,
+                25:opmd.Datatype.VEC_DOUBLE,
+                26:opmd.Datatype.VEC_LONG_DOUBLE,
+                27:opmd.Datatype.VEC_STRING,
+                28:opmd.Datatype.ARR_DBL_7,
+                29:opmd.Datatype.BOOL,
+                }
+
 from SimEx.Utilities import OpenPMDTools as opmd_legacy
 
 def convertToOPMD(input_file):
     """ Take native wpg output and rewrite in openPMD conformant way.
-    @param input_file: The hdf5 file to be converted.
-    @type: string
-    @example: input_file = "prop_out.h5"
+    :param input_file: The hdf5 file to be converted.
+    :type  input_file: string
+
+    :example: convertToOPMD(input_file="prop_out.h5")
     """
+    ###############################################
+    import ipdb
+    ipdb.set_trace()
+    ###############################################
 
     # Check input file.
     if not h5py.is_hdf5(input_file):
@@ -48,6 +85,10 @@ def convertToOPMD(input_file):
 
     # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
         data =  h5['data/arrEhor'][()]
+
+        # Have to convert to float64 until openPMD-API issue #331 is fixed.
+        data = data.astype(numpy.float64)
+
         data_shape = data.shape
 
         ## Branch off if this is a non-time dependent calculation in frequency domain.
@@ -69,7 +110,6 @@ def convertToOPMD(input_file):
 
 
     # matrix dataset to write with values 0...size*size-1
-
     print("Read complex E field of size ({0}x{1}x{2}).".format(
         number_of_x_meshpoints, number_of_y_meshpoints, number_of_time_steps))
 
@@ -81,21 +121,20 @@ def convertToOPMD(input_file):
     print("Created an empty {0} Series".format(series.iteration_encoding))
 
     print(len(series.iterations))
-    rho = series.iterations[1]. \
-        meshes["rho"][opmd.Mesh_Record_Component.SCALAR]
+    E_hor_real = series.iterations[1].meshes["E_hor_real"][opmd.Mesh_Record_Component.SCALAR]
 
     dataset = opmd.Dataset(data.dtype, data.shape)
 
     print("Created a Dataset of size {0}x{1} and Datatype {2}".format(
         dataset.extent[0], dataset.extent[1], dataset.dtype))
 
-    rho.reset_dataset(dataset)
+    E_hor_real.reset_dataset(dataset)
     print("Set the dataset properties for the scalar field rho in iteration 1")
 
     series.flush()
     print("File structure has been written")
 
-    rho[()] = data
+    E_hor_real[()] = data
 
     print("Stored the whole Dataset contents as a single chunk, " +
           "ready to write content")

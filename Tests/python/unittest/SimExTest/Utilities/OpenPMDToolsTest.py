@@ -1,6 +1,7 @@
+""" :module OpenPMDToolsTest: Test module for the openpmd tools.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015, 2016 Carsten Fortmann-Grote                        #
+# Copyright (C) 2015-2019 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,11 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the openpmd tools.
-    @author CFG
-    @institution XFEL
-    @creation 20160517
-"""
 import numpy
 import os
 import unittest
