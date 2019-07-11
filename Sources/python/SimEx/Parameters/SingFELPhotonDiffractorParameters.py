@@ -22,7 +22,7 @@
 
 import os
 
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.AbstractPhotonDiffractorParameters import AbstractPhotonDiffractorParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance

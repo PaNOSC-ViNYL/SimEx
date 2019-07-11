@@ -53,8 +53,8 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param beam_parameters: Path of the beam parameter file.
         :type beam_parameters: str
 
-        :param geometry: Path of the beam geometry file.
-        :type geometry: str
+        :param detector_geometry: The detector geometry for the simulated scattering experiment.
+        :type detector_geometry: DetectorGeometry
 
         :param kwargs: Key-value pairs to pass to the parent class.
         """
