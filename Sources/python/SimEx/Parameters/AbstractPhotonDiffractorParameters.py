@@ -132,9 +132,6 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         if self.__detector_geometry is None:
             print ("WARNING: Detector geometry not set, calculation will most probably fail.")
 
-        if self.__detector_geometry is None:
-            print ("WARNING: Detector geometry not set, calculation will most probably fail.")
-
     @property
     def number_of_diffraction_patterns(self):
         """ Query for the 'number_of_diffraction_patterns_file' parameter. """
