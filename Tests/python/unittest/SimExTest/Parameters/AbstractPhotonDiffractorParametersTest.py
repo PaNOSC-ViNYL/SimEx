@@ -72,7 +72,7 @@ class AbstractPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
-        self.assertTrue( parameters.uniform_rotation )
+        self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.beam_parameters, None )
         self.assertEqual( parameters.detector_geometry, None )
         self.assertEqual( parameters.number_of_diffraction_patterns, 1 )

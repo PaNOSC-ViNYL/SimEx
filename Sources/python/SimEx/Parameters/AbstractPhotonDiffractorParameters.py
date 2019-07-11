@@ -95,7 +95,7 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'uniform_rotation' parameter to a given value.
         :param value: The value to set 'uniform_rotation' to.
         """
-        self.__uniform_rotation = checkAndSetInstance( bool, value, True )
+        self.__uniform_rotation = checkAndSetInstance( bool, value, False )
 
     @property
     def beam_parameters(self):
@@ -128,7 +128,6 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
 
         if self.__detector_geometry is None:
             print ("WARNING: Detector geometry not set, calculation will most probably fail.")
-
 
     @property
     def number_of_diffraction_patterns(self):

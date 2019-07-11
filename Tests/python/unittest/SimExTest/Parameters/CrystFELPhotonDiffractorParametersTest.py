@@ -86,10 +86,9 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual( parameters.sample, self.__sample )
-        self.assertTrue( parameters.uniform_rotation )
+        self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.beam_parameters, None )
         self.assertEqual( parameters.detector_geometry, None )
-        self.assertTrue( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
         self.assertFalse( parameters.powder )
         self.assertEqual( parameters.intensities_file, None )

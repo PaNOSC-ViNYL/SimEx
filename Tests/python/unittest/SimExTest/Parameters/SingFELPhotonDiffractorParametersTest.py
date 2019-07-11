@@ -32,6 +32,7 @@ from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule
 
+
 from TestUtilities.TestUtilities import generateTestFilePath
 
 
@@ -86,14 +87,16 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         """ Testing the default construction of the class using a dictionary. """
 
         # Attempt to construct an instance of the class.
-        parameters = SingFELPhotonDiffractorParameters()
+        parameters = SingFELPhotonDiffractorParameters(
+                sample=generateTestFilePath("2nip.pdb")
+                )
 
         # Check instance and inheritance.
         self.assertIsInstance(parameters, SingFELPhotonDiffractorParameters)
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertEqual(parameters.uniform_rotation, False)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -106,14 +109,16 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         """ Testing the construction of the class with a DetectorGeometry instance. """
 
         # Attempt to construct an instance of the class.
-        parameters = SingFELPhotonDiffractorParameters(detector_geometry=self.detector_geometry)
+        parameters = SingFELPhotonDiffractorParameters(detector_geometry=self.detector_geometry,
+                                                       sample=generateTestFilePath("2nip.pdb"),
+                )
 
         # Check instance and inheritance.
         self.assertIsInstance(parameters, SingFELPhotonDiffractorParameters)
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertEqual(parameters.uniform_rotation, False)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -128,6 +133,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         # Attempt to construct an instance of the class.
         parameters = SingFELPhotonDiffractorParameters(detector_geometry=self.detector_geometry,
                                                        beam_parameters=self.beam,
+                                                       sample=generateTestFilePath("2nip.pdb")
                                                        )
 
         # Check instance and inheritance.
@@ -135,7 +141,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertEqual(parameters.uniform_rotation, False)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -160,7 +166,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertEqual(parameters.uniform_rotation, False)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -181,9 +187,10 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
                            'beam_parameters'                : None,
                            'detector_geometry'              : self.detector_geometry,
                            'number_of_MPI_processes'        : 4,  # Legacy, has no effect.
+                           'sample'                         : generateTestFilePath('2nip.pdb')
                            }
 
-        parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameters_dict)
+        parameters = SingFELPhotonDiffractorParameters(**parameters_dict)
 
         # Check all parameters are set correctly.
         self.assertFalse(parameters.uniform_rotation)
@@ -194,7 +201,7 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.pmi_stop_ID, 5)
         self.assertEqual(parameters.beam_parameters, None)
         self.assertEqual(parameters.detector_geometry, self.detector_geometry)
-        self.assertIsNone(parameters.sample)
+        self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
 
 if __name__ == '__main__':
     unittest.main()
