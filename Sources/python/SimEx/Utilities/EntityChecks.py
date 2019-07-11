@@ -43,7 +43,7 @@ def checkAndSetInstance(cls, var=None, default=None):
         else: return default
 
     elif not isinstance(var, cls):
-        raise TypeError("The parameter 'var' is not of correct type.")
+        raise TypeError("The parameter 'var' is not of correct type: Expected %s, obtained %s." % (cls, type(var)))
 
     return var
 
