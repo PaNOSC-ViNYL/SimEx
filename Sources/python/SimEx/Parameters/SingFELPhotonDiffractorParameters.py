@@ -1,7 +1,7 @@
 """ :module SingFELPhotonDiffractorParameters: Module that holds the SingFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2020 Carsten Fortmann-Grote, Juncheng E             #
+# Copyright (C) 2016-2019 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -63,11 +63,11 @@ class SingFELPhotonDiffractorParameters(AbstractPhotonDiffractorParameters):
         :type pmi_stop_ID: int, default 1
 
         """
-        super(SingFELPhotonDiffractorParameters, self).__init__(sample=sample,
-                                                                uniform_rotation=uniform_rotation,
-                                                                beam_parameters=beam_parameters,
-                                                                detector_geometry=detector_geometry,
-                                                                number_of_diffraction_patterns=number_of_diffraction_patterns,
+        super(SingFELPhotonDiffractorParameters, self).__init__(sample,
+                                                                uniform_rotation,
+                                                                beam_parameters,
+                                                                detector_geometry,
+                                                                number_of_diffraction_patterns,
                                                                 **kwargs,
                                                                 )
 
