@@ -76,7 +76,7 @@ def convertToOPMD(input_file):
     """
     ###############################################
     import ipdb
-    ipdb.set_trace()
+    #ipdb.set_trace()
     ###############################################
 
     # Check input file.
@@ -86,13 +86,16 @@ def convertToOPMD(input_file):
     # Read the data into memory.
     with h5py.File( input_file, 'r') as h5:
 
-    # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
-        data =  h5['data/arrEhor'][()]
+        import ipdb; ipdb.set_trace()
+
+        # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
+
+        #data =  h5['data/arrEhor'][()]
 
         # Have to convert to float64 until openPMD-API issue #331 is fixed.
-        data = data.astype(numpy.float64)
+        #data = data.astype(numpy.float64)
 
-        data_shape = data.shape
+        #data_shape = data.shape
 
         ## Branch off if this is a non-time dependent calculation in frequency domain.
         #if data_shape[2] == 1 and h5['params/wDomain'].value == "frequency":
@@ -100,50 +103,50 @@ def convertToOPMD(input_file):
             #_convert_from_frequency_representation(h5, opmd_h5, data_shape)
             #return
 
-        number_of_x_meshpoints = data_shape[0]
-        number_of_y_meshpoints = data_shape[1]
-        number_of_time_steps = data_shape[2]
+        number_of_x_meshpoints = h5['params/Mesh/nx'][()]
+        number_of_y_meshpoints = h5['params/Mesh/ny'][()]
+        number_of_time_steps =   h5['params/Mesh/nSlices'][()]
 
-        time_max = h5['params/Mesh/sliceMax'].value #s
-        time_min = h5['params/Mesh/sliceMin'].value #s
+        time_max = h5['params/Mesh/sliceMax'][()]
+        time_min = h5['params/Mesh/sliceMin'][()]
         time_step = abs(time_max - time_min) / number_of_time_steps #s
 
         photon_energy = h5['params/photonEnergy'].value # eV
         photon_energy = photon_energy * e # Convert to J
 
 
-    # matrix dataset to write with values 0...size*size-1
-    print("Read complex E field of size ({0}x{1}x{2}).".format(
-        number_of_x_meshpoints, number_of_y_meshpoints, number_of_time_steps))
+        # matrix dataset to write with values 0...size*size-1
+        print("Read geometry: ({0}x{1}x{2}).".format(
+            number_of_x_meshpoints, number_of_y_meshpoints, number_of_time_steps))
 
-    # open file for writing
-    opmd_fname = input_file.replace(".h5", ".opmd.h5")
+        # open file for writing
+        opmd_fname = input_file.replace(".h5", ".opmd.h5")
 
-    series = opmd.Series(opmd_fname, opmd.Access_Type.create)
+        series = opmd.Series(opmd_fname, opmd.Access_Type.create)
+        print("Created an empty {0} Series".format(series.iteration_encoding))
+        print(len(series.iterations))
 
-    print("Created an empty {0} Series".format(series.iteration_encoding))
+        for time_step in range(number_of_time_steps):
 
-    print(len(series.iterations))
-    E_hor_real = series.iterations[1].meshes["E_hor_real"][opmd.Mesh_Record_Component.SCALAR]
+            E_hor_real = series.iterations[time_step+1].meshes["E_hor_real"][opmd.Mesh_Record_Component.SCALAR]
+            data = h5['data/arrEhor'][:, :, time_step, 0].astype(numpy.float64)
+            dataset = opmd.Dataset(data.dtype,
+                                   [number_of_x_meshpoints,
+                                    number_of_y_meshpoints])
 
-    dataset = opmd.Dataset(data.dtype, data.shape)
+            print("Created a Dataset of size {0}x{1} and Datatype {2}".format(
+                dataset.extent[0], dataset.extent[1], dataset.dtype))
 
-    print("Created a Dataset of size {0}x{1} and Datatype {2}".format(
-        dataset.extent[0], dataset.extent[1], dataset.dtype))
+            E_hor_real.reset_dataset(dataset)
+            print("Set the dataset properties for the scalar field rho in iteration {}".format(time_step))
 
-    E_hor_real.reset_dataset(dataset)
-    print("Set the dataset properties for the scalar field rho in iteration 1")
+            series.flush()
+            print("File structure has been written")
 
-    series.flush()
-    print("File structure has been written")
+            E_hor_real[()] = data
 
-    E_hor_real[()] = data
-
-    print("Stored the whole Dataset contents as a single chunk, " +
-          "ready to write content")
-
-    series.flush()
-    print("Dataset content has been fully written")
+        series.flush()
+        print("Dataset content has been fully written")
 
     # The files in 'series' are still open until the object is destroyed, on
     # which it cleanly flushes and closes all open file handles.
