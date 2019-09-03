@@ -126,22 +126,33 @@ def convertToOPMD(input_file):
 
         for time_step in range(number_of_time_steps):
 
+            print("Writing at time step # {}.".format(time_step))
+
             E_hor_real = series.iterations[time_step+1].meshes["E_hor_real"][opmd.Mesh_Record_Component.SCALAR]
-            data = h5['data/arrEhor'][:, :, time_step, 0].astype(numpy.float64)
-            dataset = opmd.Dataset(data.dtype,
-                                   [number_of_x_meshpoints,
-                                    number_of_y_meshpoints])
+            E_hor_imag = series.iterations[time_step+1].meshes["E_hor_imag"][opmd.Mesh_Record_Component.SCALAR]
+            E_ver_real = series.iterations[time_step+1].meshes["E_ver_real"][opmd.Mesh_Record_Component.SCALAR]
+            E_ver_imag = series.iterations[time_step+1].meshes["E_ver_imag"][opmd.Mesh_Record_Component.SCALAR]
 
-            print("Created a Dataset of size {0}x{1} and Datatype {2}".format(
-                dataset.extent[0], dataset.extent[1], dataset.dtype))
+            ehor_re = h5['data/arrEhor'][:, :, time_step, 0].astype(numpy.float64)
+            ehor_im = h5['data/arrEhor'][:, :, time_step, 1].astype(numpy.float64)
+            ever_re = h5['data/arrEver'][:, :, time_step, 0].astype(numpy.float64)
+            ever_im = h5['data/arrEver'][:, :, time_step, 1].astype(numpy.float64)
 
-            E_hor_real.reset_dataset(dataset)
-            print("Set the dataset properties for the scalar field rho in iteration {}".format(time_step))
+            ehor_re_dataset = opmd.Dataset(ehor_re.dtype, [number_of_x_meshpoints, number_of_y_meshpoints])
+            ehor_im_dataset = opmd.Dataset(ehor_im.dtype, [number_of_x_meshpoints, number_of_y_meshpoints])
+            ever_re_dataset = opmd.Dataset(ever_re.dtype, [number_of_x_meshpoints, number_of_y_meshpoints])
+            ever_im_dataset = opmd.Dataset(ever_im.dtype, [number_of_x_meshpoints, number_of_y_meshpoints])
 
-            series.flush()
-            print("File structure has been written")
+            E_hor_real.reset_dataset(ehor_re_dataset)
+            E_hor_imag.reset_dataset(ehor_im_dataset)
+            E_ver_real.reset_dataset(ever_re_dataset)
+            E_ver_imag.reset_dataset(ever_im_dataset)
 
-            E_hor_real[()] = data
+
+            E_hor_real[()] = ehor_re
+            E_hor_imag[()] = ehor_im
+            E_ver_real[()] = ehor_re
+            E_ver_imag[()] = ehor_im
 
         series.flush()
         print("Dataset content has been fully written")
