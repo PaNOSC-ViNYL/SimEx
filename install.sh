@@ -4,7 +4,18 @@
 
 HOSTNAME=`hostname`
 
-echo $THIRD_PARTY_ROOT
+if [ -z $1 ]; then
+	cat <<EOF
+usage: $0 MODE
+	MODE includes:
+	conda
+	maxwell
+	develop
+EOF
+	exit
+fi
+
+#echo $THIRD_PARTY_ROOT
 
 MODE=$1
 if [ $MODE = "maxwell" ]
@@ -24,11 +35,14 @@ then
 elif [ $MODE = "conda" ]
 then
     echo $MODE
-    INSTALL_PREFIX=$HOME/Codes/anaconda3/envs/simex
-    DEVELOPER_MODE=ON
-    XCSIT=ON
-    export LD_LIBRARY_PATH=$HOME/Codes/anaconda3/envs/simex/lib:$LD_LIBRARY_PATH
-    export PYTHONPATH=$HOME/Codes/anaconda3/envs/simex/lib/python3.6:$HOME/Codes/anaconda3/envs/simex/lib/python3.6/site-packages:$PYTHONPATH
+	#conda env create -f conda/simex-conda.yml
+	#conda activate simex
+	CONDAPATH=$CONDA_PREFIX
+    INSTALL_PREFIX=$CONDAPATH
+    DEVELOPER_MODE=OFF
+    XCSIT=OFF
+    export LD_LIBRARY_PATH=$CONDAPATH/lib:$LD_LIBRARY_PATH
+    export PYTHONPATH=$CONDAPATH/lib/python3.6:$CONDAPATH/lib/python3.6/site-packages:$PYTHONPATH
 fi
 
 
