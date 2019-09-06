@@ -74,19 +74,12 @@ def convertToOPMD(input_file):
 
     :example: convertToOPMD(input_file="prop_out.h5")
     """
-    ###############################################
-    import ipdb
-    #ipdb.set_trace()
-    ###############################################
-
     # Check input file.
     if not h5py.is_hdf5(input_file):
         raise IOError("Not a valid hdf5 file: %s. " % (input_file))
 
     # Read the data into memory.
     with h5py.File( input_file, 'r') as h5:
-
-        import ipdb; ipdb.set_trace()
 
         # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
 
@@ -114,7 +107,6 @@ def convertToOPMD(input_file):
         photon_energy = h5['params/photonEnergy'].value # eV
         photon_energy = photon_energy * e # Convert to J
 
-
         # matrix dataset to write with values 0...size*size-1
         print("Read geometry: ({0}x{1}x{2}).".format(
             number_of_x_meshpoints, number_of_y_meshpoints, number_of_time_steps))
@@ -128,12 +120,10 @@ def convertToOPMD(input_file):
 
         for time_step in range(number_of_time_steps):
 
-            print("Writing at time step # {}.".format(time_step))
-
-            E_hor_real = series.iterations[time_step+1].meshes["E_hor_real"][opmd.Mesh_Record_Component.SCALAR]
-            E_hor_imag = series.iterations[time_step+1].meshes["E_hor_imag"][opmd.Mesh_Record_Component.SCALAR]
-            E_ver_real = series.iterations[time_step+1].meshes["E_ver_real"][opmd.Mesh_Record_Component.SCALAR]
-            E_ver_imag = series.iterations[time_step+1].meshes["E_ver_imag"][opmd.Mesh_Record_Component.SCALAR]
+            E_hor_real = series.iterations[time_step+1].meshes["E_real"]["x"]
+            E_hor_imag = series.iterations[time_step+1].meshes["E_imag"]["x"]
+            E_ver_real = series.iterations[time_step+1].meshes["E_real"]["y"]
+            E_ver_imag = series.iterations[time_step+1].meshes["E_imag"]["y"]
 
             ehor_re = h5['data/arrEhor'][:, :, time_step, 0].astype(numpy.float64)
             ehor_im = h5['data/arrEhor'][:, :, time_step, 1].astype(numpy.float64)
@@ -150,12 +140,72 @@ def convertToOPMD(input_file):
             E_ver_real.reset_dataset(ever_re_dataset)
             E_ver_imag.reset_dataset(ever_im_dataset)
 
-
             E_hor_real[()] = ehor_re
             E_hor_imag[()] = ehor_im
             E_ver_real[()] = ehor_re
             E_ver_imag[()] = ehor_im
 
+            # Write the common metadata for the group
+            import ipdb; ipdb.set_trace()
+
+            E_real = series.iterations[time_step+1].meshes["E_real"]
+            E_imag = series.iterations[time_step+1].meshes["E_imag"]
+
+            # Get grid geometry.
+            E_real.set_geometry(opmd.Geometry.cartesian)
+            E_imag.set_geometry(opmd.Geometry.cartesian)
+
+            # Get grid properties.
+            nx = h5['params/Mesh/nx'].value
+            xMax = h5['params/Mesh/xMax'].value
+            xMin = h5['params/Mesh/xMin'].value
+            dx = (xMax - xMin) / nx
+            ny = h5['params/Mesh/ny'].value
+            yMax = h5['params/Mesh/yMax'].value
+            yMin = h5['params/Mesh/yMin'].value
+            dy = (yMax - yMin) / ny
+            E_real.set_grid_spacing(numpy.array( [dx,dy], dtype=numpy.float64))
+            E_imag.set_grid_spacing(numpy.array( [dx,dy], dtype=numpy.float64))
+
+            E_real.set_grid_global_offset(numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64))
+            E_imag.set_grid_global_offset(numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64))
+
+            E_real.set_grid_unit_SI(numpy.float64(1.0))
+            E_imag.set_grid_unit_SI(numpy.float64(1.0))
+
+            E_real.set_data_order("C")
+            E_imag.set_data_order("C")
+
+            E_real.set_axis_labels([b"x",b"y"])
+            E_imag.set_axis_labels([b"x",b"y"])
+
+            E_real.set_unit_dimension([1.0, 1.0, -3.0, -1.0, 0.0, 0.0, 0.0 ])
+            E_imag.set_unit_dimension([1.0, 1.0, -3.0, -1.0, 0.0, 0.0, 0.0 ])
+               #            L    M     T     I  theta  N    J
+               # E is in volts per meters: V / m = kg * m / (A * s^3)
+               # -> L * M * T^-3 * I^-1
+
+            # Add time information
+            E_real.set_time_offset(0.)  # Time offset with respect to basePath's time
+            E_real.set_time_offset(0.)  # Time offset with respect to basePath's time
+
+            # Write attribute that is specific to each dataset:
+            # - Staggered position within a cell
+            #E_real["x"].attrs["position"] = numpy.array([0.0, 0.5], dtype=numpy.float32)
+            #E["y"].attrs["position"] = numpy.array([0.5, 0.0], dtype=numpy.float32)
+
+            # - Conversion factor to SI units
+            # WPG writes E fields in units of sqrt(W/mm^2), i.e. it writes E*sqrt(c * eps0 / 2).
+            # Unit analysis:
+            # [E] = V/m
+            # [eps0] = As/Vm
+            # [c] = m/s
+            # ==> [E^2 * eps0 * c] = V**2/m**2 * As/Vm * m/s = V*A/m**2 = W/m**2 = [Intensity]
+            # Converting to SI units by dividing by sqrt(c*eps0/2)*1e3, 1e3 for conversion from mm to m.
+            c    = 2.998e8   # m/s
+            eps0 = 8.854e-12 # As/Vm
+            E_real.set_grid_unit_SI = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )
+            E_imag.set_grid_unit_SI = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )
         series.flush()
         print("Dataset content has been fully written")
 
@@ -182,7 +232,6 @@ def convertToOPMD(input_file):
             number_of_y_meshpoints = data_shape[1]
             number_of_time_steps = data_shape[2]
 
-
             time_max = h5['params/Mesh/sliceMax'].value #s
             time_min = h5['params/Mesh/sliceMin'].value #s
             time_step = abs(time_max - time_min) / number_of_time_steps #s
@@ -193,8 +242,8 @@ def convertToOPMD(input_file):
             # Copy misc and params from original wpg output.
             opmd_h5.create_group('history/parent')
             try:
-                h5.copy('/params', opmd_h5['history/parent'])
-                h5.copy('/misc', opmd_h5['history/parent'])
+                h5.copy('/params',  opmd_h5['history/parent'])
+                h5.copy('/misc',    opmd_h5['history/parent'])
                 h5.copy('/history', opmd_h5['history/parent'])
 
             # Some keys may not exist, e.g. if the input file comes from a non-simex wpg run.
