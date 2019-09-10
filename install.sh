@@ -35,24 +35,28 @@ then
 elif [ $MODE = "conda" ]
 then
     echo $MODE
-	#conda env create -f conda/simex-conda.yml
-	#conda activate simex
-	CONDAPATH=$CONDA_PREFIX
-    INSTALL_PREFIX=$CONDAPATH
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	conda env create -f conda-requirements.yml
+	conda activate simex
+    INSTALL_PREFIX=$CONDA_PREFIX
+	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
+	PYLIB=${PYVERSION%.*}
     DEVELOPER_MODE=OFF
     XCSIT=OFF
-    export LD_LIBRARY_PATH=$CONDAPATH/lib:$LD_LIBRARY_PATH
-    export PYTHONPATH=$CONDAPATH/lib/python3.6:$CONDAPATH/lib/python3.6/site-packages:$PYTHONPATH
+    export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	echo "PYTHONPATH="$PYTHONPATH
 fi
 
 
-# Build for python3.4
 
 # Check for existing build directory, remove if found
 if [ -d build ]
 then
     echo "Found build/ directory, will remove it now."
-    rm -rvf build
+	rm -rvf build
 fi
 
 # Create new build dir and cd into it.

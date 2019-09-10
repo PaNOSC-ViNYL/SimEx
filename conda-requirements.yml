@@ -1,0 +1,27 @@
+name: simex
+channels:
+  - conda-forge
+  - csachs
+dependencies:
+  - python=3.6.*
+  - cython
+  - h5py>=2.2.1
+  - numpy>=1.9.0
+  - scipy>=0.13.3
+  - periodictable>=1.4.1
+  - biopython>=1.69
+  - breathe
+  - openpmd-api
+  - matplotlib
+  - setuptools
+  - mpi4py
+  - dill
+  - sqlalchemy
+  - numba
+  - pyfftw
+  - pint
+  - pyFAI
+  - py3nvml
+  - numexpr
+  - jupyter
+  - fftw
