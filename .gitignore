@@ -16,3 +16,5 @@ deploy_rsa
 deploy_doc_to_gh-pages.sh
 deploy_rsa.enc
 *.bak
+*.code-workspace
+*.root

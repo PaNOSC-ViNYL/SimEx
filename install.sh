@@ -4,7 +4,18 @@
 
 HOSTNAME=`hostname`
 
-echo $THIRD_PARTY_ROOT
+if [ -z $1 ]; then
+	cat <<EOF
+usage: $0 MODE
+	MODE includes:
+	conda
+	maxwell
+	develop
+EOF
+	exit
+fi
+
+#echo $THIRD_PARTY_ROOT
 
 MODE=$1
 if [ $MODE = "maxwell" ]
@@ -24,21 +35,28 @@ then
 elif [ $MODE = "conda" ]
 then
     echo $MODE
-    INSTALL_PREFIX=$HOME/Codes/anaconda3/envs/simex
-    DEVELOPER_MODE=ON
-    XCSIT=ON
-    export LD_LIBRARY_PATH=$HOME/Codes/anaconda3/envs/simex/lib:$LD_LIBRARY_PATH
-    export PYTHONPATH=$HOME/Codes/anaconda3/envs/simex/lib/python3.6:$HOME/Codes/anaconda3/envs/simex/lib/python3.6/site-packages:$PYTHONPATH
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	conda env create -f conda-requirements.yml
+	conda activate simex
+    INSTALL_PREFIX=$CONDA_PREFIX
+	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
+	PYLIB=${PYVERSION%.*}
+    DEVELOPER_MODE=OFF
+    XCSIT=OFF
+    export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	echo "PYTHONPATH="$PYTHONPATH
 fi
 
 
-# Build for python3.4
 
 # Check for existing build directory, remove if found
 if [ -d build ]
 then
     echo "Found build/ directory, will remove it now."
-    rm -rvf build
+	rm -rvf build
 fi
 
 # Create new build dir and cd into it.
