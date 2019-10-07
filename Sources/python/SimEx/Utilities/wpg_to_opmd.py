@@ -20,7 +20,7 @@
 ##########################################################################
 
 from argparse import ArgumentParser
-import h5py
+from SimEx.Utilities import OpenPMDTools as opmd_legacy
 import math
 import numpy
 from scipy import constants
@@ -63,7 +63,7 @@ OPMD_DATATYPES={
                 29:opmd.Datatype.BOOL,
                 }
 
-from SimEx.Utilities import OpenPMDTools as opmd_legacy
+
 
 def convertToOPMD(input_file):
     """ Take native wpg output and rewrite in openPMD conformant way.
@@ -102,7 +102,7 @@ def convertToOPMD(input_file):
         time_min = h5['params/Mesh/sliceMin'][()]
         time_step = abs(time_max - time_min) / number_of_time_steps #s
 
-        photon_energy = h5['params/photonEnergy'].value # eV
+        photon_energy = h5['params/photonEnergy'][()]
         photon_energy = photon_energy * e # Convert to J
 
         # matrix dataset to write with values 0...size*size-1
@@ -113,16 +113,15 @@ def convertToOPMD(input_file):
         opmd_fname = input_file.replace(".h5", ".opmd.h5")
 
         series = opmd.Series(opmd_fname, opmd.Access_Type.create)
-        print("Created an empty {0} Series".format(series.iteration_encoding))
-        print(len(series.iterations))
 
+
+        E_hor_real = series.iterations[1].meshes["E_real"]["x"]
+        E_hor_imag = series.iterations[1].meshes["E_imag"]["x"]
+        E_ver_real = series.iterations[1].meshes["E_real"]["y"]
+        E_ver_imag = series.iterations[1].meshes["E_imag"]["y"]
+
+        # Loop over time slices.
         for time_step in range(number_of_time_steps):
-
-            E_hor_real = series.iterations[time_step+1].meshes["E_real"]["x"]
-            E_hor_imag = series.iterations[time_step+1].meshes["E_imag"]["x"]
-            E_ver_real = series.iterations[time_step+1].meshes["E_real"]["y"]
-            E_ver_imag = series.iterations[time_step+1].meshes["E_imag"]["y"]
-
             ehor_re = h5['data/arrEhor'][:, :, time_step, 0].astype(numpy.float64)
             ehor_im = h5['data/arrEhor'][:, :, time_step, 1].astype(numpy.float64)
             ever_re = h5['data/arrEver'][:, :, time_step, 0].astype(numpy.float64)
@@ -144,8 +143,6 @@ def convertToOPMD(input_file):
             E_ver_imag[()] = ehor_im
 
             # Write the common metadata for the group
-            import ipdb; ipdb.set_trace()
-
             E_real = series.iterations[time_step+1].meshes["E_real"]
             E_imag = series.iterations[time_step+1].meshes["E_imag"]
 
@@ -154,38 +151,54 @@ def convertToOPMD(input_file):
             E_imag.set_geometry(opmd.Geometry.cartesian)
 
             # Get grid properties.
-            nx = h5['params/Mesh/nx'].value
-            xMax = h5['params/Mesh/xMax'].value
-            xMin = h5['params/Mesh/xMin'].value
+            nx = h5['params/Mesh/nx'][()]
+            xMax = h5['params/Mesh/xMax'][()]
+            xMin = h5['params/Mesh/xMin'][()]
             dx = (xMax - xMin) / nx
-            ny = h5['params/Mesh/ny'].value
-            yMax = h5['params/Mesh/yMax'].value
-            yMin = h5['params/Mesh/yMin'].value
-            dy = (yMax - yMin) / ny
-            E_real.set_grid_spacing(numpy.array( [dx,dy], dtype=numpy.float64))
-            E_imag.set_grid_spacing(numpy.array( [dx,dy], dtype=numpy.float64))
 
-            E_real.set_grid_global_offset(numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64))
-            E_imag.set_grid_global_offset(numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64))
+            ny = h5['params/Mesh/ny'][()]
+            yMax = h5['params/Mesh/yMax'][()]
+            yMin = h5['params/Mesh/yMin'][()]
+            dy = (yMax - yMin) / ny
+
+            nt = h5['params/Mesh/nt'][()]
+            tMax = h5['params/Mesh/tMax'][()]
+            tMin = h5['params/Mesh/tMin'][()]
+            dt = (tMax - tMin) / nt
+
+            E_real.set_grid_spacing(numpy.array([dx, dy], dtype=numpy.float64))
+            E_imag.set_grid_spacing(numpy.array([dx, dy], dtype=numpy.float64))
+
+            E_real.set_grid_global_offset(numpy.array([h5['params/xCentre'][()],
+                                                       h5['params/yCentre', 0.0][()]],
+                                                      dtype=numpy.float64
+                                                      )
+                                          )
+            E_imag.set_grid_global_offset(numpy.array([h5['params/xCentre'][()],
+                                                       h5['params/yCentre', 0.0][()]],
+                                                      dtype=numpy.float64
+                                                      )
+                                          )
 
             E_real.set_grid_unit_SI(numpy.float64(1.0))
             E_imag.set_grid_unit_SI(numpy.float64(1.0))
 
-            E_real.set_data_order("C")
-            E_imag.set_data_order("C")
+            E_real.set_data_order(opmd.Data_Order.C)
+            E_imag.set_data_order(opmd.Data_Order.C)
 
-            E_real.set_axis_labels([b"x",b"y"])
-            E_imag.set_axis_labels([b"x",b"y"])
+            E_real.set_axis_labels([b"x", b"y"])
+            E_imag.set_axis_labels([b"x", b"y"])
 
-            E_real.set_unit_dimension([1.0, 1.0, -3.0, -1.0, 0.0, 0.0, 0.0 ])
-            E_imag.set_unit_dimension([1.0, 1.0, -3.0, -1.0, 0.0, 0.0, 0.0 ])
-               #            L    M     T     I  theta  N    J
-               # E is in volts per meters: V / m = kg * m / (A * s^3)
-               # -> L * M * T^-3 * I^-1
-
-            # Add time information
-            E_real.set_time_offset(0.)  # Time offset with respect to basePath's time
-            E_real.set_time_offset(0.)  # Time offset with respect to basePath's time
+            unit_dimension = {opmd.Unit_Dimension.L:  1.0,
+                              opmd.Unit_Dimension.M:  1.0,
+                              opmd.Unit_Dimension.T: -3.0,
+                              opmd.Unit_Dimension.I: -1.0,
+                              opmd.Unit_Dimension.theta: 0.0,
+                              opmd.Unit_Dimension.N: 0.0,
+                              opmd.Unit_Dimension.J: 0.0
+                              }
+            E_real.set_unit_dimension(unit_dimension)
+            E_imag.set_unit_dimension(unit_dimension)
 
             # Write attribute that is specific to each dataset:
             # - Staggered position within a cell
@@ -202,9 +215,10 @@ def convertToOPMD(input_file):
             # Converting to SI units by dividing by sqrt(c*eps0/2)*1e3, 1e3 for conversion from mm to m.
             c    = 2.998e8   # m/s
             eps0 = 8.854e-12 # As/Vm
-            E_real.set_grid_unit_SI = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )
-            E_imag.set_grid_unit_SI = numpy.float64(1.0  / math.sqrt(0.5 * c * eps0) / 1.0e3 )
-        series.flush()
+            E_real.set_grid_unit_SI = numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3)
+            E_imag.set_grid_unit_SI = numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3)
+            series.flush()
+
         print("Dataset content has been fully written")
 
     # The files in 'series' are still open until the object is destroyed, on
