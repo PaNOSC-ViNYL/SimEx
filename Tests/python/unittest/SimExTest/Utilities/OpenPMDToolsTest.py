@@ -53,10 +53,10 @@ class OpenPMDToolsTest(unittest.TestCase):
                 os.remove(f)
 
     def testWpgToOPMDLegacyConverter(self):
-        """ Test the conversion of wpg output to openPMD conform file."""
+        """ Test the conversion of wpg output to openPMD conform file, omitting the openpmd-api."""
 
         # Get sample file.
-        h5_input = generateTestFilePath('prop_out_0000001.h5')
+        h5_input = generateTestFilePath('prop_out/prop_out_0000011.h5')
 
         # Convert.
         convertToOPMD(h5_input)
@@ -89,7 +89,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         """ Test the conversion of wpg output to openPMD conform file."""
 
         # Get sample file.
-        h5_input = generateTestFilePath('prop_out_0000001.h5')
+        h5_input = generateTestFilePath('prop_out/prop_out_0000011.h5')
 
         # Convert.
         convertToOPMD(h5_input)
