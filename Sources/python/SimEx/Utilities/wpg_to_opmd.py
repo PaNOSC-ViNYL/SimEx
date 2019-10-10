@@ -23,8 +23,7 @@ from argparse import ArgumentParser
 from SimEx.Utilities import OpenPMDTools as opmd_legacy
 import math
 import numpy
-import openpmd_api as opmd
-from SimEx.Utilities import OpenPMDTools as opmd_legacy
+import h5py
 from scipy import constants
 import openpmd_api as opmd
 # Get some constants.
@@ -117,13 +116,15 @@ def convertToOPMD(input_file):
         series = opmd.Series(opmd_fname, opmd.Access_Type.create)
 
 
-        E_hor_real = series.iterations[1].meshes["E_real"]["x"]
-        E_hor_imag = series.iterations[1].meshes["E_imag"]["x"]
-        E_ver_real = series.iterations[1].meshes["E_real"]["y"]
-        E_ver_imag = series.iterations[1].meshes["E_imag"]["y"]
 
         # Loop over time slices.
         for time_step in range(number_of_time_steps):
+
+            E_hor_real = series.iterations[time_step+1].meshes["E_real"]["x"]
+            E_hor_imag = series.iterations[time_step+1].meshes["E_imag"]["x"]
+            E_ver_real = series.iterations[time_step+1].meshes["E_real"]["y"]
+            E_ver_imag = series.iterations[time_step+1].meshes["E_imag"]["y"]
+
             ehor_re = h5['data/arrEhor'][:, :, time_step, 0].astype(numpy.float64)
             ehor_im = h5['data/arrEhor'][:, :, time_step, 1].astype(numpy.float64)
             ever_re = h5['data/arrEver'][:, :, time_step, 0].astype(numpy.float64)
@@ -163,21 +164,20 @@ def convertToOPMD(input_file):
             yMin = h5['params/Mesh/yMin'][()]
             dy = (yMax - yMin) / ny
 
-            nt = h5['params/Mesh/nt'][()]
-            tMax = h5['params/Mesh/tMax'][()]
-            tMin = h5['params/Mesh/tMin'][()]
-            dt = (tMax - tMin) / nt
+            tMax = h5['params/Mesh/sliceMax'][()]
+            tMin = h5['params/Mesh/sliceMin'][()]
+            dt = (tMax - tMin) / number_of_time_steps
 
             E_real.set_grid_spacing(numpy.array([dx, dy], dtype=numpy.float64))
             E_imag.set_grid_spacing(numpy.array([dx, dy], dtype=numpy.float64))
 
             E_real.set_grid_global_offset(numpy.array([h5['params/xCentre'][()],
-                                                       h5['params/yCentre', 0.0][()]],
+                                                       h5['params/yCentre'][()]],
                                                       dtype=numpy.float64
                                                       )
                                           )
             E_imag.set_grid_global_offset(numpy.array([h5['params/xCentre'][()],
-                                                       h5['params/yCentre', 0.0][()]],
+                                                       h5['params/yCentre'][()]],
                                                       dtype=numpy.float64
                                                       )
                                           )
@@ -217,11 +217,17 @@ def convertToOPMD(input_file):
             # Converting to SI units by dividing by sqrt(c*eps0/2)*1e3, 1e3 for conversion from mm to m.
             c    = 2.998e8   # m/s
             eps0 = 8.854e-12 # As/Vm
-            E_real.set_grid_unit_SI = numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3)
-            E_imag.set_grid_unit_SI = numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3)
+            E_real.set_grid_unit_SI(numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3))
+            E_imag.set_grid_unit_SI(numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3))
+
             series.flush()
 
-        print("Dataset content has been fully written")
+            print("Dataset content has been fully written")
+
+            # del ehor_re_dataset
+            # del ehor_im_dataset
+            # del ever_re_dataset
+            # del ever_im_dataset
 
     # The files in 'series' are still open until the object is destroyed, on
     # which it cleanly flushes and closes all open file handles.
