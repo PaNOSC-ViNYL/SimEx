@@ -26,6 +26,7 @@ import numpy
 import h5py
 from scipy import constants
 import openpmd_api as opmd
+
 # Get some constants.
 c = constants.speed_of_light
 eps0 = constants.epsilon_0
@@ -80,15 +81,6 @@ def convertToOPMD(input_file):
     # Read the data into memory.
     with h5py.File( input_file, 'r') as h5:
 
-        # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
-
-        #data =  h5['data/arrEhor'][()]
-
-        # Have to convert to float64 until openPMD-API issue #331 is fixed.
-        #data = data.astype(numpy.float64)
-
-        #data_shape = data.shape
-
         ## Branch off if this is a non-time dependent calculation in frequency domain.
         #if data_shape[2] == 1 and h5['params/wDomain'].value == "frequency":
             ## Time independent calculation in frequency domain.
@@ -115,9 +107,8 @@ def convertToOPMD(input_file):
 
         series = opmd.Series(opmd_fname, opmd.Access_Type.create)
 
-
-
         # Loop over time slices.
+        print("Converting {0:s} to openpmd compliant {1:s}.".format(input_file, opmd_fname))
         for time_step in range(number_of_time_steps):
 
             E_hor_real = series.iterations[time_step+1].meshes["E_real"]["x"]
@@ -220,9 +211,10 @@ def convertToOPMD(input_file):
             E_real.set_grid_unit_SI(numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3))
             E_imag.set_grid_unit_SI(numpy.float64(1.0/math.sqrt(0.5*c*eps0)/1.0e3))
 
+            # Add particles.
+
             series.flush()
 
-            print("Dataset content has been fully written")
 
             # del ehor_re_dataset
             # del ehor_im_dataset
