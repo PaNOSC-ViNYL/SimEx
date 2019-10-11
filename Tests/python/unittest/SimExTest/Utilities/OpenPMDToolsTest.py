@@ -23,6 +23,7 @@
 import numpy
 import os
 import unittest
+import openpmd_api as opmd
 
 from SimEx.Utilities import checkOpenPMD_h5 as opmd_validator
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
@@ -103,20 +104,10 @@ class OpenPMDToolsTest(unittest.TestCase):
         # Check new file was generated.
         self.assertTrue( os.path.isfile( opmd_h5_file ) )
 
-        # Validate the new file.
-        g = opmd_validator.open_file(opmd_h5_file)
+        # Read the file back in through the API.
+        series = opmd.Series(opmd_h5_file, opmd.Access_Type.read_only)
 
-        # Setup result array.
-        result_array = numpy.array([0, 0])
-        result_array += opmd_validator.check_root_attr(g, False)
-
-        # Go through all the iterations, checking both the particles and the meshes
-        extensions = {'ED-PIC': False, 'HYDRO1D': False}
-        result_array += opmd_validator.check_iterations(g,False,extensions)
-
-        # Assert that no errors nor warnings were issued.
-        self.assertEqual( result_array[0], 0 )
-        self.assertEqual( result_array[1], 0 )
+        self.assertIsInstance(series, opmd.Series)
 
     def testHydroTxtToOPMDConverter(self):
         """ Test the conversion of esther output to openPMD conform hdf5 file."""
