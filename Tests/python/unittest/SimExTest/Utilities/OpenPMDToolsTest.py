@@ -25,7 +25,7 @@ import os
 import unittest
 import openpmd_api as opmd
 
-import wpg
+# import WPG
 from SimEx.Utilities import checkOpenPMD_h5 as opmd_validator
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
 from SimEx.Utilities.wpg_to_opmd import convertToOPMD, convertToOPMDLegacy
@@ -109,6 +109,26 @@ class OpenPMDToolsTest(unittest.TestCase):
         series = opmd.Series(opmd_h5_file, opmd.Access_Type.read_only)
 
         self.assertIsInstance(series, opmd.Series)
+
+        # Check attributes are present.
+        try:
+            series.author
+            series.date
+            series.software
+            series.software_version
+        except RuntimeError:
+            self.fail("Error while querying attribute.")
+        except:
+            raise
+
+    def testLoadOPMDWavefront(self):
+        """ Test if loading a wavefront from openpmd-hdf into a WPG structure works."""
+
+        ifname = generateTestFilePath('prop_out/prop_out_0000001.opmd.h5')
+
+        series = opmd.Series(ifname, opmd.Access_Type.read_only)
+        wavefront = WPG.Wavefront()
+
 
     def testHydroTxtToOPMDConverter(self):
         """ Test the conversion of esther output to openPMD conform hdf5 file."""
