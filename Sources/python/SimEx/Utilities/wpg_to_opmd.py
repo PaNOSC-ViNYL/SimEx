@@ -27,6 +27,8 @@ import h5py
 from scipy import constants
 import openpmd_api as opmd
 
+import time
+
 # Get some constants.
 c = constants.speed_of_light
 eps0 = constants.epsilon_0
@@ -106,6 +108,22 @@ def convertToOPMD(input_file):
         opmd_fname = input_file.replace(".h5", ".opmd.h5")
 
         series = opmd.Series(opmd_fname, opmd.Access_Type.create)
+
+        # Add metadata
+        series.set_author("")
+        localtime = time.localtime()
+        date_string = "{}-{}-{} {}:{}:{} {}".format(localtime.tm_year,
+                                                    localtime.tm_month,
+                                                    localtime.tm_day,
+                                                    localtime.tm_hour,
+                                                    localtime.tm_min,
+                                                    localtime.tm_sec,
+                                                    time.tzname[time.daylight])
+        series.set_date(date_string)
+        series.set_software("WavePropaGator (WPG)")
+        series.set_software_version(h5["info/package_version"][()])
+        series.set_comment("This series is based on output from a WPG run converted to \
+                           openPMD format using the utility %s, part of the SimEx library. " % (__file__))
 
         # Loop over time slices.
         print("Converting {0:s} to openpmd compliant {1:s}.".format(input_file, opmd_fname))
