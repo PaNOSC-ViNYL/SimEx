@@ -19,15 +19,14 @@
 #                                                                        #
 ##########################################################################
 
-from argparse import ArgumentParser
-from SimEx.Utilities import OpenPMDTools as opmd_legacy
 import math
-import numpy
-import h5py
-from scipy import constants
-import openpmd_api as opmd
+from argparse import ArgumentParser
 
-import time
+import h5py
+import numpy
+import openpmd_api as opmd
+from SimEx.Utilities import OpenPMDTools as opmd_legacy
+from scipy import constants
 
 # Get some constants.
 c = constants.speed_of_light
@@ -66,7 +65,6 @@ OPMD_DATATYPES={
                 28:opmd.Datatype.ARR_DBL_7,
                 29:opmd.Datatype.BOOL,
                 }
-
 
 
 def convertToOPMD(input_file):
@@ -110,23 +108,55 @@ def convertToOPMD(input_file):
         series = opmd.Series(opmd_fname, opmd.Access_Type.create)
 
         # Add metadata
-        series.set_author("")
+        series.set_author("SIMEX")
+
+        ### FIXME: For some obscure reason, have to local import time module here, othewise
+        ### FIXME: get runtime error about "time" not being assigned.
+        import time
         localtime = time.localtime()
         date_string = "{}-{}-{} {}:{}:{} {}".format(localtime.tm_year,
-                                                    localtime.tm_month,
-                                                    localtime.tm_day,
+                                                    localtime.tm_mon,
+                                                    localtime.tm_mday,
                                                     localtime.tm_hour,
                                                     localtime.tm_min,
                                                     localtime.tm_sec,
-                                                    time.tzname[time.daylight])
+                                                    localtime.tm_zone,
+                                                    )
+        # Base standard attributes.
         series.set_date(date_string)
         series.set_software("WavePropaGator (WPG)")
         series.set_software_version(h5["info/package_version"][()])
+
+        # WAVEFRONT extension attributes.
+        series.set_attribute("beamline", str(h5['params/beamline/printout'][()]))
+        series.set_attribute("temporal domain", str(h5["params/wDomain"][()]))
+        series.set_attribute("spatial domain", str(h5["params/wSpace"][()]))
+
+        # Further comments.
         series.set_comment("This series is based on output from a WPG run converted to \
                            openPMD format using the utility %s, part of the SimEx library. " % (__file__))
 
         # Loop over time slices.
         print("Converting {0:s} to openpmd compliant {1:s}.".format(input_file, opmd_fname))
+
+        # Add constant data here.
+        series.set_attribute("radius of curvature in x", h5["params/Rx"][()])
+        series.set_attribute("z coordinate", h5["params/Mesh/zCoord"][()])
+        series.set_attribute("Rx_Unit_Dimension", [1,0,0,0,0,0,0])
+        series.set_attribute("Rx_UnitSI", 1.0)
+        series.set_attribute("radius of curvature in y", h5["params/Ry"][()])
+        series.set_attribute("Ry_Unit_Dimension", [1,0,0,0,0,0,0])
+        series.set_attribute("Ry_UnitSI", 1.0)
+        series.set_attribute("Delta radius of curvature in x", h5["params/dRx"][()])
+        series.set_attribute("DRx_Unit_Dimension", [1,0,0,0,0,0,0])
+        series.set_attribute("DRx_UnitSI", 1.0)
+        series.set_attribute("Delta radius of curvature in y", h5["params/dRy"][()])
+        series.set_attribute("DRy_Unit_Dimension", [1,0,0,0,0,0,0])
+        series.set_attribute("DRy_UnitSI", 1.0)
+        series.set_attribute("photon energy", h5['params/photonEnergy'][()])
+        series.set_attribute("photon energy unit dimension", [2,1,-2,0,0,0,0])
+        series.set_attribute("photon energy UnitSI", e)
+
         for time_step in range(number_of_time_steps):
 
             E_hor_real = series.iterations[time_step+1].meshes["E_real"]["x"]
@@ -213,8 +243,6 @@ def convertToOPMD(input_file):
 
             # Write attribute that is specific to each dataset:
             # - Staggered position within a cell
-            #E_real["x"].attrs["position"] = numpy.array([0.0, 0.5], dtype=numpy.float32)
-            #E["y"].attrs["position"] = numpy.array([0.5, 0.0], dtype=numpy.float32)
 
             # - Conversion factor to SI units
             # WPG writes E fields in units of sqrt(W/mm^2), i.e. it writes E*sqrt(c * eps0 / 2).
@@ -233,11 +261,6 @@ def convertToOPMD(input_file):
 
             series.flush()
 
-
-            # del ehor_re_dataset
-            # del ehor_im_dataset
-            # del ever_re_dataset
-            # del ever_im_dataset
 
     # The files in 'series' are still open until the object is destroyed, on
     # which it cleanly flushes and closes all open file handles.
