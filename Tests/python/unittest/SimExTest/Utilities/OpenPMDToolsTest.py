@@ -100,7 +100,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         opmd_h5_file = h5_input.replace(".h5", ".opmd.h5")
 
         # Make sure we clean up after test.
-        self.__files_to_remove.append(opmd_h5_file)
+        # self.__files_to_remove.append(opmd_h5_file)
 
         # Check new file was generated.
         self.assertTrue( os.path.isfile( opmd_h5_file ) )
@@ -116,10 +116,30 @@ class OpenPMDToolsTest(unittest.TestCase):
             series.date
             series.software
             series.software_version
+            series.get_attribute("radius of curvature in x")
+            series.get_attribute("z coordinate")
+            series.get_attribute("Rx_Unit_Dimension")
+            series.get_attribute("Rx_UnitSI")
+            series.get_attribute("radius of curvature in y")
+            series.get_attribute("Ry_Unit_Dimension")
+            series.get_attribute("Ry_UnitSI")
+            series.get_attribute("Delta radius of curvature in x")
+            series.get_attribute("DRx_Unit_Dimension")
+            series.get_attribute("DRx_UnitSI")
+            series.get_attribute("Delta radius of curvature in y")
+            series.get_attribute("DRy_Unit_Dimension")
+            series.get_attribute("DRy_UnitSI")
+            series.get_attribute("photon energy")
+            series.get_attribute("photon energy unit dimension")
+            series.get_attribute("photon energy UnitSI")
+
         except RuntimeError:
             self.fail("Error while querying attribute.")
         except:
             raise
+
+        # Check the beamline serialization
+        self.assertIsInstance(series.get_attribute("beamline"), str)
 
     def testLoadOPMDWavefront(self):
         """ Test if loading a wavefront from openpmd-hdf into a WPG structure works."""
