@@ -7,7 +7,8 @@ FIND_PACKAGE (CUDA REQUIRED)
 
 # Add the project.
 ExternalProject_Add( gapd
-    URL http://www1.pims.ac.cn/UploadFile/file/GAPD.zip
+    #URL http://www1.pims.ac.cn/UploadFile/file/GAPD.zip
+	URL ${CMAKE_CURRENT_SOURCE_DIR}/GAPD.zip
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
