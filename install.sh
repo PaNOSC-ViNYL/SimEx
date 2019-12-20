@@ -26,58 +26,11 @@ then
 	git apply patch_for_maxwell
 elif [ $MODE = "develop" ]
 then
-	echo $MODE
-	INSTALL_PREFIX=..
-	DEVELOPER_MODE=ON
-	XCSIT=ON
-    THIRD_PARTY_ROOT=/data/netapp/s2e/simex
-elif [ $MODE = "conda-env" ]
-then
-	echo $MODE
-    echo "Create conda environment"
-	CONDA_BIN=`which conda`
-	CONDA_BIN=${CONDA_BIN%/*}
-	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-	conda env create -n simex -f environment.yml
-	echo "conda environment was deployed. Please run the following to install SIMEX Platform:"
-	echo ""
-	echo " conda activate simex"
-	echo " ./install conda"
-	exit
-
-elif [ $MODE = "conda" ]
-then
-	echo $MODE
-	CONDA_BIN=`which conda`
-	CONDA_BIN=${CONDA_BIN%/*}
-	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-	INSTALL_PREFIX=$CONDA_PREFIX
-	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
-	PYLIB=${PYVERSION%.*}
-	DEVELOPER_MODE=OFF
-	XCSIT=OFF
-    export ZLIB_ROOT=$CONDA_PREFIX
-	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+    echo $MODE
+    INSTALL_PREFIX=..
+    DEVELOPER_MODE=ON
+    XCSIT=ON
 fi
-
-elif [ $MODE = "conda-develop" ]
-then
-	echo $MODE
-	CONDA_BIN=`which conda`
-	CONDA_BIN=${CONDA_BIN%/*}
-	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-	INSTALL_PREFIX=$CONDA_PREFIX
-	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
-	PYLIB=${PYVERSION%.*}
-	DEVELOPER_MODE=ON
-	XCSIT=OFF
-    export ZLIB_ROOT=$CONDA_PREFIX
-	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
-	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
-	# echo "PYTHONPATH="$PYTHONPATH
-fi
-
 
 # Check for existing build directory, remove if found
 if [ -d build ]
@@ -110,8 +63,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
       -DUSE_SingFELPhotonDiffractor=ON \
       -DUSE_CrystFELPhotonDiffractor=ON \
-      -DUSE_GAPDPhotonDiffractor=OFF \
-	  -DUSE_sdf=ON \
+      -DUSE_GAPDPhotonDiffractor=ON \
       -DUSE_s2e=ON \
       -DUSE_S2EReconstruction_EMC=ON \
       -DUSE_S2EReconstruction_DM=ON \
