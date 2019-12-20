@@ -20,19 +20,7 @@ then
     INSTALL_PREFIX=..
     DEVELOPER_MODE=ON
     XCSIT=ON
-    git apply patch_for_maxwell
-elif [ $MODE = "conda" ]
-then
-    echo $MODE
-    INSTALL_PREFIX=$HOME/Codes/anaconda3/envs/simex
-    DEVELOPER_MODE=ON
-    XCSIT=ON
-    export LD_LIBRARY_PATH=$HOME/Codes/anaconda3/envs/simex/lib:$LD_LIBRARY_PATH
-    export PYTHONPATH=$HOME/Codes/anaconda3/envs/simex/lib/python3.6:$HOME/Codes/anaconda3/envs/simex/lib/python3.6/site-packages:$PYTHONPATH
 fi
-
-
-# Build for python3.4
 
 # Check for existing build directory, remove if found
 if [ -d build ]
@@ -64,7 +52,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
       -DUSE_SingFELPhotonDiffractor=ON \
-      -DUSE_CrystFELPhotonDiffractor=OFF \
+      -DUSE_CrystFELPhotonDiffractor=ON \
       -DUSE_GAPDPhotonDiffractor=ON \
       -DUSE_s2e=ON \
       -DUSE_S2EReconstruction_EMC=ON \
