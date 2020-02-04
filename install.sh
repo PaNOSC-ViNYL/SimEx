@@ -4,41 +4,59 @@
 
 HOSTNAME=`hostname`
 
-echo $THIRD_PARTY_ROOT
+if [ -z $1 ]; then
+	cat <<EOF
+usage: $0 MODE
+	MODE includes:
+	conda
+	maxwell
+	develop
+EOF
+	exit
+fi
+
+#echo $THIRD_PARTY_ROOT
 
 MODE=$1
 if [ $MODE = "maxwell" ]
 then
-    echo $MODE
-    INSTALL_PREFIX=$THIRD_PARTY_ROOT
-    DEVELOPER_MODE=OFF
-    XCSIT=OFF
-    git apply patch_for_maxwell
+	echo $MODE
+	INSTALL_PREFIX=$THIRD_PARTY_ROOT
+	DEVELOPER_MODE=OFF
+	XCSIT=OFF
+	git apply patch_for_maxwell
 elif [ $MODE = "develop" ]
 then
-    echo $MODE
-    INSTALL_PREFIX=..
-    DEVELOPER_MODE=ON
-    XCSIT=ON
-    git apply patch_for_maxwell
+	echo $MODE
+	INSTALL_PREFIX=..
+	DEVELOPER_MODE=ON
+	XCSIT=OFF
+	git apply patch_for_maxwell
 elif [ $MODE = "conda" ]
 then
-    echo $MODE
-    INSTALL_PREFIX=$HOME/Codes/anaconda3/envs/simex
-    DEVELOPER_MODE=ON
-    XCSIT=ON
-    export LD_LIBRARY_PATH=$HOME/Codes/anaconda3/envs/simex/lib:$LD_LIBRARY_PATH
-    export PYTHONPATH=$HOME/Codes/anaconda3/envs/simex/lib/python3.6:$HOME/Codes/anaconda3/envs/simex/lib/python3.6/site-packages:$PYTHONPATH
+	echo $MODE
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	conda env create -f conda-requirements.yml
+	conda activate simex
+	INSTALL_PREFIX=$CONDA_PREFIX
+	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
+	PYLIB=${PYVERSION%.*}
+	DEVELOPER_MODE=OFF
+	XCSIT=OFF
+	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+	export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	echo "PYTHONPATH="$PYTHONPATH
 fi
 
 
-# Build for python3.4
 
 # Check for existing build directory, remove if found
 if [ -d build ]
 then
-    echo "Found build/ directory, will remove it now."
-    rm -rvf build
+	echo "Found build/ directory, will remove it now."
+	rm -rvf build
 fi
 
 # Create new build dir and cd into it.
@@ -61,23 +79,23 @@ export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
 export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
 cmake -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-      -DUSE_SingFELPhotonDiffractor=ON \
-      -DUSE_CrystFELPhotonDiffractor=OFF \
-      -DUSE_GAPDPhotonDiffractor=ON \
-      -DUSE_s2e=ON \
-      -DUSE_S2EReconstruction_EMC=ON \
-      -DUSE_S2EReconstruction_DM=ON \
-      -DUSE_wpg=ON \
-      -DUSE_GenesisPhotonSource=ON \
-      -DUSE_XCSITPhotonDetector=$XCSIT \
-      -DUSE_FEFFPhotonInteractor=ON \
-      -DXERCESC_ROOT=$XERCESC_ROOT \
-      -DGEANT4_ROOT=$GEANT4_ROOT \
-      -DXCSIT_ROOT=$XCSIT_ROOT \
-      -DBOOST_ROOT=$BOOST_ROOT \
-      ..
+	  -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
+	  -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+	  -DUSE_SingFELPhotonDiffractor=ON \
+	  -DUSE_CrystFELPhotonDiffractor=OFF \
+	  -DUSE_GAPDPhotonDiffractor=ON \
+	  -DUSE_s2e=ON \
+	  -DUSE_S2EReconstruction_EMC=ON \
+	  -DUSE_S2EReconstruction_DM=ON \
+	  -DUSE_wpg=ON \
+	  -DUSE_GenesisPhotonSource=ON \
+	  -DUSE_XCSITPhotonDetector=$XCSIT \
+	  -DUSE_FEFFPhotonInteractor=ON \
+	  -DXERCESC_ROOT=$XERCESC_ROOT \
+	  -DGEANT4_ROOT=$GEANT4_ROOT \
+	  -DXCSIT_ROOT=$XCSIT_ROOT \
+	  -DBOOST_ROOT=$BOOST_ROOT \
+	  ..
 
 # Build the project.
 make -j32
@@ -89,3 +107,6 @@ cd ..
 
 # Revert
 git checkout -- CMakeLists.txt
+if [ $MODE = "develop" ]; then
+	echo "Please run 'source build/simex_vars.sh' before developing"
+fi

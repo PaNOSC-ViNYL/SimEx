@@ -2,7 +2,7 @@ INCLUDE(ExternalProject)
 
 ExternalProject_Add(
 xraydb
-URL  https://github.com/scikit-beam/XrayDB/archive/master.zip
+URL https://github.com/xraypy/XrayDB/archive/4.2.zip
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
 BUILD_COMMAND ""

@@ -109,7 +109,6 @@ class XFELPhotonAnalysis(AbstractAnalysis):
             else:
                 plt.imshow(intensity[:,:,i], norm=mpl.colors.Normalize(vmin=mn, vmax=mx), extent=[xmin*1.e6, xmax*1.e6, ymax*1.e6, ymin*1.e6], cmap="viridis")
 
-            plt.gca().set_aspect('equal', 'datalim')
             plt.savefig("tmp/%s_%07d.png" % (inp_filename, i) )
             plt.clf()
 
@@ -171,7 +170,6 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         else:
             profile.imshow(wf_intensity, norm=mpl.colors.Normalize(vmin=mn, vmax=mx), extent=[xmin*1.e6, xmax*1.e6, ymax*1.e6, ymin*1.e6], cmap="viridis")
 
-        profile.set_aspect('equal', 'datalim')
 
         # Get x and y ranges.
         x = numpy.linspace(xmin*1.e6, xmax*1.e6, wf_intensity.shape[1])
