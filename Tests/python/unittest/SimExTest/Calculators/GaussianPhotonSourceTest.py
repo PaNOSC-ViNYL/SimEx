@@ -22,18 +22,12 @@
 ##########################################################################
 
 import unittest
-import os
 
 # Import the class to test.
 from SimEx.Calculators.GaussianPhotonSource import GaussianPhotonSource
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
-from SimEx.Parameters.GaussWavefrontParameters import GaussWavefrontParameters
 from SimEx.Utilities.Units import meter, joule, radian, electronvolt
 from TestUtilities import TestUtilities
-
-from wpg import Wavefront
-from wpg.wpg_uti_wf import calc_pulse_energy, averaged_intensity, calculate_fwhm, get_intensity_on_axis
-from wpg.wpg_uti_wf import integral_intensity, plot_intensity_map,plot_intensity_qmap
 
 class GaussianPhotonSourceTest(unittest.TestCase):
     """
@@ -43,14 +37,14 @@ class GaussianPhotonSourceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.beam_parameters = GaussWavefrontParameters(
+
+        cls.beam_parameters = PhotonBeamParameters(
             photon_energy = 8.0e3*electronvolt,
+            beam_diameter_fwhm = 0.3e-6*meter,
             pulse_energy = 2.4e-6*joule,
-            photon_energy_relative_bandwidth=1e-4,
-            number_of_transverse_grid_points=128,
-            number_of_time_slices=12,
+            photon_energy_relative_bandwidth=0.1,
             divergence=2.0e-6*radian,
-            z = 1*meter,
+            photon_energy_spectrum_type=None,
             )
 
     @classmethod
@@ -60,14 +54,8 @@ class GaussianPhotonSourceTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
 
-        self.__files_to_remove = []
-
     def tearDown(self):
         """ Tearing down a test. """
-
-        for f in self.__files_to_remove:
-            if os.path.isfile(f):
-                os.remove(f)
 
     def testConstruction(self):
         """ Testing the default construction of the class. """
@@ -76,74 +64,6 @@ class GaussianPhotonSourceTest(unittest.TestCase):
         source = GaussianPhotonSource(parameters=None, input_path="", output_path='GaussianSource.h5')
 
         self.assertIsInstance(source, GaussianPhotonSource)
-
-    def test_backengine(self):
-        """ Test the backengine method. """
-
-        source = GaussianPhotonSource(parameters=self.beam_parameters,
-                                      input_path="",
-                                      output_path="")
-
-        source.backengine()
-
-        self.assertIsInstance(source.data, Wavefront)
-
-    def plot_test_wavefront(self):
-        # Only for interactive session.
-        source = GaussianPhotonSource(parameters=self.beam_parameters,
-                                      input_path="",
-                                      output_path="")
-
-        source.backengine()
-
-        wf = source.data
-        integral_intensity(wf)
-        plot_intensity_map(wf)
-        plot_intensity_qmap(wf)
-
-    
-    def test_beam_diameter_in_wf(self):
-        parameters = GaussWavefrontParameters(
-            photon_energy = 8.0e3*electronvolt,
-            pulse_energy = 2.4e-5*joule,
-            photon_energy_relative_bandwidth=1e-3,
-            number_of_transverse_grid_points=2048,
-            number_of_time_slices=12,
-            beam_diameter_fwhm=1.0e-5*meter,
-            z = 1*meter,
-            )
-
-        source = GaussianPhotonSource(parameters=parameters,
-                                      input_path="/dev/null",
-                                      output_path="gauss_source_out.h5")
-
-        source.backengine()
-
-        wf = source.data
-        
-        # Compare parameterization to wavefront data.
-        calculated_fwhm = calculate_fwhm(wf)
-        self.assertAlmostEqual(1.0e6*calculated_fwhm['fwhm_x'],
-                1.0e6*parameters.beam_diameter_fwhm.m_as(meter), 1)
-        
-        calculated_pulse_energy = calc_pulse_energy(wf)
-        self.assertAlmostEqual(1.0e6*calculated_pulse_energy,
-                1.0e6*parameters.pulse_energy.m_as(joule), 1)
-
-    def test_saveH5(self):
-        """ Test saving the generated wavefront to disk. """
-
-        source = GaussianPhotonSource(parameters=self.beam_parameters,
-                                      input_path="",
-                                      output_path="gauss_source.h5")
-
-        source.backengine()
-
-        source.saveH5()
-
-        self.assertTrue(os.path.isfile(source.output_path))
-
-        self.__files_to_remove.append(source.output_path)
 
 if __name__ == '__main__':
     unittest.main()
