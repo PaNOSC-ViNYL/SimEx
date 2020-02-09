@@ -66,21 +66,15 @@ class GaussianPhotonSource(AbstractPhotonSource):
         beam_waist = 2.*hbar*c*joule*meter/theta/E
         amplitude_rms = 0.5*beam_waist/math.sqrt(math.log(2.))
 
-        print("Coherence time = {0:4.3e} s".format(coherence_time))
-        print("Beam waist at source position = {0:4.3e} m".format(beam_waist.m_as(meter)))
-        print("Amplitude RMS= {0:4.3e}".format(amplitude_rms.m_as(meter)))
-
-        ## Set the Region Of Interest window
-        # x-y range at beam waist.
         # Rule of thumb: 36 times w0
+        # x-y range at beam waist.
         range_xy = 36.0*beam_waist.m_as(meter)
-        ## Set number of sampling points in x and y and number of temporal slices.
 
+        # Set number of sampling points in x and y and number of temporal slices.
         np = 400 #self.parameters.number_of_transverse_grid_points
         nslices = 20 #self.parameters.number_of_time_slices
 
-        ## Build wavefront
-
+        # Build wavefront
         srwl_wf = build_gauss_wavefront(np, np, nslices,
                                         E.m_as(electronvolt)/1.0e3,
                                         -range_xy/2, range_xy/2,
@@ -90,6 +84,7 @@ class GaussianPhotonSource(AbstractPhotonSource):
                                         0.0,
                                         pulseEn=self.parameters.pulse_energy.m_as(joule),
                                         pulseRange=8.)
+        # Store on class.
         self.__wavefront = Wavefront(srwl_wf)
 
     @property
