@@ -22,9 +22,16 @@
 
 import os
 import shutil
+import math
+from scipy.constants import hbar, c
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Utilities.Units import meter, joule, radian, electronvolt, second
+
+from wpg.generators import build_gauss_wavefront
+from wpg import Wavefront
+
 
 class GaussianPhotonSource(AbstractPhotonSource):
     """
@@ -48,47 +55,43 @@ class GaussianPhotonSource(AbstractPhotonSource):
         self.__wavefront = None
 
     def backengine(self):
-        # Wavelength (m)
-        wavelength = 1.2398e-6/self.parameters.photon_energy
-
-        # Beam waist.
-        w0 = wavelength/(numpy.pi*beam_divergence)
-
-        # Rayleigh length
-        zR = (numpy.pi*w0**2)/wavelength
 
         # The rms of the amplitude distribution (Gaussian)
-        amplitude_rms = w0/(2*numpy.sqrt(numpy.log(2)))
+        theta = self.parameters.divergence.m_as(radian)
+        E = self.parameters.photon_energy
+        coherence_time = 2.*math.pi*hbar*joule*second/self.parameters.photon_energy_relative_bandwidth/E
+        coherence_time = coherence_time.m_as(second)
 
-        print("Wavelength = {0:4.3e} m".format(wavelength))
-        print("Beam waist at source position = {0:4.3e} m".format(w0))
-        print("Rayleigh length = {0:4.3e} m".format(zR))
-        print("Amplitude RMS= {0:4.3e} m".format(amplitude_rms))
+
+        beam_waist = 2.*hbar*c*joule*meter/theta/E
+        amplitude_rms = 0.5*beam_waist/math.sqrt(math.log(2.))
+
+        print("Coherence time = {0:4.3e} s".format(coherence_time))
+        print("Beam waist at source position = {0:4.3e} m".format(beam_waist.m_as(meter)))
+        print("Amplitude RMS= {0:4.3e}".format(amplitude_rms.m_as(meter)))
 
         ## Set the Region Of Interest window
-
         # x-y range at beam waist.
         # Rule of thumb: 36 times w0
-        range_xy = 36.0*w0
-        print("ROI set to square of {0:4.3e} m edge length.".format(range_xy))
-
+        range_xy = 36.0*beam_waist.m_as(meter)
         ## Set number of sampling points in x and y and number of temporal slices.
 
-        np = 400
-        nslices = 20
+        np = 400 #self.parameters.number_of_transverse_grid_points
+        nslices = 20 #self.parameters.number_of_time_slices
 
         ## Build wavefront
 
         srwl_wf = build_gauss_wavefront(np, np, nslices,
-                                        photon_energy/1.0e3,
+                                        E.m_as(electronvolt)/1.0e3,
                                         -range_xy/2, range_xy/2,
                                         -range_xy/2, range_xy/2,
-                                        coherence_time/numpy.sqrt(2),
-                                        sigmaAmp, sigmaAmp,
-                                        0.0, # Position
-                                        pulseEn=pulse_energy,
+                                        coherence_time/math.sqrt(2),
+                                        amplitude_rms.m_as(meter), amplitude_rms.m_as(meter),
+                                        0.0,
+                                        pulseEn=self.parameters.pulse_energy.m_as(joule),
                                         pulseRange=8.)
-        wf = Wavefront(srwl_wf)
+        self.__wavefront = Wavefront(srwl_wf)
+
     @property
     def data(self):
         """ Query for the field data. """

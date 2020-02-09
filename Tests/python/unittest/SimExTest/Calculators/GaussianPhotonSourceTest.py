@@ -29,6 +29,10 @@ from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.Units import meter, joule, radian, electronvolt
 from TestUtilities import TestUtilities
 
+from wpg import Wavefront
+from wpg.wpg_uti_wf import calc_pulse_energy, averaged_intensity, calculate_fwhm, get_intensity_on_axis
+from wpg.wpg_uti_wf import integral_intensity, plot_intensity_map,plot_intensity_qmap
+
 class GaussianPhotonSourceTest(unittest.TestCase):
     """
     Test class for the GaussianPhotonSource class.
@@ -42,7 +46,7 @@ class GaussianPhotonSourceTest(unittest.TestCase):
             photon_energy = 8.0e3*electronvolt,
             beam_diameter_fwhm = 0.3e-6*meter,
             pulse_energy = 2.4e-6*joule,
-            photon_energy_relative_bandwidth=0.1,
+            photon_energy_relative_bandwidth=1e-4,
             divergence=2.0e-6*radian,
             photon_energy_spectrum_type=None,
             )
@@ -64,6 +68,22 @@ class GaussianPhotonSourceTest(unittest.TestCase):
         source = GaussianPhotonSource(parameters=None, input_path="", output_path='GaussianSource.h5')
 
         self.assertIsInstance(source, GaussianPhotonSource)
+
+    def test_backengine(self):
+        """ Test the backengine method. """
+
+        source = GaussianPhotonSource(parameters=self.beam_parameters,
+                                      input_path="",
+                                      output_path="")
+
+        source.backengine()
+
+        self.assertIsInstance(source.data, Wavefront)
+
+        wf = source.data
+        integral_intensity(wf)
+        plot_intensity_map(wf)
+        plot_intensity_qmap(wf)
 
 if __name__ == '__main__':
     unittest.main()
