@@ -22,6 +22,7 @@
 ##########################################################################
 
 import unittest
+import os
 
 # Import the class to test.
 from SimEx.Calculators.GaussianPhotonSource import GaussianPhotonSource
@@ -58,8 +59,14 @@ class GaussianPhotonSourceTest(unittest.TestCase):
     def setUp(self):
         """ Setting up a test. """
 
+        self.__files_to_remove = []
+
     def tearDown(self):
         """ Tearing down a test. """
+
+        for f in self.__files_to_remove:
+            if os.path.isfile(f):
+                os.remove(f)
 
     def testConstruction(self):
         """ Testing the default construction of the class. """
@@ -80,10 +87,33 @@ class GaussianPhotonSourceTest(unittest.TestCase):
 
         self.assertIsInstance(source.data, Wavefront)
 
+    def plot_test_wavefront(self):
+        # Only for interactive session.
+        source = GaussianPhotonSource(parameters=self.beam_parameters,
+                                      input_path="",
+                                      output_path="")
+
+        source.backengine()
+
         wf = source.data
         integral_intensity(wf)
         plot_intensity_map(wf)
         plot_intensity_qmap(wf)
+
+    def test_saveH5(self):
+        """ Test saving the generated wavefront to disk. """
+
+        source = GaussianPhotonSource(parameters=self.beam_parameters,
+                                      input_path="",
+                                      output_path="gauss_source.h5")
+
+        source.backengine()
+
+        source.saveH5()
+
+        self.assertTrue(os.path.isfile(source.output_path))
+
+        self.__files_to_remove.append(source.output_path)
 
 if __name__ == '__main__':
     unittest.main()
