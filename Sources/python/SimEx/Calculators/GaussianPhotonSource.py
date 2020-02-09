@@ -22,16 +22,9 @@
 
 import os
 import shutil
-import math
-from scipy.constants import hbar, c
 
 from SimEx.Calculators.AbstractPhotonSource import AbstractPhotonSource
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
-from SimEx.Utilities.Units import meter, joule, radian, electronvolt, second
-
-from wpg.generators import build_gauss_wavefront
-from wpg import Wavefront
-
 
 class GaussianPhotonSource(AbstractPhotonSource):
     """
@@ -55,42 +48,47 @@ class GaussianPhotonSource(AbstractPhotonSource):
         self.__wavefront = None
 
     def backengine(self):
+        # Wavelength (m)
+        wavelength = 1.2398e-6/self.parameters.photon_energy
+
+        # Beam waist.
+        w0 = wavelength/(numpy.pi*beam_divergence)
+
+        # Rayleigh length
+        zR = (numpy.pi*w0**2)/wavelength
 
         # The rms of the amplitude distribution (Gaussian)
-        theta = self.parameters.divergence.m_as(radian)
-        E = self.parameters.photon_energy
-        coherence_time = 2.*math.pi*hbar/self.parameters.photon_energy_relative_bandwidth/E.m_as(joule)
+        amplitude_rms = w0/(2*numpy.sqrt(numpy.log(2)))
 
-        beam_waist = 2.*hbar*c/theta/E.m_as(joule)
+        print("Wavelength = {0:4.3e} m".format(wavelength))
+        print("Beam waist at source position = {0:4.3e} m".format(w0))
+        print("Rayleigh length = {0:4.3e} m".format(zR))
+        print("Amplitude RMS= {0:4.3e} m".format(amplitude_rms))
 
-        beam_diameter_fwhm = self.parameters.beam_diameter_fwhm.m_as(meter)
-        beam_waist_radius = beam_diameter_fwhm/math.sqrt(2.*math.log(2.))
-        
-        print("beam waist radius from divergence angle = {0:4.3e}".format(beam_waist))
-        print("beam waist radius from fwhm = {0:4.3e}".format(beam_waist_radius))
-        
-        # Rule of thumb: 7 times w0
+        ## Set the Region Of Interest window
+
         # x-y range at beam waist.
-        range_xy = 30.0*beam_waist_radius
+        # Rule of thumb: 36 times w0
+        range_xy = 36.0*w0
+        print("ROI set to square of {0:4.3e} m edge length.".format(range_xy))
 
-        # Set number of sampling points in x and y and number of temporal slices.
-        np = self.parameters.number_of_transverse_grid_points
-        nslices = self.parameters.number_of_time_slices
+        ## Set number of sampling points in x and y and number of temporal slices.
 
-        # Build wavefront
+        np = 400
+        nslices = 20
+
+        ## Build wavefront
+
         srwl_wf = build_gauss_wavefront(np, np, nslices,
-                                        E.m_as(electronvolt)/1.0e3,
+                                        photon_energy/1.0e3,
                                         -range_xy/2, range_xy/2,
                                         -range_xy/2, range_xy/2,
-                                        coherence_time/math.sqrt(2),
-                                        # beam_diameter_fwhm, beam_diameter_fwhm,
-                                        beam_waist_radius/2, beam_waist_radius/2, # Scaled such that fwhm comes out as demanded by parameters.
-                                        0.0,
-                                        pulseEn=self.parameters.pulse_energy.m_as(joule),
+                                        coherence_time/numpy.sqrt(2),
+                                        sigmaAmp, sigmaAmp,
+                                        0.0, # Position
+                                        pulseEn=pulse_energy,
                                         pulseRange=8.)
-        # Store on class.
-        self.__wavefront = Wavefront(srwl_wf)
-
+        wf = Wavefront(srwl_wf)
     @property
     def data(self):
         """ Query for the field data. """
@@ -102,4 +100,4 @@ class GaussianPhotonSource(AbstractPhotonSource):
 
     def saveH5(self):
         """ """
-        self.data.store_hdf5(self.output_path)
+        pass
