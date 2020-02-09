@@ -98,4 +98,4 @@ class GaussianPhotonSource(AbstractPhotonSource):
 
     def saveH5(self):
         """ """
-        pass
+        self.data.store_hdf5(self.output_path)
