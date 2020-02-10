@@ -2,6 +2,8 @@ language: python
 python:
   - "3.5"
   - "3.6"
+  - "3.7"
+  - "3.8"
   - "nightly"
 
 sudo: required
@@ -15,8 +17,8 @@ env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
     - WITH_CUDA: true
-    - DEPLOY_DOCS_FOR_PYTHON: '3.5'
-    - TRIGGER_DOCKER_FOR_PYTHON: '3.5'
+    - DEPLOY_DOCS_FOR_PYTHON: '3.8'
+    - TRIGGER_DOCKER_FOR_PYTHON: '3.8'
     - SIMEX_VERBOSE=MPI:PYTHON
 
 addons:
