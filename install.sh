@@ -1,14 +1,13 @@
 #! /bin/bash
 
-# Sample installation script. Adjustments might be neccessary.
-
 HOSTNAME=`hostname`
 
 if [ -z $1 ]; then
 	cat <<EOF
 usage: $0 MODE
 	MODE includes:
-	conda
+	conda-env: create conda simex virtual environment
+	conda: install SimEx in current conda environment 
 	maxwell
 	develop
 EOF
@@ -32,14 +31,21 @@ then
 	DEVELOPER_MODE=ON
 	XCSIT=OFF
 	git apply patch_for_maxwell
+elif [ $MODE = "conda-env" ]
+then
+	echo $MODE
+    echo "Create conda environment"
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	conda env create -n simex -f conda-requirements.yml
+	conda activate simex
 elif [ $MODE = "conda" ]
 then
 	echo $MODE
 	CONDA_BIN=`which conda`
 	CONDA_BIN=${CONDA_BIN%/*}
 	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-	conda env create -f conda-requirements.yml
-	conda activate simex
 	INSTALL_PREFIX=$CONDA_PREFIX
 	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
 	PYLIB=${PYVERSION%.*}
