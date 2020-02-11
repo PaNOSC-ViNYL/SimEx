@@ -7,7 +7,7 @@ python:
   - "nightly"
 
 sudo: required
-dist: xenial
+dist: bionic
 
 matrix:
     allow_failures:
