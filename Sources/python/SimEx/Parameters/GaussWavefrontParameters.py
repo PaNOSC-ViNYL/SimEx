@@ -21,13 +21,9 @@
 ##########################################################################
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
-from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysicalQuantity
-from SimEx.Utilities.Units import meter, electronvolt, joule, radian, PhysicalQuantity
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
-
-
-from scipy.constants import hbar, c
 from scipy import constants
 from wpg import Wavefront, wpg_uti_wf
 from wpg.srwlib import srwl
@@ -36,22 +32,19 @@ import numpy
 import os
 import sys
 
-class GaussWavefrontParameters(PhotonBeamParameters):
+class GaussWavefrontParameters(AbstractCalculatorParameters):
     def __init__(self,
-            photon_energy=None,
-            pulse_energy=None,
-            photon_energy_relative_bandwidth=None,
-            number_of_transverse_grid_points=None,
-            number_of_time_slices=None,
-            beam_diameter_fwhm=None,
-            divergence=None,
-            z=None,
+            photon_energy,
+            beam_diameter_fwhm,
+            pulse_energy,
+            photon_energy_relative_bandwidth,
+            divergence,
+            number_of_transverse_grid_points,
+            number_of_time_slices,
             **kwargs
             ):
         """
-        :class GaussWavefrontParameters: Encapsulates the parameters of a photon
-        beam with Gaussian beam profile, Gaussian energy spectrum, and Gaussian
-        temporal structure.
+        :class GaussWavefrontParameters: Encapsulates the parameters of a photon beam.
 
         :param photon_energy: The mean photon energy in units of electronvolts (eV).
         :type photon_energy: PhysicalQuantity
@@ -75,52 +68,33 @@ class GaussWavefrontParameters(PhotonBeamParameters):
         :param number_of_time_slices: The number of time slices.
         :type number_of_time_slices: int
 
-        :param z: The position of the pulse in the beam direction (z).
-        :type z: PhysicalQuantity
-
         :param kwargs: Key-value pairs to be passed to the parent class constructor.
         :type kwargs: dict
 
         """
-        if (beam_diameter_fwhm is not None and divergence is not None) or (beam_diameter_fwhm is None and divergence is None):
-            raise ValueError("beam_diameter_fwhm and divergence cannot be set\
-            at the same time. Chose one and leave the other one None or\
-            undefined.")
 
-        if divergence is None:
-            divergence = get_divergence_from_beam_diameter(
-                    photon_energy,
-                    beam_diameter_fwhm
-                    )
-            
-        elif beam_diameter_fwhm is None:
-            beam_diameter_fwhm = get_beam_diameter_from_divergence(
-                    photon_energy,
-                    divergence,
-                    )
+        super(GaussWavefrontParameters, self).__init__(**kwargs)
 
-        super().__init__(
-                photon_energy=photon_energy,
-                beam_diameter_fwhm=beam_diameter_fwhm,
-                pulse_energy=pulse_energy,
-                photon_energy_relative_bandwidth=photon_energy_relative_bandwidth,
-                divergence=divergence,
-                photon_energy_spectrum_type="Gauss",
-                #**kwargs
-                )
-        
         self.number_of_transverse_grid_points = number_of_transverse_grid_points
         self.number_of_time_slices = number_of_time_slices
-        self.z = z
-        
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     @property
+    def photon_energy_spectrum_type(self):
+        """ Query the 'photon_energy_spectrum_type' parameter. """
+        return self.__photon_energy_spectrum_type
+    @photon_energy_spectrum_type.setter
+    def photon_energy_spectrum_type(self, val):
+        """ Set the 'photon_energy_spectrum_type' parameter to val."""
+        raise AttributeError("The photon_energy_spectrum_type is read-only.")
+
+    @property
     def number_of_transverse_grid_points(self):
-        """ The number of transverse grid points. """
+        """ The number of grid points in both x and y dimension (transverse to
+            the beam direction)."""
         return self.__number_of_transverse_grid_points
     @number_of_transverse_grid_points.setter
     def number_of_transverse_grid_points(self, val):
@@ -130,7 +104,6 @@ class GaussWavefrontParameters(PhotonBeamParameters):
         if val <= 0:
             raise ValueError('The parameter "number_of_transverse_grid_points" must\
                              be a positive int.')
-        self.__number_of_transverse_grid_points = val
 
     @property
     def number_of_time_slices(self):
@@ -144,40 +117,5 @@ class GaussWavefrontParameters(PhotonBeamParameters):
         if val < 3:
             raise ValueError('The parameter "number_of_time_slices" must\
                              be at least 3.')
-        self.__number_of_time_slices = val
-    
-    @property
-    def z(self):
-        """ The z position. """
-        return self.__z
-    @z.setter
-    def z(self, val):
-        if not isinstance(val, PhysicalQuantity):
-            raise TypeError('The parameter "z" must\
-                             be of a length, received {}.'.format(type(val)))
-        if val.m_as(meter) == 0.0:
-            raise ValueError('The parameter "z" must not be 0.')
-            
-        self.__z = val
-
-def get_divergence_from_beam_diameter(E, beam_diameter_fwhm):
-    """ Calculate the beam diameter fwhm from the divergence angle. """
-    # The rms of the amplitude distribution (Gaussian)
-    beam_waist = beam_diameter_fwhm.m_as(meter)/math.sqrt(2.*math.log(2.))
-    theta = 2.*hbar*c/beam_waist/E.m_as(joule)
-    
-    return theta*radian
-
-
-def get_beam_diameter_from_divergence(E, divergence):
-    """ Calculate the beam diameter fwhm from the divergence angle. """
-    # The rms of the amplitude distribution (Gaussian)
-    theta = divergence.m_as(radian)
-
-    beam_waist = 2.*hbar*c/theta/E.m_as(joule)
-    intensity_fwhm = beam_waist*math.sqrt(2.*math.log(2.))*meter
-
-    return intensity_fwhm
-    
 
 
