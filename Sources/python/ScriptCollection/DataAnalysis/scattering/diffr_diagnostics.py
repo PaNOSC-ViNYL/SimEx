@@ -25,6 +25,7 @@
 from SimEx.Analysis.DiffractionAnalysis import DiffractionAnalysis, plt
 
 from argparse import ArgumentParser
+import numpy
 
 def main(args=None):
 

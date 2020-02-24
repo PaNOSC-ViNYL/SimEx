@@ -134,7 +134,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
 beam/photon_energy = 8.6000000e+03
 
 ; Number of photons per pulse
-beam/fluence = 7.2575692e+11
+beam/fluence = 7.2575687e+11
 
 ; Radius of X-ray beam (m)
 beam/radius = 5.0000000e-07
@@ -164,7 +164,7 @@ beam/radius = 5.0000000e-07
 beam/photon_energy = 8.6000000e+03
 
 ; Number of photons per pulse
-beam/fluence = 7.2575692e+11
+beam/fluence = 7.2575687e+11
 
 ; Radius of X-ray beam (m)
 beam/radius = 5.0000000e-07
@@ -190,7 +190,7 @@ beam/radius = 5.0000000e-07
 beam/photon_energy = 8.6000000e+03
 
 ; Number of photons per pulse
-beam/fluence = 7.2575692e+11
+beam/fluence = 7.2575687e+11
 
 ; Radius of X-ray beam (m)
 beam/radius = 5.0000000e-07
