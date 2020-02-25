@@ -3,9 +3,8 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-  allow_failures:
-    - "3.8"
-    - "nightly"
+  - "3.8"
+  - "nightly"
 
 sudo: required
 dist: xenial
