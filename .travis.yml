@@ -3,11 +3,12 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-  - "3.8"
-  - "nightly"
+  allow_failures:
+    - "3.8"
+    - "nightly"
 
 sudo: required
-dist: bionic
+dist: xenial
 
 matrix:
     allow_failures:
