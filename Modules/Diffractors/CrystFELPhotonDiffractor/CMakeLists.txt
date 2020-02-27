@@ -97,9 +97,10 @@ IF(${_listlen} GREATER 1)
 ENDIF()
 # Add the project.
 ExternalProject_Add( crystfel
-    URL http://www.desy.de/~twhite/crystfel/crystfel-0.9.1.tar.gz
-    BUILD_IN_SOURCE 0
-    INSTALL_COMMAND ""
+    URL http://www.desy.de/~twhite/crystfel/crystfel-0.6.3.tar.gz
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ./configure --with-hdf5=${MYHDF5_LIBRARY_DIRS} --disable-gtk --disable-gtk-doc --disable-png
+    #CONFIGURE_COMMAND ./configure --with-hdf5=/usr/lib64 --disable-gtk --disable-gtk-doc --disable-png --prefix=${CMAKE_INSTALL_PREFIX}
 )
 
 # Install needed crystfel binaries, scripts and doc material.
