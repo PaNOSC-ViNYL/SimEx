@@ -1,7 +1,7 @@
 """ Test module for the CrystFELPhotonDiffractor."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -103,6 +103,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check that beam parameters have been updated from prop output.
         self.assertAlmostEqual( diffractor.parameters.beam_parameters.photon_energy.m_as(electronvolt) , 4972.8402471221643, 5 )
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengineWithPropInput(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
 
@@ -127,6 +128,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check that beam parameters have been updated from prop output.
         diffractor.backengine()
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengineSinglePattern(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
@@ -153,6 +155,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn( "diffr_out_0000001.h5" , os.listdir( diffractor.output_path ))
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengineMultiplePatterns(self):
         """ Check we can run pattern_sim with a minimal set of parameter. """
 
@@ -180,6 +183,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "diffr_out-1.h5" , os.listdir( diffractor.output_path ))
         self.assertIn( "diffr_out-2.h5" , os.listdir( diffractor.output_path ))
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengine(self):
         # Get calculator.
 
@@ -233,6 +237,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn("diffr_out-1.h5" , os.listdir(output_path))
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
 
@@ -290,6 +295,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor.saveH5()
         self.assertIn("diffr_out_0000001.h5" , os.listdir(output_path))
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testSaveH5(self):
         """ Check that saveh5() creates correct filenames. """
 
@@ -363,6 +369,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check metafile was created.
         self.assertIn( os.path.split(diffractor.output_path)[-1], os.listdir( os.path.dirname( diffractor.output_path) ) )
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengineWithBeamParametersObject(self):
         """ Check beam parameter logic if they are set as parameters. """
 
@@ -395,6 +402,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check return code.
         self.assertEqual(status, 0)
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI())
     def testBackengineWithBeamAndGeometry(self):
         """ Check geom parameter logic if they are set as parameters. """
 
