@@ -25,10 +25,34 @@ then
 	git apply patch_for_maxwell
 elif [ $MODE = "develop" ]
 then
-    echo $MODE
-    INSTALL_PREFIX=..
-    DEVELOPER_MODE=ON
-    XCSIT=ON
+	echo $MODE
+	INSTALL_PREFIX=..
+	DEVELOPER_MODE=ON
+	XCSIT=OFF
+	git apply patch_for_maxwell
+elif [ $MODE = "conda-env" ]
+then
+	echo $MODE
+    echo "Create conda environment"
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	conda env create -n simex -f conda-requirements.yml
+	conda activate simex
+elif [ $MODE = "conda" ]
+then
+	echo $MODE
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	INSTALL_PREFIX=$CONDA_PREFIX
+	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
+	PYLIB=${PYVERSION%.*}
+	DEVELOPER_MODE=ON
+	XCSIT=OFF
+	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+	#export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	#echo "PYTHONPATH="$PYTHONPATH
 fi
 
 # Check for existing build directory, remove if found
