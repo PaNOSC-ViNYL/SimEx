@@ -14,13 +14,12 @@ EOF
 	exit
 fi
 
-#echo $THIRD_PARTY_ROOT
 
 MODE=$1
 if [ $MODE = "maxwell" ]
 then
 	echo $MODE
-	INSTALL_PREFIX=$THIRD_PARTY_ROOT
+	INSTALL_PREFIX=/data/netapp/s2e/simex
 	DEVELOPER_MODE=OFF
 	XCSIT=OFF
 	git apply patch_for_maxwell
@@ -29,8 +28,8 @@ then
 	echo $MODE
 	INSTALL_PREFIX=..
 	DEVELOPER_MODE=ON
-	XCSIT=OFF
-	git apply patch_for_maxwell
+	XCSIT=ON
+    THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 elif [ $MODE = "conda-env" ]
 then
 	echo $MODE
