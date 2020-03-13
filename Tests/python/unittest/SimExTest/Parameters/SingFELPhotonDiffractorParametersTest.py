@@ -175,6 +175,173 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.beam_parameters, self.beam)
         self.assertEqual(parameters.detector_geometry, self.detector_geometry)
 
+    def test_construction_exceptions(self):
+        """ Test that exceptions are thrown if parameters not sane. """
+        # Setup parameters that are ok
+        parameters = SingFELPhotonDiffractorParameters(
+                     uniform_rotation= True,
+                     calculate_Compton = False,
+                     slice_interval = 100,
+                     number_of_slices = 2,
+                     pmi_start_ID = 1,
+                     pmi_stop_ID  = 1,
+                     number_of_diffraction_patterns = 2,
+                     beam_parameters = self.beam,
+                     detector_geometry = self.detector_geometry,
+                     forced_mpi_command='mpirun -np 2',
+                     )
+
+        # uniform_rotation not a bool.
+        raises = False
+        try:
+            parameters.uniform_rotation =  1
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        # Reset.
+        parameters.uniform_rotation = True
+        raises = False
+
+        # calculate_Compton not a bool.
+        try:
+            parameters.calculate_Compton= 1 
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+
+        # Reset.
+        parameters.calculate_Compton = False
+        raises = False
+
+        # slice_interval not positive integer.
+        try:
+            parameters.slice_interval= 'one'
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        try:
+            parameters.slice_interval=-1 
+        except ValueError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # slice_interval not a number
+        # Reset.
+        parameters.slice_interval = 1
+        # number_of_slices not positive integer.
+        try:
+            parameters.number_of_slices= -1
+        except ValueError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # number_of_slices not a number
+        try:
+            parameters.number_of_slices = 'one'
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # Reset.
+        parameters.number_of_slices = 2
+        # number_of_diffraction_patterns not positive integer.
+        try:
+            parameters.number_of_diffraction_patterns = -1
+        except ValueError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # number_of_diffraction_patterns not a number
+        try:
+            parameters.number_of_diffraction_patterns = 'one'
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # Reset.
+        parameters.number_of_diffraction_patterns = 2
+
+        # pmi_start_ID not positive integer.
+        try:
+            parameters.pmi_start_ID = -1
+        except ValueError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # pmi_start_ID not a number
+        try:
+            parameters.pmi_start_ID = 'one'
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # Reset.
+        parameters.pmi_start_ID = 1
+
+        # pmi_stop_ID not positive integer.
+        try:
+            parameters.pmi_stop_ID = -1
+        except ValueError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # pmi_stop_ID not a number
+        try:
+            parameters.pmi_stop_ID = 'one'
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # Reset.
+        parameters.pmi_stop_ID = 1
+
+        # beam_parameters not a string.
+        try:
+            parameters.beam_parameters = 1
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # beam_parameters not a file.
+        try:
+            parameters.beam_parameters = 'xyz.beam'
+        except IOError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        parameters.beam_parameters =  self.beam
+
+        # detector_geometry not a string.
+        try:
+            parameters.detector_geometry = 1
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        # detector_geometry not a file.
+        try:
+            parameters.detector_geometry = 'xyz.geom'
+        except TypeError:
+            raises = True
+        self.assertTrue(raises)
+        raises = False
+
+        parameters.detector_geometry = self.detector_geometry
+
     def testLegacyDictionary(self):
         """ Check parameter object can be initialized via a old-style dictionary. """
         parameters_dict = {'uniform_rotation'               : False,

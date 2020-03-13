@@ -108,12 +108,13 @@ class SingFELPhotonDiffractorParameters(AbstractPhotonDiffractorParameters):
         if number_of_slices > 0:
             self.__number_of_slices = number_of_slices
         else:
-            raise ValueError( "The parameter 'slice_interval' must be a positive integer.")
+            raise ValueError( "The parameter 'number_of_slices' must be a positive integer.")
 
     @property
     def slice_interval(self):
         """ Query for the 'slice_interval' parameter. """
         return self.__slice_interval
+
     @slice_interval.setter
     def slice_interval(self, value):
         """ Set the 'slice_interval' parameter to a given value.

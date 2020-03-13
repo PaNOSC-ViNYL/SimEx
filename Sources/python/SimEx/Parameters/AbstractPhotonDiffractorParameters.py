@@ -82,9 +82,12 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
     def sample(self, val):
         """ Set the 'sample' parameter to val."""
         if val is None:
-            raise ValueError( "A sample must be defined.")
+            self.__sample = None
+            return 
         if val.split(".")[-1] == "pdb":
             self.__sample = IOUtilities.checkAndGetPDB(val)
+            return
+        raise IOError("Samples must be in pdb format.")
 
     @property
     def uniform_rotation(self):
