@@ -82,7 +82,7 @@ def convertToOPMD(input_file):
     with h5py.File( input_file, 'r') as h5:
 
         ## Branch off if this is a non-time dependent calculation in frequency domain.
-        #if data_shape[2] == 1 and h5['params/wDomain'].value == "frequency":
+        #if data_shape[2] == 1 and h5['params/wDomain'][()] == "frequency":
             ## Time independent calculation in frequency domain.
             #_convert_from_frequency_representation(h5, opmd_h5, data_shape)
             #return
@@ -273,10 +273,10 @@ def convertToOPMD(input_file):
         # Open in and out files.
     if(False):
             # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
-            data_shape = h5['data/arrEhor'].value.shape
+            data_shape = h5['data/arrEhor'][()].shape
 
             # Branch off if this is a non-time dependent calculation in frequency domain.
-            if data_shape[2] == 1 and h5['params/wDomain'].value == "frequency":
+            if data_shape[2] == 1 and h5['params/wDomain'][()] == "frequency":
                 # Time independent calculation in frequency domain.
                 _convert_from_frequency_representation(h5, opmd_h5, data_shape)
                 return
@@ -285,11 +285,11 @@ def convertToOPMD(input_file):
             number_of_y_meshpoints = data_shape[1]
             number_of_time_steps = data_shape[2]
 
-            time_max = h5['params/Mesh/sliceMax'].value #s
-            time_min = h5['params/Mesh/sliceMin'].value #s
+            time_max = h5['params/Mesh/sliceMax'][()] #s
+            time_min = h5['params/Mesh/sliceMin'][()] #s
             time_step = abs(time_max - time_min) / number_of_time_steps #s
 
-            photon_energy = h5['params/photonEnergy'].value # eV
+            photon_energy = h5['params/photonEnergy'][()] # eV
             photon_energy = photon_energy * e # Convert to J
 
             # Copy misc and params from original wpg output.
@@ -331,16 +331,16 @@ def convertToOPMD(input_file):
                 # Write the common metadata for the group
                 E.attrs["geometry"] = numpy.string_("cartesian")
                 # Get grid geometry.
-                nx = h5['params/Mesh/nx'].value
-                xMax = h5['params/Mesh/xMax'].value
-                xMin = h5['params/Mesh/xMin'].value
+                nx = h5['params/Mesh/nx'][()]
+                xMax = h5['params/Mesh/xMax'][()]
+                xMin = h5['params/Mesh/xMin'][()]
                 dx = (xMax - xMin) / nx
-                ny = h5['params/Mesh/ny'].value
-                yMax = h5['params/Mesh/yMax'].value
-                yMin = h5['params/Mesh/yMin'].value
+                ny = h5['params/Mesh/ny'][()]
+                yMax = h5['params/Mesh/yMax'][()]
+                yMin = h5['params/Mesh/yMin'][()]
                 dy = (yMax - yMin) / ny
                 E.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-                E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+                E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
                 E.attrs["gridUnitSI"] = numpy.float64(1.0)
                 E.attrs["dataOrder"] = numpy.string_("C")
                 E.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -393,7 +393,7 @@ def convertToOPMD(input_file):
                 # Write the common metadata for the group
                 Nph.attrs["geometry"] = numpy.string_("cartesian")
                 Nph.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-                Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+                Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
                 Nph.attrs["gridUnitSI"] = numpy.float64(1.0)
                 Nph.attrs["dataOrder"] = numpy.string_("C")
                 Nph.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -430,7 +430,7 @@ def convertToOPMD(input_file):
                 # Write the common metadata for the group
                 phases.attrs["geometry"] = numpy.string_("cartesian")
                 phases.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-                phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+                phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
                 phases.attrs["gridUnitSI"] = numpy.float64(1.0)
                 phases.attrs["dataOrder"] = numpy.string_("C")
                 phases.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -465,10 +465,10 @@ def convertToOPMDLegacy(input_file):
         with h5py.File(input_file.replace(".h5", ".opmd.h5"), 'w') as opmd_h5:
 
             # Get number of time slices in wpg output, assuming horizontal and vertical polarizations have same dimensions, which is always true for wpg output.
-            data_shape = h5['data/arrEhor'].value.shape
+            data_shape = h5['data/arrEhor'][()].shape
 
             # Branch off if this is a non-time dependent calculation in frequency domain.
-            if data_shape[2] == 1 and h5['params/wDomain'].value == "frequency":
+            if data_shape[2] == 1 and h5['params/wDomain'][()] == "frequency":
                 # Time independent calculation in frequency domain.
                 _convert_from_frequency_representation(h5, opmd_h5, data_shape)
                 return
@@ -478,11 +478,11 @@ def convertToOPMDLegacy(input_file):
             number_of_time_steps = data_shape[2]
 
 
-            time_max = h5['params/Mesh/sliceMax'].value #s
-            time_min = h5['params/Mesh/sliceMin'].value #s
+            time_max = h5['params/Mesh/sliceMax'][()] #s
+            time_min = h5['params/Mesh/sliceMin'][()] #s
             time_step = abs(time_max - time_min) / number_of_time_steps #s
 
-            photon_energy = h5['params/photonEnergy'].value # eV
+            photon_energy = h5['params/photonEnergy'][()] # eV
             photon_energy = photon_energy * e # Convert to J
 
             # Copy misc and params from original wpg output.
@@ -524,16 +524,16 @@ def convertToOPMDLegacy(input_file):
                 # Write the common metadata for the group
                 E.attrs["geometry"] = numpy.string_("cartesian")
                 # Get grid geometry.
-                nx = h5['params/Mesh/nx'].value
-                xMax = h5['params/Mesh/xMax'].value
-                xMin = h5['params/Mesh/xMin'].value
+                nx = h5['params/Mesh/nx'][()]
+                xMax = h5['params/Mesh/xMax'][()]
+                xMin = h5['params/Mesh/xMin'][()]
                 dx = (xMax - xMin) / nx
-                ny = h5['params/Mesh/ny'].value
-                yMax = h5['params/Mesh/yMax'].value
-                yMin = h5['params/Mesh/yMin'].value
+                ny = h5['params/Mesh/ny'][()]
+                yMax = h5['params/Mesh/yMax'][()]
+                yMin = h5['params/Mesh/yMin'][()]
                 dy = (yMax - yMin) / ny
                 E.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-                E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+                E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
                 E.attrs["gridUnitSI"] = numpy.float64(1.0)
                 E.attrs["dataOrder"] = numpy.string_("C")
                 E.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -586,7 +586,7 @@ def convertToOPMDLegacy(input_file):
                 # Write the common metadata for the group
                 Nph.attrs["geometry"] = numpy.string_("cartesian")
                 Nph.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-                Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+                Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
                 Nph.attrs["gridUnitSI"] = numpy.float64(1.0)
                 Nph.attrs["dataOrder"] = numpy.string_("C")
                 Nph.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -623,7 +623,7 @@ def convertToOPMDLegacy(input_file):
                 # Write the common metadata for the group
                 phases.attrs["geometry"] = numpy.string_("cartesian")
                 phases.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-                phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+                phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
                 phases.attrs["gridUnitSI"] = numpy.float64(1.0)
                 phases.attrs["dataOrder"] = numpy.string_("C")
                 phases.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -650,7 +650,7 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     number_of_x_meshpoints = data_shape[0]
     number_of_y_meshpoints = data_shape[1]
 
-    photon_energy = h5['params/photonEnergy'].value # eV
+    photon_energy = h5['params/photonEnergy'][()] # eV
     photon_energy = photon_energy * e # Convert to J
 
     # Copy misc and params from original wpg output.
@@ -693,16 +693,16 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     ## Write the common metadata for the group
     #E.attrs["geometry"] = numpy.string_("cartesian")
     ## Get grid geometry.
-    nx = h5['params/Mesh/nx'].value
-    xMax = h5['params/Mesh/xMax'].value
-    xMin = h5['params/Mesh/xMin'].value
+    nx = h5['params/Mesh/nx'][()]
+    xMax = h5['params/Mesh/xMax'][()]
+    xMin = h5['params/Mesh/xMin'][()]
     dx = (xMax - xMin) / nx
-    ny = h5['params/Mesh/ny'].value
-    yMax = h5['params/Mesh/yMax'].value
-    yMin = h5['params/Mesh/yMin'].value
+    ny = h5['params/Mesh/ny'][()]
+    yMax = h5['params/Mesh/yMax'][()]
+    yMin = h5['params/Mesh/yMin'][()]
     dy = (yMax - yMin) / ny
     #E.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-    #E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+    #E.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
     #E.attrs["gridUnitSI"] = numpy.float64(1.0)
     #E.attrs["dataOrder"] = numpy.string_("C")
     #E.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -752,7 +752,7 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     # Write the common metadata for the group
     Nph.attrs["geometry"] = numpy.string_("cartesian")
     Nph.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-    Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+    Nph.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
     Nph.attrs["gridUnitSI"] = numpy.float64(1.0)
     Nph.attrs["dataOrder"] = numpy.string_("C")
     Nph.attrs["axisLabels"] = numpy.array([b"x",b"y"])
@@ -804,7 +804,7 @@ def _convert_from_frequency_representation(h5, opmd_h5, data_shape, pulse_energy
     # Write the common metadata for the group
     phases.attrs["geometry"] = numpy.string_("cartesian")
     phases.attrs["gridSpacing"] = numpy.array( [dx,dy], dtype=numpy.float64)
-    phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'].value, h5['params/yCentre'].value], dtype=numpy.float64)
+    phases.attrs["gridGlobalOffset"] = numpy.array([h5['params/xCentre'][()], h5['params/yCentre'][()]], dtype=numpy.float64)
     phases.attrs["gridUnitSI"] = numpy.float64(1.0)
     phases.attrs["dataOrder"] = numpy.string_("C")
     phases.attrs["axisLabels"] = numpy.array([b"x",b"y"])
