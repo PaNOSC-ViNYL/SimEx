@@ -11,10 +11,9 @@ dist: xenial
 
 matrix:
     allow_failures:
-        - python:
-            - "3.5"
-            - "3.6"
-            - "nightly"
+        - python: "3.5"
+        - python: "3.6"
+        - python: "nightly"
 
 env:
   global:
