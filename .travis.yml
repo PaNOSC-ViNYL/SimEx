@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.5"
   - "3.6"
   - "3.7"
   - "3.8"
@@ -11,16 +10,16 @@ dist: xenial
 
 matrix:
     allow_failures:
-        - python: "3.5"
-        - python: "3.6"
-        - python: "nightly"
+        - python:
+            - "nightly"
+            - "3.5"
 
 env:
   global:
     - C_INCLUDE_PATH=/usr/lib/openmpi/include
     - WITH_CUDA: true
-    - DEPLOY_DOCS_FOR_PYTHON: '3.7'
-    - TRIGGER_DOCKER_FOR_PYTHON: '3.7'
+    - DEPLOY_DOCS_FOR_PYTHON: '3.8'
+    - TRIGGER_DOCKER_FOR_PYTHON: '3.8'
     - SIMEX_VERBOSE=MPI:PYTHON
 
 addons:
