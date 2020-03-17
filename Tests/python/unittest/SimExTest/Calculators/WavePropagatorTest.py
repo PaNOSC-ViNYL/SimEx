@@ -84,12 +84,11 @@ class WavePropagatorTest(unittest.TestCase):
     def testBackengineDefaultPaths(self):
         """ Test a backengine run with a default io paths."""
         # Cleanup.
-        self.__dirs_to_remove.append('source')
-        self.__dirs_to_remove.append('prop')
+        self.__dirs_to_remove.append( 'source' )
+        self.__dirs_to_remove.append( 'prop' )
 
         # Prepare source.
-        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'),
-                        os.path.abspath('source'))
+        shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
 
         # Construct the object.
         xfel_propagator = WavePropagator()
