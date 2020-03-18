@@ -134,7 +134,7 @@ class PhotonBeamParametersTest(unittest.TestCase):
 beam/photon_energy = 8.6000000e+03
 
 ; Number of photons per pulse
-beam/fluence = 7.2575692e+11
+beam/fluence = 7.2575687e+11
 
 ; Radius of X-ray beam (m)
 beam/radius = 5.0000000e-07
@@ -164,7 +164,7 @@ beam/radius = 5.0000000e-07
 beam/photon_energy = 8.6000000e+03
 
 ; Number of photons per pulse
-beam/fluence = 7.2575692e+11
+beam/fluence = 7.2575687e+11
 
 ; Radius of X-ray beam (m)
 beam/radius = 5.0000000e-07
@@ -190,7 +190,7 @@ beam/radius = 5.0000000e-07
 beam/photon_energy = 8.6000000e+03
 
 ; Number of photons per pulse
-beam/fluence = 7.2575692e+11
+beam/fluence = 7.2575687e+11
 
 ; Radius of X-ray beam (m)
 beam/radius = 5.0000000e-07
@@ -203,10 +203,11 @@ beam/radius = 5.0000000e-07
     def testPropToBeamParameters(self):
         """ Test the utility function to construct a PhotonBeamParameters instance from prop output (wavefront file). """
 
-        beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out_0000001.h5"))
+        beam_parameters = propToBeamParameters(TestUtilities.generateTestFilePath("prop_out/prop_out_0000011.h5"))
 
         self.assertIsInstance( beam_parameters, PhotonBeamParameters )
-        self.assertAlmostEqual( beam_parameters.photon_energy.magnitude, 4972.840247*electronvolt.magnitude, 5 )
+        self.assertAlmostEqual( beam_parameters.photon_energy.magnitude,
+                4972.065708*electronvolt.magnitude, 5 )
 if __name__ == '__main__':
     unittest.main()
 

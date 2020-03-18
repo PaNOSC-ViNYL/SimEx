@@ -1,7 +1,7 @@
 """ Test module for the CrystFELPhotonDiffractor."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -42,7 +42,30 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        pass
+        # Setup parameters.
+        cls.__beam_parameters = PhotonBeamParameters(
+            photon_energy=4.96e3*electronvolt,
+            photon_energy_relative_bandwidth=0.01,
+            beam_diameter_fwhm=2e-6*meter,
+            divergence=2e-6*radian,
+            pulse_energy=1e-3*joule,
+            photon_energy_spectrum_type='tophat')
+
+
+        cls.__geometry = DetectorGeometry(
+                panels=DetectorPanel(
+                    ranges={"fast_scan_min" : 0,
+                        "fast_scan_max" : 63,
+                        "slow_scan_min" : 0,
+                        "slow_scan_max" : 63},
+                    pixel_size=220.0e-6*meter,
+                    photon_response=1.0,
+                    distance_from_interaction_plane=0.1*meter,
+                    corners={"x" : -32, "y": -32},
+                    saturation_adu=1e4,
+                    )
+                )
+
 
     @classmethod
     def tearDownClass(cls):
@@ -86,14 +109,14 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         parameters = CrystFELPhotonDiffractorParameters(
                 sample=self.__sample,
-                detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                detector_geometry=self.__geometry,
                 beam_parameters=None,
                 number_of_diffraction_patterns=1,
                 )
 
         diffractor = CrystFELPhotonDiffractor(
                 parameters=parameters,
-                input_path=TestUtilities.generateTestFilePath("prop_out_0000001.h5"),
+                input_path=TestUtilities.generateTestFilePath("prop_out/prop_out_0000011.h5"),
                 output_path="diffr",
                 )
 
@@ -101,7 +124,9 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         diffractor.parameters.beam_parameters.photon_energy_spectrum_type="tophat"
 
         # Check that beam parameters have been updated from prop output.
-        self.assertAlmostEqual( diffractor.parameters.beam_parameters.photon_energy.m_as(electronvolt) , 4972.8402471221643, 5 )
+        self.assertAlmostEqual(
+                diffractor.parameters.beam_parameters.photon_energy.m_as(electronvolt)
+                , 4972.0657078, 5 )
 
     def testBackengineWithPropInput(self):
         """ Check that beam parameters can be taken from a given propagation output file."""
@@ -110,14 +135,15 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         parameters = CrystFELPhotonDiffractorParameters(
                 sample=self.__sample,
-                detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                detector_geometry=self.__geometry,
                 beam_parameters=None,
                 number_of_diffraction_patterns=1,
+                uniform_rotation=True,
                 )
 
         diffractor = CrystFELPhotonDiffractor(
                 parameters=parameters,
-                input_path=TestUtilities.generateTestFilePath("prop_out_0000001.h5"),
+                input_path=TestUtilities.generateTestFilePath("prop_out/prop_out_0000011.h5"),
                 output_path="diffr",
                 )
 
@@ -135,8 +161,11 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
-                detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                number_of_diffraction_patterns=1)
+                detector_geometry=self.__geometry,
+                beam_parameters=self.__beam_parameters,
+                number_of_diffraction_patterns=1,
+                uniform_rotation=True
+                )
 
         # Get calculator.
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
@@ -161,8 +190,10 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
-                detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
-                number_of_diffraction_patterns=2)
+                detector_geometry=self.__geometry,
+                number_of_diffraction_patterns=2,
+                uniform_rotation=True,
+                )
 
         # Get calculator.
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
@@ -186,36 +217,13 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Ensure cleanup.
         self.__dirs_to_remove.append("diffr")
 
-        # Setup parameters.
-        beam_parameters = PhotonBeamParameters(
-            photon_energy=4.96e3*electronvolt,
-            photon_energy_relative_bandwidth=0.01,
-            beam_diameter_fwhm=2e-6*meter,
-            divergence=2e-6*radian,
-            pulse_energy=1e-3*joule,
-            photon_energy_spectrum_type='tophat')
-
-        self.assertIsInstance(beam_parameters, PhotonBeamParameters)
-
-        geometry = DetectorGeometry(
-                panels=DetectorPanel(
-                    ranges={"fast_scan_min" : 0,
-                        "fast_scan_max" : 63,
-                        "slow_scan_min" : 0,
-                        "slow_scan_max" : 63},
-                    pixel_size=220.0e-6*meter,
-                    photon_response=1.0,
-                    distance_from_interaction_plane=0.1*meter,
-                    corners={"x" : -32, "y": -32},
-                    saturation_adu=1e4,
-                    )
-                )
-
         sys.stdout.flush()
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
-                        beam_parameters=beam_parameters,
-                        detector_geometry=geometry,
-                        number_of_diffraction_patterns=10)
+                        beam_parameters=self.__beam_parameters,
+                        detector_geometry=self.__geometry,
+                        number_of_diffraction_patterns=10,
+                        uniform_rotation=True,
+                        )
 
 
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
@@ -233,6 +241,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         # Check pattern was written.
         self.assertIn("diffr_out-1.h5" , os.listdir(output_path))
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI(), reason="Travis")
     def testBackengineGPU(self):
         """ Check a backengine calculation with openCL enabled. """
 
@@ -270,6 +279,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                         beam_parameters=beam_parameters,
                         detector_geometry=geometry,
                         number_of_diffraction_patterns=10,
+                        uniform_rotation=True,
                         use_gpu=True)
 
 
@@ -323,7 +333,9 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
                 detector_geometry=geometry,
                 beam_parameters=beam_parameters,
-                number_of_diffraction_patterns=2)
+                number_of_diffraction_patterns=2,
+                uniform_rotation=True,
+                )
 
         # Get calculator.
         diffractor = CrystFELPhotonDiffractor(parameters=parameters, input_path=None, output_path='diffr')
@@ -381,9 +393,10 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
 
         # Get parameters.
         parameters = CrystFELPhotonDiffractorParameters(sample=self.__sample,
-                detector_geometry=TestUtilities.generateTestFilePath("simple.geom"),
+                detector_geometry=self.__geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,
+                uniform_rotation=True,
                 )
 
         # Get calculator.
@@ -428,6 +441,7 @@ class CrystFELPhotonDiffractorTest(unittest.TestCase):
                 detector_geometry=geometry,
                 beam_parameters=beam_parameters,
                 number_of_diffraction_patterns=2,
+                uniform_rotation=True,
                 )
 
         # Get calculator.

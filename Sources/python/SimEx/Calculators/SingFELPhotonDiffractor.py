@@ -60,9 +60,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         :type output_path: str
         """
 
-        if isinstance(parameters, dict):
-            parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameters)
-
         if parameters is None:
             parameters_default = SingFELPhotonDiffractorParameters(),
         else:
