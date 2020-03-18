@@ -14,13 +14,12 @@ EOF
 	exit
 fi
 
-#echo $THIRD_PARTY_ROOT
 
 MODE=$1
 if [ $MODE = "maxwell" ]
 then
 	echo $MODE
-	INSTALL_PREFIX=$THIRD_PARTY_ROOT
+	INSTALL_PREFIX=/data/netapp/s2e/simex
 	DEVELOPER_MODE=OFF
 	XCSIT=OFF
 	git apply patch_for_maxwell
@@ -29,8 +28,8 @@ then
 	echo $MODE
 	INSTALL_PREFIX=..
 	DEVELOPER_MODE=ON
-	XCSIT=OFF
-	git apply patch_for_maxwell
+	XCSIT=ON
+    THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 elif [ $MODE = "conda-env" ]
 then
 	echo $MODE
@@ -49,11 +48,11 @@ then
 	INSTALL_PREFIX=$CONDA_PREFIX
 	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
 	PYLIB=${PYVERSION%.*}
-	DEVELOPER_MODE=OFF
+	DEVELOPER_MODE=ON
 	XCSIT=OFF
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-	export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
-	echo "PYTHONPATH="$PYTHONPATH
+	#export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	#echo "PYTHONPATH="$PYTHONPATH
 fi
 
 

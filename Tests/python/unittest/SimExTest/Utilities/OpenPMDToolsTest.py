@@ -25,10 +25,10 @@ import os
 import unittest
 import openpmd_api as opmd
 
-# import WPG
+import wpg
 from SimEx.Utilities import checkOpenPMD_h5 as opmd_validator
 from SimEx.Utilities.hydro_txt_to_opmd import convertTxtToOPMD
-from SimEx.Utilities.wpg_to_opmd import convertToOPMD
+from SimEx.Utilities.wpg_to_opmd import convertToOPMD, convertToOPMDLegacy
 from TestUtilities.TestUtilities import generateTestFilePath
 
 class OpenPMDToolsTest(unittest.TestCase):
@@ -61,7 +61,7 @@ class OpenPMDToolsTest(unittest.TestCase):
         h5_input = generateTestFilePath('prop_out/prop_out_0000011.h5')
 
         # Convert.
-        convertToOPMD(h5_input)
+        convertToOPMDLegacy(h5_input)
 
         # New file name.
         opmd_h5_file = h5_input.replace(".h5", ".opmd.h5")
@@ -98,9 +98,7 @@ class OpenPMDToolsTest(unittest.TestCase):
 
         # New file name.
         opmd_h5_file = h5_input.replace(".h5", ".opmd.h5")
-
-        # Make sure we clean up after test.
-        # self.__files_to_remove.append(opmd_h5_file)
+        self.__files_to_remove.append(opmd_h5_file)
 
         # Check new file was generated.
         self.assertTrue( os.path.isfile( opmd_h5_file ) )
@@ -144,11 +142,19 @@ class OpenPMDToolsTest(unittest.TestCase):
     def testLoadOPMDWavefront(self):
         """ Test if loading a wavefront from openpmd-hdf into a WPG structure works."""
 
-        ifname = generateTestFilePath('prop_out/prop_out_0000001.opmd.h5')
+        # Get sample file.
+        h5_input = generateTestFilePath('prop_out/prop_out_0000011.h5')
 
-        series = opmd.Series(ifname, opmd.Access_Type.read_only)
-        wavefront = WPG.Wavefront()
+        # Convert.
+        convertToOPMD(h5_input)
 
+        # New file name.
+        opmd_h5_file = h5_input.replace(".h5", ".opmd.h5")
+        self.__files_to_remove.append(opmd_h5_file)
+        
+        # Reconstruct the series.
+        series = opmd.Series(opmd_h5_file, opmd.Access_Type.read_only)
+        wavefront = wpg.Wavefront()
 
     def testHydroTxtToOPMDConverter(self):
         """ Test the conversion of esther output to openPMD conform hdf5 file."""

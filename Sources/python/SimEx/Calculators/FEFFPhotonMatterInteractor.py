@@ -135,8 +135,6 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
             proc = subprocess.Popen( command_line, shell=True)
             proc.wait()
 
-            # Return.
-
             os.chdir( old_wd )
 
         except:
@@ -154,9 +152,6 @@ class FEFFPhotonMatterInteractor(AbstractPhotonInteractor):
 
         # Setup tree and write data on the fly.
         self.__data.create_dataset('data/snp_0000001/r', data=atoms[:,:3])
-        #self.__data.create_dataset('data/snp_0000001/xyz', data=None)
-        #self.__data.create_dataset('data/snp_0000001/Z', data=None)
-        #self.__data.create_dataset('data/snp_0000001/T', data=None)
         self.__data.create_dataset('data/snp_0000001/E', data=xmu[:,0])
         self.__data.create_dataset('data/snp_0000001/DeltaE', data=xmu[:,1])
         self.__data.create_dataset('data/snp_0000001/k', data=xmu[:,2])
