@@ -4,7 +4,7 @@ option (SRW_OPTIMIZED "Use optimized SRW library" TRUE)
 
 ExternalProject_Add(
 wpg
-URL  https://github.com/eucall-software/WPG/archive/feature/openmp.zip
+URL  https://github.com/PaNOSC-ViNYL/WPG/archive/develop.zip
 PATCH_COMMAND ""
 CONFIGURE_COMMAND ""
 CMAKE_COMMAND ""
