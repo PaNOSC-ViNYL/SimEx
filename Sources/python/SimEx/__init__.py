@@ -40,7 +40,7 @@ from .Calculators.DMPhasing import DMPhasing
 from .Calculators.EMCCaseGenerator import EMCCaseGenerator
 from .Calculators.EMCOrientation import EMCOrientation
 from .Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
-from .Calculators.GaussianPhotonSource import GaussianPhotonSource
+from .Calculators.GaussianPhotonSource import GaussianXFELPhotonSource
 from .Calculators.GenesisPhotonSource import GenesisPhotonSource
 from .Calculators.IdealPhotonDetector import IdealPhotonDetector
 from .Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
