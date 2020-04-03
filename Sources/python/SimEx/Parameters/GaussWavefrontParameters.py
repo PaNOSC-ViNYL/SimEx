@@ -32,7 +32,7 @@ import numpy
 import os
 import sys
 
-class GaussWavefrontParameters(AbstractCalculatorParameters):
+class GaussWavefrontParameters(PhotonBeamParameters):
     def __init__(self,
             photon_energy,
             beam_diameter_fwhm,
