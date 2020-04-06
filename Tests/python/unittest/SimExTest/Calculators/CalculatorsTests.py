@@ -46,7 +46,7 @@ def suite():
              unittest.makeSuite(CrystFELPhotonDiffractorTest,               'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
-             unittest.makeSuite(GaussianPhotonSourceTest,
+             unittest.makeSuite(GaussianPhotonSourceTest,                   'test'),
              unittest.makeSuite(S2EReconstructionTest,                      'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
              unittest.makeSuite(WavePropagatorTest,                   'test'),
