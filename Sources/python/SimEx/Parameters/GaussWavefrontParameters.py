@@ -74,7 +74,14 @@ class GaussWavefrontParameters(PhotonBeamParameters):
 
         """
 
-        super(GaussWavefrontParameters, self).__init__(**kwargs)
+        super(GaussWavefrontParameters, self).__init__(
+                photon_energy,
+                beam_diameter_fwhm,
+                pulse_energy,
+                photon_energy_relative_bandwidth,
+                divergence,
+                **kwargs
+                )
 
         self.number_of_transverse_grid_points = number_of_transverse_grid_points
         self.number_of_time_slices = number_of_time_slices
