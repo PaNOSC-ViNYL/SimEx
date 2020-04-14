@@ -13,9 +13,7 @@ make docs install
 
 # Get testdata
 cd $VIRTUAL_ENV
-pwd
-ls -l
-. $VIRTUAL_ENV/get_testdata.sh
+. $TRAVIS_BUILD_DIR/get_testdata.sh
 
 # unit tests
 cd $VIRTUAL_ENV/Tests/python/unittest/
