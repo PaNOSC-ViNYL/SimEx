@@ -13,7 +13,9 @@ make docs install
 
 # Get testdata
 cd $VIRTUAL_ENV
-./get_testdata.sh
+pwd
+ls -l
+. $VIRTUAL_ENV/get_testdata.sh
 
 # unit tests
 cd $VIRTUAL_ENV/Tests/python/unittest/
