@@ -12,7 +12,7 @@ make install
 make docs install
 
 # Get testdata
-cd $VIRTUAL_ENV/Tests/python/unittest/
+cd $VIRTUAL_ENV
 ./get_testdata.sh
 
 # unit tests
