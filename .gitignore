@@ -18,3 +18,5 @@ deploy_rsa.enc
 *.bak
 *.code-workspace
 *.root
+.ropeproject
+tags
