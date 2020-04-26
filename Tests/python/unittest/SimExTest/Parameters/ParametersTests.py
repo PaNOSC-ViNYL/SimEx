@@ -34,25 +34,28 @@ from .WavePropagatorParametersTest import WavePropagatorParametersTest
 from .PhotonMatterInteractorParametersTest import PhotonMatterInteractorParametersTest
 from .XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
 
+
 # Setup the suite.
 def suite():
     suites = [
-             unittest.makeSuite(CrystFELPhotonDiffractorParametersTest,     'test'),
-             unittest.makeSuite(DetectorGeometryTest,                       'test'),
-             unittest.makeSuite(DetectorPanelTest,                          'test'),
-             unittest.makeSuite(PlasmaXRTSCalculatorParametersTest,         'test'),
-             unittest.makeSuite(SingFELPhotonDiffractorParametersTest,      'test'),
-             unittest.makeSuite(EMCOrientationParametersTest,               'test'),
-             unittest.makeSuite(DMPhasingParametersTest,                    'test'),
-             unittest.makeSuite(WavePropagatorParametersTest,               'test'),
-             unittest.makeSuite(PhotonBeamParametersTest,                   'test'),
-             unittest.makeSuite(EstherPhotonMatterInteractorParametersTest, 'test'),
-             unittest.makeSuite(PhotonMatterInteractorParametersTest,       'test'),
-             unittest.makeSuite(XCSITPhotonDetectorParametersTest,       'test'),
-             ]
+        unittest.makeSuite(CrystFELPhotonDiffractorParametersTest, 'test'),
+        unittest.makeSuite(DetectorGeometryTest, 'test'),
+        unittest.makeSuite(DetectorPanelTest, 'test'),
+        unittest.makeSuite(PlasmaXRTSCalculatorParametersTest, 'test'),
+        unittest.makeSuite(SingFELPhotonDiffractorParametersTest, 'test'),
+        unittest.makeSuite(GAPDPhotonDiffractorParametersTest, 'test'),
+        unittest.makeSuite(EMCOrientationParametersTest, 'test'),
+        unittest.makeSuite(DMPhasingParametersTest, 'test'),
+        unittest.makeSuite(WavePropagatorParametersTest, 'test'),
+        unittest.makeSuite(PhotonBeamParametersTest, 'test'),
+        unittest.makeSuite(EstherPhotonMatterInteractorParametersTest, 'test'),
+        unittest.makeSuite(PhotonMatterInteractorParametersTest, 'test'),
+        unittest.makeSuite(XCSITPhotonDetectorParametersTest, 'test'),
+    ]
 
     return unittest.TestSuite(suites)
 
+
 # If called as script, run the suite.
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main(defaultTest="suite")

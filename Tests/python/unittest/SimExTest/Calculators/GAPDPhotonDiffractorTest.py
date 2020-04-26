@@ -1,6 +1,7 @@
 """ Test module for the GAPDPhotonDiffractor."""
 ##########################################################################
-#                                                                        #
+# 
+# Modified by Juncheng E in 2020                                         #
 # Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
@@ -76,6 +77,11 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         self.assertIn( "cu.00-1.kspace.dat", os.listdir(tmp_dir))
 
         os.chdir(old_pwd)
+   def testConstructionParameters(self):
+    """ Check we can construct with a parameter object. """
+    parameters=GAPDPhotonDiffractorParameters(beam_parameters=self.beam,
+                                              detector_geometry=self.detector_geometry,
+                                              )
 
 if __name__ == '__main__':
     unittest.main()
