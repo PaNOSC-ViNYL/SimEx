@@ -101,8 +101,8 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertFalse(parameters.random_rotation)
-        self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsFalse(parameters.uniform_rotation)
+        self.assertIsNone(parameters.quaternion_rotation)
+        self.assertFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -125,14 +125,38 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertTrue(parameters.random_rotation)
-        self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsFalse(parameters.uniform_rotation)
+        self.assertIsNone(parameters.quaternion_rotation)
+        self.assertFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
         self.assertEqual(parameters.number_of_spectrum_bins, 1)
         self.assertEqual(parameters.beam_parameters, self.beam)
         self.assertEqual(parameters.detector_geometry, self.detector_geometry)
+
+    #def testConstructionWithUniform_rotation(self):
+        #""" Testing the construction of the class with a PhotonBeamParameters instance. """
+
+        ## Attempt to construct an instance of the class.
+        #parameters = GAPDPhotonDiffractorParameters(
+            #uniform_rotation=True,
+            #detector_geometry=self.detector_geometry,
+            #beam_parameters=self.beam)
+
+        ## Check instance and inheritance.
+        #self.assertIsInstance(parameters, GAPDPhotonDiffractorParameters)
+        #self.assertIsInstance(parameters, AbstractCalculatorParameters)
+
+        ## Check all parameters are set to default values.
+        #self.assertFalse(parameters.random_rotation)
+        #self.assertIsNone(parameters.quaternion_rotation)
+        #self.assertTrue(parameters.uniform_rotation)
+        #self.assertFalse(parameters.calculate_Compton)
+        #self.assertEqual(parameters.slice_interval, 100)
+        #self.assertEqual(parameters.number_of_slices, 1)
+        #self.assertEqual(parameters.number_of_spectrum_bins, 1)
+        #self.assertEqual(parameters.beam_parameters, self.beam)
+        #self.assertEqual(parameters.detector_geometry, self.detector_geometry)
 
     def testConstructionWithGeometry(self):
         """ Testing the construction of the class with a DetectorGeometry instance. """
@@ -147,8 +171,8 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertFalse(parameters.random_rotation)
-        self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsFalse(parameters.uniform_rotation)
+        self.assertIsNone(parameters.quaternion_rotation)
+        self.assertFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -171,8 +195,8 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertFalse(parameters.random_rotation)
-        self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsFalse(parameters.uniform_rotation)
+        self.assertIsNone(parameters.quaternion_rotation)
+        self.assertFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -196,7 +220,7 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         # Check all parameters are set to default values.
         self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
         self.assertFalse(parameters.random_rotation)
-        self.assertIsNone(parameters.rotation_quaternion)
+        self.assertIsNone(parameters.quaternion_rotation)
         self.assertFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)

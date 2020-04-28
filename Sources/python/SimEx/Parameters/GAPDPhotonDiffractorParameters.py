@@ -59,12 +59,12 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
                                     It will conflict with `uniform_rotation` and `random_rotation`.
         :type quaternion_rotation: list, default None
 
-        :param ramdom_rotation: Whether to rotate the sample randomly. 
+        :param random_rotation: Whether to rotate the sample randomly. 
                                 It will conflict with `uniform_rotation` and `quaternion_rotation`.
-        :type ramdom_rotation: bool, default False
+        :type random_rotation: bool, default False
 
         :param uniform_rotation: Uniform sampling of rotation space. 
-                                 It will conflict with `quaternion_rotation` and `ramdom_rotation`.
+                                 It will conflict with `quaternion_rotation` and `random_rotation`.
         :type uniform_rotation: bool, default Flase
 
         :param calculate_Compton: Whether to calculate incoherent (Compton) scattering.
@@ -94,8 +94,8 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         """
         # Check all parameters.
         self.sample = sample
-        self.random_rotation = random_dotation
         self.uniform_rotation = uniform_rotation
+        self.random_rotation = random_rotation
         self.quaternion_rotation = quaternion_rotation
         self.calculate_Compton = calculate_Compton
         self.slice_interval = slice_interval
@@ -128,48 +128,27 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.__sample = value
 
     @property
-    def ramdom_rotation(self):
-        """ Query for the 'ramdom_rotation' parameter. """
+    def random_rotation(self):
+        """ Query for the 'random_rotation' parameter. """
         return self.__random_rotation
 
-    @ramdom_rotation.setter
-    def ramdom_rotation(self, value):
-        """ Set the 'ramdom_rotation' parameter to a given value.
-        :param value: The value to set 'ramdom_rotation' to.
+    @random_rotation.setter
+    def random_rotation(self, value):
+        """ Set the 'random_rotation' parameter to a given value.
+        :param value: The value to set 'random_rotation' to.
         """
-        if value is not None:
-            if self.__uniform_rotation == True:
-                warnings.warn(
-                    "'random_rotation' will be overrided by 'uniform_rotation'"
-                )
-                self.__uniform_rotation = False
-            if self.__quaternion_rotation != None:
-                warnings.warn(
-                    "'quaternion_rotation' will be overrided by 'uniform_rotation'"
-                )
-                self.__quaternion_rotation = None
         self.__random_rotation = checkAndSetInstance(bool, value, False)
 
     @property
     def quaternion_rotation(self):
         """ Query for the 'quaternion_rotation' parameter. """
-        return self._quaternion_rotation_
+        return self.__quaternion_rotation
 
     @quaternion_rotation.setter
     def quaternion_rotation(self, value):
         """ Set the 'quaternion_rotation' parameter to a given value.
         :param value: The value to set 'quaternion_rotation' to.
         """
-        if value is not None:
-            if self.__sample_rotation != True:
-                raise ValueError(
-                    "'quaternion_rotation' is not set since 'ramdom_rotation' is not True."
-                )
-            if self.__uniform_rotation != None:
-                warnings.warn(
-                    "'uniform_rotation' will be overrided by 'quaternion_rotation'"
-                )
-                self.__uniform_rotation = None
         self.__quaternion_rotation = checkAndSetInstance((list, tuple),value, None)
                                                         
     @property
@@ -182,17 +161,6 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'uniform_rotation' parameter to a given value.
         :param value: The value to set 'uniform_rotation' to.
         """
-        if value is not None:
-            if self.__random_rotation == True:
-                warnings.warn(
-                    "'random_rotation' will be overrided by 'uniform_rotation'"
-                )
-                self.__random_rotation = False
-            if self.__quaternion_rotation != None:
-                warnings.warn(
-                    "'quaternion_rotation' will be overrided by 'uniform_rotation'"
-                )
-                self.__quaternion_rotation = None
         self.__uniform_rotation = checkAndSetInstance(bool, value, False)
 
     @property
