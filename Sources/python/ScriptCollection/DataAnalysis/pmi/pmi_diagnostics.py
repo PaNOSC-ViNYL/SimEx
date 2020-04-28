@@ -21,6 +21,7 @@
 #                                                                        #
 ##########################################################################
 
+import os
 from argparse import ArgumentParser
 
 def   pmi_diagnostics_help() :
@@ -85,7 +86,7 @@ Usage - Quick (predefined):
     """)
 import periodictable as pte
 XCOLORS = [ 'b', 'r', 'g', 'k', 'm', 'c',  'b--', 'r--', 'g--', 'k--', 'm--', 'c--'  ]
-ELEMENT_SYMBOL = ['-'] + [e.symbol for e in pte.elements()]
+ELEMENT_SYMBOL = ['-'] + [e.symbol for e in pte.elements]
 
 def main(args) :
 
@@ -110,6 +111,7 @@ def main(args) :
 
 #-------------------------------------------------------------------------
     if a_comm == 'load' :
+        pass
 
 
 
@@ -185,8 +187,8 @@ def main(args) :
     for hh in ha.get_yticklabels():
         hh.set_fontsize( fs )
         pylab.axis( [ min( data['time'] ) ,  max( data['time'] ) , ha.get_ylim()[0] , ha.get_ylim()[1] ] )
-#	ha.axhline(linewidth=lw, color='k')
-#	ha.axvline(linewidth=lw, color='k')
+#       ha.axhline(linewidth=lw, color='k')
+#       ha.axvline(linewidth=lw, color='k')
         legendtxt = []
         for sel_Z in allZ :
             legendtxt.append( element_symbol[sel_Z] )   # legendtxt.append( str( sel_Z ) )
@@ -257,8 +259,8 @@ def main(args) :
     for hh in ha.get_yticklabels():
         hh.set_fontsize( fs )
         pylab.axis( [ min( data['time'] ) ,  max( data['time'] ) , ha.get_ylim()[0] , ha.get_ylim()[1] ] )
-#	ha.axhline(linewidth=lw, color='k')
-#	ha.axvline(linewidth=lw, color='k')
+#       ha.axhline(linewidth=lw, color='k')
+#       ha.axvline(linewidth=lw, color='k')
         legendtxt = []
         for sel_Z in allZ :
             legendtxt.append( element_symbol[sel_Z] )   # legendtxt.append( str( sel_Z ) )
@@ -410,7 +412,7 @@ if __name__ == '__main__':
     parser.add_argument(
             "-s",
             "--snapshots",
-            dest=snapshot_indices,
+            dest="snapshot_indices",
             default=None,
             help="Select which snapshots to include in the analysis.",
             )

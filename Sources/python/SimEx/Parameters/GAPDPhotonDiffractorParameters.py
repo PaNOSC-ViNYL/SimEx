@@ -36,14 +36,13 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
     """
     def __init__(self,
                  sample=None,
-                 sample_rotation=None,
-                 rotation_quaternion=None,
+                 quaternion_rotation=None,
+                 random_rotation=None,
                  uniform_rotation=None,
                  calculate_Compton=None,
                  slice_interval=None,
                  number_of_slices=None,
-                 pmi_start_ID=None,
-                 pmi_stop_ID=None,
+                 number_of_spectrum_bins=None,
                  number_of_diffraction_patterns=None,
                  beam_parameters=None,
                  detector_geometry=None,
@@ -73,17 +72,14 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param calculate_Compton: Whether to calculate incoherent (Compton) scattering.
         :type calculate_Compton: bool, default False
 
-        :param slice_interval: Length of time slice interval to extract from each trajectory.
+        :param slice_interval: Length of time slice interval to extract from each beam temporal profile.
         :type slice_interval: int, default 100
 
-        :param number_of_slices: Number of time slices to read from each trajectory.
+        :param number_of_slices: Number of time slices to read from each beam temproral profile.
         :type number_of_slices: int, default 1
 
-        :param pmi_start_ID: Identifier for the first pmi trajectory to read in.
-        :type pmi_start_ID: int, default 1
-
-        :param pmi_stop_ID: Identifier for the last pmi trajectory to read in.
-        :type pmi_stop_ID: int, default 1
+        :param number_of_spectrum_bins: Number of spectrum bins to read from each beam spectrum.
+        :type number_of_spectrum_bins: int, default 1
 
         :param number_of_diffraction_patterns: Number of diffraction patterns to calculate from each trajectory.
         :type number_of_diffraction_patterns: int, default 1
@@ -98,32 +94,18 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         :type number_of_MPI_processes: int, default 1
 
         """
-        # Legacy support for dictionaries.
-        if parameters_dictionary is not None:
-            self.sample = None
-            self.uniform_rotation = parameters_dictionary['uniform_rotation']
-            self.calculate_Compton = parameters_dictionary['calculate_Compton']
-            self.slice_interval = parameters_dictionary['slice_interval']
-            self.number_of_slices = parameters_dictionary['number_of_slices']
-            self.pmi_start_ID = parameters_dictionary['pmi_start_ID']
-            self.pmi_stop_ID = parameters_dictionary['pmi_stop_ID']
-            self.beam_parameters = parameters_dictionary['beam_parameters']
-            self.detector_geometry = parameters_dictionary['detector_geometry']
-            self.number_of_diffraction_patterns = parameters_dictionary[
-                'number_of_diffraction_patterns']
-
-        else:
-            # Check all parameters.
-            self.sample = sample
-            self.uniform_rotation = uniform_rotation
-            self.calculate_Compton = calculate_Compton
-            self.slice_interval = slice_interval
-            self.number_of_slices = number_of_slices
-            self.pmi_start_ID = pmi_start_ID
-            self.pmi_stop_ID = pmi_stop_ID
-            self.beam_parameters = beam_parameters
-            self.detector_geometry = detector_geometry
-            self.number_of_diffraction_patterns = number_of_diffraction_patterns
+        # Check all parameters.
+        self.sample = sample
+        self.random_rotation = random_dotation
+        self.uniform_rotation = uniform_rotation
+        self.quaternion_rotation = quaternion_rotation
+        self.calculate_Compton = calculate_Compton
+        self.slice_interval = slice_interval
+        self.number_of_slices = number_of_slices
+        self.number_of_spectrum_bins = number_of_spectrum_bins
+        self.beam_parameters = beam_parameters
+        self.detector_geometry = detector_geometry
+        self.number_of_diffraction_patterns = number_of_diffraction_patterns
 
         # super to access the methods of the base class.
         super(GAPDPhotonDiffractorParameters, self).__init__(**kwargs)
@@ -143,7 +125,6 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'sample' parameter to a given value.
         :param value: The value to set 'sample' to.
         """
-        # Allow None.
         if value is not None:
             value = checkAndSetInstance(str, value, None)
         self.__sample = value
@@ -151,30 +132,25 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
     @property
     def sample_rotation(self):
         """ Query for the 'sample_rotation' parameter. """
-        return self.__uniform_rotation
+        return self.__sample_rotation
 
     @sample_rotation.setter
     def sample_rotation(self, value):
         """ Set the 'sample_rotation' parameter to a given value.
         :param value: The value to set 'sample_rotation' to.
         """
-        # Allow None.
-        if value is not None:
-            self.__uniform_rotation = checkAndSetInstance(bool, value, False)
-        else:
-            self.__uniform_rotation = None
+        self.__sample_rotation = checkAndSetInstance(bool, value, False)
 
     @property
     def rotation_quaternion(self):
         """ Query for the 'rotation_quaternion' parameter. """
-        return self.rotation_quaternion
+        return self.__rotation_quaternion
 
     @rotation_quaternion.setter
     def rotation_quaternion(self, value):
         """ Set the 'rotation_quaternion' parameter to a given value.
         :param value: The value to set 'rotation_quaternion' to.
         """
-        # Allow None.
         if value is not None:
             if self.__sample_rotation != True:
                 raise ValueError(
@@ -185,11 +161,8 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
                     "'uniform_rotation' will be overrided by 'rotation_quaternion'"
                 )
                 self.__uniform_rotation = None
-            self.__rotation_quaternion = checkAndSetInstance((list, tuple),
-                                                             value, None)
-        else:
-            self.__rotation_quaternion = None
-
+        self.__rotation_quaternion = checkAndSetInstance((list, tuple),value, None)
+                                                        
     @property
     def uniform_rotation(self):
         """ Query for the 'uniform_rotation' parameter. """
@@ -200,7 +173,6 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'uniform_rotation' parameter to a given value.
         :param value: The value to set 'uniform_rotation' to.
         """
-        # Allow None.
         if value is not None:
             if self.__sample_rotation != True:
                 raise ValueError(
@@ -211,9 +183,7 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
                     "'rotation_quaternion' will be overrided by 'uniform_rotation'"
                 )
                 self.__rotation_quaternion = None
-            self.__uniform_rotation = checkAndSetInstance(bool, value, None)
-        else:
-            self.__uniform_rotation = None
+        self.__uniform_rotation = checkAndSetInstance(bool, value, None)
 
     @property
     def calculate_Compton(self):
@@ -264,38 +234,22 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
                 "The parameter 'slice_interval' must be a positive integer.")
 
     @property
-    def pmi_start_ID(self):
-        """ Query for the 'pmi_start_ID' parameter. """
-        return self.__pmi_start_ID
+    def number_of_spectrum_bins (self):
+        """ Query for the 'number_of_spectrum_bins' parameter. """
+        return self.__number_of_spectrum_bins
 
-    @pmi_start_ID.setter
-    def pmi_start_ID(self, value):
-        """ Set the 'pmi_start_ID' parameter to a given value.
-        :param value: The value to set 'pmi_start_ID' to.
+    @number_of_spectrum_bins.setter
+    def number_of_spectrum_bins(self, value):
+        """ Set the 'number_of_spectrum_bins' parameter to a given value.
+        :param value: The value to set 'number_of_spectrum_bins' to.
         """
-        pmi_start_ID = checkAndSetInstance(int, value, 1)
-        if pmi_start_ID >= 0:
-            self.__pmi_start_ID = pmi_start_ID
+        number_of_spectrum_bins = checkAndSetInstance(int, value, 1)
+
+        if number_of_spectrum_bins > 0:
+            self.__number_of_spectrum_bins = number_of_spectrum_bins
         else:
             raise ValueError(
-                "The parameters 'pmi_start_ID' must be a positive integer.")
-
-    @property
-    def pmi_stop_ID(self):
-        """ Query for the 'pmi_stop_ID' parameter. """
-        return self.__pmi_stop_ID
-
-    @pmi_stop_ID.setter
-    def pmi_stop_ID(self, value):
-        """ Set the 'pmi_stop_ID' parameter to a given value.
-        :param value: The value to set 'pmi_stop_ID' to.
-        """
-        pmi_stop_ID = checkAndSetInstance(int, value, 1)
-        if pmi_stop_ID >= 0:
-            self.__pmi_stop_ID = pmi_stop_ID
-        else:
-            raise ValueError(
-                "The parameters 'pmi_stop_ID' must be a positive integer.")
+                "The parameter 'slice_interval' must be a positive integer.")
 
     @property
     def beam_parameters(self):

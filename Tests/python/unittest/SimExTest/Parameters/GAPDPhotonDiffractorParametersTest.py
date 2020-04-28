@@ -100,16 +100,40 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.uniform_rotation, None)
-        self.assertEqual(parameters.sample_rotation, None)
-        self.assertEqual(parameters.rotation_quaternion, None)
+        self.assertFalse(parameters.sample_rotation)
+        self.assertIsNone(parameters.rotation_quaternion)
+        self.assertIsNone(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
-        self.assertEqual(parameters.pmi_start_ID, 1)
-        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.number_of_spectrum_bins, 1)
         self.assertEqual(parameters.beam_parameters, None)
         self.assertEqual(parameters.detector_geometry, None)
+
+    def testConstructionWithSample_rotation(self):
+        """ Testing the construction of the class with a PhotonBeamParameters instance. """
+
+        # Attempt to construct an instance of the class.
+        parameters = GAPDPhotonDiffractorParameters(
+            sample_rotation=True,
+            detector_geometry=self.detector_geometry,
+            beam_parameters=self.beam)
+
+        # Check instance and inheritance.
+        self.assertIsInstance(parameters, GAPDPhotonDiffractorParameters)
+        self.assertIsInstance(parameters, AbstractCalculatorParameters)
+
+        # Check all parameters are set to default values.
+        self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
+        self.assertFalse(parameters.sample_rotation)
+        self.assertIsNone(parameters.rotation_quaternion)
+        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.calculate_Compton)
+        self.assertEqual(parameters.slice_interval, 100)
+        self.assertEqual(parameters.number_of_slices, 1)
+        self.assertEqual(parameters.number_of_spectrum_bins, 1)
+        self.assertEqual(parameters.beam_parameters, self.beam)
+        self.assertEqual(parameters.detector_geometry, self.detector_geometry)
 
     def testConstructionWithGeometry(self):
         """ Testing the construction of the class with a DetectorGeometry instance. """
@@ -123,12 +147,13 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.sample_rotation)
+        self.assertIsNone(parameters.rotation_quaternion)
+        self.assertIsNone(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
-        self.assertEqual(parameters.pmi_start_ID, 1)
-        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.number_of_spectrum_bins, 1)
         self.assertEqual(parameters.beam_parameters, None)
         self.assertEqual(parameters.detector_geometry, self.detector_geometry)
 
@@ -146,12 +171,13 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.sample_rotation)
+        self.assertIsNone(parameters.rotation_quaternion)
+        self.assertIsNone(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
-        self.assertEqual(parameters.pmi_start_ID, 1)
-        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.number_of_spectrum_bins, 1)
         self.assertEqual(parameters.beam_parameters, self.beam)
         self.assertEqual(parameters.detector_geometry, self.detector_geometry)
 
@@ -170,44 +196,15 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
+        self.assertFalse(parameters.sample_rotation)
+        self.assertIsNone(parameters.rotation_quaternion)
         self.assertEqual(parameters.uniform_rotation, None)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
-        self.assertEqual(parameters.pmi_start_ID, 1)
-        self.assertEqual(parameters.pmi_stop_ID, 1)
+        self.assertEqual(parameters.number_of_spectrum_bins, 1)
         self.assertEqual(parameters.beam_parameters, self.beam)
         self.assertEqual(parameters.detector_geometry, self.detector_geometry)
-
-    def testLegacyDictionary(self):
-        """ Check parameter object can be initialized via a old-style dictionary. """
-        parameters_dict = {
-            'uniform_rotation': False,
-            'calculate_Compton': True,
-            'slice_interval': 12,
-            'number_of_slices': 2,
-            'pmi_start_ID': 4,
-            'pmi_stop_ID': 5,
-            'number_of_diffraction_patterns': 2,
-            'beam_parameters': None,
-            'detector_geometry': self.detector_geometry,
-            'number_of_MPI_processes': 4,  # Legacy, has no effect.
-        }
-
-        parameters = GAPDPhotonDiffractorParameters(
-            parameters_dictionary=parameters_dict)
-
-        # Check all parameters are set correctly.
-        self.assertFalse(parameters.uniform_rotation)
-        self.assertTrue(parameters.calculate_Compton)
-        self.assertEqual(parameters.slice_interval, 12)
-        self.assertEqual(parameters.number_of_slices, 2)
-        self.assertEqual(parameters.pmi_start_ID, 4)
-        self.assertEqual(parameters.pmi_stop_ID, 5)
-        self.assertEqual(parameters.beam_parameters, None)
-        self.assertEqual(parameters.detector_geometry, self.detector_geometry)
-        self.assertIsNone(parameters.sample)
-
 
 if __name__ == '__main__':
     unittest.main()

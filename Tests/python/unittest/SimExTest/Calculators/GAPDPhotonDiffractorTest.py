@@ -1,6 +1,6 @@
 """ Test module for the GAPDPhotonDiffractor."""
 ##########################################################################
-# 
+#
 # Modified by Juncheng E in 2020                                         #
 # Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
@@ -28,11 +28,11 @@ import unittest
 
 from TestUtilities import TestUtilities
 
+
 class GAPDPhotonDiffractorTest(unittest.TestCase):
     """
     Test class for the GAPDPhotonDiffractor class.
     """
-
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
@@ -57,7 +57,6 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
             if os.path.isdir(d):
                 shutil.rmtree(d)
 
-
     def testGAPDInstallation(self):
         """ Make a test run of GAPD using the CLI and a config shipped with the GAPD package. """
 
@@ -65,24 +64,27 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         tmp_dir = tempfile.mkdtemp(prefix='gapd_')
 
         # Copy input file to tmp_dir
-        shutil.copy2( TestUtilities.generateTestFilePath( "in.GAPD"), tmp_dir)
-        shutil.copy2( TestUtilities.generateTestFilePath( "single-cu.cfg"), tmp_dir)
+        shutil.copy2(TestUtilities.generateTestFilePath("in.GAPD"), tmp_dir)
+        shutil.copy2(TestUtilities.generateTestFilePath("single-cu.cfg"),
+                     tmp_dir)
         # Chdir to tmp directory.
         old_pwd = os.getcwd()
         os.chdir(tmp_dir)
 
-        proc = subprocess.Popen( ["GAPD.cuda", "-i", "in.GAPD"] )
+        proc = subprocess.Popen(["GAPD.cuda", "-i", "in.GAPD"])
         proc.wait()
 
-        self.assertIn( "cu.00-1.kspace.dat", os.listdir(tmp_dir))
+        self.assertIn("cu.00-1.kspace.dat", os.listdir(tmp_dir))
 
         os.chdir(old_pwd)
-   def testConstructionParameters(self):
-    """ Check we can construct with a parameter object. """
-    parameters=GAPDPhotonDiffractorParameters(beam_parameters=self.beam,
-                                              detector_geometry=self.detector_geometry,
-                                              )
+
+    def testConstructionParameters(self):
+        """ Check we can construct with a parameter object. """
+        parameters = GAPDPhotonDiffractorParameters(
+            beam_parameters=self.beam,
+            detector_geometry=self.detector_geometry,
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
-
