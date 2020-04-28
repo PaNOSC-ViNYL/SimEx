@@ -161,7 +161,9 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
                                           input_path='3WUL.pdb',
                                           output_path='out')
 
-
+        calculator.backengine()
+        
+        os.chdir(old_pwd)
 
 if __name__ == '__main__':
     unittest.main()
