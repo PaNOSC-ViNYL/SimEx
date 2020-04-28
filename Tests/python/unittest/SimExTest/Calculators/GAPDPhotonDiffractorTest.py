@@ -26,8 +26,16 @@ import subprocess
 import tempfile
 import unittest
 
+# Include needed directories in sys.path.
+import unittest
+
 from TestUtilities import TestUtilities
 from SimEx.Calculators.GAPDCalculator import GAPDCalculator
+# Import the class to test.
+from SimEx.Calculators.GAPDPhotonDiffractor import GAPDPhotonDiffractor
+from SimEx.Parameters.GAPDPhotonDiffractorParameters import GAPDPhotonDiffractorParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 
 class GAPDPhotonDiffractorTest(unittest.TestCase):
@@ -37,7 +45,29 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        pass
+        detector_panel = DetectorPanel(
+            ranges={
+                'fast_scan_min': 0,
+                'fast_scan_max': 21,
+                'slow_scan_min': 0,
+                'slow_scan_max': 21
+            },
+            pixel_size=2.2e-4 * meter,
+            photon_response=1.0,
+            distance_from_interaction_plane=0.13 * meter,
+            corners={
+                'x': -11,
+                'y': -11
+            },
+        )
+
+        cls.detector_geometry = DetectorGeometry(panels=[detector_panel])
+
+        cls.beam = PhotonBeamParameters(
+            photon_energy=8.6e3 * electronvolt,
+            beam_diameter_fwhm=1.0e-6 * meter,
+            pulse_energy=1.0e-3 * joule,
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -72,19 +102,30 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         old_pwd = os.getcwd()
         os.chdir(tmp_dir)
 
-        proc = subprocess.Popen(["GAPD-SimEx", "-i", "in.param"])
+        proc = subprocess.Popen(["GAPD-SimEx", "-p", "in.param"])
         proc.wait()
 
         self.assertIn("diffr.txt", os.listdir(tmp_dir))
 
         os.chdir(old_pwd)
 
-    # TODO
     def testGAPDAtomInput(self):
+        """ GAPD atom format preparation test """
+
+        tmp_dir = tempfile.mkdtemp(prefix='gapd_')
+
+        # Chdir to tmp directory.
+        old_pwd = os.getcwd()
+        os.chdir(tmp_dir)
+
         calculator = GAPDPhotonDiffractor(parameters=self.parameters,
-                                           input_path='3WUL.pdb',
-                                           output_path='out')
+                                          input_path='3WUL.pdb',
+                                          output_path='out')
         calculator.prepareAtomData()
+
+        self.assertIn("atoms.xyz", os.listdir(tmp_dir))
+
+        os.chdir(old_pwd)
 
     def testConstructionParameters(self):
         """ Check we can construct with a parameter object. """

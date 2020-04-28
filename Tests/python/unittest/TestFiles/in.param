@@ -1,0 +1,40 @@
+# Created by Juncheng E on 2020/04/23
+# Last modified on 2020/04/23
+
+
+# Read configuration
+xyz single-cu.xyz 
+#xyz single-cu.xyz 
+
+# Detector Parameters:
+# pixel number along two axis
+pn 101 101
+# pixel size of detector (um)
+ps 120
+# The coordinates of lower left pixel of the detector panel in the globale detector geometry (unit: pixel)
+# Note: The coordinate of direct beam on the detector is [0 0]
+corner -50 -50
+# sample to detector distance (unit: mm)
+s2d 250
+# normal incident direction to screen
+nid 0 0 1
+# the horizontal direction of detector
+dx 1 0 0
+
+# Beam parameters:
+# choose beam type
+beam e
+# beam x
+# Monochromatic beam wavelength(A)/energy(keV)
+# mono l 1.54
+mono e 200
+# mono l 0.025079
+# fluence (unit: [J/cm^2])
+fluence 2.5e+4
+# the polarization angle with respect to the horizontal plane (unit: radian)
+polarization_angle 0
+# incident beam direction
+id 0 0 1
+
+# output options
+output_fn diffr.txt
