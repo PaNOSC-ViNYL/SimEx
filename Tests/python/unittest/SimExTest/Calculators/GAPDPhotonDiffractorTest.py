@@ -30,12 +30,12 @@ import unittest
 import unittest
 
 from TestUtilities import TestUtilities
-from SimEx.Calculators.GAPDCalculator import GAPDCalculator
 # Import the class to test.
 from SimEx.Calculators.GAPDPhotonDiffractor import GAPDPhotonDiffractor
 from SimEx.Parameters.GAPDPhotonDiffractorParameters import GAPDPhotonDiffractorParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
 
 class GAPDPhotonDiffractorTest(unittest.TestCase):
@@ -69,6 +69,8 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
             pulse_energy=1.0e-3 * joule,
         )
 
+        cls.parameters = GAPDPhotonDiffractorParameters()
+
     @classmethod
     def tearDownClass(cls):
         """ Tearing down the test class. """
@@ -87,27 +89,6 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d):
                 shutil.rmtree(d)
-
-    def testGAPDInstallation(self):
-        """ Make a test run of GAPD using the CLI and a config shipped with the GAPD package. """
-
-        # Make a tmpdir
-        tmp_dir = tempfile.mkdtemp(prefix='gapd_')
-
-        # Copy input file to tmp_dir
-        shutil.copy2(TestUtilities.generateTestFilePath("in.param"), tmp_dir)
-        shutil.copy2(TestUtilities.generateTestFilePath("single-cu.xyz"),
-                     tmp_dir)
-        # Chdir to tmp directory.
-        old_pwd = os.getcwd()
-        os.chdir(tmp_dir)
-
-        proc = subprocess.Popen(["GAPD-SimEx", "-p", "in.param"])
-        proc.wait()
-
-        self.assertIn("diffr.txt", os.listdir(tmp_dir))
-
-        os.chdir(old_pwd)
 
     def testGAPDAtomInput(self):
         """ GAPD atom format preparation test """
