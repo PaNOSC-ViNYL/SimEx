@@ -27,6 +27,7 @@ import tempfile
 import unittest
 
 from TestUtilities import TestUtilities
+from SimEx.Calculators.GAPDCalculator import GAPDCalculator
 
 
 class GAPDPhotonDiffractorTest(unittest.TestCase):
@@ -64,19 +65,26 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         tmp_dir = tempfile.mkdtemp(prefix='gapd_')
 
         # Copy input file to tmp_dir
-        shutil.copy2(TestUtilities.generateTestFilePath("in.GAPD"), tmp_dir)
-        shutil.copy2(TestUtilities.generateTestFilePath("single-cu.cfg"),
+        shutil.copy2(TestUtilities.generateTestFilePath("in.param"), tmp_dir)
+        shutil.copy2(TestUtilities.generateTestFilePath("single-cu.xyz"),
                      tmp_dir)
         # Chdir to tmp directory.
         old_pwd = os.getcwd()
         os.chdir(tmp_dir)
 
-        proc = subprocess.Popen(["GAPD.cuda", "-i", "in.GAPD"])
+        proc = subprocess.Popen(["GAPD-SimEx", "-i", "in.param"])
         proc.wait()
 
-        self.assertIn("cu.00-1.kspace.dat", os.listdir(tmp_dir))
+        self.assertIn("diffr.txt", os.listdir(tmp_dir))
 
         os.chdir(old_pwd)
+
+    # TODO
+    def testGAPDAtomInput(self):
+        calculator = GAPDPhotonDiffractor(parameters=self.parameters,
+                                           input_path='3WUL.pdb',
+                                           output_path='out')
+        calculator.prepareAtomData()
 
     def testConstructionParameters(self):
         """ Check we can construct with a parameter object. """

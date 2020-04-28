@@ -20,19 +20,14 @@
 #                                                                        #
 ##########################################################################
 
-from pysingfel.FileIO import saveAsDiffrOutFile, prepH5
-from pysingfel.beam import Beam
-from pysingfel.detector import Detector
-from pysingfel.diffraction import calculate_molecularFormFactorSq
-from pysingfel.particle import Particle
-from pysingfel.radiationDamage import generateRotations, rotateParticle
-from pysingfel.toolbox import convert_to_poisson
 import copy
 import h5py
 import os
 import subprocess
 import shlex
 import sys
+import ase.io
+
 
 from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -83,44 +78,6 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         # TODO: define this with Aljosa 
         self.__expected_prop_data = []
 
-        self.__expected_PMI_data = ['/data/snp_<7 digit index>/ff',
-                                '/data/snp_<7 digit index>/halfQ',
-                                '/data/snp_<7 digit index>/Nph',
-                                '/data/snp_<7 digit index>/r',
-                                '/data/snp_<7 digit index>/T',
-                                '/data/snp_<7 digit index>/Z',
-                                '/data/snp_<7 digit index>/xyz',
-                                '/data/snp_<7 digit index>/Sq_halfQ',
-                                '/data/snp_<7 digit index>/Sq_bound',
-                                '/data/snp_<7 digit index>/Sq_free',
-                                '/history/parent/detail',
-                                '/history/parent/parent',
-                                '/info/package_version',
-                                '/info/contact',
-                                '/info/data_description',
-                                '/info/method_description',
-                                '/version']
-
-        self.__provided_data = [
-                                '/data/data',
-                                '/data/diffr',
-                                '/data/angle',
-                                '/history/parent/detail',
-                                '/history/parent/parent',
-                                '/info/package_version',
-                                '/info/contact',
-                                '/info/data_description',
-                                '/info/method_description',
-                                '/params/geom/detectorDist',
-                                '/params/geom/pixelWidth',
-                                '/params/geom/pixelHeight',
-                                '/params/geom/mask',
-                                '/params/beam/photonEnergy',
-                                '/params/beam/photons',
-                                '/params/beam/focusArea',
-                                '/params/info',
-                                ]
-
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
         return self.__expected_data
@@ -141,9 +98,59 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
         return np, ncores
 
-    def backengine(self):
-        """ This method drives the backengine GAPD."""
 
+    # Atom data
+    def prepareAtomData(self):
+        # If the sample is passed as a pdb, convert '.pdb' into '.xyz' 
+        if self.input_path.split(".")[-1].lower() == 'pdb':
+            if not os.path.isfile(self.input_path):
+                # Attempt to query from pdb.
+                pdb_path = IOUtilities.checkAndGetPDB(self.input_path)
+            # Convert pdb to xyz
+            a = ase.io.read(pdb_path)
+            ase.io.write('atoms.xyz',a)
+            self.input_path = 'atoms.xyz'
+
+    def prepareDetector(self):
+        # Setup the GAPD detector using the simex object.
+        detector = Detector(None) 
+        panel = self.parameters.detector_geometry.panels[0]
+        detector.set_detector_dist(panel.distance_from_interaction_plane.m_as(meter))
+        detector.set_pix_width(panel.pixel_size.m_as(meter))
+        detector.set_pix_height(panel.pixel_size.m_as(meter))
+        detector.set_numPix(panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,   # y
+                            panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"] + 1,   # x
+                            )
+        detector.set_center_x((panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] + 1) / 2.)
+        detector.set_center_y((panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] + 1) / 2.)
+
+    def writeParam(self, in_param_file=None):
+        """ Put diffractor parameters into GAPD param file
+
+        :param in_param_file: The stream to write the serialized geometry to (default sys.stdout).
+        :type  in_param_file: File like object.
+
+        """
+
+        # If this is a string, open a corresponding file.
+
+   
+
+
+        pn = 
+        if isinstance(in_param_file,  str):
+            with open(in_param_file, 'w') as fstream:
+                fstream.write('xyz {}'.format(self.input_path))
+                fstream.write('pn {} {}'.format(parameters.)
+
+
+        if not hasattr(in_param_file, "write"):
+            raise IOError("The stream % is not writable." % (stream) )
+
+    def backengine(self):
+        """ Prepare parameters and data needed to run GAPD diffractor."""
+
+        # Diffractor parameters
         uniform_rotation = self.parameters.uniform_rotation
         calculate_Compton = int(self.parameters.calculate_Compton)
         slice_interval = self.parameters.slice_interval
@@ -152,23 +159,17 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
 
+        # Diffractor atom data
+        prepareAtomData()
+
+        # Diffractor output
         if not os.path.isdir(self.output_path):
             os.mkdir(self.output_path)
         self.__output_dir = self.output_path
 
-        # TODO: convert pdb file into xyz format
-        # If the sample is passed as a pdb, branch out to separate backengine implementation.
-        if self.input_path.split(".")[-1].lower() == 'pdb':
-            if not os.path.isfile(self.input_path):
-                # Attempt to query from pdb.
-                self.input_path = IOUtilities.checkAndGetPDB(self.input_path)
-
-            return self._backengineWithPdb()
-
-        # TODO: convert PMI out  into xyz format
-        # Serialize the input param file.
+        # Put calculator parameters into GAPD param file.
         in_param_file = "in.param"
-        self.parameters.GAPDPhotonDiffractorParameters.serialize(in_param_file)
+        writeParam(in_param_file)
 
         # Setup directory to propogated beam folder
         # Backengine expects a directory name, so have to check if
@@ -186,7 +187,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             mpicommand = self.parameters.forced_mpi_command
         # collect program arguments
-        command_sequence = ['GAPD',
+        command_sequence = ['GAPD-SimEx',
                             '-i',         str(in_param_file)
                             ]
 
@@ -242,41 +243,9 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         return proc.returncode
 
     def _run(self):
-        """ """
-        """ Workhorse function to run the pysingfel backengine.
-        Called if run from the command-line with dill dump.
+        """ Run GAPD simulation
         """
-        # Local import of MPI to avoid premature call to MPI.init().
-        from mpi4py import MPI
 
-        # Initialize MPI
-        mpi_comm = MPI.COMM_WORLD
-        mpi_rank = mpi_comm.Get_rank()
-        mpi_size = mpi_comm.Get_size()
-
-        # Perform common work on all cores.
-        initial_particle = Particle()
-        initial_particle.readPDB(self.input_path, ff='WK')
-
-        # Generate rotations.
-        quaternions = generateRotations(
-                self.parameters.uniform_rotation,
-                'xyz',
-                self.parameters.number_of_diffraction_patterns,
-               )
-
-        # Setup the pysingfel detector using the simex object.
-        # TODO: only the first panel is considered for now, can loop over panels later.
-        detector = Detector(None)  # read geom file
-        panel = self.parameters.detector_geometry.panels[0]
-        detector.set_detector_dist(panel.distance_from_interaction_plane.m_as(meter))
-        detector.set_pix_width(panel.pixel_size.m_as(meter))
-        detector.set_pix_height(panel.pixel_size.m_as(meter))
-        detector.set_numPix(panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,   # y
-                            panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"] + 1,   # x
-                            )
-        detector.set_center_x((panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] + 1) / 2.)
-        detector.set_center_y((panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] + 1) / 2.)
 
         # Setup the beam based on the PhotonBeamParameters instance.
         beam = Beam(None)

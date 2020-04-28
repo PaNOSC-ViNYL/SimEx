@@ -300,3 +300,6 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
             raise ValueError(
                 "The parameters 'number_of_diffraction_patterns' must be a positive integer."
             )
+
+    
+
