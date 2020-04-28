@@ -155,27 +155,27 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             with open(in_param_file, 'w') as fstream:
 
                 # Detector part
-                fstream.write('xyz {}'.format(self.input_path))
-                fstream.write('pn {} {}'.format(self._det_nx, self._det_ny))
-                fstream.write('ps {}'.format(self._det_ps))
-                fstream.write('corner {} {}'.format(self._det_conerx,
+                fstream.write('xyz {}\n'.format(self.input_path))
+                fstream.write('pn {} {}\n'.format(self._det_nx, self._det_ny))
+                fstream.write('ps {}\n'.format(self._det_ps))
+                fstream.write('corner {} {}\n'.format(self._det_conerx,
                                                     self._det_conery))
-                fstream.write('s2d {}'.format(self._det_s2d))
+                fstream.write('s2d {}\n'.format(self._det_s2d))
 
                 # Detector perpendicular to x-ray beam
-                fstream.write('nid 0 0 -1')
-                fstream.write('dx 1 0 0')
+                fstream.write('nid 0 0 -1\n')
+                fstream.write('dx 1 0 0\n')
 
                 # Beam part:
-                fstream.write('beam x') # It's x-ray beam for GAPD
-                fstream.write('mono e {}'.format(self._beam_energy))
-                fstream.write('fluence {}'.format(self._beam_fluence))
-                fstream.write('polarization_angle 0')
+                fstream.write('beam x\n') # It's x-ray beam for GAPD
+                fstream.write('mono e {}\n'.format(self._beam_energy))
+                fstream.write('fluence {}\n'.format(self._beam_fluence))
+                fstream.write('polarization_angle 0\n')
                 # Beam is propograted along -z direction of the sample
-                fstream.write('id 0 0 -1')
+                fstream.write('id 0 0 -1\n')
 
                 # Output file:
-                fstream.write('output_fn {}'.format(self.output_path))
+                fstream.write('output_fn {}\n'.format(self.output_path))
 
 
     def backengine(self):
@@ -186,8 +186,6 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         calculate_Compton = int(self.parameters.calculate_Compton)
         slice_interval = self.parameters.slice_interval
         number_of_slices = self.parameters.number_of_slices
-        pmi_start_ID = self.parameters.pmi_start_ID
-        pmi_stop_ID = self.parameters.pmi_stop_ID
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
 
         # Diffractor atom data
@@ -198,11 +196,6 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Diffractor beam data
         self.prepareBeam()
-
-        # Diffractor output
-        if not os.path.isdir(self.output_path):
-            os.mkdir(self.output_path)
-        self.__output_dir = self.output_path
 
         # Put calculator parameters into GAPD param file.
         in_param_file = "in.param"
@@ -225,20 +218,19 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand = self.parameters.forced_mpi_command
 
         # collect program arguments
-        command_sequence = ['GAPD-SimEx', '-i', str(in_param_file)]
+        command_sequence = ['GAPD-SimEx', '-p', str(in_param_file)]
+        #command_sequence = ['GAPD-SimEx', '-p', str(in_param_file), '&>','sta.GAPD']
 
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
 
-        if 'SIMEX_VERBOSE' in os.environ:
-            print(
+        #if 'SIMEX_VERBOSE' in os.environ:
+        print(
                 ("GAPDPhotonDiffractor backengine command: " + " ".join(args)))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
         proc.wait()
-
-        # TODO: return code running status
 
         # Return the return code from the backengine.
         return proc.returncode

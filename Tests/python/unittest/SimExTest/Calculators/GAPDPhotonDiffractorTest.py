@@ -70,7 +70,9 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         )
 
         cls.parameters = GAPDPhotonDiffractorParameters(
-            detector_geometry=cls.detector_geometry, beam_parameters=cls.beam)
+            detector_geometry=cls.detector_geometry,
+            beam_parameters=cls.beam,
+            forced_mpi_command='mpirun -np 1')
 
     @classmethod
     def tearDownClass(cls):
@@ -120,6 +122,7 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         """ GAPD atom format preparation test """
 
         tmp_dir = tempfile.mkdtemp(prefix='gapd_')
+        print ('WriteParam test:',tmp_dir)
 
         shutil.copy2(TestUtilities.generateTestFilePath("3WUL.pdb"), tmp_dir)
 
@@ -145,12 +148,12 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("in.param", os.listdir(tmp_dir))
 
         os.chdir(old_pwd)
-        
+
     def testRun(self):
         """ GAPD atom format preparation test """
 
         tmp_dir = tempfile.mkdtemp(prefix='gapd_')
-
+        print ('Engine test:',tmp_dir)
         shutil.copy2(TestUtilities.generateTestFilePath("3WUL.pdb"), tmp_dir)
 
         # Chdir to tmp directory.
@@ -159,11 +162,12 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
 
         calculator = GAPDPhotonDiffractor(parameters=self.parameters,
                                           input_path='3WUL.pdb',
-                                          output_path='out')
+                                          output_path='out.txt')
 
         calculator.backengine()
-        
+
         os.chdir(old_pwd)
+
 
 if __name__ == '__main__':
     unittest.main()
