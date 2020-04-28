@@ -100,9 +100,9 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertFalse(parameters.sample_rotation)
+        self.assertFalse(parameters.random_rotation)
         self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsNone(parameters.uniform_rotation)
+        self.assertIsFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -110,12 +110,12 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertEqual(parameters.beam_parameters, None)
         self.assertEqual(parameters.detector_geometry, None)
 
-    def testConstructionWithSample_rotation(self):
+    def testConstructionWithRandom_rotation(self):
         """ Testing the construction of the class with a PhotonBeamParameters instance. """
 
         # Attempt to construct an instance of the class.
         parameters = GAPDPhotonDiffractorParameters(
-            sample_rotation=True,
+            random_rotation=True,
             detector_geometry=self.detector_geometry,
             beam_parameters=self.beam)
 
@@ -124,10 +124,9 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
-        self.assertFalse(parameters.sample_rotation)
+        self.assertTrue(parameters.random_rotation)
         self.assertIsNone(parameters.rotation_quaternion)
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertIsFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -147,9 +146,9 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertFalse(parameters.sample_rotation)
+        self.assertFalse(parameters.random_rotation)
         self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsNone(parameters.uniform_rotation)
+        self.assertIsFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -171,9 +170,9 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertIsInstance(parameters, AbstractCalculatorParameters)
 
         # Check all parameters are set to default values.
-        self.assertFalse(parameters.sample_rotation)
+        self.assertFalse(parameters.random_rotation)
         self.assertIsNone(parameters.rotation_quaternion)
-        self.assertIsNone(parameters.uniform_rotation)
+        self.assertIsFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)
@@ -196,9 +195,9 @@ class GAPDPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual(parameters.sample, generateTestFilePath('2nip.pdb'))
-        self.assertFalse(parameters.sample_rotation)
+        self.assertFalse(parameters.random_rotation)
         self.assertIsNone(parameters.rotation_quaternion)
-        self.assertEqual(parameters.uniform_rotation, None)
+        self.assertFalse(parameters.uniform_rotation)
         self.assertFalse(parameters.calculate_Compton)
         self.assertEqual(parameters.slice_interval, 100)
         self.assertEqual(parameters.number_of_slices, 1)

@@ -53,21 +53,19 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param sample: Name of file containing atomic sample geometry (default None).
         :type sample: str
 
-        :param sample_rotation: Whether to rotate the sample. 
-        :type sample_rotation: bool, default False
+        :param quaternion_rotation: The rotation quaternion for sample rotation.
+                                    quaternion_rotation = None: No rotation by quaternion
+                                    quaternion_rotation = [0.1, 0.1, 0.1, 0.1]: Rotation by input quaternion
+                                    It will conflict with `uniform_rotation` and `random_rotation`.
+        :type quaternion_rotation: list, default None
 
-        :param rotation_quaternion: The rotation quaternion for sample rotation. If \
-                                    `sample_rotation` is True, it will perform the rotation.
-                                     It will conflict with `uniform_rotation`.
-        :type rotation_quaternion: list, default None
+        :param ramdom_rotation: Whether to rotate the sample randomly. 
+                                It will conflict with `uniform_rotation` and `quaternion_rotation`.
+        :type ramdom_rotation: bool, default False
 
-        :param uniform_rotation: Uniform or random sampling of rotation space. It will take \
-                                 effect only if `sample_rotation` is True.
-                                 uniform_rotation = True: uniform sampling of rotation space
-                                 uniform_rotation = Flase: random sampling of rotation space
-                                 uniform_rotation = None: No automatic rotation
-                                 It will conflict with `rotation_quaternion`.
-        :type uniform_rotation: bool, default None
+        :param uniform_rotation: Uniform sampling of rotation space. 
+                                 It will conflict with `quaternion_rotation` and `ramdom_rotation`.
+        :type uniform_rotation: bool, default Flase
 
         :param calculate_Compton: Whether to calculate incoherent (Compton) scattering.
         :type calculate_Compton: bool, default False
@@ -130,38 +128,49 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.__sample = value
 
     @property
-    def sample_rotation(self):
-        """ Query for the 'sample_rotation' parameter. """
-        return self.__sample_rotation
+    def ramdom_rotation(self):
+        """ Query for the 'ramdom_rotation' parameter. """
+        return self.__random_rotation
 
-    @sample_rotation.setter
-    def sample_rotation(self, value):
-        """ Set the 'sample_rotation' parameter to a given value.
-        :param value: The value to set 'sample_rotation' to.
+    @ramdom_rotation.setter
+    def ramdom_rotation(self, value):
+        """ Set the 'ramdom_rotation' parameter to a given value.
+        :param value: The value to set 'ramdom_rotation' to.
         """
-        self.__sample_rotation = checkAndSetInstance(bool, value, False)
+        if value is not None:
+            if self.__uniform_rotation == True:
+                warnings.warn(
+                    "'random_rotation' will be overrided by 'uniform_rotation'"
+                )
+                self.__uniform_rotation = False
+            if self.__quaternion_rotation != None:
+                warnings.warn(
+                    "'quaternion_rotation' will be overrided by 'uniform_rotation'"
+                )
+                self.__quaternion_rotation = None
+        self.__random_rotation = checkAndSetInstance(bool, value, False)
 
     @property
-    def rotation_quaternion(self):
-        """ Query for the 'rotation_quaternion' parameter. """
-        return self.__rotation_quaternion
+    def quaternion_rotation(self):
+        """ Query for the 'quaternion_rotation' parameter. """
+        return self._quaternion_rotation_
 
-    @rotation_quaternion.setter
-    def rotation_quaternion(self, value):
-        """ Set the 'rotation_quaternion' parameter to a given value.
-        :param value: The value to set 'rotation_quaternion' to.
+    @quaternion_rotation.setter
+    def quaternion_rotation(self, value):
+        """ Set the 'quaternion_rotation' parameter to a given value.
+        :param value: The value to set 'quaternion_rotation' to.
         """
         if value is not None:
             if self.__sample_rotation != True:
                 raise ValueError(
-                    "'rotation_quaternion' is not set since 'sample_rotation' is not True."
+                    "'quaternion_rotation' is not set since 'ramdom_rotation' is not True."
                 )
             if self.__uniform_rotation != None:
                 warnings.warn(
-                    "'uniform_rotation' will be overrided by 'rotation_quaternion'"
+                    "'uniform_rotation' will be overrided by 'quaternion_rotation'"
                 )
                 self.__uniform_rotation = None
-        self.__rotation_quaternion = checkAndSetInstance((list, tuple),value, None)
+        self.__quaternion_rotation = checkAndSetInstance((list, tuple),value, None)
                                                         
     @property
     def uniform_rotation(self):
@@ -174,16 +183,17 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param value: The value to set 'uniform_rotation' to.
         """
         if value is not None:
-            if self.__sample_rotation != True:
-                raise ValueError(
-                    "'uniform_rotation' is not set since 'sample_rotation' is not True."
-                )
-            if self.__rotation_quaternion != None:
+            if self.__random_rotation == True:
                 warnings.warn(
-                    "'rotation_quaternion' will be overrided by 'uniform_rotation'"
+                    "'random_rotation' will be overrided by 'uniform_rotation'"
                 )
-                self.__rotation_quaternion = None
-        self.__uniform_rotation = checkAndSetInstance(bool, value, None)
+                self.__random_rotation = False
+            if self.__quaternion_rotation != None:
+                warnings.warn(
+                    "'quaternion_rotation' will be overrided by 'uniform_rotation'"
+                )
+                self.__quaternion_rotation = None
+        self.__uniform_rotation = checkAndSetInstance(bool, value, False)
 
     @property
     def calculate_Compton(self):
