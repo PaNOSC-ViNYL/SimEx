@@ -27,7 +27,7 @@ import subprocess
 import shlex
 import sys
 import ase.io
-
+import numpy as np
 
 from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -41,7 +41,6 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
     """
     :class GAPDPhotonDiffractor: Representing scattering from a molecular sample into a detector plane.
     """
-
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
@@ -60,22 +59,26 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         else:
             parameters_default = None
 
-        self.__parameters = checkAndSetInstance(GAPDPhotonDiffractorParameters,
-                                                parameters,
-                                                parameters_default,
-                                                )
+        self.__parameters = checkAndSetInstance(
+            GAPDPhotonDiffractorParameters,
+            parameters,
+            parameters_default,
+        )
 
         # Handle sample geometry provenience.
         if self.__parameters.sample is None and input_path is None:
-            raise AttributeError("One and only one of parameters.sample or input_path must be provided.")
+            raise AttributeError(
+                "One and only one of parameters.sample or input_path must be provided."
+            )
         if self.__parameters.sample is not None:
             input_path = self.__parameters.sample
 
         # Init base class.
-        super(GAPDPhotonDiffractor, self).__init__(parameters, input_path, output_path)
+        super(GAPDPhotonDiffractor, self).__init__(parameters, input_path,
+                                                   output_path)
 
         # expected X-ray beam data
-        # TODO: define this with Aljosa 
+        # TODO: define this with Aljosa
         self.__expected_prop_data = []
 
     def expectedData(self):
@@ -94,35 +97,49 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.cpus_per_task == "MAX":
             np = nnodes
         else:
-            np = max(ncores//self.parameters.cpus_per_task, 1)
+            np = max(ncores // self.parameters.cpus_per_task, 1)
 
         return np, ncores
 
-
     # Atom data
     def prepareAtomData(self):
-        # If the sample is passed as a pdb, convert '.pdb' into '.xyz' 
+        """ Prepare atomoic configuration for GAPD """
+
+        # If the sample is passed as a pdb, convert '.pdb' into '.xyz'
         if self.input_path.split(".")[-1].lower() == 'pdb':
             if not os.path.isfile(self.input_path):
                 # Attempt to query from pdb.
                 pdb_path = IOUtilities.checkAndGetPDB(self.input_path)
             # Convert pdb to xyz
             a = ase.io.read(pdb_path)
-            ase.io.write('atoms.xyz',a)
+            ase.io.write('atoms.xyz', a)
             self.input_path = 'atoms.xyz'
 
     def prepareDetector(self):
-        # Setup the GAPD detector using the simex object.
-        detector = Detector(None) 
+        """ Setup GAPD detector using simex objects. """
+
+        # Read the first panel of the detector
+        # We have only one panel representing a large detector here
         panel = self.parameters.detector_geometry.panels[0]
-        detector.set_detector_dist(panel.distance_from_interaction_plane.m_as(meter))
-        detector.set_pix_width(panel.pixel_size.m_as(meter))
-        detector.set_pix_height(panel.pixel_size.m_as(meter))
-        detector.set_numPix(panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,   # y
-                            panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"] + 1,   # x
-                            )
-        detector.set_center_x((panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] + 1) / 2.)
-        detector.set_center_y((panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] + 1) / 2.)
+
+        _self.det_ny = panel.ranges["slow_scan_max"] - panel.ranges[
+            "slow_scan_min"] + 1
+        _self.det_nx = panel.ranges["fast_scan_max"] - panel.ranges[
+            "fast_scan_min"] + 1
+        _self.det_s2d = panel.distance_from_interaction_plane.m_as(
+            meter) * 1000.0  # mm
+        _self.det_ps = panel.pixel_size.m_as(meter) * 1e6  # um
+        _self.det_conerx = detector_panel.corners['x']
+        _self.det_conery = detector_panel.corners['y']
+
+    def prepareBeam(self):
+        """ Setup GAPD beam using simex objects. """
+
+        beam = self.parameters.beam_parameters
+        _self.beam_energy = beam.photon_energy.m_as(electronvolt)/1000.0 # keV
+        _self.beam_diameter = beam.beam_diameter_fwhm.m_as(meter)*100 # cm
+        _self.beam_fluence = beam.pulse_energy.m_as(joule)/np.pi/(_self.beam_diameter*_self.beam_diameter/4) # J/cm^2
+     
 
     def writeParam(self, in_param_file=None):
         """ Put diffractor parameters into GAPD param file
@@ -133,19 +150,34 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         """
 
         # If this is a string, open a corresponding file.
-
-   
-
-
-        pn = 
-        if isinstance(in_param_file,  str):
+        if isinstance(in_param_file, str):
             with open(in_param_file, 'w') as fstream:
-                fstream.write('xyz {}'.format(self.input_path))
-                fstream.write('pn {} {}'.format(parameters.)
 
+                # Detector part
+                fstream.write('xyz {}'.format(_self.input_path))
+                fstream.write('pn {} {}'.format(_self.det_nx, _self.det_ny))
+                fstream.write('ps {}'.format(_self.det_ps))
+                fstream.write('corner {} {}'.format(_self.det_conerx,
+                                                    _self.det_conery))
+                fstream.write('s2d {}'.format(_self.det_s2d))
+
+                # Detector perpendicular to x-ray beam
+                fstream.write('nid 0 0 -1')
+                fstream.write('dx 1 0 0')
+
+                # Beam part:
+                fstream.write('beam x') # It's x-ray beam for GAPD
+                fstream.write('mono e {}'.format(_self.beam_energy))
+                fstream.write('fluence {}'.format(_self.beam_fluence))
+                fstream.write('polarization_angle 0')
+                # Beam is propograted along -z direction of the sample
+                fstream.write('id 0 0 -1')
+
+                # Output file:
+                fstream.write('output_fn {}'.format(self.output_path))
 
         if not hasattr(in_param_file, "write"):
-            raise IOError("The stream % is not writable." % (stream) )
+            raise IOError("The stream % is not writable." % (stream))
 
     def backengine(self):
         """ Prepare parameters and data needed to run GAPD diffractor."""
@@ -160,7 +192,13 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
 
         # Diffractor atom data
-        prepareAtomData()
+        self.prepareAtomData()
+
+        # Diffractor detector data
+        self.prepareDetector()
+
+        # Diffractor beam data
+        self.prepareBeam()
 
         # Diffractor output
         if not os.path.isdir(self.output_path):
@@ -169,7 +207,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Put calculator parameters into GAPD param file.
         in_param_file = "in.param"
-        writeParam(in_param_file)
+        self.writeParam(in_param_file)
 
         # Setup directory to propogated beam folder
         # Backengine expects a directory name, so have to check if
@@ -186,16 +224,16 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand = ParallelUtilities.prepareMPICommandArguments(np)
         else:
             mpicommand = self.parameters.forced_mpi_command
+
         # collect program arguments
-        command_sequence = ['GAPD-SimEx',
-                            '-i',         str(in_param_file)
-                            ]
+        command_sequence = ['GAPD-SimEx', '-i', str(in_param_file)]
 
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
 
         if 'SIMEX_VERBOSE' in os.environ:
-            print(("GAPDPhotonDiffractor backengine command: "+" ".join(args)))
+            print(
+                ("GAPDPhotonDiffractor backengine command: " + " ".join(args)))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -205,126 +243,6 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Return the return code from the backengine.
         return proc.returncode
-
-    def _backengineWithPdb(self):
-        """ """
-        """
-        Run the diffraction simulation if the sample is a pdb.
-        Codes is based on pysingfel/tests/test_particle.test_calFromPDB
-        """
-
-        # Dump self to file.
-        fname = IOUtilities.getTmpFileName()
-        self.dumpToFile(fname)
-
-        # Setup the mpi call.
-        forcedMPIcommand = self.parameters.forced_mpi_command
-
-        if forcedMPIcommand == "" or forcedMPIcommand is None:
-            (np, ncores) = self.computeNTasks()
-            mpicommand = ParallelUtilities.prepareMPICommandArguments(np, ncores)
-        else:
-            mpicommand = forcedMPIcommand
-
-        mpicommand += " ".join(("",sys.executable, __file__, fname))
-
-        if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print(("GAPDPhotonDiffractor backengine mpicommand: "+mpicommand))
-
-        # Launch the system command.
-        args = shlex.split(mpicommand)
-        with subprocess.Popen(args, universal_newlines=True) as proc:
-            out, err = proc.communicate()
-
-        # Remove the dumped class.
-        os.remove(fname)
-
-        return proc.returncode
-
-    def _run(self):
-        """ Run GAPD simulation
-        """
-
-
-        # Setup the beam based on the PhotonBeamParameters instance.
-        beam = Beam(None)
-        simex_beam = self.parameters.beam_parameters
-        beam.set_photon_energy(simex_beam.photon_energy.m_as(electronvolt))
-        beam.set_focus(simex_beam.beam_diameter_fwhm.m_as(meter))
-        beam.set_photonsPerPulse(simex_beam.pulse_energy.m_as(joule) /
-                                 simex_beam.photon_energy.m_as(joule))    # Will update all other attributes.
-
-        # Initialize diffraction pattern
-        detector.init_dp(beam)
-
-        # Determine which patterns to run on which core.
-        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns // mpi_size
-        # Remainder of the division.
-        remainder = self.parameters.number_of_diffraction_patterns % mpi_size
-        # Pattern indices
-        pattern_indices = list(range(self.parameters.number_of_diffraction_patterns))
-
-        # Distribute patterns over cores.
-        rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
-        # Distribute remainder
-        if mpi_rank < remainder:
-            rank_indices.append(pattern_indices[mpi_size * number_of_patterns_per_core + mpi_rank])
-
-        # Setup the output file.
-        outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(mpi_comm.Get_rank()+1) + '.h5'
-
-        if os.path.exists(outputName):
-            os.remove(outputName)
-
-        output_is_ready = False
-        # Loop over assigned tasks
-        for pattern_index in rank_indices:
-
-            # Setup the output hdf5 file if not already done.
-            if not output_is_ready:
-                prepH5(outputName)
-                output_is_ready = True
-
-            # Make local copy of the sample.
-            particle = copy.deepcopy(initial_particle)
-
-            # Rotate particle.
-            quaternion = quaternions[pattern_index, :]
-            rotateParticle(quaternion, particle)
-
-            # Calculate the diffraction intensity.
-            detector_intensity = calculate_molecularFormFactorSq(particle, detector)
-
-            # Correct for solid angle
-            detector_intensity *= detector.solidAngle
-
-            # Correct for polarization
-            detector_intensity *= detector.PolarCorr
-
-            # Multiply by photon fluence.
-            detector_intensity *= beam.get_photonsPerPulsePerArea()
-
-            # Poissonize.
-            detector_counts = convert_to_poisson(detector_intensity)
-
-            # Save to h5 file.
-            saveAsDiffrOutFile(
-                    outputName,
-                    None,
-                    pattern_index,
-                    detector_counts,
-                    detector_intensity,
-                    quaternion,
-                    detector,
-                    beam,
-                   )
-
-            del particle
-
-        mpi_comm.Barrier()
-
-        return 0
 
     @property
     def data(self):
@@ -356,7 +274,10 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         with h5py.File(self.output_path + ".h5", "w") as h5_outfile:
 
             # Files to read from.
-            individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
+            individual_files = [
+                os.path.join(path_to_files, f)
+                for f in os.listdir(path_to_files)
+            ]
             individual_files.sort()
 
             # Keep track of global parameters being linked.
@@ -367,27 +288,33 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
                 with h5py.File(ind_file, 'r') as h5_infile:
 
                     # Links must be relative.
-                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+                    relative_link_target = os.path.relpath(
+                        path=ind_file,
+                        start=os.path.dirname(os.path.dirname(ind_file)))
 
                     # Link global parameters.
                     if not global_parameters:
                         global_parameters = True
 
-                        h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
-                        h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
-                        h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
-                        h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
+                        h5_outfile["params"] = h5py.ExternalLink(
+                            relative_link_target, "params")
+                        h5_outfile["info"] = h5py.ExternalLink(
+                            relative_link_target, "info")
+                        h5_outfile["misc"] = h5py.ExternalLink(
+                            relative_link_target, "misc")
+                        h5_outfile["version"] = h5py.ExternalLink(
+                            relative_link_target, "version")
 
                     for key in h5_infile['data']:
 
                         # Link in the data.
                         ds_path = "data/%s" % (key)
-                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
-
+                        h5_outfile[ds_path] = h5py.ExternalLink(
+                            relative_link_target, ds_path)
 
         # Reset output path.
-        self.output_path = self.output_path+".h5"
+        self.output_path = self.output_path + ".h5"
 
 
-if __name__ == '__main__':
-    GAPDPhotonDiffractor.runFromCLI()
+# if __name__ == '__main__':
+    # GAPDPhotonDiffractor.runFromCLI()
