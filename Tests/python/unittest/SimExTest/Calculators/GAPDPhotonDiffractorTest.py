@@ -108,6 +108,37 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
 
         os.chdir(old_pwd)
 
+    def testWriteParam(self):
+        """ GAPD atom format preparation test """
+
+        tmp_dir = tempfile.mkdtemp(prefix='gapd_')
+
+        shutil.copy2(TestUtilities.generateTestFilePath("3WUL.pdb"), tmp_dir)
+
+        # Chdir to tmp directory.
+        old_pwd = os.getcwd()
+        os.chdir(tmp_dir)
+
+        calculator = GAPDPhotonDiffractor(parameters=self.parameters,
+                                          input_path='3WUL.pdb',
+                                          output_path='out')
+        # Diffractor atom data
+        calculator.prepareAtomData()
+
+        # Diffractor detector data
+        calculator.prepareDetector()
+
+        # Diffractor beam data
+        calculator.prepareBeam()
+
+        in_param_file = "in.param"
+        calculator.writeParam(in_param_file)
+
+        self.assertIn("in.param", os.listdir(tmp_dir))
+
+        os.chdir(old_pwd)
+
+
     def testConstructionParameters(self):
         """ Check we can construct with a parameter object. """
         parameters = GAPDPhotonDiffractorParameters(
