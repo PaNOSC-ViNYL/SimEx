@@ -69,7 +69,8 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
             pulse_energy=1.0e-3 * joule,
         )
 
-        cls.parameters = GAPDPhotonDiffractorParameters()
+        cls.parameters = GAPDPhotonDiffractorParameters(
+            detector_geometry=cls.detector_geometry, beam_parameters=cls.beam)
 
     @classmethod
     def tearDownClass(cls):
@@ -89,6 +90,13 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         for d in self.__dirs_to_remove:
             if os.path.isdir(d):
                 shutil.rmtree(d)
+
+    def testConstructionParameters(self):
+        """ Check we can construct with a parameter object. """
+        parameters = GAPDPhotonDiffractorParameters(
+            beam_parameters=self.beam,
+            detector_geometry=self.detector_geometry,
+        )
 
     def testGAPDAtomInput(self):
         """ GAPD atom format preparation test """
@@ -137,14 +145,22 @@ class GAPDPhotonDiffractorTest(unittest.TestCase):
         self.assertIn("in.param", os.listdir(tmp_dir))
 
         os.chdir(old_pwd)
+        
+    def testRun(self):
+        """ GAPD atom format preparation test """
 
+        tmp_dir = tempfile.mkdtemp(prefix='gapd_')
 
-    def testConstructionParameters(self):
-        """ Check we can construct with a parameter object. """
-        parameters = GAPDPhotonDiffractorParameters(
-            beam_parameters=self.beam,
-            detector_geometry=self.detector_geometry,
-        )
+        shutil.copy2(TestUtilities.generateTestFilePath("3WUL.pdb"), tmp_dir)
+
+        # Chdir to tmp directory.
+        old_pwd = os.getcwd()
+        os.chdir(tmp_dir)
+
+        calculator = GAPDPhotonDiffractor(parameters=self.parameters,
+                                          input_path='3WUL.pdb',
+                                          output_path='out')
+
 
 
 if __name__ == '__main__':

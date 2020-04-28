@@ -107,6 +107,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
         # If the sample is passed as a pdb, convert '.pdb' into '.xyz'
         if self.input_path.split(".")[-1].lower() == 'pdb':
+            pdb_path = self.input_path
             if not os.path.isfile(self.input_path):
                 # Attempt to query from pdb.
                 pdb_path = IOUtilities.checkAndGetPDB(self.input_path)
@@ -122,23 +123,23 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         # We have only one panel representing a large detector here
         panel = self.parameters.detector_geometry.panels[0]
 
-        _self.det_ny = panel.ranges["slow_scan_max"] - panel.ranges[
+        self._det_ny = panel.ranges["slow_scan_max"] - panel.ranges[
             "slow_scan_min"] + 1
-        _self.det_nx = panel.ranges["fast_scan_max"] - panel.ranges[
+        self._det_nx = panel.ranges["fast_scan_max"] - panel.ranges[
             "fast_scan_min"] + 1
-        _self.det_s2d = panel.distance_from_interaction_plane.m_as(
+        self._det_s2d = panel.distance_from_interaction_plane.m_as(
             meter) * 1000.0  # mm
-        _self.det_ps = panel.pixel_size.m_as(meter) * 1e6  # um
-        _self.det_conerx = detector_panel.corners['x']
-        _self.det_conery = detector_panel.corners['y']
+        self._det_ps = panel.pixel_size.m_as(meter) * 1e6  # um
+        self._det_conerx = panel.corners['x']
+        self._det_conery = panel.corners['y']
 
     def prepareBeam(self):
         """ Setup GAPD beam using simex objects. """
 
         beam = self.parameters.beam_parameters
-        _self.beam_energy = beam.photon_energy.m_as(electronvolt)/1000.0 # keV
-        _self.beam_diameter = beam.beam_diameter_fwhm.m_as(meter)*100 # cm
-        _self.beam_fluence = beam.pulse_energy.m_as(joule)/np.pi/(_self.beam_diameter*_self.beam_diameter/4) # J/cm^2
+        self._beam_energy = beam.photon_energy.m_as(electronvolt)/1000.0 # keV
+        self._beam_diameter = beam.beam_diameter_fwhm.m_as(meter)*100 # cm
+        self._beam_fluence = beam.pulse_energy.m_as(joule)/np.pi/(self._beam_diameter*self._beam_diameter/4) # J/cm^2
      
 
     def writeParam(self, in_param_file=None):
@@ -154,12 +155,12 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             with open(in_param_file, 'w') as fstream:
 
                 # Detector part
-                fstream.write('xyz {}'.format(_self.input_path))
-                fstream.write('pn {} {}'.format(_self.det_nx, _self.det_ny))
-                fstream.write('ps {}'.format(_self.det_ps))
-                fstream.write('corner {} {}'.format(_self.det_conerx,
-                                                    _self.det_conery))
-                fstream.write('s2d {}'.format(_self.det_s2d))
+                fstream.write('xyz {}'.format(self.input_path))
+                fstream.write('pn {} {}'.format(self._det_nx, self._det_ny))
+                fstream.write('ps {}'.format(self._det_ps))
+                fstream.write('corner {} {}'.format(self._det_conerx,
+                                                    self._det_conery))
+                fstream.write('s2d {}'.format(self._det_s2d))
 
                 # Detector perpendicular to x-ray beam
                 fstream.write('nid 0 0 -1')
@@ -167,8 +168,8 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
                 # Beam part:
                 fstream.write('beam x') # It's x-ray beam for GAPD
-                fstream.write('mono e {}'.format(_self.beam_energy))
-                fstream.write('fluence {}'.format(_self.beam_fluence))
+                fstream.write('mono e {}'.format(self._beam_energy))
+                fstream.write('fluence {}'.format(self._beam_fluence))
                 fstream.write('polarization_angle 0')
                 # Beam is propograted along -z direction of the sample
                 fstream.write('id 0 0 -1')
@@ -176,8 +177,6 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
                 # Output file:
                 fstream.write('output_fn {}'.format(self.output_path))
 
-        if not hasattr(in_param_file, "write"):
-            raise IOError("The stream % is not writable." % (stream))
 
     def backengine(self):
         """ Prepare parameters and data needed to run GAPD diffractor."""
