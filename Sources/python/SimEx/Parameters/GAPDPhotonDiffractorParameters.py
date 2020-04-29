@@ -246,9 +246,7 @@ class GAPDPhotonDiffractorParameters(AbstractCalculatorParameters):
                 raise IOError(
                     "The beam_parameters %s is not a valid file or filename." %
                     (value))
-            raise TypeError(
-                "Passing beam parameters as a file is currently unsupported. Please use the PhotonBeamParameters class."
-            )
+            print ("Passing beam parameters as a tratracing_out file.")
 
         self.__beam_parameters = value
 

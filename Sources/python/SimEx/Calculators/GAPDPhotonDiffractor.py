@@ -141,7 +141,8 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             intensity = f['data/0/particles/rays/totalIntensity'][...]
 
         # Generate spectrum.txt
-        bins = np.linspace(wavelength.min(), wavelength.max(), self.number_of_spectrum_bins+1)
+        n_bins = self.parameters.number_of_spectrum_bins+1
+        bins = np.linspace(wavelength.min(), wavelength.max(),n_bins)
         hist, edges = np.histogram(wavelength, bins, weights=intensity)
 
         lmd_list = []
@@ -162,7 +163,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             self._beam_diameter = beam.beam_diameter_fwhm.m_as(meter)*100 # cm
             self._beam_fluence = beam.pulse_energy.m_as(joule)/np.pi/(self._beam_diameter*self._beam_diameter/4) # J/cm^2
         else:
-            opmdRayTacingReader(beam)
+            self.opmdRayTacingReader(beam)
      
     def writeParam(self, in_param_file=None):
         """ Put diffractor parameters into GAPD param file
@@ -190,11 +191,13 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
                 # Beam part:
                 fstream.write('beam x\n') # It's x-ray beam for GAPD
-                if isinstance(beam, PhotonBeamParameters):
+
+                if isinstance(self.parameters.beam_parameters, PhotonBeamParameters):
                     fstream.write('mono e {}\n'.format(self._beam_energy))
+                    fstream.write('fluence {}\n'.format(self._beam_fluence))
                 else:
                     fstream.write('poly spectrum.txt\n')
-                fstream.write('fluence {}\n'.format(self._beam_fluence))
+
                 fstream.write('polarization_angle 0\n')
                 # Beam is propograted along -z direction of the sample
                 fstream.write('id 0 0 -1\n')

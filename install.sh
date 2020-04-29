@@ -28,7 +28,7 @@ then
 	echo $MODE
 	INSTALL_PREFIX=..
 	DEVELOPER_MODE=ON
-	XCSIT=ON
+	XCSIT=OFF
     THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 elif [ $MODE = "conda-env" ]
 then
