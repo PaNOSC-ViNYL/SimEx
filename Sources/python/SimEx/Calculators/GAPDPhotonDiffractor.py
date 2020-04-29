@@ -32,6 +32,7 @@ import numpy as np
 from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.GAPDPhotonDiffractorParameters import GAPDPhotonDiffractorParameters
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities import IOUtilities
@@ -133,15 +134,36 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
         self._det_conerx = panel.corners['x']
         self._det_conery = panel.corners['y']
 
+    def opmdRayTacingReader(self, fname):
+        # Read the file
+        with h5py.File(fname, 'r') as f:
+            wavelength = f['data/0/particles/rays/photonWavelength'][...]
+            intensity = f['data/0/particles/rays/totalIntensity'][...]
+
+        # Generate spectrum.txt
+        bins = np.linspace(wavelength.min(), wavelength.max(), self.number_of_spectrum_bins+1)
+        hist, edges = np.histogram(wavelength, bins, weights=intensity)
+
+        lmd_list = []
+        for i,lmd in enumerate(bins):
+            if i < n_bins-1:
+                lmd_list.append((bins[i]+bins[i+1])/2.0)
+
+        data = np.vstack((np.array(lmd_list), hist)).T
+        np.savetxt('spectrum.txt', data)
+
     def prepareBeam(self):
         """ Setup GAPD beam using simex objects. """
 
         beam = self.parameters.beam_parameters
-        self._beam_energy = beam.photon_energy.m_as(electronvolt)/1000.0 # keV
-        self._beam_diameter = beam.beam_diameter_fwhm.m_as(meter)*100 # cm
-        self._beam_fluence = beam.pulse_energy.m_as(joule)/np.pi/(self._beam_diameter*self._beam_diameter/4) # J/cm^2
-     
 
+        if (isinstance(beam, PhotonBeamParameters)):
+            self._beam_energy = beam.photon_energy.m_as(electronvolt)/1000.0 # keV
+            self._beam_diameter = beam.beam_diameter_fwhm.m_as(meter)*100 # cm
+            self._beam_fluence = beam.pulse_energy.m_as(joule)/np.pi/(self._beam_diameter*self._beam_diameter/4) # J/cm^2
+        else:
+            opmdRayTacingReader(beam)
+     
     def writeParam(self, in_param_file=None):
         """ Put diffractor parameters into GAPD param file
 
@@ -168,7 +190,10 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
                 # Beam part:
                 fstream.write('beam x\n') # It's x-ray beam for GAPD
-                fstream.write('mono e {}\n'.format(self._beam_energy))
+                if isinstance(beam, PhotonBeamParameters):
+                    fstream.write('mono e {}\n'.format(self._beam_energy))
+                else:
+                    fstream.write('poly spectrum.txt\n')
                 fstream.write('fluence {}\n'.format(self._beam_fluence))
                 fstream.write('polarization_angle 0\n')
                 # Beam is propograted along -z direction of the sample
