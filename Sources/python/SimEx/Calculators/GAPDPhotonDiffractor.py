@@ -246,7 +246,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand = self.parameters.forced_mpi_command
 
         # collect program arguments
-        command_sequence = ['GAPD-SimEx', '-p', str(in_param_file)]
+        command_sequence = ['GAPD-SimEx', '-a -p', str(in_param_file)]
         #command_sequence = ['GAPD-SimEx', '-p', str(in_param_file), '&>','sta.GAPD']
 
         # put MPI and program arguments together
