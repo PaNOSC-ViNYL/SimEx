@@ -340,7 +340,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             # Rotate particle.
             quaternion = quaternions[pattern_index, :]
             rotateParticle(quaternion, particle)
-            for panel_index in range(len(self.parameters.detector_geometry.panels):
+            for panel_index in range(len(self.parameters.detector_geometry.panels)):
 
                 # Setup the output hdf5 file if not already done.
                 if not output_is_ready:
@@ -437,10 +437,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
                     for key in h5_infile['data']:
                         pattern_index = int(key)//self.parameters.number_of_diffraction_patterns # i
-                        panel_index = int(key)%(iMax) # i
+                        panel_index = int(key)%self.parameters.number_of_diffraction_patterns # j
 
                         # Link in the data.
-                        ds_path = "data/{0:07}/panel{1:02}" % (pattern_index,panel_index)
+                        print (pattern_index,panel_index)
+                        ds_path = "data/{0:07}/panel{1:02}".format(pattern_index,panel_index)
                         h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
 
         # Reset output path.
