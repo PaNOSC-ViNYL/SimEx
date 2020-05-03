@@ -266,7 +266,6 @@ class XFELPhotonAnalysis(AbstractAnalysis):
             # Switch back to time domain.
             wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
             self.intensity = self.wavefront.get_intensity()
-        return xs_mf,int0_mean
 
     def plotOnAxisPowerDensity(self, spectrum=False):
         """ Method to plot the on-axis power density.
