@@ -9,15 +9,15 @@ Download
 
 First obtain the source code by either cloning the repository::
 
-    $> git clone https://github.com/eucall-software/simex_platform
+    $> git clone https://github.com/PaNOSC-ViNYL/SimEx
 
 or by downloading and extracting the zip_ archive.
 
-.. _zip: https://github.com/eucall-software/simex_platform/archive/master.zip
+.. _zip: https://github.com/PaNOSC-ViNYL/SimEx/archive/master.zip
 
 After downloading (and extracting), switch into the top level directory::
 
-    $> cd simex_platform
+    $> cd SimEx
 
 Software dependencies
 `````````````````````
@@ -165,7 +165,7 @@ Make sure that the user has write access to the installation directory, or use::
 Binary packages
 _____________________
 Binary (.deb) packages are provided for Ubuntu (currently supporting version 16.04).
-https://github.com/eucall-software/simex_platform/releases/download/v0.2.0/simex-0.2.0-Ubuntu16.04.deb
+https://github.com/PaNOSC-ViNYL/SimEx/releases/download/v0.2.0/simex-0.2.0-Ubuntu16.04.deb
 
 Simply download and install, e.g. using the command (might require root privileges)::
 

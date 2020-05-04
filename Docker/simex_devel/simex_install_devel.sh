@@ -4,7 +4,7 @@ set -e
 
 
 BRANCH=develop
-URL=https://github.com/eucall-software/simex_platform.git
+URL=https://github.com/PaNOSC-ViNYL/SimEx.git
 cd /opt
 
 wget https://github.com/github/git-lfs/releases/download/v1.1.2/git-lfs-linux-amd64-1.1.2.tar.gz
