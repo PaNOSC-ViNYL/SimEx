@@ -1,6 +1,6 @@
 """ :module shadow_to_opmd: Script to save a Shadow beams object to OpenPMD compliant hdf5.
     :usage: In Oasys, load this script in the Python script widget and connect the widget to the element at which to save the rays. Click "Execute". A shadow.out.h5 file should now exist in your $PWD. For OpenPMD format, please consult www.openpmd.org
-    :Neccessary adjustments: Path to the simex utility collection OpenPMD must be specified. If SimEx ist not installed, get just the class OpenPMDTools.py from https://github.com/eucall-software/simex_platform/blob/develop/Sources/python/SimEx/Utilities/OpenPMDTools.py and copy it to your working directory.
+    :Neccessary adjustments: Path to the simex utility collection OpenPMD must be specified. If SimEx ist not installed, get just the class OpenPMDTools.py from https://github.com/PaNOSC-ViNYL/SimEx/blob/develop/Sources/python/SimEx/Utilities/OpenPMDTools.py and copy it to your working directory.
     :note: Assumes that all lengths in the beam object are expressed in units of metres.
 """
 ##########################################################################
