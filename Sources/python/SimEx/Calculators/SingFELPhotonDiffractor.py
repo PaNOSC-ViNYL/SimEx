@@ -261,6 +261,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Local import of MPI to avoid premature call to MPI.init().
         from mpi4py import MPI
 
+        if not os.path.isdir(self.output_path):
+            os.mkdir(self.output_path)
+        self.__output_dir = self.output_path
+
         # Initialize MPI
         mpi_comm = MPI.COMM_WORLD
         mpi_rank = mpi_comm.Get_rank()
@@ -290,40 +294,32 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         singfel_detectors = []
 
 
-        for pannel in self.parameters.detector_geometry.panels:
+        for panel in self.parameters.detector_geometry.panels:
             singfel_detector = Detector(None)  # read geom file
             # panel = self.parameters.detector_geometry.panels[0]
             singfel_detector.set_detector_dist(panel.distance_from_interaction_plane.m_as(meter))
             singfel_detector.set_pix_width(panel.pixel_size.m_as(meter))
             singfel_detector.set_pix_height(panel.pixel_size.m_as(meter))
-            singfel_detector.detector.set_numPix(panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,   # y
+            singfel_detector.set_numPix(panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,   # y
                                 panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"] + 1,   # x
                                 )
-            singfel_detector.set_center_x((panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] + 1) / 2.)
-            singfel_detector.set_center_y((panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] + 1) / 2.)
+            singfel_detector.set_center_x(-panel.corners['x'])
+            singfel_detector.set_center_y(-panel.corners['y'])
             # Initialize diffraction pattern
             singfel_detector.init_dp(beam)
             singfel_detectors.append(singfel_detector)
 
-        # Total task
-        total_task = self.parameters.number_of_diffraction_patterns*len(self.parameters.detector_geometry.panels)
         # Determine which patterns to run on which core.
-        number_of_tasks_per_core = total_task // mpi_size
+        number_of_patterns_per_core = self.parameters.number_of_diffraction_patterns // mpi_size
         # Remainder of the division.
-        remainder = total_task % mpi_size
+        remainder = self.parameters.number_of_diffraction_patterns % mpi_size
         # indices for each whole pattern consisted with all panels
         pattern_indices = range(self.parameters.number_of_diffraction_patterns)
-        # indeces for the overall computing tasks
-        all_task_indices = []
-        for i in range(self.parameters.number_of_diffraction_patterns):
-            for j in range(len(self.parameters.detector_geometry.panels)):
-                index = j + i * self.parameters.number_of_diffraction_patterns
-                all_task_indices.append(index)
         # Distribute patterns over cores.
-        rank_indices = all_task_indices[mpi_rank*number_of_tasks_per_core:(mpi_rank+1)*number_of_tasks_per_core]
+        rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
         # Distribute remainder
         if mpi_rank < remainder:
-            rank_indices.append(all_task_indices[mpi_size * number_of_tasks_per_core + mpi_rank])
+            rank_indices.append(pattern_indices[mpi_size * number_of_patterns_per_core + mpi_rank])
 
         # Setup the output file.
         outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(mpi_comm.Get_rank()+1) + '.h5'
@@ -334,13 +330,14 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         output_is_ready = False
 
         # Loop over assigned tasks
-        for pattern_index in pattern_indices:
+        for pattern_index in rank_indices:
             # Make local copy of the sample.
             particle = copy.deepcopy(initial_particle)
             # Rotate particle.
             quaternion = quaternions[pattern_index, :]
             rotateParticle(quaternion, particle)
             for panel_index in range(len(self.parameters.detector_geometry.panels)):
+                #print ('panel_index =',panel_index)
 
                 # Setup the output hdf5 file if not already done.
                 if not output_is_ready:
@@ -350,19 +347,20 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                 idx = panel_index + pattern_index * self.parameters.number_of_diffraction_patterns
 
                 # Calculate the diffraction intensity.
-                detector_intensity = calculate_molecularFormFactorSq(particle, detector[panel_index])
+                detector_intensity = calculate_molecularFormFactorSq(particle, singfel_detectors[panel_index])
 
                 # Correct for solid angle
-                detector_intensity *= detector[panel_index].solidAngle
+                detector_intensity *= singfel_detectors[panel_index].solidAngle
 
                 # Correct for polarization
-                detector_intensity *= detector[panel_index].PolarCorr
+                detector_intensity *= singfel_detectors[panel_index].PolarCorr
 
                 # Multiply by photon fluence.
                 detector_intensity *= beam.get_photonsPerPulsePerArea()
 
                 # Poissonize.
                 detector_counts = convert_to_poisson(detector_intensity)
+
 
                 # Save to h5 file.
                 saveAsDiffrOutFile(
@@ -372,11 +370,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                         detector_counts,
                         detector_intensity,
                         quaternion,
-                        detector[panel_index],
+                        singfel_detectors[panel_index],
                         beam,
                        )
 
-                del particle
+            del particle
 
         mpi_comm.Barrier()
 
@@ -436,13 +434,13 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
                     for key in h5_infile['data']:
-                        pattern_index = int(key)//self.parameters.number_of_diffraction_patterns # i
-                        panel_index = int(key)%self.parameters.number_of_diffraction_patterns # j
+                        pattern_index = (int(key)-1)//self.parameters.number_of_diffraction_patterns # i
+                        panel_index = (int(key)-1)%self.parameters.number_of_diffraction_patterns # j
 
                         # Link in the data.
-                        print (pattern_index,panel_index)
-                        ds_path = "data/{0:07}/panel{1:02}".format(pattern_index,panel_index)
-                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
+                        #print (pattern_index,panel_index)
+                        ds_path = "data/{0:07}/panel_{1:02}".format(pattern_index,panel_index)
+                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, "data/{}".format(key))
 
         # Reset output path.
         self.output_path = self.output_path+".h5"
