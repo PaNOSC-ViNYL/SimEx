@@ -203,7 +203,35 @@ Make sure that the user has write access to the installation directory, or use::
 
 .. include:: environment.rst
 
-Troubleshooting
+Binary packages
+_____________________
+Binary (.deb) packages are provided for Ubuntu (currently supporting version 16.04).
+https://github.com/PaNOSC-ViNYL/SimEx/releases/download/v0.2.0/simex-0.2.0-Ubuntu16.04.deb
+
+Simply download and install, e.g. using the command (might require root privileges)::
+
+    $> dpkg --install simex-0.2.0-Ubuntu16.04.deb
+
+
+Docker
+____________
+
+We also provide docker images. Docker is a rather new technology, think of it as a "lightweight virtualbox", i.e. a docker container ships all
+software dependencies including hardware abstraction and OS components
+along with the executable. To run a docker container, you first need the docker
+environment. Get it for your OS from https://www.docker.com/products/overview.
+Then, download the simex docker container using the following shell command::
+
+    docker pull yakser/simex
+
+or::
+
+    docker pull yakser/simex:devel
+
+The latter contains all test files.
+
+
+Getting started
 ```````````````
 
 cmake fails to resolve dependency but the library is installed
