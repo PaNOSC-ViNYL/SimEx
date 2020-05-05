@@ -427,7 +427,8 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         pass
 
-    def saveH5(self):
+
+    def saveH5_multiple(self):
         """ """
         """
         Private method to save the object to a file. Creates links to h5 files that all contain only one pattern.
@@ -477,6 +478,54 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Reset output path.
         self.output_path = self.output_path+".h5"
+
+    def saveH5(self):
+            """ """
+            """
+            Private method to save the object to a file. Creates links to h5 files that all contain only one pattern.
+
+            :param output_path: The file where to save the object's data.
+            :type output_path: string, default b
+            """
+
+            # Path where individual h5 files are located.
+            path_to_files = self.output_path
+
+            # Setup new file.
+            with h5py.File(self.output_path + ".h5", "w") as h5_outfile:
+
+                # Files to read from.
+                individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
+                individual_files.sort()
+
+                # Keep track of global parameters being linked.
+                global_parameters = False
+                # Loop over all individual files and link in the top level groups.
+                for ind_file in individual_files:
+                    # Open file.
+                    with h5py.File(ind_file, 'r') as h5_infile:
+
+                        # Links must be relative.
+                        relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+
+                        # Link global parameters.
+                        if not global_parameters:
+                            global_parameters = True
+
+                            h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
+                            h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
+                            h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
+                            h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
+
+                        for key in h5_infile['data']:
+
+                            # Link in the data.
+                            ds_path = "data/%s" % (key)
+                            h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
+
+
+            # Reset output path.
+            self.output_path = self.output_path+".h5"
 
 
 if __name__ == '__main__':
