@@ -20,7 +20,7 @@
 #                                                                        #
 ##########################################################################
 
-from pysingfel.FileIO import saveAsDiffrOutFile, prepH5
+from pysingfel.FileIO import prepH5
 from pysingfel.beam import Beam
 from pysingfel.detector import Detector
 from pysingfel.diffraction import calculate_molecularFormFactorSq
@@ -33,6 +33,8 @@ import os
 import subprocess
 import shlex
 import sys
+import numpy as np
+
 
 from SimEx.Utilities.Units import electronvolt, meter, joule
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
@@ -136,6 +138,37 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             np = max(ncores//self.parameters.cpus_per_task, 1)
 
         return np, ncores
+
+    def saveSingfelOutFile(outputName, inputName, counter, detector_intensity, quaternion, det, beam):
+        """
+        Save simulation results as new dataset in to the h5py file prepared before.
+        """
+        with h5py.File(outputName, 'a') as f:
+            group_name = '/data/' + '{0:07}'.format(counter + 1) + '/'
+            f.create_dataset(group_name + 'diffr', data=detector_intensity)
+            f.create_dataset(group_name + 'angle', data=quaternion)
+
+            # Link history from input pmi file into output diffr file
+            if inputName is not None and inputName.split('.')[-1] == '.h5':
+                group_name_history = group_name + 'history/parent/detail/'
+                f[group_name_history + 'data'] = h5py.ExternalLink(inputName, 'data')
+                f[group_name_history + 'info'] = h5py.ExternalLink(inputName, 'info')
+                f[group_name_history + 'misc'] = h5py.ExternalLink(inputName, 'misc')
+                f[group_name_history + 'params'] = h5py.ExternalLink(inputName, 'params')
+                f[group_name_history + 'version'] = h5py.ExternalLink(inputName, 'version')
+                f[group_name + '/history/parent/parent'] = h5py.ExternalLink(inputName, 'history/parent')
+
+            # Parameters
+            if 'geom' not in list(f['params'].keys()) and 'beam' not in list(f['params'].keys()):
+                # Geometry
+                f.create_dataset('params/geom/detectorDist', data=det.get_detector_dist())
+                f.create_dataset('params/geom/pixelWidth', data=det.get_pix_width())
+                f.create_dataset('params/geom/pixelHeight', data=det.get_pix_height())
+                f.create_dataset('params/geom/mask', data=np.ones((det.py, det.px)))
+
+                # Photons
+                f.create_dataset('params/beam/photonEnergy', data=beam.get_photon_energy())
+                f.create_dataset('params/beam/focusArea', data=beam.get_focus_area())
 
     def backengine(self):
         """ This method drives the backengine singFEL."""
@@ -336,7 +369,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             # Rotate particle.
             quaternion = quaternions[pattern_index, :]
             rotateParticle(quaternion, particle)
-            for panel_index in range(len(self.parameters.detector_geometry.panels)):
+            # Number of detector panels
+            n_panels = len(self.parameters.detector_geometry.panels)
+            detector_intensity = np.zeros((n_panels, singfel_detectors[0].py,singfel_detectors[0].px))
+            for panel_index in range(n_panels):
                 #print ('panel_index =',panel_index)
 
                 # Setup the output hdf5 file if not already done.
@@ -344,35 +380,32 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                     prepH5(outputName)
                     output_is_ready = True
 
-                idx = panel_index + pattern_index * self.parameters.number_of_diffraction_patterns
-
                 # Calculate the diffraction intensity.
-                detector_intensity = calculate_molecularFormFactorSq(particle, singfel_detectors[panel_index])
+                detector_intensity[panel_index] = calculate_molecularFormFactorSq(particle, singfel_detectors[panel_index])
 
                 # Correct for solid angle
-                detector_intensity *= singfel_detectors[panel_index].solidAngle
+                detector_intensity[panel_index] *= singfel_detectors[panel_index].solidAngle
 
                 # Correct for polarization
-                detector_intensity *= singfel_detectors[panel_index].PolarCorr
+                detector_intensity[panel_index] *= singfel_detectors[panel_index].PolarCorr
 
                 # Multiply by photon fluence.
-                detector_intensity *= beam.get_photonsPerPulsePerArea()
+                detector_intensity[panel_index] *= beam.get_photonsPerPulsePerArea()
 
                 # Poissonize.
-                detector_counts = convert_to_poisson(detector_intensity)
+                # FIXME: The generation of poissoniation
+                # detector_counts = convert_to_poisson(detector_intensity)
 
-
-                # Save to h5 file.
-                saveAsDiffrOutFile(
-                        outputName,
-                        None,
-                        idx,
-                        detector_counts,
-                        detector_intensity,
-                        quaternion,
-                        singfel_detectors[panel_index],
-                        beam,
-                       )
+            # Save to h5 file.
+            self.saveSingfelOutFile(
+                    outputName,
+                    None,
+                    pattern_index,
+                    detector_intensity,
+                    quaternion,
+                    singfel_detectors[0],
+                    beam,
+                   )
 
             del particle
 
