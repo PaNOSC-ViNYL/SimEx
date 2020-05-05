@@ -1,4 +1,4 @@
 Contribute
 ----------
-- Source Code github.com/eucall-software/simex_platform
-- Issue Tracker: github.com/eucall-software/simex_platform/issues
+- Source Code https://github.com/PaNOSC-ViNYL/SimEx/
+- Issue Tracker: https://github.com/PaNOSC-ViNYL/SimEx/issues

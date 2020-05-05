@@ -67,7 +67,6 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         :type kwargs: dict
 
         """
-
         super(PhotonBeamParameters, self).__init__(**kwargs)
 
         self.photon_energy = photon_energy

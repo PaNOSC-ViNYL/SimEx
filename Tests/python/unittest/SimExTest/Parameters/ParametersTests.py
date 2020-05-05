@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -26,6 +26,7 @@ from .CrystFELPhotonDiffractorParametersTest import CrystFELPhotonDiffractorPara
 from .DMPhasingParametersTest import DMPhasingParametersTest
 from .DetectorGeometryTest import DetectorGeometryTest, DetectorPanelTest
 from .EMCOrientationParametersTest import EMCOrientationParametersTest
+from .GaussWavefrontParametersTest import GaussWavefrontParametersTest
 from .EstherPhotonMatterInteractorParametersTest import EstherPhotonMatterInteractorParametersTest
 from .PhotonBeamParametersTest import PhotonBeamParametersTest
 from .PlasmaXRTSCalculatorParametersTest import PlasmaXRTSCalculatorParametersTest

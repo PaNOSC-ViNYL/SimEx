@@ -21,6 +21,7 @@
 ##########################################################################
 
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysicalQuantity
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
@@ -32,7 +33,7 @@ import numpy
 import os
 import sys
 
-class GaussWavefrontParameters(AbstractCalculatorParameters):
+class GaussWavefrontParameters(PhotonBeamParameters):
     def __init__(self,
             photon_energy,
             beam_diameter_fwhm,
@@ -44,7 +45,9 @@ class GaussWavefrontParameters(AbstractCalculatorParameters):
             **kwargs
             ):
         """
-        :class GaussWavefrontParameters: Encapsulates the parameters of a photon beam.
+        :class GaussWavefrontParameters: Encapsulates the parameters of a photon
+        beam with Gaussian beam profile, Gaussian energy spectrum, and Gaussian
+        temporal structure.
 
         :param photon_energy: The mean photon energy in units of electronvolts (eV).
         :type photon_energy: PhysicalQuantity
@@ -73,8 +76,16 @@ class GaussWavefrontParameters(AbstractCalculatorParameters):
 
         """
 
-        super(GaussWavefrontParameters, self).__init__(**kwargs)
-
+        super().__init__(
+                photon_energy=photon_energy,
+                beam_diameter_fwhm=beam_diameter_fwhm,
+                pulse_energy=pulse_energy,
+                photon_energy_relative_bandwidth=photon_energy_relative_bandwidth,
+                divergence=divergence,
+                photon_energy_spectrum_type="Gauss",
+                #**kwargs
+                )
+        
         self.number_of_transverse_grid_points = number_of_transverse_grid_points
         self.number_of_time_slices = number_of_time_slices
 
@@ -83,18 +94,8 @@ class GaussWavefrontParameters(AbstractCalculatorParameters):
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
 
     @property
-    def photon_energy_spectrum_type(self):
-        """ Query the 'photon_energy_spectrum_type' parameter. """
-        return self.__photon_energy_spectrum_type
-    @photon_energy_spectrum_type.setter
-    def photon_energy_spectrum_type(self, val):
-        """ Set the 'photon_energy_spectrum_type' parameter to val."""
-        raise AttributeError("The photon_energy_spectrum_type is read-only.")
-
-    @property
     def number_of_transverse_grid_points(self):
-        """ The number of grid points in both x and y dimension (transverse to
-            the beam direction)."""
+        """ The number of transverse grid points. """
         return self.__number_of_transverse_grid_points
     @number_of_transverse_grid_points.setter
     def number_of_transverse_grid_points(self, val):
@@ -104,6 +105,7 @@ class GaussWavefrontParameters(AbstractCalculatorParameters):
         if val <= 0:
             raise ValueError('The parameter "number_of_transverse_grid_points" must\
                              be a positive int.')
+        self.__number_of_transverse_grid_points = val
 
     @property
     def number_of_time_slices(self):
@@ -117,5 +119,6 @@ class GaussWavefrontParameters(AbstractCalculatorParameters):
         if val < 3:
             raise ValueError('The parameter "number_of_time_slices" must\
                              be at least 3.')
+        self.__number_of_time_slices = val
 
 

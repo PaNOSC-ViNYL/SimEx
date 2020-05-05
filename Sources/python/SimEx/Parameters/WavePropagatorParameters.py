@@ -1,7 +1,7 @@
 """ :module WavePropagatorParameters: Module that holds the WavePropagatorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #

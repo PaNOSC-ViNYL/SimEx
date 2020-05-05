@@ -20,6 +20,8 @@
 #                                                                        #
 ##########################################################################
 
+import tracemalloc
+tracemalloc.start()
 import os
 import shutil
 import io
@@ -27,7 +29,7 @@ import io
 # Include needed directories in sys.path.
 import unittest
 
-from SimEx.Parameters.GaussWavefrontParameters import GaussWavefrontParameters
+from SimEx.Parameters.GaussWavefrontParameters import GaussWavefrontParameters, PhotonBeamParameters, AbstractCalculatorParameters
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 from TestUtilities import TestUtilities
 
@@ -43,7 +45,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                                     pulse_energy=1.0e-3*joule,
                                     photon_energy_relative_bandwidth=0.001,
                                     divergence=2.0e-6*radian,
-                                    photon_energy_spectrum_type="Gauss",
                                     number_of_transverse_grid_points=400,
                                     number_of_time_slices=10,
                                     )
@@ -69,8 +70,19 @@ class GaussWavefrontParametersTest(unittest.TestCase):
     def testDefaultConstruction(self):
         """ Testing the default construction. """
 
-        # Attempt to construct an instance of the class.
-        self.assertRaises(TypeError, GaussWavefrontParameters)
+        parameters = GaussWavefrontParameters(
+                photon_energy=4.96e3*electronvolt,
+                photon_energy_relative_bandwidth=2e-2,
+                pulse_energy = 2e-3*joule,
+                beam_diameter_fwhm = 2e-6*meter,
+                divergence = 1e-6*radian,
+                number_of_transverse_grid_points=400,
+                number_of_time_slices=10,
+                )
+        self.assertIsInstance(parameters, GaussWavefrontParameters)
+        self.assertIsInstance(parameters, PhotonBeamParameters)
+        self.assertIsInstance(parameters, AbstractCalculatorParameters)
+
 
     def testShapedConstruction(self):
         """ Testing the construction of the class with parameters. """
@@ -79,7 +91,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         parameters = GaussWavefrontParameters(
                 photon_energy=4.96e3*electronvolt,
                 photon_energy_relative_bandwidth=2e-2,
-                photon_energy_spectrum_type="Gauss",
                 pulse_energy = 2e-3*joule,
                 beam_diameter_fwhm = 2e-6*meter,
                 divergence = 1e-6*radian,
@@ -98,7 +109,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         self.assertEqual(parameters.number_of_time_slices, 10)
 
     def testSettersAndQueries(self):
-        """ Testing the default construction of the class using a dictionary. """
+        """ Testing the accessors. """
         # Attempt to construct an instance of the class.
         parameters = GaussWavefrontParameters(
                 photon_energy=4.96e3*electronvolt,
@@ -106,6 +117,8 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 beam_diameter_fwhm = 2e-6*meter,
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
+                photon_energy_relative_bandwidth=0.1,
+                divergence=5.0e-6*radian,
                 )
 
         # Set via methods.
@@ -114,7 +127,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         parameters.beam_diameter_fwhm = 100e-9*meter
         parameters.photon_energy_relative_bandwidth = 1e-3
         parameters.divergence = 5e-6*radian
-        parameters.photon_energy_spectrum_type="Gauss"
         parameters.number_of_transverse_grid_points = 400
         parameters.number_of_time_slices = 10
 
