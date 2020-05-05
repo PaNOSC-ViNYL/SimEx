@@ -1,7 +1,7 @@
 """:module SingFELPhotonDiffractor: Module that holds the SingFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -20,7 +20,7 @@
 #                                                                        #
 ##########################################################################
 
-from pysingfel.FileIO import prepH5
+from pysingfel.FileIO import prepH5,saveAsDiffrOutFile
 from pysingfel.beam import Beam
 from pysingfel.detector import Detector
 from pysingfel.diffraction import calculate_molecularFormFactorSq
@@ -139,7 +139,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         return np, ncores
 
-    def saveSingfelOutFile(outputName, inputName, counter, detector_intensity, quaternion, det, beam):
+    def saveSingfelOutFile(self, outputName, inputName, counter, detector_intensity, quaternion, det, beam):
         """
         Save simulation results as new dataset in to the h5py file prepared before.
         """
@@ -404,7 +404,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                     detector_intensity,
                     quaternion,
                     singfel_detectors[0],
-                    beam,
+                    beam
                    )
 
             del particle
@@ -467,12 +467,12 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
                     for key in h5_infile['data']:
-                        pattern_index = (int(key)-1)//self.parameters.number_of_diffraction_patterns # i
-                        panel_index = (int(key)-1)%self.parameters.number_of_diffraction_patterns # j
+                        #pattern_index = (int(key)-1)//self.parameters.number_of_diffraction_patterns # i
+                        #panel_index = (int(key)-1)%self.parameters.number_of_diffraction_patterns # j
 
                         # Link in the data.
                         #print (pattern_index,panel_index)
-                        ds_path = "data/{0:07}/panel_{1:02}".format(pattern_index,panel_index)
+                        ds_path = "data/{}".format(key)
                         h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, "data/{}".format(key))
 
         # Reset output path.
