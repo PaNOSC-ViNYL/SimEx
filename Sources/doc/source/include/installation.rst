@@ -183,15 +183,6 @@ Make sure that the user has write access to the installation directory, or use::
 
 .. include:: environment.rst
 
-Binary packages
-_____________________
-Binary (.deb) packages are provided for Ubuntu (currently supporting version 16.04).
-https://github.com/PaNOSC-ViNYL/SimEx/releases/download/v0.2.0/simex-0.2.0-Ubuntu16.04.deb
-
-Simply download and install, e.g. using the command (might require root privileges)::
-
-    $> dpkg --install simex-0.2.0-Ubuntu16.04.deb
-
 
 Docker
 ____________
