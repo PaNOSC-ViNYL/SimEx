@@ -347,7 +347,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Remainder of the division.
         remainder = self.parameters.number_of_diffraction_patterns % mpi_size
         # indices for each whole pattern consisted with all panels
-        pattern_indices = range(self.parameters.number_of_diffraction_patterns)
+        pattern_indices = list(range(self.parameters.number_of_diffraction_patterns))
         # Distribute patterns over cores.
         rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
         # Distribute remainder
@@ -427,57 +427,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         pass
 
-
-    def saveH5_multiple(self):
-        """ """
-        """
-        Private method to save the object to a file. Creates links to h5 files that all contain only one pattern.
-
-        :param output_path: The file where to save the object's data.
-        :type output_path: string, default b
-        """
-
-        # Path where individual h5 files are located.
-        path_to_files = self.output_path
-
-        # Setup new file.
-        with h5py.File(self.output_path + ".h5", "w") as h5_outfile:
-
-            # Files to read from.
-            individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
-            individual_files.sort()
-
-            # Keep track of global parameters being linked.
-            global_parameters = False
-            # Loop over all individual files and link in the top level groups.
-            for ind_file in individual_files:
-                # Open file.
-                with h5py.File(ind_file, 'r') as h5_infile:
-
-                    # Links must be relative.
-                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
-
-                    # Link global parameters.
-                    if not global_parameters:
-                        global_parameters = True
-
-                        h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
-                        h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
-                        h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
-                        h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
-
-
-                    for key in h5_infile['data']:
-                        #pattern_index = (int(key)-1)//self.parameters.number_of_diffraction_patterns # i
-                        #panel_index = (int(key)-1)%self.parameters.number_of_diffraction_patterns # j
-
-                        # Link in the data.
-                        #print (pattern_index,panel_index)
-                        ds_path = "data/{}".format(key)
-                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, "data/{}".format(key))
-
-        # Reset output path.
-        self.output_path = self.output_path+".h5"
 
     def saveH5(self):
             """ """
