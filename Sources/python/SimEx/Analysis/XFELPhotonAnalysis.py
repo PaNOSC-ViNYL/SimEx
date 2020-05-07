@@ -205,13 +205,11 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         if qspace:
             del wf
 
-    def numpyTotalPower(self, spectrum=False, all=False):
+    def dumpTotalPower(self, spectrum=False):
         """ Method to dump meaningful total power.
 
         :param spectrum: Whether to dump the power density in energy domain (True) or time domain (False, default).
         :type spectrum: bool
-        :param all: `True` to extract all the points, `False` to extract only meaningful points
-        :type all: bool
 
         """
 
@@ -219,11 +217,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Switch to frequency (energy) domain if requested.
         if spectrum:
-            print("Switching to frequency domain.")
+            print("\n Switching to frequency domain.")
             wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
-            self.intensity = self.wavefront.get_intensity()
-        else:
-            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
             self.intensity = self.wavefront.get_intensity()
 
         # Get dimensions.
@@ -234,8 +229,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         # Get intensity by integrating over transverse dimensions.
         int0 = self.intensity.sum(axis=(0,1))
 
-        # Get power
-        int0 = int0*(dx*dy*1.e6)
+        # Scale to get unit W/mm^2
+        int0 = int0*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
         int0max = int0.max()
 
         # Get center pixel numbers.
@@ -243,15 +238,11 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         center_ny = int(mesh.ny/2)
 
         # Get meaningful slices.
-        if all:
-            aw = numpy.arange(len(int0))
-        else:
-            aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
-        int0_mean = int0[min(aw):max(aw)+1]  # meaningful range of pulse
+        aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
+        int0_mean = int0[min(aw):max(aw)]  # meaningful range of pulse
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw)+1)*dSlice + mesh.sliceMin
-
+        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
         if(self.wavefront.params.wDomain=='time'):
             print('x: Time (fs)')
             print('y: Power (W)')
