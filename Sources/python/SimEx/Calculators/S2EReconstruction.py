@@ -1,7 +1,7 @@
 """:module S2EReconstruction: Module that holds the S2EReconstruction class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -49,7 +49,6 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
 
         # Initialize base class.
         super(S2EReconstruction, self).__init__(parameters,input_path,output_path)
-
 
         self.__provided_data = ['/data/electronDensity',
                                 '/params/info',
@@ -130,7 +129,6 @@ class S2EReconstruction(AbstractPhotonAnalyzer):
         emc_status = self.__emc.backengine()
 
         # If EMC was not successful, return with error code.
-
         if  emc_status!= 0:
             return emc_status
 

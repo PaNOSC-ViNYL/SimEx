@@ -14,13 +14,12 @@ EOF
 	exit
 fi
 
-#echo $THIRD_PARTY_ROOT
 
 MODE=$1
 if [ $MODE = "maxwell" ]
 then
 	echo $MODE
-	INSTALL_PREFIX=$THIRD_PARTY_ROOT
+	INSTALL_PREFIX=/data/netapp/s2e/simex
 	DEVELOPER_MODE=OFF
 	XCSIT=OFF
 	git apply patch_for_maxwell
@@ -29,8 +28,8 @@ then
 	echo $MODE
 	INSTALL_PREFIX=..
 	DEVELOPER_MODE=ON
-	XCSIT=OFF
-	git apply patch_for_maxwell
+	XCSIT=ON
+    THIRD_PARTY_ROOT=/data/netapp/s2e/simex
 elif [ $MODE = "conda-env" ]
 then
 	echo $MODE
@@ -49,11 +48,11 @@ then
 	INSTALL_PREFIX=$CONDA_PREFIX
 	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
 	PYLIB=${PYVERSION%.*}
-	DEVELOPER_MODE=OFF
+	DEVELOPER_MODE=ON
 	XCSIT=OFF
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-	export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
-	echo "PYTHONPATH="$PYTHONPATH
+	#export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	#echo "PYTHONPATH="$PYTHONPATH
 fi
 
 
@@ -85,24 +84,23 @@ export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
 export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
 cmake -DSRW_OPTIMIZED=ON \
-	  -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
-	  -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-	  -DUSE_SingFELPhotonDiffractor=ON \
-	  -DUSE_CrystFELPhotonDiffractor=OFF \
-	  -DUSE_GAPDPhotonDiffractor=ON \
-	  -DUSE_s2e=ON \
-	  -DUSE_S2EReconstruction_EMC=ON \
-	  -DUSE_S2EReconstruction_DM=ON \
-	  -DUSE_wpg=ON \
-	  -DUSE_GenesisPhotonSource=ON \
-	  -DUSE_XCSITPhotonDetector=$XCSIT \
-	  -DUSE_FEFFPhotonInteractor=ON \
-	  -DXERCESC_ROOT=$XERCESC_ROOT \
-	  -DGEANT4_ROOT=$GEANT4_ROOT \
-	  -DXCSIT_ROOT=$XCSIT_ROOT \
-	  -DBOOST_ROOT=$BOOST_ROOT \
-	  ..
-
+      -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
+      -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+      -DUSE_SingFELPhotonDiffractor=ON \
+      -DUSE_CrystFELPhotonDiffractor=ON \
+      -DUSE_GAPDPhotonDiffractor=ON \
+      -DUSE_s2e=ON \
+      -DUSE_S2EReconstruction_EMC=ON \
+      -DUSE_S2EReconstruction_DM=ON \
+      -DUSE_wpg=ON \
+      -DUSE_GenesisPhotonSource=ON \
+      -DUSE_XCSITPhotonDetector=$XCSIT \
+      -DUSE_FEFFPhotonInteractor=ON \
+      -DXERCESC_ROOT=$XERCESC_ROOT \
+      -DGEANT4_ROOT=$GEANT4_ROOT \
+      -DXCSIT_ROOT=$XCSIT_ROOT \
+      -DBOOST_ROOT=$BOOST_ROOT \
+      ..
 # Build the project.
 make -j32
 

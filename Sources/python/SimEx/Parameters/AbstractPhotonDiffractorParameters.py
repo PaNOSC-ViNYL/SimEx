@@ -1,7 +1,7 @@
 """ :module  AbstractPhotonDiffractorParameters: Hosts the abstract base class for all PhotonDiffractors."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,6 +25,7 @@ import os
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities import IOUtilities
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 
 class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
@@ -36,7 +37,7 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
                 uniform_rotation=None,
                 number_of_diffraction_patterns=None,
                 beam_parameters=None,
-                geometry=None,
+                detector_geometry=None,
                 **kwargs
                 ):
         """
@@ -52,8 +53,8 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param beam_parameters: Path of the beam parameter file.
         :type beam_parameters: str
 
-        :param geometry: Path of the beam geometry file.
-        :type geometry: str
+        :param detector_geometry: The detector geometry for the simulated scattering experiment.
+        :type detector_geometry: DetectorGeometry
 
         :param kwargs: Key-value pairs to pass to the parent class.
         """
@@ -63,7 +64,7 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.sample = sample
         self.uniform_rotation = uniform_rotation
         self.beam_parameters = beam_parameters
-        self.geometry = geometry
+        self.detector_geometry = detector_geometry
         self.number_of_diffraction_patterns = number_of_diffraction_patterns
 
         super(AbstractPhotonDiffractorParameters, self).__init__(**kwargs)
@@ -81,9 +82,12 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
     def sample(self, val):
         """ Set the 'sample' parameter to val."""
         if val is None:
-            raise ValueError( "A sample must be defined.")
+            self.__sample = None
+            return 
         if val.split(".")[-1] == "pdb":
             self.__sample = IOUtilities.checkAndGetPDB(val)
+            return
+        raise IOError("Samples must be in pdb format.")
 
     @property
     def uniform_rotation(self):
@@ -94,7 +98,7 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'uniform_rotation' parameter to a given value.
         :param value: The value to set 'uniform_rotation' to.
         """
-        self.__uniform_rotation = checkAndSetInstance( bool, value, True )
+        self.__uniform_rotation = checkAndSetInstance( bool, value, False )
 
     @property
     def beam_parameters(self):
@@ -115,22 +119,18 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
                 raise IOError("The beam_parameters %s is not a valid file or filename." % (self.__beam_parameters) )
 
     @property
-    def geometry(self):
-        """ Query for the 'geometry' parameter. """
-        return self.__geometry
-    @geometry.setter
-    def geometry(self, value):
-        """ Set the 'geometry' parameter to a given value.
-        :param value: The value to set 'geometry' to.
+    def detector_geometry(self):
+        """ Query for the 'detector_geometry' parameter. """
+        return self.__detector_geometry
+    @detector_geometry.setter
+    def detector_geometry(self, value):
+        """ Set the 'detector_geometry' parameter to a given value.
+        :param value: The value to set 'detector_geometry' to.
         """
-        self.__geometry = checkAndSetInstance( str, value, None )
+        self.__detector_geometry = checkAndSetInstance( DetectorGeometry, value, None )
 
-        if self.__geometry is not None:
-            if not os.path.isfile( self.__geometry):
-                raise IOError("The geometry %s is not a valid file or filename." % (self.__geometry) )
-        else:
-            print ("WARNING: Geometry file not set, calculation will most probably fail.")
-
+        if self.__detector_geometry is None:
+            print ("WARNING: Detector geometry not set, calculation will most probably fail.")
 
     @property
     def number_of_diffraction_patterns(self):

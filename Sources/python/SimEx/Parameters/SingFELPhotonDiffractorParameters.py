@@ -1,7 +1,7 @@
 """ :module SingFELPhotonDiffractorParameters: Module that holds the SingFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2019 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -22,12 +22,12 @@
 
 import os
 
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.AbstractPhotonDiffractorParameters import AbstractPhotonDiffractorParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 
-class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
+class SingFELPhotonDiffractorParameters(AbstractPhotonDiffractorParameters):
     """
     :class SingFELPhotonDiffractorParameters: Class representing parameters for the SingFELPhotonDiffractor calculator.
     """
@@ -44,16 +44,9 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
                 beam_parameters=None,
                 detector_geometry=None,
                 number_of_MPI_processes=None,
-                parameters_dictionary=None,
                 **kwargs
                 ):
         """
-        :param sample: Name of file containing atomic sample geometry (default None).
-        :type sample: str
-
-        :param uniform_rotation: Whether to perform uniform sampling of rotation space.
-        :type uniform_rotation: bool, default True
-
         :param calculate_Compton: Whether to calculate incoherent (Compton) scattering.
         :type calculate_Compton: bool, default False
 
@@ -69,80 +62,26 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param pmi_stop_ID: Identifier for the last pmi trajectory to read in.
         :type pmi_stop_ID: int, default 1
 
-        :param number_of_diffraction_patterns: Number of diffraction patterns to calculate from each trajectory.
-        :type number_of_diffraction_patterns: int, default 1
-
-        :param beam_parameters: Path of the beam parameter file.
-        :type beam_parameters: str
-
-        :param detector_geometry: Path of the beam geometry file.
-        :type detector_geometry: str
-
-        :param number_of_MPI_processes: Number of MPI processes
-        :type number_of_MPI_processes: int, default 1
-
         """
-        # Legacy support for dictionaries.
-        if parameters_dictionary is not None:
-            self.sample                         = None
-            self.uniform_rotation               = parameters_dictionary['uniform_rotation']
-            self.calculate_Compton              = parameters_dictionary['calculate_Compton']
-            self.slice_interval                 = parameters_dictionary['slice_interval']
-            self.number_of_slices               = parameters_dictionary['number_of_slices']
-            self.pmi_start_ID                   = parameters_dictionary['pmi_start_ID']
-            self.pmi_stop_ID                    = parameters_dictionary['pmi_stop_ID']
-            self.beam_parameters                = parameters_dictionary['beam_parameters']
-            self.detector_geometry              = parameters_dictionary['detector_geometry']
-            self.number_of_diffraction_patterns = parameters_dictionary['number_of_diffraction_patterns']
+        super(SingFELPhotonDiffractorParameters, self).__init__(sample=sample,
+                                                                uniform_rotation=uniform_rotation,
+                                                                beam_parameters=beam_parameters,
+                                                                detector_geometry=detector_geometry,
+                                                                number_of_diffraction_patterns=number_of_diffraction_patterns,
+                                                                **kwargs,
+                                                                )
 
-        else:
-            # Check all parameters.
-            self.sample                         = sample
-            self.uniform_rotation               = uniform_rotation
-            self.calculate_Compton              = calculate_Compton
-            self.slice_interval                 = slice_interval
-            self.number_of_slices               = number_of_slices
-            self.pmi_start_ID                   = pmi_start_ID
-            self.pmi_stop_ID                    = pmi_stop_ID
-            self.beam_parameters                = beam_parameters
-            self.detector_geometry              = detector_geometry
-            self.number_of_diffraction_patterns = number_of_diffraction_patterns
+        # Check all parameters.
+        self.calculate_Compton              = calculate_Compton
+        self.slice_interval                 = slice_interval
+        self.number_of_slices               = number_of_slices
+        self.pmi_start_ID                   = pmi_start_ID
+        self.pmi_stop_ID                    = pmi_stop_ID
 
-        super(SingFELPhotonDiffractorParameters, self).__init__(**kwargs)
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = 1
-
-    ### Setters and queries.
-    @property
-    def sample(self):
-        """ Query for the 'sample' parameter. """
-        return self.__sample
-    @sample.setter
-    def sample(self, value):
-        """ Set the 'sample' parameter to a given value.
-        :param value: The value to set 'sample' to.
-        """
-        # Allow None.
-        if value is not None:
-            value = checkAndSetInstance( str, value, None )
-        self.__sample = value
-
-    @property
-    def uniform_rotation(self):
-        """ Query for the 'uniform_rotation' parameter. """
-        return self.__uniform_rotation
-    @uniform_rotation.setter
-    def uniform_rotation(self, value):
-        """ Set the 'uniform_rotation' parameter to a given value.
-        :param value: The value to set 'uniform_rotation' to.
-        """
-        # Allow None.
-        if value is not None:
-            self.__uniform_rotation = checkAndSetInstance( bool, value, True )
-        else:
-            self.__uniform_rotation = None
 
     @property
     def calculate_Compton(self):
@@ -169,12 +108,13 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         if number_of_slices > 0:
             self.__number_of_slices = number_of_slices
         else:
-            raise ValueError( "The parameter 'slice_interval' must be a positive integer.")
+            raise ValueError( "The parameter 'number_of_slices' must be a positive integer.")
 
     @property
     def slice_interval(self):
         """ Query for the 'slice_interval' parameter. """
         return self.__slice_interval
+
     @slice_interval.setter
     def slice_interval(self, value):
         """ Set the 'slice_interval' parameter to a given value.
@@ -217,60 +157,3 @@ class SingFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         else:
             raise ValueError("The parameters 'pmi_stop_ID' must be a positive integer.")
 
-    @property
-    def beam_parameters(self):
-        """ Query for the 'beam_parameters' parameter. """
-        return self.__beam_parameters
-    @beam_parameters.setter
-    def beam_parameters(self, value):
-        """ Set the 'beam_parameters' parameter to a given value.
-        :param value: The value to set 'beam_parameters' to.
-        """
-        value = checkAndSetInstance( (str,PhotonBeamParameters), value, None )
-
-        if isinstance(value, str):
-            if not os.path.isfile( value ):
-                raise IOError("The beam_parameters %s is not a valid file or filename." % (value) )
-            raise TypeError("Passing beam parameters as a file is currently unsupported. Please use the PhotonBeamParameters class.")
-
-        self.__beam_parameters = value
-
-    @property
-    def detector_geometry(self):
-        """ Query for the 'detector_geometry' parameter. """
-        return self.__detector_geometry
-    @detector_geometry.setter
-    def detector_geometry(self, value):
-        """ Set the 'detector_geometry' parameter to a given value.
-        :param value: The value to set 'detector_geometry' to.
-        """
-        if value is None:
-            print ("WARNING: Geometry not set, calculation will most probably fail.")
-
-        else:
-            value = checkAndSetInstance( (str, DetectorGeometry), value, None )
-
-            if isinstance(value, str):
-                if not os.path.isfile( value ):
-                    raise IOError('The parameter "detector_geometry" %s is not a valid file or filename.' % (value) )
-
-                value = DetectorGeometry(filename=value)
-
-        # Store on object and return.
-        self.__detector_geometry = value
-
-    @property
-    def number_of_diffraction_patterns(self):
-        """ Query for the 'number_of_diffraction_patterns_file' parameter. """
-        return self.__number_of_diffraction_patterns
-    @number_of_diffraction_patterns.setter
-    def number_of_diffraction_patterns(self, value):
-        """ Set the 'number_of_diffraction_patterns' parameter to a given value.
-        :param value: The value to set 'number_of_diffraction_patterns' to.
-        """
-        number_of_diffraction_patterns = checkAndSetInstance( int, value, 1 )
-
-        if number_of_diffraction_patterns > 0:
-            self.__number_of_diffraction_patterns = number_of_diffraction_patterns
-        else:
-            raise ValueError("The parameters 'number_of_diffraction_patterns' must be a positive integer.")

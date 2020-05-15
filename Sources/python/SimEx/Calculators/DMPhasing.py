@@ -1,7 +1,7 @@
 """:module DMPhasing: Module that holds the DMPhasing class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -231,7 +231,7 @@ def _load_intensities(ref_file):
     """
 
     fp      = h5py.File(ref_file, 'r')
-    t_intens = (fp["data/data"].value).astype("float")
+    t_intens = (fp["data/data"][()]).astype("float")
     fp.close()
     intens_len = len(t_intens)
     qmax    = intens_len/2

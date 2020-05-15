@@ -93,16 +93,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     def testShapedConstructionDict(self):
         """ Testing the construction of the class with parameters given as a dict. """
 
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameters' : self.beam,
-                     'detector_geometry' : self.detector_geometry,
-                   }
+        parameters=SingFELPhotonDiffractorParameters(uniform_rotation=True,
+                                                       calculate_Compton=False,
+                                                       slice_interval=100,
+                                                       number_of_slices=2,
+                                                       pmi_start_ID=1,
+                                                       pmi_stop_ID=1,
+                                                       number_of_diffraction_patterns=2,
+                                                       beam_parameters=self.beam,
+                                                       detector_geometry=self.detector_geometry,
+                                                       )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
@@ -129,16 +129,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
     def testShapedConstruction2(self):
         """ Testing the construction of the class with parameters. """
 
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameters' : self.beam,
-                     'detector_geometry' : self.detector_geometry,
-                   }
+        parameters=SingFELPhotonDiffractorParameters(uniform_rotation=True,
+                                                       calculate_Compton=False,
+                                                       slice_interval=100,
+                                                       number_of_slices=2,
+                                                       pmi_start_ID=1,
+                                                       pmi_stop_ID=1,
+                                                       number_of_diffraction_patterns=2,
+                                                       beam_parameters=self.beam,
+                                                       detector_geometry=self.detector_geometry,
+                                                       )
 
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr_out.h5')
@@ -156,16 +156,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
 
         # Set up parameters.
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameters' : None,
-                     'detector_geometry' : self.detector_geometry,
-                   }
+        parameters=SingFELPhotonDiffractorParameters(uniform_rotation=True,
+                                                       calculate_Compton=False,
+                                                       slice_interval=100,
+                                                       number_of_slices=2,
+                                                       pmi_start_ID=1,
+                                                       pmi_stop_ID=1,
+                                                       number_of_diffraction_patterns=2,
+                                                       beam_parameters=self.beam,
+                                                       detector_geometry=self.detector_geometry,
+                                                       )
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
 
@@ -271,17 +271,19 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
 
         # Set up parameters.
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameters' : None,
-                     'detector_geometry' : self.detector_geometry,
-                     'number_of_MPI_processes' : 2,
-                   }
+        parameters=SingFELPhotonDiffractorParameters(
+                sample=None,
+                uniform_rotation = False,
+                calculate_Compton = False,
+                slice_interval = 100,
+                number_of_slices = 3,
+                pmi_start_ID = 1,
+                pmi_stop_ID = 1,
+                number_of_diffraction_patterns= 2,
+                beam_parameters=self.beam,
+                detector_geometry= self.detector_geometry,
+                forced_mpi_command='mpirun -np 2',
+                )
         # Construct the object.
         diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path='pmi')
 
@@ -293,97 +295,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
 
     def testConstructionExceptions(self):
         """ Check that proper exceptions are thrown if object is constructed incorrectly. """
-        # Parameter not a dict.
+        # Parameter not a parameters object.
         self.assertRaises( TypeError, SingFELPhotonDiffractor, 1, self.input_h5, 'diffr.h5')
-
-        # Setup parameters that are ok
-        parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : False,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 1,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameters' : self.beam,
-                     'detector_geometry' : self.detector_geometry,
-                     }
-
-        # Check construction with sane parameters.
-        singfel = SingFELPhotonDiffractor( parameters, self.input_h5, 'diffr.h5')
-        self.assertIsInstance( singfel, SingFELPhotonDiffractor )
-
-        # uniform_rotation not a bool.
-        parameters['uniform_rotation'] = 1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['uniform_rotation'] = True
-
-        # calculate_Compton not a bool.
-        parameters['calculate_Compton'] = 1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['calculate_Compton'] = False
-
-        # slice_interval not positive integer.
-        parameters['slice_interval'] = -1
-        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # slice_interval not a number
-        parameters['slice_interval'] = 'one'
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['slice_interval'] = 1
-
-        # number_of_slices not positive integer.
-        parameters['number_of_slices'] = -1
-        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # number_of_slices not a number
-        parameters['number_of_slices'] = 'one'
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['number_of_slices'] = 2
-
-        # number_of_diffraction_patterns not positive integer.
-        parameters['number_of_diffraction_patterns'] = -1
-        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # number_of_diffraction_patterns not a number
-        parameters['number_of_diffraction_patterns'] = 'one'
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['number_of_diffraction_patterns'] = 2
-
-        # pmi_start_ID not positive integer.
-        parameters['pmi_start_ID'] = -1
-        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # pmi_start_ID not a number
-        parameters['pmi_start_ID'] = 'one'
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['pmi_start_ID'] = 1
-
-        # pmi_stop_ID not positive integer.
-        parameters['pmi_stop_ID'] = -1
-        self.assertRaises( ValueError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # pmi_stop_ID not a number
-        parameters['pmi_stop_ID'] = 'one'
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # Reset.
-        parameters['pmi_stop_ID'] = 1
-
-        # beam_parameters not a string.
-        parameters['beam_parameters'] = 1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # beam_parameters not a file.
-        parameters['beam_parameters'] = 'xyz.beam'
-        self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        parameters['beam_parameters'] =  self.beam
-
-        # detector_geometry not a string.
-        parameters['detector_geometry'] = 1
-        self.assertRaises( TypeError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        # detector_geometry not a file.
-        parameters['detector_geometry'] = 'xyz.geom'
-        self.assertRaises( IOError, SingFELPhotonDiffractor, parameters, self.input_h5, 'diffr.h5')
-        parameters['detector_geometry'] = self.detector_geometry
 
     @unittest.skipIf(TRAVIS, "CI.")
     def testBackengine(self):
@@ -400,8 +313,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID  = 1,
                      number_of_diffraction_patterns = 2,
-                     beam_parameters = self.beam,
-                     detector_geometry = self.detector_geometry,
+                     beam_parameters=self.beam,
+                     detector_geometry=self.detector_geometry,
                      forced_mpi_command='mpirun -np 2',
                      )
 
@@ -429,8 +342,8 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
                      pmi_start_ID = 1,
                      pmi_stop_ID  = 1,
                      number_of_diffraction_patterns = 2,
-                     beam_parameters = None,
-                     detector_geometry = self.detector_geometry,
+                     beam_parameters=None,
+                     detector_geometry=self.detector_geometry,
                      forced_mpi_command='mpirun -np 2',
                      )
 
@@ -455,12 +368,12 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
 
         parameters = SingFELPhotonDiffractorParameters(
-                     uniform_rotation = True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
+                     uniform_rotation=True,
+                     calculate_Compton=False,
+                     slice_interval=100,
+                     number_of_slices=2,
+                     pmi_start_ID=1,
+                     pmi_stop_ID=1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun -np 2',
@@ -527,12 +440,12 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.__dirs_to_remove.append('diffr')
 
         parameters = SingFELPhotonDiffractorParameters(
-                     uniform_rotation = True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
+                     uniform_rotation=True,
+                     calculate_Compton=False,
+                     slice_interval=100,
+                     number_of_slices=2,
+                     pmi_start_ID=1,
+                     pmi_stop_ID=1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun -np 2 -x OMP_NUM_THREADS=2',
@@ -556,12 +469,12 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.__dirs_to_remove.append('diffr')
 
         parameters = SingFELPhotonDiffractorParameters(
-                     uniform_rotation = True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID = 1,
+                     uniform_rotation=True,
+                     calculate_Compton=False,
+                     slice_interval=100,
+                     number_of_slices=2,
+                     pmi_start_ID=1,
+                     pmi_stop_ID=1,
                      number_of_diffraction_patterns= 2,
                      detector_geometry= self.detector_geometry,
                      forced_mpi_command='mpirun -np 2',
@@ -606,20 +519,22 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         """ Test that saveH5() generates only one linked hdf. """
 
 
-        diffraction_parameters={ 'uniform_rotation': True,
-                     'calculate_Compton' : True,
-                     'slice_interval' : 100,
-                     'number_of_slices' : 2,
-                     'pmi_start_ID' : 1,
-                     'pmi_stop_ID'  : 4,
-                     'number_of_diffraction_patterns' : 2,
-                     'beam_parameters' : None,
-                     'detector_geometry' : self.detector_geometry,
-                     'number_of_MPI_processes' : 8,
-                   }
+        parameters=SingFELPhotonDiffractorParameters(
+                sample=None,
+                uniform_rotation = False,
+                calculate_Compton = False,
+                slice_interval = 100,
+                number_of_slices = 3,
+                pmi_start_ID = 1,
+                pmi_stop_ID = 1,
+                number_of_diffraction_patterns= 8,
+                beam_parameters=self.beam,
+                detector_geometry= self.detector_geometry,
+                forced_mpi_command='mpirun -np 8',
+                )
 
         photon_diffractor = SingFELPhotonDiffractor(
-                parameters=diffraction_parameters,
+                parameters=parameters,
                 input_path=TestUtilities.generateTestFilePath('pmi_out'),
                 output_path='diffr_newstyle')
 
@@ -701,7 +616,7 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         with h5py.File(photon_diffractor.output_path) as handle:
             new_pattern = handle['data/0000001/diffr'].value
 
-        self.assertAlmostEqual(numpy.linalg.norm(pattern-new_pattern), 0.0, 10)
+        self.assertAlmostEqual(numpy.linalg.norm(pattern-new_pattern), 0.0, 5)
 
 
 if __name__ == '__main__':

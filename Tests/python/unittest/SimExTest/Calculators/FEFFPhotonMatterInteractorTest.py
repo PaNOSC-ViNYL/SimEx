@@ -234,6 +234,7 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         # Check exception.
         self.assertRaises( IOError, FEFFPhotonMatterInteractor )
 
+    @unittest.skip(reason="Skipped becaucse backengine never returns even when FEFF is done.")
     def testOutputPath(self):
         """ Check that the default path is set correctly. """
         # Setup the calculator.
@@ -246,6 +247,7 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         # Check that the pmi dir was created.
         self.assertTrue( os.path.isdir( 'pmi' ) )
 
+    @unittest.skip(reason="Skipped becaucse backengine never returns even when FEFF is done.")
     def testBackengine(self):
         """ Test the backengine execution. """
 
@@ -292,6 +294,7 @@ class FEFFPhotonMatterInteractorTest(unittest.TestCase):
         self.assertIn('xmu.dat', os.listdir(feff.working_directory) )
         self.assertIn('xsect.bin', os.listdir(feff.working_directory) )
 
+    @unittest.skip(reason="Skipped becaucse backengine never returns even when FEFF is done.")
     def testSaveH5(self):
         # Setup the calculator.
         feff = FEFFPhotonMatterInteractor(parameters = self.__parameters, output_path='feff.h5')

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.12)
 
 project (SIMEX)
 
@@ -26,12 +26,15 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
 )
 
 ### PYTHON
-FIND_PACKAGE(PythonInterp 3.5 REQUIRED)
+FIND_PACKAGE(Python
+             3.5
+             REQUIRED
+             )
 
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (PYPATH     ${LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+set (PYPATH     ${LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
 message( "PYPATH=${PYPATH}" )
 
 set (DOCDIR share/doc)
@@ -137,6 +140,3 @@ endif()
 
 # Add documentation target.
 add_subdirectory("Sources/doc")
-
-# Add extra stuff, e.g. python libs not pip'able.
-add_subdirectory("Sources/python/extra")

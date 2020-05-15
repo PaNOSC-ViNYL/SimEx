@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -40,6 +40,7 @@ from .Calculators.DMPhasing import DMPhasing
 from .Calculators.EMCCaseGenerator import EMCCaseGenerator
 from .Calculators.EMCOrientation import EMCOrientation
 from .Calculators.EstherPhotonMatterInteractor import EstherPhotonMatterInteractor
+from .Calculators.GaussianPhotonSource import GaussianPhotonSource
 from .Calculators.GenesisPhotonSource import GenesisPhotonSource
 from .Calculators.IdealPhotonDetector import IdealPhotonDetector
 from .Calculators.PlasmaXRTSCalculator import PlasmaXRTSCalculator
@@ -57,6 +58,7 @@ from .Parameters.DetectorGeometry import DetectorGeometry
 from .Parameters.DetectorGeometry import DetectorPanel
 from .Parameters.EMCOrientationParameters import EMCOrientationParameters
 from .Parameters.EstherPhotonMatterInteractorParameters import EstherPhotonMatterInteractorParameters
+from .Parameters.GaussWavefrontParameters import GaussWavefrontParameters
 from .Parameters.PhotonBeamParameters import PhotonBeamParameters
 from .Parameters.PlasmaXRTSCalculatorParameters import PlasmaXRTSCalculatorParameters
 from .Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters

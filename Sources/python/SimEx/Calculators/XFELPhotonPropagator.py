@@ -153,7 +153,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
                 propagate_s2e.propagate(input_file, output_file, self.parameters.beamline.get_beamline)
 
                 # Rewrite in openpmd conformant way.
-                wpg_to_opmd.convertToOPMD( output_file )
+                # wpg_to_opmd.convertToOPMD( output_file )
 
         return 0
 
