@@ -125,70 +125,12 @@ class DiffractionAnalysis(AbstractAnalysis):
 
     @property
     def npattern(self):
-        """ get the number of the selected patterns in this analysis object """
-        indices = self.pattern_indices
-        if indices != 'all':
-            npattern = len(indices)
+        if (self.pattern_indices == "all"):
+            with h5py.File(self.input_path, 'r') as h5:
+                npattern = len(h5['data'])
         else:
-            npattern = totalNPattern(self.input_path)
-
+            npattern = len(self.pattern_indices)
         return npattern
-
-    @property
-    def solidAngles(self):
-        """ Solid angle of each pixel """
-        """ Note: the pixel is assumed to be square """
-
-        # pixel number (py, px)
-        pn = self.parameters['geom']['mask'].shape
-        # initialize array
-        solidAngles = numpy.zeros_like(pn)
-        y, x = numpy.indices(pn)
-        # pixel size (meter)
-        ph = self.parameters['geom']['pixelHeight']
-        pw = self.parameters['geom']['pixelWidth']
-        # sample to detector distance (meter)
-        s2d = self.parameters['geom']['detectorDist']
-
-        center_x = 0.5*(pn[1]-1)
-        center_y = 0.5*(pn[0]-1)
-        rx = (x - center_x)*pw
-        ry = (y - center_y)*ph
-        r = numpy.sqrt(rx**2 + ry**2)
-        pixDist = numpy.sqrt(r**2 + s2d**2)
-        alpha = numpy.arctan2(pw,2*pixDist)
-        solidAngles = 4*numpy.arcsin(numpy.sin(alpha)**2)
-
-        return solidAngles
-
-    @property
-    def qMap(self):
-        """ q of each pixel """
-        """ q = 4*pi*sin(twotheta/2)/lmd """
-
-        # pixel number (py, px)
-        pn = self.parameters['geom']['mask'].shape
-        # initialize array
-        qMap = numpy.zeros_like(pn)
-        y, x = numpy.indices(pn)
-        # pixel size (meter)
-        ph = self.parameters['geom']['pixelHeight']
-        pw = self.parameters['geom']['pixelWidth']
-        # sample to detector distance (meter)
-        s2d = self.parameters['geom']['detectorDist']
-
-        E0 = self.parameters['beam']['photonEnergy']
-        lmd = 12398 / E0 #Angstrom
-
-        center_x = 0.5*(pn[1]-1)
-        center_y = 0.5*(pn[0]-1)
-        rx = (x - center_x)*pw
-        ry = (y - center_y)*ph
-        r = numpy.sqrt(rx**2 + ry**2)
-        twotheta = numpy.arctan2(r,s2d)
-        qMap = 4*numpy.pi*numpy.sin(twotheta/2)/lmd
-
-        return qMap
 
     @property
     def mask(self):
@@ -255,7 +197,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
 
 
-    def numpyPattern(self, operation=None):
+    def dumpPattern(self, operation=None):
         """ Return the pattern after opentation over the patterns defined in DiffractionAnalysis class.
 
         :param operation: Operation to apply to selected patterns (default none).
@@ -284,7 +226,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         return pattern_to_dump
 
-    def plotRadialProjection(self, operation=None, logscale=False, offset = 1e-5, unit="q_nm^-1"):
+    def plotRadialProjection(self, operation=None, logscale=False):
         """ Plot the radial projection of a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
