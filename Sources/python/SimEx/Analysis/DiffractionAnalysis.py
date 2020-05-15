@@ -124,6 +124,15 @@ class DiffractionAnalysis(AbstractAnalysis):
         self.__poissonize = val
 
     @property
+    def npattern(self):
+        if (self.pattern_indices == "all"):
+            with h5py.File(self.input_path, 'r') as h5:
+                npattern = len(h5['data'])
+        else:
+            npattern = len(self.pattern_indices)
+        return npattern
+
+    @property
     def mask(self):
         """ Query the mask. """
         return self.__mask
@@ -187,6 +196,35 @@ class DiffractionAnalysis(AbstractAnalysis):
                     yield diffr*self.mask
 
 
+
+    def dumpPattern(self, operation=None):
+        """ Return the pattern after opentation over the patterns defined in DiffractionAnalysis class.
+
+        :param operation: Operation to apply to selected patterns (default none).
+        :type operation: python function
+        :note operation: Operation must accept a 3D numpy.array as first input argument and the "axis" keyword-argument. Operation must return a 2D numpy.array. Axis will always be chosen as axis=0.
+        :example operation: numpy.mean, numpy.std, numpy.sum
+
+        """
+        if operation is None:
+            # Get all the patterns read by DiffractionAnalysis class.
+            pi = self.patterns_iterator
+            if len(self.pattern_indices) == 1:
+                pattern_to_dump = next(pi)
+            else:
+                pattern_to_dump = numpy.array([p for p in pi])
+
+        # Handle operation
+        else:
+            operation = eval(operation)
+            # Get pattern to dump.
+            pi = self.patterns_iterator
+            if len(self.pattern_indices) == 1:
+                pattern_to_dump = next(pi)
+            else:
+                pattern_to_dump = operation(numpy.array([p for p in pi]), axis=0)
+
+        return pattern_to_dump
 
     def plotRadialProjection(self, operation=None, logscale=False):
         """ Plot the radial projection of a pattern.
