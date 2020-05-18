@@ -34,6 +34,7 @@ from .SingFELPhotonDiffractorParametersTest import SingFELPhotonDiffractorParame
 from .WavePropagatorParametersTest import WavePropagatorParametersTest
 from .PhotonMatterInteractorParametersTest import PhotonMatterInteractorParametersTest
 from .XCSITPhotonDetectorParametersTest import XCSITPhotonDetectorParametersTest
+from .IonMatterInteractorParametersTest import IonMatterInteractorParametersTest
 
 # Setup the suite.
 def suite():
@@ -51,6 +52,7 @@ def suite():
              unittest.makeSuite(EstherPhotonMatterInteractorParametersTest, 'test'),
              unittest.makeSuite(PhotonMatterInteractorParametersTest,       'test'),
              unittest.makeSuite(XCSITPhotonDetectorParametersTest,       'test'),
+             unittest.makeSuite(IonMatterInteractorParametersTest,       'test'),
              ]
 
     return unittest.TestSuite(suites)
