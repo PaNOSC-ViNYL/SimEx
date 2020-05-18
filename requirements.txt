@@ -17,3 +17,4 @@ pint
 py3nvml
 openpmd-api
 xraydb
+SDF (https://github.com/PaNOSC-ViNYL/SDF)
