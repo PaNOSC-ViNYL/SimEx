@@ -39,6 +39,7 @@ from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
 from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
+from .TNSAIonMatterInteractorTest import TNSAIonMatterInteractorTest
 
 # Setup the suite.
 def suite():
@@ -53,6 +54,7 @@ def suite():
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
              unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
+             unittest.makeSuite(TNSAIonMatterInteractorTest,                'test')
              ]
 
     if not runs_on_travisCI():
