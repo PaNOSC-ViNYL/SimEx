@@ -133,6 +133,34 @@ class DiffractionAnalysis(AbstractAnalysis):
         return npattern
 
     @property
+    def solidAngles(self):
+        """ Solid angle of each pixel """
+
+        # pixel number (py, px)
+        pn = analyzer.parameters['geom']['mask'].shape
+        # initialize array
+        solidAngles = numpy.zeros_like(pn)
+        y, x = np.indices(pn)
+        # pixel size (meter)
+        ph = self.parameters['geom']['pixelHeight']
+        pw = self.parameters['geom']['pixelWidth']
+        # sample to detector distance (meter)
+        s2d = self.parameters['geom']['detectorDist']
+
+        center_x = 0.5*(pn[1]-1)
+        center_y = 0.5*(pn[0]-1)
+        rx = (x - center_x)*pw
+        ry = (y - center_y)*ph
+        r = np.sqrt(rx**2 + ry**2)
+
+        if (self.pattern_indices == "all"):
+            with h5py.File(self.input_path, 'r') as h5:
+                npattern = len(h5['data'])
+        else:
+            npattern = len(self.pattern_indices)
+        return npattern
+
+    @property
     def mask(self):
         """ Query the mask. """
         return self.__mask
