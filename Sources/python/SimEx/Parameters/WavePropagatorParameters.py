@@ -40,8 +40,7 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         :type use_opmd: bool, default False
 
         :param beamline: The WPG beamline to use in the propagation.
-        :type beamline: class or module that defines a function
-        `get_beamline`, which in turn returns a WPG.Beamline instance.
+        :type beamline: WPG.Beamline instance.
         """
 
         # Check all parameters.

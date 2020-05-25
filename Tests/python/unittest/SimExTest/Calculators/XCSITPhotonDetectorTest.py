@@ -174,8 +174,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
 
         self.assertEqual(len(detector.getInteractionData()), 1)
 
-    @unittest.skip("This test segfaults.")
-    def testBackengineIAMultiPatterns(self):
+    def failingtestBackengineIAMultiPatternsFails(self):
         """ """
 
         # Get a fresh detector.
@@ -244,7 +243,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         """ Check numbers for 1 AGIPD Quad. """
 
         # Cleanup.
-        self.__files_to_remove.append('6r43.pdb')
+        self.__files_to_remove.append('5mzd.pdb')
         self.__files_to_remove.append('diffr.h5')
         self.__dirs_to_remove.append('diffr')
 
@@ -281,7 +280,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
                 number_of_diffraction_patterns=1,
                 detector_geometry=detector_geometry,
                 beam_parameters=beam,
-                sample="6r43.pdb",
+                sample="5mzd.pdb",
                 forced_mpi_command='mpirun -np 1',
               )
 
@@ -318,7 +317,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         """ Compare patterns before and after detector sim. """
 
         # Cleanup.
-        #self.__files_to_remove.append('6r43.pdb')
+        #self.__files_to_remove.append('5mzd.pdb')
         #self.__files_to_remove.append('diffr.h5')
         #self.__dirs_to_remove.append('diffr')
 
@@ -355,7 +354,7 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
                 number_of_diffraction_patterns=1,
                 detector_geometry=detector_geometry,
                 beam_parameters=beam,
-                sample="6r43.pdb",
+                sample="5mzd.pdb",
                 forced_mpi_command='mpirun -np 1',
               )
 
@@ -392,6 +391,8 @@ class XCSITPhotonDetectorTest(unittest.TestCase):
         analysis2.plotPattern(operation=None, logscale=False, )
 
         mpl.pyplot.show()
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -55,6 +55,8 @@ then
 	#echo "PYTHONPATH="$PYTHONPATH
 fi
 
+
+
 # Check for existing build directory, remove if found
 if [ -d build ]
 then
@@ -71,7 +73,7 @@ echo "Changed dir to $PWD."
 # (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by
 # $> source `which compilervars.sh` <arch>
 # where <arch> is either intel64 or ia32
-#export FC=ifort
+export FC=ifort
 
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}

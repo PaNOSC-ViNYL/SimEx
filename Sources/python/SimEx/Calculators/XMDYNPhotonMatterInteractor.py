@@ -1,7 +1,7 @@
 """:module XMDYNPhotonMatterInteractor: Module that holds the XMDYNPhotonMatterInteractor class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -222,17 +222,16 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
         for i,input_file in enumerate(input_files):
             output_file = os.path.join( self.output_path , 'pmi_out_%07d.h5' % (i+1) )
 
-            command = "xmdyn" + \
+            command = os.environ["XMDYN"] + \
             ' --s2e_sample {0:s}'.format(self.sample_path) + \
             ' --prop_out {0:s}'.format(input_file) + \
             ' --pmi_out {0:s}'.format(output_file) + \
-            ' --xatom-exe {0:s}'.format("xatom") + \
+            ' --xatom-exe {0:s}'.format(os.environ["XATOM"]) + \
             ' --dbase {0:s}'.format(os.environ["XMDYNANDXATOMDBPATH"]) + \
             ' --seed {0:d}'.format(self.__seed) + \
             ' --s2e-rot "{0:f} {1:f} {2:f} {3:f}"'.format(*self.parameters.rotation) + \
-            ' --pmi_params ' + \
-            ' --root {0:s}'.format(self.__root_path) 
-
+            ' --pmi_params -' + \
+            ' --root {0:s}'.format(self.__root_path)
 
             command = shlex.split(command)
             if self.__cudadev is not None:
@@ -442,7 +441,7 @@ def h5_out2in( src , dest , *args ) :
     grp_param = file_out.create_group( "misc" )
     grp_param = file_out.create_group( "info" )
 
-    # Create s2e interface version
+	# Create s2e interface version
     interface = file_out.create_dataset("info/interface_version", (1,), dtype='f')
     interface[0] = 1.0
 

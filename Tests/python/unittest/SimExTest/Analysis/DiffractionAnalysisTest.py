@@ -25,9 +25,6 @@ RENDER_PLOT=False # Set to True or use environment variable to show plots.
     @author : CFG
     @institution : XFEL
     @creation 20170322
-    @author : Juncheng E
-    @institution : XFEL
-    @modification 20200914
 
 """
 import numpy
@@ -261,46 +258,6 @@ class DiffractionAnalysisTest(unittest.TestCase):
         # Check file is present.
         self.assertIn(animation_out_path, os.listdir(os.getcwd()) )
 
-    def testWholeNumpyPattern(self):
-        """ Check if we can getting the numpy array of the whole set of diffraction patterns """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
-
-        self.assertEqual(analyzer.npattern,1000)
-        patterns = analyzer.numpyPattern()
-        self.assertEqual(patterns.shape,(1000,81,81))
-
-    def testOneNumpyPattern(self):
-        """ Check if we can getting the numpy array of one snapshot """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices=1, poissonize=True)
-
-        self.assertEqual(analyzer.npattern,1)
-        pattern_one = analyzer.numpyPattern()
-        self.assertEqual(pattern_one.shape,(81,81))
-
-    def testSolidAngles(self):
-        """ Check getting solid angles mapping """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
-
-        sa = analyzer.solidAngles
-    
-    def testSolidAngles(self):
-        """ Check getting solid angles mapping """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
-
-        sa = analyzer.solidAngles
-
-    def testGetQMap(self):
-        """ Check the 2D reciprocal space mapping """
-        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
-
-        qMap = analyzer.qMap
-
-    def testShannonPixelPhoton(self):
-        """ Check if we can get the average number of photons per shannon pixel at a certain resolution"""
-        analyzer = DiffractionAnalysis(input_path=self.__test_data, pattern_indices="all", poissonize=True)
-
-        # Get the number of photons per shannon pixel at the resolution of 10 angstrom
-        analyzer.shannonPixelPhoton(10)
 
 if __name__ == '__main__':
     unittest.main()

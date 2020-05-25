@@ -192,7 +192,7 @@ class PlasmaXRTSCalculatorTest(unittest.TestCase):
         self.assertAlmostEqual( h5['data/static']['Sk_core'].value,     0.05999, 4)
         self.assertAlmostEqual( h5['data/static']['Wk'].value,          4.084 ,  2)
         self.assertAlmostEqual( h5['data/static']['Sk_total'].value,    6.002,  3)
-        self.assertAlmostEqual( h5['data/static']['ipl'].value,        38.353,  3)
+        self.assertAlmostEqual( h5['data/static']['ipl'].value,        38.35,  3)
         # IPL has a unit.
         self.assertEqual( h5['data/static']['ipl'].attrs['unit'], 'eV')
         self.assertAlmostEqual( h5['data/static']['lfc'].value,         0.000 , 3)

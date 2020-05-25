@@ -1,7 +1,7 @@
 """ :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
+# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -205,60 +205,6 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         if qspace:
             del wf
 
-    def dumpTotalPower(self, spectrum=False):
-        """ Method to dump meaningful total power.
-
-        :param spectrum: Whether to dump the power density in energy domain (True) or time domain (False, default).
-        :type spectrum: bool
-
-        """
-
-        """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
-
-        # Switch to frequency (energy) domain if requested.
-        if spectrum:
-            print("\n Switching to frequency domain.")
-            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
-            self.intensity = self.wavefront.get_intensity()
-
-        # Get dimensions.
-        mesh = self.wavefront.params.Mesh
-        dx = (mesh.xMax - mesh.xMin)/(mesh.nx - 1)
-        dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
-
-        # Get intensity by integrating over transverse dimensions.
-        int0 = self.intensity.sum(axis=(0,1))
-
-        # Scale to get unit W/mm^2
-        int0 = int0*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
-        int0max = int0.max()
-
-        # Get center pixel numbers.
-        center_nx = int(mesh.nx/2)
-        center_ny = int(mesh.ny/2)
-
-        # Get meaningful slices.
-        aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
-        int0_mean = int0[min(aw):max(aw)]  # meaningful range of pulse
-        dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
-        xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
-        if(self.wavefront.params.wDomain=='time'):
-            print('x: Time (fs)')
-            print('y: Power (W)')
-            dt = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
-            print(('Pulse energy {:1.2g} J'.format(int0_mean.sum()*dt)))
-            return xs_mf*1e15, int0_mean
-
-        else: #frequency domain
-            print('x: eV')
-            print('y: J/eV')
-
-            # Switch back to time domain.
-            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
-            self.intensity = self.wavefront.get_intensity()
-
-            return(xs_mf, int0_mean)
 
     def plotTotalPower(self, spectrum=False):
         """ Method to plot the total power.
@@ -297,10 +243,10 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Get meaningful slices.
         aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
-        int0_mean = int0[min(aw):max(aw)+1]  # meaningful range of pulse
+        int0_mean = int0[min(aw):max(aw)]  # meaningful range of pulse
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw)+1)*dSlice + mesh.sliceMin
+        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
         if(self.wavefront.params.wDomain=='time'):
             plt.plot(xs*1e15, int0) # time axis converted to fs.
             plt.plot(xs_mf*1e15, int0_mean, 'ro')
@@ -364,18 +310,18 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
 
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw)+1)*dSlice + mesh.sliceMin
+        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
 
         # Plot.
         if(self.wavefront.params.wDomain=='time'):
             plt.plot(xs*1e15,int0_00)
-            plt.plot(xs_mf*1e15, int0_00[min(aw):max(aw)+1], 'ro')
+            plt.plot(xs_mf*1e15, int0_00[min(aw):max(aw)], 'ro')
             plt.title('On-Axis Power Density')
             plt.xlabel('time (fs)')
             plt.ylabel(r'Power density (W/mm${}^{2}$)')
         else: #frequency domain
             plt.plot(xs,int0_00)
-            plt.plot(xs_mf, int0_00[min(aw):max(aw)+1], 'ro')
+            plt.plot(xs_mf, int0_00[min(aw):max(aw)], 'ro')
             plt.title('On-Axis Spectral Fluence')
             plt.xlabel('photon energy (eV)')
             plt.ylabel(r'fluence (J/eV/mm${}^{2}$)')
@@ -402,23 +348,3 @@ def mask_nans(a, replacement=0.0):
         a[nans] = 0.0 # Yes this works because a is a reference!
     return isnan_array
 
-def calculate_fwhm(wfr):
-    """
-    Calculate FWHM of the beam calculating number of point bigger then max/2 throuhgt center of the image
-
-    :param wfr:  wavefront
-    :return: {'fwhm_x':fwhm_x, 'fwhm_y': fwhm_y} in [m]
-    """
-    intens = wfr.get_intensity(polarization='total').sum(axis=-1);
-
-
-    mesh = wfr.params.Mesh
-    dx = (mesh.xMax-mesh.xMin)/mesh.nx
-    dy = (mesh.yMax-mesh.yMin)/mesh.ny
-
-    x_center = intens[intens.shape[0]//2,:]
-    fwhm_x = len(x_center[x_center>x_center.max()/2])*dx
-
-    y_center = intens[:,intens.shape[1]//2]
-    fwhm_y = len(y_center[y_center>y_center.max()/2])*dy
-    return {'fwhm_x':fwhm_x, 'fwhm_y': fwhm_y}

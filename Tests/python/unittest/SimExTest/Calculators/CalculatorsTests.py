@@ -34,7 +34,7 @@ from .PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
 from .S2EReconstructionTest import S2EReconstructionTest
 from .SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
-from .WavePropagatorTest import WavePropagatorTest
+from .XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
 from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
@@ -50,7 +50,7 @@ def suite():
              unittest.makeSuite(GaussianPhotonSourceTest,                   'test'),
              unittest.makeSuite(S2EReconstructionTest,                      'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
-             unittest.makeSuite(WavePropagatorTest,                   'test'),
+             unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
              unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),

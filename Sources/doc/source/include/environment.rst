@@ -1,8 +1,5 @@
 Environment settings
-````````````````````
-.. 
-    --------------------
-
+--------------------
 simex_platform is a python library, hence python needs to be aware of its location. To this end,
 run the command::
 

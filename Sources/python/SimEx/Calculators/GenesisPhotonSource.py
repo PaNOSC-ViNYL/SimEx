@@ -70,7 +70,7 @@ class GenesisPhotonSource(AbstractPhotonSource):
         self.__genesis_beam = genesis.edist2beam(edist, step=self.parameters['time_averaging_window'])
 
         # Generate genesis input with defaults and guesses from beam peak parameters.
-        genesis_input = genesis.generate_input( undulator = self.parameters['undulator_parameters'],
+        genesis_input = genesis.generate_input( up = self.parameters['undulator_parameters'],
                                                        beam=genesis.get_beam_peak(self.__genesis_beam),
                                                        itdp=self.parameters['is_time_dependent'] )
 

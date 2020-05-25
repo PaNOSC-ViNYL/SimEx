@@ -20,7 +20,6 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 # Make sure simex_vars.sh has been sourced.
-sys.path.insert(0, os.path.abspath('../../python'))
 
 # -- General configuration ------------------------------------------------
 
@@ -32,7 +31,7 @@ sys.path.insert(0, os.path.abspath('../../python'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    # 'sphinx.ext.doctest',
+    'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -40,8 +39,6 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'breathe',
-    'sphinx_rtd_theme',
-    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,8 +54,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'SIMEX Platform'
-copyright = '2015-2020, Carsten Fortmann-Grote, Juncheng E'
+project = 'simex_platform'
+copyright = '2015-2018, Carsten Fortmann-Grote'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -115,15 +112,13 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# html_theme = 'classic'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-        # "stickysidebar" : "true",
-        "sticky_navigation" : "true",
+        "stickysidebar" : "true",
         }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -138,7 +133,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = os.path.join('resources','eucall_logo_print_transparent.png')
+html_logo = os.path.join('resources','eucall_logo_print_transparent.png')
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -282,10 +277,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'SIMEX Platform'
+epub_title = 'simex_platform'
 epub_author = 'Carsten Fortmann-Grote, Sergey Yakubov'
 epub_publisher = 'Carsten Fortmann-Grote, Sergey Yakubov'
-epub_copyright = '2015-2020, Carsten Fortmann-Grote, Sergey Yakubov, Juncheng E'
+epub_copyright = '2015-2017, Carsten Fortmann-Grote, Sergey Yakubov'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'simex_platform'

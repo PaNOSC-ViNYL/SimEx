@@ -105,7 +105,6 @@ ExternalProject_Add( crystfel
 
 # Install needed crystfel binaries, scripts and doc material.
 ExternalProject_Get_Property(crystfel SOURCE_DIR)
-ExternalProject_Get_Property(crystfel BINARY_DIR)
 #
 install(PROGRAMS ${SOURCE_DIR}/src/pattern_sim DESTINATION ${BINDIR})
 install(PROGRAMS ${SOURCE_DIR}/src/partial_sim DESTINATION ${BINDIR})

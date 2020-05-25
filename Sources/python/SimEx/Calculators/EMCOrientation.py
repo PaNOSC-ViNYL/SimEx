@@ -217,8 +217,7 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         # collect MPI arguments
         if self.parameters.forced_mpi_command=="":
             np=self.computeNTasks()
-            #mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
-            mpicommand=""
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np)
         else:
             mpicommand=self.parameters.forced_mpi_command
         # collect program arguments
@@ -228,13 +227,11 @@ class EMCOrientation(AbstractPhotonAnalyzer):
                             ]
         # put MPI and program arguments together
         args = shlex.split(mpicommand) + command_sequence
-        
-        print(' '.join(args)) 
+
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
                 print(("EMCOrientation backengine mpicommand: "+mpicommand))
-                print(' '.join(args)) 
             if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
                 import platform
                 print("Running python version %s." % (platform.python_version()))
@@ -297,11 +294,9 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         outh5.close()
 
 
-    def _prepare_photon_files(self,comm=None):
-        #thisProcess = comm.rank
-        thisProcess = 0
-        #numProcesses = comm.size
-        numProcesses = 1
+    def _prepare_photon_files(self,comm):
+        thisProcess = comm.rank
+        numProcesses = comm.size
 
         # Prepare for reading input.
         if os.path.isdir(self.input_path):
@@ -322,12 +317,12 @@ class EMCOrientation(AbstractPhotonAnalyzer):
         gen.writeSparsePhotonFile(photonFiles, self._sparsePhotonFile+ "_"+str(thisProcess),
                                                self._avgPatternFile + "_"+str(thisProcess),
                                                thisProcess,numProcesses)
-        #comm.Barrier()
+        comm.Barrier()
 
         if thisProcess == 0:
             self._join_photon_files(numProcesses)
 
-        #comm.Barrier()
+        comm.Barrier()
 
         if thisProcess == 0:
             _print_to_log(msg="Sparse photons file created. Deleting lock file now", log_file=self._outputLog)
@@ -343,31 +338,28 @@ class EMCOrientation(AbstractPhotonAnalyzer):
 
         :note: Copied and adapted from the main routine in s2e_recon/EMC/runEMC.py
         """
-        #from mpi4py import MPI
-        #rc.finalize = False
+        import mpi4py.rc
+        mpi4py.rc.finalize = False
 
+        from mpi4py import MPI
         # MPI info
-        #comm = MPI.COMM_WORLD
-        #thisProcess = comm.Get_rank()
+        comm = MPI.COMM_WORLD
+        thisProcess = comm.rank
 
-        #if self._need_prepare_photon_files(thisProcess):
-        if True:
-            # if thisProcess == 0:
-            if True:
+        if self._need_prepare_photon_files(thisProcess):
+            if thisProcess == 0:
                 msg = "Photons.dat and detector.dat not found in " + self._tmp_out_dir + ". Will create them now..."
                 _print_to_log(msg=msg, log_file=self._outputLog)
-                print(msg)
-            self._prepare_photon_files(comm=None)
+            self._prepare_photon_files(comm)
         else:
             if thisProcess == 0:
                 msg = "Photons.dat and detector.dat already exists in " + self._tmp_out_dir + "."
                 _print_to_log(msg=msg, log_file=self._outputLog)
-                print(msg)
 
 # the rest is non-parallel (yet)
-#        if thisProcess != 0:
-#            MPI.Finalize()
-#            return 0
+        if thisProcess != 0:
+            MPI.Finalize()
+            return 0
 
         ###############################################################
         # Instantiate a reconstruction object
@@ -526,12 +518,12 @@ class EMCOrientation(AbstractPhotonAnalyzer):
             _print_to_log("All EMC iterations completed", log_file=self._outputLog)
 
             os.chdir(cwd)
-            #MPI.Finalize()
+            MPI.Finalize()
             return 0
 
         except:
             os.chdir(cwd)
-            #MPI.Finalize()
+            MPI.Finalize()
             return 1
 
 def _checkPaths(run_files_path, tmp_files_path):
