@@ -205,6 +205,60 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         if qspace:
             del wf
 
+    def numpyTotalPower(self, spectrum=False):
+        """ Method to dump meaningful total power.
+
+        :param spectrum: Whether to dump the power density in energy domain (True) or time domain (False, default).
+        :type spectrum: bool
+
+        """
+
+        """ Adapted from github:Samoylv/WPG/wpg/wpg_uti_wf.integral_intensity() """
+
+        # Switch to frequency (energy) domain if requested.
+        if spectrum:
+            print("Switching to frequency domain.")
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
+            self.intensity = self.wavefront.get_intensity()
+
+        # Get dimensions.
+        mesh = self.wavefront.params.Mesh
+        dx = (mesh.xMax - mesh.xMin)/(mesh.nx - 1)
+        dy = (mesh.yMax - mesh.yMin)/(mesh.ny - 1)
+
+        # Get intensity by integrating over transverse dimensions.
+        int0 = self.intensity.sum(axis=(0,1))
+
+        # Get power
+        int0 = int0*(dx*dy*1.e6)
+        int0max = int0.max()
+
+        # Get center pixel numbers.
+        center_nx = int(mesh.nx/2)
+        center_ny = int(mesh.ny/2)
+
+        # Get meaningful slices.
+        aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
+        int0_mean = int0[min(aw):max(aw)]  # meaningful range of pulse
+        dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
+        xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
+        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
+        if(self.wavefront.params.wDomain=='time'):
+            print('x: Time (fs)')
+            print('y: Power (W)')
+            dt = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
+            print(('Pulse energy {:1.2g} J'.format(int0_mean.sum()*dt)))
+            return xs_mf*1e15, int0_mean
+
+        else: #frequency domain
+            print('x: eV')
+            print('y: J/eV')
+
+            # Switch back to time domain.
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
+            self.intensity = self.wavefront.get_intensity()
+
+            return(xs_mf, int0_mean)
 
     def plotTotalPower(self, spectrum=False):
         """ Method to plot the total power.
