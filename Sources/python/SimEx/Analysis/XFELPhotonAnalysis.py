@@ -205,7 +205,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         if qspace:
             del wf
 
-    def dumpTotalPower(self, spectrum=False):
+    def numpyTotalPower(self, spectrum=False):
         """ Method to dump meaningful total power.
 
         :param spectrum: Whether to dump the power density in energy domain (True) or time domain (False, default).
@@ -217,7 +217,7 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Switch to frequency (energy) domain if requested.
         if spectrum:
-            print("\n Switching to frequency domain.")
+            print("Switching to frequency domain.")
             wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
             self.intensity = self.wavefront.get_intensity()
 
@@ -229,8 +229,8 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         # Get intensity by integrating over transverse dimensions.
         int0 = self.intensity.sum(axis=(0,1))
 
-        # Scale to get unit W/mm^2
-        int0 = int0*(dx*dy*1.e6) #  amplitude units sqrt(W/mm^2)
+        # Get power
+        int0 = int0*(dx*dy*1.e6)
         int0max = int0.max()
 
         # Get center pixel numbers.
