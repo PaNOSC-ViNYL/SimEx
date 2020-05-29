@@ -127,7 +127,7 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         """ Set the 'detector_geometry' parameter to a given value.
         :param value: The value to set 'detector_geometry' to.
         """
-        self.__detector_geometry = checkAndSetInstance( DetectorGeometry, value, None )
+        self.__detector_geometry = checkAndSetInstance( (str,DetectorGeometry), value, None )
 
         if self.__detector_geometry is None:
             print ("WARNING: Detector geometry not set, calculation will most probably fail.")
