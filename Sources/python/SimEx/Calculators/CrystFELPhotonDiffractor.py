@@ -122,7 +122,6 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         return np
 
-    # Useless now, just for compatibility
     def _run_geom(self):
         """ Perform the actual calls to pattern_sim with multi-panel .geom file. """
         # Setup directory structure as needed.
@@ -315,7 +314,6 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
         pass
 
-    # Deprecated
     def saveH5_geom(self):
         """
         Method to save the output to a file. Creates links to h5 files that all contain only one pattern.
