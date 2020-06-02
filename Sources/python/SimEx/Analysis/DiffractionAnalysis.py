@@ -125,11 +125,14 @@ class DiffractionAnalysis(AbstractAnalysis):
 
     @property
     def npattern(self):
-        if (self.pattern_indices == "all"):
-            with h5py.File(self.input_path, 'r') as h5:
-                npattern = len(h5['data'])
-        else:
-            npattern = len(self.pattern_indices)
+        with h5py.File(self.input_path, 'r') as h5:
+            npattern = len(h5['data'])
+        return npattern
+
+    @property
+    def npattern(self):
+        with h5py.File(self.input_path, 'r') as h5:
+            npattern = len(h5['data'])
         return npattern
 
     @property
@@ -253,7 +256,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
 
 
-    def dumpPattern(self, operation=None):
+    def numpyPattern(self, operation=None):
         """ Return the pattern after opentation over the patterns defined in DiffractionAnalysis class.
 
         :param operation: Operation to apply to selected patterns (default none).
@@ -282,7 +285,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         return pattern_to_dump
 
-    def plotRadialProjection(self, operation=None, logscale=False):
+    def plotRadialProjection(self, operation=None, logscale=False,nm=True):
         """ Plot the radial projection of a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -293,8 +296,8 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
 
-        :param unit:can be "q_nm^-1", "q_A^-1", "2th_deg", "2th_rad", "r_mm".
-        :type unit: str
+        :type nm: bool
+        :param nm: The x-axis unit is 1/nm (True) or 1/Angstom (False).
 
         """
         # Handle default operation
@@ -309,7 +312,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters, logscale,offset,unit)
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale, nm)
 
     def plotPattern(self, operation=None, logscale=False, offset=1e-1,symlog=False,*argv,**kwargs):
         """ Plot a pattern.
@@ -342,73 +345,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot image and colorbar.
-        return  plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
-
-    def shannonPixelPhoton(self, resolution):
-        """
-        Get the average number of photons per shannon pixel
-
-        :param resolution: The full periodic resolution (A) for shannon pixels
-        :type resolution: float
-        """
-        # Extract parameters.
-        beam = self.parameters['beam']
-        geom = self.parameters['geom']
-
-        # Photon energy and wavelength
-        E0 = beam['photonEnergy']
-        lmd = 1239.8 / E0
-
-        # Pixel dimension
-        apix = geom['pixelWidth']
-        # Sample-detector distance
-        Ddet = geom['detectorDist']
-        # Number of pixels in each dimension
-        Npix = geom['mask'].shape[0]
-
-        # Find center.
-        center = 0.5*(Npix-1)
-
-        # Max. scattering angle.
-        theta_max = math.atan( center * apix / Ddet )
-        # Min resolution.
-        d_min = 0.5*lmd/math.sin(theta_max/2.0)
-
-        # Next integer resolution.
-        d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
-
-        ds = resolution/10 # nm
-
-        # Pixel numbers corresponding to resolution rings.
-        N = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds)*2)
-
-        pi = self.patterns_iterator
-        stack = numpy.array([p for p in pi])
-
-        y, x = numpy.indices(stack[0].shape)
-        r = numpy.sqrt((x-center)**2 + (y-center)**2)
-        mask = (abs(r-N) <= 0.5)
-
-        for i in range(len(stack)):
-            stack[i] *= mask
-
-        plt.figure()
-        plt.imshow(stack[0])
-        plt.title('Frame 0')
-
-        a = mask[mask==True]
-        nShannonPixel = len(a)
-        # Mean number of expected photons per Shannon pixel
-        photons = numpy.sum(stack,axis=(1,2))/nShannonPixel
-        avg_photons = numpy.mean(photons)
-        rms_photons = numpy.std(photons)
-
-        print("*************************")
-        print("nShannonPixel = %i" % (nShannonPixel))
-        print("avg = %6.5e" % (avg_photons))
-        print("std = %6.5e" % (rms_photons))
-        print("*************************")
-        
+        plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -471,31 +408,23 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, unit="q_nm^-1"):
-    """ Perform integration over azimuthal angle and plot as function of radius.
+def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, nm = True):
+    """ Perform integration over azimuthal angle and plot as function of radius. """
 
-        :param unit:can be "q_nm^-1", "q_A^-1", "2th_deg", "2th_rad", "r_mm".
-        :type unit: str
-
-    """
-
-    qs, intensities = azimuthalIntegration(pattern, parameters,unit=unit)
+    if (nm):
+        qs, intensities = azimuthalIntegration(pattern, parameters)
+    else:
+        qs, intensities = azimuthalIntegration(pattern, parameters,unit="q_A^-1")
 
     if logscale:
         plt.semilogy(qs, intensities+offset)
     else:
         plt.plot(qs, intensities)
 
-    if (unit=="q_nm^-1"):
+    if (nm):
         plt.xlabel("q (1/nm)")
-    elif (unit=="q_A^-1"):
+    else:
         plt.xlabel("q (1/A)")
-    elif (unit=="2th_deg"):
-        plt.xlabel("2theta (degrees)")
-    elif (unit=="2th_rad"):
-        plt.xlabel("2theta (radians)")
-    elif (unit=="r_mm"):
-        plt.xlabel("mm")
     plt.ylabel("Intensity (arb. units)")
     plt.tight_layout()
 
@@ -630,7 +559,7 @@ def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs)
 
 
 
-def plotResolutionRings(parameters):
+def plotResolutionRings(parameters,rings=(10, 5.0, 3.5)):
     """
     Show half period resolution rings on current plot.
 
@@ -638,8 +567,6 @@ def plotResolutionRings(parameters):
     :type parameters: dict
     :param rings: the rings shown on the figure
     :type rings: list
-    :param half: show half period resolution (True, default) or full period resolution (False)
-    :type half: bool
 
     """
 
@@ -670,7 +597,7 @@ def plotResolutionRings(parameters):
     d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
 
     # Array of half period resolution rings to plot.
-    ds = numpy.array([1.0, 0.5, .35])
+    ds = numpy.array(rings)/10 # nm
 
     # Pixel numbers corresponding to resolution rings.
     Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds/2.)*2)
