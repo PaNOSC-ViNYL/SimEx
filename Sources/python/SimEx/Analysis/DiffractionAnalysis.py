@@ -345,7 +345,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot image and colorbar.
-        plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
+        return  plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -515,8 +515,14 @@ def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs)
     :param offset: Offset to apply if logarithmic scaling is on.
     :type offset: float
 
+    :param symlog: If logscale is True, to show the data on symlogarithmic scale (z axis) (default False).
+    :type symlog: bool
+
+    :return: the handles of figure and axis
+    :rtype: figure,axis
+
     """
-    plt.figure()
+    fig, ax = plt.subplots()
     # Get limits.
     mn, mx = pattern.min(), pattern.max()
 
@@ -547,6 +553,7 @@ def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs)
     plt.ylim([0,y_range-1])
     plt.tight_layout()
     plt.colorbar()
+    return fig,ax
 
 
 
