@@ -345,7 +345,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot image and colorbar.
-        plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
+        return  plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -555,7 +555,6 @@ def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs)
     plt.tight_layout()
     plt.colorbar()
     return fig,ax
-
 
 
 
