@@ -125,11 +125,14 @@ class DiffractionAnalysis(AbstractAnalysis):
 
     @property
     def npattern(self):
-        if (self.pattern_indices == "all"):
-            with h5py.File(self.input_path, 'r') as h5:
-                npattern = len(h5['data'])
-        else:
-            npattern = len(self.pattern_indices)
+        with h5py.File(self.input_path, 'r') as h5:
+            npattern = len(h5['data'])
+        return npattern
+
+    @property
+    def npattern(self):
+        with h5py.File(self.input_path, 'r') as h5:
+            npattern = len(h5['data'])
         return npattern
 
     @property
@@ -253,7 +256,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
 
 
-    def dumpPattern(self, operation=None):
+    def numpyPattern(self, operation=None):
         """ Return the pattern after opentation over the patterns defined in DiffractionAnalysis class.
 
         :param operation: Operation to apply to selected patterns (default none).
@@ -282,7 +285,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         return pattern_to_dump
 
-    def plotRadialProjection(self, operation=None, logscale=False):
+    def plotRadialProjection(self, operation=None, logscale=False,nm=True):
         """ Plot the radial projection of a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -292,6 +295,9 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
+
+        :type nm: bool
+        :param nm: The x-axis unit is 1/nm (True) or 1/Angstom (False).
 
         """
         # Handle default operation
@@ -306,9 +312,9 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters, logscale)
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale, nm)
 
-    def plotPattern(self, operation=None, logscale=False, offset=1e-1):
+    def plotPattern(self, operation=None, logscale=False, offset=1e-1,symlog=False,*argv,**kwargs):
         """ Plot a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -339,7 +345,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot image and colorbar.
-        plotImage(pattern_to_plot, logscale, offset)
+        plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -402,17 +408,23 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5):
+def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, nm = True):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
-    qs, intensities = azimuthalIntegration(pattern, parameters)
+    if (nm):
+        qs, intensities = azimuthalIntegration(pattern, parameters)
+    else:
+        qs, intensities = azimuthalIntegration(pattern, parameters,unit="q_A^-1")
 
     if logscale:
         plt.semilogy(qs, intensities+offset)
     else:
         plt.plot(qs, intensities)
 
-    plt.xlabel("q (1/nm)")
+    if (nm):
+        plt.xlabel("q (1/nm)")
+    else:
+        plt.xlabel("q (1/A)")
     plt.ylabel("Intensity (arb. units)")
     plt.tight_layout()
 
@@ -494,7 +506,7 @@ def diffractionParameters(path):
     # Return.
     return parameters_dict
 
-def plotImage(pattern, logscale=False, offset=1e-1):
+def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs):
     """ Workhorse function to plot an image
 
     :param logscale: Whether to show the data on logarithmic scale (z axis) (default False).
@@ -512,11 +524,22 @@ def plotImage(pattern, logscale=False, offset=1e-1):
 
     if logscale:
         if mn <= 0.0:
-            mn += pattern.min()+offset
-            pattern = pattern.astype(float) + mn
-        plt.imshow(pattern, norm=mpl.colors.LogNorm(vmin=mn, vmax=mx), cmap="viridis")
+            mn = pattern.min()+offset
+            mx = pattern.max()+offset
+            pattern = pattern.astype(float) + offset
+
+        # default plot setup
+        kwargs['cmap'] = kwargs.pop('cmap',"viridis")
+        if symlog:
+            kwargs['norm'] = kwargs.pop('norm',mpl.colors.SymLogNorm(0.015,vmin=mn, vmax=mx))
+        else:
+            kwargs['norm'] = kwargs.pop('norm',mpl.colors.LogNorm(vmin=mn, vmax=mx))
+        axes = kwargs.pop('axes',None)
+        plt.imshow(pattern, *argv,**kwargs)
     else:
-        plt.imshow(pattern, norm=Normalize(vmin=mn, vmax=mx), cmap='viridis')
+        kwargs['norm'] = kwargs.pop('norm',Normalize(vmin=mn, vmax=mx))
+        kwargs['cmap'] = kwargs.pop('cmap',"viridis")
+        plt.imshow(pattern, *argv,**kwargs)
 
     plt.xlabel(r'$x$ (pixel)')
     plt.ylabel(r'$y$ (pixel)')
@@ -527,12 +550,14 @@ def plotImage(pattern, logscale=False, offset=1e-1):
 
 
 
-def plotResolutionRings(parameters):
+def plotResolutionRings(parameters,rings=(10, 5.0, 3.5)):
     """
     Show half period resolution rings on current plot.
 
     :param parameters: Parameters needed to construct the resolution rings.
     :type parameters: dict
+    :param rings: the rings shown on the figure
+    :type rings: list
 
     """
 
@@ -563,7 +588,7 @@ def plotResolutionRings(parameters):
     d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
 
     # Array of half period resolution rings to plot.
-    ds = numpy.array([1.0, 0.5, .35])
+    ds = numpy.array(rings)/10 # nm
 
     # Pixel numbers corresponding to resolution rings.
     Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds/2.)*2)
