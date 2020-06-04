@@ -122,6 +122,75 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         return np
 
+    def _run_geom(self):
+        """ Perform the actual calls to pattern_sim with multi-panel .geom file. """
+        # Setup directory structure as needed.
+        if not os.path.isdir( self.output_path ):
+            os.makedirs( self.output_path )
+
+        output_file_base = os.path.join( self.output_path, "diffr_out")
+
+        if self.parameters.number_of_diffraction_patterns == 1:
+            output_file_base += "_0000001.h5"
+
+        geom_filename = self.parameters.detector_geometry
+
+        # Setup command, minimum set first.
+        # Distribute patterns over available processes in round-robin.
+        command_sequence = ['pattern_sim',
+                            '-p%s'                  % self.parameters.sample,
+                            '--geometry=%s'         % geom_filename,
+                            '--output=%s'           % (output_file_base),
+                            '--number=%d'           % (self.parameters.number_of_diffraction_patterns)
+                            ]
+        # Handle random rotation as requested.
+        if self.parameters.uniform_rotation is True:
+            command_sequence.append('--random-orientation')
+            command_sequence.append('--really-random')
+
+        if self.parameters.beam_parameters is not None:
+            command_sequence.append('--photon-energy=%f' % (self.parameters.beam_parameters.photon_energy.m_as(electronvolt)))
+            command_sequence.append('--beam-bandwidth=%f' % (self.parameters.beam_parameters.photon_energy_relative_bandwidth))
+            nphotons = self.parameters.beam_parameters.pulse_energy / self.parameters.beam_parameters.photon_energy
+            command_sequence.append('--nphotons=%e' % (nphotons))
+            command_sequence.append('--beam-radius=%e' % (self.parameters.beam_parameters.beam_diameter_fwhm.m_as(meter)/2.))
+            command_sequence.append('--spectrum=%s' % (self.parameters.beam_parameters.photon_energy_spectrum_type.lower()))
+            if self.parameters.beam_parameters.photon_energy_spectrum_type.lower() == "sase":
+                command_sequence.append('--sample-spectrum=512')
+
+        # Handle intensities list if present.
+        if self.parameters.intensities_file is not None:
+            command_sequence.append('--intensities=%s' % (self.parameters.intensities_file))
+
+        # Handle powder if present.
+        if self.parameters.powder is True:
+            command_sequence.append('--powder=%s' % (os.path.join(self.output_path, "powder.h5")))
+
+        # Handle size range if present.
+        if self.parameters.crystal_size_min is not None:
+            command_sequence.append('--min-size=%f' % (self.parameters.crystal_size_min.m_as(1e-9*meter) ))
+        if self.parameters.crystal_size_max is not None:
+            command_sequence.append('--max-size=%f' % (self.parameters.crystal_size_max.m_as(1e-9*meter) ))
+
+        # Handle gpu acceleration.
+        if self.parameters.gpus_per_task > 0:
+            # Check if crystfel was built with opencv support.
+            # Get pattern_sim's path.
+            pattern_sim_path = subprocess.check_output(shlex.split("which pattern_sim"))[:-1].decode('utf-8')
+            # Get list of dynamic dependencies.
+            ldd = subprocess.check_output(shlex.split("ldd "+pattern_sim_path)).decode('utf-8')
+            if "libOpenCL.so.1" in ldd:
+                command_sequence.append('--gpu')
+
+        if 'SIMEX_VERBOSE' in os.environ:
+            print("Pattern_sim call: "+ " ".join(command_sequence))
+
+        # Run the backengine command.
+        proc = subprocess.Popen(command_sequence)
+        proc.wait()
+
+        return proc.returncode
+
     def backengine(self):
         """ This method drives the backengine CrystFEL.pattern_sim."""
 
@@ -245,6 +314,65 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
         pass
+
+    def saveH5_geom(self):
+        """
+        Method to save the output to a file. Creates links to h5 files that all contain only one pattern.
+        """
+        # Path where individual h5 files are located.
+        path_to_files = self.output_path
+
+        # Rename files.
+        _rename_files(path_to_files)
+
+        print("Linking all patterns into %s.h5." % (self.output_path))
+
+        # Setup new file.
+        with h5py.File( self.output_path + ".h5" , "w") as h5_outfile:
+
+            data_group = h5_outfile.create_group("data")
+            params_group = h5_outfile.create_group("params")
+            beam_params_group = params_group.create_group("beam")
+            geom_params_group = params_group.create_group("geom")
+
+            beam_params_group["photonEnergy"] = self.parameters.beam_parameters.photon_energy.m_as(electronvolt)
+            beam_params_group["photonEnergy"].attrs["unit_symbol"] = "eV"
+            beam_params_group["photonEnergy"].attrs["unit_longname"] = "electronvolt"
+            beam_params_group["focusArea"] = self.parameters.beam_parameters.beam_diameter_fwhm.m_as(meter)**2
+            beam_params_group["focusArea"].attrs["unit_symbol"] = "m^2"
+            beam_params_group["focusArea"].attrs["unit_longname"] = "square_metre"
+
+            # Files to read from.
+            individual_files = [os.path.join( path_to_files, f ) for f in os.listdir( path_to_files ) ]
+            individual_files.sort()
+
+            # Loop over all individual files and link in the top level groups.
+            for ind_file in individual_files:
+                # Open file.
+                with h5py.File( ind_file, 'r') as h5_infile:
+
+                    # Get file ID.
+                    file_ID = os.path.split(ind_file)[-1].split(".h5")[0].split("_")[-1]
+
+                    # Create group
+                    data_group.create_group(file_ID)
+
+                    # Links must be relative.
+                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+
+                    # Link in the data.
+                    path_in_target = "/data/data"
+                    path_in_origin = "data/%s/data" % (file_ID)
+                    h5_outfile[path_in_origin] = h5py.ExternalLink(relative_link_target, path_in_target)
+
+                    # Close input file.
+                    h5_infile.close()
+
+            # Close file.
+            h5_outfile.close()
+
+            # Reset output_path
+            self.output_path = self.output_path+".h5"
 
     def saveH5(self):
         """
