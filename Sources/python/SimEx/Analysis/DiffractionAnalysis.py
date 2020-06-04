@@ -558,14 +558,16 @@ def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs)
 
 
 
-def plotResolutionRings(parameters,rings=(10, 5.0, 3.5)):
+def plotResolutionRings(parameters,rings=(10, 5.0, 3.5),half=True):
     """
-    Show half period resolution rings on current plot.
+    Show resolution rings on current plot.
 
     :param parameters: Parameters needed to construct the resolution rings.
     :type parameters: dict
     :param rings: the rings shown on the figure
     :type rings: list
+    :param half: show half period resolution (True, default) or full period resolution (False)
+    :type half: bool
 
     """
 
@@ -590,7 +592,10 @@ def plotResolutionRings(parameters,rings=(10, 5.0, 3.5)):
     # Max. scattering angle.
     theta_max = math.atan( center * apix / Ddet )
     # Min resolution.
-    d_min = 0.5*lmd/math.sin(theta_max/2.0)/2.0
+    if (half):
+        d_min = 0.5*lmd/math.sin(theta_max/2.0)/2.0
+    else:
+        d_min = 0.5*lmd/math.sin(theta_max/2.0)
 
     # Next integer resolution.
     d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
@@ -599,7 +604,10 @@ def plotResolutionRings(parameters,rings=(10, 5.0, 3.5)):
     ds = numpy.array(rings)/10 # nm
 
     # Pixel numbers corresponding to resolution rings.
-    Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds/2.)*2)
+    if (half):
+        Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds/2.)*2)
+    else:
+        Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds)*2)
 
     # Plot each ring and attach a label.
     for i,N in enumerate(Ns):
