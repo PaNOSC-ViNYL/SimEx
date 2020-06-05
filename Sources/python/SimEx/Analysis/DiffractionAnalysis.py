@@ -399,7 +399,10 @@ class DiffractionAnalysis(AbstractAnalysis):
         plt.imshow(stack[0])
         plt.title('Frame 0')
 
-        photons = numpy.sum(stack,axis=(1,2))
+        a = mask[mask==True]
+        nShannonPixel = len(a)
+        # Mean number of expected photons per Shannon pixel
+        photons = numpy.sum(stack,axis=(1,2))/nShannonPixel
         avg_photons = numpy.mean(photons)
         rms_photons = numpy.std(photons)
 
