@@ -45,7 +45,9 @@ dependencies:
   - py3nvml
   - openpmd-api
   - python>=3.5
-  - nomkl
+  - mkl
+  - mkl_fft
+  - mkl_random  
   - pip
   - pip:
     - xraydb
