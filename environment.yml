@@ -45,8 +45,14 @@ dependencies:
   - py3nvml
   - openpmd-api
   - python>=3.5
+<<<<<<< HEAD
   - nomkl
   - cfelpyutils
+=======
+  - mkl
+  - mkl_fft
+  - mkl_random  
+>>>>>>> 9421ad5... add mkl dependency now that memory leak in srw is fixed.
   - pip
   - sdf
   - pip:
