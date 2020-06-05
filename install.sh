@@ -50,9 +50,8 @@ then
 	PYLIB=${PYVERSION%.*}
 	DEVELOPER_MODE=ON
 	XCSIT=OFF
+    export ZLIB_ROOT=$CONDA_PREFIX
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-	#export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
-	#echo "PYTHONPATH="$PYTHONPATH
 fi
 
 # Check for existing build directory, remove if found
@@ -81,24 +80,28 @@ export GEANT4_ROOT=${THIRD_PARTY_ROOT}
 export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
 export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
-cmake -DSRW_OPTIMIZED=ON \
-      -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-      -DUSE_SingFELPhotonDiffractor=ON \
-      -DUSE_CrystFELPhotonDiffractor=ON \
-      -DUSE_GAPDPhotonDiffractor=ON \
-      -DUSE_s2e=ON \
-      -DUSE_S2EReconstruction_EMC=ON \
-      -DUSE_S2EReconstruction_DM=ON \
-      -DUSE_wpg=ON \
-      -DUSE_GenesisPhotonSource=ON \
-      -DUSE_XCSITPhotonDetector=$XCSIT \
-      -DUSE_FEFFPhotonInteractor=ON \
-      -DXERCESC_ROOT=$XERCESC_ROOT \
-      -DGEANT4_ROOT=$GEANT4_ROOT \
-      -DXCSIT_ROOT=$XCSIT_ROOT \
-      -DBOOST_ROOT=$BOOST_ROOT \
-      ..
+cmake \
+            -DSRW_OPTIMIZED=ON \
+            -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
+            -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+            -DUSE_SingFELPhotonDiffractor=ON \
+            -DUSE_CrystFELPhotonDiffractor=ON \
+            -DUSE_GAPDPhotonDiffractor=ON \
+            -DUSE_s2e=ON \
+            -DUSE_S2EReconstruction_EMC=ON \
+            -DUSE_S2EReconstruction_DM=ON \
+            -DUSE_wpg=ON \
+            -DUSE_GenesisPhotonSource=ON \
+            -DUSE_XCSITPhotonDetector=$XCSIT \
+            -DUSE_FEFFPhotonInteractor=ON \
+            -DXERCESC_ROOT=$XERCESC_ROOT \
+            -DGEANT4_ROOT=$GEANT4_ROOT \
+            -DXCSIT_ROOT=$XCSIT_ROOT \
+            -DBOOST_ROOT=$BOOST_ROOT \
+            ..
+
+
+
 # Build the project.
 make  -j32
 
