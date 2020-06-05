@@ -45,8 +45,9 @@ dependencies:
   - py3nvml
   - openpmd-api
   - python>=3.5
-  - nomkl
-  - cfelpyutils
+  - mkl
+  - mkl_fft
+  - mkl_random  
   - pip
   - sdf
   - pip:
