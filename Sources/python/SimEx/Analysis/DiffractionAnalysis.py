@@ -347,6 +347,68 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Plot image and colorbar.
         return  plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
 
+    def shannonPixelPhoton(self, resolution):
+        """
+        Get the average number of photons on shannon pixels
+
+        :param resolution: The full periodic resolution (A) for shannon pixels
+        :type resolution: float
+        """
+        # Extract parameters.
+        beam = self.parameters['beam']
+        geom = self.parameters['geom']
+
+        # Photon energy and wavelength
+        E0 = beam['photonEnergy']
+        lmd = 1239.8 / E0
+
+        # Pixel dimension
+        apix = geom['pixelWidth']
+        # Sample-detector distance
+        Ddet = geom['detectorDist']
+        # Number of pixels in each dimension
+        Npix = geom['mask'].shape[0]
+
+        # Find center.
+        center = 0.5*(Npix-1)
+
+        # Max. scattering angle.
+        theta_max = math.atan( center * apix / Ddet )
+        # Min resolution.
+        d_min = 0.5*lmd/math.sin(theta_max/2.0)
+
+        # Next integer resolution.
+        d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
+
+        ds = resolution/10 # nm
+
+        # Pixel numbers corresponding to resolution rings.
+        N = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds)*2)
+
+        pi = self.patterns_iterator
+        stack = numpy.array([p for p in pi])
+
+        y, x = numpy.indices(stack[0].shape)
+        r = numpy.sqrt((x-center)**2 + (y-center)**2)
+        mask = (abs(r-N) <= 0.5)
+
+        for i in range(len(stack)):
+            stack[i] *= mask
+
+        plt.figure()
+        plt.imshow(stack[0])
+        plt.title('Frame 0')
+
+        photons = numpy.sum(stack,axis=(1,2))
+        avg_photons = numpy.mean(photons)
+        rms_photons = numpy.std(photons)
+
+        print("*************************")
+        print("avg = %6.5e" % (avg_photons))
+        print("std = %6.5e" % (rms_photons))
+        print("*************************")
+        
+
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
 
@@ -600,7 +662,7 @@ def plotResolutionRings(parameters,rings=(10, 5.0, 3.5),half=True):
     # Next integer resolution.
     d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
 
-    # Array of half period resolution rings to plot.
+    # Array of resolution rings to plot.
     ds = numpy.array(rings)/10 # nm
 
     # Pixel numbers corresponding to resolution rings.
