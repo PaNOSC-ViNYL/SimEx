@@ -285,7 +285,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         return pattern_to_dump
 
-    def plotRadialProjection(self, operation=None, logscale=False,nm=True):
+    def plotRadialProjection(self, operation=None, logscale=False, offset = 1e-5, nm=True):
         """ Plot the radial projection of a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -312,7 +312,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters, logscale, nm)
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale,offset,nm)
 
     def plotPattern(self, operation=None, logscale=False, offset=1e-1,symlog=False,*argv,**kwargs):
         """ Plot a pattern.
@@ -473,7 +473,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, nm = True):
+def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, nm =True):
     """ Perform integration over azimuthal angle and plot as function of radius. """
 
     if (nm):
@@ -493,7 +493,7 @@ def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, nm = 
     plt.ylabel("Intensity (arb. units)")
     plt.tight_layout()
 
-def azimuthalIntegration(pattern, parameters):
+def azimuthalIntegration(pattern, parameters, unit="q_nm^-1" ):
 
     # Extract parameters.
     beam = parameters['beam']
@@ -532,7 +532,8 @@ def azimuthalIntegration(pattern, parameters):
     qs, intensities = azimuthal_integrator.integrate1d(
             pattern,
             min(Npix,1024),
-            unit="q_nm^-1",
+            unit=unit
+            #unit="q_nm^-1",
             #unit="2th_deg",
             )
 
