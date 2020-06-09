@@ -285,7 +285,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         return pattern_to_dump
 
-    def plotRadialProjection(self, operation=None, logscale=False, offset = 1e-5, nm=True):
+    def plotRadialProjection(self, operation=None, logscale=False, offset = 1e-5, unit="q_nm^-1"):
         """ Plot the radial projection of a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -296,8 +296,8 @@ class DiffractionAnalysis(AbstractAnalysis):
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
         :type logscale: bool
 
-        :type nm: bool
-        :param nm: The x-axis unit is 1/nm (True) or 1/Angstom (False).
+        :param unit:can be "q_nm^-1", "q_A^-1", "2th_deg", "2th_rad", "r_mm".
+        :type unit: str
 
         """
         # Handle default operation
@@ -312,7 +312,7 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters, logscale,offset,nm)
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale,offset,unit)
 
     def plotPattern(self, operation=None, logscale=False, offset=1e-1,symlog=False,*argv,**kwargs):
         """ Plot a pattern.
@@ -407,6 +407,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         rms_photons = numpy.std(photons)
 
         print("*************************")
+        print("nShannonPixel = %i" % (nShannonPixel))
         print("avg = %6.5e" % (avg_photons))
         print("std = %6.5e" % (rms_photons))
         print("*************************")
@@ -473,23 +474,31 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Render the animated gif.
         os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
 
-def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, nm =True):
-    """ Perform integration over azimuthal angle and plot as function of radius. """
+def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, unit="q_nm^-1"):
+    """ Perform integration over azimuthal angle and plot as function of radius.
 
-    if (nm):
-        qs, intensities = azimuthalIntegration(pattern, parameters)
-    else:
-        qs, intensities = azimuthalIntegration(pattern, parameters,unit="q_A^-1")
+        :param unit:can be "q_nm^-1", "q_A^-1", "2th_deg", "2th_rad", "r_mm".
+        :type unit: str
+
+    """
+
+    qs, intensities = azimuthalIntegration(pattern, parameters,unit=unit)
 
     if logscale:
         plt.semilogy(qs, intensities+offset)
     else:
         plt.plot(qs, intensities)
 
-    if (nm):
+    if (unit=="q_nm^-1"):
         plt.xlabel("q (1/nm)")
-    else:
+    elif (unit=="q_A^-1"):
         plt.xlabel("q (1/A)")
+    elif (unit=="2th_deg"):
+        plt.xlabel("2theta (degrees)")
+    elif (unit=="2th_rad"):
+        plt.xlabel("2theta (radians)")
+    elif (unit=="r_mm"):
+        plt.xlabel("mm")
     plt.ylabel("Intensity (arb. units)")
     plt.tight_layout()
 
