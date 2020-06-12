@@ -18,7 +18,9 @@ MESSAGE("HDF5_VERSION= ${HDF5_VERSION}")
 MESSAGE("HDF5_LIBRARY_DIRS= ${HDF5_LIBRARY_DIRS}")
 
 FIND_PACKAGE (GSL REQUIRED)
-
+find_package(ZLIB)
+include_directories(${ZLIB_INCLUDE_DIRS})
+# TARGET_LINK_LIBRARIES( ${ZLIB_LIBRARIES})
 # This macro invokes the HDF5 compiler wrapper, it parses the output and
 # extracts the path where library are stored.
 # Usage:
@@ -97,17 +99,19 @@ IF(${_listlen} GREATER 1)
 ENDIF()
 # Add the project.
 ExternalProject_Add( crystfel
-    URL http://www.desy.de/~twhite/crystfel/crystfel-0.6.3.tar.gz
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure --with-hdf5=${MYHDF5_LIBRARY_DIRS} --disable-gtk --disable-gtk-doc --disable-png --prefix=${CMAKE_INSTALL_PREFIX}
+    URL http://www.desy.de/~twhite/crystfel/crystfel-0.9.0.tar.gz
+    BUILD_IN_SOURCE 0
+    #CONFIGURE_COMMAND ./configure --with-hdf5=${MYHDF5_LIBRARY_DIRS} --disable-gtk --disable-gtk-doc --disable-png --prefix=${CMAKE_INSTALL_PREFIX}
     #CONFIGURE_COMMAND ./configure --with-hdf5=/usr/lib64 --disable-gtk --disable-gtk-doc --disable-png 
+    INSTALL_COMMAND ""
 )
 
 # Install needed crystfel binaries, scripts and doc material.
+ExternalProject_Get_Property(crystfel BINARY_DIR)
 ExternalProject_Get_Property(crystfel SOURCE_DIR)
 #
-install(PROGRAMS ${SOURCE_DIR}/src/pattern_sim DESTINATION ${BINDIR})
-install(PROGRAMS ${SOURCE_DIR}/src/partial_sim DESTINATION ${BINDIR})
+install(PROGRAMS ${BINARY_DIR}/pattern_sim DESTINATION ${BINDIR})
+install(PROGRAMS ${BINARY_DIR}/partial_sim DESTINATION ${BINDIR})
 install(PROGRAMS ${SOURCE_DIR}/scripts/gen-sfs DESTINATION ${BINDIR})
 install(PROGRAMS ${SOURCE_DIR}/scripts/gen-sfs-ano DESTINATION ${BINDIR})
 install(PROGRAMS ${SOURCE_DIR}/scripts/gen-sfs-expand DESTINATION ${BINDIR})
