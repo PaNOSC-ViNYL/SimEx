@@ -49,5 +49,6 @@ dependencies:
   - mkl_fft
   - mkl_random  
   - pip
+  - sdf
   - pip:
     - xraydb
