@@ -34,7 +34,7 @@ FIND_PACKAGE(Python
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (PYPATH     ${LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+set (PYPATH     ${LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages)
 message( "PYPATH=${PYPATH}" )
 
 set (DOCDIR share/doc)
