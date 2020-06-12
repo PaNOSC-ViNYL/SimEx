@@ -47,5 +47,6 @@ dependencies:
   - python>=3.5
   - nomkl
   - pip
+  - sdf
   - pip:
     - xraydb
