@@ -48,5 +48,6 @@ dependencies:
   - nomkl
   - cfelpyutils
   - pip
+  - sdf
   - pip:
     - xraydb
