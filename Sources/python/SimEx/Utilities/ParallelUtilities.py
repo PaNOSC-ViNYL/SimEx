@@ -67,9 +67,9 @@ def _getParallelResourceInfoFromSlurm():
                 cores = node
                 mul = 1
             else:
-                cores = node[:ind]
-                mul = node[ind + 2:node.find(")")]
-            ncores += int(cores) * int(mul)
+                cores=node[:ind]
+                mul=node[ind+2:node.find(")")]
+            ncores+=int(cores)*int(mul)
 
         # Use all physical cores
         resource['NCores'] = int(ncores / threads_per_core)
