@@ -60,6 +60,7 @@ def _getParallelResourceInfoFromSlurm():
         if resource['NNodes']<=0 or resource['NCores']<=0:
             raise IOError()
     except:
+        print (os.environ['SLURM_JOB_CPUS_PER_NODE'])
         raise IOError( "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead")
 
     return resource
