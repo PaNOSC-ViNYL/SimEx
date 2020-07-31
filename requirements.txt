@@ -3,14 +3,14 @@ SDF
 biopython>=1.69
 breathe
 dill
-h5py>=2.2.1
+h5py>=2.2.1,<=2.8
 matplotlib>=1.5.1
 numpy>=1.18.1
 openpmd-api
 periodictable>=1.4.1
 pint
 py3nvml
-pyFAI
+pyFAI<=0.15
 pyfftw
 scipy==1.3.1
 setuptools
