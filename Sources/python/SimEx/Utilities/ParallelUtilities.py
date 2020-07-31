@@ -52,14 +52,15 @@ def _getParallelResourceInfoFromSlurm():
                 cores=node
                 mul=1
             else:
-                cores=node[:ind-1]
-                mul=node[ind+1:node.find(")")]
+                cores=node[:ind]
+                mul=node[ind+2:node.find(")")]
             ncores+=int(cores)*int(mul)
 
         resource['NCores'] = ncores
         if resource['NNodes']<=0 or resource['NCores']<=0:
             raise IOError()
     except:
+        print (os.environ['SLURM_JOB_CPUS_PER_NODE'])
         raise IOError( "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead")
 
     return resource
