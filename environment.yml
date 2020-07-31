@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2020 Carsten Fortmann-Grote                              #
+# Copyright (C) 2020 Carsten Fortmann-Grote, Juncheng E                  #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -26,7 +26,7 @@ channels:
 dependencies:
   - Cython
   - cmake>=3.12.1
-  - h5py>=2.2.1
+  - h5py>=2.2.1,<=2.8
   - hdf5>=1.8.5  
   - matplotlib>=1.5.1
   - numpy>=1.18.1
@@ -39,20 +39,14 @@ dependencies:
   - dill
   - sqlalchemy
   - pyfftw
-  - pyFAI
+  - pyFAI<=0.15
   - numba
   - pint
   - py3nvml
   - openpmd-api
   - python>=3.5
-<<<<<<< HEAD
   - nomkl
   - cfelpyutils
-=======
-  - mkl
-  - mkl_fft
-  - mkl_random  
->>>>>>> 9421ad5... add mkl dependency now that memory leak in srw is fixed.
   - pip
   - sdf
   - pip:
