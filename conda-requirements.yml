@@ -1,0 +1,32 @@
+channels:
+  - conda-forge
+  - csachs
+dependencies:
+  - python=3.6.*
+  - notebook=5.7.*
+  - Cython
+  - cmake>=3.12.1
+  - h5py>=2.2.1,<=2.8
+  - hdf5>=1.8.5  
+  - matplotlib>=1.5.1
+  - numpy>=1.18.1
+  - scipy
+  - periodictable>=1.4.1
+  - biopython>=1.69
+  - setuptools
+  - mpi4py
+  - breathe
+  - dill
+  - sqlalchemy
+  - pyfftw
+  - pyFAI<=0.15
+  - numba
+  - pint
+  - py3nvml
+  - openpmd-api
+  - python>=3.5
+  - sdf
+  - nomkl
+  - pip
+  - pip:
+    - xraydb
