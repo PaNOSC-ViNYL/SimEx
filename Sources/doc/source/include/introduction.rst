@@ -1,7 +1,7 @@
 Introduction
 ------------
 
-simex_platform provides a software platform for simulation of experiments at advanced laser and x-ray light sources.
+SIMEX platform provides a software platform for simulation of experiments at advanced laser and x-ray light sources.
 All aspects of a typical experiment,
 the photon source, light transport through optics elements in the beamline,
 interaction with a target or sample,

@@ -1,11 +1,14 @@
 Installation
 ------------
+.. contents::
 
 From sources
 ____________
 
+To build and install from the source code directly.
+
 Download
-````````
+````````````````
 
 First obtain the source code by either cloning the repository::
 
@@ -20,20 +23,20 @@ After downloading (and extracting), switch into the top level directory::
     $> cd SimEx
 
 Software dependencies
-`````````````````````
+`````````````````````````````````````````
 Python dependencies
 ..................
-The python dependencies are listed in `$SIMEX_ROOT/requirements.txt`, reproduced here:
+The python dependencies are listed in ``$SIMEX_ROOT/requirements.txt``, reproduced here:
 
 .. include ../../../../requirements.txt
 
 Note that these these requirements contain all dependencies of all modules. A customized build with only selected Modules may well get away with fewer dependencies installed. The cmake build system will check all dependencies for each individual Module. Cmake will abort the configuration if missing dependencies are detected for a given Module.
 
-The python dependencies can be installed via `pip`::
+The python dependencies can be installed via ``pip``::
 
     $> python -m pip install -r requirements.txt
 
-Except for `xraydb`, all python requirements can also be installed through `conda`.
+Except for ``xraydb``, all python requirements can also be installed through ``conda``.
 
 
 Non-python dependencies
@@ -67,32 +70,35 @@ NOTE 3 (BOOST): It has been observed that newer versions of boost (>1.61), if li
 which might not be available on all systems, especially not completely updated clusters. Use boost.1.60 or lower if this problem occurs.
 You can find out by running ldd on libboost_mpi.so.
 
-Installing only the python SimEx library
-````````````````````````````````````````
+Install only the python SimEx API
+````````````````````````````````````````````````````````````````````````````````
 If, for whatever obscure reason, you only need the SimEx python library (the Calculators and Parameters), simply run::
 
    $> cd Sources/python
    $> python -m pip install [-e] .
 
-The `-e` option is recommended for developers: Changes in `Sources` would be reflected in the imported python module.
+The ``-e`` option is recommended for developers: Changes in ``Sources`` would be reflected in the imported python module.
 
-Building the backengine modules (aka Modules) and the SimEx python library
-``````````````````````````````````````````````````````````````````````````
+Install the backengine modules along with the SimEx python API
+``````````````````````````````````````````````````````````````
 
-The build process has three stages: configuration, building, and installing.
+The SimEx python API and backengine modules (aka Modules) can be installed
+by following the steps below.
+
+The install process has three stages: configuration, building, and installing.
 
 Configuration via cmake
-'''''''''''''''''''''''
+.......................
 This step requires a dedicated build directory. Create one, and change into it::
 
     $> mkdir build
     $> cd build
 
-Configuration is done by issuing the command `cmake ..`. `cmake` accepts numerous command line arguments. To list them all along with their defaults, run::
+Configuration is done by issuing the command ``cmake ..``. ``cmake`` accepts numerous command line arguments. To list them all along with their defaults, run::
 
     $> cmake -LAH 
 
-To set a flag/argument to a non-default value, it is appended to the `cmake` command. E.g. to set the installation prefix (path under which all SimEx libraries and executables will be installed)::
+To set a flag/argument to a non-default value, it is appended to the ``cmake`` command. E.g. to set the installation prefix (path under which all SimEx libraries and executables will be installed)::
 
 
     $> cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/some/directory
@@ -101,12 +107,12 @@ Note the capital "D" before the actual flag.
 
 
 Module selection
-""""""""""""""""
-As of version 0.5, no Module is installed by default. To switch to the old behaviour and install all Modules, set the flag `USE_MODULES_DEFAULT`::
+''''''''''''''''
+As of version 0.5, no Module is installed by default. To switch to the old behaviour and install all Modules, set the flag ``USE_MODULES_DEFAULT``::
 
    $> cmake .. -DUSE_MODULES_DEFAULT=ON + further flags and arguments]
 
-To keep the new behaviour AND select individual modules, append each selected module with a `-DUSE_` prefix. E.g. to activate the propagation Module based on WPG::
+To keep the new behaviour AND select individual modules, append each selected module with a ``-DUSE_`` prefix. E.g. to activate the propagation Module based on WPG::
 
    $> cmake .. -DUSE_wpg=ON
 
@@ -122,41 +128,42 @@ In this example, all but the wpg module will be installed.
 
 
 Build the documentation
-"""""""""""""""""""""""
-   ::
+'''''''''''''''''''''''
+This will build this documentation using the source code at ``Sources/doc``::
+
     $> cmake -DBUILD_DOC=ON ..
 
 Developer install
-"""""""""""""""""
+'''''''''''''''''
 This is recommended for SimEx developers. In this way, you will be able to run the unittests without having to recompile::
 
     $> cmake -DCMAKE_INSTALL_PREFIX=.. 
 
 
-Create deb packages::
-"""""""""""""""""""
-::
+Create deb packages
+''''''''''''''''''''
+This will create .deb packages::
 
     $> cmake -DPACKAGE_MAKE=ON -DCMAKE_INSTALL_PREFIX=/usr ..
     $> make package
 
-  Probably you will have to call cmake two times because for some unknown reason CMake creates `.tgz` archives in the first time.
+Probably you will have to call cmake two times because for some unknown reason CMake creates ``.tgz`` archives in the first time.
 
-  The package can then be installed system-wide along with all necessary dependencies::
+The package can then be installed system-wide along with all necessary dependencies::
 
     $> dpkg -i <package_name>
     $> apt-get install -f
 
-  on another computer with Debian based OS. Simex will be
-  installed in `/usr/...` , Tests are installed in
-  `/usr/share/simex/...` and should be system-wide available.
-  Calling `dpkg` with `--instdir` option allows to change
-  installation dir. In this case `simex_vars.sh` should be
-  modified manually to set paths correctly.
-
+on another computer with Debian based OS. Simex will be
+installed in ``/usr/...`` , Tests are installed in
+``/usr/share/simex/...`` and should be system-wide available.
+Calling ``dpkg`` with ``--instdir`` option allows to change
+installation dir. In this case ``simex_vars.sh`` should be
+modified manually to set paths correctly.
 
 Building the library
-''''''''''''''''''''
+.................
+
 
 After successful completion of cmake, just type::
 
@@ -172,7 +179,7 @@ An example build & installation script is provided (install.sh). It might need m
 
 
 Installation
-''''''''''''
+............
 
 Finally, after make returns, install the compiled software into the installation directory::
 
@@ -182,11 +189,13 @@ Make sure that the user has write access to the installation directory, or use::
 
     $> sudo make install
 
+.. include:: environment.rst
+
 Troubleshooting
-'''''''''''''''
+```````````````
 
 cmake fails to resolve dependency but the library is installed
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+..............................................................
 On some systems cmake fails to find the paths for some of the
 third party libraries like boost. If this should be the case,
 consult the corresponding FindXXX.cmake scripts in the CMake directory and
@@ -196,10 +205,7 @@ the install.sh script that comes with the sources.
 
 
 gomp/iomp not found / MKL not found
-"""""""""""""""""""""""""""""""""""
+...................................
 If compiling with Intel compilers and/or using MKL, run this command before cmake::
 
     $> source `which compilervars.sh` intel64
-
-
-
