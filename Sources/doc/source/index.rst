@@ -30,7 +30,6 @@ Contents
     Acknowledgements <include/acknowledgements>
     Introduction <include/introduction>
     Installation <include/installation>
-    Environment  <include/environment>
     Testing      <include/testing>
     Usage        <include/usage>
     Contribute   <include/contribute>
@@ -38,3 +37,5 @@ Contents
     License      <include/license>
     Reference Manual <include/refman>
     Data formats <include/data_formats>
+..
+            Environment  <include/environment>
