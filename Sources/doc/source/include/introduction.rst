@@ -20,8 +20,8 @@ are even shorter, of the order of a few femtoseconds, this radiation damage can,
 be avoided, i.e. the sample is probed before destruction. The scattered photons are registered in
 a area pixel detector and the scattering (diffraction) pattern can be analyzed to infer structural informaton about the sample, i.e. the 3D electron density and the position of atoms within the molecule.
 
-simex_platforms provides scriptable python user interfaces to a number of advanced simulation codes for the various stages of the experiment: Photon Source, Photon Propagation, Photon-Matter Interaction, Photon Diffraction and Scattering, Photon Detection, and Photon Data Analysis. Additionaly, simex_platform defines data interfaces such that the involved simulation codes can "talk" to each other. E.g. output from a photon source calculation can be fed into the photon propagation simulation.
+SIMEX platform provides scriptable python user interfaces, SimEx API, to a number of advanced simulation codes for the various stages of the experiment: Photon Source, Photon Propagation, Photon-Matter Interaction, Photon Diffraction and Scattering, Photon Detection, and Photon Data Analysis. Additionaly, simex_platform defines data interfaces such that the involved simulation codes can "talk" to each other. E.g. output from a photon source calculation can be fed into the photon propagation simulation.
 
-The simex_platform library is open-source, but some of the interfaced simulation codes are not. In such cases, the user has to acquire the simulation code and install on his system.
+The SimEx API is open-source, but some of the interfaced simulation codes are not. In such cases, the user has to acquire the simulation code and install on his system.
 
 
