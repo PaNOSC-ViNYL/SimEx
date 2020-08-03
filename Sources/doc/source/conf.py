@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'simex_platform'
+project = 'SIMEX Platform'
 copyright = '2015-2020, Carsten Fortmann-Grote, Juncheng E'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -135,7 +135,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = os.path.join('resources','eucall_logo_print_transparent.png')
+# html_logo = os.path.join('resources','eucall_logo_print_transparent.png')
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -279,10 +279,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'simex_platform'
+epub_title = 'SIMEX Platform'
 epub_author = 'Carsten Fortmann-Grote, Sergey Yakubov'
 epub_publisher = 'Carsten Fortmann-Grote, Sergey Yakubov'
-epub_copyright = '2015-2017, Carsten Fortmann-Grote, Sergey Yakubov'
+epub_copyright = '2015-2020, Carsten Fortmann-Grote, Sergey Yakubov, Juncheng E'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'simex_platform'
