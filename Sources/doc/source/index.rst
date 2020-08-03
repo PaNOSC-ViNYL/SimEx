@@ -30,15 +30,11 @@ Contents
     Acknowledgements <include/acknowledgements>
     Introduction <include/introduction>
     Installation <include/installation>
+    Environment  <include/environment>
     Testing      <include/testing>
     Usage        <include/usage>
-    Examples     <include/examples>
     Contribute   <include/contribute>
     Support      <include/support>
     License      <include/license>
-    API Manual  <include/apiman>
-    Data formats <include/data_formats>
-..
-    comment
     Reference Manual <include/refman>
-    Environment  <include/environment>
+    Data formats <include/data_formats>
