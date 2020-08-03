@@ -41,7 +41,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'breathe',
     'sphinx_rtd_theme',
-    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,7 +56,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'SIMEX Platform'
+project = 'simex_platform'
 copyright = '2015-2020, Carsten Fortmann-Grote, Juncheng E'
 
 # The version info for the project you're documenting, acts as replacement for
