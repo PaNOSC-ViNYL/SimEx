@@ -1,4 +1,4 @@
-""":module XFELPhotonPropagator: Module that holds the XFELPhotonPropagator class.  """
+""":module WavePropagator: Module that holds the WavePropagator class.  """
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
@@ -33,9 +33,9 @@ from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities import wpg_to_opmd
 from prop import propagate_s2e
 
-class XFELPhotonPropagator(AbstractPhotonPropagator):
+class WavePropagator(AbstractPhotonPropagator):
     """
-    :class XFELPhotonPropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
+    :class WavePropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
     """
 
     def __init__(self, parameters=None, input_path=None, output_path=None):
@@ -56,7 +56,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         parameters = EntityChecks.checkAndSetInstance( WavePropagatorParameters, parameters, WavePropagatorParameters() )
 
         # Initialize base class.
-        super(XFELPhotonPropagator, self).__init__(parameters,input_path,output_path)
+        super(WavePropagator, self).__init__(parameters,input_path,output_path)
 
 
     def computeNTasks(self):
@@ -92,7 +92,7 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
 
         if 'SIMEX_VERBOSE' in os.environ:
             if 'MPI' in  os.environ['SIMEX_VERBOSE']:
-                print(("XFELPhotonPropagator backengine mpicommand: "+mpicommand))
+                print(("WavePropagator backengine mpicommand: "+mpicommand))
             if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
                 import platform
                 print("Running python %s." % ( platform.python_version() ) )
@@ -177,4 +177,4 @@ class XFELPhotonPropagator(AbstractPhotonPropagator):
         pass # No action required since output is written in backengine.
 
 if __name__ == '__main__':
-    XFELPhotonPropagator.runFromCLI()
+    WavePropagator.runFromCLI()
