@@ -1,9 +1,11 @@
 from setuptools import setup
 
+from SimEx import version
+
 setup(
     name='SimEx',
     packages=['SimEx',
              ],
     license='GPL-v3',
-    #long_description=open('README.md').read(),
+    version=version.__version__
 )
