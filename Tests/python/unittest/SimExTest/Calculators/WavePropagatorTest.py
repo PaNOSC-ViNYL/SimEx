@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
+
 """ Test module for the WavePropagator.
 
     @author : CFG
@@ -32,16 +33,15 @@ import unittest
 from SimEx.Calculators.WavePropagator import WavePropagator
 from TestUtilities import TestUtilities
 
-
 class WavePropagatorTest(unittest.TestCase):
     """
     Test class for the WavePropagator class.
     """
+
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        cls.input_h5 = TestUtilities.generateTestFilePath(
-            'FELsource_out/FELsource_out_0000000.h5')
+        cls.input_h5 = TestUtilities.generateTestFilePath('FELsource_out/FELsource_out_0000000.h5')
 
     @classmethod
     def tearDownClass(cls):
@@ -68,16 +68,14 @@ class WavePropagatorTest(unittest.TestCase):
 
         self.assertIsInstance(xfel_propagator, WavePropagator)
 
-        self.assertEqual(xfel_propagator.input_path, os.path.abspath('source'))
-        self.assertEqual(xfel_propagator.output_path, os.path.abspath('prop'))
+        self.assertEqual( xfel_propagator.input_path,  os.path.abspath('source') )
+        self.assertEqual( xfel_propagator.output_path, os.path.abspath('prop') )
 
     def testShapedConstruction(self):
         """ Testing the construction of the class with non-default parameters. """
 
         # Construct the object.
-        xfel_propagator = WavePropagator(parameters=None,
-                                         input_path=self.input_h5,
-                                         output_path='prop_out_0000000.h5')
+        xfel_propagator = WavePropagator(parameters=None, input_path=self.input_h5, output_path='prop_out_0000000.h5')
 
         self.assertIsInstance(xfel_propagator, WavePropagator)
 
@@ -97,12 +95,13 @@ class WavePropagatorTest(unittest.TestCase):
         status = xfel_propagator.backengine()
 
         # Check backengine returned sanely.
-        self.assertEqual(status, 0)
+        self.assertEqual( status, 0 )
 
         # Check expected files exist.
-        self.assertTrue(os.path.isdir, os.path.abspath('prop'))
-        self.assertIn('prop_out_0000000.h5', os.listdir('prop'))
-        self.assertIn('prop_out_0000001.h5', os.listdir('prop'))
+        self.assertTrue( os.path.isdir, os.path.abspath('prop') )
+        self.assertIn( 'prop_out_0000000.h5', os.listdir( 'prop' ) )
+        self.assertIn( 'prop_out_0000001.h5', os.listdir( 'prop' ) )
+
 
     def testBackengineSingleInputFile(self):
         """ Test a backengine run with a single input file. """
@@ -110,29 +109,24 @@ class WavePropagatorTest(unittest.TestCase):
         self.__files_to_remove.append('prop_out_0000001.h5')
 
         # Construct the object.
-        xfel_propagator = WavePropagator(parameters=None,
-                                         input_path=self.input_h5,
-                                         output_path='prop_out_0000001.h5')
+        xfel_propagator = WavePropagator( parameters=None, input_path=self.input_h5, output_path='prop_out_0000001.h5' )
 
         # Call the backengine.
         status = xfel_propagator.backengine()
 
         # Check backengine returned sanely.
-        self.assertEqual(status, 0)
+        self.assertEqual( status, 0 )
 
     def testBackengineMultipleInputFile(self):
         """ Test a backengine run with multiple input files. """
         # Construct the object.
-        xfel_propagator = WavePropagator(
-            parameters=None,
-            input_path=TestUtilities.generateTestFilePath('FELsource_out'),
-            output_path='prop_out')
+        xfel_propagator = WavePropagator( parameters=None, input_path=TestUtilities.generateTestFilePath( 'FELsource_out' ), output_path='prop_out' )
 
         # Call the backengine.
         status = xfel_propagator.backengine()
 
         # Check backengine returned sanely.
-        self.assertEqual(status, 0)
+        self.assertEqual( status, 0 )
 
         # Ensure clean-up.
         self.__dirs_to_remove.append(xfel_propagator.output_path)
@@ -140,3 +134,4 @@ class WavePropagatorTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

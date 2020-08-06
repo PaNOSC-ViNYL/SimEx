@@ -20,6 +20,7 @@
 #                                                                        #
 ##########################################################################
 
+
 import os
 import subprocess
 import shlex
@@ -32,11 +33,11 @@ from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities import wpg_to_opmd
 from prop import propagate_s2e
 
-
 class WavePropagator(AbstractPhotonPropagator):
     """
     :class WavePropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
     """
+
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
@@ -50,29 +51,30 @@ class WavePropagator(AbstractPhotonPropagator):
         :type output_path:  str, default 'prop/'
         """
 
+
         # Handle default parameters if None.
-        parameters = EntityChecks.checkAndSetInstance(
-            WavePropagatorParameters, parameters, WavePropagatorParameters())
+        parameters = EntityChecks.checkAndSetInstance( WavePropagatorParameters, parameters, WavePropagatorParameters() )
 
         # Initialize base class.
-        super(WavePropagator, self).__init__(parameters, input_path,
-                                             output_path)
+        super(WavePropagator, self).__init__(parameters,input_path,output_path)
+
 
     def computeNTasks(self):
-        resources = ParallelUtilities.getParallelResourceInfo()
-        nnodes = resources['NNodes']
-        ncores = resources['NCores']
+        resources=ParallelUtilities.getParallelResourceInfo()
+        nnodes=resources['NNodes']
+        ncores=resources['NCores']
 
-        cpusPerTask = self.parameters.cpus_per_task
+        cpusPerTask=self.parameters.cpus_per_task
 
-        if cpusPerTask == "MAX":
-            np = nnodes
-            ncores = 0
+        if cpusPerTask=="MAX":
+            np=nnodes
+            ncores=0
         else:
-            np = max(1, int(ncores / int(cpusPerTask)))
-            ncores = int(cpusPerTask)
+            np=max(1,int(ncores/int(cpusPerTask)))
+            ncores=int(cpusPerTask)
 
-        return (np, ncores)
+        return (np,ncores)
+
 
     def backengine(self):
         """ Starts WPG simulations in parallel in a subprocess """
@@ -80,41 +82,42 @@ class WavePropagator(AbstractPhotonPropagator):
         fname = IOUtilities.getTmpFileName()
         self.dumpToFile(fname)
 
-        forcedMPIcommand = self.parameters.forced_mpi_command
+        forcedMPIcommand=self.parameters.forced_mpi_command
 
-        if forcedMPIcommand == "":
-            (np, ncores) = self.computeNTasks()
-            mpicommand = ParallelUtilities.prepareMPICommandArguments(
-                np, ncores)
+        if forcedMPIcommand=="":
+            (np,ncores)=self.computeNTasks()
+            mpicommand=ParallelUtilities.prepareMPICommandArguments(np,ncores)
         else:
-            mpicommand = forcedMPIcommand
+            mpicommand=forcedMPIcommand
 
         if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print(("WavePropagator backengine mpicommand: " + mpicommand))
+            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
+                print(("WavePropagator backengine mpicommand: "+mpicommand))
             if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
                 import platform
-                print("Running python %s." % (platform.python_version()))
+                print("Running python %s." % ( platform.python_version() ) )
 
-        mpicommand += " python " + __file__ + " " + fname
+        mpicommand+=" python "+__file__+" "+fname
+
 
         args = shlex.split(mpicommand)
 
-        proc = subprocess.Popen(args, universal_newlines=True)
+        proc = subprocess.Popen(args,universal_newlines=True)
         proc.wait()
         os.remove(fname)
 
         return proc.returncode
 
     def _run(self):
+
         """ This method drives the WPG backengine.
 
         :return: 0 if WPG returns successfully, 1 if not.
 
         """
 
-        # import should be here, not in header as it calls MPI_Init when
-        # imported. We want MPI to be initialized at this stage only.
+        # import should be here, not in header as it calls MPI_Init when imported. We want MPI to be
+        # initialized at this stage only.
         from mpi4py import MPI
 
         # MPI info
@@ -124,41 +127,36 @@ class WavePropagator(AbstractPhotonPropagator):
 
         # Check if input path is a directory.
         if os.path.isdir(self.input_path):
-            input_files = [os.path.join(self.input_path, input_file) for \
-                            input_file in os.listdir(self.input_path)]
-            input_files.sort(
-            )  # Assuming the filenames have some kind of ordering scheme.
+            input_files = [ os.path.join( self.input_path, input_file ) for \
+                            input_file in os.listdir( self.input_path ) ]
+            input_files.sort() # Assuming the filenames have some kind of ordering scheme.
         else:
-            if thisProcess == 0:  # other MPI processes (if any) have nothing to do
-                propagate_s2e.propagate(self.input_path, self.output_path,
-                                        self.parameters.beamline.get_beamline)
+            if thisProcess == 0: # other MPI processes (if any) have nothing to do
+                propagate_s2e.propagate(self.input_path, self.output_path, self.parameters.beamline.get_beamline)
             return 0
 
-        # If we have more than one input file, we should also have more than
-        # one output file, i.e. output_path should be a directory.
+        # If we have more than one input file, we should also have more than one output file, i.e.
+        # output_path should be a directory.
         if os.path.isfile(self.output_path):
-            raise IOError(
-                "The given output path is a file but a directory is needed. Cowardly refusing to overwrite."
-            )
+            raise IOError("The given output path is a file but a directory is needed. Cowardly refusing to overwrite.")
 
         # Check if output dir exists, create if not.
         if not os.path.isdir(self.output_path):
             os.mkdir(self.output_path)
 
         # Loop over all input files and generate one run per source file.
-        for i, input_file in enumerate(input_files):
-            # TODO: Transmit number of cpus.
+        for i,input_file in enumerate(input_files):
+            ### TODO: Transmit number of cpus.
             # process file on a corresponding process (round-robin)
             if i % numProcesses == thisProcess:
-                output_file = os.path.join(self.output_path,
-                                           'prop_out_%07d.h5' % (i))
-                propagate_s2e.propagate(input_file, output_file,
-                                        self.parameters.beamline.get_beamline)
+                output_file = os.path.join( self.output_path, 'prop_out_%07d.h5' % (i) )
+                propagate_s2e.propagate(input_file, output_file, self.parameters.beamline.get_beamline)
 
                 # Rewrite in openpmd conformant way.
                 # wpg_to_opmd.convertToOPMD( output_file )
 
         return 0
+
 
     @property
     def data(self):
@@ -168,7 +166,7 @@ class WavePropagator(AbstractPhotonPropagator):
     def _readH5(self):
         """ """
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
-        pass  # Nothing to be done since IO happens in backengine.
+        pass # Nothing to be done since IO happens in backengine.
 
     def saveH5(self):
         """ """
@@ -176,8 +174,7 @@ class WavePropagator(AbstractPhotonPropagator):
         :param output_path: Path to propagation output.
         :type output_path: string
         """
-        pass  # No action required since output is written in backengine.
-
+        pass # No action required since output is written in backengine.
 
 if __name__ == '__main__':
     WavePropagator.runFromCLI()
