@@ -5,7 +5,6 @@ Reference Manual
 .. automodule:: SimEx.Analysis.DiffractionAnalysis
 .. automodule:: SimEx.Analysis.XFELPhotonAnalysis
 .. automodule:: SimEx.Analysis.XMDYNPhotonMatterAnalysis
-.. automodule:: SimEx.Analysis.RadHydroAnalysis
 .. .. Calculator classes
 .. automodule:: SimEx.Calculators.AbstractBaseCalculator
 .. automodule:: SimEx.Calculators.AbstractPhotonAnalyzer
@@ -27,7 +26,7 @@ Reference Manual
 .. automodule:: SimEx.Calculators.S2EReconstruction
 .. automodule:: SimEx.Calculators.SingFELPhotonDiffractor
 .. automodule:: SimEx.Calculators.XCSITPhotonDetector
-.. automodule:: SimEx.Calculators.XFELPhotonPropagator
+.. automodule:: SimEx.Calculators.WavePropagator
 .. automodule:: SimEx.Calculators.XFELPhotonSource
 .. automodule:: SimEx.Calculators.XMDYNDemoPhotonMatterInteractor
 .. automodule:: SimEx.Calculators.XMDYNPhotonMatterInteractor
@@ -45,7 +44,6 @@ Reference Manual
 .. automodule:: SimEx.Parameters.XCSITPhotonDetectorParameters
 .. .. Workflows and Managers
 .. automodule:: SimEx.PhotonExperimentSimulation.EstherExperiment
-.. automodule:: SimEx.Submitters.SimExSLURM
 .. .. Utilities
 .. automodule:: SimEx.Utilities.Utilities
 .. automodule:: SimEx.Utilities.IOUtilities
