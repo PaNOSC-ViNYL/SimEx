@@ -20,6 +20,7 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 # Make sure simex_vars.sh has been sourced.
+sys.path.insert(0, os.path.abspath('../../python'))
 
 # -- General configuration ------------------------------------------------
 
@@ -31,7 +32,7 @@ import os
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
+    # 'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
