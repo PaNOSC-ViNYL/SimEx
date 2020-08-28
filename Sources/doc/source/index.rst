@@ -35,7 +35,9 @@ Contents
     Contribute   <include/contribute>
     Support      <include/support>
     License      <include/license>
-    Reference Manual <include/refman>
+    API Manual  <include/apiman.rst>
     Data formats <include/data_formats>
 ..
-            Environment  <include/environment>
+    comment
+    Reference Manual <include/refman>
+    Environment  <include/environment>
