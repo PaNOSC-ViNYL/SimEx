@@ -62,7 +62,6 @@ class GaussianPhotonSource(AbstractPhotonSource):
         coherence_time = 2.*math.pi*hbar*joule*second/self.parameters.photon_energy_relative_bandwidth/E
         coherence_time = coherence_time.m_as(second)
 
-
         beam_waist = 2.*hbar*c*joule*meter/theta/E
         amplitude_rms = 0.5*beam_waist/math.sqrt(math.log(2.))
 
@@ -71,8 +70,8 @@ class GaussianPhotonSource(AbstractPhotonSource):
         range_xy = 36.0*beam_waist.m_as(meter)
 
         # Set number of sampling points in x and y and number of temporal slices.
-        np = 400 #self.parameters.number_of_transverse_grid_points
-        nslices = 20 #self.parameters.number_of_time_slices
+        np = self.parameters.number_of_transverse_grid_points
+        nslices = self.parameters.number_of_time_slices
 
         # Build wavefront
         srwl_wf = build_gauss_wavefront(np, np, nslices,
