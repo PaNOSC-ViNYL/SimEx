@@ -59,15 +59,22 @@ class GaussianPhotonSource(AbstractPhotonSource):
         # The rms of the amplitude distribution (Gaussian)
         theta = self.parameters.divergence.m_as(radian)
         E = self.parameters.photon_energy
-        coherence_time = 2.*math.pi*hbar*joule*second/self.parameters.photon_energy_relative_bandwidth/E
-        coherence_time = coherence_time.m_as(second)
+        coherence_time = 2.*math.pi*hbar/self.parameters.photon_energy_relative_bandwidth/E.m_as(joule)
 
-        beam_waist = 2.*hbar*c*joule*meter/theta/E
-        amplitude_rms = 0.5*beam_waist/math.sqrt(math.log(2.))
+        beam_waist = 2.*hbar*c/theta/E.m_as(joule)
+
+        beam_diameter_fwhm = self.parameters.beam_diameter_fwhm.m_as(meter)
+        beam_waist_radius = 2.0*beam_diameter_fwhm*math.sqrt(math.log(2.))
+        
+        try:
+            assert beam_waist == beam_waist_radius
+        except:
+            print(beam_waist, beam_waist_radius)
+            raise ValueError()
 
         # Rule of thumb: 36 times w0
         # x-y range at beam waist.
-        range_xy = 36.0*beam_waist.m_as(meter)
+        range_xy = 36.0*beam_waist
 
         # Set number of sampling points in x and y and number of temporal slices.
         np = self.parameters.number_of_transverse_grid_points
@@ -79,7 +86,8 @@ class GaussianPhotonSource(AbstractPhotonSource):
                                         -range_xy/2, range_xy/2,
                                         -range_xy/2, range_xy/2,
                                         coherence_time/math.sqrt(2),
-                                        amplitude_rms.m_as(meter), amplitude_rms.m_as(meter),
+                                        # beam_diameter_fwhm, beam_diameter_fwhm,
+                                        beam_waist/3.922, beam_waist/3.922, # Scaled such that fwhm comes out as demanded by parameters.
                                         0.0,
                                         pulseEn=self.parameters.pulse_energy.m_as(joule),
                                         pulseRange=8.)
