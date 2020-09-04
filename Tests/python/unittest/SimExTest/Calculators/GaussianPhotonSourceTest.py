@@ -27,6 +27,7 @@ import os
 # Import the class to test.
 from SimEx.Calculators.GaussianPhotonSource import GaussianPhotonSource
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.GaussWavefrontParameters import GaussWavefrontParameters
 from SimEx.Utilities.Units import meter, joule, radian, electronvolt
 from TestUtilities import TestUtilities
 
@@ -42,14 +43,13 @@ class GaussianPhotonSourceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-
-        cls.beam_parameters = PhotonBeamParameters(
+        cls.beam_parameters = GaussWavefrontParameters(
             photon_energy = 8.0e3*electronvolt,
-            beam_diameter_fwhm = 0.3e-6*meter,
             pulse_energy = 2.4e-6*joule,
             photon_energy_relative_bandwidth=1e-4,
-            divergence=2.0e-6*radian,
-            photon_energy_spectrum_type=None,
+            number_of_transverse_grid_points=128,
+            number_of_time_slices=12,
+            divergence=2.0e-6*radian
             )
 
     @classmethod
@@ -99,6 +99,34 @@ class GaussianPhotonSourceTest(unittest.TestCase):
         integral_intensity(wf)
         plot_intensity_map(wf)
         plot_intensity_qmap(wf)
+
+    
+    def test_beam_diameter_in_wf(self):
+        parameters = GaussWavefrontParameters(
+            photon_energy = 8.0e3*electronvolt,
+            pulse_energy = 2.4e-5*joule,
+            photon_energy_relative_bandwidth=1e-3,
+            number_of_transverse_grid_points=2048,
+            number_of_time_slices=12,
+            beam_diameter_fwhm=1.0e-5*meter,
+            )
+
+        source = GaussianPhotonSource(parameters=parameters,
+                                      input_path="/dev/null",
+                                      output_path="gauss_source_out.h5")
+
+        source.backengine()
+
+        wf = source.data
+        
+        # Compare parameterization to wavefront data.
+        calculated_fwhm = calculate_fwhm(wf)
+        self.assertAlmostEqual(1.0e6*calculated_fwhm['fwhm_x'],
+                1.0e6*parameters.beam_diameter_fwhm.m_as(meter), 1)
+        
+        calculated_pulse_energy = calc_pulse_energy(wf)
+        self.assertAlmostEqual(1.0e6*calculated_pulse_energy,
+                1.0e6*parameters.pulse_energy.m_as(joule), 1)
 
     def test_saveH5(self):
         """ Test saving the generated wavefront to disk. """
