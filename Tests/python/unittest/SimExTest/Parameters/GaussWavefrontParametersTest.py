@@ -29,7 +29,7 @@ import io
 # Include needed directories in sys.path.
 import unittest
 
-from SimEx.Parameters.GaussWavefrontParameters import GaussWavefrontParameters, PhotonBeamParameters, AbstractCalculatorParameters
+from SimEx.Parameters.GaussWavefrontParameters import GaussWavefrontParameters, PhotonBeamParameters, AbstractCalculatorParameters, get_divergence_from_beam_diameter, get_beam_diameter_from_divergence
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 from TestUtilities import TestUtilities
 
@@ -41,7 +41,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.beam = GaussWavefrontParameters(photon_energy=8.6e3*electronvolt,
-                                    beam_diameter_fwhm=1.0e-6*meter,
                                     pulse_energy=1.0e-3*joule,
                                     photon_energy_relative_bandwidth=0.001,
                                     divergence=2.0e-6*radian,
@@ -75,7 +74,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 photon_energy_relative_bandwidth=2e-2,
                 pulse_energy = 2e-3*joule,
                 beam_diameter_fwhm = 2e-6*meter,
-                divergence = 1e-6*radian,
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
                 )
@@ -93,7 +91,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 photon_energy_relative_bandwidth=2e-2,
                 pulse_energy = 2e-3*joule,
                 beam_diameter_fwhm = 2e-6*meter,
-                divergence = 1e-6*radian,
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
                 )
@@ -104,7 +101,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         self.assertEqual(parameters.photon_energy_spectrum_type, "Gauss")
         self.assertEqual(parameters.pulse_energy, 2e-3*joule)
         self.assertEqual(parameters.beam_diameter_fwhm, 2e-6*meter)
-        self.assertEqual(parameters.divergence, 1e-6*radian)
+        self.assertAlmostEqual(parameters.divergence, 2.38925256e-5*radian)
         self.assertEqual(parameters.number_of_transverse_grid_points, 400)
         self.assertEqual(parameters.number_of_time_slices, 10)
 
@@ -118,7 +115,6 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
                 photon_energy_relative_bandwidth=0.1,
-                divergence=5.0e-6*radian,
                 )
 
         # Set via methods.
@@ -139,6 +135,25 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         self.assertEqual(parameters.photon_energy_spectrum_type, "Gauss")
         self.assertEqual(parameters.number_of_transverse_grid_points, 400)
         self.assertEqual(parameters.number_of_time_slices, 10)
+    
+    def test_get_divergence_from_beam_diameter(self):
+        """ Test that the calculation of divergence from beamwidth and
+        vice-versa works correcly."""
+
+        energy = 8.0e3*electronvolt
+        beamwidth = 5.0e-6*meter
+
+        divergence_from_beam_diameter = get_divergence_from_beam_diameter(energy, beamwidth)
+
+        beam_diameter_from_divergence = get_beam_diameter_from_divergence(energy, divergence_from_beam_diameter)
+
+        # Check conversions are idempotent.
+        self.assertAlmostEqual(beam_diameter_from_divergence, beamwidth)
+
+        # Check absolute value. Compare with
+        # https://www.rp-photonics.com/gaussian_beams.html. This combination of
+        # parameters should give a beam waist radius w0 = 8.325546e-6*meter
+        self.assertAlmostEqual(divergence_from_beam_diameter, 5.925346353e-6*radian, 12)
 
 if __name__ == '__main__':
     unittest.main()
