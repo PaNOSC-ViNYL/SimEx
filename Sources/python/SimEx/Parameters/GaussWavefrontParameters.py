@@ -76,7 +76,6 @@ class GaussWavefrontParameters(PhotonBeamParameters):
         :type kwargs: dict
 
         """
-
         if (beam_diameter_fwhm is not None and divergence is not None) or (beam_diameter_fwhm is None and divergence is None):
             raise ValueError("beam_diameter_fwhm and divergence cannot be set\
             at the same time. Chose one and leave the other one None or\
