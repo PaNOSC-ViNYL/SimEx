@@ -142,19 +142,19 @@ class GaussWavefrontParameters(PhotonBeamParameters):
 def get_divergence_from_beam_diameter(E, beam_diameter_fwhm):
     """ Calculate the beam diameter fwhm from the divergence angle. """
     # The rms of the amplitude distribution (Gaussian)
-    beam_waist = 2.*beam_diameter_fwhm.m_as(meter)*math.sqrt(math.log(2.))
+    beam_waist = beam_diameter_fwhm.m_as(meter)/math.sqrt(2.*math.log(2.))
     theta = 2.*hbar*c/beam_waist/E.m_as(joule)
     
     return theta*radian
 
 
 def get_beam_diameter_from_divergence(E, divergence):
-    """ Calculate the bandwith fwhm from the divergence angle. """
+    """ Calculate the beam diameter fwhm from the divergence angle. """
     # The rms of the amplitude distribution (Gaussian)
     theta = divergence.m_as(radian)
 
     beam_waist = 2.*hbar*c/theta/E.m_as(joule)
-    intensity_fwhm = 0.5*beam_waist/math.sqrt(math.log(2.))*meter
+    intensity_fwhm = beam_waist*math.sqrt(2.*math.log(2.))*meter
 
     return intensity_fwhm
     
