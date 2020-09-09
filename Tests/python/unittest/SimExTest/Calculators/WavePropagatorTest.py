@@ -19,7 +19,7 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the XFELPhotonPropagator.
+""" Test module for the WavePropagator.
 
     @author : CFG
     @institution : XFEL
@@ -30,12 +30,12 @@ import os, shutil
 import unittest
 
 # Import the class to test.
-from SimEx.Calculators.XFELPhotonPropagator import XFELPhotonPropagator
+from SimEx.Calculators.WavePropagator import WavePropagator
 from TestUtilities import TestUtilities
 
-class XFELPhotonPropagatorTest(unittest.TestCase):
+class WavePropagatorTest(unittest.TestCase):
     """
-    Test class for the XFELPhotonPropagator class.
+    Test class for the WavePropagator class.
     """
 
     @classmethod
@@ -64,9 +64,9 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Construct the object.
-        xfel_propagator = XFELPhotonPropagator()
+        xfel_propagator = WavePropagator()
 
-        self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
+        self.assertIsInstance(xfel_propagator, WavePropagator)
 
         self.assertEqual( xfel_propagator.input_path,  os.path.abspath('source') )
         self.assertEqual( xfel_propagator.output_path, os.path.abspath('prop') )
@@ -75,9 +75,9 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         """ Testing the construction of the class with non-default parameters. """
 
         # Construct the object.
-        xfel_propagator = XFELPhotonPropagator(parameters=None, input_path=self.input_h5, output_path='prop_out_0000000.h5')
+        xfel_propagator = WavePropagator(parameters=None, input_path=self.input_h5, output_path='prop_out_0000000.h5')
 
-        self.assertIsInstance(xfel_propagator, XFELPhotonPropagator)
+        self.assertIsInstance(xfel_propagator, WavePropagator)
 
     def testBackengineDefaultPaths(self):
         """ Test a backengine run with a default io paths."""
@@ -89,7 +89,7 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         shutil.copytree(TestUtilities.generateTestFilePath('FELsource_out'), os.path.abspath('source') )
 
         # Construct the object.
-        xfel_propagator = XFELPhotonPropagator()
+        xfel_propagator = WavePropagator()
 
         # Call the backengine.
         status = xfel_propagator.backengine()
@@ -109,7 +109,7 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
         self.__files_to_remove.append('prop_out_0000001.h5')
 
         # Construct the object.
-        xfel_propagator = XFELPhotonPropagator( parameters=None, input_path=self.input_h5, output_path='prop_out_0000001.h5' )
+        xfel_propagator = WavePropagator( parameters=None, input_path=self.input_h5, output_path='prop_out_0000001.h5' )
 
         # Call the backengine.
         status = xfel_propagator.backengine()
@@ -120,7 +120,7 @@ class XFELPhotonPropagatorTest(unittest.TestCase):
     def testBackengineMultipleInputFile(self):
         """ Test a backengine run with multiple input files. """
         # Construct the object.
-        xfel_propagator = XFELPhotonPropagator( parameters=None, input_path=TestUtilities.generateTestFilePath( 'FELsource_out' ), output_path='prop_out' )
+        xfel_propagator = WavePropagator( parameters=None, input_path=TestUtilities.generateTestFilePath( 'FELsource_out' ), output_path='prop_out' )
 
         # Call the backengine.
         status = xfel_propagator.backengine()
