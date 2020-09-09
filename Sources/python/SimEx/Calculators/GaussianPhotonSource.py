@@ -64,17 +64,14 @@ class GaussianPhotonSource(AbstractPhotonSource):
         beam_waist = 2.*hbar*c/theta/E.m_as(joule)
 
         beam_diameter_fwhm = self.parameters.beam_diameter_fwhm.m_as(meter)
-        beam_waist_radius = 2.0*beam_diameter_fwhm*math.sqrt(math.log(2.))
+        beam_waist_radius = beam_diameter_fwhm/math.sqrt(2.*math.log(2.))
         
-        try:
-            assert beam_waist == beam_waist_radius
-        except:
-            print(beam_waist, beam_waist_radius)
-            raise ValueError()
-
-        # Rule of thumb: 36 times w0
+        print("beam waist radius from divergence angle = {0:4.3e}".format(beam_waist))
+        print("beam waist radius from fwhm = {0:4.3e}".format(beam_waist_radius))
+        
+        # Rule of thumb: 7 times w0
         # x-y range at beam waist.
-        range_xy = 36.0*beam_waist
+        range_xy = 30.0*beam_waist_radius
 
         # Set number of sampling points in x and y and number of temporal slices.
         np = self.parameters.number_of_transverse_grid_points
@@ -87,7 +84,7 @@ class GaussianPhotonSource(AbstractPhotonSource):
                                         -range_xy/2, range_xy/2,
                                         coherence_time/math.sqrt(2),
                                         # beam_diameter_fwhm, beam_diameter_fwhm,
-                                        beam_waist/3.922, beam_waist/3.922, # Scaled such that fwhm comes out as demanded by parameters.
+                                        beam_waist_radius/2, beam_waist_radius/2, # Scaled such that fwhm comes out as demanded by parameters.
                                         0.0,
                                         pulseEn=self.parameters.pulse_energy.m_as(joule),
                                         pulseRange=8.)
