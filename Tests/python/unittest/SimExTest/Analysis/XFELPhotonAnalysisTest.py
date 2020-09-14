@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -25,6 +25,9 @@ RENDER_PLOT=False # Set to True to show plots.
     @author : CFG
     @institution : XFEL
     @creation 20170322
+    @author : Juncheng E
+    @institution : XFEL
+    @modification 20200914
 
 """
 import h5py
