@@ -20,3 +20,4 @@ deploy_rsa.enc
 *.root
 .ropeproject
 tags
+Tests/python/unittest/TestFiles/
