@@ -43,6 +43,7 @@ class GaussWavefrontParameters(PhotonBeamParameters):
             number_of_time_slices=None,
             beam_diameter_fwhm=None,
             divergence=None,
+            z=None,
             **kwargs
             ):
         """
@@ -71,6 +72,9 @@ class GaussWavefrontParameters(PhotonBeamParameters):
 
         :param number_of_time_slices: The number of time slices.
         :type number_of_time_slices: int
+
+        :param z: The position of the pulse in the beam direction (z).
+        :type z: PhysicalQuantity
 
         :param kwargs: Key-value pairs to be passed to the parent class constructor.
         :type kwargs: dict
@@ -105,6 +109,7 @@ class GaussWavefrontParameters(PhotonBeamParameters):
         
         self.number_of_transverse_grid_points = number_of_transverse_grid_points
         self.number_of_time_slices = number_of_time_slices
+        self.z = z
         
 
     def _setDefaults(self):
@@ -138,6 +143,20 @@ class GaussWavefrontParameters(PhotonBeamParameters):
             raise ValueError('The parameter "number_of_time_slices" must\
                              be at least 3.')
         self.__number_of_time_slices = val
+    
+    @property
+    def z(self):
+        """ The z position. """
+        return self.__z
+    @z.setter
+    def z(self, val):
+        if not isinstance(val, PhysicalQuantity):
+            raise TypeError('The parameter "z" must\
+                             be of a length, received {}.'.format(type(val)))
+        if val.m_as(meter) == 0.0:
+            raise ValueError('The parameter "z" must not be 0.')
+            
+        self.__z = val
 
 def get_divergence_from_beam_diameter(E, beam_diameter_fwhm):
     """ Calculate the beam diameter fwhm from the divergence angle. """
