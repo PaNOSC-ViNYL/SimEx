@@ -46,6 +46,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                                     divergence=2.0e-6*radian,
                                     number_of_transverse_grid_points=400,
                                     number_of_time_slices=10,
+                                    z=1*meter,
                                     )
     @classmethod
     def tearDownClass(cls):
@@ -76,6 +77,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 beam_diameter_fwhm = 2e-6*meter,
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
+                z=1*meter,
                 )
         self.assertIsInstance(parameters, GaussWavefrontParameters)
         self.assertIsInstance(parameters, PhotonBeamParameters)
@@ -93,6 +95,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 beam_diameter_fwhm = 2e-6*meter,
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
+                z=1*meter,
                 )
 
         # Check all parameters are set as intended.
@@ -115,6 +118,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
                 number_of_transverse_grid_points=400,
                 number_of_time_slices=10,
                 photon_energy_relative_bandwidth=0.1,
+                z=1*meter,
                 )
 
         # Set via methods.
@@ -125,6 +129,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         parameters.divergence = 5e-6*radian
         parameters.number_of_transverse_grid_points = 400
         parameters.number_of_time_slices = 10
+        parameters.z = 2.*meter
 
         # Check all parameters are set as intended.
         self.assertEqual(parameters.photon_energy, 8.0e3*electronvolt)
@@ -135,6 +140,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         self.assertEqual(parameters.photon_energy_spectrum_type, "Gauss")
         self.assertEqual(parameters.number_of_transverse_grid_points, 400)
         self.assertEqual(parameters.number_of_time_slices, 10)
+        self.assertEqual(parameters.z, 2.0*meter)
     
     def test_get_divergence_from_beam_diameter(self):
         """ Test that the calculation of divergence from beamwidth and
