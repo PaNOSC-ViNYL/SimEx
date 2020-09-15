@@ -99,16 +99,15 @@ IF(${_listlen} GREATER 1)
 ENDIF()
 # Add the project.
 ExternalProject_Add( crystfel
-    URL http://www.desy.de/~twhite/crystfel/crystfel-0.9.0.tar.gz
+    URL http://www.desy.de/~twhite/crystfel/crystfel-0.9.1.tar.gz
     BUILD_IN_SOURCE 0
-    #CONFIGURE_COMMAND ./configure --with-hdf5=${MYHDF5_LIBRARY_DIRS} --disable-gtk --disable-gtk-doc --disable-png --prefix=${CMAKE_INSTALL_PREFIX}
-    #CONFIGURE_COMMAND ./configure --with-hdf5=/usr/lib64 --disable-gtk --disable-gtk-doc --disable-png 
     INSTALL_COMMAND ""
 )
 
 # Install needed crystfel binaries, scripts and doc material.
 ExternalProject_Get_Property(crystfel BINARY_DIR)
 ExternalProject_Get_Property(crystfel SOURCE_DIR)
+ExternalProject_Get_Property(crystfel BINARY_DIR)
 #
 install(PROGRAMS ${BINARY_DIR}/pattern_sim DESTINATION ${BINDIR})
 install(PROGRAMS ${BINARY_DIR}/partial_sim DESTINATION ${BINDIR})
