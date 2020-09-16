@@ -23,7 +23,9 @@
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysicalQuantity
-from SimEx.Utilities.Units import meter, electronvolt, joule, radian
+from SimEx.Utilities.Units import meter, electronvolt, joule, radian, PhysicalQuantity
+
+
 
 from scipy.constants import hbar, c
 from scipy import constants
