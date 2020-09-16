@@ -58,7 +58,8 @@ def _getParallelResourceInfoFromSlurm():
         threads_per_core = getThreadsPerCoreFromSlurm()
         resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
         uniq_nodes = os.environ['SLURM_JOB_CPUS_PER_NODE'].split(",")
-        # SLURM sets this variable to something like 40x(2),20x(1),10x(10). We extract ncores from this
+        # SLURM sets this variable to something like 40(x2),20(x1),10(x10). We extract ncores from this
+        # print('uniq_nodes =', uniq_nodes)
         ncores = 0
         for node in uniq_nodes:
             ind = node.find("(")
@@ -68,6 +69,7 @@ def _getParallelResourceInfoFromSlurm():
             else:
                 cores = node[:ind]
                 mul = node[ind + 2:node.find(")")]
+            # print('cores =', cores)
             ncores += int(cores) * int(mul)
 
         # Use all physical cores
