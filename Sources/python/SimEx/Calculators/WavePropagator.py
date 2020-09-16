@@ -32,6 +32,7 @@ from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities import wpg_to_opmd
 from prop import propagate_s2e
 
+
 class WavePropagator(AbstractPhotonPropagator):
     """
     :class WavePropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
@@ -54,8 +55,8 @@ class WavePropagator(AbstractPhotonPropagator):
             WavePropagatorParameters, parameters, WavePropagatorParameters())
 
         # Initialize base class.
-        super(WavePropagator, self).__init__(parameters,input_path,output_path)
-
+        super(WavePropagator, self).__init__(parameters, input_path,
+                                             output_path)
 
     def computeNTasks(self):
         resources = ParallelUtilities.getParallelResourceInfo()
@@ -89,8 +90,8 @@ class WavePropagator(AbstractPhotonPropagator):
             mpicommand = forcedMPIcommand
 
         if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in  os.environ['SIMEX_VERBOSE']:
-                print(("WavePropagator backengine mpicommand: "+mpicommand))
+            if 'MPI' in os.environ['SIMEX_VERBOSE']:
+                print(("WavePropagator backengine mpicommand: " + mpicommand))
             if 'PYTHON' in os.environ['SIMEX_VERBOSE']:
                 import platform
                 print("Running python %s." % (platform.python_version()))
