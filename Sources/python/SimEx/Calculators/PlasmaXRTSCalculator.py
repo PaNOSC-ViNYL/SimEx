@@ -318,8 +318,8 @@ def _parseStaticData(data_string):
         static_dict = {}
 
         # Extract static data from
-        pattern_after_equal = '\\s\\d+\\.\\d+e[\+,\-]\\d+'
-        static_dict['k']           = extractDate('k\(w=0\)\\s+\[m\^-1\]\\s+='+pattern_after_equal, data_string)
+        pattern_after_equal = '\\s*\\d+\\.*\\d*[e,E]*[\+,\-]*\\d*'
+        static_dict['k']            = extractDate('k\(w=0\)\\s+\[m\^-1\]\\s+='+pattern_after_equal, data_string)
         static_dict['fk']           = extractDate('f\(k\)\\s+='+pattern_after_equal, data_string)
         static_dict['qk']           = extractDate('q\(k\)\\s+='+pattern_after_equal, data_string)
         static_dict['Sk_ion']       = extractDate('S_ii\(k\)\\s+='+pattern_after_equal, data_string)
@@ -351,7 +351,7 @@ def extractDate(pattern_string, text):
     line = pattern.findall(text)
 
     # Extract value (behind the '=' symbol).
-    pattern = re.compile("=\\s")
+    pattern = re.compile('=\\s')
     return  float( pattern.split( line[0] )[-1] )
 #
 # Check and set functions
