@@ -60,9 +60,12 @@ class PhotonExperimentSimulation(object):
         :type photon_analyzer:  AbstractPhotonAnalyzer
         """
         self.__photon_source = checkAndSetPhotonSource(photon_source)
-        self.__photon_propagator = checkAndSetPhotonPropagator(photon_propagator)
-        self.__photon_interactor = checkAndSetPhotonInteractor(photon_interactor)
-        self.__photon_diffractor = checkAndSetPhotonDiffractor(photon_diffractor)
+        self.__photon_propagator = checkAndSetPhotonPropagator(
+            photon_propagator)
+        self.__photon_interactor = checkAndSetPhotonInteractor(
+            photon_interactor)
+        self.__photon_diffractor = checkAndSetPhotonDiffractor(
+            photon_diffractor)
         self.__photon_detector = checkAndSetPhotonDetector(photon_detector)
         self.__photon_analyzer = checkAndSetPhotonAnalyzer(photon_analyzer)
 
@@ -158,23 +161,35 @@ class PhotonExperimentSimulation(object):
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
 
-        print('\n'.join(["#"*80,  "# Starting SIMEX photon-matter interaction.", "#"*80]))
+        print('\n'.join([
+            "#" * 80, "# Starting SIMEX photon-matter interaction.", "#" * 80
+        ]))
         self.__photon_interactor._readH5()
         self.__photon_interactor.backengine()
         self.__photon_interactor.saveH5()
 
+        print('\n'.join(
+            ["#" * 80, "# Starting SIMEX photon diffraction.", "#" * 80]))
         self.__photon_diffractor._readH5()
-            print('\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80]))
+        self.__photon_diffractor.backengine()
+        self.__photon_diffractor.saveH5()
+
+        if self.__photon_detector is not None:
+            print('\n'.join(
+                ["#" * 80, "# Starting SIMEX photon detection.", "#" * 80]))
             self.__photon_detector._readH5()
             self.__photon_detector.backengine()
             self.__photon_detector.saveH5()
 
         # If no detector is present, link diffr out to analysis in. If already exists, do nothing.
         else:
-            if not (os.path.isfile(self.__photon_analyzer.input_path) or os.path.isdir(self.__photon_analyzer.input_path)):
-                os.symlink(self.__photon_diffractor.output_path, self.__photon_analyzer.input_path)
+            if not (os.path.isfile(self.__photon_analyzer.input_path)
+                    or os.path.isdir(self.__photon_analyzer.input_path)):
+                os.symlink(self.__photon_diffractor.output_path,
+                           self.__photon_analyzer.input_path)
 
-        print('\n'.join(["#"*80,  "# Starting SIMEX photon signal analysis.", "#"*80]))
+        print('\n'.join(
+            ["#" * 80, "# Starting SIMEX photon signal analysis.", "#" * 80]))
         self.__photon_analyzer._readH5()
         self.__photon_analyzer.backengine()
         self.__photon_analyzer.saveH5()
