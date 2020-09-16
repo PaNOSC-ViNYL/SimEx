@@ -104,7 +104,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         self.assertEqual(parameters.photon_energy_spectrum_type, "Gauss")
         self.assertEqual(parameters.pulse_energy, 2e-3*joule)
         self.assertEqual(parameters.beam_diameter_fwhm, 2e-6*meter)
-        self.assertAlmostEqual(parameters.divergence, 2.38925256e-5*radian)
+        self.assertAlmostEqual(parameters.divergence, 4.6841685614614345e-05*radian)
         self.assertEqual(parameters.number_of_transverse_grid_points, 400)
         self.assertEqual(parameters.number_of_time_slices, 10)
 
@@ -159,7 +159,7 @@ class GaussWavefrontParametersTest(unittest.TestCase):
         # Check absolute value. Compare with
         # https://www.rp-photonics.com/gaussian_beams.html. This combination of
         # parameters should give a beam waist radius w0 = 8.325546e-6*meter
-        self.assertAlmostEqual(divergence_from_beam_diameter, 5.925346353e-6*radian, 12)
+        self.assertAlmostEqual(divergence_from_beam_diameter, 1.1616738032424358e-05*radian, 12)
 
 if __name__ == '__main__':
     unittest.main()
