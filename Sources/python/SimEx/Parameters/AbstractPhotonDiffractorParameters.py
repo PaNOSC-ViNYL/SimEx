@@ -1,7 +1,7 @@
 """ :module  AbstractPhotonDiffractorParameters: Hosts the abstract base class for all PhotonDiffractors."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2020 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -128,6 +128,10 @@ class AbstractPhotonDiffractorParameters(AbstractCalculatorParameters):
         :param value: The value to set 'detector_geometry' to.
         """
         self.__detector_geometry = checkAndSetInstance( (str,DetectorGeometry), value, None )
+
+        if isinstance(self.__detector_geometry, str):
+            if not os.path.isfile( self.__detector_geometry):
+                raise IOError("The detector_geometry %s is not a valid file or filename." % (self.__detector_geometry) )
 
         if self.__detector_geometry is None:
             print ("WARNING: Detector geometry not set, calculation will most probably fail.")

@@ -314,8 +314,9 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertTrue(raises)
         raises = False
 
-        # beam_parameters not a file.
+        # beam_parameters not a valid file.
         try:
+            # File not existed
             parameters.beam_parameters = 'xyz.beam'
         except IOError:
             raises = True
@@ -332,10 +333,11 @@ class SingFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertTrue(raises)
         raises = False
 
-        # detector_geometry not a file.
+        # detector_geometry not a valid file.
         try:
+            # File not existed
             parameters.detector_geometry = 'xyz.geom'
-        except TypeError:
+        except IOError:
             raises = True
         self.assertTrue(raises)
         raises = False
