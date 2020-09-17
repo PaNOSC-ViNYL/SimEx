@@ -168,15 +168,8 @@ class PhotonExperimentSimulation(object):
         self.__photon_interactor.backengine()
         self.__photon_interactor.saveH5()
 
-        print('\n'.join(
-            ["#" * 80, "# Starting SIMEX photon diffraction.", "#" * 80]))
         self.__photon_diffractor._readH5()
-        self.__photon_diffractor.backengine()
-        self.__photon_diffractor.saveH5()
-
-        if self.__photon_detector is not None:
-            print('\n'.join(
-                ["#" * 80, "# Starting SIMEX photon detection.", "#" * 80]))
+            print('\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80]))
             self.__photon_detector._readH5()
             self.__photon_detector.backengine()
             self.__photon_detector.saveH5()
