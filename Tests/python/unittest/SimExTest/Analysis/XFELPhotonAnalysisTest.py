@@ -144,15 +144,14 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
         xfel_photon_analyzer.plotIntensityMap(qspace=False)
         xfel_photon_analyzer.plotIntensityMap(qspace=True)
 
-    def testNumpyTotalPowerVsEnergy(self):
-        """ Test export numpy array from the total power spectrum."""
+    def testNumpylPowerVsTime(self):
+        """ Test export numpy array from the total power as function of time. """
         xfel_photon_analyzer = XFELPhotonAnalysis(input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'))
 
         xs_mf, int0_mean = xfel_photon_analyzer.numpyTotalPower()
 
-
-    def testNumpyTotalPowerVsTime(self):
-        """ Test export numpy array from the on-axis power as function of time. """
+    def testNumpyTotalPowerVsEnergy(self):
+        """ Test export numpy array from the total power spectrum."""
         xfel_photon_analyzer = XFELPhotonAnalysis(input_path=TestUtilities.generateTestFilePath('prop_out_0000001.h5'))
 
         energy, totalPower = xfel_photon_analyzer.numpyTotalPower(spectrum=True)

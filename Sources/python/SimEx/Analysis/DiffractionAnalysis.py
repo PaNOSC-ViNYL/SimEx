@@ -125,14 +125,13 @@ class DiffractionAnalysis(AbstractAnalysis):
 
     @property
     def npattern(self):
-        with h5py.File(self.input_path, 'r') as h5:
-            npattern = len(h5['data'])
-        return npattern
+        """ get the number of the selected patterns in this analysis object """
+        indices = self.pattern_indices
+        if indices != 'all':
+            npattern = len(indices)
+        else:
+            npattern = totalNPattern(self.input_path)
 
-    @property
-    def npattern(self):
-        with h5py.File(self.input_path, 'r') as h5:
-            npattern = len(h5['data'])
         return npattern
 
     @property
@@ -349,7 +348,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
     def shannonPixelPhoton(self, resolution):
         """
-        Get the average number of photons on shannon pixels
+        Get the average number of photons per shannon pixel
 
         :param resolution: The full periodic resolution (A) for shannon pixels
         :type resolution: float
