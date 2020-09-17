@@ -37,10 +37,6 @@ then
 	CONDA_BIN=`which conda`
 	CONDA_BIN=${CONDA_BIN%/*}
 	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-<<<<<<< HEAD
-	conda env create -n simex -f conda-requirements.yml
-	conda activate simex
-=======
 	conda env create -n simex -f environment.yml
 	echo "conda environment was deployed. Please run the following to install SIMEX Platform:"
 	echo ""
@@ -48,7 +44,6 @@ then
 	echo " ./install conda"
 	exit
 
->>>>>>> b5555cb... singfel: support .geom file
 elif [ $MODE = "conda" ]
 then
 	echo $MODE
@@ -83,11 +78,7 @@ echo "Changed dir to $PWD."
 # (otherwise gfortran will be used). Make sure $MKLROOT is set. This can be achieved by
 # $> source `which compilervars.sh` <arch>
 # where <arch> is either intel64 or ia32
-<<<<<<< HEAD
-export FC=ifort
-=======
 #export FC=ifort
->>>>>>> b5555cb... singfel: support .geom file
 
 # Some needed environment variables.
 export BOOST_ROOT=${THIRD_PARTY_ROOT}
