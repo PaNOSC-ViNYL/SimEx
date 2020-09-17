@@ -32,8 +32,6 @@ from SimEx.Calculators.XFELPhotonSource import XFELPhotonSource
 from SimEx.Calculators.XMDYNDemoPhotonMatterInteractor import XMDYNDemoPhotonMatterInteractor
 from SimEx.PhotonExperimentSimulation.PhotonExperimentSimulation import PhotonExperimentSimulation
 from SimEx.Parameters.SingFELPhotonDiffractorParameters import SingFELPhotonDiffractorParameters
-from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
-from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 
 from TestUtilities import TestUtilities
 
@@ -43,19 +41,6 @@ class PhotonExperimentSimulationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
-        detector_panel = DetectorPanel( ranges={'fast_scan_min' : 0,
-                                'fast_scan_max' : 21,
-                                'slow_scan_min' : 0,
-                                'slow_scan_max' : 21},
-                        pixel_size=2.2e-4*meter,
-                        photon_response=1.0,
-                        distance_from_interaction_plane=0.13*meter,
-                        corners={'x': -11, 'y' : -11},
-                        )
-
-        cls.detector_geometry = DetectorGeometry(panels=[detector_panel]
-
-
         #  Diffraction with parameters pmi_stop_ID =1.
         cls.diffractorParam_1 = SingFELPhotonDiffractorParameters(
             uniform_rotation=True,
@@ -83,8 +68,6 @@ class PhotonExperimentSimulationTest(unittest.TestCase):
             beam_geometry_file=TestUtilities.generateTestFilePath('s2e.geom'),
             number_of_MPI_processes=2,
         )
-
-  
 
     @classmethod
     def tearDownClass(cls):
@@ -801,7 +784,7 @@ class PhotonExperimentSimulationTest(unittest.TestCase):
             pmi_stop_ID=1,
             number_of_diffraction_patterns=1,
             beam_parameter_file=TestUtilities.generateTestFilePath('s2e.beam'),
-            beam_geometry_file=TestUtilities.generateTestFilePath('s2e.geom'),
+            detector_geometry=TestUtilities.generateTestFilePath('s2e.geom'),
             number_of_MPI_processes=2,
         )
 
@@ -838,13 +821,13 @@ class PhotonExperimentSimulationTest(unittest.TestCase):
             ),  # Cheeting here to provide more realistic data for emc.
             output_path='recon.h5')
 
-        photon_detector = IdealPhotonDetector(parameters=self.d,
+        photon_detector = IdealPhotonDetector(parameters=None,
                                               input_path='diffr',
                                               output_path='detector')
         # Setup the photon experiment.
         pxs = PhotonExperimentSimulation(
             photon_source=photon_source,
-            photon_propagator=photon_propagator,
+            photon_propagator=None,
             photon_interactor=photon_interactor,
             photon_diffractor=photon_diffractor,
             photon_detector=photon_detector,

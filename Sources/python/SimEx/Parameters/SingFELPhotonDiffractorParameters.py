@@ -1,7 +1,7 @@
 """ :module SingFELPhotonDiffractorParameters: Module that holds the SingFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2019 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
