@@ -41,16 +41,6 @@ def _getParallelResourceInfoFromEnv():
     return resource
 
 
-def getThreadsPerCoreFromSlurm():
-    process = subprocess.Popen(['slurmd', '-C'],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT)
-    (output, err) = process.communicate()
-    output = output.decode('utf-8')
-    threads_per_core = int(output.partition('ThreadsPerCore=')[2].split()[0])
-    return threads_per_core
-
-
 def _getParallelResourceInfoFromSlurm():
     """ """
     resource = {}
@@ -67,17 +57,18 @@ def _getParallelResourceInfoFromSlurm():
                 cores = node
                 mul = 1
             else:
-                cores=node[:ind]
-                mul=node[ind+2:node.find(")")]
-            ncores+=int(cores)*int(mul)
+                cores = node[:ind]
+                mul = node[ind + 2:node.find(")")]
+            # print('cores =', cores)
+            ncores += int(cores) * int(mul)
 
-        # Use all physical cores
-        resource['NCores'] = int(ncores / threads_per_core)
+        resource['NCores'] = ncores
         if resource['NNodes'] <= 0 or resource['NCores'] <= 0:
             raise IOError()
-    except:
-        print (os.environ['SLURM_JOB_CPUS_PER_NODE'])
-        raise IOError( "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead")
+    except Exception:
+        raise IOError(
+            "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead"
+        )
 
     return resource
 
@@ -191,7 +182,6 @@ def _getVendorSpecificMPIArguments(version, threads_per_task):
             if threads_per_task > 0:
                 mpi_cmd += " -x OMP_NUM_THREADS=" + str(threads_per_task)
             mpi_cmd += " -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
-            mpi_cmd += ' --mca mpi_cuda_support 0'+' --mca btl_openib_warn_no_device_params_found 0'
         elif version['Vendor'] == "MPICH":
             mpi_cmd += " -map-by node"
             if threads_per_task > 0:

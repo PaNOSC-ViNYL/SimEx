@@ -32,10 +32,11 @@ Contents
     Installation <include/installation>
     Testing      <include/testing>
     Usage        <include/usage>
+    Examples     <include/examples>
     Contribute   <include/contribute>
     Support      <include/support>
     License      <include/license>
-    API Manual  <include/apiman.rst>
+    API Manual  <include/apiman>
     Data formats <include/data_formats>
 ..
     comment
