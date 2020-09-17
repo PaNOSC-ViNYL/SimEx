@@ -81,13 +81,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Init base class.
         super(SingFELPhotonDiffractor, self).__init__(parameters, input_path,
                                                       output_path)
-        
-        try: 
-            if (self.parameters.detector_geometry.panels[0].corners):
-                print ("Notice: corners setting in the DetectorGeometry takes no effects in pysingFEL calculations."
-                    "But it will still be exported by detector_geometry.serialize.")
-        except:
-            pass
 
         self.__expected_data = [
             '/data/snp_<7 digit index>/ff', '/data/snp_<7 digit index>/halfQ',
@@ -189,7 +182,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
 # collect program arguments
-        command_sequence = ['radiationDamageMPI',
+       command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(self.__output_dir),
                             '--geomFile',         str(beam_geometry_file),
@@ -215,7 +208,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         if 'SIMEX_VERBOSE' in os.environ:
             print(("SingFELPhotonDiffractor backengine command: "
-                   + " ".join(args)),flush=True)
+                   + " ".join(args)))
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -241,15 +234,16 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if forcedMPIcommand == "" or forcedMPIcommand is None:
             (np, ncores) = self.computeNTasks()
             mpicommand = ParallelUtilities.prepareMPICommandArguments(
-                np,1)
+                np, ncores)
         else:
             mpicommand = forcedMPIcommand
 
         mpicommand += " ".join(("", sys.executable, __file__, fname))
 
         if 'SIMEX_VERBOSE' in os.environ:
-            print(("SingFELPhotonDiffractor backengine mpicommand: "
-                    + mpicommand),flush=True)
+            if 'MPI' in os.environ['SIMEX_VERBOSE']:
+                print(("SingFELPhotonDiffractor backengine mpicommand: "
+                       + mpicommand))
 
         # Launch the system command.
         args = shlex.split(mpicommand)
