@@ -20,7 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-
 import os
 import subprocess
 import shlex
@@ -37,7 +36,6 @@ class WavePropagator(AbstractPhotonPropagator):
     """
     :class WavePropagator: Represents coherent wavefront propagation using the WPG wrapper for SWR.
     """
-
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
@@ -109,7 +107,6 @@ class WavePropagator(AbstractPhotonPropagator):
         return proc.returncode
 
     def _run(self):
-
         """ This method drives the WPG backengine.
 
         :return: 0 if WPG returns successfully, 1 if not.
@@ -156,7 +153,6 @@ class WavePropagator(AbstractPhotonPropagator):
                 # wpg_to_opmd.convertToOPMD( output_file )
 
         return 0
-
 
     @property
     def data(self):

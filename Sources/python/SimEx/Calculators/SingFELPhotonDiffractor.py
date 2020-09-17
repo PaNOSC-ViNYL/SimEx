@@ -46,7 +46,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
     :class SingFELPhotonDiffractor: Representing scattering from a molecular sample into a detector plane.
     """
-
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
@@ -133,7 +132,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.cpus_per_task == "MAX":
             np = nnodes
         else:
-            np = max(ncores//self.parameters.cpus_per_task, 1)
+            np = max(ncores // self.parameters.cpus_per_task, 1)
 
         return np, ncores
 
@@ -272,10 +271,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Generate rotations.
         quaternions = generateRotations(
-                self.parameters.uniform_rotation,
-                'xyz',
-                self.parameters.number_of_diffraction_patterns,
-               )
+            self.parameters.uniform_rotation,
+            'xyz',
+            self.parameters.number_of_diffraction_patterns,
+        )
 
         # Setup the pysingfel detector using the simex object.
         # TODO: only the first panel is considered for now, can loop over panels later.
@@ -353,15 +352,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
             # Save to h5 file.
             saveAsDiffrOutFile(
-                    outputName,
-                    None,
-                    pattern_index,
-                    detector_counts,
-                    detector_intensity,
-                    quaternion,
-                    detector,
-                    beam,
-                   )
+                outputName,
+                None,
+                pattern_index,
+                detector_counts,
+                detector_intensity,
+                quaternion,
+                detector,
+                beam,
+            )
 
             del particle
 

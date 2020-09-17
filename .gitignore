@@ -20,4 +20,7 @@ deploy_rsa.enc
 *.root
 .ropeproject
 tags
+<<<<<<< HEAD
+=======
 Tests/python/unittest/TestFiles/
+>>>>>>> b5555cb... singfel: support .geom file
