@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2020 Carsten Fortmann-Grote, Juncheng E                  #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -18,11 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
 """ Test module for the parallel utilities.
     @author SY
     @institution DESY
     @creation 20161111
+    
+    @Juncheng E
+    @modification 20200917
 """
 import os, shutil
 import unittest
@@ -30,9 +32,9 @@ import unittest
 from SimEx.Utilities import ParallelUtilities
 from distutils.version import StrictVersion
 
+
 class ParallelUtilitiesTest(unittest.TestCase):
     """ Test class for the ParallelUtilities. """
-
     @classmethod
     def setUpClass(cls):
         """ Setting up the test class. """
@@ -70,139 +72,151 @@ class ParallelUtilitiesTest(unittest.TestCase):
     def testResourceInfoFromMPI(self):
         """ Test we can get resource info from MPI command."""
         resource = ParallelUtilities.getParallelResourceInfo()
-        self.assertGreater(resource['NCores'],0)
-        self.assertEqual(resource['NNodes'],1)
+        self.assertGreater(resource['NCores'], 0)
+        self.assertEqual(resource['NNodes'], 1)
 
     def testResourceInfoNothingWorked(self):
         """ Test that we if we cannot get info, the  default values are used."""
 
-# we set SIMEX_MPICOMMAND so that it call return error
-        os.environ["SIMEX_MPICOMMAND"]='blabla'
+        # we set SIMEX_MPICOMMAND so that it call return error
+        os.environ["SIMEX_MPICOMMAND"] = 'blabla'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual(resource['NCores'],0)
-        self.assertEqual(resource['NNodes'],1)
+        self.assertEqual(resource['NCores'], 0)
+        self.assertEqual(resource['NNodes'], 1)
 
         del os.environ["SIMEX_MPICOMMAND"]
-
 
     def testResourceInfoFromSimexWorks(self):
         """ Test we can set resource info via environment variables."""
-        os.environ["SIMEX_NNODES"]='1'
-        os.environ["SIMEX_NCORES"]='1'
+        os.environ["SIMEX_NNODES"] = '1'
+        os.environ["SIMEX_NCORES"] = '1'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual( resource['NCores'],1)
-        self.assertEqual( resource['NNodes'],1)
+        self.assertEqual(resource['NCores'], 1)
+        self.assertEqual(resource['NNodes'], 1)
 
-        os.environ["SIMEX_NNODES"]='-1'
-        os.environ["SIMEX_NCORES"]='-1'
+        os.environ["SIMEX_NNODES"] = '-1'
+        os.environ["SIMEX_NCORES"] = '-1'
 
-        self.assertRaises( IOError, ParallelUtilities.getParallelResourceInfo)
+        self.assertRaises(IOError, ParallelUtilities.getParallelResourceInfo)
 
     def testResourceInfoFromSlurm_WorksForSingleNode(self):
         """ Test we can get resource info from SLURM for a single node."""
-        os.environ['SLURM_JOB_NUM_NODES']='1'
-        os.environ['SLURM_JOB_CPUS_PER_NODE']='40'
+        os.environ['SLURM_JOB_NUM_NODES'] = '1'
+        os.environ['SLURM_JOB_CPUS_PER_NODE'] = '40'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual( resource['NCores'],40)
-        self.assertEqual( resource['NNodes'],1)
+        self.assertEqual(resource['NCores'], 40)
+        self.assertEqual(resource['NNodes'], 1)
 
-    def testResourceInfoFromSlurm_WorksForMultipleNodeWithSameAmountOfCores(self):
+    def testResourceInfoFromSlurm_WorksForMultipleNodeWithSameAmountOfCores(
+            self):
         """ Test we can get resource info from SLURM for multiple homogeneous nodes."""
-        os.environ['SLURM_JOB_NUM_NODES']='3'
-        os.environ['SLURM_JOB_CPUS_PER_NODE']='40x(3)'
+
+        os.environ['SLURM_JOB_NUM_NODES'] = '3'
+        os.environ['SLURM_JOB_CPUS_PER_NODE'] = '40(x3)'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual( resource['NCores'],120)
-        self.assertEqual( resource['NNodes'],3)
+        self.assertEqual(resource['NCores'], 120)
+        self.assertEqual(resource['NNodes'], 3)
 
-    def testResourceInfoFromSlurm_WorksForMultipleNodeWithDifferentAmountOfCores(self):
+    def testResourceInfoFromSlurm_WorksForMultipleNodeWithDifferentAmountOfCores(
+            self):
         """ Test we can get resource info from SLURM for multiple heterogeneous nodes."""
-        os.environ['SLURM_JOB_NUM_NODES']='3'
-        os.environ['SLURM_JOB_CPUS_PER_NODE']='40x(2),20x(1),10x(10)'
+        os.environ['SLURM_JOB_NUM_NODES'] = '3'
+        os.environ['SLURM_JOB_CPUS_PER_NODE'] = '40(x2),20(x1),10(x10)'
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual(resource['NCores'],200)
-        self.assertEqual(resource['NNodes'],3)
+        self.assertEqual(resource['NCores'], 200)
+        self.assertEqual(resource['NNodes'], 3)
 
     def testGetVersionInfo(self):
         """ Test we can extract MPI version infromation."""
-        version=ParallelUtilities._getMPIVersionInfo()
+        version = ParallelUtilities._getMPIVersionInfo()
 
-        self.assertIn('Vendor',version)
-        self.assertIn('Version',version)
-        self.assertIn(version['Vendor'],["OpenMPI","MPICH"])
+        self.assertIn('Vendor', version)
+        self.assertIn('Version', version)
+        self.assertIn(version['Vendor'], ["OpenMPI", "MPICH"])
 
-        self.assertIsInstance(version['Version'],str)
-        self.assertGreater(StrictVersion(version['Version']),StrictVersion("0.0.0"))
+        self.assertIsInstance(version['Version'], str)
+        self.assertGreater(StrictVersion(version['Version']),
+                           StrictVersion("0.0.0"))
 
     def testMPICommandArguments_ExceptionWhenCannotDefine(self):
         """ Test we get exception when we cannot setup mpirun arguments."""
-        os.environ["SIMEX_MPICOMMAND"]='blabla'
+        os.environ["SIMEX_MPICOMMAND"] = 'blabla'
 
-        self.assertRaises(IOError,ParallelUtilities.prepareMPICommandArguments,1)
+        self.assertRaises(IOError,
+                          ParallelUtilities.prepareMPICommandArguments, 1)
 
         del os.environ["SIMEX_MPICOMMAND"]
 
-
     def testVendorSpecificMPIArguments_OpenMPIOldVersion(self):
         """ Test mpirun arguments for OpenMPi are set correctly for old version."""
-        version=dict([("Vendor", "OpenMPI"),("Version",'1.6.0')])
+        version = dict([("Vendor", "OpenMPI"), ("Version", '1.6.0')])
 
-        str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
-        self.assertEqual(str," --bynode -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0")
+        str = ParallelUtilities._getVendorSpecificMPIArguments(version, 1)
+        self.assertEqual(
+            str,
+            " --bynode -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
+        )
 
     def testVendorSpecificMPIArguments_OpenMPINewVersion(self):
         """ Test mpirun arguments for OpenMPI are set correctly for new version."""
-        version=dict([("Vendor", "OpenMPI"),("Version",'1.9.0')])
+        version = dict([("Vendor", "OpenMPI"), ("Version", '1.9.0')])
 
-        str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
-        self.assertEqual(str," --map-by node --bind-to none -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0")
-
+        str = ParallelUtilities._getVendorSpecificMPIArguments(version, 1)
+        self.assertEqual(
+            str,
+            " --map-by node --bind-to none -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
+        )
 
     def testVendorSpecificMPIArguments_MPICH(self):
         """ Test mpirun arguments for MPICH are set correctly."""
-        version=dict([("Vendor", "MPICH"),("Version",'1.9.0')])
+        version = dict([("Vendor", "MPICH"), ("Version", '1.9.0')])
 
-        str=ParallelUtilities._getVendorSpecificMPIArguments(version,1)
-        self.assertEqual(str," -map-by node -env OMP_NUM_THREADS 1")
+        str = ParallelUtilities._getVendorSpecificMPIArguments(version, 1)
+        self.assertEqual(str, " -map-by node -env OMP_NUM_THREADS 1")
 
     def testVendorSpecificMPIArguments_UseAllThreads(self):
         """ Test we don't set OMP_NUM_THREADS by default"""
 
-        version=dict([("Vendor", "OpenMPI"),("Version",'1.6.0')])
+        version = dict([("Vendor", "OpenMPI"), ("Version", '1.6.0')])
 
-        str=ParallelUtilities._getVendorSpecificMPIArguments(version,0)
-        self.assertNotIn("OMP_NUM_THREADS",str)
+        str = ParallelUtilities._getVendorSpecificMPIArguments(version, 0)
+        self.assertNotIn("OMP_NUM_THREADS", str)
 
     def testVendorSpecificMPIArguments_Exception_OnNoneVersion(self):
         """ Test we get exception when MPI version is not defined"""
-        version=None
-        self.assertRaises(IOError,ParallelUtilities._getVendorSpecificMPIArguments,version,0)
+        version = None
+        self.assertRaises(IOError,
+                          ParallelUtilities._getVendorSpecificMPIArguments,
+                          version, 0)
 
     def testPrepareMPICommandArguments_Exception_OnNegativeNTasks(self):
         """ Test we get exception on negative number of tasks"""
-        self.assertRaises(IOError,ParallelUtilities.prepareMPICommandArguments,-1,0)
+        self.assertRaises(IOError,
+                          ParallelUtilities.prepareMPICommandArguments, -1, 0)
 
     def testPrepareMPICommandArguments_Adds_NumberOfTasks(self):
         """ Test we correctly set number of tasks"""
-        self.assertIn("-np 10",ParallelUtilities.prepareMPICommandArguments(10,0))
+        self.assertIn("-np 10",
+                      ParallelUtilities.prepareMPICommandArguments(10, 0))
 
     def testPrepareMPICommandArguments_Adds_ExtraMPIParameters(self):
         """ Test we correctly use SIMEX_EXTRA_MPI_PARAMETERS environment variable"""
-        os.environ["SIMEX_EXTRA_MPI_PARAMETERS"]='blabla'
+        os.environ["SIMEX_EXTRA_MPI_PARAMETERS"] = 'blabla'
 
-        self.assertIn("blabla",ParallelUtilities.prepareMPICommandArguments(10,0))
+        self.assertIn("blabla",
+                      ParallelUtilities.prepareMPICommandArguments(10, 0))
 
         del os.environ["SIMEX_EXTRA_MPI_PARAMETERS"]
-
 
 
 if __name__ == '__main__':

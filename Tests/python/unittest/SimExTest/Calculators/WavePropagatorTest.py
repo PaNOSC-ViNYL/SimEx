@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #                                                                        #
 ##########################################################################
-
 """ Test module for the WavePropagator.
 
     @author : CFG
@@ -134,4 +133,3 @@ class WavePropagatorTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
