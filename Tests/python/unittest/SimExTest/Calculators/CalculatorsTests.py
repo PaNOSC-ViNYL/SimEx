@@ -37,7 +37,7 @@ from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
 from .WavePropagatorTest import WavePropagatorTest
 from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
-from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
+#from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
 from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
 from .TNSAIonMatterInteractorTest import TNSAIonMatterInteractorTest
 
