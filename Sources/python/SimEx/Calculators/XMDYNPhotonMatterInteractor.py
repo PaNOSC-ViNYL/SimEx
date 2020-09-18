@@ -230,7 +230,7 @@ class XMDYNPhotonMatterInteractor(AbstractPhotonInteractor):
             ' --dbase {0:s}'.format(os.environ["XMDYNANDXATOMDBPATH"]) + \
             ' --seed {0:d}'.format(self.__seed) + \
             ' --s2e-rot "{0:f} {1:f} {2:f} {3:f}"'.format(*self.parameters.rotation) + \
-            ' --pmi_params ' + \
+            ' --pmi_params' + \
             ' --root {0:s}'.format(self.__root_path) 
 
 
