@@ -1,7 +1,7 @@
 """ :module XFELPhotonAnalysis: Module that hosts the XFELPhotonAnalysis class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -205,11 +205,13 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         if qspace:
             del wf
 
-    def numpyTotalPower(self, spectrum=False):
+    def numpyTotalPower(self, spectrum=False, all=False):
         """ Method to dump meaningful total power.
 
         :param spectrum: Whether to dump the power density in energy domain (True) or time domain (False, default).
         :type spectrum: bool
+        :param all: `True` to extract all the points, `False` to extract only meaningful points
+        :type all: bool
 
         """
 
@@ -219,6 +221,9 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         if spectrum:
             print("Switching to frequency domain.")
             wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 'f')
+            self.intensity = self.wavefront.get_intensity()
+        else:
+            wpg.srwlib.srwl.SetRepresElecField(self.wavefront._srwl_wf, 't')
             self.intensity = self.wavefront.get_intensity()
 
         # Get dimensions.
@@ -238,11 +243,15 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         center_ny = int(mesh.ny/2)
 
         # Get meaningful slices.
-        aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
-        int0_mean = int0[min(aw):max(aw)]  # meaningful range of pulse
+        if all:
+            aw = numpy.arange(len(int0))
+        else:
+            aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
+        int0_mean = int0[min(aw):max(aw)+1]  # meaningful range of pulse
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
+        xs_mf = numpy.arange(min(aw), max(aw)+1)*dSlice + mesh.sliceMin
+
         if(self.wavefront.params.wDomain=='time'):
             print('x: Time (fs)')
             print('y: Power (W)')
@@ -297,10 +306,10 @@ class XFELPhotonAnalysis(AbstractAnalysis):
 
         # Get meaningful slices.
         aw = [a[0] for a in numpy.argwhere(int0 > int0max*0.01)]
-        int0_mean = int0[min(aw):max(aw)]  # meaningful range of pulse
+        int0_mean = int0[min(aw):max(aw)+1]  # meaningful range of pulse
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
+        xs_mf = numpy.arange(min(aw), max(aw)+1)*dSlice + mesh.sliceMin
         if(self.wavefront.params.wDomain=='time'):
             plt.plot(xs*1e15, int0) # time axis converted to fs.
             plt.plot(xs_mf*1e15, int0_mean, 'ro')
@@ -364,18 +373,18 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         dSlice = (mesh.sliceMax - mesh.sliceMin)/(mesh.nSlices - 1)
 
         xs = numpy.arange(mesh.nSlices)*dSlice+ mesh.sliceMin
-        xs_mf = numpy.arange(min(aw), max(aw))*dSlice + mesh.sliceMin
+        xs_mf = numpy.arange(min(aw), max(aw)+1)*dSlice + mesh.sliceMin
 
         # Plot.
         if(self.wavefront.params.wDomain=='time'):
             plt.plot(xs*1e15,int0_00)
-            plt.plot(xs_mf*1e15, int0_00[min(aw):max(aw)], 'ro')
+            plt.plot(xs_mf*1e15, int0_00[min(aw):max(aw)+1], 'ro')
             plt.title('On-Axis Power Density')
             plt.xlabel('time (fs)')
             plt.ylabel(r'Power density (W/mm${}^{2}$)')
         else: #frequency domain
             plt.plot(xs,int0_00)
-            plt.plot(xs_mf, int0_00[min(aw):max(aw)], 'ro')
+            plt.plot(xs_mf, int0_00[min(aw):max(aw)+1], 'ro')
             plt.title('On-Axis Spectral Fluence')
             plt.xlabel('photon energy (eV)')
             plt.ylabel(r'fluence (J/eV/mm${}^{2}$)')
@@ -402,3 +411,23 @@ def mask_nans(a, replacement=0.0):
         a[nans] = 0.0 # Yes this works because a is a reference!
     return isnan_array
 
+def calculate_fwhm(wfr):
+    """
+    Calculate FWHM of the beam calculating number of point bigger then max/2 throuhgt center of the image
+
+    :param wfr:  wavefront
+    :return: {'fwhm_x':fwhm_x, 'fwhm_y': fwhm_y} in [m]
+    """
+    intens = wfr.get_intensity(polarization='total').sum(axis=-1);
+
+
+    mesh = wfr.params.Mesh
+    dx = (mesh.xMax-mesh.xMin)/mesh.nx
+    dy = (mesh.yMax-mesh.yMin)/mesh.ny
+
+    x_center = intens[intens.shape[0]//2,:]
+    fwhm_x = len(x_center[x_center>x_center.max()/2])*dx
+
+    y_center = intens[:,intens.shape[1]//2]
+    fwhm_y = len(y_center[y_center>y_center.max()/2])*dy
+    return {'fwhm_x':fwhm_x, 'fwhm_y': fwhm_y}

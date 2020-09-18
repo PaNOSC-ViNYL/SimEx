@@ -1,7 +1,7 @@
 """:module PhotonExperimentSimulation: Module that hosts the PhotonExperimentSimulation class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -22,22 +22,23 @@
 
 import os
 
-from SimEx.Calculators.AbstractPhotonAnalyzer   import checkAndSetPhotonAnalyzer
-from SimEx.Calculators.AbstractPhotonDetector   import checkAndSetPhotonDetector
+from SimEx.Calculators.AbstractPhotonAnalyzer import checkAndSetPhotonAnalyzer
+from SimEx.Calculators.AbstractPhotonDetector import checkAndSetPhotonDetector
 from SimEx.Calculators.AbstractPhotonDiffractor import checkAndSetPhotonDiffractor
 from SimEx.Calculators.AbstractPhotonInteractor import checkAndSetPhotonInteractor
 from SimEx.Calculators.AbstractPhotonPropagator import checkAndSetPhotonPropagator
 from SimEx.Calculators.AbstractPhotonSource import checkAndSetPhotonSource
 
+
 class PhotonExperimentSimulation(object):
     """ :class PhotonExperimentSimulation: Top level object for running photon experiment simulations. It hosts the modules (calculators) ."""
-
-    def __init__(self, photon_source=None,
-                       photon_propagator=None,
-                       photon_interactor=None,
-                       photon_diffractor=None,
-                       photon_detector=None,
-                       photon_analyzer=None):
+    def __init__(self,
+                 photon_source=None,
+                 photon_propagator=None,
+                 photon_interactor=None,
+                 photon_diffractor=None,
+                 photon_detector=None,
+                 photon_analyzer=None):
         """
 
         :param photon_source: The calculator for the photon source.
@@ -66,16 +67,15 @@ class PhotonExperimentSimulation(object):
         self.__photon_analyzer = checkAndSetPhotonAnalyzer(photon_analyzer)
 
         self.__calculators = [
-                self.__photon_source,
-                self.__photon_propagator,
-                self.__photon_interactor,
-                self.__photon_diffractor,
-                self.__photon_analyzer,
-                ]
-
+            self.__photon_source,
+            self.__photon_propagator,
+            self.__photon_interactor,
+            self.__photon_diffractor,
+            self.__photon_analyzer,
+        ]
 
         if self.__photon_detector is not None:
-            self.__calculators.insert(-1, self.__photon_detector )
+            self.__calculators.insert(-1, self.__photon_detector)
 
         if any([calc is None for calc in self.__calculators]):
             raise TypeError
@@ -87,63 +87,73 @@ class PhotonExperimentSimulation(object):
     def photon_source(self):
         """ Query for the photon source attached to this workflow. """
         return self.__photon_source
+
     @photon_source.setter
     def photon_source(self, value):
-        self.__photon_source = checkAndSetPhotonSource( value )
+        self.__photon_source = checkAndSetPhotonSource(value)
 
     @property
     def photon_propagator(self):
         """ Query for the photon propagator attached to this workflow. """
         return self.__photon_propagator
+
     @photon_propagator.setter
     def photon_propagator(self, value):
-        self.__photon_propagator = checkAndSetPhotonPropagator( value )
+        self.__photon_propagator = checkAndSetPhotonPropagator(value)
 
     @property
     def photon_interactor(self):
         """ Query for the photon interactor attached to this workflow. """
         return self.__photon_interactor
+
     @photon_interactor.setter
     def photon_interactor(self, value):
-        self.__photon_interactor = checkAndSetPhotonInteractor( value )
+        self.__photon_interactor = checkAndSetPhotonInteractor(value)
 
     @property
     def photon_diffractor(self):
         """ Query for the photon diffractor attached to this workflow. """
         return self.__photon_diffractor
+
     @photon_diffractor.setter
     def photon_diffractor(self, value):
-        self.__photon_diffractor = checkAndSetPhotonDiffractor( value )
+        self.__photon_diffractor = checkAndSetPhotonDiffractor(value)
 
     @property
     def photon_detector(self):
         """ Query for the photon detector attached to this workflow. """
         return self.__photon_detector
+
     @photon_detector.setter
     def photon_detector(self, value):
-        self.__photon_detector = checkAndSetPhotonDetector( value )
+        self.__photon_detector = checkAndSetPhotonDetector(value)
 
     @property
     def photon_analyzer(self):
         """ Query for the photon analyzer attached to this workflow. """
         return self.__photon_analyzer
+
     @photon_analyzer.setter
     def photon_analyzer(self, value):
-        self.__photon_analyzer = checkAndSetPhotonAnalyzer( value )
+        self.__photon_analyzer = checkAndSetPhotonAnalyzer(value)
 
     def run(self):
         """ Method to start the photon experiment simulation workflow. """
 
         if not self._checkInterfaceConsistency():
-            raise RuntimeError(" Interfaces are not consistent, i.e. at least one module's expectations with respect to incoming data sets are not satisfied.")
+            raise RuntimeError(
+                " Interfaces are not consistent, i.e. at least one module's expectations with respect to incoming data sets are not satisfied."
+            )
 
-        print('\n'.join(["#"*80,  "# Starting SIMEX run.", "#"*80]))
-        print('\n'.join(["#"*80,  "# Starting SIMEX photon source.", "#"*80]))
+        print('\n'.join(["#" * 80, "# Starting SIMEX run.", "#" * 80]))
+        print('\n'.join(
+            ["#" * 80, "# Starting SIMEX photon source.", "#" * 80]))
         self.__photon_source._readH5()
         self.__photon_source.backengine()
         self.__photon_source.saveH5()
 
-        print('\n'.join(["#"*80,  "# Starting SIMEX photon propagation.", "#"*80]))
+        print('\n'.join(
+            ["#" * 80, "# Starting SIMEX photon propagation.", "#" * 80]))
         self.__photon_propagator._readH5()
         self.__photon_propagator.backengine()
         self.__photon_propagator.saveH5()
@@ -153,12 +163,7 @@ class PhotonExperimentSimulation(object):
         self.__photon_interactor.backengine()
         self.__photon_interactor.saveH5()
 
-        print('\n'.join(["#"*80,  "# Starting SIMEX photon diffraction.", "#"*80]))
         self.__photon_diffractor._readH5()
-        self.__photon_diffractor.backengine()
-        self.__photon_diffractor.saveH5()
-
-        if self.__photon_detector is not None:
             print('\n'.join(["#"*80,  "# Starting SIMEX photon detection.", "#"*80]))
             self.__photon_detector._readH5()
             self.__photon_detector.backengine()
@@ -174,8 +179,7 @@ class PhotonExperimentSimulation(object):
         self.__photon_analyzer.backengine()
         self.__photon_analyzer.saveH5()
 
-        print('\n'.join(["#"*80,  "# SIMEX  done.", "#"*80]))
-
+        print('\n'.join(["#" * 80, "# SIMEX  done.", "#" * 80]))
 
     def _checkInterfaceConsistency(self):
         """
@@ -183,9 +187,13 @@ class PhotonExperimentSimulation(object):
         calculator.
         """
         status = True
-        for i,calculator in enumerate(self.__calculators[:-1]):
+        for i, calculator in enumerate(self.__calculators[:-1]):
             provided_data_set = set(calculator.providedData())
-            expected_data_set = set(self.__calculators[i+1].expectedData())
-            if not expected_data_set.issubset( provided_data_set ):
-                raise RuntimeError( "Dataset expected by %s is not a subset of data provided by %s.\n Provided data are:\n%s.\n\n Expected data are:\n%s" % (self.__calculators[i+1], calculator, str(provided_data_set).replace(',', '\n'), str(expected_data_set).replace(',', '\n') ) )
+            expected_data_set = set(self.__calculators[i + 1].expectedData())
+            if not expected_data_set.issubset(provided_data_set):
+                raise RuntimeError(
+                    "Dataset expected by %s is not a subset of data provided by %s.\n Provided data are:\n%s.\n\n Expected data are:\n%s"
+                    % (self.__calculators[i + 1], calculator,
+                       str(provided_data_set).replace(',', '\n'),
+                       str(expected_data_set).replace(',', '\n')))
         return status
