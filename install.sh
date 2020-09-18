@@ -60,6 +60,9 @@ then
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 fi
 
+XCSIT=ON
+THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+
 # Check for existing build directory, remove if found
 if [ -d build ]
 then
