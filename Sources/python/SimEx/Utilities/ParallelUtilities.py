@@ -41,10 +41,21 @@ def _getParallelResourceInfoFromEnv():
     return resource
 
 
+def getThreadsPerCoreFromSlurm():
+    process = subprocess.Popen(['slurmd', '-C'],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT)
+    (output, err) = process.communicate()
+    output = output.decode('utf-8')
+    threads_per_core = int(output.partition('ThreadsPerCore=')[2].split()[0])
+    return threads_per_core
+
+
 def _getParallelResourceInfoFromSlurm():
     """ """
     resource = {}
     try:
+        threads_per_core = getThreadsPerCoreFromSlurm()
         resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
         uniq_nodes = os.environ['SLURM_JOB_CPUS_PER_NODE'].split(",")
         # SLURM sets this variable to something like 40(x2),20(x1),10(x10). We extract ncores from this
@@ -58,10 +69,10 @@ def _getParallelResourceInfoFromSlurm():
             else:
                 cores = node[:ind]
                 mul = node[ind + 2:node.find(")")]
-            # print('cores =', cores)
             ncores += int(cores) * int(mul)
 
-        resource['NCores'] = ncores
+        # Use all physical cores
+        resource['NCores'] = int(ncores / threads_per_core)
         if resource['NNodes'] <= 0 or resource['NCores'] <= 0:
             raise IOError()
     except Exception:
@@ -181,6 +192,7 @@ def _getVendorSpecificMPIArguments(version, threads_per_task):
             if threads_per_task > 0:
                 mpi_cmd += " -x OMP_NUM_THREADS=" + str(threads_per_task)
             mpi_cmd += " -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
+            mpi_cmd += ' --mca mpi_cuda_support 0'+' --mca btl_openib_warn_no_device_params_found 0'
         elif version['Vendor'] == "MPICH":
             mpi_cmd += " -map-by node"
             if threads_per_task > 0:
