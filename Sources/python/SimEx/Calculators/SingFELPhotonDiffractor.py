@@ -182,7 +182,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
 
 # collect program arguments
-       command_sequence = ['radiationDamageMPI',
+        command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(self.__output_dir),
                             '--geomFile',         str(beam_geometry_file),
@@ -208,7 +208,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         if 'SIMEX_VERBOSE' in os.environ:
             print(("SingFELPhotonDiffractor backengine command: "
-                   + " ".join(args)))
+                   + " ".join(args)),flush=True)
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -234,16 +234,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if forcedMPIcommand == "" or forcedMPIcommand is None:
             (np, ncores) = self.computeNTasks()
             mpicommand = ParallelUtilities.prepareMPICommandArguments(
-                np, ncores)
+                np,1)
         else:
             mpicommand = forcedMPIcommand
 
         mpicommand += " ".join(("", sys.executable, __file__, fname))
 
         if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print(("SingFELPhotonDiffractor backengine mpicommand: "
-                       + mpicommand))
+            print(("SingFELPhotonDiffractor backengine mpicommand: "
+                    + mpicommand),flush=True)
 
         # Launch the system command.
         args = shlex.split(mpicommand)
