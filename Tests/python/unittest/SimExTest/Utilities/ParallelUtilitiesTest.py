@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2020 Carsten Fortmann-Grote, Juncheng E                  #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -22,9 +22,8 @@
     @author SY
     @institution DESY
     @creation 20161111
-    
     @Juncheng E
-    @modification 20200917
+    @modified 20200918
 """
 import os, shutil
 import unittest
@@ -112,7 +111,7 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual(resource['NCores'], 40)
+        self.assertEqual(resource['NCores'], 40 / self.threads_per_core)
         self.assertEqual(resource['NNodes'], 1)
 
     def testResourceInfoFromSlurm_WorksForMultipleNodeWithSameAmountOfCores(
@@ -124,7 +123,7 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual(resource['NCores'], 120)
+        self.assertEqual(resource['NCores'], 120 / self.threads_per_core)
         self.assertEqual(resource['NNodes'], 3)
 
     def testResourceInfoFromSlurm_WorksForMultipleNodeWithDifferentAmountOfCores(
@@ -135,8 +134,9 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
         resource = ParallelUtilities.getParallelResourceInfo()
 
-        self.assertEqual(resource['NCores'], 200)
+        self.assertEqual(resource['NCores'], 200 / self.threads_per_core)
         self.assertEqual(resource['NNodes'], 3)
+
 
     def testGetVersionInfo(self):
         """ Test we can extract MPI version infromation."""
@@ -166,7 +166,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
         str = ParallelUtilities._getVendorSpecificMPIArguments(version, 1)
         self.assertEqual(
             str,
-            " --bynode -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
+            " --bynode -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0 "
+            "--mca mpi_cuda_support 0 --mca btl_openib_warn_no_device_params_found 0"
         )
 
     def testVendorSpecificMPIArguments_OpenMPINewVersion(self):
@@ -176,7 +177,8 @@ class ParallelUtilitiesTest(unittest.TestCase):
         str = ParallelUtilities._getVendorSpecificMPIArguments(version, 1)
         self.assertEqual(
             str,
-            " --map-by node --bind-to none -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
+            " --map-by node --bind-to none -x OMP_NUM_THREADS=1 -x OMPI_MCA_mpi_warn_on_fork=0 "
+            "-x OMPI_MCA_btl_base_warn_component_unused=0 --mca mpi_cuda_support 0 --mca btl_openib_warn_no_device_params_found 0"
         )
 
     def testVendorSpecificMPIArguments_MPICH(self):
@@ -193,13 +195,6 @@ class ParallelUtilitiesTest(unittest.TestCase):
 
         str = ParallelUtilities._getVendorSpecificMPIArguments(version, 0)
         self.assertNotIn("OMP_NUM_THREADS", str)
-
-    def testVendorSpecificMPIArguments_Exception_OnNoneVersion(self):
-        """ Test we get exception when MPI version is not defined"""
-        version = None
-        self.assertRaises(IOError,
-                          ParallelUtilities._getVendorSpecificMPIArguments,
-                          version, 0)
 
     def testPrepareMPICommandArguments_Exception_OnNegativeNTasks(self):
         """ Test we get exception on negative number of tasks"""
