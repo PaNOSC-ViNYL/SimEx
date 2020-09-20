@@ -1,7 +1,7 @@
 """:module SingFELPhotonDiffractor: Module that holds the SingFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -176,13 +176,13 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # collect MPI arguments
         if self.parameters.forced_mpi_command == "":
             np, ncores = self.computeNTasks()
-            mpicommand = ParallelUtilities.prepareMPICommandArguments(np)
+            mpicommand = ParallelUtilities.prepareMPICommandArguments(np,1)
         else:
             mpicommand = self.parameters.forced_mpi_command
 
 
 # collect program arguments
-       command_sequence = ['radiationDamageMPI',
+        command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
                             '--outputDir',        str(self.__output_dir),
                             '--geomFile',         str(beam_geometry_file),
@@ -208,7 +208,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         if 'SIMEX_VERBOSE' in os.environ:
             print(("SingFELPhotonDiffractor backengine command: "
-                   + " ".join(args)))
+                   + " ".join(args)),flush=True)
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -234,16 +234,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if forcedMPIcommand == "" or forcedMPIcommand is None:
             (np, ncores) = self.computeNTasks()
             mpicommand = ParallelUtilities.prepareMPICommandArguments(
-                np, ncores)
+                np,1)
         else:
             mpicommand = forcedMPIcommand
 
         mpicommand += " ".join(("", sys.executable, __file__, fname))
 
         if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print(("SingFELPhotonDiffractor backengine mpicommand: "
-                       + mpicommand))
+            print(("SingFELPhotonDiffractor backengine mpicommand: "
+                    + mpicommand),flush=True)
 
         # Launch the system command.
         args = shlex.split(mpicommand)
