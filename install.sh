@@ -94,7 +94,6 @@ cmake -DSRW_OPTIMIZED=ON \
       -DUSE_SingFELPhotonDiffractor=ON \
       -DUSE_CrystFELPhotonDiffractor=ON \
       -DUSE_GAPDPhotonDiffractor=OFF \
-	  -DUSE_sdf=ON \
       -DUSE_s2e=ON \
       -DUSE_S2EReconstruction_EMC=ON \
       -DUSE_S2EReconstruction_DM=ON \
