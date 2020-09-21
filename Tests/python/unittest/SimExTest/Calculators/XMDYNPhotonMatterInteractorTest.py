@@ -160,8 +160,8 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
 
         # Prepare input.
         shutil.copytree( TestUtilities.generateTestFilePath('prop_out'), os.path.abspath( 'prop' ) )
-        #self.__dirs_to_remove.append( 'prop' )
-        #self.__dirs_to_remove.append( 'pmi' )
+        self.__dirs_to_remove.append( 'prop' )
+        self.__dirs_to_remove.append( 'pmi' )
 
         parameters = PhotonMatterInteractorParameters(number_of_trajectories=1)
         test_interactor = XMDYNPhotonMatterInteractor(
@@ -180,47 +180,12 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
         self.assertIn( 'pmi_out_0000001.h5' , os.listdir( test_interactor.output_path ) )
 
     @unittest.skipIf(runs_on_travisCI(), "xmdyn not available on travisCI.")
-    def testBackengineRestart(self):
-        """ Check that we can restart an aborted simulation. """
-
-        # Clean up.
-        #self.__dirs_to_remove.append('pmi')
-
-        # Get test instance.
-        pmi_parameters = {'number_of_trajectories' : 1,
-                         }
-
-        test_interactor = XMDYNPhotonMatterInteractor(parameters=pmi_parameters,
-                                                          input_path=self.input_h5,
-                                                          output_path='pmi',
-                                                          sample_path = TestUtilities.generateTestFilePath('sample.h5'),
-                                                          root_path='pmi/root.1')
-
-        #self.__dirs_to_remove.append(test_interactor.root_path)
-        # Call backengine
-        with test_interactor.backengine() as status:
-            import time
-            time.sleep(10)
-            test_interactor._XMDYNPhotonMatterInteractor__process.kill()
-
-
-        self.assertTrue(os.path.isdir(test_interactor.output_path))
-
-        # Check that the backengine returned zero.
-        self.assertEqual(status, 0)
-
-        # Check we have generated the expected output.
-        self.assertTrue( 'pmi_out_0000001.h5' in os.listdir( test_interactor.output_path ) )
-
-        self.assertTrue(os.path.isdir(test_interactor.root_path))
-
-    @unittest.skipIf(runs_on_travisCI(), "xmdyn not available on travisCI.")
     def testBackengine(self):
         """ Check that the backengine method works correctly. """
 
         # Clean up.
-        breakpoint()
-        #self.__dirs_to_remove.append('pmi')
+        self.__dirs_to_remove.append('prop')w
+        self.__dirs_to_remove.append( 'pmi' )
 
         # Get test instance.
         pmi_parameters = {
