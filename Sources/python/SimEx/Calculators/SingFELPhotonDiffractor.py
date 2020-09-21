@@ -81,6 +81,13 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Init base class.
         super(SingFELPhotonDiffractor, self).__init__(parameters, input_path,
                                                       output_path)
+        
+        try: 
+            if (self.parameters.detector_geometry.panels[0].corners):
+                print ("Notice: corners setting in the DetectorGeometry takes no effects in pysingFEL calculations."
+                    "But it will still be exported by detector_geometry.serialize.")
+        except:
+            pass
 
         self.__expected_data = [
             '/data/snp_<7 digit index>/ff', '/data/snp_<7 digit index>/halfQ',
