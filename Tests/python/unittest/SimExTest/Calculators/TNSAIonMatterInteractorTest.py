@@ -2,6 +2,7 @@ import unittest
 from SimEx.Calculators.TNSAIonMatterInteractor import TNSAIonMatterInteractor
 from SimEx.Parameters.IonMatterInteractorParameters import IonMatterInteractorParameters
 from SimEx.Calculators.AbstractIonInteractor import AbstractIonInteractor
+from TestUtilities import TestUtilities
 import os
 
 
@@ -25,8 +26,9 @@ class TNSAIonMatterInteractorTest(unittest.TestCase):
         self.assertIsInstance(interact, AbstractIonInteractor)
 
     def testRun(self):
+        input_file = TestUtilities.generateTestFilePath('0010.sdf')
         mysource = TNSAIonMatterInteractor(parameters=self.params,
-                                           input_path=generateTestFilePath('0010.sdf'),
+                                           input_path=input_file,
                                            output_path='Data/NeutronData.h5')
 
         try:
