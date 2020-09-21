@@ -48,7 +48,7 @@ class TNSAIonMatterInteractorTest(unittest.TestCase):
         self.assertIsInstance(interact, AbstractIonInteractor)
 
     def testRun(self):
-        input_file = TestUtilities.generateTestFilePath('00101.sdf')
+        input_file = TestUtilities.generateTestFilePath('0010.sdf')
         mysource = TNSAIonMatterInteractor(parameters=self.params,
                                            input_path=input_file,
                                            output_path='Data/NeutronData.h5')
