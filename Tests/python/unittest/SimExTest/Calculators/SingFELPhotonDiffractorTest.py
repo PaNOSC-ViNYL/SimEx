@@ -384,34 +384,6 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         # Check successful completion.
         self.assertEqual(status, 0)
 
-    @unittest.skipIf(TRAVIS, "CI.")
-    def testBackengineNoBeam(self):
-        """ Test that we can start a test calculation with no explicit beam parameters. """
-
-        # Cleanup.
-        self.__dirs_to_remove.append('diffr')
-
-        parameters = SingFELPhotonDiffractorParameters(
-                     uniform_rotation= True,
-                     calculate_Compton = False,
-                     slice_interval = 100,
-                     number_of_slices = 2,
-                     pmi_start_ID = 1,
-                     pmi_stop_ID  = 1,
-                     number_of_diffraction_patterns = 2,
-                     beam_parameters=None,
-                     detector_geometry=self.detector_geometry,
-                     forced_mpi_command='mpirun -np 2',
-                     )
-
-        # Construct the object.
-        diffractor = SingFELPhotonDiffractor(parameters=parameters, input_path=self.input_h5, output_path='diffr')
-
-        # Call backengine.
-        status = diffractor.backengine()
-
-        # Check successful completion.
-        self.assertEqual(status, 0)
 
     @unittest.skipIf(TRAVIS, "CI.")
     def testBackengineDefaultPaths(self):
