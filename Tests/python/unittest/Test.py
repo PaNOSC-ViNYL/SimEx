@@ -43,8 +43,8 @@ def suite():
              ]
 
     # Append if NOT on CI server.
-    if not is_travisCI:
-        suites.append(PhotonExperimentSimulationTests.suite())
+    # if not is_travisCI:
+    #     suites.append(PhotonExperimentSimulationTests.suite())
 
     return unittest.TestSuite(suites)
 
