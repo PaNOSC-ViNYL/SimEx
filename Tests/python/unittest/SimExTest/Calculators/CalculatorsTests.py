@@ -52,8 +52,8 @@ def suite():
              unittest.makeSuite(WavePropagatorTest,                   'test'),
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
-            #  unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
-             unittest.makeSuite(TNSAIonMatterInteractorTest,                'test'),
+             unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
+            #  unittest.makeSuite(TNSAIonMatterInteractorTest,                'test'),
              ]
 
     if not runs_on_travisCI():
