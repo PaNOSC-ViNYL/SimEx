@@ -49,7 +49,8 @@ class GaussianPhotonSourceTest(unittest.TestCase):
             photon_energy_relative_bandwidth=1e-4,
             number_of_transverse_grid_points=128,
             number_of_time_slices=12,
-            divergence=2.0e-6*radian
+            divergence=2.0e-6*radian,
+            z = 1*meter,
             )
 
     @classmethod
@@ -109,6 +110,7 @@ class GaussianPhotonSourceTest(unittest.TestCase):
             number_of_transverse_grid_points=2048,
             number_of_time_slices=12,
             beam_diameter_fwhm=1.0e-5*meter,
+            z = 1*meter,
             )
 
         source = GaussianPhotonSource(parameters=parameters,
