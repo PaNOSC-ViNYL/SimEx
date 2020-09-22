@@ -1,7 +1,7 @@
 """:module CrystFELPhotonDiffractor: Module that holds the CrystFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2017-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2017-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,7 +28,7 @@ import tempfile
 from SimEx.Calculators.AbstractPhotonDiffractor import AbstractPhotonDiffractor
 from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDiffractorParameters
 from SimEx.Parameters.PhotonBeamParameters import propToBeamParameters
-from SimEx.Parameters.DetectorGeometry import _detectorGeometryFromString, DetectorGeometry
+from SimEx.Parameters.DetectorGeometry import detectorGeometryFromFile
 from SimEx.Utilities import ParallelUtilities
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
 from SimEx.Utilities.Units import electronvolt, meter
@@ -241,14 +241,13 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Serialize geometry if necessary.
         if isinstance(self.parameters.detector_geometry, str) and os.path.isfile(self.parameters.detector_geometry):
-            # with open(self.parameters.detector_geometry) as tmp_geom_file:
-            #     geom_string = "\n".join(tmp_geom_file.readlines())
-            # self.parameters.detector_geometry = _detectorGeometryFromString( geom_string )
-            geom_filename = self.parameters.detector_geometry
-        elif isinstance(self.parameters.detector_geometry, DetectorGeometry):
-            geom_file = tempfile.NamedTemporaryFile(suffix=".geom", delete=True)
-            geom_filename = geom_file.name
-            self.parameters.detector_geometry.serialize(stream=geom_filename, caller=self.parameters)
+            # Convert input .geom file into detector_geometry class 
+            input_file = self.parameters.detector_geometry
+            self.parameters.detector_geometry = detectorGeometryFromFile(input_file)
+
+        geom_file = tempfile.NamedTemporaryFile(suffix=".geom", delete=True)
+        geom_filename = geom_file.name
+        self.parameters.detector_geometry.serialize(stream=geom_filename, caller=self.parameters)
 
         # Setup command, minimum set first.
         # Distribute patterns over available processes in round-robin.
@@ -316,6 +315,7 @@ class CrystFELPhotonDiffractor(AbstractPhotonDiffractor):
         """ Private method for reading the hdf5 input and extracting the parameters and data relevant to initialize the object. """
         pass
 
+    # Deprecated
     def saveH5_geom(self):
         """
         Method to save the output to a file. Creates links to h5 files that all contain only one pattern.
