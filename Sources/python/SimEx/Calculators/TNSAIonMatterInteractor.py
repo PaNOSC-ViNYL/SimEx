@@ -1,11 +1,35 @@
+""":module TNSAIonMatterInteractor: Module that holds the TNSAIonMatterInteractor class.  """
+##########################################################################
+#                                                                        #
+# Copyright (C) 2020 Zsolt Lecz, Juncheng E                              #
+# Contact: Juncheng E <juncheng.e@xfel.eu>                               #
+#                                                                        #
+# This file is part of simex_platform.                                   #
+# simex_platform is free software: you can redistribute it and/or modify #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# simex_platform is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
+#                                                                        #
+##########################################################################
 from SimEx.Calculators.AbstractIonInteractor import AbstractIonInteractor
 import sdf
-import sys, math
+import sys
+import math
 import numpy as np
 from scipy.constants import e, m_p as mp
 from numpy.random import random
 import openpmd_api as api
 import time
+import pathlib
+import os
 
 
 class TNSAIonMatterInteractor(AbstractIonInteractor):
@@ -13,16 +37,21 @@ class TNSAIonMatterInteractor(AbstractIonInteractor):
     __dims = 8
     Nn = 0
 
-    def __init__(self,  parameters=None, input_path=None, output_path=None):
-        super(TNSAIonMatterInteractor, self).__init__(parameters, input_path, output_path)
+    def __init__(self, parameters=None, input_path=None, output_path=None):
+        super(TNSAIonMatterInteractor, self).__init__(parameters, input_path,
+                                                      output_path)
         self.counts = []
         self.binedges = []
 
     def read_xsec(self):
         """Read in cross section from filename """
         masses = {'D': 2.014, 'T': 3.016, '3He': 3.016}
-        file_path = self.input_path.split('/')[-2]+ '/' + self.parameters.xsec_file
-        E, xs = np.genfromtxt(file_path, comments='#', skip_footer=2, unpack=True)
+        parent_path = pathlib.Path(self.input_path).parent.absolute()
+        file_path = os.path.join(parent_path, self.parameters.xsec_file)
+        E, xs = np.genfromtxt(file_path,
+                              comments='#',
+                              skip_footer=2,
+                              unpack=True)
 
         collider, target = self.parameters.xsec_file.split('_')[:2]
         m1, m2 = masses[target], masses[collider]
@@ -34,9 +63,7 @@ class TNSAIonMatterInteractor(AbstractIonInteractor):
         SCALAR = api.Mesh_Record_Component.SCALAR
         Unit_Dimension = api.Unit_Dimension
 
-        series = api.Series(
-            self.output_path,
-            api.Access_Type.create)
+        series = api.Series(self.output_path, api.Access_Type.create)
         dateNow = time.strftime('%Y-%m-%d %H:%M:%S %z', time.localtime())
         print("Default settings:")
         print("basePath: ", series.base_path)
@@ -92,7 +119,10 @@ class TNSAIonMatterInteractor(AbstractIonInteractor):
         neutrons["velocity"]["x"].set_unit_SI(1)
         neutrons["velocity"]["y"].set_unit_SI(1)
         neutrons["velocity"]["z"].set_unit_SI(1)
-        neutrons["velocity"].set_unit_dimension({Unit_Dimension.L: 1, Unit_Dimension.T: -1})
+        neutrons["velocity"].set_unit_dimension({
+            Unit_Dimension.L: 1,
+            Unit_Dimension.T: -1
+        })
         neutrons["velocity"]["x"].store_chunk(self.data[3])
         neutrons["velocity"]["y"].store_chunk(self.data[4])
         neutrons["velocity"]["z"].store_chunk(self.data[5])
@@ -102,37 +132,41 @@ class TNSAIonMatterInteractor(AbstractIonInteractor):
 
     def backengine(self):
         if not self.counts:
-            [mom, weight]= self.readSDF()
-            energy = np.square(mom)/(2*mp*e)
-            de=self.parameters.energy_bin
-            nb=math.floor(np.max(energy)/de)
-            self.counts = [0 for i in range(nb+1)]
-            self.binedges = [(i+1)*de for i in range(nb+1)]
+            [mom, weight] = self.readSDF()
+            energy = np.square(mom) / (2 * mp * e)
+            de = self.parameters.energy_bin
+            nb = math.floor(np.max(energy) / de)
+            self.counts = [0 for i in range(nb + 1)]
+            self.binedges = [(i + 1) * de for i in range(nb + 1)]
             print("Number of energy bins: %s" % len(self.binedges))
             for en in energy:
-                index=math.floor(en/de)
+                index = math.floor(en / de)
                 self.counts[index] += weight[index]
 
         [E, xs] = self.read_xsec()
         xs = np.interp(self.binedges, E * 1.e6, xs * 1.e-28)
 
-        vx=[0]
-        self.Nn=0
+        vx = [0]
+        self.Nn = 0
         for i in range(len(self.binedges)):
             px = np.sqrt(2 * mp * self.binedges[i] * e)
-            Nd = self.counts[i]* self.parameters.ibeam_radius**2 / self.parameters.neutron_weight
-            inc = int(round(Nd * self.parameters.target_density * self.parameters.target_length * xs[i]))
-            if inc>0:
-                vx=np.append(vx, np.ones(inc)*px/mp)
+            Nd = self.counts[
+                i] * self.parameters.ibeam_radius**2 / self.parameters.neutron_weight
+            inc = int(
+                round(Nd * self.parameters.target_density
+                      * self.parameters.target_length * xs[i]))
+            if inc > 0:
+                vx = np.append(vx, np.ones(inc) * px / mp)
                 self.Nn += inc
 
         print("Number of neutron macroparticles:", self.Nn)
-        vx=vx[1:]
+        vx = vx[1:]
 
         self.data = np.zeros(shape=(self.__dims, self.Nn))
         vn = math.sqrt(2 * 2.45e6 * e / mp)
         self.data[0] = 1.e6 * self.parameters.target_length * random(self.Nn)
-        r = 1.e6 * self.parameters.ibeam_radius * np.sqrt(random(self.Nn))  # positions will be saved in units of micron
+        r = 1.e6 * self.parameters.ibeam_radius * np.sqrt(random(
+            self.Nn))  # positions will be saved in units of micron
         a = 2 * math.pi * random(self.Nn)
 
         self.data[1] = np.multiply(r, np.cos(a))
@@ -148,12 +182,14 @@ class TNSAIonMatterInteractor(AbstractIonInteractor):
         self.data[6] = np.arange(1, self.Nn + 1)  # id
         self.data[7] = self.parameters.neutron_weight * np.ones(self.Nn)
 
+        return 0
+
     def readSDF(self):
-        try:
-            d = sdf.read(self.input_path)
-        except:
-            print('File "%s" not found' % self.input_path)
-            sys.exit()
+        if not os.path.exists(self.input_path):
+            msg = 'File "{:s}" not found'.format(self.input_path)
+            raise FileNotFoundError(msg)
+
+        d = sdf.read(self.input_path)
 
         px = d.__dict__[self.expectedData[1]]
         wd = d.__dict__[self.expectedData[-1]]
