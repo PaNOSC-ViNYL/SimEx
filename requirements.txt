@@ -1,5 +1,4 @@
 Cython
-SDF
 biopython>=1.69
 breathe
 dill
