@@ -1,7 +1,7 @@
 """ :module DetectorGeometry: Module holding the DetectorGeometry class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -23,6 +23,7 @@ from SimEx.AbstractBaseClass import AbstractBaseClass
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetNumber, checkAndSetPhysicalQuantity
 from SimEx.Utilities.Units import meter, electronvolt
+from cfelpyutils.crystfel_utils import load_crystfel_geometry
 
 import numpy
 import sys
@@ -539,6 +540,80 @@ def _panelStringToDict( input_string ):
         tmp_dict[key] = val
 
     return tmp_dict
+
+def _crystfel_format_vec(vec):
+    """Convert an array of 3 numbers to CrystFEL format like "+1.0x -0.1y"
+    from extra_geom
+    """
+    s = '{:+}x {:+}y'.format(*vec[:2])
+    if vec[2] != 0:
+        s += ' {:+}z'.format(vec[2])
+    return s
+
+
+def _detectorPanelFromDict(panel_dict):
+    fs_vec = numpy.array([panel_dict['fsx'], panel_dict['fsy'], panel_dict['fsz']])
+    ss_vec = numpy.array([panel_dict['ssx'], panel_dict['ssy'], panel_dict['ssz']])
+    panel = DetectorPanel( ranges={"fast_scan_min" : float(panel_dict["min_fs"]),
+                                "fast_scan_max" : float(panel_dict["max_fs"]),
+                                "slow_scan_min" : float(panel_dict["min_ss"]),
+                                "slow_scan_max" : float(panel_dict["max_ss"]),
+                                },
+                        corners={"x" : float(panel_dict["cnx"]),
+                                    "y" : float(panel_dict["cny"]),
+                                },
+                        fast_scan_xyz=_crystfel_format_vec(fs_vec),
+                        slow_scan_xyz=_crystfel_format_vec(ss_vec),
+                        distance_from_interaction_plane=float(panel_dict["clen"])*meter,
+                        pixel_size=1.0/float(panel_dict["res"])*meter,
+                        )
+
+    if panel_dict["adu_per_photon"] is not None:
+        panel.photon_response = float(panel_dict["adu_per_photon"])
+    if panel_dict["adu_per_eV"] is not None:
+        panel.energy_response = float(panel_dict["adu_per_eV"])/electronvolt
+    if panel_dict["coffset"] is not None:
+        panel.distance_offset = float(panel_dict["coffset"])*meter
+    else:
+        panel.distance_offset=None
+    if panel_dict["max_adu"] is not None:
+        panel.saturation_adu = float(panel_dict["max_adu"])
+    else:
+        panel.saturation_adu = None
+    if panel_dict["mask"] is not None:
+        panel.mask = numpy.array( eval(panel_dict["mask"]) )
+    else:
+        panel.mask = None
+    try:
+        panel.good_bit_mask = panel_dict["mask_good"]
+    except KeyError:
+        panel.good_bit_mask = None
+    else:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    try:
+        panel.bad_bit_mask = panel_dict["mask_bad"]
+    except KeyError:
+        panel.bad_bit_mask = None
+    else:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    if panel_dict["satmap"] is not None:
+        panel.saturation_map = panel_dict["satmap"]
+    else:
+        panel.saturation_map = None
+    # saturation_map file missed here
+
+    return panel
+
+
+def detectorGeometryFromFile (input_file):
+    # Create DetectorGeometry class from .geom file
+    geometryDict = load_crystfel_geometry(input_file)
+    panelDicts = geometryDict['panels']
+    panels = [_detectorPanelFromDict(panelDicts[panel]) for panel in panelDicts]
+
+    return DetectorGeometry(panels=panels)
 
 
 def _detectorGeometryFromString( input_string):
