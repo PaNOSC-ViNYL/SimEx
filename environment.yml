@@ -21,8 +21,8 @@
 
 name: simex
 channels:
-  - defaults
   - conda-forge
+  - ondateam
 dependencies:
   - Cython
   - cmake>=3.12.1
@@ -46,6 +46,7 @@ dependencies:
   - openpmd-api
   - python>=3.5
   - nomkl
+  - cfelpyutils
   - pip
   - pip:
     - xraydb
