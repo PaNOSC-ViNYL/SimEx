@@ -46,6 +46,7 @@ dependencies:
   - openpmd-api
   - python>=3.5
   - nomkl
+  - cfelpyutils
   - pip
   - sdf
   - pip:
