@@ -10,7 +10,7 @@ cd /opt
 wget $URL
 unzip ${BRANCH}.zip
 rm ${BRANCH}.zip
-cd simex_platform-${BRANCH}
+cd SimEx-${BRANCH}
 
 export PATH=/opt/miniconda/bin:$PATH
 export HDF5_ROOT=/opt/miniconda
