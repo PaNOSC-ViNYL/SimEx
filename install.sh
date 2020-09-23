@@ -101,18 +101,18 @@ cmake -DSRW_OPTIMIZED=ON \
       -DUSE_S2EReconstruction_DM=ON \
       -DUSE_wpg=ON \
       -DUSE_GenesisPhotonSource=ON \
-      -DUSE_XCSITPhotonDetector=$XCSIT \
-      -DUSE_FEFFPhotonInteractor=ON \
       -DXERCESC_ROOT=$XERCESC_ROOT \
       -DGEANT4_ROOT=$GEANT4_ROOT \
       -DXCSIT_ROOT=$XCSIT_ROOT \
       -DBOOST_ROOT=$BOOST_ROOT \
       ..
+#      -DUSE_XCSITPhotonDetector=$XCSIT \ # requires GEANT
+#     -DUSE_FEFFPhotonInteractor=ON \     # does not compile
 # Build the project.
-make -j32
+cmake --build . -- -j4
 
 # Install the project.
-make install
+cmake --build . --target install
 
 cd ..
 

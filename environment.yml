@@ -49,3 +49,4 @@ dependencies:
   - pip
   - pip:
     - xraydb
+    - openPMD-api

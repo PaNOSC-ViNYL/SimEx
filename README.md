@@ -33,6 +33,27 @@ This command can clone only the newest develop branch to reduce the dowloading s
 Now the TestFiles are hosted at [Zenodo](https://zenodo.org/record/3750541#.X2R9DZMzZE5).
 The files can be downloaded with [this script](get_testdata.sh).
 
+# Install
+## CENTOS 8 Conda (preferred)
+```
+wget -c -O /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh /tmp/miniconda.sh
+```
+
+ * Select a directory XX where to install miniconda, consider 5GB of free disk space.
+ * Add the XX/miniconda/bin/ directory to your path
+
+```
+./install conda-env
+conda init $SHELL
+```
+restart your shell
+```
+conda activate simex
+./install conda
+```
+
+
 ## Acknowledgements
 This project has received funding from the European Union’s Horizon 2020 research
 and innovation programme under grant agreement No 654220 and No 823852.
