@@ -1,0 +1,8 @@
+INCLUDE(ExternalProject)
+
+ExternalProject_Add(
+sdf
+GIT_REPOSITORY https://github.com/PaNOSC-ViNYL/SDF.git
+GIT_SUBMODULES C utilities
+CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+)

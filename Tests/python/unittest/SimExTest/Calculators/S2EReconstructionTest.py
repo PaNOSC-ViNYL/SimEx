@@ -1,6 +1,7 @@
+""" :module: Test module for the S2EReconstruction."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015 Carsten Fortmann-Grote                              #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the S2EReconstruction.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20151109
-
-"""
 import os, shutil
 import unittest
 
@@ -68,6 +62,7 @@ class S2EReconstructionTest(unittest.TestCase):
         self.assertEqual( analyzer.input_path,  os.path.abspath( 'detector' ) )
         self.assertEqual( analyzer.output_path, os.path.abspath( 'analysis' ) )
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI(), "CI.")
     def testBackengineDefaultPath(self):
         """ Test that we can start a test calculation. """
 
@@ -127,6 +122,7 @@ class S2EReconstructionTest(unittest.TestCase):
 
         self.assertIsInstance(analyzer, S2EReconstruction)
 
+    @unittest.skipIf(TestUtilities.runs_on_travisCI(), "CI.")
     def testBackengine(self):
         """ Test that we can start a test calculation. """
 

@@ -21,6 +21,7 @@
 ##########################################################################
 
 # 3rd party imports
+import ocelot
 from ocelot.adaptors import genesis
 from ocelot.rad.undulator_params import UndulatorParameters, Ephoton2K
 import os, shutil, sys
@@ -135,7 +136,7 @@ class GenesisPhotonSourceTest(unittest.TestCase):
 
         # Check generated data.
         self.assertIsInstance( xfel_source._GenesisPhotonSource__genesis_input, genesis.GenesisInput )
-        self.assertIsInstance( xfel_source._GenesisPhotonSource__genesis_beam, genesis.GenesisBeam )
+        self.assertIsInstance( xfel_source._GenesisPhotonSource__genesis_beam, ocelot.cpbd.beam.BeamArray )
 
 
     def testBackengine(self):

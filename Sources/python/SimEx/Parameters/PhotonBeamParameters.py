@@ -1,7 +1,7 @@
 """ :module PhotonBeamParameters: Contains the PhotonBeamParameters class and associated functions."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -67,7 +67,6 @@ class PhotonBeamParameters(AbstractCalculatorParameters):
         :type kwargs: dict
 
         """
-
         super(PhotonBeamParameters, self).__init__(**kwargs)
 
         self.photon_energy = photon_energy

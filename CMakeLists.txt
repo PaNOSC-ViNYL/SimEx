@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.12)
 
 project (SIMEX)
 
@@ -8,35 +8,38 @@ include(CMakeDependentOption)
 if ("${SIMEX_SOURCE_DIR}"  STREQUAL "${SIMEX_BINARY_DIR}")
   message(FATAL_ERROR
     "SIMEX requires an out of source Build. "
-    "Please create a separate binary directory and run CMake there.")
+    "Please create a separate build/ directory and run CMake there.")
 endif()
 
 # set path for modules
 set (SIMEX_CMAKE_DIR "${SIMEX_SOURCE_DIR}/CMake")
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SIMEX_CMAKE_DIR})
 
+# Build variant.
 option (DEVELOPER_INSTALL "Install modules only, do not install SimEx files" OFF)
-
 option (INSTALL_TESTS "Install tests" ON)
+option (PACKAGE_MAKE "Use this option to create linux packages" OFF)
 
-# options required for building the py_detector_interface module:
+# Options required for building the py_detector_interface module:
 # XCSITPotonDetector
 option(PY_DETECTOR_INTERFACE_DEBUG "
     -DPY_DETECTOR_INTERFACE_DEBUG=default: OFF | ON"
 )
 
 ### PYTHON
-FIND_PACKAGE(PythonInterp 3.5 REQUIRED)
+FIND_PACKAGE(Python
+             3.5
+             REQUIRED
+             )
 
 set (LIBDIR     lib)
 set (INCLUDEDIR include)
 set (BINDIR     bin)
-set (PYPATH     ${LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+set (PYPATH     ${LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
 message( "PYPATH=${PYPATH}" )
 
 set (DOCDIR share/doc)
 
-option (PACKAGE_MAKE "Use this option to create linux packages" OFF)
 if (PACKAGE_MAKE)
  set (TESTSDIR   share/simex/Tests)
 else()
@@ -60,7 +63,7 @@ message (STATUS "************************ checking python dependencies *********
 add_subdirectory (Sources)
 
 #By default all modules are included/excluded depending on this flag.
-#If a flag: USE_${module_name} is passed, this will overwrite teh default.
+#If a flag: USE_${module_name} is passed, this will overwrite the default.
 #For example:
 # [De-]activate all modules:
 #      cmake -DUSE_MODULES_DEFAULT=[OFF]ON [...]
@@ -68,7 +71,7 @@ add_subdirectory (Sources)
 #      cmake -DUSE_MODULES_DEFAULT=OFF -DUSE_wpg=ON [...]
 # Deactivate a single module:
 #      cmake -DUSE_MODULES_DEFAULT=ON -DUSE_wpg=OFF [...]
-option(USE_MODULES_DEFAULT "Default to include/exclude a module" ON)
+option(USE_MODULES_DEFAULT "Default to include/exclude all modules" OFF)
 message(STATUS "**************** Including modules (default "
             "${USE_MODULES_DEFAULT}) ****************")
 # find and add modules
@@ -137,6 +140,3 @@ endif()
 
 # Add documentation target.
 add_subdirectory("Sources/doc")
-
-# Add extra stuff, e.g. python libs not pip'able.
-add_subdirectory("Sources/python/extra")

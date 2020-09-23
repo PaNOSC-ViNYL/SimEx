@@ -342,12 +342,13 @@ class PMIDemoTest(unittest.TestCase):
             if os.path.isdir(p):
                 shutil.rmtree(p)
 
+    @unittest.skip("Testfiles do not exist.")
     def test_load_snapshot_from_dir(self):
         """ Test loading a xmdyn snapshot from a directory that contains xmdyn output. """
 
         pmi_demo = PMIDemo()
 
-        snapshot = pmi_demo.f_load_snp_from_dir(self.input_xmdyn_dir, 1600 )
+        snapshot = pmi_demo.f_load_snp_from_dir(self.input_xmdyn_dir)
 
         self.assertIsInstance(snapshot, dict)
 
