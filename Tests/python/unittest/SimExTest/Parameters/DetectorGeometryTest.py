@@ -509,6 +509,16 @@ panel0/corner_x       = -512
         self.assertEqual( panel.slow_scan_xyz, deserialized_panel.slow_scan_xyz )
         self.assertAlmostEqual( panel.pixel_size.magnitude, deserialized_panel.pixel_size.magnitude )
         self.assertAlmostEqual( panel.distance_from_interaction_plane.magnitude, deserialized_panel.distance_from_interaction_plane.magnitude )
+    
+    def testDeSerializeFromFile(self):
+        geom_file_path = TestUtilities.generateTestFilePath("simple.geom")
+        with open(geom_file_path, 'r') as geom_file_handle:
+            geom_string = ''.join(geom_file_handle.readlines())
+
+        geom_instance = _detectorGeometryFromString(geom_string)
+
+
+
 
     #def test<++>(self):
         #""" <++> """

@@ -25,76 +25,98 @@ import os
 import subprocess
 from distutils.version import StrictVersion
 from py3nvml import py3nvml as nvml
+
+
 def _getParallelResourceInfoFromEnv():
     """ """
     resource = {}
     try:
         resource['NCores'] = int(os.environ['SIMEX_NCORES'])
         resource['NNodes'] = int(os.environ['SIMEX_NNODES'])
-        if resource['NNodes']<=0 or resource['NCores']<=0:
+        if resource['NNodes'] <= 0 or resource['NCores'] <= 0:
             raise IOError()
     except:
-        raise IOError( "SIMEX_NNODES and SIMEX_NCORES are set incorrectly")
+        raise IOError("SIMEX_NNODES and SIMEX_NCORES are set incorrectly")
 
     return resource
+
+
+def getThreadsPerCoreFromSlurm():
+    process = subprocess.Popen(['slurmd', '-C'],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT)
+    (output, err) = process.communicate()
+    output = output.decode('utf-8')
+    threads_per_core = int(output.partition('ThreadsPerCore=')[2].split()[0])
+    return threads_per_core
+
 
 def _getParallelResourceInfoFromSlurm():
     """ """
     resource = {}
     try:
+        threads_per_core = getThreadsPerCoreFromSlurm()
         resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
-        uniq_nodes=os.environ['SLURM_JOB_CPUS_PER_NODE'].split(",")
-        # SLURM sets this variable to something like 40x(2),20x(1),10x(10). We extract ncores from this
-        ncores=0
+        uniq_nodes = os.environ['SLURM_JOB_CPUS_PER_NODE'].split(",")
+        # SLURM sets this variable to something like 40(x2),20(x1),10(x10). We extract ncores from this
+        # print('uniq_nodes =', uniq_nodes)
+        ncores = 0
         for node in uniq_nodes:
-            ind=node.find("(")
-            if ind==-1:
-                cores=node
-                mul=1
+            ind = node.find("(")
+            if ind == -1:
+                cores = node
+                mul = 1
             else:
-                cores=node[:ind-1]
-                mul=node[ind+1:node.find(")")]
-            ncores+=int(cores)*int(mul)
+                cores = node[:ind]
+                mul = node[ind + 2:node.find(")")]
+            ncores += int(cores) * int(mul)
 
-        resource['NCores'] = ncores
-        if resource['NNodes']<=0 or resource['NCores']<=0:
+        # Use all physical cores
+        resource['NCores'] = int(ncores / threads_per_core)
+        if resource['NNodes'] <= 0 or resource['NCores'] <= 0:
             raise IOError()
-    except:
-        raise IOError( "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead")
+    except Exception:
+        raise IOError(
+            "Cannot use SLURM_JOB_NUM_NODES and/or SLURM_JOB_CPUS_PER_NODE. Set SIMEX_NNODES and SIMEX_NCORES instead"
+        )
 
     return resource
+
 
 def _MPICommandName():
     """ """
     if 'SIMEX_MPICOMMAND' in os.environ:
-        mpicmd=os.environ['SIMEX_MPICOMMAND']
+        mpicmd = os.environ['SIMEX_MPICOMMAND']
     else:
-        mpicmd='mpirun'
+        mpicmd = 'mpirun'
 
     return mpicmd
 
+
 def _getParallelResourceInfoFromMpirun():
     """ """
-# we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be
-# listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node
+    # we call mpirun hostname which returns list of nodes where mpi tasks will start. Each node can be
+    # listed several times (depending on mpi vendor) that gives us number of cores available for mpirun on this node
     try:
         mpicmd = _MPICommandName()
-        process = subprocess.Popen([mpicmd, "hostname"], stdout=subprocess.PIPE,
+        process = subprocess.Popen([mpicmd, "hostname"],
+                                   stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
         # Decode
         output = output.decode('utf-8')
 
-        if process.returncode !=0:
+        if process.returncode != 0:
             return None
 
-        nodes=output.strip().split('\n')
+        nodes = output.strip().split('\n')
         resource = {}
-        resource['NNodes']=len(set(nodes))
-        resource['NCores']=len(nodes)
+        resource['NNodes'] = len(set(nodes))
+        resource['NCores'] = len(nodes)
         return resource
     except:
         return None
+
 
 def getParallelResourceInfo():
     """
@@ -108,64 +130,76 @@ def getParallelResourceInfo():
     if 'SIMEX_NNODES' in os.environ and 'SIMEX_NCORES' in os.environ:
         return _getParallelResourceInfoFromEnv()
 
-
     if 'SLURM_JOB_NUM_NODES' in os.environ and 'SLURM_JOB_CPUS_PER_NODE' in os.environ:
         return _getParallelResourceInfoFromSlurm()
 
-    resource=_getParallelResourceInfoFromMpirun()
+    resource = _getParallelResourceInfoFromMpirun()
 
-    if resource!=None:
+    if resource != None:
         return resource
     else:
-        print("Was unable to determine parallel resources, will run in serial mode")
-        return dict([("NCores", 0),("NNodes",1)])
+        print(
+            "Was unable to determine parallel resources, will run in serial mode"
+        )
+        return dict([("NCores", 0), ("NNodes", 1)])
+
 
 def _getMPIVersionInfo():
     """ """
     try:
         mpi_cmd = _MPICommandName()
-        process = subprocess.Popen([mpi_cmd, "--version"], stdout=subprocess.PIPE,
-                                    stderr=subprocess.STDOUT)
+
+        process = subprocess.Popen([mpi_cmd, "--version"],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
         (output, err) = process.communicate()
         output = output.decode('utf-8')
 
         version = {}
         if "(Open MPI)" in output:
-            version['Vendor']="OpenMPI"
-            version['Version']=output.split("(Open MPI)")[1].split('\n')[0].strip()
+            version['Vendor'] = "OpenMPI"
+            version['Version'] = output.split("(Open MPI)")[1].split(
+                '\n')[0].strip()
             return version
         if "HYDRA" in output:
-            version['Vendor']="MPICH"
-            version['Version']=output.split("Version:")[1].split('\n')[0].strip()
+            version['Vendor'] = "MPICH"
+            version['Version'] = output.split("Version:")[1].split(
+                '\n')[0].strip()
             return version
 
-    except:
+    except Exception:
         return None
+
 
 def _getVendorSpecificMPIArguments(version, threads_per_task):
     """ """
 
-    if version == None:
-        raise IOError( "Could not determine MPI vendor/version. Set SIMEX_MPICOMMAND or "
-                       "provide backengine_mpicommand calculator parameter")
+    mpi_cmd = ""
 
-    mpi_cmd=""
-    # mapping by node is required to distribute tasks in round-robin mode.
-    if version['Vendor'] == "OpenMPI":
-        if StrictVersion(version['Version'])>StrictVersion("1.8.0"):
-            mpi_cmd+=" --map-by node --bind-to none"
-        else:
-            mpi_cmd+=" --bynode"
-        # by default, all cores will be available, no need to set OMP_NUM_THREADS
-        if threads_per_task > 0:
-            mpi_cmd+=" -x OMP_NUM_THREADS="+str(threads_per_task)
-        mpi_cmd+=" -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
-    elif version['Vendor'] == "MPICH":
-        mpi_cmd+=" -map-by node"
-        if threads_per_task > 0:
-            mpi_cmd+=" -env OMP_NUM_THREADS "+str(threads_per_task)
+    # If version is empty
+    if version is None:
+        msg = ('Warning: Could not determine MPI vendor/version.'
+               'Please set your own MPI arguments if needed.')
+        print(msg)
+    else:
+        # Mapping by node is required to distribute tasks in round-robin mode.
+        if version['Vendor'] == "OpenMPI":
+            if StrictVersion(version['Version']) > StrictVersion("1.8.0"):
+                mpi_cmd += " --map-by node --bind-to none"
+            else:
+                mpi_cmd += " --bynode"
+            # by default, all cores will be available, no need to set OMP_NUM_THREADS
+            if threads_per_task > 0:
+                mpi_cmd += " -x OMP_NUM_THREADS=" + str(threads_per_task)
+            mpi_cmd += " -x OMPI_MCA_mpi_warn_on_fork=0 -x OMPI_MCA_btl_base_warn_component_unused=0"
+            mpi_cmd += ' --mca mpi_cuda_support 0'+' --mca btl_openib_warn_no_device_params_found 0'
+        elif version['Vendor'] == "MPICH":
+            mpi_cmd += " -map-by node"
+            if threads_per_task > 0:
+                mpi_cmd += " -env OMP_NUM_THREADS " + str(threads_per_task)
 
     return mpi_cmd
+
 
 def prepareMPICommandArguments(ntasks, threads_per_task=0):
     """
@@ -188,13 +222,19 @@ def prepareMPICommandArguments(ntasks, threads_per_task=0):
     mpi_cmd = _MPICommandName() + " -np " + str(ntasks)
 
     version = _getMPIVersionInfo()
-    mpi_cmd+=_getVendorSpecificMPIArguments(version, threads_per_task)
+    MPIArguments = _getVendorSpecificMPIArguments(version, threads_per_task)
+    mpi_cmd += MPIArguments
 
     if 'SIMEX_EXTRA_MPI_PARAMETERS' in os.environ:
-        mpi_cmd+=" "+os.environ['SIMEX_EXTRA_MPI_PARAMETERS']
+        mpi_cmd += " " + os.environ['SIMEX_EXTRA_MPI_PARAMETERS']
 
+    if mpi_cmd.split(' ')[0] != "mpirun":
+        raise IOError(
+            "MPI command: '" + mpi_cmd + "' is not starting with 'mpirun' " +
+            "Please check your SIMEX_MPICOMMAND environment variable setting.")
 
     return mpi_cmd
+
 
 def getCUDAEnvironment():
     """ Get the CUDA runtime environment parameters (number of cards etc.). """
@@ -207,12 +247,15 @@ def getCUDAEnvironment():
         nvml.nvmlInit()
         rdict['device_count'] = nvml.nvmlDeviceGetCount()
 
-    except:
-        print('WARNING: At least one of (py3nvml.nvml, CUDA) is not available. Will continue without GPU.')
+    except Exception:
+        print(
+            'WARNING: At least one of (py3nvml.nvml, CUDA) is not available. Will continue without GPU.'
+        )
         return rdict
 
     for i in range(rdict['device_count']):
-        memory_info = nvml.nvmlDeviceGetMemoryInfo(nvml.nvmlDeviceGetHandleByIndex(i))
+        memory_info = nvml.nvmlDeviceGetMemoryInfo(
+            nvml.nvmlDeviceGetHandleByIndex(i))
         memory_usage_percentage = memory_info.used / memory_info.total
 
         if memory_usage_percentage <= 0.1:
@@ -222,4 +265,3 @@ def getCUDAEnvironment():
     nvml.nvmlShutdown()
 
     return rdict
-

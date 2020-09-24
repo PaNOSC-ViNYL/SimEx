@@ -3,7 +3,7 @@
 set -e
 
 BRANCH=develop
-URL=https://github.com/eucall-software/simex_platform/archive/${BRANCH}.zip
+URL=https://github.com/PaNOSC-ViNYL/SimEx/archive/${BRANCH}.zip
 
 cd /opt
 

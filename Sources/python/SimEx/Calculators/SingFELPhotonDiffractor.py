@@ -1,7 +1,7 @@
 """:module SingFELPhotonDiffractor: Module that holds the SingFELPhotonDiffractor class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote, Juncheng E             #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -46,7 +46,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
     """
     :class SingFELPhotonDiffractor: Representing scattering from a molecular sample into a detector plane.
     """
-
     def __init__(self, parameters=None, input_path=None, output_path=None):
         """
 
@@ -60,65 +59,67 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         :type output_path: str
         """
 
-        if isinstance(parameters, dict):
-            parameters = SingFELPhotonDiffractorParameters(parameters_dictionary=parameters)
-
         if parameters is None:
             parameters_default = SingFELPhotonDiffractorParameters(),
         else:
             parameters_default = None
 
-        self.__parameters = checkAndSetInstance(SingFELPhotonDiffractorParameters,
-                                                parameters,
-                                                parameters_default,
-                                                )
+        self.__parameters = checkAndSetInstance(
+            SingFELPhotonDiffractorParameters,
+            parameters,
+            parameters_default,
+        )
 
         # Handle sample geometry provenience.
         if self.__parameters.sample is None and input_path is None:
-            raise AttributeError("One and only one of parameters.sample or input_path must be provided.")
+            raise AttributeError(
+                "One and only one of parameters.sample or input_path must be provided."
+            )
         if self.__parameters.sample is not None:
             input_path = self.__parameters.sample
 
         # Init base class.
-        super(SingFELPhotonDiffractor, self).__init__(parameters, input_path, output_path)
+        super(SingFELPhotonDiffractor, self).__init__(parameters, input_path,
+                                                      output_path)
+        
+        try: 
+            if (self.parameters.detector_geometry.panels[0].corners):
+                print ("Notice: corners setting in the DetectorGeometry takes no effects in pysingFEL calculations."
+                    "But it will still be exported by detector_geometry.serialize.")
+        except:
+            pass
 
-        self.__expected_data = ['/data/snp_<7 digit index>/ff',
-                                '/data/snp_<7 digit index>/halfQ',
-                                '/data/snp_<7 digit index>/Nph',
-                                '/data/snp_<7 digit index>/r',
-                                '/data/snp_<7 digit index>/T',
-                                '/data/snp_<7 digit index>/Z',
-                                '/data/snp_<7 digit index>/xyz',
-                                '/data/snp_<7 digit index>/Sq_halfQ',
-                                '/data/snp_<7 digit index>/Sq_bound',
-                                '/data/snp_<7 digit index>/Sq_free',
-                                '/history/parent/detail',
-                                '/history/parent/parent',
-                                '/info/package_version',
-                                '/info/contact',
-                                '/info/data_description',
-                                '/info/method_description',
-                                '/version']
+        self.__expected_data = [
+            '/data/snp_<7 digit index>/ff', '/data/snp_<7 digit index>/halfQ',
+            '/data/snp_<7 digit index>/Nph', '/data/snp_<7 digit index>/r',
+            '/data/snp_<7 digit index>/T', '/data/snp_<7 digit index>/Z',
+            '/data/snp_<7 digit index>/xyz',
+            '/data/snp_<7 digit index>/Sq_halfQ',
+            '/data/snp_<7 digit index>/Sq_bound',
+            '/data/snp_<7 digit index>/Sq_free', '/history/parent/detail',
+            '/history/parent/parent', '/info/package_version', '/info/contact',
+            '/info/data_description', '/info/method_description', '/version'
+        ]
 
         self.__provided_data = [
-                                '/data/data',
-                                '/data/diffr',
-                                '/data/angle',
-                                '/history/parent/detail',
-                                '/history/parent/parent',
-                                '/info/package_version',
-                                '/info/contact',
-                                '/info/data_description',
-                                '/info/method_description',
-                                '/params/geom/detectorDist',
-                                '/params/geom/pixelWidth',
-                                '/params/geom/pixelHeight',
-                                '/params/geom/mask',
-                                '/params/beam/photonEnergy',
-                                '/params/beam/photons',
-                                '/params/beam/focusArea',
-                                '/params/info',
-                                ]
+            '/data/data',
+            '/data/diffr',
+            '/data/angle',
+            '/history/parent/detail',
+            '/history/parent/parent',
+            '/info/package_version',
+            '/info/contact',
+            '/info/data_description',
+            '/info/method_description',
+            '/params/geom/detectorDist',
+            '/params/geom/pixelWidth',
+            '/params/geom/pixelHeight',
+            '/params/geom/mask',
+            '/params/beam/photonEnergy',
+            '/params/beam/photons',
+            '/params/beam/focusArea',
+            '/params/info',
+        ]
 
     def expectedData(self):
         """ Query for the data expected by the Diffractor. """
@@ -136,7 +137,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         if self.parameters.cpus_per_task == "MAX":
             np = nnodes
         else:
-            np = max(ncores//self.parameters.cpus_per_task, 1)
+            np = max(ncores // self.parameters.cpus_per_task, 1)
 
         return np, ncores
 
@@ -182,9 +183,11 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # collect MPI arguments
         if self.parameters.forced_mpi_command == "":
             np, ncores = self.computeNTasks()
-            mpicommand = ParallelUtilities.prepareMPICommandArguments(np)
+            mpicommand = ParallelUtilities.prepareMPICommandArguments(np,1)
         else:
             mpicommand = self.parameters.forced_mpi_command
+
+
 # collect program arguments
         command_sequence = ['radiationDamageMPI',
                             '--inputDir',         str(input_dir),
@@ -211,7 +214,8 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         args = shlex.split(mpicommand) + command_sequence
 
         if 'SIMEX_VERBOSE' in os.environ:
-            print(("SingFELPhotonDiffractor backengine command: "+" ".join(args)))
+            print(("SingFELPhotonDiffractor backengine command: "
+                   + " ".join(args)),flush=True)
 
         # Run the backengine command.
         proc = subprocess.Popen(args)
@@ -236,15 +240,16 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         if forcedMPIcommand == "" or forcedMPIcommand is None:
             (np, ncores) = self.computeNTasks()
-            mpicommand = ParallelUtilities.prepareMPICommandArguments(np, ncores)
+            mpicommand = ParallelUtilities.prepareMPICommandArguments(
+                np,1)
         else:
             mpicommand = forcedMPIcommand
 
-        mpicommand += " ".join(("",sys.executable, __file__, fname))
+        mpicommand += " ".join(("", sys.executable, __file__, fname))
 
         if 'SIMEX_VERBOSE' in os.environ:
-            if 'MPI' in os.environ['SIMEX_VERBOSE']:
-                print(("SingFELPhotonDiffractor backengine mpicommand: "+mpicommand))
+            print(("SingFELPhotonDiffractor backengine mpicommand: "
+                    + mpicommand),flush=True)
 
         # Launch the system command.
         args = shlex.split(mpicommand)
@@ -275,31 +280,40 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
         # Generate rotations.
         quaternions = generateRotations(
-                self.parameters.uniform_rotation,
-                'xyz',
-                self.parameters.number_of_diffraction_patterns,
-               )
+            self.parameters.uniform_rotation,
+            'xyz',
+            self.parameters.number_of_diffraction_patterns,
+        )
 
         # Setup the pysingfel detector using the simex object.
         # TODO: only the first panel is considered for now, can loop over panels later.
         detector = Detector(None)  # read geom file
         panel = self.parameters.detector_geometry.panels[0]
-        detector.set_detector_dist(panel.distance_from_interaction_plane.m_as(meter))
+        detector.set_detector_dist(
+            panel.distance_from_interaction_plane.m_as(meter))
         detector.set_pix_width(panel.pixel_size.m_as(meter))
         detector.set_pix_height(panel.pixel_size.m_as(meter))
-        detector.set_numPix(panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"] + 1,   # y
-                            panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"] + 1,   # x
-                            )
-        detector.set_center_x((panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] + 1) / 2.)
-        detector.set_center_y((panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] + 1) / 2.)
+        detector.set_numPix(
+            panel.ranges["slow_scan_max"] - panel.ranges["slow_scan_min"]
+            + 1,  # y
+            panel.ranges["fast_scan_max"] - panel.ranges["fast_scan_min"]
+            + 1,  # x
+        )
+        detector.set_center_x(
+            (panel.ranges["fast_scan_max"] + panel.ranges["fast_scan_min"] + 1)
+            / 2.)
+        detector.set_center_y(
+            (panel.ranges["slow_scan_max"] + panel.ranges["slow_scan_min"] + 1)
+            / 2.)
 
         # Setup the beam based on the PhotonBeamParameters instance.
         beam = Beam(None)
         simex_beam = self.parameters.beam_parameters
         beam.set_photon_energy(simex_beam.photon_energy.m_as(electronvolt))
         beam.set_focus(simex_beam.beam_diameter_fwhm.m_as(meter))
-        beam.set_photonsPerPulse(simex_beam.pulse_energy.m_as(joule) /
-                                 simex_beam.photon_energy.m_as(joule))    # Will update all other attributes.
+        beam.set_photonsPerPulse(
+            simex_beam.pulse_energy.m_as(joule) / simex_beam.photon_energy.
+            m_as(joule))  # Will update all other attributes.
 
         # Initialize diffraction pattern
         detector.init_dp(beam)
@@ -309,16 +323,21 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         # Remainder of the division.
         remainder = self.parameters.number_of_diffraction_patterns % mpi_size
         # Pattern indices
-        pattern_indices = list(range(self.parameters.number_of_diffraction_patterns))
+        pattern_indices = list(
+            range(self.parameters.number_of_diffraction_patterns))
 
         # Distribute patterns over cores.
-        rank_indices = pattern_indices[mpi_rank*number_of_patterns_per_core:(mpi_rank+1)*number_of_patterns_per_core]
+        rank_indices = pattern_indices[mpi_rank * number_of_patterns_per_core:(
+            mpi_rank + 1) * number_of_patterns_per_core]
         # Distribute remainder
         if mpi_rank < remainder:
-            rank_indices.append(pattern_indices[mpi_size * number_of_patterns_per_core + mpi_rank])
+            rank_indices.append(
+                pattern_indices[mpi_size * number_of_patterns_per_core
+                                + mpi_rank])
 
         # Setup the output file.
-        outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(mpi_comm.Get_rank()+1) + '.h5'
+        outputName = self.__output_dir + '/diffr_out_' + '{0:07}'.format(
+            mpi_comm.Get_rank() + 1) + '.h5'
 
         if os.path.exists(outputName):
             os.remove(outputName)
@@ -340,7 +359,8 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
             rotateParticle(quaternion, particle)
 
             # Calculate the diffraction intensity.
-            detector_intensity = calculate_molecularFormFactorSq(particle, detector)
+            detector_intensity = calculate_molecularFormFactorSq(
+                particle, detector)
 
             # Correct for solid angle
             detector_intensity *= detector.solidAngle
@@ -356,15 +376,15 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
 
             # Save to h5 file.
             saveAsDiffrOutFile(
-                    outputName,
-                    None,
-                    pattern_index,
-                    detector_counts,
-                    detector_intensity,
-                    quaternion,
-                    detector,
-                    beam,
-                   )
+                outputName,
+                None,
+                pattern_index,
+                detector_counts,
+                detector_intensity,
+                quaternion,
+                detector,
+                beam,
+            )
 
             del particle
 
@@ -402,7 +422,10 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         with h5py.File(self.output_path + ".h5", "w") as h5_outfile:
 
             # Files to read from.
-            individual_files = [os.path.join(path_to_files, f) for f in os.listdir(path_to_files)]
+            individual_files = [
+                os.path.join(path_to_files, f)
+                for f in os.listdir(path_to_files)
+            ]
             individual_files.sort()
 
             # Keep track of global parameters being linked.
@@ -413,27 +436,32 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                 with h5py.File(ind_file, 'r') as h5_infile:
 
                     # Links must be relative.
-                    relative_link_target = os.path.relpath(path=ind_file, start=os.path.dirname(os.path.dirname(ind_file)))
+                    relative_link_target = os.path.relpath(
+                        path=ind_file,
+                        start=os.path.dirname(os.path.dirname(ind_file)))
 
                     # Link global parameters.
                     if not global_parameters:
                         global_parameters = True
 
-                        h5_outfile["params"] = h5py.ExternalLink(relative_link_target, "params")
-                        h5_outfile["info"] = h5py.ExternalLink(relative_link_target, "info")
-                        h5_outfile["misc"] = h5py.ExternalLink(relative_link_target, "misc")
-                        h5_outfile["version"] = h5py.ExternalLink(relative_link_target, "version")
+                        h5_outfile["params"] = h5py.ExternalLink(
+                            relative_link_target, "params")
+                        h5_outfile["info"] = h5py.ExternalLink(
+                            relative_link_target, "info")
+                        h5_outfile["misc"] = h5py.ExternalLink(
+                            relative_link_target, "misc")
+                        h5_outfile["version"] = h5py.ExternalLink(
+                            relative_link_target, "version")
 
                     for key in h5_infile['data']:
 
                         # Link in the data.
                         ds_path = "data/%s" % (key)
-                        h5_outfile[ds_path] = h5py.ExternalLink(relative_link_target, ds_path)
-
+                        h5_outfile[ds_path] = h5py.ExternalLink(
+                            relative_link_target, ds_path)
 
         # Reset output path.
-        self.output_path = self.output_path+".h5"
-
+        self.output_path = self.output_path + ".h5"
 
 if __name__ == '__main__':
     SingFELPhotonDiffractor.runFromCLI()

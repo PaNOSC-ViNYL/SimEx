@@ -1,4 +1,4 @@
 cp ../../requirements.txt .
 
-docker build --no-cache -t chuckie82/simex .
+docker build --no-cache -t cfgrote/simex .
 

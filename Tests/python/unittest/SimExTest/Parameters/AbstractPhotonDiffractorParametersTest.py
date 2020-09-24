@@ -1,6 +1,7 @@
+""" :module: Module for the AbstractPhotonDiffractorParameter class. """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2019 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -19,13 +20,6 @@
 #                                                                        #
 ##########################################################################
 
-""" Test module for the AbstractPhotonDiffractorParameter class.
-
-    @author : CFG
-    @institution : XFEL
-    @creation 20160721
-
-"""
 import os
 import shutil
 
@@ -78,9 +72,9 @@ class AbstractPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual( parameters.sample, TestUtilities.generateTestFilePath("2nip.pdb") )
-        self.assertTrue( parameters.uniform_rotation )
+        self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.beam_parameters, None )
-        self.assertEqual( parameters.geometry, None )
+        self.assertEqual( parameters.detector_geometry, None )
         self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
 
 

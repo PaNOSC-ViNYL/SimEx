@@ -1,7 +1,7 @@
 """ :module CrystFELPhotonDiffractorParameters: Module that holds the CrystFELPhotonDiffractorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -22,14 +22,14 @@
 
 import os
 
-from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.AbstractPhotonDiffractorParameters import AbstractPhotonDiffractorParameters
 from SimEx.Utilities.EntityChecks import checkAndSetInstance, checkAndSetPhysicalQuantity
 from SimEx.Utilities import IOUtilities
 from SimEx.Utilities.Units import meter
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 
-class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
+class CrystFELPhotonDiffractorParameters(AbstractPhotonDiffractorParameters):
     """
     :class CrystFELPhotonDiffractorParameters: Encapsulates parameters for the CrystFELPhotonDiffractor.
     """
@@ -89,8 +89,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         """
 
         # Check all parameters.
-        self.sample = sample
-        self.uniform_rotation = uniform_rotation
         self.powder = powder
         self.intensities_file = intensities_file
         self.crystal_size_min = crystal_size_min
@@ -98,9 +96,6 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
         self.poissonize = poissonize
         self.number_of_background_photons = number_of_background_photons
         self.suppress_fringes = suppress_fringes
-        self.beam_parameters = beam_parameters
-        self.detector_geometry = detector_geometry
-        self.number_of_diffraction_patterns = number_of_diffraction_patterns
 
         # Handle single size case:
         if self.crystal_size_min is None or self.crystal_size_max is None:
@@ -109,26 +104,17 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
             else:
                 self.crystal_size_max = self.crystal_size_min
 
-        super(CrystFELPhotonDiffractorParameters, self).__init__(**kwargs)
+        super(CrystFELPhotonDiffractorParameters, self).__init__(sample=sample,
+                                                                 uniform_rotation=uniform_rotation,
+                                                                 number_of_diffraction_patterns=number_of_diffraction_patterns,
+                                                                 beam_parameters=beam_parameters,
+                                                                 detector_geometry=detector_geometry,
+                                                                 **kwargs)
 
     def _setDefaults(self):
         """ Set default for required inherited parameters. """
         self._AbstractCalculatorParameters__cpus_per_task_default = "MAX"
 
-    ### Setters and queries.
-    @property
-    def sample(self):
-        """ Query the 'sample' parameter. """
-        return self.__sample
-    @sample.setter
-    def sample(self, val):
-        """ Set the 'sample' parameter to val."""
-        if val is None:
-            raise ValueError( "A sample must be defined.")
-        if val.split(".")[-1] == "pdb":
-            print("Checking presence of %s. Will query from PDB if not found in $PWD." % (val))
-            self.__sample = IOUtilities.checkAndGetPDB(val)
-            print("Sample path is set to %s." % (self.__sample))
     @property
     def powder(self):
         """ Query the 'powder' parameter. """
@@ -193,66 +179,3 @@ class CrystFELPhotonDiffractorParameters(AbstractCalculatorParameters):
     def suppress_fringes(self, val):
         """ Set the 'suppress_fringes' parameter to val."""
         self.__suppress_fringes = checkAndSetInstance( bool, val, False)
-
-    @property
-    def uniform_rotation(self):
-        """ Query for the 'uniform_rotation' parameter. """
-        return self.__uniform_rotation
-    @uniform_rotation.setter
-    def uniform_rotation(self, value):
-        """ Set the 'uniform_rotation' parameter to a given value.
-        :param value: The value to set 'uniform_rotation' to.
-        """
-        self.__uniform_rotation = checkAndSetInstance( bool, value, True )
-
-    @property
-    def beam_parameters(self):
-        """ Query for the 'beam_parameters' parameter. """
-        return self.__beam_parameters
-    @beam_parameters.setter
-    def beam_parameters(self, value):
-        """ Set the 'beam_parameters' parameter to a given value.
-        :param value: The value to set 'beam_parameters' to.
-        """
-        if value is None:
-            print ("WARNING: Beam parameters not set, will use crystFEL/pattern_sim defaults.")
-
-        self.__beam_parameters = checkAndSetInstance( (str, PhotonBeamParameters), value, None )
-
-        if isinstance(self.__beam_parameters, str):
-            if not os.path.isfile( self.__beam_parameters):
-                raise IOError("The beam_parameters %s is not a valid file or filename." % (self.__beam_parameters) )
-
-    @property
-    def detector_geometry(self):
-        """ Query for the 'detector_geometry' parameter. """
-        return self.__detector_geometry
-    @detector_geometry.setter
-    def detector_geometry(self, value):
-        """ Set the 'detector_geometry' parameter to a given value.
-        :param value: The value to set 'detector_geometry' to.
-        """
-        self.__detector_geometry = checkAndSetInstance( (str, DetectorGeometry), value, None )
-
-        if isinstance(self.__detector_geometry, str):
-            if not os.path.isfile( self.__detector_geometry):
-                raise IOError("The detector_geometry %s is not a valid file or filename." % (self.__detector_geometry) )
-        if self.__detector_geometry is None:
-            print ("WARNING: Geometry file not set, calculation will most probably fail.")
-
-
-    @property
-    def number_of_diffraction_patterns(self):
-        """ Query for the 'number_of_diffraction_patterns_file' parameter. """
-        return self.__number_of_diffraction_patterns
-    @number_of_diffraction_patterns.setter
-    def number_of_diffraction_patterns(self, value):
-        """ Set the 'number_of_diffraction_patterns' parameter to a given value.
-        :param value: The value to set 'number_of_diffraction_patterns' to.
-        """
-        number_of_diffraction_patterns = checkAndSetInstance( int, value, 1 )
-
-        if number_of_diffraction_patterns > 0:
-            self.__number_of_diffraction_patterns = number_of_diffraction_patterns
-        else:
-            raise ValueError("The parameters 'number_of_diffraction_patterns' must be a positive integer.")

@@ -1,7 +1,7 @@
 """ Test module for the CrystFELPhotonDiffractorParameter class."""
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016 Carsten Fortmann-Grote                              #
+# Copyright (C) 2016-2019 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,6 +28,7 @@ from SimEx.Parameters.CrystFELPhotonDiffractorParameters import CrystFELPhotonDi
 from SimEx.Parameters.DetectorGeometry import DetectorGeometry, DetectorPanel
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
 from SimEx.Parameters.PhotonBeamParameters import PhotonBeamParameters
+from SimEx.Parameters.DetectorGeometry import DetectorGeometry
 from SimEx.Utilities.Units import meter, electronvolt, joule, radian
 from TestUtilities import TestUtilities
 
@@ -38,7 +39,18 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        detector_panel = DetectorPanel(ranges={'fast_scan_min': 0,
+                                               'fast_scan_max': 1023,
+                                               'slow_scan_min': 0,
+                                               'slow_scan_max': 1023},
+                                       pixel_size=2.2e-4*meter,
+                                       photon_response=1.0,
+                                       distance_from_interaction_plane=0.13*meter,
+                                       corners={'x': -512, 'y': 512},
+                                       )
+
+        cls.detector_geometry = DetectorGeometry(panels=[detector_panel])
+
 
     @classmethod
     def tearDownClass(cls):
@@ -74,10 +86,9 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
 
         # Check all parameters are set to default values.
         self.assertEqual( parameters.sample, self.__sample )
-        self.assertTrue( parameters.uniform_rotation )
+        self.assertFalse( parameters.uniform_rotation )
         self.assertEqual( parameters.beam_parameters, None )
         self.assertEqual( parameters.detector_geometry, None )
-        self.assertTrue( parameters.uniform_rotation )
         self.assertEqual( parameters.number_of_diffraction_patterns, 1 )
         self.assertFalse( parameters.powder )
         self.assertEqual( parameters.intensities_file, None )
@@ -111,7 +122,8 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
                 crystal_size_max=100.0e-9*meter,
                 uniform_rotation=False,
                 beam_parameters=beam_parameters,
-                detector_geometry=TestUtilities.generateTestFilePath('simple.geom'))
+                detector_geometry=self.detector_geometry
+                )
 
 
         # Check all parameters are set as intended.
@@ -125,7 +137,7 @@ class CrystFELPhotonDiffractorParametersTest(unittest.TestCase):
         self.assertTrue( parameters.suppress_fringes )
         self.assertIsInstance( parameters.beam_parameters, PhotonBeamParameters )
         self.assertEqual( parameters.beam_parameters.photon_energy.m_as(electronvolt), 4.96e3 )
-        self.assertEqual( parameters.detector_geometry, TestUtilities.generateTestFilePath('simple.geom') )
+        self.assertEqual( parameters.detector_geometry, self.detector_geometry)
 
     def testShapedConstructionGeometry(self):
         """ Testing the construction with a geometry object. """

@@ -250,7 +250,7 @@ def test_attr(f, v, request, name, is_type=None, type_format=None):
                not isinstance(type_format, collections.Iterable):
                 type_format = [type_format]
                 type_format_names = [x.__name__ for x in type_format]
-            if not is_type is None and not isinstance(is_type, collections.Iterable):
+            if not is_type is None and not isinstance(is_type, collections.abc.Iterable):
                 is_type = [is_type]
             is_type_names = [x.__name__ for x in is_type]
             # add for each type in is_type -> wrong, need to add this at the comparison level!

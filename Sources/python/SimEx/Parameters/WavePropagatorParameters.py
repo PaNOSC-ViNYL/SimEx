@@ -1,7 +1,7 @@
 """ :module WavePropagatorParameters: Module that holds the WavePropagatorParameters class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2016-2017 Carsten Fortmann-Grote                         #
+# Copyright (C) 2016-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -40,7 +40,8 @@ class WavePropagatorParameters(AbstractCalculatorParameters):
         :type use_opmd: bool, default False
 
         :param beamline: The WPG beamline to use in the propagation.
-        :type beamline: WPG.Beamline instance.
+        :type beamline: class or module that defines a function
+        `get_beamline`, which in turn returns a WPG.Beamline instance.
         """
 
         # Check all parameters.

@@ -3,7 +3,8 @@ INCLUDE(ExternalProject)
 ExternalProject_Add(
 ocelot
 #URL https://github.com/eucall-software/ocelot/archive/dev_gen.zip
-URL https://github.com/ocelot-collab/ocelot/archive/dev_gen.zip
+#URL https://github.com/ocelot-collab/ocelot/archive/dev_gen.zip
+URL https://github.com/panosc-vinyl/ocelot/archive/dev_gen.zip
 PATCH_COMMAND ""
 INSTALL_COMMAND ""
 CONFIGURE_COMMAND ""

@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2020 Carsten Fortmann-Grote                         #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
 #                                                                        #
 # This file is part of simex_platform.                                   #
@@ -28,16 +28,18 @@ from TestUtilities.TestUtilities import runs_on_travisCI
 from .CrystFELPhotonDiffractorTest import CrystFELPhotonDiffractorTest
 from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorParametersTest
 from .FEFFPhotonMatterInteractorTest import FEFFPhotonMatterInteractorTest
+from .GaussianPhotonSourceTest import GaussianPhotonSourceTest
 from .GenesisPhotonSourceTest import GenesisPhotonSourceTest
 from .PlasmaXRTSCalculatorTest import PlasmaXRTSCalculatorTest
 from .S2EReconstructionTest import S2EReconstructionTest
 from .SingFELPhotonDiffractorTest import SingFELPhotonDiffractorTest
 from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
-from .XFELPhotonPropagatorTest import XFELPhotonPropagatorTest
+from .WavePropagatorTest import WavePropagatorTest
 from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
 from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
 from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
+from .TNSAIonMatterInteractorTest import TNSAIonMatterInteractorTest
 
 # Setup the suite.
 def suite():
@@ -45,12 +47,14 @@ def suite():
              unittest.makeSuite(CrystFELPhotonDiffractorTest,               'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorParametersTest,   'test'),
              unittest.makeSuite(FEFFPhotonMatterInteractorTest,             'test'),
+             unittest.makeSuite(GaussianPhotonSourceTest,                   'test'),
              unittest.makeSuite(S2EReconstructionTest,                      'test'),
              unittest.makeSuite(SingFELPhotonDiffractorTest,                'test'),
-             unittest.makeSuite(XFELPhotonPropagatorTest,                   'test'),
+             unittest.makeSuite(WavePropagatorTest,                   'test'),
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
-             unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
+            #  unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
+             unittest.makeSuite(TNSAIonMatterInteractorTest,                'test'),
              ]
 
     if not runs_on_travisCI():
