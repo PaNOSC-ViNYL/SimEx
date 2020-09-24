@@ -58,7 +58,9 @@ then
 	XCSIT=OFF
     export ZLIB_ROOT=$CONDA_PREFIX
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-fi
+	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	# echo "PYTHONPATH="$PYTHONPATH
 
 elif [ $MODE = "conda-develop" ]
 then
