@@ -37,7 +37,7 @@ from .XCSITPhotonDetectorTest import XCSITPhotonDetectorTest
 from .WavePropagatorTest import WavePropagatorTest
 from .XFELPhotonSourceTest import XFELPhotonSourceTest
 from .XMDYNDemoPhotonMatterInteractorTest import XMDYNDemoPhotonMatterInteractorTest
-#from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
+from .XMDYNPhotonMatterInteractorTest import XMDYNPhotonMatterInteractorTest
 from .EstherPhotonMatterInteractorTest import EstherPhotonMatterInteractorTest
 from .TNSAIonMatterInteractorTest import TNSAIonMatterInteractorTest
 
@@ -53,7 +53,7 @@ def suite():
              unittest.makeSuite(WavePropagatorTest,                   'test'),
              unittest.makeSuite(XFELPhotonSourceTest,                       'test'),
              unittest.makeSuite(XMDYNDemoPhotonMatterInteractorTest,        'test'),
-             unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
+            #  unittest.makeSuite(XMDYNPhotonMatterInteractorTest,            'test'),
              unittest.makeSuite(TNSAIonMatterInteractorTest,                'test'),
              ]
 

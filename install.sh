@@ -58,6 +58,9 @@ then
 	XCSIT=OFF
     export ZLIB_ROOT=$CONDA_PREFIX
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	# echo "PYTHONPATH="$PYTHONPATH
 fi
 
 elif [ $MODE = "conda-develop" ]
@@ -111,6 +114,7 @@ cmake -DSRW_OPTIMIZED=ON \
       -DUSE_SingFELPhotonDiffractor=ON \
       -DUSE_CrystFELPhotonDiffractor=ON \
       -DUSE_GAPDPhotonDiffractor=OFF \
+	  -DUSE_sdf=ON \
       -DUSE_s2e=ON \
       -DUSE_S2EReconstruction_EMC=ON \
       -DUSE_S2EReconstruction_DM=ON \

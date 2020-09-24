@@ -59,6 +59,13 @@ Module specific dependencies
 * libfftw3-dev or INTEL-MKL (needed to run WPG/SRW wavefront propagation)
 
 
+For conda, we provide an environment.yml file to create a simex environment::
+
+
+    $> conda env create --file environment.yml
+
+See below for how to install the dependencies and backengines into the same environment.
+
 NOTE 1 (Intel(R) MKL(R)): If you want to link against Intel(R) MKL(R), make sure that the Intel(R) MKL(R) environment variables are set. This is typically done by running one of the
 scripts in $INTEL_HOME/bin/, where $INTEL_HOME is the root directory of the Intel(R) MKL(R) installation,
 e.g. /opt/intel/2015.
@@ -120,7 +127,11 @@ To activate the SingFELPhotonDiffractor::
 
    $> cmake .. -DUSE_SingFELPhotonDiffractor=ON
 
-As a third alternative, this syntax also allows to deselect individual Modules and install all others::
+
+By setting the installation prefix to $CONDA_PREFIX, one can install the backengines and the simex library into the same environment.
+
+ii. Wave propagation with OpenMP::
+
 
    $> cmake .. -DUSE_MODULES_DEFAULT=ON -DUSE_wpg=OFF
 

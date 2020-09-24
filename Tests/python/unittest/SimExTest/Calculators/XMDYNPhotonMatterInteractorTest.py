@@ -184,7 +184,7 @@ class XMDYNPhotonMatterInteractorTest(unittest.TestCase):
         """ Check that the backengine method works correctly. """
 
         # Clean up.
-        self.__dirs_to_remove.append('prop')w
+        self.__dirs_to_remove.append('prop')
         self.__dirs_to_remove.append( 'pmi' )
 
         # Get test instance.
