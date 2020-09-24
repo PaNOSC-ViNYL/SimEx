@@ -54,14 +54,30 @@ then
 	INSTALL_PREFIX=$CONDA_PREFIX
 	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
 	PYLIB=${PYVERSION%.*}
-	DEVELOPER_MODE=ON
+	DEVELOPER_MODE=OFF
 	XCSIT=OFF
     export ZLIB_ROOT=$CONDA_PREFIX
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 fi
 
-XCSIT=ON
-THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+elif [ $MODE = "conda-develop" ]
+then
+	echo $MODE
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	INSTALL_PREFIX=$CONDA_PREFIX
+	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
+	PYLIB=${PYVERSION%.*}
+	DEVELOPER_MODE=ON
+	XCSIT=OFF
+    export ZLIB_ROOT=$CONDA_PREFIX
+	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	# echo "PYTHONPATH="$PYTHONPATH
+fi
+
 
 # Check for existing build directory, remove if found
 if [ -d build ]
