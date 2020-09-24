@@ -8,6 +8,7 @@ usage: $0 MODE
 	MODE includes:
 	conda-env: create conda simex virtual environment
 	conda: install SimEx in current conda environment 
+	conda-develop: install SimEx in current conda environment with DEVELOPER_MODE=ON
 	maxwell
 	develop
 EOF
@@ -55,13 +56,31 @@ then
 	PYLIB=${PYVERSION%.*}
 	DEVELOPER_MODE=ON
 	XCSIT=OFF
+    export ZLIB_ROOT=$CONDA_PREFIX
 	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-	#export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
-	#echo "PYTHONPATH="$PYTHONPATH
+	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	# echo "PYTHONPATH="$PYTHONPATH
 fi
 
-XCSIT=ON
-THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+elif [ $MODE = "conda-develop" ]
+then
+	echo $MODE
+	CONDA_BIN=`which conda`
+	CONDA_BIN=${CONDA_BIN%/*}
+	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
+	INSTALL_PREFIX=$CONDA_PREFIX
+	PYVERSION=`python -V | tr  '[:upper:]' '[:lower:]' | tr -d ' '`
+	PYLIB=${PYVERSION%.*}
+	DEVELOPER_MODE=ON
+	XCSIT=OFF
+    export ZLIB_ROOT=$CONDA_PREFIX
+	export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
+	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
+	# echo "PYTHONPATH="$PYTHONPATH
+fi
+
 
 # Check for existing build directory, remove if found
 if [ -d build ]
@@ -109,15 +128,20 @@ cmake -DSRW_OPTIMIZED=ON \
       -DBOOST_ROOT=$BOOST_ROOT \
       ..
 # Build the project.
-make -j32
+make  -j32
 
 # Install the project.
 make install
 
+# Back to root dir.
 cd ..
 
-# Revert
-git checkout -- CMakeLists.txt
+# make and make install should be exec'ed not in this script (crystfel fails to compile).
+if [ $MODE = "conda" ] || [ $MODE = "conda-env " ]
+then
+    echo "In case of error in compiling crystfel, rerun make in the build dir."
+fi
+
 if [ $MODE = "develop" ]; then
 	echo "Please run 'source build/simex_vars.sh' before developing"
 fi

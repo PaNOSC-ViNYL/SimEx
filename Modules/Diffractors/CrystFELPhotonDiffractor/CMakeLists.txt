@@ -18,7 +18,9 @@ MESSAGE("HDF5_VERSION= ${HDF5_VERSION}")
 MESSAGE("HDF5_LIBRARY_DIRS= ${HDF5_LIBRARY_DIRS}")
 
 FIND_PACKAGE (GSL REQUIRED)
-
+find_package(ZLIB)
+include_directories(${ZLIB_INCLUDE_DIRS})
+# TARGET_LINK_LIBRARIES( ${ZLIB_LIBRARIES})
 # This macro invokes the HDF5 compiler wrapper, it parses the output and
 # extracts the path where library are stored.
 # Usage:
@@ -103,6 +105,7 @@ ExternalProject_Add( crystfel
 )
 
 # Install needed crystfel binaries, scripts and doc material.
+ExternalProject_Get_Property(crystfel BINARY_DIR)
 ExternalProject_Get_Property(crystfel SOURCE_DIR)
 ExternalProject_Get_Property(crystfel BINARY_DIR)
 #

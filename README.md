@@ -3,8 +3,8 @@ SimEx
 
 Software platform for **Sim**ulation of advanced photon **Ex**periments.
 
-[![Build Status](https://travis-ci.org/PaNOSC-ViNYL/SimEx.svg?branch=master)](https://travis-ci.org/PaNOSC-ViNYL/SimEx)
-[![Build Status](https://travis-ci.org/PaNOSC-ViNYL/SimEx.svg?branch=develop)](https://travis-ci.org/PaNOSC-ViNYL/SimEx)
+[![Build Status master](https://travis-ci.org/PaNOSC-ViNYL/SimEx.svg?branch=master)](https://travis-ci.org/github/panosc-vinyl/simex/branches)
+[![Build Status develop](https://travis-ci.org/PaNOSC-ViNYL/SimEx.svg?branch=develop)](https://travis-ci.org/github/panosc-vinyl/simex/branches)
 
 
 ## Purpose of SimEx
