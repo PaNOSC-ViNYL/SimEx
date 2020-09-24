@@ -32,7 +32,7 @@ class TNSAIonMatterInteractorTest(unittest.TestCase):
 
     def setUp(self):
         self.params = IonMatterInteractorParameters(ion_name='proton')
-        self.params.xsec_file = generateTestFilePath('D_D_-_3He_n.txt')
+        self.params.xsec_file = 'D_D_-_3He_n.txt'
         self.__files_to_remove = ['NeutronData.h5']
 
     def tearDown(self):
@@ -48,7 +48,7 @@ class TNSAIonMatterInteractorTest(unittest.TestCase):
         self.assertIsInstance(interact, AbstractIonInteractor)
 
     def testRun(self):
-        input_file = TestUtilities.generateTestFilePath('00101.sdf')
+        input_file = TestUtilities.generateTestFilePath('0010.sdf')
         mysource = TNSAIonMatterInteractor(parameters=self.params,
                                            input_path=input_file,
                                            output_path='Data/NeutronData.h5')
