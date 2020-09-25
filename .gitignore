@@ -9,6 +9,7 @@ lib
 /docs
 doc/build/
 doc/doxy_build/
+build/
 ._quaternion*.dat
 .idea
 /*.iml
@@ -21,3 +22,7 @@ deploy_rsa.enc
 .ropeproject
 tags
 Tests/python/unittest/TestFiles/
+*.ipynb
+share
+.vscode
+tmp
