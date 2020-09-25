@@ -24,6 +24,7 @@ import os
 import h5py
 import numpy
 import shutil
+import sys
 
 # Include needed directories in sys.path.
 import unittest
@@ -259,6 +260,54 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
             self.assertIn("mask", geom.keys())
             self.assertIn("pixelHeight", geom.keys())
             self.assertIn("pixelWidth", geom.keys())
+
+    def testH5OutputThrice(self):
+        """ Test whether the backengine behaves normally after multiple calculation"""
+
+        # Ensure proper cleanup.
+        sample_file = TestUtilities.generateTestFilePath('2nip.pdb')
+
+        # Set up parameters.
+        parameters=SingFELPhotonDiffractorParameters(
+                sample=sample_file,
+                uniform_rotation = False,
+                calculate_Compton = False,
+                slice_interval = 100,
+                number_of_slices = 3,
+                pmi_start_ID = 1,
+                pmi_stop_ID = 1,
+                number_of_diffraction_patterns= 2,
+                beam_parameters=self.beam,
+                detector_geometry= self.detector_geometry,
+                forced_mpi_command='mpirun -np 2',
+                )
+
+        # Construct the object.
+        diffractor = SingFELPhotonDiffractor(parameters=parameters,
+        output_path='tmp/diffr')
+
+        # Run and save.
+        diffractor.backengine()
+        diffractor.saveH5()
+        self.__dirs_to_remove.append( os.path.abspath( 'tmp' ) )
+        self.__files_to_remove.append( os.path.abspath( diffractor.output_path+'.h5' ) )
+
+        os.remove('tmp/diffr.h5')
+        shutil.rmtree('tmp/diffr')
+
+        diffractor.backengine()
+        diffractor.saveH5()
+
+        try:
+            os.remove('tmp/diffr.h5')
+            shutil.rmtree('tmp/diffr')
+        except IsADirectoryError:
+            shutil.rmtree('tmp')
+            print(sys.exc_info()[0])
+            raise 
+
+        diffractor.backengine()
+        diffractor.saveH5()
 
     def testDefaultConstructionLegacy(self):
         """ Testing the default construction of the class with MPI parameter. """
