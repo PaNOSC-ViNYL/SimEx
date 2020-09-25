@@ -28,7 +28,8 @@ please visit the project's homepage at https://panosc-vinyl.github.io/SimEx/
 The size of this Github repository of SimEx is huge due to the historical TestFiles.
 
 This command can clone only the newest develop branch to reduce the dowloading size:
-`git clone --depth 1 -b develop git@github.com:PaNOSC-ViNYL/SimEx.git`
+
+`git clone --depth 1 -b develop https://github.com/PaNOSC-ViNYL/SimEx.git`
 
 Now the TestFiles are hosted at [Zenodo](https://zenodo.org/record/3750541#.X2R9DZMzZE5).
 The files can be downloaded with [this script](get_testdata.sh).
