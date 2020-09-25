@@ -61,7 +61,6 @@ then
 	# THIRD_PARTY_ROOT=/gpfs/exfel/data/group/spb-sfx/spb_simulation/simex
 	# export PYTHONPATH=$CONDA_PREFIX/lib/$PYLIB:$CONDA_PREFIX/lib/$PYLIB/site-packages:$PYTHONPATH
 	# echo "PYTHONPATH="$PYTHONPATH
-fi
 
 elif [ $MODE = "conda-develop" ]
 then

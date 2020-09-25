@@ -153,7 +153,7 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
         number_of_diffraction_patterns = self.parameters.number_of_diffraction_patterns
 
         if not os.path.isdir(self.output_path):
-            os.mkdir(self.output_path)
+            os.makedirs(self.output_path)
         self.__output_dir = self.output_path
 
         # If the sample is passed as a pdb, branch out to separate backengine implementation.
@@ -460,8 +460,6 @@ class SingFELPhotonDiffractor(AbstractPhotonDiffractor):
                         h5_outfile[ds_path] = h5py.ExternalLink(
                             relative_link_target, ds_path)
 
-        # Reset output path.
-        self.output_path = self.output_path + ".h5"
 
 if __name__ == '__main__':
     SingFELPhotonDiffractor.runFromCLI()
