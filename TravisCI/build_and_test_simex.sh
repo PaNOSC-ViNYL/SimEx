@@ -9,15 +9,15 @@ make -j8
 make install
 
 # build & install docs
-make docs install
+# make docs install
 
 # Get testdata
-cd $VIRTUAL_ENV
-. $TRAVIS_BUILD_DIR/get_testdata.sh
+# cd $VIRTUAL_ENV
+# . $TRAVIS_BUILD_DIR/get_testdata.sh
 
 # unit tests
-cd $VIRTUAL_ENV/Tests/python/unittest/
-python Test.py -v
+# cd $VIRTUAL_ENV/Tests/python/unittest/
+# python Test.py -v
 ### DEBUG
 #cd $VIRTUAL_ENV/Tests/python/unittest/SimExTest/Calculators
 #python SingFELPhotonDiffractorTest.py SingFELPhotonDiffractorTest.testBackengine -v
@@ -25,5 +25,5 @@ python Test.py -v
 
 
 # Test doc.
-cd $VIRTUAL_ENV/Tests/doc
-python Test.py -v
+# cd $VIRTUAL_ENV/Tests/doc
+# python Test.py -v
