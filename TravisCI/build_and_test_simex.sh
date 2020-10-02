@@ -4,7 +4,12 @@ set -e # Exit with nonzero exit code if anything fails
 # build & install
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DUSE_XCSITPhotonDetector=OFF -DDEVELOPER_INSTALL=OFF ..
+cmake -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV -DSRW_OPTIMIZED=ON -DUSE_XCSITPhotonDetector=OFF -DDEVELOPER_INSTALL=OFF \
+-DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
+-DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") \
+-DPYTHON_EXECUTABLE:FILEPATH=`which python`  \
+..
+
 make -j8
 make install
 
