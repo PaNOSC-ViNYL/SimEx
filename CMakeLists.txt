@@ -27,7 +27,7 @@ option(PY_DETECTOR_INTERFACE_DEBUG "
 )
 
 ### PYTHON
-FIND_PACKAGE(Python
+FIND_PACKAGE(PythonInterp
              3.5
              REQUIRED
              )
