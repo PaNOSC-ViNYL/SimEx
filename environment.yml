@@ -39,7 +39,7 @@ dependencies:
   - dill
   - sqlalchemy
   - pyfftw
-  - pyFAI<=0.15
+  - pyFAI
   - numba
   - pint
   - py3nvml
