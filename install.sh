@@ -38,12 +38,15 @@ then
 	CONDA_BIN=`which conda`
 	CONDA_BIN=${CONDA_BIN%/*}
 	source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-	conda env create -n simex -f environment.yml
+	conda env create -n simex -f environment.yml || {
+	    echo "[ERROR] conda environment was NOT deployed."
+	    exit 1
+	}
 	echo "conda environment was deployed. Please run the following to install SIMEX Platform:"
 	echo ""
 	echo " conda activate simex"
-	echo " ./install conda"
-	exit
+	echo " `basename $0` conda"
+	exit 0
 
 elif [ $MODE = "conda" ]
 then
@@ -119,18 +122,18 @@ cmake -DSRW_OPTIMIZED=ON \
       -DUSE_S2EReconstruction_DM=ON \
       -DUSE_wpg=ON \
       -DUSE_GenesisPhotonSource=ON \
-      -DUSE_XCSITPhotonDetector=$XCSIT \
-      -DUSE_FEFFPhotonInteractor=ON \
       -DXERCESC_ROOT=$XERCESC_ROOT \
       -DGEANT4_ROOT=$GEANT4_ROOT \
       -DXCSIT_ROOT=$XCSIT_ROOT \
       -DBOOST_ROOT=$BOOST_ROOT \
       ..
+#      -DUSE_XCSITPhotonDetector=$XCSIT \ # requires GEANT
+#     -DUSE_FEFFPhotonInteractor=ON \     # does not compile
 # Build the project.
-make  -j32
+cmake --build . -- -j32 || exit 1
 
 # Install the project.
-make install
+cmake --build . --target install
 
 # Back to root dir.
 cd ..
