@@ -719,10 +719,10 @@ def photonStatistics(stack):
 
 
     print("*************************")
-    print ("Photon number statistics per pattern"
+    print ("Photon number statistics per pattern")
     print("avg = %6.5e" % (avg_photons))
     print("std = %6.5e" % (rms_photons))
-    print ("Photon number statistics per pixel"
+    print ("Photon number statistics per pixel")
     print("avg_mean_pixel = %6.5e" % (avg_mean))
     print("avg_max_pixel = %6.5e" % (avg_max))
     print("avg_min_pixel = %6.5e" % (avg_min))

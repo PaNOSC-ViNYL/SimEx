@@ -22,6 +22,8 @@
 
 from abc import ABCMeta
 from abc import abstractmethod
+import os
+import errno
 
 from SimEx.Calculators.AbstractBaseCalculator import AbstractBaseCalculator
 from SimEx.Utilities.EntityChecks import checkAndSetInstance
@@ -47,6 +49,9 @@ class AbstractPhotonDiffractor(AbstractBaseCalculator, metaclass=ABCMeta):
 
         # Check input path. Set to default if none given.
         input_path = checkAndSetInstance(str, input_path, 'pmi')
+        if not os.path.exists(input_path):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    input_path)
         # Check output path. Set default if none given.
         output_path = checkAndSetInstance(str, output_path, 'diffr')
 
@@ -63,4 +68,3 @@ def checkAndSetPhotonDiffractor(var=None, default=None):
     """
 
     return checkAndSetInstance(AbstractPhotonDiffractor, var, default)
-

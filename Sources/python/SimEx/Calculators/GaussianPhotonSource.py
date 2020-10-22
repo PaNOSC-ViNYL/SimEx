@@ -62,20 +62,23 @@ class GaussianPhotonSource(AbstractPhotonSource):
         coherence_time = 2.*math.pi*hbar/self.parameters.photon_energy_relative_bandwidth/E.m_as(joule)
 
         beam_waist = 2.*hbar*c/theta/E.m_as(joule)
+        wavelength = 1239.8e-9/ E.m_as(electronvolt)
+        rayleigh_length = math.pi*beam_waist**2/wavelength
+        
+        print(rayleigh_length)
 
         beam_diameter_fwhm = self.parameters.beam_diameter_fwhm.m_as(meter)
         beam_waist_radius = beam_diameter_fwhm/math.sqrt(2.*math.log(2.))
         
-        print("beam waist radius from divergence angle = {0:4.3e}".format(beam_waist))
-        print("beam waist radius from fwhm = {0:4.3e}".format(beam_waist_radius))
-        
-        # Rule of thumb: 7 times w0
         # x-y range at beam waist.
         range_xy = 30.0*beam_waist_radius
 
         # Set number of sampling points in x and y and number of temporal slices.
         np = self.parameters.number_of_transverse_grid_points
         nslices = self.parameters.number_of_time_slices
+        
+        # Distance from source position.
+        z = self.parameters.z.m_as(meter)
 
         # Build wavefront
         srwl_wf = build_gauss_wavefront(np, np, nslices,
@@ -83,12 +86,18 @@ class GaussianPhotonSource(AbstractPhotonSource):
                                         -range_xy/2, range_xy/2,
                                         -range_xy/2, range_xy/2,
                                         coherence_time/math.sqrt(2),
-                                        # beam_diameter_fwhm, beam_diameter_fwhm,
                                         beam_waist_radius/2, beam_waist_radius/2, # Scaled such that fwhm comes out as demanded by parameters.
-                                        0.0,
+                                        d2waist=z,
                                         pulseEn=self.parameters.pulse_energy.m_as(joule),
                                         pulseRange=8.)
+        
+        # Correct radius of curvature.
+        Rx = Ry = z*math.sqrt(1.+(rayleigh_length/z)**2)
+        
         # Store on class.
+        srwl_wf.Rx = Rx
+        srwl_wf.Ry = Ry
+        
         self.__wavefront = Wavefront(srwl_wf)
 
     @property

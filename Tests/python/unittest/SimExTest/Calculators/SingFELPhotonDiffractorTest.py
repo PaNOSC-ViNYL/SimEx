@@ -173,6 +173,30 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         self.assertIsInstance(diffractor, SingFELPhotonDiffractor)
         self.assertEqual( diffractor.output_path, os.path.abspath( 'diffr') )
 
+    def testNotExistedInput(self):
+        """ Testing the not existed input file error """
+
+        # Prepare input.
+        shutil.copytree( TestUtilities.generateTestFilePath( 'pmi_out' ), os.path.abspath( 'pmi' ) )
+
+        # Ensure proper cleanup.
+        self.__dirs_to_remove.append( os.path.abspath( 'pmi') )
+        self.__dirs_to_remove.append( os.path.abspath( 'diffr' ) )
+
+        # Set up parameters.
+        parameters=SingFELPhotonDiffractorParameters(uniform_rotation=True,
+                                                       calculate_Compton=False,
+                                                       slice_interval=100,
+                                                       number_of_slices=2,
+                                                       pmi_start_ID=1,
+                                                       pmi_stop_ID=1,
+                                                       number_of_diffraction_patterns=2,
+                                                       beam_parameters=self.beam,
+                                                       detector_geometry=self.detector_geometry,
+                                                       )
+        # Construct the object.
+        self.assertRaises(FileNotFoundError,SingFELPhotonDiffractor,parameters=parameters, input_path='pmi_233')
+
     def testConstructionWithSample(self):
         """ Testing the construction with sample passed via parameters."""
 
@@ -623,14 +647,16 @@ class SingFELPhotonDiffractorTest(unittest.TestCase):
         photon_diffractor.backengine()
         photon_diffractor.saveH5()
 
+        linked_h5 = photon_diffractor.output_path+'.h5'
+
         # Cleanup new style files.
-        self.__files_to_remove.append(photon_diffractor.output_path)
+        self.__files_to_remove.append(linked_h5)
 
         # Check that only one file was generated.
-        self.assertTrue( os.path.isfile( photon_diffractor.output_path ))
+        self.assertTrue( os.path.isfile( linked_h5 ))
 
         # Open the file for reading.
-        h5_filehandle = h5py.File( photon_diffractor.output_path, 'r')
+        h5_filehandle = h5py.File( linked_h5, 'r')
 
         # Count groups under /data.
         number_of_patterns = len(list(h5_filehandle['data'].keys()))
