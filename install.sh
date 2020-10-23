@@ -3,9 +3,10 @@
 function usage()
 {
 	cat <<EOF
-usage: $0 MODE
+usage: $0 MODE [conda_env_name]
 	MODE includes:
-	conda-env: create conda simex virtual environment
+	conda-env: create conda virtual environment with the name of [conda_env_name].
+                   default name: simex
 	conda: install SimEx in current conda environment
 	conda-develop: install SimEx in current conda environment with DEVELOPER_MODE=ON
 	maxwell
@@ -60,18 +61,23 @@ elif [ $MODE = "conda-env" ]
 # conda-env: create conda simex virtual environment
 then
     echo $MODE
-    echo "Create conda environment"
+    if [ -z $2 ]; then
+        INSTALL_CONDA_ENV=simex
+    else
+        INSTALL_CONDA_ENV=$2
+    fi
+    echo "Create conda environment $INSTALL_CONDA_ENV"
     CONDA_BIN=`which conda`
     CONDA_BIN=${CONDA_BIN%/*}
     source ${CONDA_BIN%/*}/etc/profile.d/conda.sh
-    conda env create -n simex -f environment.yml || {
+    conda env create -n $INSTALL_CONDA_ENV -f environment.yml || {
         echo "[ERROR] conda environment was NOT deployed."
         exit 1
     }
     echo "conda environment was deployed. Please run the following to install SIMEX Platform:"
     echo ""
-    echo " conda activate simex"
-    echo " `basename $0` conda"
+    echo " conda activate $INSTALL_CONDA_ENV"
+    echo " $0 conda"
     exit 0
 elif [ $MODE = "conda" ]
 # conda: install SimEx in current conda environment
@@ -114,11 +120,6 @@ export GEANT4_ROOT=${THIRD_PARTY_ROOT}
 export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
 export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
-#cmake -DUSE_CrystFELPhotonDiffractor=ON \
-#-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-#..
-
-
 cmake -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
@@ -154,6 +155,6 @@ cd ..
 #echo "In case of error in compiling crystfel, rerun make in the build dir."
 #fi
 
-if [ $MODE = "develop" ] || [ $MODE = "conda-env " ]; then
+if [ $MODE = "develop" ] || [ $MODE = "conda-develop" ]; then
     echo "Please run 'source build/simex_vars.sh' before developing"
 fi
