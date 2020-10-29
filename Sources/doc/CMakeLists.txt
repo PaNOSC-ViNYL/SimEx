@@ -1,5 +1,4 @@
 include(FindPythonModules)
-find_python_module(breathe REQUIRED)
 
 INCLUDE(ExternalProject)
 
