@@ -33,7 +33,6 @@ dependencies:
   - biopython>=1.69
   - setuptools
   - mpi4py
-  - breathe
   - dill
   - sqlalchemy
   - pyfftw
