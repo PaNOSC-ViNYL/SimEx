@@ -48,3 +48,4 @@ dependencies:
     - xraydb
     - cfelpyutils
     - openpmd-api
+    - extra_geom

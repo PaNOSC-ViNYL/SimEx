@@ -18,3 +18,4 @@ setuptools
 sqlalchemy
 xraydb
 numexp
+extra_geom
