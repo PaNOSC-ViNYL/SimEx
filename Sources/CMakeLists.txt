@@ -19,5 +19,6 @@ if (NOT DEVELOPER_INSTALL)
 	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/  DESTINATION ${PYPATH}
 		    PATTERN "*.pyc" EXCLUDE
 		    PATTERN ".git*" EXCLUDE
-		    PATTERN "CMakeLists.txt" EXCLUDE )
+		    PATTERN "CMakeLists.txt" EXCLUDE 
+		    PATTERN "setup.py" EXCLUDE )
 endif()

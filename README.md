@@ -23,16 +23,47 @@ interfaces for the various simulation steps.
 For more details (User Manual, installation instructions, examples, etc.),
 please visit the project's homepage at https://panosc-vinyl.github.io/SimEx/
 
-## Development
+# Install
+Get source code:
+```
+git clone --depth 1 -b master https://github.com/PaNOSC-ViNYL/SimEx.git
+```
 
+## CENTOS 8
+```
+yum install -y hdf5 hdf5-devel fftw-devel flex bison
+```
+
+### Conda (preferred)
+```
+wget -c -O /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh /tmp/miniconda.sh
+```
+
+ * Select a directory XX where to install miniconda, consider 5GB of free disk space.
+ * Add the XX/miniconda/bin/ directory to your path
+
+```
+./install.sh conda-env
+conda init $SHELL
+```
+restart your shell
+```
+conda activate simex
+./install.sh conda
+```
+<!--- ## CENTOS non conda --->
+
+## Development
 The size of this Github repository of SimEx is huge due to the historical TestFiles.
 
 This command can clone only the newest develop branch to reduce the dowloading size:
-
-`git clone --depth 1 -b develop https://github.com/PaNOSC-ViNYL/SimEx.git`
-
+```
+git clone --depth 1 -b develop https://github.com/PaNOSC-ViNYL/SimEx.git
+```
 Now the TestFiles are hosted at [Zenodo](https://zenodo.org/record/3750541#.X2R9DZMzZE5).
 The files can be downloaded with [this script](get_testdata.sh).
+
 
 ## Acknowledgements
 This project has received funding from the European Union’s Horizon 2020 research
