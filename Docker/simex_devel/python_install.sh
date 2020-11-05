@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-URL=http://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
-
+#export myminiconda=Miniconda3-4.4.10-Linux-x86_64.sh
+export myminiconda=Miniconda3-py37_4.8.3-Linux-x86_64.sh
+URL=https://repo.continuum.io/miniconda/$myminiconda
 
 # Install dir
-PREFIX=/opt/miniconda2
-
+PREFIX=/opt/miniconda
 
 # Download Miniconda
 wget -q $URL
 
 # Extract packages
 
-chmod +x Miniconda2-4.0.5-Linux-x86_64.sh
-./Miniconda2-4.0.5-Linux-x86_64.sh -b -p $PREFIX
-rm ./Miniconda2-4.0.5-Linux-x86_64.sh
+chmod +x $myminiconda
+./$myminiconda -b -p $PREFIX
+rm ./$myminiconda
 cd $PREFIX
 
 # config
@@ -22,7 +22,7 @@ export PATH=$PREFIX/bin:$PATH
 conda config --set always_yes True
 
 # pip cannot install pyqt
-conda install --no-update-deps pyqt=4
+conda install --no-update-deps pyqt=5.9.2
 
 # delete tests
 find . -type d -name tests -depth -exec rm -rf {} \;
@@ -44,4 +44,5 @@ rm -r pkgs/*
 rm -rf /root/.cache/pip
 
 
-echo "export PATH=/opt/miniconda2/bin:${PATH}" >> /etc/profile.d/scripts-path.sh
+echo "export PATH=/opt/miniconda/bin:${PATH}" >> /etc/profile.d/scripts-path.sh
+

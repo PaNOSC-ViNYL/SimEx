@@ -1,4 +1,4 @@
 cp ../../requirements.txt .
 
-docker build --no-cache -t cfgrote/simex .
+buildah bud -t cloudbusting/simex -f Dockerfile .
 

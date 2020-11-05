@@ -2,7 +2,7 @@
 
 set -e
 
-BRANCH=master
+BRANCH=develop
 URL=https://github.com/PaNOSC-ViNYL/SimEx/archive/${BRANCH}.zip
 
 cd /opt
