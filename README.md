@@ -54,6 +54,15 @@ conda activate simex
 ```
 <!--- ## CENTOS non conda --->
 
+## Docker image
+https://github.com/PaNOSC-ViNYL/SimEx/tree/master/Docker
+
+To run the docker image, edit `run_docker.sh` and run the script.
+
+```
+./run_docker.sh
+```
+
 ## Tutorial notebooks
 https://github.com/PaNOSC-ViNYL/SimEx-notebooks
 
