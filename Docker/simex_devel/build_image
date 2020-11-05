@@ -1,0 +1,4 @@
+cp ../../requirements.txt .
+
+buildah bud -t cloudbusting/simex:devel -f Dockerfile .
+
