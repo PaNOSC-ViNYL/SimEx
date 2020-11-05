@@ -54,6 +54,9 @@ conda activate simex
 ```
 <!--- ## CENTOS non conda --->
 
+## Tutorial notebooks
+https://github.com/PaNOSC-ViNYL/SimEx-notebooks
+
 ## Development
 The size of this Github repository of SimEx is huge due to the historical TestFiles.
 
