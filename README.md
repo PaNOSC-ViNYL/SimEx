@@ -21,7 +21,7 @@ field and detection of the latter. The platform provides slots and
 interfaces for the various simulation steps.
 
 For more details (User Manual, installation instructions, examples, etc.),
-please visit the project's homepage at https://panosc-vinyl.github.io/SimEx/
+please visit the project's readthedocs page at https://simex.readthedocs.io/
 
 # Install
 Get source code:
