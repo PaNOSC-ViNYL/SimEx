@@ -20,21 +20,23 @@ point, photon-matter interaction, scattering of the radiation into the far
 field and detection of the latter. The platform provides slots and
 interfaces for the various simulation steps.
 
-For more details (User Manual, installation instructions, examples, etc.),
+## User manual
+
+For more details (user manual, installation instructions, examples, etc.),
 please visit the project's readthedocs page at https://simex.readthedocs.io/
 
-# Install
+## Install
 Get source code:
 ```
 git clone --depth 1 -b master https://github.com/PaNOSC-ViNYL/SimEx.git
 ```
 
-## CENTOS 8
+### CENTOS 8
 ```
 yum install -y hdf5 hdf5-devel fftw-devel flex bison
 ```
 
-### Conda (preferred)
+#### Conda (preferred)
 ```
 wget -c -O /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh /tmp/miniconda.sh
