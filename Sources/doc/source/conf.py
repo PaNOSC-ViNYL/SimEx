@@ -44,6 +44,9 @@ extensions = [
     'nbsphinx',
 ]
 
+# Will mock all imports in the list
+autodoc_mock_imports = ["wpg","prop"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
