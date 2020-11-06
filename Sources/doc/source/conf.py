@@ -45,7 +45,7 @@ extensions = [
 ]
 
 # Will mock all imports in the list
-autodoc_mock_imports = ["wpg","prop"]
+autodoc_mock_imports = ["wpg","prop","pysingfel"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
