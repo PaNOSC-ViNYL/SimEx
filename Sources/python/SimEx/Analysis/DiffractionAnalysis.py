@@ -133,6 +133,19 @@ class DiffractionAnalysis(AbstractAnalysis):
             npattern = totalNPattern(self.input_path)
 
         return npattern
+    
+    @property
+    def quaternions(self):
+        """ Return a list of the quaternions of the diffr data """
+
+        quat_list = []
+        angles = self.__angleGenerator()
+
+        for angle in angles:
+            quat_list.append(angle)
+
+        return quat_list
+
 
     @property
     def solidAngles(self):
@@ -205,6 +218,24 @@ class DiffractionAnalysis(AbstractAnalysis):
             raise TypeError('The parameter "mask" must be a numpy.array.')
 
         self.__mask = val
+
+
+    def __angleGenerator(self):
+        # diffraction rotation quaternion generator
+        indices = self.pattern_indices
+        path = self.input_path
+        with h5py.File(path, 'r') as h5:
+            if indices is None or indices == 'all':
+                indices = [key for key in h5['data'].keys()]
+            else:
+                indices = ["%0.7d" % ix for ix in indices]
+            for ix in indices:
+                root_path = '/data/%s/'% (ix)
+                path_to_data = root_path + 'angle'
+
+                angle = h5[path_to_data][...]
+
+                yield angle
 
 
     def patternGenerator(self):
@@ -283,6 +314,22 @@ class DiffractionAnalysis(AbstractAnalysis):
                 pattern_to_dump = operation(numpy.array([p for p in pi]), axis=0)
 
         return pattern_to_dump
+    
+    def get_integrations(diffr_path):
+        """Get integrations from diffraction h5"""
+
+        pi = self.patterns_iterator
+        if len(self.pattern_indices) == 1:
+            pattern_to_dump = next(pi)
+        else:
+            pattern_to_dump = numpy.array([p for p in pi])
+
+        patterns = pattern_to_dump
+        integrations = []
+        for pat in patterns:
+            qs, intensity = azimuthalIntegration(pat,analyzer.parameters,unit='q_A^-1')
+            integrations.append((qs, intensity))
+        return integrations
 
     def plotRadialProjection(self, operation=None, logscale=False, offset = 1e-5, unit="q_nm^-1"):
         """ Plot the radial projection of a pattern.
