@@ -135,7 +135,13 @@ class DiffractionAnalysis(AbstractAnalysis):
         return npattern
 
     @property
-    def solidAngles(self):
+    def total_npattern(self):
+        """ get the total pattern nnumber of the dataset """
+
+        return totalNPattern(self.input_path)
+
+    @property
+    def solid_angles(self):
         """ Solid angle of each pixel """
         """ Note: the pixel is assumed to be square """
 
@@ -162,7 +168,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         return solidAngles
 
     @property
-    def qMap(self):
+    def q_map(self):
         """ q of each pixel """
         """ q = 4*pi*sin(twotheta/2)/lmd """
 
