@@ -313,7 +313,27 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Plot radial projection.
         plotRadialProjection(pattern_to_plot, self.__parameters, logscale,offset,unit)
 
-    def plotPattern(self, operation=None, logscale=False, offset=1e-1,symlog=False,*argv,**kwargs):
+    def plotPatterns(self, logscale=False, offset=1e-1, symlog=False, *argv, **kwargs):
+        """ Plot patterns in the class.
+
+        :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
+        :type logscale: bool
+
+        :param offset: Offset to apply if logarithmic scaling is on.
+        :type offset: float
+
+        :param symlog: Whether to plot the intensity on a symlogarithmic scale (z-axis) (default False).
+        :type symlog: bool
+
+        """
+
+        # Get pattern to plot.
+        pi = self.patterns_iterator
+        for pattern_to_plot in pi:
+            plotImage(pattern_to_plot, logscale, offset, symlog, *argv,
+                      **kwargs)
+
+    def plotPattern(self, operation=None, logscale=False, offset=1e-1, symlog=False, *argv, **kwargs):
         """ Plot a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -326,6 +346,9 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         :param offset: Offset to apply if logarithmic scaling is on.
         :type offset: float
+
+        :param symlog: Whether to plot the intensity on a symlogarithmic scale (z-axis) (default False).
+        :type symlog: bool
 
         """
 
@@ -410,7 +433,7 @@ class DiffractionAnalysis(AbstractAnalysis):
         print("avg = %6.5e" % (avg_photons))
         print("std = %6.5e" % (rms_photons))
         print("*************************")
-        
+
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -705,7 +728,7 @@ def photonStatistics(stack):
     avg_photons = numpy.mean(photons)
     rms_photons =  numpy.std(photons)
 
-    meanPerPattern = numpy.mean(stack, axis=(1,2)) 
+    meanPerPattern = numpy.mean(stack, axis=(1,2))
     # average over the mean nphotons of each pattern in the stack
     avg_mean = numpy.mean(meanPerPattern)
 
@@ -752,5 +775,3 @@ def totalNPattern(input_path):
     with h5py.File(input_path, 'r') as h5:
         npattern = len(h5['data'])
     return npattern
-
-
