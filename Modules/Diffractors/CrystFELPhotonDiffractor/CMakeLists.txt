@@ -1,5 +1,7 @@
 INCLUDE(ExternalProject)
 
+cmake_policy(SET CMP0074 NEW)
+
 # Make sure hdf5 and gsl are available. Want dynamic linking to hdf5.
 set (HDF5_USE_STATIC_LIBRARIES OFF)
 
