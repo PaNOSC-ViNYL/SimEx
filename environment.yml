@@ -24,7 +24,7 @@ channels:
 dependencies:
   - Cython
   - h5py>=2.2.1,<=2.8
-  - hdf5>=1.8.5
+  - hdf5=1.10.*
   - cmake>=3.12.1
   - matplotlib>=1.5.1
   - numpy>=1.18.1
