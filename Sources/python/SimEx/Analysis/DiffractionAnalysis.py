@@ -336,15 +336,24 @@ class DiffractionAnalysis(AbstractAnalysis):
         # Get pattern to plot.
         pi = self.patterns_iterator
         for pattern_to_plot in pi:
+            pattern_to_plot = numpy.squeeze(pattern_to_plot)
             plotImage(pattern_to_plot, logscale, offset, symlog, *argv,
                       **kwargs)
 
-    def plotPattern(self, operation=None, logscale=False, offset=1e-1, symlog=False, *argv, **kwargs):
+    def plotPattern(self,
+                    operation=None,
+                    logscale=False,
+                    offset=1e-1,
+                    symlog=False,
+                    *argv,
+                    **kwargs):
         """ Plot a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
         :type operation: python function
-        :note operation: Operation must accept a 3D numpy.array as first input argument and the "axis" keyword-argument. Operation must return a 2D numpy.array. Axis will always be chosen as axis=0.
+        :note operation: Operation must accept a 3D numpy.array as first input argument
+            and the "axis" keyword-argument. Operation must return a 2D numpy.array.
+            Axis will always be chosen as axis=0.
         :example operation: numpy.mean, numpy.std, numpy.sum
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
@@ -360,7 +369,9 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Handle default operation
         if operation is not None and len(self.pattern_indices) == 1:
-            print("WARNING: Giving an operation with a single pattern has no effect.")
+            print(
+                "WARNING: Giving an operation with a single pattern has no effect."
+            )
             operation = None
         if operation is None and len(self.pattern_indices) > 1:
             operation = numpy.sum
@@ -373,7 +384,9 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot image and colorbar.
-        return  plotImage(pattern_to_plot, logscale, offset,symlog,*argv,**kwargs)
+        pattern_to_plot = numpy.squeeze(pattern_to_plot)
+        return plotImage(pattern_to_plot, logscale, offset, symlog, *argv,
+                         **kwargs)
 
     def shannonPixelPhoton(self, resolution):
         """
