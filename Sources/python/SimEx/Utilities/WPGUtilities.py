@@ -82,7 +82,7 @@ class WPGdata:
         xs_mf = numpy.arange(min(aw), max(aw) + 1) * dSlice + mesh.sliceMin
 
         if (self.wavefront.params.wDomain == 'time'):
-            print('x: Time (fs)')
+            print('x: Time (s)')
             print('y: Power (W)')
             dt = (mesh.sliceMax - mesh.sliceMin) / (mesh.nSlices - 1)
             print(('Pulse energy {:1.2g} J'.format(int0_mean.sum() * dt)))
