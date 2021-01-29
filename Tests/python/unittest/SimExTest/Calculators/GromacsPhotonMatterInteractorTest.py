@@ -24,6 +24,7 @@
 ##########################################################################
 
 
+from random import sample
 import h5py
 import os
 import shutil
@@ -47,6 +48,12 @@ class GromacsPhotonMatterInteractorTest(unittest.TestCase):
     def setUpClass(cls):
         """ Setting up the test class. """
         cls.input_path = TestUtilities.generateTestFilePath('')
+        # Setup parameters.
+        cls.Gromacs_parameters = GromacsPhotonMatterInteractorParameters(
+            pmi_parameters = GromacsPhotonMatterInteractorParameters(
+            rotations=None,
+            pulse_indices='all',
+            forced_mpi_command=None)
 
     @classmethod
     def tearDownClass(cls):
@@ -57,27 +64,6 @@ class GromacsPhotonMatterInteractorTest(unittest.TestCase):
         """ Setting up a test. """
         self.__files_to_remove = []
         self.__dirs_to_remove = []
-
-        # Setup parameters.
-        self.Gromacs_parameters = GromacsPhotonMatterInteractorParameters(
-                 number_of_layers=2,
-                 ablator="CH",
-                 ablator_thickness=10.0,
-                 sample="Iron",
-                 sample_thickness=20.0,
-                 window=None,
-                 window_thickness=0.0,
-                 laser_wavelength=1064.0,
-                 laser_pulse='flat',
-                 laser_pulse_duration=6.0,
-                 laser_intensity=0.1,
-                 run_time=10.,
-                 delta_time=.25,
-                 read_from_file=None,
-                 force_passage=True,
-                 without_therm_conduc=False,
-                 rad_transfer=False,
-            )
 
     def tearDown(self):
         """ Tearing down a test. """
@@ -92,9 +78,12 @@ class GromacsPhotonMatterInteractorTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Attempt to construct an instance of the class.
-        Gromacs_calculator = GromacsPhotonMatterInteractor(parameters=self.Gromacs_parameters,
-                                               input_path=self.input_path,
-                                               output_path='Gromacs_out')
+        Gromacs_calculator = GromacsPhotonMatterInteractor(
+                                                parameters=self.Gromacs_parameters,
+                                                input_path=self.input_path,
+                                                output_path='pmi_out',
+                                                sample_path=TestUtilities.generateTestFilePath('2nip.pdb')
+                                              )
 
         # Check instance and inheritance.
         self.assertIsInstance( Gromacs_calculator, GromacsPhotonMatterInteractor )
@@ -108,7 +97,8 @@ class GromacsPhotonMatterInteractorTest(unittest.TestCase):
         Gromacs_calculator = GromacsPhotonMatterInteractor(
                                                 parameters=self.Gromacs_parameters,
                                                 input_path=self.input_path,
-                                                output_path='Gromacs_out'
+                                                output_path='pmi_out',
+                                                sample_path=TestUtilities.generateTestFilePath('2nip.pdb')
                                               )
 
         # Query the parameters.
@@ -118,7 +108,6 @@ class GromacsPhotonMatterInteractorTest(unittest.TestCase):
         self.assertIsInstance( query, GromacsPhotonMatterInteractorParameters )
 
 
-    @unittest.skip("Backengine not available.")
     def testBackengine(self):
         """ Check that the backengine can be executed and output is generated. """
 
@@ -138,12 +127,11 @@ class GromacsPhotonMatterInteractorTest(unittest.TestCase):
         self.assertEqual(Gromacs_message, "")
 
 
-    @unittest.skip("Backengine not available.")
     def testSaveH5(self):
         """ Test hdf5 output generation. """
 
         # Make sure we clean up after ourselves.
-        outfile = 'Gromacs_out.h5'
+        outfile = 'pmi_out.h5'
         self.__files_to_remove.append(outfile)
 
         # Setup parameters.
