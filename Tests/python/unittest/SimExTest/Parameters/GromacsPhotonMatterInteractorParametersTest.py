@@ -24,12 +24,11 @@
 ##########################################################################
 
 import unittest
-from SimEx.Parameters.GromacsInteractorParameters import GromacsInteractorParameters
 from SimEx.Parameters.AbstractCalculatorParameters import AbstractCalculatorParameters
+from SimEx.Parameters.GromacsPhotonMatterInteractorParameters import GromacsPhotonMatterInteractorParameters
 
 
-class GromacsInteractorParametersTest(unittest.TestCase):
-
+class GromacsPhotonMatterInteractorParametersTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         pass
@@ -45,24 +44,45 @@ class GromacsInteractorParametersTest(unittest.TestCase):
         pass
 
     def testDefaultConstruction(self):
-        parameters = GromacsInteractorParameters()
-        self.assertIsInstance(parameters, GromacsInteractorParameters)
-        self.assertIsInstance(parameters, AbstractCalculatorParameters)
-
-        self.assertEqual(parameters.neutron_weight, 1.e4)
-        self.assertEqual(parameters.energy_bin, 1.e4)
-
-    def testShapedConstruction(self):
-        # TODO: @Ibbe, please think about the parameters we need to pass to gromacs.  
-        parameters = GromacsInteractorParameters(energy_bin=2.e4, ibeam_radius=15.e-6, target_density=6.e28)
+        pmi_parameters = GromacsPhotonMatterInteractorParameters()
 
         # Check if the parameters of the constructed class are correct
-        self.assertIsInstance(parameters, GromacsInteractorParameters)
-        self.assertIsInstance(parameters, AbstractCalculatorParameters)
+        self.assertIsInstance(pmi_parameters,
+                              GromacsPhotonMatterInteractorParameters)
+        self.assertIsInstance(pmi_parameters, AbstractCalculatorParameters)
 
-        self.assertEqual(parameters.energy_bin, 2.e4)
-        self.assertEqual(parameters.ibeam_radius, 1.5e-5)
-        self.assertEqual(parameters.target_density, 6.e28)
+        # The default non-rotation
+        self.assertEqual(pmi_parameters.rotations, [(1, 0, 0, 0)])
+        # The default all incidices
+        self.assertEqual(pmi_parameters.pulse_indices, 'all')
+
+    def testRotations(self):
+        pmi_parameters = GromacsPhotonMatterInteractorParameters(
+            rotations=[1, 0.75, 0.3, 0.2])
+
+        self.assertEqual(pmi_parameters.rotations[0], [1, 0.75, 0.3, 0.2])
+
+        pmi_parameters = GromacsPhotonMatterInteractorParameters(
+            rotations=[(1, 0.75, 0.3, 0.2), (1, 0.3, 0.2, 0.1)])
+
+        self.assertEqual(pmi_parameters.rotations[0], (1, 0.75, 0.3, 0.2))
+        self.assertEqual(pmi_parameters.rotations[1], (1, 0.3, 0.2, 0.1))
+
+    def testPulse_indices(self):
+        pmi_parameters = GromacsPhotonMatterInteractorParameters(
+            pulse_indices=[1, 2, 5])
+
+        self.assertEqual(pmi_parameters.pulse_indices, [1, 2, 5])
+
+    def testShapedConstruction(self):
+        pmi_parameters = GromacsPhotonMatterInteractorParameters(
+            rotations=[(1, 0.75, 0.3, 0.2)],
+            pulse_indices=[1, 2, 5],
+            forced_mpi_command='mpirun -np 4')
+
+        self.assertEqual(pmi_parameters.rotations[0], (1, 0.75, 0.3, 0.2))
+        self.assertEqual(pmi_parameters.pulse_indices, [1, 2, 5])
+        self.assertEqual(pmi_parameters.forced_mpi_command, 'mpirun -np 4')
 
 
 if __name__ == '__main__':
