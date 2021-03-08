@@ -11,7 +11,7 @@ usage: $0 MODE [conda_env_name]
 	conda-develop: install SimEx in current conda environment with DEVELOPER_MODE=ON
 	maxwell
 	develop
-note: modules can be (de)selected around line 128 in this $0 file.
+note: modules can be (de)selected in the "CMake section" in this $0 file.
 EOF
     exit
 }
@@ -121,6 +121,7 @@ export GEANT4_ROOT=${THIRD_PARTY_ROOT}
 export Geant4_DIR=${THIRD_PARTY_ROOT}/lib64/Geant4-10.4.0
 export XCSIT_ROOT=${THIRD_PARTY_ROOT}
 
+# CMake section to manage modules
 cmake -DSRW_OPTIMIZED=ON \
       -DDEVELOPER_INSTALL=$DEVELOPER_MODE \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
@@ -128,11 +129,11 @@ cmake -DSRW_OPTIMIZED=ON \
       -DUSE_CrystFELPhotonDiffractor=ON \
       -DUSE_GAPDPhotonDiffractor=OFF \
       -DUSE_sdf=ON \
-      -DUSE_s2e=ON \
+      -DUSE_s2e=OFF \
       -DUSE_S2EReconstruction_EMC=ON \
       -DUSE_S2EReconstruction_DM=ON \
       -DUSE_wpg=ON \
-      -DUSE_GenesisPhotonSource=ON \
+      -DUSE_GenesisPhotonSource=OFF \
       -DXERCESC_ROOT=$XERCESC_ROOT \
       -DGEANT4_ROOT=$GEANT4_ROOT \
       -DXCSIT_ROOT=$XCSIT_ROOT \
