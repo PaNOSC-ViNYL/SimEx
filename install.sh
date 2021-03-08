@@ -5,12 +5,13 @@ function usage()
 	cat <<EOF
 usage: $0 MODE [conda_env_name]
 	MODE includes:
-	conda-env: create conda virtual environment with the name of [conda_env_name].
+	conda-env: create a conda virtual environment with the name of [conda_env_name].
                    default name: simex
 	conda: install SimEx in current conda environment
 	conda-develop: install SimEx in current conda environment with DEVELOPER_MODE=ON
 	maxwell
 	develop
+note: modules can be (de)selected around line 128 in this $0 file.
 EOF
     exit
 }
