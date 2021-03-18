@@ -79,7 +79,7 @@ fi
     def script(self):
         return self.__script
 
-    def submit(self):
+    def submit(self, test=False):
         self.writeScript()
         wd = os.getcwd()
         os.chdir(self.slurm_path)
@@ -87,7 +87,7 @@ fi
         if is_exist:
             if self.is_cleanup:
                 cleanUp(self.out_dir)
-                print("Delete up above files...done")
+                print("Delete above files...done")
             else:
                 print("Above files will not be cleaned.")
                 print("If you wish to clean them, please set is_cleanup=True")
@@ -96,13 +96,14 @@ fi
         # cmd_line = ['ls','.']
         print(*cmd_line)
         try:
-            df = subprocess.Popen(cmd_line,
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-            output, err = df.communicate()
-            print(output.decode('ascii'))
-            if err:
-                print(err.decode('ascii'))
+            if not test:
+                df = subprocess.Popen(cmd_line,
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE)
+                output, err = df.communicate()
+                print(output.decode('ascii'))
+                if err:
+                    print(err.decode('ascii'))
         except subprocess.CalledProcessError as e:
             print(e.message)
         os.chdir(wd)
@@ -122,20 +123,24 @@ def getSingfelCommand(uniform_rotation=None,
                       number_of_diffraction_patterns=1,
                       calculate_Compton=0,
                       orientation=None,
+                      pmi_start_ID=1,
+                      pmi_stop_ID=1000,
+                      number_of_slices=100,
+                      slice_interval=10,
                       geomFile='../tmp.geom'):
     MPI_command = f"""\
 mpirun $MCA --map-by node --bind-to none -x OMP_NUM_THREADS=1 radiationDamageMPI \\
     --inputDir $IN_DIR  \\
     --outputDir $SPATH/$OUT_DIR  \\
     --configFile /dev/null     \\
-    --sliceInterval 10   \\
-    --numSlices 100   \\
-    --pmiStartID 1   \\
-    --pmiEndID 1000   \\
+    --numDP {number_of_diffraction_patterns} \\
+    --pmiStartID {pmi_start_ID} \\
+    --pmiEndID {pmi_stop_ID} \\
+    --numSlices {number_of_slices} \\
+    --sliceInterval {slice_interval} \\
+    --calculateCompton {calculate_Compton} \\
+    --geomFile {geomFile} \\
 """
-    MPI_command += '--numDP {} '.format(number_of_diffraction_patterns)
-    MPI_command += '--calculateCompton {} '.format(calculate_Compton)
-    MPI_command += '--geomFile {} '.format(geomFile)
     if uniform_rotation is not None:
         MPI_command += '--uniformRotation {} '.format(uniform_rotation)
     if back_rotation is not None:

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 ##########################################################################
 #                                                                        #
 # Copyright (C) 2015-2019 Carsten Fortmann-Grote                         #
