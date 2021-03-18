@@ -360,6 +360,17 @@ class DiffractionAnalysis(AbstractAnalysis):
                       **kwargs)
 
     def getRfactor(self, ref_da):
+        """ Get R factors from diffraction patterns
+
+        :param ref_da: The DiffractionAnalysis class instance of the reference
+        data
+        :type DiffractionAnalysis class
+
+        :return: [full period resolution, a list of r factors for each pair
+        of diffraction patters]
+        :rtype: [list, list]
+        """
+
         pi = self.patterns_iterator
         ref_pi = ref_da.patterns_iterator
         R_factor_list = []
@@ -373,7 +384,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                 for pattern in pi:
                     R_factor_list.append(
                         R_factor_paper(pattern, next(ref_pi), self.q_map,
-                                    self.solid_angles))
+                                       self.solid_angles))
             except StopIteration:
                 print("Number of patterns might not match")
                 raise StopIteration
