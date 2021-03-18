@@ -3,7 +3,6 @@
 import os
 import shutil
 import subprocess
-import click
 from pathlib import Path
 
 
@@ -14,6 +13,7 @@ class singfelSlurm:
                  mpi_command,
                  slurm_path='./',
                  slurm_file='submit.slurm',
+                 is_cleanup=False,
                  out_dir='diffr',
                  nodes=1,
                  time='1-01:00:00',
@@ -24,6 +24,7 @@ class singfelSlurm:
         self.slurm_path = slurm_path
         self.slurm_file = slurm_file
         self.out_dir = out_dir
+        self.is_cleanup = is_cleanup
         conda_active = os.path.join(conda_path, 'bin/activate')
         Path(self.slurm_path).mkdir(parents=True, exist_ok=True)
 
@@ -82,7 +83,14 @@ fi
         self.writeScript()
         wd = os.getcwd()
         os.chdir(self.slurm_path)
-        cleanUp(self.out_dir)
+        is_exist = checkExist(self.out_dir)
+        if is_exist:
+            if self.is_cleanup:
+                cleanUp(self.out_dir)
+                print("Delete up above files...done")
+            else:
+                print("Above files will not be cleaned.")
+                print("If you wish to clean them, please set is_cleanup=True")
 
         cmd_line = ['sbatch', self.slurm_file]
         # cmd_line = ['ls','.']
@@ -112,7 +120,8 @@ fi
 def getSingfelCommand(uniform_rotation=None,
                       back_rotation=None,
                       number_of_diffraction_patterns=1,
-                      calculate_Compton=0):
+                      calculate_Compton=0,
+                      orientation=None):
     MPI_command = f"""\
 mpirun $MCA --map-by node --bind-to none -x OMP_NUM_THREADS=1 radiationDamageMPI \\
     --inputDir $IN_DIR  \\
@@ -130,19 +139,32 @@ mpirun $MCA --map-by node --bind-to none -x OMP_NUM_THREADS=1 radiationDamageMPI
         MPI_command += '--uniformRotation {} '.format(uniform_rotation)
     if back_rotation is not None:
         MPI_command += '--backRotation {} '.format(back_rotation)
+    if orientation is not None:
+        if isinstance(orientation, (list, tuple)) and len(orientation) == 4:
+            MPI_command += '--orientation {} '.format(orientation)
+        else:
+            raise TypeError(
+                "Orientation needs to be a 4-element list of a quaternion")
     return MPI_command
+
+
+def checkExist(out_path):
+    dir_to_remove = out_path
+    file_to_remove = out_path + '.h5'
+
+    is_exist = os.path.exists(dir_to_remove) or os.path.exists(file_to_remove)
+
+    if is_exist:
+        print(dir_to_remove, 'exists:', str(os.path.exists(dir_to_remove)))
+        print(file_to_remove, 'exists:', str(os.path.exists(file_to_remove)))
+    return is_exist
 
 
 def cleanUp(out_path):
     dir_to_remove = out_path
     file_to_remove = out_path + '.h5'
 
-    if os.path.exists(dir_to_remove) or os.path.exists(file_to_remove):
-        print(dir_to_remove, str(os.path.exists(dir_to_remove)))
-        print(file_to_remove, str(os.path.exists(file_to_remove)))
-        if click.confirm('Do you want delete the existed file/folder?',
-                         default=False):
-            if os.path.isdir(dir_to_remove):
-                shutil.rmtree(dir_to_remove)
-            if os.path.isfile(file_to_remove):
-                os.remove(file_to_remove)
+    if os.path.isdir(dir_to_remove):
+        shutil.rmtree(dir_to_remove)
+    if os.path.isfile(file_to_remove):
+        os.remove(file_to_remove)
