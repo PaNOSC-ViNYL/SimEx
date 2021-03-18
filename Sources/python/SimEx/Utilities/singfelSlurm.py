@@ -121,12 +121,12 @@ def getSingfelCommand(uniform_rotation=None,
                       back_rotation=None,
                       number_of_diffraction_patterns=1,
                       calculate_Compton=0,
-                      orientation=None):
+                      orientation=None,
+                      geomFile='../tmp.geom'):
     MPI_command = f"""\
 mpirun $MCA --map-by node --bind-to none -x OMP_NUM_THREADS=1 radiationDamageMPI \\
     --inputDir $IN_DIR  \\
     --outputDir $SPATH/$OUT_DIR  \\
-    --geomFile ../tmp.geom   \\
     --configFile /dev/null     \\
     --sliceInterval 10   \\
     --numSlices 100   \\
@@ -135,13 +135,14 @@ mpirun $MCA --map-by node --bind-to none -x OMP_NUM_THREADS=1 radiationDamageMPI
 """
     MPI_command += '--numDP {} '.format(number_of_diffraction_patterns)
     MPI_command += '--calculateCompton {} '.format(calculate_Compton)
+    MPI_command += '--geomFile {} '.format(geomFile)
     if uniform_rotation is not None:
         MPI_command += '--uniformRotation {} '.format(uniform_rotation)
     if back_rotation is not None:
         MPI_command += '--backRotation {} '.format(back_rotation)
     if orientation is not None:
         if isinstance(orientation, (list, tuple)) and len(orientation) == 4:
-            MPI_command += '--orientation {} '.format(orientation)
+            MPI_command += '--orientation {} {} {} {} '.format(*orientation)
         else:
             raise TypeError(
                 "Orientation needs to be a 4-element list of a quaternion")

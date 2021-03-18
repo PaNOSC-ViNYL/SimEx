@@ -65,6 +65,15 @@ class singfelSlurmTest(unittest.TestCase):
                                         orientation=(1, 0, 0, 0))
         singfelSlurm('Test', './', singfel_cmd, nodes=2).writeScript()
 
+    # @unittest.skip("demonstrating skipping")
+    def testSlurmGeom(self):
+        singfel_cmd = getSingfelCommand(uniform_rotation=None,
+                                        back_rotation=True,
+                                        number_of_diffraction_patterns=1,
+                                        calculate_Compton=0,
+                                        orientation=(1, 0, 0, 0),
+                                        geomFile='../my.geom')
+        self.assertNotEqual(singfel_cmd.find("--geomFile ../my.geom"), -1)
 
 if __name__ == '__main__':
     unittest.main()
