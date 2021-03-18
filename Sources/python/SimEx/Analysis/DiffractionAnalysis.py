@@ -2,8 +2,9 @@
 """ :module DiffractionAnalysis: Module that hosts the DiffractionAnalysis class.  """
 ##########################################################################
 #                                                                        #
-# Copyright (C) 2015-2018 Carsten Fortmann-Grote                         #
+# Copyright (C) 2015-2021 Carsten Fortmann-Grote Juncheng E              #
 # Contact: Carsten Fortmann-Grote <carsten.grote@xfel.eu>                #
+#          Juncheng E <juncheng.e@xfel.eu>                               #
 #                                                                        #
 # This file is part of simex_platform.                                   #
 # simex_platform is free software: you can redistribute it and/or modify #
@@ -31,17 +32,16 @@ import tempfile
 
 import pyFAI
 
+
 class DiffractionAnalysis(AbstractAnalysis):
     """
     :class DiffractionAnalysis: Class that implements common data analysis tasks for diffraction data.
     """
-
     def __init__(self,
                  input_path=None,
                  pattern_indices=None,
                  poissonize=True,
-                 mask=None
-            ):
+                 mask=None):
         """
 
         :param input_path: Name of file or directory that contains data to analyse.
@@ -82,6 +82,7 @@ class DiffractionAnalysis(AbstractAnalysis):
     @parameters.setter
     def parameters(self, val):
         self.__parameters = val
+
     @property
     def pattern_indices(self):
         """ Query pattern indices attribute. """
@@ -95,8 +96,11 @@ class DiffractionAnalysis(AbstractAnalysis):
         if indices is None:
             indices = 'all'
 
-        if not (isinstance(indices, int) or indices == 'all' or hasattr(indices, '__iter__')):
-            raise TypeError('The parameter "pattern_indices" must be an int, iterable over ints, or "all".')
+        if not (isinstance(indices, int) or indices == 'all'
+                or hasattr(indices, '__iter__')):
+            raise TypeError(
+                'The parameter "pattern_indices" must be an int, iterable over ints, or "all".'
+            )
 
         # Convert int to list.
         if isinstance(pattern_indices, int):
@@ -112,6 +116,7 @@ class DiffractionAnalysis(AbstractAnalysis):
     def poissonize(self):
         """ Query whether to read data with (True) or without (False) Poisson noise. """
         return self.__poissonize
+
     @poissonize.setter
     def poissonize(self, val):
         """ Set the 'poissonize' flag."""
@@ -156,14 +161,14 @@ class DiffractionAnalysis(AbstractAnalysis):
         # sample to detector distance (meter)
         s2d = self.parameters['geom']['detectorDist']
 
-        center_x = 0.5*(pn[1]-1)
-        center_y = 0.5*(pn[0]-1)
-        rx = (x - center_x)*pw
-        ry = (y - center_y)*ph
+        center_x = 0.5 * (pn[1] - 1)
+        center_y = 0.5 * (pn[0] - 1)
+        rx = (x - center_x) * pw
+        ry = (y - center_y) * ph
         r = numpy.sqrt(rx**2 + ry**2)
         pixDist = numpy.sqrt(r**2 + s2d**2)
-        alpha = numpy.arctan2(pw,2*pixDist)
-        solidAngles = 4*numpy.arcsin(numpy.sin(alpha)**2)
+        alpha = numpy.arctan2(pw, 2 * pixDist)
+        solidAngles = 4 * numpy.arcsin(numpy.sin(alpha)**2)
 
         return solidAngles
 
@@ -184,15 +189,15 @@ class DiffractionAnalysis(AbstractAnalysis):
         s2d = self.parameters['geom']['detectorDist']
 
         E0 = self.parameters['beam']['photonEnergy']
-        lmd = 12398 / E0 #Angstrom
+        lmd = 12398 / E0  #Angstrom
 
-        center_x = 0.5*(pn[1]-1)
-        center_y = 0.5*(pn[0]-1)
-        rx = (x - center_x)*pw
-        ry = (y - center_y)*ph
+        center_x = 0.5 * (pn[1] - 1)
+        center_y = 0.5 * (pn[0] - 1)
+        rx = (x - center_x) * pw
+        ry = (y - center_y) * ph
         r = numpy.sqrt(rx**2 + ry**2)
-        twotheta = numpy.arctan2(r,s2d)
-        qMap = 4*numpy.pi*numpy.sin(twotheta/2)/lmd
+        twotheta = numpy.arctan2(r, s2d)
+        qMap = 4 * numpy.pi * numpy.sin(twotheta / 2) / lmd
 
         return qMap
 
@@ -200,6 +205,7 @@ class DiffractionAnalysis(AbstractAnalysis):
     def mask(self):
         """ Query the mask. """
         return self.__mask
+
     @mask.setter
     def mask(self, val):
         """ Set the 'mask' flag."""
@@ -212,19 +218,23 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         self.__mask = val
 
-
     def patternGenerator(self):
         """ Yield an iterator over a given pattern sequence from a diffraction file.
         """
 
         indices = self.pattern_indices
         path = self.input_path
-        if os.path.isdir(path): # legacy format.
+        if os.path.isdir(path):  # legacy format.
             dir_listing = os.listdir(path)
             dir_listing.sort()
             if indices != 'all':
-                dir_listing = [d for (i,d) in enumerate(dir_listing) if i in indices]
-            h5_files = [os.path.join(path, f) for f in dir_listing if f.split('.')[-1] == "h5"]
+                dir_listing = [
+                    d for (i, d) in enumerate(dir_listing) if i in indices
+                ]
+            h5_files = [
+                os.path.join(path, f) for f in dir_listing
+                if f.split('.')[-1] == "h5"
+            ]
             for h5_file in h5_files:
                 try:
                     with h5py.File(h5_file, 'r') as h5:
@@ -240,7 +250,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                 except:
                     continue
 
-        else: # v0.2
+        else:  # v0.2
 
             # Open file for reading
             with h5py.File(path, 'r') as h5:
@@ -249,7 +259,7 @@ class DiffractionAnalysis(AbstractAnalysis):
                 else:
                     indices = ["%0.7d" % ix for ix in indices]
                 for ix in indices:
-                    root_path = '/data/%s/'% (ix)
+                    root_path = '/data/%s/' % (ix)
                     if self.poissonize:
                         path_to_data = root_path + 'data'
                     else:
@@ -257,9 +267,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
                     diffr = h5[path_to_data].value
 
-                    yield diffr*self.mask
-
-
+                    yield diffr * self.mask
 
     def numpyPattern(self, operation=None):
         """ Return the pattern after opentation over the patterns defined in DiffractionAnalysis class.
@@ -286,11 +294,16 @@ class DiffractionAnalysis(AbstractAnalysis):
             if len(self.pattern_indices) == 1:
                 pattern_to_dump = next(pi)
             else:
-                pattern_to_dump = operation(numpy.array([p for p in pi]), axis=0)
+                pattern_to_dump = operation(numpy.array([p for p in pi]),
+                                            axis=0)
 
         return pattern_to_dump
 
-    def plotRadialProjection(self, operation=None, logscale=False, offset = 1e-5, unit="q_nm^-1"):
+    def plotRadialProjection(self,
+                             operation=None,
+                             logscale=False,
+                             offset=1e-5,
+                             unit="q_nm^-1"):
         """ Plot the radial projection of a pattern.
 
         :param operation: Operation to apply to selected patterns (default numpy.sum).
@@ -317,9 +330,15 @@ class DiffractionAnalysis(AbstractAnalysis):
             pattern_to_plot = operation(numpy.array([p for p in pi]), axis=0)
 
         # Plot radial projection.
-        plotRadialProjection(pattern_to_plot, self.__parameters, logscale,offset,unit)
+        plotRadialProjection(pattern_to_plot, self.__parameters, logscale,
+                             offset, unit)
 
-    def plotPatterns(self, logscale=False, offset=1e-1, symlog=False, *argv, **kwargs):
+    def plotPatterns(self,
+                     logscale=False,
+                     offset=1e-1,
+                     symlog=False,
+                     *argv,
+                     **kwargs):
         """ Plot patterns in the class.
 
         :param logscale: Whether to plot the intensity on a logarithmic scale (z-axis) (default False).
@@ -340,10 +359,30 @@ class DiffractionAnalysis(AbstractAnalysis):
             plotImage(pattern_to_plot, logscale, offset, symlog, *argv,
                       **kwargs)
 
+    def getRfactor(self, ref_da):
+        pi = self.patterns_iterator
+        ref_pi = ref_da.patterns_iterator
+        R_factor_list = []
+        if len(self.pattern_indices) == 1:
+            pattern = next(pi)
+            R_factor_list.append(
+                R_factor_paper(pattern, next(ref_pi), self.q_map,
+                               self.solid_angles))
+        else:
+            try:
+                for pattern in pi:
+                    R_factor_list.append(
+                        R_factor_paper(pattern, next(ref_pi), self.q_map,
+                                    self.solid_angles))
+            except StopIteration:
+                print("Number of patterns might not match")
+                raise StopIteration
+        return get_Ds(self.q_map), R_factor_list
+
     def plotPattern(self,
                     operation=None,
                     logscale=False,
-                    offset=1e-1,
+                    offset=None,
                     symlog=False,
                     *argv,
                     **kwargs):
@@ -411,27 +450,27 @@ class DiffractionAnalysis(AbstractAnalysis):
         Npix = geom['mask'].shape[0]
 
         # Find center.
-        center = 0.5*(Npix-1)
+        center = 0.5 * (Npix - 1)
 
         # Max. scattering angle.
-        theta_max = math.atan( center * apix / Ddet )
+        theta_max = math.atan(center * apix / Ddet)
         # Min resolution.
-        d_min = 0.5*lmd/math.sin(theta_max/2.0)
+        d_min = 0.5 * lmd / math.sin(theta_max / 2.0)
 
         # Next integer resolution.
-        d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
+        d0 = 0.1 * math.ceil(d_min * 10.0)  # 10 powers to get Angstrom
 
-        ds = resolution/10 # nm
+        ds = resolution / 10  # nm
 
         # Pixel numbers corresponding to resolution rings.
-        N = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds)*2)
+        N = Ddet / apix * numpy.tan(numpy.arcsin(lmd / 2. / ds) * 2)
 
         pi = self.patterns_iterator
         stack = numpy.array([p for p in pi])
 
         y, x = numpy.indices(stack[0].shape)
-        r = numpy.sqrt((x-center)**2 + (y-center)**2)
-        mask = (abs(r-N) <= 0.5)
+        r = numpy.sqrt((x - center)**2 + (y - center)**2)
+        mask = (abs(r - N) <= 0.5)
 
         for i in range(len(stack)):
             stack[i] *= mask
@@ -440,10 +479,10 @@ class DiffractionAnalysis(AbstractAnalysis):
         plt.imshow(stack[0])
         plt.title('Frame 0')
 
-        a = mask[mask==True]
+        a = mask[mask == True]
         nShannonPixel = len(a)
         # Mean number of expected photons per Shannon pixel
-        photons = numpy.sum(stack,axis=(1,2))/nShannonPixel
+        photons = numpy.sum(stack, axis=(1, 2)) / nShannonPixel
         avg_photons = numpy.mean(photons)
         rms_photons = numpy.std(photons)
 
@@ -452,7 +491,6 @@ class DiffractionAnalysis(AbstractAnalysis):
         print("avg = %6.5e" % (avg_photons))
         print("std = %6.5e" % (rms_photons))
         print("*************************")
-
 
     def statistics(self):
         """ Get statistics of photon numbers per pattern (mean and rms) over selected patterns and plot a historgram. """
@@ -479,18 +517,21 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         # Handle default path for saving the animated gif.
         if output_path is None:
-            output_path=os.path.join(os.getcwd(), "animated_patterns.gif")
+            output_path = os.path.join(os.getcwd(), "animated_patterns.gif")
 
         if not isinstance(output_path, str):
-            raise TypeError('The parameter "output_path" must be a str, not %s.' % (type(output_path)) )
+            raise TypeError(
+                'The parameter "output_path" must be a str, not %s.'
+                % (type(output_path)))
 
         parent_dir = os.path.dirname(os.path.abspath(output_path))
-        if not os.path.isdir( parent_dir ):
+        if not os.path.isdir(parent_dir):
             raise IOError('%s does not exist.' % (parent_dir))
         if os.path.isfile(output_path):
-            raise IOError('%s already exists, cowardly refusing to overwrite.' % (output_path))
+            raise IOError('%s already exists, cowardly refusing to overwrite.'
+                          % (output_path))
 
-        self.__animation_output_path=os.path.abspath(output_path)
+        self.__animation_output_path = os.path.abspath(output_path)
 
         # Make tempdir.
         tmp_out_dir = tempfile.mkdtemp()
@@ -498,7 +539,7 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         mn, mx = stack.min(), stack.max()
         x_range, y_range = stack.shape[1:]
-        for i,img in enumerate(stack):
+        for i, img in enumerate(stack):
             plotImage(img, logscale=logscale, offset=offset)
 
             # Save image.
@@ -507,15 +548,21 @@ class DiffractionAnalysis(AbstractAnalysis):
             else:
                 png_filename = "%07d.png" % (i)
 
-            plt.savefig(os.path.join(tmp_out_dir, png_filename) )
+            plt.savefig(os.path.join(tmp_out_dir, png_filename))
 
             # Clear figure.
             plt.clf()
 
         # Render the animated gif.
-        os.system("convert -delay 100 %s %s" %(os.path.join(tmp_out_dir, "*.png"), output_path) )
+        os.system("convert -delay 100 %s %s" % (os.path.join(
+            tmp_out_dir, "*.png"), output_path))
 
-def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, unit="q_nm^-1"):
+
+def plotRadialProjection(pattern,
+                         parameters,
+                         logscale=True,
+                         offset=1.e-5,
+                         unit="q_nm^-1"):
     """ Perform integration over azimuthal angle and plot as function of radius.
 
         :param unit:can be "q_nm^-1", "q_A^-1", "2th_deg", "2th_rad", "r_mm".
@@ -523,27 +570,28 @@ def plotRadialProjection(pattern, parameters, logscale=True, offset=1.e-5, unit=
 
     """
 
-    qs, intensities = azimuthalIntegration(pattern, parameters,unit=unit)
+    qs, intensities = azimuthalIntegration(pattern, parameters, unit=unit)
 
     if logscale:
-        plt.semilogy(qs, intensities+offset)
+        plt.semilogy(qs, intensities + offset)
     else:
         plt.plot(qs, intensities)
 
-    if (unit=="q_nm^-1"):
+    if (unit == "q_nm^-1"):
         plt.xlabel("q (1/nm)")
-    elif (unit=="q_A^-1"):
+    elif (unit == "q_A^-1"):
         plt.xlabel("q (1/A)")
-    elif (unit=="2th_deg"):
+    elif (unit == "2th_deg"):
         plt.xlabel("2theta (degrees)")
-    elif (unit=="2th_rad"):
+    elif (unit == "2th_rad"):
         plt.xlabel("2theta (radians)")
-    elif (unit=="r_mm"):
+    elif (unit == "r_mm"):
         plt.xlabel("mm")
     plt.ylabel("Intensity (arb. units)")
     plt.tight_layout()
 
-def azimuthalIntegration(pattern, parameters, unit="q_nm^-1" ):
+
+def azimuthalIntegration(pattern, parameters, unit="q_nm^-1"):
 
     # Extract parameters.
     beam = parameters['beam']
@@ -561,33 +609,30 @@ def azimuthalIntegration(pattern, parameters, unit="q_nm^-1" ):
     Npix = geom['mask'].shape[0]
 
     # Find center.
-    center = 0.5*(Npix-1)
+    center = 0.5 * (Npix - 1)
 
-    azimuthal_integrator = pyFAI.AzimuthalIntegrator(
-            dist=Ddet,
-            pixel1=apix,
-            pixel2=apix,
-            wavelength=lmd*1e-9)
-
+    azimuthal_integrator = pyFAI.AzimuthalIntegrator(dist=Ddet,
+                                                     pixel1=apix,
+                                                     pixel2=apix,
+                                                     wavelength=lmd * 1e-9)
 
     azimuthal_integrator.setFit2D(
-            directDist=Ddet*1e3,
-            centerX=center,
-            centerY=center,
-            tilt=0.0,
-            tiltPlanRotation=0.0,
-            pixelX=apix*1e6,
-            pixelY=apix*1e6,
-            )
+        directDist=Ddet * 1e3,
+        centerX=center,
+        centerY=center,
+        tilt=0.0,
+        tiltPlanRotation=0.0,
+        pixelX=apix * 1e6,
+        pixelY=apix * 1e6,
+    )
     qs, intensities = azimuthal_integrator.integrate1d(
-            pattern,
-            min(Npix,1024),
-            unit=unit
-            #unit="q_nm^-1",
-            #unit="2th_deg",
-            )
+        pattern, min(Npix, 1024), unit=unit
+        #unit="q_nm^-1",
+        #unit="2th_deg",
+    )
 
     return qs, intensities
+
 
 def diffractionParameters(path):
     """ Extract beam parameters and geometry from given file or directory.
@@ -606,7 +651,7 @@ def diffractionParameters(path):
         raise IOError("%s: no such file or directory." % (path))
 
     # Setup return dictionary.
-    parameters_dict = {'beam':{}, 'geom':{}}
+    parameters_dict = {'beam': {}, 'geom': {}}
 
     # Open file.
     try:
@@ -622,21 +667,23 @@ def diffractionParameters(path):
     # Return.
     return parameters_dict
 
-def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs):
+
+def plotImage(pattern,
+              logscale=False,
+              offset=None,
+              symlog=False,
+              *argv,
+              **kwargs):
     """ Workhorse function to plot an image
 
     :param logscale: Whether to show the data on logarithmic scale (z axis) (default False).
     :type logscale: bool
 
-    :param offset: Offset to apply if logarithmic scaling is on.
+    :param offset: Offset to apply to the pattern.
     :type offset: float
 
-    :param symlog: If logscale is True, to show the data on symlogarithmic scale (z axis) (default False).
+    :param symlog: To show the data on symlogarithmic scale (z axis) (default False).
     :type symlog: bool
-
-    :return: the handles of figure and axis
-    :rtype: figure,axis
-
     """
     fig, ax = plt.subplots()
     # Get limits.
@@ -644,36 +691,37 @@ def plotImage(pattern, logscale=False, offset=1e-1,symlog=False,*argv, **kwargs)
 
     x_range, y_range = pattern.shape
 
-    if logscale:
-        if mn <= 0.0:
-            mn = pattern.min()+offset
-            mx = pattern.max()+offset
-            pattern = pattern.astype(float) + offset
+    if offset:
+        mn = pattern.min() + offset
+        mx = pattern.max() + offset
+        pattern = pattern.astype(float) + offset
 
-        # default plot setup
-        kwargs['cmap'] = kwargs.pop('cmap',"viridis")
-        if symlog:
-            kwargs['norm'] = kwargs.pop('norm',mpl.colors.SymLogNorm(0.015,vmin=mn, vmax=mx))
-        else:
-            kwargs['norm'] = kwargs.pop('norm',mpl.colors.LogNorm(vmin=mn, vmax=mx))
-        axes = kwargs.pop('axes',None)
-        plt.imshow(pattern, *argv,**kwargs)
+    if (logscale and symlog):
+        print('logscale and symlog are both true.\noverrided by logscale')
+
+    # default plot setup
+    if (logscale or symlog):
+        kwargs['cmap'] = kwargs.pop('cmap', "viridis")
+        if logscale:
+            kwargs['norm'] = kwargs.pop('norm', mpl.colors.LogNorm())
+        elif symlog:
+            kwargs['norm'] = kwargs.pop('norm', mpl.colors.SymLogNorm(0.015))
+        axes = kwargs.pop('axes', None)
+        plt.imshow(pattern, *argv, **kwargs)
     else:
-        kwargs['norm'] = kwargs.pop('norm',Normalize(vmin=mn, vmax=mx))
-        kwargs['cmap'] = kwargs.pop('cmap',"viridis")
-        plt.imshow(pattern, *argv,**kwargs)
+        kwargs['norm'] = kwargs.pop('norm', Normalize(vmin=mn, vmax=mx))
+        kwargs['cmap'] = kwargs.pop('cmap', "viridis")
+        plt.imshow(pattern, *argv, **kwargs)
 
     plt.xlabel(r'$x$ (pixel)')
     plt.ylabel(r'$y$ (pixel)')
-    plt.xlim([0,x_range-1])
-    plt.ylim([0,y_range-1])
+    plt.xlim([0, x_range - 1])
+    plt.ylim([0, y_range - 1])
     plt.tight_layout()
     plt.colorbar()
-    return fig,ax
 
 
-
-def plotResolutionRings(parameters,rings=(10, 5.0, 3.5),half=True):
+def plotResolutionRings(parameters, rings=(10, 5.0, 3.5), half=True):
     """
     Show resolution rings on current plot.
 
@@ -702,87 +750,90 @@ def plotResolutionRings(parameters,rings=(10, 5.0, 3.5),half=True):
     Npix = geom['mask'].shape[0]
 
     # Find center.
-    center = 0.5*(Npix-1)
+    center = 0.5 * (Npix - 1)
 
     # Max. scattering angle.
-    theta_max = math.atan( center * apix / Ddet )
+    theta_max = math.atan(center * apix / Ddet)
     # Min resolution.
     if (half):
-        d_min = 0.5*lmd/math.sin(theta_max/2.0)/2.0
+        d_min = 0.5 * lmd / math.sin(theta_max / 2.0) / 2.0
     else:
-        d_min = 0.5*lmd/math.sin(theta_max/2.0)
+        d_min = 0.5 * lmd / math.sin(theta_max / 2.0)
 
     # Next integer resolution.
-    d0 = 0.1*math.ceil(d_min*10.0) # 10 powers to get Angstrom
+    d0 = 0.1 * math.ceil(d_min * 10.0)  # 10 powers to get Angstrom
 
     # Array of resolution rings to plot.
-    ds = numpy.array(rings)/10 # nm
+    ds = numpy.array(rings) / 10  # nm
 
     # Pixel numbers corresponding to resolution rings.
     if (half):
-        Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds/2.)*2)
+        Ns = Ddet / apix * numpy.tan(numpy.arcsin(lmd / 2. / ds / 2.) * 2)
     else:
-        Ns = Ddet/apix * numpy.tan(numpy.arcsin(lmd/2./ds)*2)
+        Ns = Ddet / apix * numpy.tan(numpy.arcsin(lmd / 2. / ds) * 2)
 
     # Plot each ring and attach a label.
-    for i,N in enumerate(Ns):
+    for i, N in enumerate(Ns):
         x0 = center
-        X = numpy.linspace(x0-N,x0+N, 512)
-        Y_up = x0 + numpy.sqrt(N**2 - (X-x0)**2)
-        Y_dn = x0 - numpy.sqrt(N**2 - (X-x0)**2)
-        plt.plot(X,Y_up,color='k')
-        plt.plot(X,Y_dn,color='k')
-        plt.text(x0+0.75*N,x0+0.75*N, "%2.1f" % (ds[i]*10.), color = 'red')
+        X = numpy.linspace(x0 - N, x0 + N, 512)
+        Y_up = x0 + numpy.sqrt(N**2 - (X - x0)**2)
+        Y_dn = x0 - numpy.sqrt(N**2 - (X - x0)**2)
+        plt.plot(X, Y_up, color='k')
+        plt.plot(X, Y_dn, color='k')
+        plt.text(x0 + 0.75 * N,
+                 x0 + 0.75 * N,
+                 "%2.1f" % (ds[i] * 10.),
+                 color='red')
 
-    plt.xlim(0,Npix-1)
-    plt.ylim(0,Npix-1)
-
+    plt.xlim(0, Npix - 1)
+    plt.ylim(0, Npix - 1)
 
 
 def photonStatistics(stack):
     """ """
 
     number_of_images = stack.shape[0]
-    photons = numpy.sum(stack, axis=(1,2))
+    photons = numpy.sum(stack, axis=(1, 2))
     avg_photons = numpy.mean(photons)
-    rms_photons =  numpy.std(photons)
+    rms_photons = numpy.std(photons)
 
-    meanPerPattern = numpy.mean(stack, axis=(1,2))
+    meanPerPattern = numpy.mean(stack, axis=(1, 2))
     # average over the mean nphotons of each pattern in the stack
     avg_mean = numpy.mean(meanPerPattern)
 
-    maxPerPattern = numpy.max(stack, axis=(1,2))
+    maxPerPattern = numpy.max(stack, axis=(1, 2))
     # average over the max nphotons of each pattern in the stack
     avg_max = numpy.mean(maxPerPattern)
 
-    minPerPattern = numpy.min(stack, axis=(1,2))
+    minPerPattern = numpy.min(stack, axis=(1, 2))
     # average over the min nphotons of each pattern in the stack
     avg_min = numpy.mean(minPerPattern)
 
-
     print("*************************")
-    print ("Photon number statistics per pattern")
+    print("Photon number statistics per pattern")
     print("avg = %6.5e" % (avg_photons))
     print("std = %6.5e" % (rms_photons))
-    print ("Photon number statistics per pixel")
+    print("Photon number statistics per pixel")
     print("avg_mean_pixel = %6.5e" % (avg_mean))
     print("avg_max_pixel = %6.5e" % (avg_max))
     print("avg_min_pixel = %6.5e" % (avg_min))
     print("*************************")
 
-
     # Plot histogram.
     plt.figure()
-    max_photon_number = int(numpy.max( photons ))
-    min_photon_number = int(numpy.min( photons ))
+    max_photon_number = int(numpy.max(photons))
+    min_photon_number = int(numpy.min(photons))
     if max_photon_number == min_photon_number:
         max_photon_number += 1
 
     binwidth = max_photon_number - min_photon_number
     number_of_bins = min(20, number_of_images)
-    binwidth = int( binwidth / number_of_bins )
+    binwidth = int(binwidth / number_of_bins)
 
-    plt.hist(photons, bins=range(min_photon_number, max_photon_number, binwidth), facecolor='red', alpha=0.75)
+    plt.hist(photons,
+             bins=range(min_photon_number, max_photon_number, binwidth),
+             facecolor='red',
+             alpha=0.75)
     plt.xlim([min_photon_number, max_photon_number])
     plt.xlabel("Photons")
     plt.ylabel("Histogram")
@@ -794,3 +845,59 @@ def totalNPattern(input_path):
     with h5py.File(input_path, 'r') as h5:
         npattern = len(h5['data'])
     return npattern
+
+
+def R_factor_paper(img, img_ref, q_map, sa_array):
+    '''Get pixelized residual factor in the paper way.
+    
+    Args:
+        img: Diffraction pattern array
+        img_ref: Referece diffraction pattern array
+        sa_array: Solid angle array of the diffraction
+         pattern
+    
+    Returns:
+        The residual factor of each pixel
+    '''
+
+    Ds = get_Ds(q_map)
+    R_factors = [R_d(D, img, img_ref, q_map, sa_array) for D in Ds]
+    return R_factors
+
+
+def get_Ds(q_map):
+    qs = numpy.linspace(q_map.min(), q_map.max(), q_map.shape[0])
+    return 2 * numpy.pi / qs  # Angstrom
+
+
+def R_d(d, img, img_ref, q_map, sa_array):
+    '''Get R_factor of specific d.
+    
+    Args:
+        D: resolution (Angstrom).
+        qs: q list of the pattern to be analyzed. (Angstrom^-1).
+        nq: The pattern to be analyzed.
+        qs_ref: q list of the reference pattern.
+        n_ref: The reference to be analyzed.
+    
+    Returns:
+        The R_factor
+    '''
+
+    N_real = img / sa_array
+    N_ideal = img_ref / sa_array
+
+    q_range = (q_map <= 2 * numpy.pi / d)
+
+    N_real_sub = N_real[q_range]
+    N_ideal_sub = N_ideal[q_range]
+    sa_sub = sa_array[q_range]
+
+    N_d = numpy.sum(numpy.sqrt(N_real_sub) * sa_sub)
+    N_ideal_d = numpy.sum(numpy.sqrt(N_ideal_sub) * sa_sub)
+
+    eqs = abs(
+        numpy.sqrt(N_real_sub) / N_d - numpy.sqrt(N_ideal_sub) / N_ideal_d
+    ) * sa_sub
+
+    return numpy.sum(eqs)
