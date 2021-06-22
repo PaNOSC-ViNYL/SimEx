@@ -1,11 +1,3 @@
-find_program(HAVE_CRYSTFEL NAMES hdfsee REQUIRED)
-
-IF (HAVE_CRYSTFEL)
-    MESSAGE (">>> CrystFEL is installed!")
-    RETURN()
-ELSE ()
-    MESSAGE (">>> CrystFEL not found!")
-ENDIF()
 INCLUDE(ExternalProject)
 
 cmake_policy(SET CMP0074 NEW)
