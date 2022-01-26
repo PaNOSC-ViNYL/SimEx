@@ -80,7 +80,8 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
         """ Testing the default construction of the class. """
 
         # Constructing the object without input fails.
-        self.assertRaises(ValueError, XFELPhotonAnalysis )
+        analysis = XFELPhotonAnalysis()
+        self.assertIsInstance(analysis, XFELPhotonAnalysis)
 
     def testShapedConstruction(self):
         """ Testing the construction of the class with non-default parameters. """
@@ -93,6 +94,20 @@ class XFELPhotonAnalysisTest(unittest.TestCase):
         self.assertIsInstance(xfel_photon_analyzer, object)
 
         self.assertIsInstance( xfel_photon_analyzer.wavefront, wpg.Wavefront)
+    
+    def testSetWavefront(self):
+        """ Test setting the wavefront into the constructed instance """
+
+
+        analysis = XFELPhotonAnalysis()
+
+        wavefront = wpg.Wavefront()
+        wavefront.load_hdf5(TestUtilities.generateTestFilePath('prop_out_0000001.h5'))
+
+        analysis.wavefront = wavefront
+
+        self.assertIsInstance(analysis.wavefront, wpg.Wavefront)
+
 
     def testPlotTotalPowerVsTime(self):
         """ Test plotting the total power as function of time. """

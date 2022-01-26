@@ -37,22 +37,25 @@ class XFELPhotonAnalysis(AbstractAnalysis):
         :param input_path: Name of file or directory that contains data to analyse.
         :type input_path: str
         """
-        print("\n Start initialization.")
-        # Initialize base class. This takes care of parameter checking.
-        super(XFELPhotonAnalysis, self).__init__(input_path)
+        if input_path is not None:
+            # Initialize base class. This takes care of parameter checking.
+            super(XFELPhotonAnalysis, self).__init__(input_path)
 
-        # Get wavefront file name.
-        wavefront = wpg.Wavefront()
+            # Get wavefront file name.
+            wavefront = wpg.Wavefront()
 
-        print("\n Loading wavefront from %s." % (self.input_path))
-        wavefront.load_hdf5(self.input_path)
-        print(" ... done.")
+            print("\n Loading wavefront from %s." % (self.input_path))
+            wavefront.load_hdf5(self.input_path)
+            print(" ... done.")
 
-        # Init intensity.
-        self.__intensity = None
+            self.__intensity = None
+            self.wavefront = wavefront
 
-        # Init wavefront, triggers assignment of intensity.
-        self.wavefront = wavefront
+        else:
+            # Init wavefront, triggers assignment of intensity.
+            super(XFELPhotonAnalysis, self).__init__('/dev/null')
+            self.__intensity = None
+            self.__wavefront = None
 
 
     @property
