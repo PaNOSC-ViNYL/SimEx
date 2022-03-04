@@ -179,6 +179,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
 
                 # Detector part
                 fstream.write('xyz {}\n'.format(self.input_path))
+                fstream.write('detector\n')
                 fstream.write('pn {} {}\n'.format(self._det_nx, self._det_ny))
                 fstream.write('ps {}\n'.format(self._det_ps))
                 fstream.write('corner {} {}\n'.format(self._det_conerx,
@@ -246,7 +247,7 @@ class GAPDPhotonDiffractor(AbstractPhotonDiffractor):
             mpicommand = self.parameters.forced_mpi_command
 
         # collect program arguments
-        command_sequence = ['GAPD-SimEx', '-a -p', str(in_param_file)]
+        command_sequence = ['GAPD-SimEx', '-a', '-p', str(in_param_file)]
         #command_sequence = ['GAPD-SimEx', '-p', str(in_param_file), '&>','sta.GAPD']
 
         # put MPI and program arguments together
