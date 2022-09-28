@@ -193,7 +193,7 @@ class XMDYNPhotonMatterAnalysis(AbstractAnalysis):
             sample = loadPDB(self.sample_path)
 
         snapshot_indices = self.snapshot_indices
-        if snapshot_indices == "All":
+        if snapshot_indices == "All" or snapshot_indices == ["All"]:
             snapshot_indices = range(1, self.number_of_snapshots() + 1)
 
         for si in snapshot_indices:
