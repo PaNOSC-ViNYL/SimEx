@@ -142,8 +142,8 @@ class XMDYNPhotonMatterAnalysis(AbstractAnalysis):
             xsnp['r'] = fp.get(dbase_root + 'r').value
             xsnp['Nph'] = fp.get(dbase_root + 'Nph').value
             N = xsnp['Z'].size
-            xsnp['q'] = numpy.array([xsnp['ff'][pylab.find(xsnp['T']==x), 0] for x in xsnp['xyz']]).reshape(N,)
-            xsnp['snp'] = snp ;
+            xsnp['q'] = numpy.array([xsnp['ff'][(numpy.array(xsnp['T'])==numpy.array(x)), 0] for x in xsnp['xyz']]).reshape(N,)
+            xsnp['snp'] = snp
 
         return xsnp
 
@@ -224,7 +224,7 @@ def load_sample(sample_path) :
     sample['selZ'] = dict()
 
     for sel_Z in numpy.unique(sample['Z']) :
-        sample['selZ'][sel_Z] = pylab.find(sel_Z == sample['Z'])
+        sample['selZ'][sel_Z] = numpy.array(sel_Z) == numpy.array(sample['Z'])
 
     return sample
 
