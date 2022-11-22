@@ -31,6 +31,9 @@ import periodictable
 import requests
 import uuid
 
+import warnings
+warnings.simplefilter("default")
+
 def getTmpFileName():
     """ Create a unique filename
     :return: unique filename for temporary storage
@@ -401,5 +404,3 @@ def get_dict_from_lines(reader):
 
     # Return finished dict.
     return ret
-
-
