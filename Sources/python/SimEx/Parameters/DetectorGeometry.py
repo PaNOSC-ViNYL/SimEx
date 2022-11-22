@@ -53,7 +53,7 @@ class DetectorPanel(AbstractBaseClass):
         """
         :param ranges: The minimum and maximum values pixel numbers on the respective transverse axis.
         :type  ranges: Dictionary
-        ":example ranges: {"fast_scan_min : 11, "fast_scan_max" : 20, "slow_scan_min" : 1, "fast_scan_max" : 20} # First axis from 11 to 20 and second axis from 1 to 20."
+        ":example ranges: {"fast_scan_min : 11, "fast_scan_max" : 20, "slow_scan_min" : 1, "slow_scan_max" : 20} # First axis from 11 to 20 and second axis from 1 to 20."
 
         :param pixel_size: The physical size of the pixel (assuming quadratic shape) (SI units).
         :type  pixel_size: PhysicalQuantity with unit meter.
