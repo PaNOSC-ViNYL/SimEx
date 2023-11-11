@@ -78,6 +78,22 @@ git clone --depth 1 -b develop https://github.com/PaNOSC-ViNYL/SimEx.git
 Now the TestFiles are hosted at [Zenodo](https://zenodo.org/record/3750541#.X2R9DZMzZE5).
 The files can be downloaded with [this script](get_testdata.sh).
 
+## Docker
+Our docker image `cfgrote/simex` provides a complete runtime environment including
+* The SimEx python library
+* All dependencies and backengines
+* jupyter lab
+* Example jupyter notebooks from [simex_notebooks](https://github.com/PaNOSC-ViNYL/SimEx-notebooks). 
+  
+### Running the container
+In the terminal, run
+```
+docker run --port HOSTPORT:24306 cfgrote/simex 
+```
+If the docker image is not found on the host system, it will first be `pull`ed from dockerhub.
+
+Then, navigate to http://host:HOSTPORT and find yourself in a running jupyter notebook environment.
+
 
 ## Acknowledgements
 This project has received funding from the European Union’s Horizon 2020 research
